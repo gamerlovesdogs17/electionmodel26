@@ -10,7 +10,7 @@ import pandas as pd
 # nested cycle replay can ablate them. Not fit on the target cycle.
 COEF = {
     "prior_lean": 1.0,
-    "generic_ballot": 0.35,
+    "generic_ballot": 0.28,
     "incumbency": 2.0,
     "fundraising_logit": 1.4,  # applied to logit(share) - logit(0.5)
     "pres_approval": 0.08,  # net approval → Dem margin contribution

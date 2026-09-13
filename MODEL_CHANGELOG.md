@@ -4,6 +4,17 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-13 — senate-hierarchical-v0.9.1
+
+Blueprint alignment pass (Senate-only):
+
+- **Fold-pure stacking:** production weights from OOS cycle CRPS; LOO weights per holdout; hierarchical mass labeled `pymc` (`stack_provenance`).
+- **Markets:** soft CONTROLS pull only by default; hard chamber calibration opt-in (`--control-calibrate`) — blueprint §9.4.
+- **Peer gate:** integrity/race MAE hard; control gap vs markets soft (§2 compare-only); pass if any peer panel OK when panels disagree.
+- **Leave-pollster-out** CLI + validation report block; named `error_budget` in fit diagnostics.
+- **Kalshi specials:** `SENATEFLS-26` / `SENATEOHS-26` event tickers for FL/OH specials.
+- **Ops:** Ed25519 in GOVERNANCE; `verify-rebuild` hash gate; OneDrive-safe parquet writes; UI null-safe chips/bars.
+
 ## 2026-09-13 — senate-hierarchical-v0.9
 
 Blueprint gap-close (Senate-complete; no Cook license; House/EC still out):

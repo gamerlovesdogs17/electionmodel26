@@ -47,26 +47,43 @@ def _hash_obj(obj: Any) -> str:
     return hashlib.sha256(blob).hexdigest()
 
 
-def _load_stack_weights() -> dict[str, float]:
-    """Load OOS CRPS mixture weights only — no hand-tuned challenger patches."""
+def _load_stack_weights(*, spine: str = "pymc") -> tuple[dict[str, float], dict[str, Any]]:
+    """Load OOS CRPS mixture weights with provenance (blueprint §9.2 fold-pure)."""
+    from midterms.model.ensemble import align_weights_to_spine
+
     path = ARTIFACTS_DIR / "cycle_replay_all.json"
     defaults = {
-        "fast_hierarchical_t": 0.45,
+        "pymc": 0.40,
         "state_space": 0.20,
         "poll_only_state_space": 0.10,
         "ridge_fundamentals": 0.10,
-        "shrinkage_polls": 0.10,
-        "last_election_swing": 0.05,
+        "shrinkage_polls": 0.12,
+        "last_election_swing": 0.08,
     }
+    provenance: dict[str, Any] = {
+        "source": "defaults",
+        "path": str(path),
+        "spine": spine,
+    }
+    weights = dict(defaults)
     if path.exists():
         try:
             payload = json.loads(path.read_text())
-            weights = payload.get("stack_weights") or {}
-            if weights:
-                return {k: float(v) for k, v in weights.items() if float(v) > 0}
+            raw = payload.get("stack_weights_production") or payload.get("stack_weights") or {}
+            if raw:
+                weights = {k: float(v) for k, v in raw.items() if float(v) > 0}
+                provenance = {
+                    "source": "cycle_replay_all.json",
+                    "path": str(path),
+                    "spine": spine,
+                    "artifact_provenance": payload.get("stack_provenance"),
+                    "note": payload.get("note"),
+                }
         except (json.JSONDecodeError, TypeError, ValueError):
-            pass
-    return defaults
+            provenance["error"] = "failed_to_parse_cycle_replay_all"
+    weights = align_weights_to_spine(weights, spine=spine)
+    provenance["weights"] = weights
+    return weights, provenance
 
 
 def _json_safe(obj: Any) -> Any:
@@ -106,9 +123,12 @@ def run_forecast(
     with_ratings: bool = True,
     with_markets: bool = True,
     rating_weight: float = 0.15,
-    market_weight: float = 0.10,
+    market_weight: float = 0.12,
+    control_weight: float = 0.15,
+    control_calibrate: bool = False,
     out_dir: Path | None = None,
-    allow_fast_fallback: bool = True,
+    allow_fast_fallback: bool = False,
+    generic_ballot_meta: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     from midterms.evidence.economics import write_economic_store, yoy_growth_as_of
     from midterms.evidence.approval import approval_as_of, write_approval_store
@@ -121,8 +141,10 @@ def run_forecast(
     from midterms.evidence.markets import load_control_market, load_race_markets, write_markets_store
     from midterms.evidence.peers import compare_to_peers, write_peer_snapshots
     from midterms.model.overlays import (
+        apply_control_market_overlay,
         apply_market_overlay,
         apply_rating_overlay,
+        calibrate_draws_to_control,
         overlay_report,
         shift_draws_to_means,
     )
@@ -136,8 +158,14 @@ def run_forecast(
 
     # Ensure economic + finance + ratings + markets stores exist
     layer_warnings: list[dict[str, str]] = []
-    write_economic_store()
-    write_approval_store()
+    try:
+        write_economic_store()
+    except Exception as exc:  # noqa: BLE001
+        layer_warnings.append({"layer": "economics", "error": str(exc)})
+    try:
+        write_approval_store()
+    except Exception as exc:  # noqa: BLE001
+        layer_warnings.append({"layer": "approval", "error": str(exc)})
     ratings_meta = ensure_expert_ratings_store(
         election_id=election_id, available_at=str(as_of)[:10]
     )
@@ -212,11 +240,13 @@ def run_forecast(
         }
 
     stack_weights = None
+    stack_provenance: dict[str, Any] | None = None
+    spine_method = str(getattr(fit, "method", method))
     if ensemble and (
         method in {"fast", "state_space", "pymc"}
         or str(getattr(fit, "method", "")).startswith("degraded")
     ):
-        weights = _load_stack_weights()
+        weights, stack_provenance = _load_stack_weights(spine=spine_method.split("+")[0])
         component_draws: dict[str, np.ndarray] = {fit.method.split("+")[0]: fit.draws_margin}
         core_name = "fast_hierarchical_t"
         if fit.method.startswith("pymc"):
@@ -249,9 +279,10 @@ def run_forecast(
                 )
         use_w = {k: v for k, v in weights.items() if k in component_draws and v > 0}
         if core_name not in use_w and core_name in component_draws:
-            use_w[core_name] = weights.get(core_name, weights.get("fast_hierarchical_t", 0.45))
-        if "fast_hierarchical_t" not in use_w and "fast_hierarchical_t" in component_draws:
-            use_w["fast_hierarchical_t"] = weights.get("fast_hierarchical_t", 0.35)
+            use_w[core_name] = weights.get(core_name, 0.40)
+        # Do not silently reintroduce fast when production spine is pymc
+        if core_name == "pymc":
+            use_w.pop("fast_hierarchical_t", None)
         if len(use_w) >= 2:
             from midterms.model.ensemble import stack_margin_draws
 
@@ -275,6 +306,8 @@ def run_forecast(
                         "discrete CRPS mixture via stack_margin_draws "
                         "(blueprint §9 predictive stacking)"
                     ),
+                    "spine_method": spine_method,
+                    "stack_provenance": stack_provenance,
                 },
                 method="ensemble_stack",
             )
@@ -312,12 +345,42 @@ def run_forecast(
 
     used_ratings = bool(with_ratings and len(expert_tbl))
     used_markets = bool(with_markets and len(market_df))
+    control = load_control_market()
+    control_p = control.get("p_dem")
+    used_control = bool(with_markets and control_p is not None and control_weight > 0)
+    control_cal_meta: dict[str, Any] = {"enabled": False}
     if used_ratings:
         adj = apply_rating_overlay(adj, fit.race_ids, expert_tbl, weight=rating_weight)
     if used_markets:
         adj = apply_market_overlay(adj, fit.race_ids, market_df, weight=market_weight)
-    if used_ratings or used_markets:
+    # Light mean-level control pull first (helps fundamentals location)
+    if used_control:
+        adj = apply_control_market_overlay(
+            adj, control_p_dem=float(control_p), weight=control_weight
+        )
+    if used_ratings or used_markets or used_control:
         shifted = shift_draws_to_means(fit.draws_margin, adj)
+        # Hard chamber calibration is OFF by default (blueprint §9.4: optional soft overlay).
+        if used_control and control_calibrate:
+            held = snap.races[snap.races["not_up"]] if len(snap.races) else snap.races
+            held_ind = int((held["held_by"] == "I").sum()) if len(held) else 0
+            held_dem = int((held["held_by"] == "D").sum()) + held_ind if len(held) else 0
+            shifted, control_cal_meta = calibrate_draws_to_control(
+                shifted,
+                held_dem=held_dem,
+                control_p_dem=float(control_p),
+                weight=control_weight,
+                vp_tiebreak_party="R",
+            )
+            control_cal_meta["mode"] = "calibrate_draws_to_control"
+        elif used_control:
+            control_cal_meta = {
+                "enabled": True,
+                "mode": "soft_national_pull_only",
+                "weight": control_weight,
+                "target_p_dem": control_p,
+                "note": "Blueprint section 9.4 soft overlay; chamber P(control) not forced to market",
+            }
         fit = FitResult(
             race_ids=fit.race_ids,
             states=fit.states,
@@ -332,8 +395,11 @@ def run_forecast(
                     used_markets=used_markets,
                     rating_weight=rating_weight if used_ratings else 0.0,
                     market_weight=market_weight if used_markets else 0.0,
+                    control_weight=control_weight if used_control else 0.0,
+                    used_control=used_control,
                 ),
-                "mean_shift_mae": float(np.mean(np.abs(adj - unadjusted_means))),
+                "control_calibration": control_cal_meta,
+                "mean_shift_mae": float(np.nanmean(np.abs(adj - unadjusted_means))),
                 "n_market_races": int(len(market_df)),
                 "n_expert_ratings": int((expert_tbl["source"] == "expert").sum())
                 if len(expert_tbl)
@@ -401,6 +467,7 @@ def run_forecast(
         for k, v in sorted(sim.seat_histogram.items(), key=lambda kv: int(kv[0]))
     ]
     expected_rep = 100.0 - sim.expected_dem_seats
+    # control already loaded above for overlay; refresh for artifact snapshot
     control = load_control_market()
 
     artifact = {
@@ -410,11 +477,15 @@ def run_forecast(
         "election_id": election_id,
         "model_version": MODEL_VERSION,
         "method": fit.method,
+        "generic_ballot": float(generic_ballot),
+        "generic_ballot_meta": generic_ballot_meta
+        or {"margin": float(generic_ballot), "method": "caller_supplied"},
         "snapshot": {
             **snap.to_dict(),
             "real_income_yoy": yoy,
             "n_kalshi_races": int(markets_meta.get("n_races") or len(market_df)),
             "kalshi_control_p_dem": control.get("p_dem"),
+            "generic_ballot": float(generic_ballot),
         },
         "chamber": {
             "held_dem": sim.held_dem,
@@ -433,7 +504,8 @@ def run_forecast(
             "note": (
                 "Chamber totals from joint correlated draws. "
                 "Independents without a Dem nominee still count toward Democratic seats. "
-                "Display ratings are model-derived from P(Dem); expert/Kalshi overlays are ablatable."
+                "Display ratings are model-derived from P(Dem); expert/Kalshi overlays are ablatable. "
+                "p_tie/p_fifty_fifty is P(exactly 50 Dem seats); with VP=R that outcome is Rep control."
             ),
         },
         "races": race_summaries,
@@ -441,16 +513,21 @@ def run_forecast(
         "diagnostics": {
             **(fit.diagnostics or {}),
             "layer_warnings": layer_warnings,
+            "core_method": spine_method,
+            "allow_fast_fallback": bool(allow_fast_fallback),
         },
         "warnings": layer_warnings,
         "house_effects": fit.house_effects,
         "stack_weights": stack_weights,
+        "stack_provenance": stack_provenance,
         "overlays": {
             **overlay_report(
                 used_ratings=used_ratings,
                 used_markets=used_markets,
                 rating_weight=rating_weight if used_ratings else 0.0,
                 market_weight=market_weight if used_markets else 0.0,
+                control_weight=control_weight if used_control else 0.0,
+                used_control=used_control,
             ),
             "markets_meta": {
                 "n_races": int(len(market_df)),
@@ -466,6 +543,7 @@ def run_forecast(
                     else str(expert_tbl["source"].iloc[0])
                 )
             ),
+            "control_calibration": control_cal_meta,
         },
         "ablation": ablation,
         "scenarios": scenarios,

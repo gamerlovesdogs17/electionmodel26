@@ -24,15 +24,20 @@ Use `midterms.ops.corrections.register_correction` to pair original + corrected
 artifacts with reason, first affected as-of, statistical impact, and prevention test.
 
 ## Signing
-Release manifests and forecast JSON carry HMAC-SHA256 sidecars
-(`MIDTERMS_SIGNING_KEY` env; dev default is not for public trust).
+Release manifests and forecast JSON carry **Ed25519** signature sidecars
+(`generate-signing-keys`, `MIDTERMS_SIGNING_KEY` / keypair under `data/keys/`).
+Set `MIDTERMS_REQUIRE_SIGNING=1` to fail closed when signatures are missing.
+(Legacy HMAC notes are obsolete.)
 
 ## Red-team checklist
 - Pollster flood / ENOP sublinearity
+- Leave-pollster-out CRPS stability (`leave-pollster-out` CLI)
 - Common national polling miss scenarios
 - Heavy-tail joint shocks
 - Candidate withdrawal / runoff_pending exclusion
 - Leakage canary on `build_as_of`
 - Source outage → last sealed artifact + stale alerts
+- Fold-pure stack weights (no holdout peeking)
+- Rebuild hash check (`verify-rebuild`)
 
 House / Electoral College remain out of scope.

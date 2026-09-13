@@ -1,0 +1,1214 @@
+
+
+===== PAGE 1 =====
+
+Designing a High-Integrity
+U.S. Election Forecasting
+System
+ 
+A strong forecast is not a single clever equation. It is a controlled evidence system:
+source-vintaged inputs, explicit measurement error, restrained structural priors,
+correlated and heavy-tailed uncertainty, joint simulation, and historical-date
+validation.
+SCOPE
+This paper concerns statistical design, data engineering, validation, and governance. It does not produce a live forecast,
+assess any current candidate or party, or estimate any current race.
+
+
+===== PAGE 2 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+1
+Abstract
+The strongest defensible U.S. election forecast is a probabilistic, auditable
+measurement-and-forecasting system rather than a weighted average of public win probabilities.
+Its core should estimate latent voter preference from individual polls; use partial pooling for
+sparse states and districts; maintain a small, regularized fundamentals model; separate current
+opinion from future opinion movement and Election-Day polling error; and draw complete
+elections from a correlated, heavy-tailed joint distribution. The model should be evaluated with
+proper scoring rules, calibration, interval coverage, and margin accuracy on entire election cycles
+and on historical as-of dates that reproduce the information actually available at the time. These
+choices synthesize the dynamic Bayesian tradition associated with Linzer and The Economist, the
+empirical poll-adjustment and uncertainty discipline of Silver-era FiveThirtyEight, the 2024
+Morris/538 architecture, the ensemble approach documented by Decision Desk HQ, and
+VoteHub's complete-cycle validation and effective-poll concepts.
+The paper's central recommendation is organizational as much as statistical: build an immutable, versioned evidence
+layer before optimizing the model. Every poll correction, economic revision, district boundary, finance report, expert
+rating, and candidate-status change must carry both the period it describes and the timestamp at which it became
+available. Without that two-time model, apparent backtest accuracy can be created by leakage. With it, competing
+specifications can be evaluated honestly and combined only when out-of-sample evidence supports the combination.
+The recommended production design is modular. A primary hierarchical Bayesian path should coexist with simpler
+challengers; any ensemble weights should be learned from held-out predictive distributions, not chosen because one
+public model happened to perform well in the most recent cycle. The system should publish probability distributions,
+expected margins, uncertainty intervals, scenario sensitivity, calibration history, and a model-change log while
+avoiding false precision.
+Research questions
+  What exactly should an election forecast estimate, and how should accuracy be defined?
+  How should polling, economics, fundamentals, finance, demographics, geography, ratings, and markets enter
+ without double-counting information?
+ How can cross-race correlation, rare misses, and model uncertainty be represented coherently?
+  What validation and data-governance system prevents historical leakage and overfitting?
+ Method. The analysis emphasizes official data documentation, original academic research, published methodology, and public source
+code. Named forecasting systems are used as design evidence, not as authorities whose final outputs should be averaged.
+
+
+===== PAGE 3 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+2
+Contents
+1
+Abstract
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 1
+Research questions
+4
+1. The forecasting object
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 4
+1.1 Outputs and estimands
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 4
+1.2 The objective: sharpness subject to calibration
+5
+2. What public forecasting systems contribute
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 5
+2.1 The recommended synthesis
+6
+3. Data collection: build the evidence system first
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 6
+3.1 Immutable raw layer and bitemporal analytical layer
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 6
+3.2 Source inventory and collection cadence
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 7
+3.3 Poll discovery and reconciliation
+7
+4. Polling as a measurement model
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 7
+4.1 Likelihood and overdispersion
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 7
+4.2 House effects, bias, and reliability are different
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 8
+4.3 Preventing pollster flooding and pseudo-replication
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 8
+4.4 Time dynamics and borrowing strength
+8
+5. Fundamentals: a restrained structural prior
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 8
+5.1 Presidential prior
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 9
+5.2 Congressional and gubernatorial priors
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 9
+5.3 Economic vintage discipline
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 9
+5.4 Regularization and model class
+9
+6. Demographics, district geography, and redistricting
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 10
+6.1 A boundary-aware warehouse
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 10
+6.2 Feature construction
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 10
+6.3 Similarity and covariance
+10
+7. The recommended generative core
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 11
+7.1 Polling path and fundamentals prior
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 11
+7.2 Separate three uncertainties
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 12
+7.3 Multi-candidate and turnout extensions
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 12
+7.4 Inference and diagnostics
+12
+8. Correlated and fat-tailed uncertainty
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 13
+8.1 Factor covariance
+
+
+===== PAGE 4 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+3
+ .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 13
+8.2 Heavy tails and surprise regimes
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 13
+8.3 Nonstationarity
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 13
+8.4 An explicit error budget
+13
+9. Simulation and model ensembles
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 13
+9.1 Simulate the whole electoral system
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 14
+9.2 What to ensemble
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 14
+9.3 What not to ensemble
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 14
+9.4 Optional expert and market layers
+14
+10. Validation, backtesting, and leakage prevention
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 15
+10.1 Validation design
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 15
+10.2 Metrics
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 16
+10.3 Baselines and ablations
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 16
+10.4 Leakage controls
+17
+11. Production implementation blueprint
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 17
+11.1 Build sequence
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 17
+11.2 Suggested system components
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 17
+11.3 Monitoring
+18
+12. Governance and communication
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 18
+12.1 Model card
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 18
+12.2 Public presentation
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 18
+12.3 Red-team tests
+18
+13. Conclusion
+20
+Appendix A. Canonical data contracts
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 20
+A.1 Poll record
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 20
+A.2 Economic observation
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 20
+A.3 Campaign-finance observation
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 20
+A.4 Forecast run manifest
+20
+Appendix B. Acceptance checklist
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 20
+Data
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 21
+Model
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 21
+Validation
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 21
+Operations and publication
+22
+Sources
+
+
+===== PAGE 5 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+4
+1. The forecasting object
+A polling average asks where measured opinion appears to be now. A forecast asks what distribution of certified
+outcomes is implied by everything legitimately known at a particular time. Let Dt denote the full information set
+available at time t, and let Y denote the vector of final vote margins. The primary object is therefore a joint predictive
+distribution, not a list of independent race calls.
+Forecast target:  p(Y | D_t)
+Joint draws:  Y^(k) = m_t + error^(k)
+The model estimates a distribution over coherent election outcomes; it does not merely label winners.
+1.1 Outputs and estimands
+The production system should maintain several related but distinct estimands: two-party vote margin; all-candidate
+vote share; turnout; Electoral College allocation; and chamber seat totals. The two-party margin is usually the cleanest
+core target because it separates the major-party contest from changes in third-party and undecided shares.
+All-candidate vote shares and turnout should be modeled in auxiliary layers when they materially affect the translation
+to institutional outcomes.
+For each race, publish the predictive mean or median margin, central intervals, the probability implied by the draw
+distribution, and sensitivity to major assumptions. For the electoral system, publish draw-based distributions rather
+than adding marginal probabilities. Maine and Nebraska district allocations, uncontested races, vacancies, runoffs,
+candidate replacement, and other institutional rules must be represented explicitly rather than handled by ad hoc
+postprocessing.
+1.2 The objective: sharpness subject to calibration
+Probabilistic forecasts should be as informative as possible while remaining statistically calibrated. Proper scoring
+rules reward accurate, honest predictive distributions and penalize both misplaced certainty and unhelpful
+vagueness.[1] Accuracy therefore cannot be reduced to the share of favored candidates who won. A system can choose
+the more likely side in every race while still assigning probabilities that are too extreme, intervals that under-cover, or
+joint seat distributions that are incoherent.
+The model-development loss should combine continuous and binary targets: log score or continuous ranked
+probability score for margins, Brier or log score for event probabilities, interval coverage and width, and multivariate
+scores for joint outcomes. Metrics should be reported by forecast lead time, office, poll density, competitiveness, and
+historical era rather than pooled into one flattering headline number.
+Design principle. Optimize the complete predictive distribution under historical replay. The simulation count is a
+numerical setting; the difficult parameters are the mean vector, uncertainty scales, tails, and covariance structure.
+
+
+===== PAGE 6 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+5
+2. What public forecasting systems contribute
+The major documented traditions are more complementary than their public disagreements sometimes suggest. The
+Economist's 2020 repository exposes a dynamic multilevel Bayesian implementation in R and Stan. It adds poll-mode
+and population corrections, informative state priors, and empirically constructed state correlations to the Linzer
+framework.[3][4][5] Silver-era FiveThirtyEight emphasizes empirical poll weighting, house effects, prolific-pollster
+controls, fundamentals, and decomposed correlated error.[6][7] Morris's 2024 538 model separates future opinion drift
+from polling bias and combines polling and fundamentals through a time-varying predictive mixture.[8][9][10] DDHQ
+documents spline polling averages, large feature sets, regularized and tree-based ensembles, dynamic
+poll/fundamentals weights, and multilevel simulations.[11] VoteHub documents complete-year holdouts, out-of-fold
+stacking, effective poll counts, ratings and market layers, and continuous similarity-based correlation.[12]
+Tradition
+Documented contribution
+Best lesson to retain
+Caution
+Linzer / The Economist
+2020
+Dynamic multilevel Bayesian state and
+national model; fundamentals prior;
+poll-level bias terms; cross-state
+covariance.
+Treat polls as noisy measurements of a
+latent time path and share information
+hierarchically.
+Published code also illustrates how
+bugs and uncertain hyperparameters
+can affect confidence; openness is
+necessary, not sufficient.
+Silver / FiveThirtyEight
+Empirical pollster ratings and house
+effects; recency; pollster caps;
+fundamentals; national, regional, and
+local error.
+Model non-sampling error and correlated
+miss mechanisms rather than trusting
+nominal survey margins alone.
+Many implementation details are
+proprietary or evolved across cycles,
+so descriptions should be
+benchmarked, not
+reverse-engineered as ground truth.
+Morris / 538 2024
+Regularized fundamentals; historical
+polling trajectories; separate drift and
+Election-Day error; fat-tailed error;
+predictive stacking.
+Let uncertainty and poll/fundamentals
+influence change with lead time based on
+historical evidence.
+The number of presidential cycles is
+small; weight curves and tail choices
+need nested historical testing.
+Decision Desk HQ 2024
+Cubic-spline poll paths; Bayesian
+ridge, Elastic Net, random forest, and
+boosting components; correlated
+simulation.
+Use diverse challengers and allow
+nonlinear structure where complete-cycle
+tests justify it.
+Hundreds of predictors create a high
+leakage and overfit burden; every
+transformation must be fold-local
+and time-valid.
+VoteHub 2026
+Year-held-out stacking; ENOP;
+pollster-level aggregation; expert and
+market layers; similarity-based
+covariance.
+Treat the election year as the validation
+unit and quantify polling information
+rather than counting releases.
+Current-cycle structural overlays,
+ratings, and markets must be
+separately audited and ablated.
+Table 1. A synthesis of documented model families. The table identifies reusable design ideas, not a performance ranking.
+2.1 The recommended synthesis
+The strongest architecture uses The Economist/Linzer style measurement as the primary statistical spine, Silver-style
+empirical poll diagnostics, Morris-style separation of drift and terminal error, and VoteHub/DDHQ-style challengers
+and complete-cycle validation. The final forecast should be generated from one controlled data system. Public forecast
+probabilities should be retained only as external benchmarks unless their underlying information sets and historical
+vintages are known.
+This recommendation deliberately separates a generative core from an ensemble layer. The core states how polls and
+fundamentals produce a joint election-day distribution. The ensemble layer may combine genuinely distinct predictive
+distributions, but only with weights trained on out-of-sample historical forecasts. Predictive stacking is appropriate
+because it chooses weights for forecast performance rather than assuming one candidate model is literally true.[13]
+
+
+===== PAGE 7 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+6
+3. Data collection: build the evidence system first
+Every forecasting record needs two clocks. event_time says when the underlying fact occurred or what period it
+describes. available_at says when a historical forecaster could first have known it. A poll may finish fieldwork on one
+date and be published later; an economic estimate may describe an earlier quarter but be released and revised on still
+later dates; a campaign-finance report covers a defined period but appears after filing and processing. Historical replay
+must filter on available_at, never merely on event date.
+eligible_record(r, t) = 1  only if  r.available_at <= t
+historical_query(t) = latest version known by t, not latest version known today
+ The same rule applies to polls, economics, ratings, filings, boundaries, candidates, and model metadata.
+3.1 Immutable raw layer and bitemporal analytical layer
+ 1. Store the original artifact: release page or PDF, retrieved payload, response headers where useful, checksum,
+ source URL, retrieval timestamp, and license/usage note.
+2. Append corrections as new versions. Never overwrite the earlier poll, revised economic observation, corrected
+ election return, changed race rating, or amended FEC filing.
+3. Normalize into analytical tables with stable source identifiers, event validity, system validity, and lineage back to
+ raw bytes.
+4. Build all features through an as-of join that is tested to reject records from the future.
+ 5. Create a run manifest recording snapshot IDs, code revision, model version, random seed, configuration, and
+ output hashes.
+3.2 Source inventory and collection cadence
+ Domain
+Preferred source chain
+Critical timestamps / versions
+Principal risk
+Polls
+Original pollster release first; discovery and
+reconciliation through established
+aggregators; AAPOR disclosure fields.[2][14]
+Field start/end; publication time;
+correction time;
+questionnaire/version; retrieval time.
+Missing methodological details, duplicate
+releases, overlapping trackers, corrected
+toplines, sponsor effects.
+Economic conditions
+ALFRED/FRED real-time API plus original BLS,
+BEA, and other agency releases.[15][16]
+Observation period; first release; every
+revision; release calendar; model
+retrieval.
+Using today's revised history in
+yesterday's backtest; release-lag
+mismatch; silent seasonal revisions.
+Campaign finance
+OpenFEC API, bulk data, filings, and source
+images.[17][18]
+Coverage-through date; filed time;
+FEC availability; amendment and
+processing time.
+Comparing unequal reporting windows,
+double-counting transfers, treating
+spending as causal.
+Election results
+State certification; FEC compilations; Clerk of
+the House; MEDSL as a normalized research
+layer.[19][20][21]
+Election type; certification and
+revision dates; precinct reporting
+scheme; dataset release version.
+Unofficial versus certified results,
+name/party normalization, district and
+precinct changes.
+Demography and
+geography
+Census ACS/decennial APIs, PL 94-171,
+TIGER/Line, and official district plans.[22][23]
+Survey/data vintage; boundary
+vintage; plan effective election;
+crosswalk version.
+Attaching modern demographics or
+modern boundaries to older elections;
+ACS sampling error.
+Voter attitudes /
+turnout
+ANES cumulative and cycle files; CPS voting
+supplements where suitable.[24]
+Interview wave; release version;
+weighting design; post-election
+availability.
+Post-election variables leaking into
+pre-election forecasts; small subgroup
+samples.
+Expert ratings
+Timestamped snapshots from each rating
+publisher, including definition changes.
+Publication time; category scheme;
+race; analyst; correction.
+Ratings summarize polling and
+fundamentals already in the model;
+opaque historical archives.
+Prediction markets
+Time-stamped trade and order-book records,
+rules, resolution source, liquidity fields.
+Quote/trade time; spread; volume;
+open interest; contract-rule version.
+Thin liquidity, correlated information,
+changing access, and feedback from
+public forecasts.
+
+
+===== PAGE 8 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+7
+Table 2. Production data inventory. Each layer needs explicit provenance, versioning, and date validity.
+3.3 Poll discovery and reconciliation
+A production collector should ingest individual polls rather than another site's average. Start from original releases
+and archive a permissible copy or structured extract. Use external poll lists to discover missing items, then reconcile by
+pollster, sponsor, geography, field dates, sample population, mode, candidate set, and questionnaire. The AAPOR
+Transparency Initiative provides a strong metadata baseline: sponsorship and funding, instrument wording, target
+population, recruitment and sample construction, mode, dates, sample size, weighting, and precision disclosures.[2]
+The collector should preserve adults, registered-voter, and likely-voter versions separately; two-way and multiway
+questions separately; and each release/correction separately. When a poll reports multiple candidate matchups or
+populations, treat them as correlated measurements from one underlying study, not independent polls.
+4. Polling as a measurement model
+Let thetas,t be latent two-party preference in geography s on day t. A poll is a noisy observation of that state, shifted by
+organization, method, population, sponsor, questionnaire, and other study-level effects. This framing follows the
+dynamic Bayesian literature and the public Economist implementation.[3][4][5]
+poll_margin_i = theta[s(i), t(i)] + house[j(i)] + mode[k(i)] + population[q(i)]
+                 + sponsor_i + questionnaire_i + sampling_error_i + extra_error_i
+All adjustments are hierarchically regularized and estimated only from data available inside the training fold.
+4.1 Likelihood and overdispersion
+A binomial likelihood is a useful starting point for candidate counts, but real polls are not simple random samples.
+Weighting, clustering, nonresponse, turnout screens, panel reuse, and design choices introduce extra variation. Polling
+error studies find meaningful election-level bias and excess variance beyond nominal sampling error.[14][25] A robust
+implementation can use a Student-t margin likelihood or a binomial/beta-binomial formulation with design-effect and
+extra-error terms. The tails and scale should be estimated by historical cycle, office, lead time, and poll type, with
+partial pooling where samples are thin.
+4.2 House effects, bias, and reliability are different
+Estimate a pollster's systematic lean and its residual variance separately. A firm can be consistently shifted but precise
+after correction; another can be unbiased on average but noisy. Both parameters require hierarchical shrinkage. New
+or low-volume pollsters should begin near the industry distribution and move only as evidence accumulates.
+house_j ~ Normal(0, tau_house)
+log(extra_sd_j) ~ Normal(mu_quality, tau_quality)
+The posterior moves away from the population mean only when the pollster's history is informative.
+
+
+===== PAGE 9 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+8
+4.3 Preventing pollster flooding and pseudo-replication
+Tracking polls, repeated releases, shared samples, and many polls from one organization do not create independent
+information. Silver-era models explicitly cap prolific pollsters, and VoteHub first compresses releases into
+pollster-level signals before computing an effective number of polls.[7][12] The recommended model should represent a
+study-series cluster and estimate within-series correlation. A public ENOP diagnostic can be computed from
+normalized influence weights, but the internal likelihood should do the deeper work of identifying shared samples and
+organizations.
+ENOP = (sum_i w_i)^2 / sum_i(w_i^2)
+A descriptive information measure, not a substitute for a correctly clustered likelihood.
+4.4 Time dynamics and borrowing strength
+Latent opinion should move smoothly but not rigidly. A correlated random walk, local linear trend, spline, or Gaussian
+process can connect adjacent days. The innovation covariance should permit national movement, regional or
+demographic movement, and local deviations. Sparse states and districts then borrow from national polling, similar
+geographies, and structural priors without being treated as clones.
+theta_t = theta_(t-1) + L_time * z_t,     z_t ~ robust multivariate noise
+ theta[s,t] = national_t + state_baseline_s + local_deviation[s,t]
+ L_time controls which geographies tend to move together during the campaign.
+Mode, population, and questionnaire effects should vary by era when evidence supports it. Historical landline effects
+need not equal modern web-panel effects. A hierarchical era interaction is safer than a permanent universal
+adjustment, and every added interaction must clear complete-cycle validation.
+5. Fundamentals: a restrained structural prior
+Fundamentals are valuable when race-specific polling is sparse and early campaign polls have substantial time to
+move. They are also unusually vulnerable to overfitting. Presidential models have only a small number of modern
+cycles, while the analyst can choose among many plausible economic definitions, windows, transformations, and
+interactions. Traditional structural models show why growth, approval, incumbency, and party tenure are plausible
+predictors, but their specifications differ and should be treated as candidate hypotheses rather than settled
+law.[26][27][28]
+5.1 Presidential prior
+Use a small set of predeclared, historically available predictors: prior national and state two-party vote; state relative
+lean; incumbency and whether the incumbent is personally running; party tenure; presidential approval; recent real
+income or output growth; inflation or real-income pressure; and a limited polarization interaction. Morris/538 used
+regularized Bayesian regression, and The Economist anchored its Election-Day prior to a regularized fundamentals
+forecast.[4][8]
+fundamental_margin_s = beta0 + beta1*prior_lean_s + beta2*approval
+                     + beta3*real_income_growth + beta4*incumbency + beta5*party_tenure + u_s
+ Illustrative specification. Coefficients and predictor windows must be selected in nested complete-cycle validation.
+
+
+===== PAGE 10 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+9
+5.2 Congressional and gubernatorial priors
+The larger number of House, Senate, and gubernatorial contests permits more structure, but observations within a
+cycle share the same national environment and are not independent. Useful predictors include district or state lean,
+the generic ballot, recent office-specific performance, incumbency/open-seat status, candidate experience,
+fundraising, special-election evidence, and statewide environment. Silver-era 538, Morris/538, DDHQ, and VoteHub
+all document variants of these ingredients.[7][9][10][11][12]
+Transform finance variables to reflect scale and matched reporting windows. A log ratio or share of candidate receipts
+is more stable than a raw dollar difference; cash on hand, spending, independent expenditures, debts, and small-donor
+receipts should remain distinct. Because fundraising partly reflects donor beliefs about candidate quality and
+competitiveness, it is predictive but not automatically causal. The FEC also warns that summary files can double-count
+transfers among authorized committees, which should be netted or modeled carefully.[18]
+5.3 Economic vintage discipline
+The economic feature store should be reconstructed from real-time releases. ALFRED explicitly distinguishes the
+observation date from the real-time period during which a value was known and provides vintage-date queries.[15] For
+every backtest run, use the latest value available on that date, not the latest revised value now. When an Election-Day
+economic quantity was not yet released, either carry forward the last known release or include a separate nowcast
+distribution; do not silently substitute later data.
+Predeclare transformation windows - for example, year-over-year real disposable income growth or cumulative recent
+growth - and select among them within nested cycle-level validation. Store seasonal-adjustment flags, unit
+transformations, release lag, and revision history. Missing historical coverage should be imputed inside the training
+fold only, with imputation uncertainty propagated.
+5.4 Regularization and model class
+Begin with hierarchical ridge or regularized Bayesian regression. Add Elastic Net, shallow trees, boosting, or small
+neural networks only as challengers. DDHQ and VoteHub document ensembles of linear and nonlinear learners;
+VoteHub also performs year-aware tuning inside each held-out-year fold.[11][12] That nested structure is the minimum
+protection against a high-dimensional model learning the test cycle through preprocessing or tuning.
+Admission rule. A variable enters production only if its definition is stable, its historical availability can be reconstructed,
+its missingness is understood, and it improves complete-cycle predictive performance or calibration without creating
+fragile tail behavior.
+6. Demographics, district geography, and redistricting
+Geography is not a static lookup. Congressional and legislative districts change; precincts split and merge; county
+equivalents change; and ACS estimates have their own vintages and sampling error. The data model must separate a
+stable place identity from the boundary polygon and the election in which that boundary applies. Census redistricting
+products, PL 94-171 data, APIs, and TIGER/Line provide official demographic and spatial building blocks.[22][23]
+
+
+===== PAGE 11 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+10
+6.1 A boundary-aware warehouse
+ Entity
+Stable key
+Version fields
+Required checks
+District plan
+plan_id
+effective election; enactment/court dates;
+source map version
+Correct Congress/election; overlaps;
+gaps; district count; state provenance.
+Polygon
+geography_version_id
+valid_from; valid_to; source release; CRS
+Geometry validity; area tolerance; water
+handling; projection; checksum.
+Census unit
+vintage + GEOID
+census/ACS vintage; boundary vintage
+Suppression; margin of error; variable
+definition; geography compatibility.
+Precinct
+state/local source ID +
+election
+election date; reporting version; split/merge
+lineage
+Vote-total reconciliation; duplicate
+labels; absentee/central count
+allocation.
+Crosswalk
+from_version + to_version
+method; weight type; build date; input hashes
+Weights sum correctly; population
+versus area basis; uncertainty retained.
+Table 3. Minimal geography entities. District identity and polygon version must never be conflated.
+6.2 Feature construction
+Build district demographics from contemporaneous census units using population-weighted or
+voting-age-population-weighted crosswalks. Keep citizen voting-age population, total population, age, race/ethnicity,
+education, income, density, urbanicity, industry, and migration measures as separate features with margins of error.
+Avoid using ecological features as if they directly identified individual behavior; demographics are best used for
+pooling, similarity, and variance structure unless stronger out-of-sample evidence supports direct effects.
+For redistricted districts, recalculate historical partisan baselines on the new boundary using precinct or block-level
+returns when defensible, record the allocation method, and propagate uncertainty from split precincts. Do not train on
+the realized result of the target election simply because it is now available on the same modern geography.
+6.3 Similarity and covariance
+A similarity matrix may combine geographic proximity, recent partisan lean, density, education, race/ethnicity, media
+market, and economic structure. Estimate the mapping from similarity to residual correlation only within training
+cycles. A factor model or Gaussian-process kernel guarantees a positive-semidefinite covariance matrix more reliably
+than editing pairwise correlations by hand.
+7. The recommended generative core
+
+
+===== PAGE 12 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+11
+1  VINTAGED EVIDENCE
+poll releases | economics | finance
+results | ratings | markets | geography
+2  MEASUREMENT + FEATURES
+poll likelihood and house effects
+regularized structural predictors
+3  LATENT ELECTION-DAY STATE
+current opinion + future movement
+polling bias + parameter uncertainty
+4  JOINT OUTCOME SIMULATOR
+national | regional | demographic
+race-specific factors with heavy tails
+VALIDATION HARNESS
+complete-cycle holdouts
+historical-date replay
+proper scores + calibration
+ablation and stress tests
+PRODUCTION + GOVERNANCE
+immutable snapshots
+lineage and run manifests
+model cards + version history
+review, monitoring, rollback
+scores
+audit
+Every arrow crosses an as-of-time barrier
+Figure 1. Recommended system architecture. Validation and governance are continuous components, not final-stage decorations.
+7.1 Polling path and fundamentals prior
+The primary model should be a hierarchical state-space model whose Election-Day latent state is weakly anchored by a
+structural prior. The Economist implementation runs the opinion path backward from an Election-Day fundamentals
+prior so that polls update that prior coherently.[4][5] A forward-filtering formulation is also valid if it estimates current
+opinion and explicitly projects future movement to Election Day. The choice between forward and backward
+parameterization is computational; the validation target is the same predictive distribution.
+Do not add fundamentals twice. If fundamentals define the Bayesian prior inside the polling model, a second additive
+fundamentals correction at the end duplicates evidence unless the entire combined specification is backtested as such.
+If separate poll-only and fundamentals-only distributions are retained for stacking, the primary model's prior should
+be broad enough that the components remain meaningfully distinct.
+7.2 Separate three uncertainties
+final_margin_s - current_latent_margin[s,t]
+    = future_opinion_movement[s,t] + Election_Day_polling_error[s] + turnout_or_translation_error[s]
+ Parameter and model uncertainty sit around every component and must also be integrated.
+Future opinion movement should shrink as Election Day approaches. Election-Day polling error should not.
+Morris/538 explicitly estimated historical poll movement by campaign date separately from terminal polling bias, and
+Silver-era methodology likewise distinguishes campaign movement from final error.[6][8] This separation prevents a
+forecast from becoming mechanically certain merely because the calendar reached Election Day.
+
+
+===== PAGE 13 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+12
+EARLIER IN THE CAMPAIGN
+ELECTION DAY
+Future opinion movement
+learned by date from historical polling paths
+Election-Day polling error
+remains even when no campaign time remains
+Parameter + model uncertainty
+small samples and structural nonstationarity
+Conceptual decomposition; band thickness is not an empirical estimate.
+Figure 2. Conceptual uncertainty budget over the campaign. Future movement contracts; terminal measurement and structural uncertainty
+remain.
+7.3 Multi-candidate and turnout extensions
+The simplest core can model the two-party margin and treat undecided/other share as an auxiliary outcome. A fuller
+specification can use a logistic-normal composition for major candidates, other candidates, and undecided
+respondents, with questionnaire-specific mapping. Turnout should usually be a separate, uncertainty-bearing model
+informed by historical participation, registration and eligible-population data, not an unobserved deterministic
+correction to vote preference. Translating voter intention into votes may require an additional turnout-screen error
+term.
+7.4 Inference and diagnostics
+Fit the core with Stan, PyMC, or another system that exposes posterior predictive checks and diagnostics. Require
+stable chains or reliable approximate-inference diagnostics, high effective sample sizes for decision-relevant
+quantities, no material divergences, and simulation-based calibration on synthetic data. Run prior predictive checks
+before fitting historical elections. The public Economist model demonstrates the value of inspectable code and also
+documents how external scrutiny exposed questionable predictions, bugs, and modeling choices.[4][5]
+8. Correlated and fat-tailed uncertainty
+Cross-race dependence is indispensable. If the polling industry misestimates the composition of the electorate or a
+national environment measure is biased, many states or districts can miss in the same direction. Shirani-Mehr and
+colleagues decompose polling misses into election-level bias and poll-level variation, while public forecasters model
+national, regional/demographic, and local components.[14][7][8][11][12]
+error_r = loading_national[r]*G + loading_region[r]*R_region(r)
+         + feature_loadings[r]'*F + local_scale[r]*u_r
+G, R, F, and u may share a scale-mixture shock to produce heavy tails.
+
+
+===== PAGE 14 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+13
+8.1 Factor covariance
+Use a low-rank factor structure plus race-specific residual variance. National factors capture common miss; region or
+demographic factors capture structured deviations; local residuals capture candidate and survey idiosyncrasies. The
+factor loadings can be regularized functions of geography, office, poll density, and demographics. This structure scales
+to hundreds of House races, remains positive-semidefinite, and yields interpretable stress scenarios.
+8.2 Heavy tails and surprise regimes
+Normal errors understate the chance of large joint misses when historical samples are small and data-generating
+processes change. Morris/538 documented a Student-t error layer; DDHQ describes heavy-tailed priors in part of its
+ensemble.[8][11] A robust simulator can draw from a multivariate Student-t distribution or a scale mixture in which a
+cycle-level shock inflates all error components together. Degrees of freedom and scale should be regularized and tested
+by held-out predictive scores and interval coverage, not chosen to create a desired level of suspense.
+8.3 Nonstationarity
+Polling methodology, polarization, turnout patterns, redistricting, and media environments change. Estimate era
+effects and allow recent cycles more influence, but do not simply discard older elections: they contain rare-error
+information that newer samples lack. A hierarchical time-varying scale, robust mixture, or discounted likelihood can
+balance relevance and tail estimation. Report sensitivity to reasonable era windows.
+8.4 An explicit error budget
+ Component
+What it represents
+How it changes with time
+How to validate
+Poll sampling/design
+Finite sample, weighting, clustering, and study
+design.
+Poll-specific; more independent
+evidence reduces aggregate variance.
+Residuals by design, population,
+mode, and ENOP; coverage.
+House/method effects
+Persistent organization or method tendencies.
+Updated as evidence arrives;
+shrinkage limits early movement.
+Leave-pollster-out and
+leave-cycle-out diagnostics.
+Future opinion
+movement
+Change between forecast date and Election
+Day.
+Declines toward zero by construction.
+Historical-date polling paths and
+lead-time coverage.
+Industrywide terminal
+bias
+Common polling miss on Election Day.
+Does not vanish with the calendar.
+Held-out final polls versus certified
+outcomes.
+Regional/demographic
+miss
+Related errors among similar geographies.
+May contract with direct local polling
+but remains shared.
+Residual covariance and joint tail
+events.
+Local race error
+Candidate, local event, ballot, and sparse-data
+effects.
+Usually shrinks with direct evidence;
+never disappears.
+Race-level residuals by office and
+poll density.
+Parameter/model
+uncertainty
+Small samples and specification ambiguity.
+May shrink with data but persists
+across cycles.
+Posterior checks, specification
+ensemble, sensitivity.
+Table 4. Error components should be identifiable in code, simulation output, and validation reports.
+9. Simulation and model ensembles
+9.1 Simulate the whole electoral system
+For each draw, sample model parameters, the Election-Day latent margin vector, and all shared and local error factors.
+Translate margins to vote shares and institutional rules inside the same draw, then count electoral votes or chamber
+seats. This preserves dependence automatically. Independent Bernoulli draws from each race's marginal probability
+should never be the default.
+1. Draw posterior parameters and any discrete model specification.
+ 
+
+===== PAGE 15 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+14
+2. Draw national, regional/demographic, and local shocks from the calibrated heavy-tailed structure.
+ 3. Generate all race margins jointly, including turnout/third-party layers when used.
+ 4. Apply election rules, district allocations, runoffs, uncontested-race handling, and tie procedures.
+ 5. Store the complete draw or reproducible sufficient summaries, not only final displayed probabilities.
+ Monte Carlo error should be far smaller than displayed precision. Use deterministic seeds for published runs,
+convergence checks across seeds, and enough draws for stable tail summaries. More draws do not fix a misspecified
+covariance matrix.
+9.2 What to ensemble
+Maintain structurally different challengers: a hierarchical Bayesian core; a robust poll-only state-space model; a
+parsimonious fundamentals model; a regularized linear congressional model; and, where data support it, a nonlinear
+ensemble. Fit each from the same source-vintaged warehouse. Combine posterior predictive distributions with
+nonnegative weights learned from held-out cycles and historical lead times.[13]
+p_ensemble(Y | D_t) = sum_m w_m(t, poll_information, office) * p_m(Y | D_t)
+ w_m >= 0,   sum_m w_m = 1
+Weights are trained on out-of-fold predictive distributions and regularized toward simple, stable mixtures.
+9.3 What not to ensemble
+Do not average published probabilities from The Economist, 538, Silver Bulletin, DDHQ, and VoteHub as if they were
+independent observations. Those products often ingest overlapping polls, economic releases, ratings, and market
+information; they may target different estimands; and historical revisions may not be reproducible. An average can
+conceal, rather than reduce, common-mode error. Use public forecasts as external benchmarks or as a separately
+labeled consensus model only when versioned archives and a transparent validation design exist.[29]
+9.4 Optional expert and market layers
+Expert ratings and prediction markets can contain information not easily encoded in structured data, especially in
+sparsely polled races. They also echo polls, fundraising, news, and each other. Enter them as separate timestamped
+modules with explicit transformations, liquidity or category uncertainty, and strict ablation. VoteHub and Morris/538
+document two different ways of integrating those signals.[10][12] The production report should always show results
+with and without optional layers.
+10. Validation, backtesting, and leakage prevention
+Random race-level train/test splits are invalid for the primary performance claim because races within an election year
+share national conditions, polling errors, candidate environments, and data-production choices. Hold out complete
+cycles. For each held-out cycle, replay multiple forecast dates, reconstruct the as-of data snapshot, tune models only
+within the remaining cycles, and generate the full joint distribution. VoteHub documents this year-held-out and
+nested-tuning principle explicitly.[12]
+
+
+===== PAGE 16 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+15
+1
+Freeze a historical as-of date
+Query only records known by that timestamp
+2
+Hold out a complete election cycle
+No race from the target cycle enters training
+3
+Tune inside the remaining cycles
+Preprocessing and hyperparameters stay fold-local
+4
+Generate a joint predictive distribution
+Preserve race dependence and full uncertainty
+5
+Score, diagnose, and ablate
+Unlock changes only after holdout evaluation
+No model choice sees the held-out cycle before scoring
+Figure 3. Nested complete-cycle historical replay. The held-out cycle remains sealed through preprocessing, tuning, and stacking.
+10.1 Validation design
+ 1. Outer loop: hold out one complete presidential or midterm cycle, with office-specific evaluation where
+ appropriate.
+2. As-of loop: choose a fixed grid of historical lead times and reconstruct exactly what was available at each
+ timestamp.
+3. Inner loop: tune transformations, priors, learners, covariance parameters, and ensemble weights using only earlier
+ or non-held-out cycles.
+4. Production simulation: generate joint race and system outcomes using only fold-trained objects.
+ 5. Scoring: aggregate within cycle first, then across cycles, so a House year with many races does not overwhelm the
+ small number of independent national environments.
+10.2 Metrics
+ Target
+Primary metrics
+Diagnostic views
+Failure signal
+Race margin distribution
+Log score or CRPS; RMSE/MAE of center;
+interval score.
+Lead time, office, poll density,
+competitiveness, era.
+Good RMSE but under-covered
+intervals; tail misses concentrated
+by cycle.
+Binary race outcome
+Brier and log score.
+Reliability diagram; calibration
+intercept/slope; sharpness.
+Forecasts near a probability level
+realize much more or less often.
+Joint state/race vector
+Energy or variogram score; residual
+covariance diagnostics.
+National, regional, and demographic
+joint misses.
+Marginals calibrate but chamber or
+Electoral College distributions are
+too narrow.
+Seat / electoral-vote
+distribution
+Discrete log score; CRPS; interval coverage.
+Quantiles and realized rank; draw-level
+coherence.
+Realized totals repeatedly land in
+tails despite reasonable race
+marginals.
+Data pipeline
+Snapshot reproducibility; lineage
+completeness; schema tests.
+Future-row scans; source-version diffs;
+deterministic rebuilds.
+A historical run changes when
+today's source is refreshed.
+Table 5. A validation scorecard should include calibration, sharpness, margins, and joint outcomes.
+
+
+===== PAGE 17 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+16
+10.3 Baselines and ablations
+Every complex model should face simple baselines: last-election lean plus national swing; equal-weight recent polls; a
+shrinkage polling average; a parsimonious fundamentals regression; and independent-error simulation. Then remove
+one component at a time: pollster quality, house effects, sponsor effect, fundamentals, ratings, markets, regional
+factors, heavy tails, and recent-cycle weighting. A component earns production status only if its gain is stable across
+multiple held-out cycles or materially improves a known risk such as interval under-coverage.
+10.4 Leakage controls
+ Leakage path
+Control
+Revised economic history
+Query ALFRED or a stored release snapshot by vintage date; freeze transformations and release
+calendars.
+Corrected polls
+Retain every publication version and use the version visible at the forecast timestamp.
+Future pollster ratings
+Recompute ratings excluding the held-out cycle and any later elections.
+Target-year preprocessing
+Fit scalers, imputers, embeddings, feature selection, and hyperparameters inside the inner
+training folds.
+Modern district geography
+Use the plan effective for the election; derive old-to-new crosswalks without target outcomes.
+Post-election candidate labels
+Version candidate status, ballot access, withdrawals, and incumbency according to public
+knowledge.
+Ratings/market hindsight
+Use timestamped snapshots, original category definitions, order books, contract rules, and
+liquidity.
+Stacker sees in-sample predictions
+Train the meta-model only on out-of-fold predictive distributions.
+Table 6. Common leakage routes and enforceable controls.
+Reproducibility test. A historical forecast rebuilt next month from the same run manifest must be byte-identical or differ
+only for a documented, versioned reason. If a refreshed upstream API changes the backtest silently, the evidence system
+has failed.
+
+
+===== PAGE 18 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+17
+11. Production implementation blueprint
+11.1 Build sequence
+ Gate
+Deliverable
+Exit criterion
+0. Charter
+Estimands, update cadence, source policy, versioning rules, scoring plan, and
+publication policy.
+Written definitions; no unresolved target
+ambiguity; sources and licenses approved.
+1. Evidence
+warehouse
+Immutable raw store, bitemporal normalized tables, geography registry, as-of
+joins, and run manifests.
+Historical snapshots reproduce; correction and
+revision tests pass.
+2. Baselines
+Last-election-plus-swing, equal-weight polls, simple shrinkage average, simple
+fundamentals.
+Complete-cycle replay and score reports run
+automatically.
+3. Polling model
+Hierarchical house/method effects, state-space opinion path, clustered repeated
+polls.
+Posterior checks, leave-pollster-out tests, and
+lead-time coverage are acceptable.
+4. Fundamentals
+Presidential and office-specific regularized structural models with vintage
+economics/finance.
+Nested complete-cycle improvement or robust
+sparse-race value.
+5. Joint
+simulator
+Factor covariance, heavy tails, institutional rules, and deterministic draw pipeline.
+Joint score and stress tests show calibrated
+system-level uncertainty.
+6. Ensemble
+Out-of-fold predictive stacking and optional ratings/market modules.
+Stable gains across cycles; ablation and
+sensitivity published.
+7. Operations
+Scheduled ingestion, model monitoring, review, rollback, model card, and public
+archive.
+Dry-run cycle completes with alerts,
+reproducibility, and independent review.
+Table 7. A gated build prevents a sophisticated model from outrunning its evidence and validation system.
+11.2 Suggested system components
+  Object storage for immutable raw artifacts; relational or columnar tables for normalized records; a spatial database
+ for polygons and crosswalks.
+ Declarative data contracts for polls, economic vintages, FEC filings, election results, candidate status, ratings,
+ markets, and geography.
+ A feature builder whose only public interface is build_as_of(timestamp, election, geography_version).
+  A probabilistic model package separated from data ingestion, with typed inputs and generated-quantities checks.
+  A simulation service that consumes posterior draws and an explicit election-rules configuration.
+  A validation registry storing fold definitions, scores, calibration plots, ablations, stress tests, and model approval
+ decisions.
+ A publication layer that reads immutable forecast artifacts rather than querying live upstream data.
+ 
+11.3 Monitoring
+Operational alerts should cover stale sources, failed poll parsing, suspicious duplicate IDs, large corrections, missing
+geographic mappings, FEC amendments, candidate-status changes, posterior diagnostic failures, unstable
+probabilities across seeds, and implausibly abrupt model moves. Distinguish a data update from a code update and a
+parameter update in the public change log.
+Each release should have a signed or hashed manifest. Preserve old public forecasts exactly as published. If an error is
+corrected, publish both the original and corrected artifact, the first affected timestamp, the statistical impact, and the
+prevention test added afterward. The Economist experience demonstrates that public code and active model checking
+can surface errors that internal development missed.[4]
+
+
+===== PAGE 19 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+18
+12. Governance and communication
+Election forecasts influence public interpretation, journalism, campaigns, and markets. The modeling team should
+separate research, production, editorial presentation, and approval roles. A model-change committee should review
+any current-cycle overlay, discretionary adjustment, new source, or recalibration against a written standard. Manual
+race adjustments should be exceptional, timestamped, reproducible, and accompanied by an unadjusted output.
+12.1 Model card
+  Forecast target, population, unit, election rules, update cadence, and earliest supported date.
+  Complete source inventory with licensing, vintages, coverage, exclusions, and known gaps.
+  Mathematical specification, priors, covariance factors, tail distribution, and ensemble components.
+  Training elections, held-out design, historical as-of grid, preprocessing boundaries, and all metrics.
+  Calibration and interval coverage by lead time, office, poll density, and historical era.
+  Known limitations: small presidential sample, changing polling methods, redistricting, missing polls, data
+ revisions, and unknown unknowns.
+12.2 Public presentation
+Lead with the expected margin range and major uncertainty drivers before displaying a precise win probability. Round
+displayed probabilities and intervals to a precision justified by Monte Carlo stability and historical calibration. Show
+scenario sensitivity - for example, a generic national polling miss, a regional miss, or reduced poll quality - without
+treating those scenarios as new forecasts. Explain that correlated uncertainty allows many races to move together.
+Publish the forecast archive, methodology, data dictionary, change log, and validation report. Open source the
+executable core where licensing permits. When raw polls or ratings cannot be redistributed, publish hashes, source
+metadata, transformation code, and synthetic fixtures so the pipeline can still be audited.
+12.3 Red-team tests
+  Pollster flood: add many overlapping releases from one firm and verify that information grows sublinearly.
+  Common polling miss: shift all polls coherently and test national/regional propagation.
+  Heavy-tail shock: inflate the cycle scale and verify plausible joint tail behavior.
+  Candidate replacement or withdrawal: confirm that data lineage, eligibility rules, and publication state change
+ cleanly.
+ Redistricting: swap boundary vintages and require hard failure rather than a silent crosswalk.
+  Source outage: reproduce the last forecast exactly and label stale inputs instead of partially updating.
+  Leakage canary: inject a future-dated record and require the as-of builder and test suite to reject it.
+ 
+13. Conclusion
+The strongest possible U.S. election forecast is not the model with the most variables, the newest
+algorithm, or the largest simulation count. It is the system that most faithfully represents the
+information available at the time, distinguishes measurement from future change, preserves
+dependence across races, remains humble about rare errors, and proves each design choice on
+unseen election cycles.
+
+
+===== PAGE 20 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+19
+A dynamic hierarchical polling model should form the primary spine. A restrained, regularized fundamentals model
+should supply early and sparse-race structure. Correlated Student-t or scale-mixture errors should preserve national,
+regional, demographic, and local miss mechanisms. Joint simulation should translate margins into institutional
+outcomes. Predictive stacking may combine genuinely different models, but only with fold-pure historical predictions.
+Ratings and markets should be optional, timestamped modules whose incremental value is visible through ablation.
+The decisive advantage, however, is the evidence architecture: immutable raw artifacts, bitemporal records,
+boundary-aware geography, economic vintages, matched finance periods, model manifests, and historical-date replay.
+That infrastructure turns methodological disagreement into testable hypotheses and protects backtests from
+hindsight. The result is not certainty. It is a forecast whose uncertainty is earned, whose history can be reconstructed,
+and whose failures can teach the next version.
+Minimum viable high-integrity model: source-vintaged polling and results; a hierarchical latent-opinion path; a
+parsimonious structural prior; complete-cycle historical replay; national/regional/local heavy-tailed errors; joint
+simulation; proper scores and calibration; immutable forecast archives. Add complexity only after these foundations work.
+
+
+===== PAGE 21 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+20
+Appendix A. Canonical data contracts
+A.1 Poll record
+ Field group
+Required fields
+Identity
+poll_id; study_id; release_version; pollster_id; sponsor_id; source_url; raw_hash
+Time
+field_start; field_end; published_at; corrected_at; retrieved_at; valid_from; valid_to
+Target
+election_id; office; geography_version_id; candidate_set_version; question_id
+Sample
+population (adult/RV/LV); sample_size; frame; recruitment; mode; language; design_effect if reported
+Measurement
+candidate shares; undecided/other; two-way/multiway; leaners; questionnaire wording; order
+Method
+weights and benchmarks; likely-voter screen; transparency fields; partisan/internal flag
+Lineage
+parser_version; normalized_at; supersedes; exclusion_status; exclusion_reason
+A.2 Economic observation
+ Field group
+Required fields
+Series
+provider; source_agency; series_id; title; units; frequency; seasonal_adjustment
+Time
+observation_date; release_date; realtime_start; realtime_end; retrieved_at
+Value
+reported_value; status (initial/revised); transformation; transformation_window
+Lineage
+release_id; vintage_id; raw_hash; API request; parser_version; imputation flag
+A.3 Campaign-finance observation
+ Field group
+Required fields
+Entity
+candidate_id; committee_id; office; election_id; filing_id; amendment_chain
+Time
+coverage_start; coverage_end; filed_at; available_at; processed_at; retrieved_at
+Measure
+receipts; disbursements; cash_on_hand; debts; transfers; independent_expenditures
+Comparability
+report_type; filing_frequency; matched_window_id; inflation_basis; source_image_id
+A.4 Forecast run manifest
+ Field group
+Required fields
+Run
+run_id; generated_at; forecast_as_of; election_id; model_version; code_commit; configuration_hash
+Data
+snapshot IDs for every domain; geography plan; source cutoffs; exclusion-set hash
+Inference
+seed; chain/draw counts; diagnostics; approximation method; environment lockfile
+Outputs
+draw artifact hash; summary artifact hash; publication status; supersedes; correction note
+Appendix B. Acceptance checklist
+Data
+  Every record has a stable identity, source provenance, event time, available-at time, retrieval time, and immutable
+ version history.
+
+
+===== PAGE 22 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+21
+ Economic data are reconstructed from historical vintages; polls and ratings preserve corrections; finance reports
+ preserve amendments.
+ District and precinct data reference the boundary version valid for the target election.
+  A historical run cannot access a future row through joins, preprocessing, labels, or configuration.
+ 
+Model
+  Pollster lean and reliability are distinct and hierarchically regularized.
+  Repeated polls and shared samples are clustered; effective information grows sublinearly.
+  Future movement and terminal polling error are separate; terminal uncertainty does not vanish on Election Day.
+  The covariance matrix is positive-semidefinite and produces empirically credible national, regional, and local
+ misses.
+ Heavy-tail parameters and era weights are validated, not selected for narrative effect.
+  Every optional layer has an unadjusted counterpart and an ablation report.
+ 
+Validation
+  Outer holdouts are complete election cycles; tuning and preprocessing are nested within training cycles.
+  Forecasts are replayed at fixed historical lead times using as-of data.
+  Scores include continuous margins, binary outcomes, intervals, and joint system outcomes.
+  Metrics aggregate by independent cycle as well as by race; uncertainty around the metrics is reported.
+  Simple baselines remain in the benchmark suite and can replace the production model if complexity stops helping.
+ 
+Operations and publication
+  Every public release has a reproducible run manifest and deterministic artifact hashes.
+  Old forecasts remain archived; corrections are paired with explanations and prevention tests.
+  Source freshness, parser health, inference diagnostics, and forecast discontinuities are monitored.
+  The methodology, model card, validation report, and change log are publicly accessible.
+ 
+
+===== PAGE 23 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+22
+Sources
+Numbered citations in the text refer to this list. Links point to original academic publications, official data documentation, published
+methodology, or public source code. Web sources were checked on September 12, 2026.
+ [1] Tilmann Gneiting and Adrian E. Raftery. Strictly Proper Scoring Rules, Prediction, and Estimation. Journal of the American Statistical
+ Association 102, no. 477 (2007): 359-378.
+[2] American Association for Public Opinion Research. Transparency Initiative. disclosure requirements and guidance, accessed September 12,
+ 2026.
+[3] Drew A. Linzer. Dynamic Bayesian Forecasting of Presidential Elections in the States. Journal of the American Statistical Association 108,
+ no. 501 (2013): 124-134.
+[4] Merlin Heidemanns, Andrew Gelman, and G. Elliott Morris. An Updated Dynamic Bayesian Forecasting Model for the U.S. Presidential
+ Election. Harvard Data Science Review 2, no. 4 (2020).
+[5] The Economist. State and National Presidential Election Forecasting Model. public R and Stan repository, last model update October 15,
+ 2020.
+[6] Nate Silver. How FiveThirtyEight's 2020 Presidential Forecast Works - And What's Different Because of COVID-19. FiveThirtyEight,
+ August 12, 2020.
+[7] Nate Silver. How FiveThirtyEight's House, Senate and Governor Models Work. FiveThirtyEight methodology, updated June 30, 2022.
+ [8] G. Elliott Morris. How 538's 2024 Presidential Election Forecast Works. ABC News / 538, August 23, 2024.
+ [9] G. Elliott Morris. How 538's 2024 House Election Forecast Works. ABC News / 538, October 8, 2024.
+ [10] G. Elliott Morris. How 538's 2024 Senate Election Forecast Works. ABC News / 538, October 23, 2024.
+ [11] Decision Desk HQ. 2024 Forecast Methodology. methodology page, accessed September 12, 2026.
+ [12] Zachary Donnini, Ryan McComb, Varun Vishwanath, Austin Park, Luke Wines, and Garrett Herrin. The VoteHub 2026 Midterm
+ Forecasting Model. VoteHub, April 2026.
+[13] Yuling Yao, Aki Vehtari, Daniel Simpson, and Andrew Gelman. Using Stacking to Average Bayesian Predictive Distributions. Bayesian
+ Analysis 13, no. 3 (2018): 917-1007.
+[14] Houshmand Shirani-Mehr, David Rothschild, Sharad Goel, and Andrew Gelman. Disentangling Bias and Variance in Election Polls.
+ Journal of the American Statistical Association 113, no. 522 (2018): 607-614.
+[15] Federal Reserve Bank of St. Louis. FRED API Real-Time Periods. official API documentation, accessed September 12, 2026.
+ [16] U.S. Bureau of Labor Statistics. Public Data API. official documentation, accessed September 12, 2026.
+ [17] Federal Election Commission. OpenFEC API Documentation. official documentation, accessed September 12, 2026.
+ [18] Federal Election Commission. All Candidates File Description. official campaign-finance data documentation, accessed September 12,
+ 2026.
+[19] Federal Election Commission. Election Results and Voting Information. official federal election-result compilations, accessed September
+ 12, 2026.
+[20] Office of the Historian, U.S. House of Representatives. Election Statistics, 1920 to Present. official Clerk-compiled election statistics,
+ accessed September 12, 2026.
+[21] MIT Election Data and Science Lab. County Presidential Election Returns 2000-2024. Harvard Dataverse, version 16.
+ [22] U.S. Census Bureau. Redistricting Data Program. official program and data documentation, accessed September 12, 2026.
+ [23] U.S. Census Bureau. Available APIs. ACS and other official data APIs, accessed September 12, 2026.
+ [24] American National Election Studies. Data Center. time-series, panel, and cumulative datasets, accessed September 12, 2026.
+ [25] Xiao-Li Meng. Statistical Paradises and Paradoxes in Big Data (I): Law of Large Populations, Big Data Paradox, and the 2016 U.S.
+ Presidential Election. Annals of Applied Statistics 12, no. 2 (2018): 685-726.
+[26] Alan I. Abramowitz. Forecasting the 2008 Presidential Election with the Time-for-Change Model. PS: Political Science & Politics 41, no. 4
+ (2008): 691-695.
+[27] Ray C. Fair. Presidential and Congressional Vote-Share Equations: November 2022 Update. Yale University, November 23, 2022.
+ [28] Robert S. Erikson and Christopher Wlezien. The Economy and the Presidential Vote: What Leading Indicators Reveal Well in Advance.
+ International Journal of Forecasting 24, no. 2 (2008): 218-226.
+
+
+===== PAGE 24 =====
+
+U.S. ELECTION FORECASTING SYSTEM DESIGN
+23
+[29] Andrew Gelman, Jessica Hullman, Christopher Wlezien, and G. Elliott Morris. Information, Incentives, and Goals in Election Forecasts.
+ Judgment and Decision Making 15, no. 5 (2020): 863-880.

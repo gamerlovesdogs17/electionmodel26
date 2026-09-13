@@ -305,30 +305,67 @@ def replay_all_cycles(
     out_path: Path | None = None,
     allow_synthetic: bool = False,
 ) -> dict[str, Any]:
-    """Leave-one-cycle-out style reports for each historical Senate cycle."""
+    """
+    Leave-one-cycle-out reports for each historical Senate cycle.
+
+    Production `stack_weights` average CRPS across all OOS cycle reports (each
+    cycle was held out when scored). Per-holdout `stack_weights_loo` excludes
+    that holdout's own CRPS so evaluation of stacking on year Y never peeks at Y.
+    """
+    from midterms.model.ensemble import align_weights_to_spine, weights_from_oof_scores
+
     years = years or CYCLES
     reports = {}
-    crps_pool: dict[str, list[float]] = {}
+    crps_by_fold: dict[str, dict[str, float]] = {}
     for year in years:
         try:
             rep = replay_cycle(year, allow_synthetic=allow_synthetic)
         except ValueError:
             continue
         reports[str(year)] = rep
+        fold_scores = {}
         for name, block in (rep.get("aggregate") or {}).items():
-            if "crps" in block:
-                crps_pool.setdefault(name, []).append(float(block["crps"]))
+            if isinstance(block, dict) and "crps" in block:
+                fold_scores[name] = float(block["crps"])
+        if fold_scores:
+            crps_by_fold[str(year)] = fold_scores
 
-    mean_crps = {k: float(np.mean(v)) for k, v in crps_pool.items() if v}
+    # Second pass: LOO weights need the full fold table
+    for y, rep in reports.items():
+        rep["stack_weights_loo"] = align_weights_to_spine(
+            weights_from_oof_scores(crps_by_fold, exclude_fold=str(y)),
+            spine="pymc",
+        )
+
+    mean_crps = {
+        k: float(np.mean([fold[k] for fold in crps_by_fold.values() if k in fold]))
+        for k in {n for fold in crps_by_fold.values() for n in fold}
+    }
+    production_weights = align_weights_to_spine(
+        weights_from_oof_scores(crps_by_fold),
+        spine="pymc",
+    )
     summary = {
         "cycles": list(reports.keys()),
         "mean_crps_by_model": mean_crps,
-        "stack_weights": softmax_neg_scores(mean_crps, temperature=0.75) if mean_crps else {},
-        "note": "Stack weights from OOS mean CRPS across cycles; no hand-tuned challenger mass.",
+        "stack_weights": production_weights,
+        "stack_weights_production": production_weights,
+        "stack_provenance": {
+            "method": "leave_one_cycle_out_mean_crps",
+            "folds": list(crps_by_fold.keys()),
+            "temperature": 0.75,
+            "note": (
+                "Production weights average OOS CRPS across historical cycles. "
+                "Each cycle's scores were computed with that cycle held out. "
+                "Per-cycle stack_weights_loo excludes that cycle for nested evaluation."
+            ),
+        },
+        "note": "Stack weights from OOS mean CRPS across cycles; hierarchical mass labeled pymc.",
         "by_cycle": {
             y: {
                 "aggregate": reports[y].get("aggregate"),
                 "stack_weights": reports[y].get("stack_weights"),
+                "stack_weights_loo": reports[y].get("stack_weights_loo"),
                 "chamber": reports[y].get("chamber"),
                 "overlay_ablation": reports[y].get("overlay_ablation"),
                 "poll_gate": reports[y].get("poll_gate"),
@@ -337,6 +374,10 @@ def replay_all_cycles(
         },
     }
     out_path = out_path or (ARTIFACTS_DIR / "cycle_replay_all.json")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(summary, indent=2, default=str))
+    summary["path"] = str(out_path)
+    return summary
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(summary, indent=2))
     if str(PRIMARY_HOLDOUT) in reports:

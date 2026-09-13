@@ -127,13 +127,29 @@ def build_validation_report(
         },
         "calibration": calibration,
         "stack_weights_artifact": stack_weights,
+        "peer_gate": None,
         "limitations": [
             "VoteHub documents no /polls/archive — historical polls prefer FTE CC BY Datasette.",
             "Licensed Cook/IE feeds are not redistributed; Wikipedia multi-rater is production ratings.",
             "House / Electoral College intentionally out of scope.",
             "fast hierarchical-t is a non-production approximation; production prefers pymc / ensemble_stack.",
+            "Peer Brier/CRPS is a release gate only — peers are never averaged into the ensemble.",
         ],
     }
+    try:
+        from midterms.validation.leave_pollster_out import leave_pollster_out
+
+        report["leave_pollster_out"] = leave_pollster_out(
+            year=PRIMARY_HOLDOUT, lead_days=60, draws=max(150, draws // 2), top_n=3
+        )
+    except Exception as exc:  # noqa: BLE001
+        report["leave_pollster_out"] = {"ok": False, "error": str(exc)}
+    try:
+        from midterms.validation.peer_gate import write_peer_gate_report
+
+        report["peer_gate"] = write_peer_gate_report()
+    except Exception as exc:  # noqa: BLE001
+        report["peer_gate"] = {"ok": False, "error": str(exc)}
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     path = ARTIFACTS_DIR / "validation_report_latest.json"
     path.write_text(json.dumps(report, indent=2, default=str))
@@ -162,6 +178,12 @@ def _to_markdown(report: dict[str, Any]) -> str:
         f"- n: {(report.get('calibration') or {}).get('n')}",
         f"- Brier: {(report.get('calibration') or {}).get('brier')}",
         f"- Mean 90% interval score: {(report.get('calibration') or {}).get('mean_interval_score_90')}",
+        "",
+        "## Peer release gate",
+        "",
+        "```json",
+        json.dumps(report.get("peer_gate"), indent=2, default=str),
+        "```",
         "",
         "## Limitations",
         "",

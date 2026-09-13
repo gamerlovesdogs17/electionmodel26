@@ -54,7 +54,7 @@ def fit_state_space(
     flat_prior: bool = False,
     future_base: float = 4.5,
     terminal_base: float = 3.5,
-    national_path_sd: float = 2.0,
+    national_path_sd: float | None = None,
 ) -> FitResult:
     """
     Per-race forward filter of poll margins → current latent, then project to ED.
@@ -92,6 +92,8 @@ def fit_state_space(
     days_to_ed = max((ed - snapshot.as_of).days, 1)
     future_sd = future_movement_sd(days_to_ed, era_weight=era_weight, base=future_base)
     terminal_sd = terminal_error_sd(era_weight=era_weight, base=terminal_base)
+    if national_path_sd is None:
+        national_path_sd = float(2.5 + 0.02 * days_to_ed)
     pull = float(np.clip(fund_pull, 0.0, 1.0))
 
     means = []

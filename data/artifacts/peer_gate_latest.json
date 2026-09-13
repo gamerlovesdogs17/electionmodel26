@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "control_ok": true,
+  "control_soft": true,
+  "control_gaps": {
+    "ddhq": -0.05499999999999999,
+    "kalshi": -0.06
+  },
+  "primary_control_gap": -0.06,
+  "max_abs_control_gap": 0.06,
+  "race_scores": {
+    "ddhq": {
+      "n": 10,
+      "brier_vs_peer_favorite": 0.12233578125,
+      "mae": 0.15612499999999999,
+      "crps_proxy": 0.15612499999999999,
+      "ok": true
+    },
+    "kalshi": {
+      "n": 10,
+      "brier_vs_peer_favorite": 0.26108578125000004,
+      "mae": 0.18449666017076136,
+      "crps_proxy": 0.18449666017076136,
+      "ok": false
+    }
+  },
+  "race_ok": true,
+  "mean_peer_disagreement": 0.15787166017076132,
+  "null_margin_races": [],
+  "method": "ensemble_stack+overlays",
+  "core_method": "pymc",
+  "generic_ballot": 5.852513615064197,
+  "reasons": [],
+  "thresholds": {
+    "max_abs_control_gap": 0.25,
+    "race_brier": 0.22,
+    "race_mae": 0.22,
+    "control_gap_hard_fail": false
+  },
+  "note": "Peers are a release gate for integrity/race calibration only \u2014 never averaged into the ensemble (blueprint \u00a72). Chamber control gap vs markets is soft/informational."
+}

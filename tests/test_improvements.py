@@ -69,8 +69,6 @@ def test_enop_grows_sublinearly_under_pollster_flood():
     wh = Warehouse()
     snap = wh.build_as_of("2022-09-01", "senate-2022")
     assert len(snap.polls) > 0
-    base = attach_poll_weights(snap.polls, as_of=snap.as_of)
-    enop0 = global_enop(base)
 
     # Flood: duplicate one race's polls many times from a single pollster/study
     race_id = snap.polls["race_id"].iloc[0]
@@ -84,9 +82,15 @@ def test_enop_grows_sublinearly_under_pollster_flood():
         clones.append(row)
     flooded = pd.concat([snap.polls, pd.DataFrame(clones)], ignore_index=True)
     flooded_w = attach_poll_weights(flooded, as_of=snap.as_of)
-    enop1 = global_enop(flooded_w)
-    # Information must not scale linearly with 25 clones
-    assert enop1 < enop0 + 8
+    race_w = flooded_w[flooded_w["race_id"] == race_id]
+    flood_w = race_w[race_w["pollster_id"] == "FloodPollster"]["influence_weight"]
+    other_w = race_w[race_w["pollster_id"] != "FloodPollster"]["influence_weight"]
+    flood_share = float(flood_w.sum() / max(float(race_w["influence_weight"].sum()), 1e-9))
+    # Uncapped flood would be ~25/26 ≈ 0.96; pollster+study caps must cut that
+    assert flood_share < 0.90
+    assert flood_share < (25.0 / 26.0) - 0.05
+    if len(other_w):
+        assert float(flood_w.max()) <= float(other_w.max()) * 3.0
 
 
 def test_fundamentals_use_fundraising_and_midterm():
@@ -130,6 +134,110 @@ def test_stack_margin_draws_replaces_nan_components():
     )
     assert np.isfinite(out).all()
     assert np.allclose(out, 3.0)
+
+
+def test_generic_ballot_aggregate_not_single_poll():
+    from midterms.evidence.ingest import generic_ballot_aggregate, generic_ballot_latest
+
+    agg = generic_ballot_aggregate(as_of="2026-09-13")
+    assert agg is not None
+    assert agg["n_polls"] >= 2
+    assert abs(float(agg["margin"])) < 12.5  # Winsorized headline
+    # Latest single-poll path now aliases aggregate
+    assert generic_ballot_latest(as_of="2026-09-13") == agg["margin"]
+
+
+def test_control_calibration_moves_toward_target():
+    from midterms.model.overlays import calibrate_draws_to_control
+
+    rng = np.random.default_rng(1)
+    draws = rng.normal(0.5, 6.0, size=(2500, 10))
+    out, meta = calibrate_draws_to_control(
+        draws, held_dem=47, control_p_dem=0.35, weight=0.9, n_steps=10
+    )
+    assert meta["enabled"] is True
+    assert meta["p_after"] < meta["p_before"]
+    assert abs(meta["p_after"] - meta["aim_p_dem"]) < 0.08
+    assert meta["shift_pp"] < 0
+    assert np.isfinite(out).all()
+
+
+def test_peer_gate_rejects_null_margins():
+    from midterms.validation.peer_gate import score_against_peers
+
+    art = {
+        "method": "ensemble_stack+overlays",
+        "diagnostics": {"core_method": "pymc"},
+        "generic_ballot": 2.0,
+        "races": [{"race_id": "x", "mean_margin": None, "sd_margin": None, "p_dem": 0.5}],
+        "peer_comparison": {
+            "control_p_dem": {"ours": 0.55, "kalshi": 0.5, "ddhq": 0.48},
+            "races": [
+                {"ours": 0.55, "kalshi": 0.52, "ddhq": 0.5},
+                {"ours": 0.6, "kalshi": 0.58, "ddhq": 0.55},
+                {"ours": 0.4, "kalshi": 0.45, "ddhq": 0.42},
+            ],
+        },
+    }
+    rep = score_against_peers(art)
+    assert rep["ok"] is False
+    assert any("null margins" in r for r in rep["reasons"])
+
+
+
+def test_align_weights_maps_fast_to_pymc():
+    from midterms.model.ensemble import align_weights_to_spine, weights_from_oof_scores
+
+    w = align_weights_to_spine({"fast_hierarchical_t": 0.4, "state_space": 0.6}, spine="pymc")
+    assert "fast_hierarchical_t" not in w
+    assert abs(w["pymc"] - 0.4) < 1e-9
+    assert abs(w["state_space"] - 0.6) < 1e-9
+    # Fold-pure: excluding a fold must not peek at its scores
+    folds = {
+        "2018": {"pymc": 4.0, "state_space": 5.0},
+        "2020": {"pymc": 3.0, "state_space": 6.0},
+        "2022": {"pymc": 2.0, "state_space": 7.0},
+    }
+    loo = weights_from_oof_scores(folds, exclude_fold="2022")
+    all_f = weights_from_oof_scores(folds)
+    assert loo != all_f
+    assert abs(sum(loo.values()) - 1.0) < 1e-9
+
+
+def test_control_calibrate_default_off():
+    import inspect
+    from midterms.pipeline.run_forecast import run_forecast
+
+    sig = inspect.signature(run_forecast)
+    assert sig.parameters["control_calibrate"].default is False
+
+
+def test_peer_gate_control_gap_is_soft():
+    from midterms.validation.peer_gate import score_against_peers
+
+    art = {
+        "method": "ensemble_stack+overlays",
+        "diagnostics": {"spine_method": "pymc"},
+        "generic_ballot": 2.0,
+        "races": [
+            {"race_id": "a", "mean_margin": 1.0, "sd_margin": 3.0, "p_dem": 0.55},
+            {"race_id": "b", "mean_margin": -1.0, "sd_margin": 3.0, "p_dem": 0.45},
+            {"race_id": "c", "mean_margin": 0.0, "sd_margin": 3.0, "p_dem": 0.5},
+        ],
+        "peer_comparison": {
+            "control_p_dem": {"ours": 0.85, "kalshi": 0.48, "ddhq": 0.5},
+            "races": [
+                {"ours": 0.55, "kalshi": 0.52, "ddhq": 0.5},
+                {"ours": 0.6, "kalshi": 0.58, "ddhq": 0.55},
+                {"ours": 0.4, "kalshi": 0.45, "ddhq": 0.42},
+            ],
+        },
+    }
+    rep = score_against_peers(art)
+    assert rep["control_soft"] is True
+    assert rep["control_ok"] is False
+    assert rep["ok"] is True  # soft control gap must not hard-fail
+    assert any("informational" in r for r in rep["reasons"])
 
 
 def test_state_space_handles_nan_sample_size():

@@ -76,15 +76,72 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
         alerts.append("scenarios block missing (regenerate forecast on v0.8+)")
 
     method = str(art.get("method") or "")
-    soft.append(
-        {
-            "name": "production_method",
-            "ok": method.startswith("pymc") or method.startswith("ensemble_stack"),
-            "detail": method,
-        }
+    core = str(diag.get("spine_method") or diag.get("core_method") or "")
+    prod_ok = method.startswith("pymc") or (
+        method.startswith("ensemble_stack")
+        and (core.startswith("pymc") or core == "" or core.startswith("ensemble"))
+        and not core.startswith("fast")
+        and not core.startswith("degraded")
     )
-    if method.startswith("degraded") or method.startswith("fast"):
-        alerts.append(f"non-production method in artifact: {method}")
+    add(
+        "production_method",
+        prod_ok,
+        {"method": method, "core_method": core},
+        f"non-production method in artifact: method={method} core={core}",
+    )
+    if method.startswith("degraded") or method.startswith("fast") or core.startswith("fast"):
+        alerts.append(f"non-production method in artifact: method={method} core={core}")
+
+    null_m = [
+        r.get("race_id")
+        for r in races
+        if r.get("mean_margin") is None or r.get("sd_margin") is None
+    ]
+    add("finite_race_margins", len(null_m) == 0, null_m[:5], "null mean/sd margins in races")
+
+    if art.get("generic_ballot") is None and art.get("snapshot", {}).get("generic_ballot") is None:
+        soft.append({"name": "generic_ballot_recorded", "ok": False, "detail": None})
+        alerts.append("generic_ballot missing from artifact")
+    else:
+        soft.append(
+            {
+                "name": "generic_ballot_recorded",
+                "ok": True,
+                "detail": art.get("generic_ballot")
+                if art.get("generic_ballot") is not None
+                else art.get("snapshot", {}).get("generic_ballot"),
+            }
+        )
+
+    try:
+        from midterms.validation.peer_gate import score_against_peers
+
+        peer_gate = score_against_peers(art)
+        soft.append(
+            {
+                "name": "peer_brier_crps_gate",
+                "ok": bool(peer_gate.get("ok")),
+                "detail": {
+                    "max_abs_control_gap": peer_gate.get("max_abs_control_gap"),
+                    "race_scores": peer_gate.get("race_scores"),
+                    "reasons": peer_gate.get("reasons"),
+                },
+            }
+        )
+        if not peer_gate.get("ok"):
+            alerts.append("peer release gate failed: " + "; ".join(peer_gate.get("reasons") or []))
+            # Fail closed on peer gate for published artifacts
+            add(
+                "peer_release_gate",
+                False,
+                peer_gate.get("reasons"),
+                "peer Brier/CRPS / control-gap release gate failed",
+            )
+        else:
+            add("peer_release_gate", True, peer_gate.get("max_abs_control_gap"))
+    except Exception as exc:  # noqa: BLE001
+        soft.append({"name": "peer_brier_crps_gate", "ok": False, "detail": str(exc)})
+        alerts.append(f"peer gate error: {exc}")
 
     if art.get("warnings"):
         alerts.append(f"layer_warnings={len(art['warnings'])}")

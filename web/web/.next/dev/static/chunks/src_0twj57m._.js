@@ -12,11 +12,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$
 ;
 ;
 function ChamberPanel({ chamber }) {
-    const hist = chamber.seat_histogram;
+    const hist = chamber.seat_histogram ?? [];
     const maxP = Math.max(...hist.map((h)=>h.probability), 0.01);
-    const lo = Math.min(...hist.map((h)=>h.dem_seats));
-    const hi = Math.max(...hist.map((h)=>h.dem_seats));
-    const expectedRep = chamber.expected_rep_seats ?? 100 - chamber.expected_dem_seats;
+    const lo = hist.length ? Math.min(...hist.map((h)=>h.dem_seats)) : 0;
+    const hi = hist.length ? Math.max(...hist.map((h)=>h.dem_seats)) : 0;
+    const expectedDem = typeof chamber.expected_dem_seats === "number" && Number.isFinite(chamber.expected_dem_seats) ? chamber.expected_dem_seats : 0;
+    const expectedRep = typeof chamber.expected_rep_seats === "number" && Number.isFinite(chamber.expected_rep_seats) ? chamber.expected_rep_seats : 100 - expectedDem;
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
         className: "space-y-6",
         children: [
@@ -29,7 +30,7 @@ function ChamberPanel({ chamber }) {
                         tone: "dem"
                     }, void 0, false, {
                         fileName: "[project]/src/components/chamber-panel.tsx",
-                        lineNumber: 16,
+                        lineNumber: 24,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Stat, {
@@ -38,13 +39,13 @@ function ChamberPanel({ chamber }) {
                         tone: "rep"
                     }, void 0, false, {
                         fileName: "[project]/src/components/chamber-panel.tsx",
-                        lineNumber: 21,
+                        lineNumber: 29,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/chamber-panel.tsx",
-                lineNumber: 15,
+                lineNumber: 23,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -60,7 +61,7 @@ function ChamberPanel({ chamber }) {
                                         children: "Joint seat-total distribution"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/chamber-panel.tsx",
-                                        lineNumber: 31,
+                                        lineNumber: 39,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -76,12 +77,12 @@ function ChamberPanel({ chamber }) {
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "font-medium text-[var(--ink)]",
                                                 children: [
-                                                    chamber.expected_dem_seats.toFixed(1),
+                                                    expectedDem.toFixed(1),
                                                     " D"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/chamber-panel.tsx",
-                                                lineNumber: 37,
+                                                lineNumber: 45,
                                                 columnNumber: 15
                                             }, this),
                                             " / ",
@@ -93,20 +94,20 @@ function ChamberPanel({ chamber }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/chamber-panel.tsx",
-                                                lineNumber: 41,
+                                                lineNumber: 49,
                                                 columnNumber: 15
                                             }, this),
                                             ". Bars at ≤50 seats are Republican control."
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/chamber-panel.tsx",
-                                        lineNumber: 34,
+                                        lineNumber: 42,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/chamber-panel.tsx",
-                                lineNumber: 30,
+                                lineNumber: 38,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -119,18 +120,18 @@ function ChamberPanel({ chamber }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/chamber-panel.tsx",
-                                lineNumber: 47,
+                                lineNumber: 55,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/chamber-panel.tsx",
-                        lineNumber: 29,
+                        lineNumber: 37,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "flex h-40 items-end gap-px overflow-x-auto",
-                        children: hist.map((bin)=>{
+                        children: hist.length ? hist.map((bin)=>{
                             const isDemControl = bin.dem_seats >= chamber.majority_threshold;
                             // Floor height so mid-range bins (incl. 50) stay visible
                             const barPx = Math.max(4, Math.round(bin.probability / maxP * 152));
@@ -144,18 +145,18 @@ function ChamberPanel({ chamber }) {
                                     }
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/chamber-panel.tsx",
-                                    lineNumber: 67,
+                                    lineNumber: 76,
                                     columnNumber: 17
                                 }, this)
                             }, bin.dem_seats, false, {
                                 fileName: "[project]/src/components/chamber-panel.tsx",
-                                lineNumber: 60,
+                                lineNumber: 69,
                                 columnNumber: 15
                             }, this);
-                        })
+                        }) : null
                     }, void 0, false, {
                         fileName: "[project]/src/components/chamber-panel.tsx",
-                        lineNumber: 51,
+                        lineNumber: 59,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -165,7 +166,7 @@ function ChamberPanel({ chamber }) {
                                 children: lo
                             }, void 0, false, {
                                 fileName: "[project]/src/components/chamber-panel.tsx",
-                                lineNumber: 78,
+                                lineNumber: 88,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -175,32 +176,32 @@ function ChamberPanel({ chamber }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/chamber-panel.tsx",
-                                lineNumber: 79,
+                                lineNumber: 89,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 children: hi
                             }, void 0, false, {
                                 fileName: "[project]/src/components/chamber-panel.tsx",
-                                lineNumber: 80,
+                                lineNumber: 90,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/chamber-panel.tsx",
-                        lineNumber: 77,
+                        lineNumber: 87,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/chamber-panel.tsx",
-                lineNumber: 28,
+                lineNumber: 36,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/chamber-panel.tsx",
-        lineNumber: 14,
+        lineNumber: 22,
         columnNumber: 5
     }, this);
 }
@@ -215,7 +216,7 @@ function Stat({ label, value, tone }) {
                 children: label
             }, void 0, false, {
                 fileName: "[project]/src/components/chamber-panel.tsx",
-                lineNumber: 99,
+                lineNumber: 109,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -223,13 +224,13 @@ function Stat({ label, value, tone }) {
                 children: value
             }, void 0, false, {
                 fileName: "[project]/src/components/chamber-panel.tsx",
-                lineNumber: 102,
+                lineNumber: 112,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/chamber-panel.tsx",
-        lineNumber: 98,
+        lineNumber: 108,
         columnNumber: 5
     }, this);
 }
@@ -443,7 +444,19 @@ function ForecastDashboard() {
                                 lineNumber: 92,
                                 columnNumber: 11
                             }, this),
-                            typeof data.diagnostics?.enop_global === "number" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                            typeof data.generic_ballot === "number" && Number.isFinite(data.generic_ballot) ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "rounded-md border border-[var(--line)] px-2 py-1",
+                                children: [
+                                    "GB: ",
+                                    data.generic_ballot >= 0 ? "+" : "",
+                                    data.generic_ballot.toFixed(1)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/forecast-dashboard.tsx",
+                                lineNumber: 104,
+                                columnNumber: 13
+                            }, this) : null,
+                            typeof data.diagnostics?.enop_global === "number" && Number.isFinite(data.diagnostics.enop_global) ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "rounded-md border border-[var(--line)] px-2 py-1",
                                 children: [
                                     "ENOP: ",
@@ -451,7 +464,7 @@ function ForecastDashboard() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                                lineNumber: 103,
+                                lineNumber: 111,
                                 columnNumber: 13
                             }, this) : null,
                             typeof data.overlays?.expert_source === "string" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -462,10 +475,10 @@ function ForecastDashboard() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                                lineNumber: 108,
+                                lineNumber: 116,
                                 columnNumber: 13
                             }, this) : null,
-                            typeof data.snapshot?.kalshi_control_p_dem === "number" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                            typeof data.snapshot?.kalshi_control_p_dem === "number" && Number.isFinite(data.snapshot.kalshi_control_p_dem) ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "rounded-md border border-[var(--line)] px-2 py-1",
                                 children: [
                                     "Kalshi control D:",
@@ -475,10 +488,10 @@ function ForecastDashboard() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                                lineNumber: 113,
+                                lineNumber: 122,
                                 columnNumber: 13
                             }, this) : null,
-                            data.ablation ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                            data.ablation && typeof (data.ablation.delta_p_dem_majority ?? (data.ablation.adjusted?.p_dem_majority != null && data.ablation.unadjusted?.p_dem_majority != null ? data.ablation.adjusted.p_dem_majority - data.ablation.unadjusted.p_dem_majority : null)) === "number" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "rounded-md border border-[var(--line)] px-2 py-1",
                                 children: [
                                     "ablation ΔDem ctl:",
@@ -488,7 +501,7 @@ function ForecastDashboard() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                                lineNumber: 119,
+                                lineNumber: 136,
                                 columnNumber: 13
                             }, this) : null,
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -499,7 +512,7 @@ function ForecastDashboard() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                                lineNumber: 129,
+                                lineNumber: 146,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -509,7 +522,7 @@ function ForecastDashboard() {
                                 children: "Reload artifact"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                                lineNumber: 132,
+                                lineNumber: 149,
                                 columnNumber: 11
                             }, this)
                         ]
@@ -527,7 +540,7 @@ function ForecastDashboard() {
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/forecast-dashboard.tsx",
-                        lineNumber: 137,
+                        lineNumber: 154,
                         columnNumber: 11
                     }, this) : null
                 ]
@@ -544,35 +557,35 @@ function ForecastDashboard() {
                 asOf: data.forecast_as_of
             }, void 0, false, {
                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                lineNumber: 146,
+                lineNumber: 163,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$chamber$2d$panel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ChamberPanel"], {
                 chamber: data.chamber
             }, void 0, false, {
                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                lineNumber: 157,
+                lineNumber: 174,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$race$2d$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["RaceTable"], {
                 races: data.races
             }, void 0, false, {
                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                lineNumber: 158,
+                lineNumber: 175,
                 columnNumber: 7
             }, this),
             data.scenarios ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$scenario$2d$panel$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ScenarioPanel"], {
                 scenarios: data.scenarios
             }, void 0, false, {
                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                lineNumber: 160,
+                lineNumber: 177,
                 columnNumber: 9
             }, this) : null,
             data.peer_comparison ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$peer$2d$compare$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PeerComparePanel"], {
                 peer: data.peer_comparison
             }, void 0, false, {
                 fileName: "[project]/src/components/forecast-dashboard.tsx",
-                lineNumber: 163,
+                lineNumber: 180,
                 columnNumber: 9
             }, this) : null
         ]
@@ -1091,7 +1104,7 @@ function RaceTable({ races }) {
                                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                             className: "h-full bg-[var(--dem)]",
                                                             style: {
-                                                                width: `${r.p_dem * 100}%`
+                                                                width: `${typeof r.p_dem === "number" && Number.isFinite(r.p_dem) ? Math.min(100, Math.max(0, r.p_dem * 100)) : 0}%`
                                                             }
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/race-table.tsx",
@@ -1108,7 +1121,7 @@ function RaceTable({ races }) {
                                                         children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["pct"])(r.p_dem, 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/race-table.tsx",
-                                                        lineNumber: 125,
+                                                        lineNumber: 131,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
@@ -1131,13 +1144,13 @@ function RaceTable({ races }) {
                                                     children: typeof r.sd_margin === "number" ? `±${r.sd_margin.toFixed(1)}` : ""
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/race-table.tsx",
-                                                    lineNumber: 132,
+                                                    lineNumber: 138,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/race-table.tsx",
-                                            lineNumber: 128,
+                                            lineNumber: 134,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -1145,7 +1158,7 @@ function RaceTable({ races }) {
                                             children: typeof r.ci05 === "number" && typeof r.ci95 === "number" ? `${(0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["signedMargin"])(r.ci05)} – ${(0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["signedMargin"])(r.ci95)}` : "—"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/race-table.tsx",
-                                            lineNumber: 138,
+                                            lineNumber: 144,
                                             columnNumber: 19
                                         }, this)
                                     ]
@@ -1176,7 +1189,7 @@ function RaceTable({ races }) {
                 children: "No races match that filter."
             }, void 0, false, {
                 fileName: "[project]/src/components/race-table.tsx",
-                lineNumber: 150,
+                lineNumber: 156,
                 columnNumber: 9
             }, this) : null
         ]
@@ -1333,7 +1346,7 @@ function ScenarioPanel({ scenarios }) {
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
                                             className: "px-3 py-2",
-                                            children: row.expected_dem_seats != null ? row.expected_dem_seats.toFixed(1) : "—"
+                                            children: typeof row.expected_dem_seats === "number" && Number.isFinite(row.expected_dem_seats) ? row.expected_dem_seats.toFixed(1) : "—"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/scenario-panel.tsx",
                                             lineNumber: 78,
@@ -1341,10 +1354,10 @@ function ScenarioPanel({ scenarios }) {
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
                                             className: "px-3 py-2",
-                                            children: row.delta_p_dem != null ? `${(row.delta_p_dem * 100).toFixed(1)} pp` : "—"
+                                            children: typeof row.delta_p_dem === "number" && Number.isFinite(row.delta_p_dem) ? `${(row.delta_p_dem * 100).toFixed(1)} pp` : "—"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/scenario-panel.tsx",
-                                            lineNumber: 83,
+                                            lineNumber: 84,
                                             columnNumber: 19
                                         }, this)
                                     ]
@@ -2125,11 +2138,8 @@ function CandidateRow({ name, party, share }) {
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                 className: `font-medium tabular-nums ${tone}`,
-                children: [
-                    share.toFixed(1),
-                    "%"
-                ]
-            }, void 0, true, {
+                children: typeof share === "number" && Number.isFinite(share) ? `${share.toFixed(1)}%` : "—"
+            }, void 0, false, {
                 fileName: "[project]/src/components/senate-map.tsx",
                 lineNumber: 521,
                 columnNumber: 7
@@ -2213,9 +2223,11 @@ function cn(...inputs) {
     return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$tailwind$2d$merge$2f$dist$2f$bundle$2d$mjs$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["twMerge"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$clsx$2f$dist$2f$clsx$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["clsx"])(inputs));
 }
 function pct(p, digits = 0) {
+    if (typeof p !== "number" || Number.isNaN(p) || !Number.isFinite(p)) return "—";
     return `${(p * 100).toFixed(digits)}%`;
 }
 function signedMargin(m) {
+    if (typeof m !== "number" || Number.isNaN(m)) return "—";
     const abs = Math.abs(m).toFixed(1);
     if (m > 0.05) return `D+${abs}`;
     if (m < -0.05) return `R+${abs}`;

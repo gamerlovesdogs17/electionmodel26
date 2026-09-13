@@ -104,15 +104,23 @@ def _prepare(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0):
             else 0.0
         )
         poll_y = polls["two_party_margin"].astype(float).to_numpy() - mode_adj - pop_adj
-        n = polls["sample_size"].astype(float).clip(lower=50)
+        n_raw = pd.to_numeric(polls["sample_size"], errors="coerce")
+        n = n_raw.where(np.isfinite(n_raw) & (n_raw > 0), 500.0).clip(lower=50.0).to_numpy(dtype=float)
         qw = (
             polls["quality_weight"].astype(float)
             if "quality_weight" in polls.columns
-            else pd.Series(np.ones(len(polls)))
-        ).clip(0.2, 1.0)
+            else pd.Series(np.ones(len(polls)), index=polls.index)
+        ).fillna(1.0).clip(0.2, 1.0).to_numpy(dtype=float)
         # Inflate SE when influence weight is low (down-weighted / capped polls)
-        iw = polls["influence_weight"].astype(float).clip(0.05, 3.0).to_numpy()
-        poll_se = (100.0 / np.sqrt(n) / np.sqrt(qw.to_numpy()) / np.sqrt(iw)).astype(float)
+        iw = (
+            polls["influence_weight"].astype(float).fillna(1.0).clip(0.05, 3.0).to_numpy(dtype=float)
+            if "influence_weight" in polls.columns
+            else np.ones(len(polls), dtype=float)
+        )
+        poll_se = np.asarray(
+            100.0 / np.sqrt(n) / np.sqrt(np.maximum(qw, 0.2)) / np.sqrt(np.maximum(iw, 0.05)),
+            dtype=float,
+        )
         house_prior = (
             polls.groupby("pollster_id")["house_effect_prior"].mean()
             if "house_effect_prior" in polls.columns
@@ -183,11 +191,11 @@ def fit_pymc(
     }
 
     with pm.Model(coords=coords) as model:  # noqa: F841
-        sigma_nat = pm.HalfNormal("sigma_nat", 3.0)
+        sigma_nat = pm.HalfNormal("sigma_nat", 4.0)
         national = pm.StudentT("national", nu=4, mu=0.0, sigma=sigma_nat)
-        sigma_region = pm.HalfNormal("sigma_region", 2.0)
+        sigma_region = pm.HalfNormal("sigma_region", 2.5)
         region_eff = pm.StudentT("region_eff", nu=5, mu=0.0, sigma=sigma_region, dims="region")
-        sigma_local = pm.HalfNormal("sigma_local", 3.0)
+        sigma_local = pm.HalfNormal("sigma_local", 3.5)
         local = pm.StudentT("local", nu=5, mu=0.0, sigma=sigma_local, dims="race")
 
         mu_ed = pm.Deterministic(
@@ -224,7 +232,7 @@ def fit_pymc(
                 observed=prep["poll_y"],
             )
 
-        terminal_bias = pm.StudentT("terminal_bias", nu=4, mu=0.0, sigma=1.5)
+        terminal_bias = pm.StudentT("terminal_bias", nu=4, mu=0.0, sigma=2.5)
         mu_final = pm.Deterministic("mu_final", mu_ed + terminal_bias, dims="race")
 
         idata = pm.sample(
@@ -267,6 +275,15 @@ def fit_pymc(
             "enop_by_race_mean": float(np.mean(list(prep["enop_by_race"].values())))
             if prep["enop_by_race"]
             else 0.0,
+            "error_budget": {
+                "sigma_nat_prior": 4.0,
+                "sigma_region_prior": 2.5,
+                "sigma_local_prior": 3.5,
+                "terminal_bias_sd": 2.5,
+                "future_sd": float(1.2 * np.sqrt(prep["days_to_ed"] / 30.0)),
+                "days_to_ed": prep["days_to_ed"],
+                "note": "Blueprint Table 4-style named uncertainty components (PyMC priors)",
+            },
         },
         method="pymc",
     )
@@ -298,7 +315,7 @@ def fit_fast_approximation(
     for i, rid in enumerate(prep["race_ids"]):
         rp = polls[polls["race_id"] == rid] if len(polls) else polls
         if len(rp):
-            n_samp = rp["sample_size"].astype(float).clip(100)
+            n_samp = pd.to_numeric(rp["sample_size"], errors="coerce").fillna(500.0).clip(100)
             qw = (
                 rp["quality_weight"].astype(float)
                 if "quality_weight" in rp.columns
@@ -336,15 +353,17 @@ def fit_fast_approximation(
             )
 
     # Joint draws: national + region + local + continuous similarity Student-t shocks
-    nat = rng.standard_t(4, size=n_draws) * 2.0
-    region_draws = {r: rng.standard_t(5, size=n_draws) * 1.5 for r in range(prep["n_regions"])}
-    local = rng.standard_t(5, size=(n_draws, n)) * (sds * 0.55)
+    # National path scales with days-to-ED so mid-cycle chamber uncertainty is not tiny.
+    nat_sd = float(2.8 + 0.025 * max(prep["days_to_ed"], 1))
+    nat = rng.standard_t(4, size=n_draws) * nat_sd
+    region_draws = {r: rng.standard_t(5, size=n_draws) * 1.8 for r in range(prep["n_regions"])}
+    local = rng.standard_t(5, size=(n_draws, n)) * (sds * 0.6)
     contested = snapshot.races.set_index("race_id").loc[prep["race_ids"]].reset_index()
     sim_shocks = correlated_shocks(
         contested,
         n_draws,
         rng,
-        scale=sds * 0.35,
+        scale=sds * 0.4,
         length_scale=1.75,
         nu=5.0,
     )
@@ -357,7 +376,7 @@ def fit_fast_approximation(
             + local[:, i]
             + sim_shocks[:, i]
         )
-    mu += rng.standard_t(4, size=(n_draws, 1)) * 1.2
+    mu += rng.standard_t(4, size=(n_draws, 1)) * 1.6
 
     return FitResult(
         race_ids=prep["race_ids"],
@@ -379,6 +398,15 @@ def fit_fast_approximation(
             if prep["enop_by_race"]
             else 0.0,
             "similarity_covariance": True,
+            "error_budget": {
+                "national_path_sd": float(nat_sd),
+                "region_sd": 1.8,
+                "local_scale_of_race_sd": 0.6,
+                "similarity_scale_of_race_sd": 0.4,
+                "common_shock_sd": 1.6,
+                "days_to_ed": prep["days_to_ed"],
+                "note": "Blueprint Table 4-style components for the fast approximation",
+            },
             "note": (
                 "NON-PRODUCTION approximation: fast hierarchical-t with ENOP weights, "
                 "mode/pop offsets, richer fundamentals, continuous similarity covariance. "

@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, ROOT
+from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, ROOT, ARTIFACTS_DIR
 
 
 def environment_lock() -> dict[str, Any]:
@@ -43,6 +43,41 @@ def snapshot_domain_hashes() -> dict[str, str]:
             continue
         out[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
     return out
+
+
+def verify_rebuild(*, run_id: str | None = None) -> dict[str, Any]:
+    """
+    Compare current forecast_latest.json + draws hashes to a sealed release / manifest.
+
+    Blueprint §11 byte-identical rebuild gate (lite): fail if hashes diverge.
+    """
+    from midterms.config import ARTIFACTS_DIR, MANIFESTS_DIR
+
+    art_path = ARTIFACTS_DIR / "forecast_latest.json"
+    if not art_path.exists():
+        return {"ok": False, "error": "missing forecast_latest.json"}
+    art = json.loads(art_path.read_text(encoding="utf-8"))
+    rid = run_id or art.get("run_id")
+    man_path = MANIFESTS_DIR / f"run_{rid}.json"
+    if not man_path.exists():
+        return {"ok": False, "error": f"missing run manifest {man_path}", "run_id": rid}
+    man = json.loads(man_path.read_text(encoding="utf-8"))
+    expected = (man.get("output_hashes") or {}).get("forecast_json")
+    actual = hashlib.sha256(art_path.read_bytes()).hexdigest()
+    ok = bool(expected) and expected == actual
+    draws_ok = None
+    draws_path = Path(str((man.get("paths") or {}).get("draws") or ""))
+    if draws_path.exists() and (man.get("output_hashes") or {}).get("draws"):
+        draws_ok = hashlib.sha256(draws_path.read_bytes()).hexdigest() == man["output_hashes"]["draws"]
+        ok = ok and bool(draws_ok)
+    return {
+        "ok": ok,
+        "run_id": rid,
+        "forecast_hash_expected": expected,
+        "forecast_hash_actual": actual,
+        "draws_ok": draws_ok,
+        "manifest": str(man_path),
+    }
 
 
 def write_environment_lock() -> Path:

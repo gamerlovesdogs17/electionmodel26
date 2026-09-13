@@ -120,7 +120,14 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
     raw_path = RAW_DIR / "economics_vintages.csv"
     norm_path = NORMALIZED_DIR / "economics_vintages.parquet"
     df.to_csv(raw_path, index=False)
-    df.to_parquet(norm_path, index=False)
+    try:
+        from midterms.ops.fsutil import safe_to_parquet
+
+        safe_to_parquet(df, norm_path, index=False)
+    except OSError:
+        # OneDrive lock: keep existing parquet if present
+        if not norm_path.exists():
+            raise
     man = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "n_rows": int(len(df)),

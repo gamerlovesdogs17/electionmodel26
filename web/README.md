@@ -4,7 +4,7 @@ Internal research UI for the 2026 Midterms Senate model.
 
 ```bash
 # from repo root: generate artifact first
-python -m midterms.cli forecast --method fast
+python -m midterms.cli forecast --method pymc
 
 # optional API
 python -m midterms.cli serve-api --port 8787

@@ -33,10 +33,10 @@ python -m midterms.cli fetch-external
 python -m midterms.cli ingest-polls
 python -m midterms.cli replay-baselines --year 2022
 python -m midterms.cli replay-cycle --all
-python -m midterms.cli forecast --method fast --as-of 2026-09-01
+python -m midterms.cli forecast --method pymc --as-of 2026-09-13
 
-# Optional: full PyMC NUTS fit (slower)
-python -m midterms.cli forecast --method pymc --draws 400 --tune 400 --chains 2
+# CI / degraded only (not for published releases):
+python -m midterms.cli forecast --method fast --allow-fast-fallback --as-of 2026-09-13
 
 # API for the UI (port 8787)
 python -m midterms.cli serve-api --port 8787
@@ -62,10 +62,9 @@ In the repo **Settings â†’ Pages**, set **Source** to **GitHub Actions** (not â€
 ```bash
 python -m midterms.cli forecast \
   --election-id senate-2026 \
-  --as-of 2026-09-01 \
-  --method fast \
-  --seed 20260901 \
-  --generic-ballot -1.0
+  --as-of 2026-09-13 \
+  --method pymc \
+  --seed 20260901
 ```
 
 Artifacts land in `data/artifacts/` with a run manifest under `data/manifests/`. The UI reads `forecast_latest.json` via the API (or a vendored copy under `web/public/`).

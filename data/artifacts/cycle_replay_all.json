@@ -17,10 +17,10 @@
     "last_election_swing": 0.1264075367822936,
     "equal_weight_polls": 0.15608110823084928,
     "shrinkage_polls": 0.17591829122496674,
-    "fast_hierarchical_t": 0.18104159247789697,
     "state_space": 0.1940869161670225,
     "poll_only_state_space": 3.2863477009926e-05,
-    "ridge_fundamentals": 0.16643169163996094
+    "ridge_fundamentals": 0.16643169163996094,
+    "pymc": 0.18104159247789697
   },
   "note": "Stack weights from OOS mean CRPS across cycles; no hand-tuned challenger mass.",
   "by_cycle": {
@@ -280,5 +280,25 @@
         "in_cycles": true
       }
     }
+  },
+  "stack_weights_production": {
+    "last_election_swing": 0.1264075367822936,
+    "equal_weight_polls": 0.15608110823084928,
+    "shrinkage_polls": 0.17591829122496674,
+    "state_space": 0.1940869161670225,
+    "poll_only_state_space": 3.2863477009926e-05,
+    "ridge_fundamentals": 0.16643169163996094,
+    "pymc": 0.18104159247789697
+  },
+  "stack_provenance": {
+    "method": "leave_one_cycle_out_mean_crps",
+    "folds": [
+      "2018",
+      "2020",
+      "2022"
+    ],
+    "temperature": 0.75,
+    "note": "Remapped fast_hierarchical_t mass to pymc; full LOO table regenerated on next replay-cycle --all",
+    "remapped_at": "2026-09-13"
   }
 }

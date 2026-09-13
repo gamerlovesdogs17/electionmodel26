@@ -76,12 +76,14 @@ export function ScenarioPanel({ scenarios }: { scenarios: ScenarioBlock }) {
                       : "—"}
                   </td>
                   <td className="px-3 py-2">
-                    {row.expected_dem_seats != null
+                    {typeof row.expected_dem_seats === "number" &&
+                    Number.isFinite(row.expected_dem_seats)
                       ? row.expected_dem_seats.toFixed(1)
                       : "—"}
                   </td>
                   <td className="px-3 py-2">
-                    {row.delta_p_dem != null
+                    {typeof row.delta_p_dem === "number" &&
+                    Number.isFinite(row.delta_p_dem)
                       ? `${(row.delta_p_dem * 100).toFixed(1)} pp`
                       : "—"}
                   </td>

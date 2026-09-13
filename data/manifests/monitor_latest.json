@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "checked_at": "2026-09-13T15:47:47.092817+00:00",
-  "model_version": "senate-hierarchical-v0.8",
-  "run_id": "senate-2026_2026-09-01_ensemble_stack+overlays_20260901",
+  "checked_at": "2026-09-13T18:18:43.509644+00:00",
+  "model_version": "senate-hierarchical-v0.9.1",
+  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
   "checks": [
     {
       "name": "has_races",
@@ -12,30 +12,30 @@
     {
       "name": "model_version_present",
       "ok": true,
-      "detail": "senate-hierarchical-v0.8"
+      "detail": "senate-hierarchical-v0.9.1"
     },
     {
       "name": "control_probs_sum_to_one",
       "ok": true,
       "detail": {
-        "p_dem": 0.721,
-        "p_rep": 0.279
+        "p_dem": 0.425,
+        "p_rep": 0.575
       }
     },
     {
       "name": "expected_seats_in_range",
       "ok": true,
-      "detail": 52.1815
+      "detail": 50.18125
     },
     {
       "name": "min_polls",
       "ok": true,
-      "detail": 304
+      "detail": 260
     },
     {
       "name": "min_enop",
       "ok": true,
-      "detail": 63.52839516545164
+      "detail": 199.83773609977055
     },
     {
       "name": "has_oh_fl_specials",
@@ -56,21 +56,39 @@
       "detail": []
     },
     {
+      "name": "production_method",
+      "ok": true,
+      "detail": {
+        "method": "ensemble_stack+overlays",
+        "core_method": "pymc"
+      }
+    },
+    {
+      "name": "finite_race_margins",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "peer_release_gate",
+      "ok": true,
+      "detail": 0.06
+    },
+    {
       "name": "polls_file_present",
       "ok": true,
       "detail": {
-        "age_hours": 0.04
+        "age_hours": 0.19
       }
     },
     {
       "name": "run_manifest_present",
       "ok": true,
-      "detail": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\run_senate-2026_2026-09-01_ensemble_stack+overlays_20260901.json"
+      "detail": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\run_senate-2026_2026-09-13_ensemble_stack+overlays_20260901.json"
     },
     {
       "name": "manifest_model_version",
       "ok": true,
-      "detail": "senate-hierarchical-v0.8"
+      "detail": "senate-hierarchical-v0.9.1"
     }
   ],
   "soft_checks": [
@@ -85,6 +103,47 @@
       "detail": true
     },
     {
+      "name": "generic_ballot_recorded",
+      "ok": true,
+      "detail": 5.852513615064197
+    },
+    {
+      "name": "peer_brier_crps_gate",
+      "ok": true,
+      "detail": {
+        "max_abs_control_gap": 0.06,
+        "race_scores": {
+          "ddhq": {
+            "n": 10,
+            "brier_vs_peer_favorite": 0.12233578125,
+            "mae": 0.15612499999999999,
+            "crps_proxy": 0.15612499999999999,
+            "ok": true
+          },
+          "kalshi": {
+            "n": 10,
+            "brier_vs_peer_favorite": 0.26108578125000004,
+            "mae": 0.18449666017076136,
+            "crps_proxy": 0.18449666017076136,
+            "ok": false
+          }
+        },
+        "reasons": []
+      }
+    },
+    {
+      "name": "stack_weights_fresh",
+      "ok": true,
+      "detail": {
+        "age_hours": 0.2058110609319475
+      }
+    },
+    {
+      "name": "historical_polls_primary",
+      "ok": false,
+      "detail": "synthetic"
+    },
+    {
       "name": "has_environment_lock",
       "ok": true,
       "detail": true
@@ -95,5 +154,7 @@
       "detail": true
     }
   ],
-  "alerts": []
+  "alerts": [
+    "historical polls not FTE-primary \u2014 run ingest-fte-polls"
+  ]
 }

@@ -519,7 +519,9 @@ function CandidateRow({
         </span>
       </span>
       <span className={`font-medium tabular-nums ${tone}`}>
-        {share.toFixed(1)}%
+        {typeof share === "number" && Number.isFinite(share)
+          ? `${share.toFixed(1)}%`
+          : "—"}
       </span>
     </div>
   );

@@ -5,11 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function pct(p: number, digits = 0): string {
+export function pct(p: number | null | undefined, digits = 0): string {
+  if (typeof p !== "number" || Number.isNaN(p) || !Number.isFinite(p)) return "—";
   return `${(p * 100).toFixed(digits)}%`;
 }
 
-export function signedMargin(m: number): string {
+export function signedMargin(m: number | null | undefined): string {
+  if (typeof m !== "number" || Number.isNaN(m)) return "—";
   const abs = Math.abs(m).toFixed(1);
   if (m > 0.05) return `D+${abs}`;
   if (m < -0.05) return `R+${abs}`;
@@ -68,6 +70,8 @@ export type ForecastArtifact = {
   election_id: string;
   model_version: string;
   method: string;
+  generic_ballot?: number | null;
+  generic_ballot_meta?: Record<string, unknown>;
   warnings?: { layer?: string; error?: string }[];
   chamber: ChamberForecast;
   races: RaceForecast[];

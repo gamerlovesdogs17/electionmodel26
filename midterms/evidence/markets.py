@@ -23,6 +23,12 @@ SENATE_2026_STATES = [
     "OR", "RI", "SC", "SD", "TN", "TX", "VA", "WV", "WY",
 ]
 
+# Kalshi uses SENATE{ST}S-{yy} for special elections (FL / OH 2026).
+SPECIAL_EVENT_SUFFIX: dict[str, str] = {
+    "FL": "S",
+    "OH": "S",
+}
+
 
 def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
     url = f"{KALSHI}{path}"
@@ -110,11 +116,25 @@ def fetch_race_markets(
     rows = []
     errors = []
     for st in states:
-        event = f"SENATE{st}-{cycle_suffix}"
-        try:
-            data = _get("/markets", {"limit": 10, "status": "open", "event_ticker": event})
-        except Exception as exc:  # noqa: BLE001
-            errors.append({"state": st, "error": str(exc)})
+        candidates = [f"SENATE{st}-{cycle_suffix}"]
+        extra = SPECIAL_EVENT_SUFFIX.get(st)
+        if extra:
+            candidates.insert(0, f"SENATE{st}{extra}-{cycle_suffix}")
+        data = None
+        event = candidates[0]
+        last_err: Exception | None = None
+        for event in candidates:
+            try:
+                data = _get("/markets", {"limit": 10, "status": "open", "event_ticker": event})
+                if data.get("markets"):
+                    break
+            except Exception as exc:  # noqa: BLE001
+                last_err = exc
+                data = None
+        if data is None:
+            errors.append({"state": st, "error": str(last_err or "no markets")})
+            continue
+        if not (data.get("markets") or []):
             continue
         p_dem = None
         p_rep = None

@@ -12,9 +12,10 @@ def attach_poll_weights(
     polls: pd.DataFrame,
     *,
     as_of: date,
-    half_life_days: float = 14.0,
+    half_life_days: float = 28.0,
     max_pollster_share: float = 0.35,
     study_cluster_power: float = 0.55,
+    max_weight_ratio: float = 8.0,
 ) -> pd.DataFrame:
     """
     Attach normalized influence weights and ENOP diagnostics.
@@ -22,6 +23,8 @@ def attach_poll_weights(
     ENOP = (sum w)^2 / sum(w^2)  — effective number of independent poll signals.
     Within a race, prolific pollsters are soft-capped and shared study_id rows
     are down-weighted so repeated releases add sublinear information.
+    Per-race max/median weight ratio is capped so a single recent poll cannot
+    dominate (~half-life 28d default).
 
     Weights use recency, sample size, quality, and partisan status only.
     Mode / population corrections are applied as additive offsets in the
@@ -40,7 +43,8 @@ def attach_poll_weights(
     age = (as_of_ts - field_end).dt.days.clip(lower=0).astype(float)
     recency = np.exp(-np.log(2.0) * age / max(half_life_days, 1.0))
 
-    n = out["sample_size"].astype(float).clip(lower=50.0)
+    n_raw = pd.to_numeric(out["sample_size"], errors="coerce")
+    n = n_raw.where(np.isfinite(n_raw) & (n_raw > 0), 500.0).clip(lower=50.0)
     size_w = np.sqrt(n / 600.0).clip(0.35, 2.0)
 
     qw = (
@@ -86,7 +90,13 @@ def attach_poll_weights(
     normed = clustered.copy()
     for _, g in out.groupby("race_id", sort=False):
         ix = g.index.to_numpy()
-        w = clustered[ix]
+        w = clustered[ix].astype(float, copy=True)
+        # Cap extreme within-race weights (single recent poll domination)
+        pos = w[w > 0]
+        if len(pos) and max_weight_ratio > 0:
+            med = float(np.median(pos))
+            if med > 0:
+                w = np.minimum(w, med * float(max_weight_ratio))
         s = float(w.sum())
         ss = float(np.square(w).sum())
         race_enop = (s * s / ss) if ss > 0 else 0.0
@@ -94,6 +104,8 @@ def attach_poll_weights(
         mean_w = float(w.mean()) if len(w) else 1.0
         if mean_w > 0:
             normed[ix] = w / mean_w
+        else:
+            normed[ix] = w
 
     out["enop_race"] = enop
     out["influence_weight"] = np.nan_to_num(normed, nan=0.0, posinf=0.0, neginf=0.0)

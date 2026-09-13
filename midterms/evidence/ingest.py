@@ -17,6 +17,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 import pandas as pd
+import numpy as np
 
 from midterms.config import DEMO_ELECTION_ID, MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR, REGIONS
 from midterms.evidence.candidates import (
@@ -368,22 +369,32 @@ def generic_ballot_latest(
     *,
     as_of: str | None = None,
 ) -> float | None:
-    """Return dem-rep margin (pp) from the most recent VoteHub 2026 generic ballot.
+    """Backward-compatible alias: trailing-window aggregate, not a single poll."""
+    agg = generic_ballot_aggregate(path=path, as_of=as_of)
+    return None if agg is None else float(agg["margin"])
 
-    If `as_of` is set, only polls with created_at/end_date on or before that date
-    are eligible (blueprint as-of discipline).
+
+def generic_ballot_aggregate(
+    path: Path | None = None,
+    *,
+    as_of: str | None = None,
+    window_days: int = 21,
+    winsor_abs: float = 8.0,
+) -> dict[str, Any] | None:
+    """
+    VoteHub generic-ballot Dem−Rep margin (pp), ENOP-ish trailing average.
+
+    Uses polls in the last `window_days` on/before as_of (else all eligible),
+    Winsorizes outlier margins, and weights by recency × √N. Avoids letting a
+    single YouGov/etc. print dominate fundamentals.
     """
     path = path or (RAW_DIR / "external" / "votehub_generic_ballot_2026.json")
     if not path.exists():
         return None
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if isinstance(payload, list):
-        polls = payload
-    else:
-        polls = payload.get("polls", [])
+    polls = payload if isinstance(payload, list) else payload.get("polls", [])
     cutoff = as_of
-    best = None
-    best_date = ""
+    rows: list[dict[str, Any]] = []
     for p in polls:
         answers = {normalize_candidate_key(a["choice"]): float(a["pct"]) for a in p.get("answers") or []}
         dem = (
@@ -407,15 +418,76 @@ def generic_ballot_latest(
                     rep = v
         if dem is None or rep is None:
             continue
-        end = str(p.get("end_date") or p.get("created_at") or "")
-        published = str(p.get("created_at") or end)
-        if cutoff and published[:10] > cutoff[:10]:
+        end = str(p.get("end_date") or p.get("created_at") or "")[:10]
+        published = str(p.get("created_at") or end)[:10]
+        if cutoff and published > cutoff[:10]:
             continue
-        if end >= best_date:
-            best_date = end
-            total = dem + rep
-            best = 100.0 * (dem - rep) / total if total else dem - rep
-    return best
+        if not end:
+            continue
+        total = dem + rep
+        raw = 100.0 * (dem - rep) / total if total else dem - rep
+        # Headline D−R (not two-party renorm) — closer to public GB reporting
+        headline = float(dem) - float(rep)
+        sample = p.get("sample_size")
+        try:
+            n = float(sample) if sample is not None else 1000.0
+        except (TypeError, ValueError):
+            n = 1000.0
+        if not np.isfinite(n) or n <= 0:
+            n = 1000.0
+        rows.append(
+            {
+                "end": end,
+                "margin_renorm": float(raw),
+                "margin_headline": float(headline),
+                "n": n,
+                "pollster": str(p.get("pollster") or p.get("pollster_id") or ""),
+            }
+        )
+    if not rows:
+        return None
+
+    import math
+    from datetime import date, timedelta
+
+    ref = date.fromisoformat((cutoff or max(r["end"] for r in rows))[:10])
+    windowed = [
+        r
+        for r in rows
+        if (ref - date.fromisoformat(r["end"])).days <= window_days
+        and (ref - date.fromisoformat(r["end"])).days >= 0
+    ]
+    if not windowed:
+        # Fall back to most recent 5 polls overall
+        windowed = sorted(rows, key=lambda r: r["end"], reverse=True)[:5]
+
+    margins = []
+    weights = []
+    for r in windowed:
+        m = float(np.clip(r["margin_headline"], -winsor_abs, winsor_abs))
+        age = max((ref - date.fromisoformat(r["end"])).days, 0)
+        recency = math.exp(-math.log(2.0) * age / max(window_days / 2.0, 1.0))
+        w = recency * math.sqrt(max(r["n"], 100.0) / 1000.0)
+        margins.append(m)
+        weights.append(w)
+    w_arr = np.asarray(weights, dtype=float)
+    m_arr = np.asarray(margins, dtype=float)
+    if float(w_arr.sum()) <= 0:
+        margin = float(np.median(m_arr))
+    else:
+        margin = float(np.average(m_arr, weights=w_arr))
+    return {
+        "margin": margin,
+        "n_polls": len(windowed),
+        "window_days": window_days,
+        "winsor_abs": winsor_abs,
+        "as_of": cutoff,
+        "ref_date": ref.isoformat(),
+        "raw_median": float(np.median(m_arr)),
+        "raw_mean": float(np.mean(m_arr)),
+        "method": "trailing_weighted_headline",
+        "note": "Headline D-R pp (not two-party renorm); Winsorized; recency*sqrt(N) weights",
+    }
 
 
 def merge_live_polls_into_warehouse(

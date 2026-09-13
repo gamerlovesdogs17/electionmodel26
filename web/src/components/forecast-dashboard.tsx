@@ -99,7 +99,15 @@ export function ForecastDashboard() {
           >
             method: {data.method ?? "unknown"}
           </span>
-          {typeof data.diagnostics?.enop_global === "number" ? (
+          {typeof data.generic_ballot === "number" &&
+          Number.isFinite(data.generic_ballot) ? (
+            <span className="rounded-md border border-[var(--line)] px-2 py-1">
+              GB: {data.generic_ballot >= 0 ? "+" : ""}
+              {data.generic_ballot.toFixed(1)}
+            </span>
+          ) : null}
+          {typeof data.diagnostics?.enop_global === "number" &&
+          Number.isFinite(data.diagnostics.enop_global as number) ? (
             <span className="rounded-md border border-[var(--line)] px-2 py-1">
               ENOP: {(data.diagnostics.enop_global as number).toFixed(1)}
             </span>
@@ -109,19 +117,28 @@ export function ForecastDashboard() {
               ratings: {String(data.overlays.expert_source)}
             </span>
           ) : null}
-          {typeof data.snapshot?.kalshi_control_p_dem === "number" ? (
+          {typeof data.snapshot?.kalshi_control_p_dem === "number" &&
+          Number.isFinite(data.snapshot.kalshi_control_p_dem as number) ? (
             <span className="rounded-md border border-[var(--line)] px-2 py-1">
               Kalshi control D:{" "}
               {((data.snapshot.kalshi_control_p_dem as number) * 100).toFixed(0)}%
             </span>
           ) : null}
-          {data.ablation ? (
+          {data.ablation &&
+          typeof (
+            data.ablation.delta_p_dem_majority ??
+            (data.ablation.adjusted?.p_dem_majority != null &&
+            data.ablation.unadjusted?.p_dem_majority != null
+              ? data.ablation.adjusted.p_dem_majority -
+                data.ablation.unadjusted.p_dem_majority
+              : null)
+          ) === "number" ? (
             <span className="rounded-md border border-[var(--line)] px-2 py-1">
               ablation ΔDem ctl:{" "}
               {(
                 (data.ablation.delta_p_dem_majority ??
-                  data.ablation.adjusted.p_dem_majority -
-                    data.ablation.unadjusted.p_dem_majority) * 100
+                  (data.ablation.adjusted!.p_dem_majority as number) -
+                    (data.ablation.unadjusted!.p_dem_majority as number)) * 100
               ).toFixed(1)}
               pp
             </span>

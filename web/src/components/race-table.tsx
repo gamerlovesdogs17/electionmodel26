@@ -119,7 +119,13 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                       <div className="h-2 w-20 overflow-hidden rounded bg-[var(--rep)]/25 sm:w-28">
                         <div
                           className="h-full bg-[var(--dem)]"
-                          style={{ width: `${r.p_dem * 100}%` }}
+                          style={{
+                            width: `${
+                              typeof r.p_dem === "number" && Number.isFinite(r.p_dem)
+                                ? Math.min(100, Math.max(0, r.p_dem * 100))
+                                : 0
+                            }%`,
+                          }}
                         />
                       </div>
                       <span className="tabular-nums">{pct(r.p_dem, 0)}</span>

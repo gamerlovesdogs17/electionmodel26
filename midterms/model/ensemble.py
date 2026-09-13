@@ -17,11 +17,64 @@ def softmax_neg_scores(scores: dict[str, float], temperature: float = 1.0) -> di
         return {}
     vals = np.array([float(scores[k]) if np.isfinite(scores[k]) else 1e6 for k in keys], dtype=float)
     # Lower CRPS → higher weight
-    logits = -vals / max(temperature, 1e-6)
+    logits = -vals / max(temperature, 1.0e-6)
     logits = logits - logits.max()
     ex = np.exp(logits)
     w = ex / ex.sum()
     return {k: float(wi) for k, wi in zip(keys, w)}
+
+
+def weights_from_oof_scores(
+    crps_by_fold: dict[str, dict[str, float]],
+    *,
+    temperature: float = 0.75,
+    exclude_fold: str | None = None,
+) -> dict[str, float]:
+    """
+    Stack weights from leave-one-fold CRPS tables.
+
+    `crps_by_fold`: {fold_id: {model_name: crps}}.
+    When `exclude_fold` is set, that fold's scores are omitted (true OOF for that holdout).
+    When omitted, averages all folds (production weights for a future cycle).
+    """
+    pool: dict[str, list[float]] = {}
+    for fold, scores in crps_by_fold.items():
+        if exclude_fold is not None and str(fold) == str(exclude_fold):
+            continue
+        for name, crps in scores.items():
+            try:
+                v = float(crps)
+            except (TypeError, ValueError):
+                continue
+            if np.isfinite(v):
+                pool.setdefault(name, []).append(v)
+    mean_crps = {k: float(np.mean(v)) for k, v in pool.items() if v}
+    if not mean_crps:
+        return {"pymc": 1.0}
+    return softmax_neg_scores(mean_crps, temperature=temperature)
+
+
+def align_weights_to_spine(
+    weights: dict[str, float],
+    *,
+    spine: str = "pymc",
+) -> dict[str, float]:
+    """
+    Map validation-spine labels onto the production core name.
+
+    Historical replay scores `fast_hierarchical_t`; production spine is `pymc`.
+    Transfer that mass rather than dropping the hierarchical core.
+    """
+    out = {k: float(v) for k, v in weights.items() if float(v) > 0}
+    if spine.startswith("pymc"):
+        if "pymc" not in out and "fast_hierarchical_t" in out:
+            out["pymc"] = out.pop("fast_hierarchical_t")
+        elif "pymc" in out and "fast_hierarchical_t" in out:
+            out["pymc"] = out.get("pymc", 0.0) + out.pop("fast_hierarchical_t")
+    total = sum(out.values())
+    if total <= 0:
+        return {spine: 1.0}
+    return {k: v / total for k, v in out.items()}
 
 
 def stack_margin_draws(
@@ -66,6 +119,7 @@ def default_weights_from_replay(replay_report: dict[str, Any]) -> dict[str, floa
     Build stack weights from a cycle-replay aggregate block.
 
     Expects keys like aggregate.fast_hierarchical_t.crps, aggregate.shrinkage_polls.crps.
+    Prefer production spine label `pymc` when present.
     """
     agg = replay_report.get("aggregate") or {}
     scores = {}
@@ -73,5 +127,5 @@ def default_weights_from_replay(replay_report: dict[str, Any]) -> dict[str, floa
         if isinstance(block, dict) and "crps" in block:
             scores[name] = float(block["crps"])
     if not scores:
-        return {"fast_hierarchical_t": 1.0}
-    return softmax_neg_scores(scores, temperature=0.75)
+        return {"pymc": 1.0}
+    return align_weights_to_spine(softmax_neg_scores(scores, temperature=0.75), spine="pymc")

@@ -74,19 +74,32 @@ def run_refresh(
     )
 
     if forecast:
-        from midterms.evidence.ingest import generic_ballot_latest
+        from midterms.evidence.ingest import generic_ballot_aggregate
         from midterms.pipeline.run_forecast import run_forecast
 
-        gb = generic_ballot_latest(as_of=as_of)
+        gb_meta = generic_ballot_aggregate(as_of=as_of) or {
+            "margin": -1.0,
+            "method": "fallback_default",
+            "note": "VoteHub GB unavailable; using midterm prior -1.0",
+        }
+        steps["generic_ballot"] = gb_meta
         steps["forecast"] = run_forecast(
             election_id=election_id,
             as_of=as_of,
             method="pymc",
             draws=draws,
             seed=20260901,
-            generic_ballot=float(gb) if gb is not None else -1.0,
-            allow_fast_fallback=True,
+            generic_ballot=float(gb_meta["margin"]),
+            generic_ballot_meta=gb_meta,
+            allow_fast_fallback=False,
+            ensemble=True,
         )["paths"]
+        try:
+            from midterms.validation.peer_gate import write_peer_gate_report
+
+            steps["peer_gate"] = write_peer_gate_report()
+        except Exception as exc:  # noqa: BLE001
+            steps["peer_gate"] = {"ok": False, "error": str(exc)}
 
     from midterms.ops.monitor import monitor_check
 

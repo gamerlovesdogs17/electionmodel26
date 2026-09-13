@@ -139,7 +139,9 @@ def main(argv: list[str] | None = None) -> None:
 
     p_run = sub.add_parser("forecast", help="Fit/simulate and write forecast artifact")
     p_run.add_argument("--election-id", default="senate-2026")
-    p_run.add_argument("--as-of", default="2026-09-01")
+    from midterms.config import DEMO_AS_OF as _DEMO_AS_OF
+
+    p_run.add_argument("--as-of", default=_DEMO_AS_OF)
     p_run.add_argument("--method", choices=["fast", "pymc", "state_space"], default="pymc")
     p_run.add_argument("--draws", type=int, default=400)
     p_run.add_argument("--tune", type=int, default=400)
@@ -149,7 +151,7 @@ def main(argv: list[str] | None = None) -> None:
         "--generic-ballot",
         type=float,
         default=None,
-        help="Dem-Rep generic ballot margin (pp). Default: VoteHub latest if available, else -1.0",
+        help="Dem-Rep generic ballot margin (pp). Default: VoteHub 21d trailing average",
     )
     p_run.add_argument(
         "--no-ensemble",
@@ -167,15 +169,37 @@ def main(argv: list[str] | None = None) -> None:
         help="Disable Kalshi market overlay (on by default when markets exist)",
     )
     p_run.add_argument("--rating-weight", type=float, default=0.15)
-    p_run.add_argument("--market-weight", type=float, default=0.10)
+    p_run.add_argument("--market-weight", type=float, default=0.12)
+    p_run.add_argument(
+        "--control-weight",
+        type=float,
+        default=0.15,
+        help="Soft national pull toward CONTROLS market (blueprint §9.4; default 0.15)",
+    )
+    p_run.add_argument(
+        "--control-calibrate",
+        action="store_true",
+        help="Opt-in hard chamber calibration to market P(control) — off by default",
+    )
+    p_run.add_argument(
+        "--allow-fast-fallback",
+        action="store_true",
+        help="Allow degraded fast hierarchical-t if PyMC fails (off by default)",
+    )
 
     def _forecast(a: argparse.Namespace) -> None:
+        gb_meta = None
         gb = a.generic_ballot
         if gb is None:
-            from midterms.evidence.ingest import generic_ballot_latest
+            from midterms.evidence.ingest import generic_ballot_aggregate
 
-            live_gb = generic_ballot_latest(as_of=a.as_of)
-            gb = float(live_gb) if live_gb is not None else -1.0
+            gb_meta = generic_ballot_aggregate(as_of=a.as_of) or {
+                "margin": -1.0,
+                "method": "fallback_default",
+            }
+            gb = float(gb_meta["margin"])
+        else:
+            gb_meta = {"margin": float(gb), "method": "cli_override"}
         result = run_forecast(
             election_id=a.election_id,
             as_of=a.as_of,
@@ -185,11 +209,15 @@ def main(argv: list[str] | None = None) -> None:
             chains=a.chains,
             seed=a.seed,
             generic_ballot=gb,
+            generic_ballot_meta=gb_meta,
             ensemble=not a.no_ensemble,
             with_ratings=not a.no_ratings,
             with_markets=not a.no_markets,
             rating_weight=a.rating_weight,
             market_weight=a.market_weight,
+            control_weight=a.control_weight,
+            control_calibrate=bool(a.control_calibrate),
+            allow_fast_fallback=bool(a.allow_fast_fallback) or a.method == "fast",
         )
         print(
             json.dumps(
@@ -197,11 +225,19 @@ def main(argv: list[str] | None = None) -> None:
                     "paths": result["paths"],
                     "chamber": result["artifact"]["chamber"],
                     "generic_ballot": gb,
+                    "generic_ballot_meta": gb_meta,
                     "method": result["artifact"]["method"],
                     "stack_weights": result["artifact"].get("stack_weights"),
                     "diagnostics": {
                         k: result["artifact"]["diagnostics"].get(k)
-                        for k in ("enop_global", "enop_by_race_mean", "n_polls", "ensemble")
+                        for k in (
+                            "enop_global",
+                            "enop_by_race_mean",
+                            "n_polls",
+                            "ensemble",
+                            "core_method",
+                        )
+                        if k in result["artifact"]["diagnostics"]
                     },
                     "n_polls": result["artifact"]["snapshot"]["n_polls"],
                 },
@@ -316,6 +352,41 @@ def main(argv: list[str] | None = None) -> None:
             raise SystemExit(1)
 
     p_mon.set_defaults(func=_monitor)
+
+    p_lpo = sub.add_parser(
+        "leave-pollster-out",
+        help="Leave-pollster-out CRPS diagnostics (blueprint §4.3)",
+    )
+    p_lpo.add_argument("--year", type=int, default=2022)
+    p_lpo.add_argument("--lead-days", type=int, default=60)
+    p_lpo.add_argument("--draws", type=int, default=300)
+    p_lpo.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.leave_pollster_out", fromlist=["leave_pollster_out"]
+                ).leave_pollster_out(year=a.year, lead_days=a.lead_days, draws=a.draws),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_vrb = sub.add_parser(
+        "verify-rebuild",
+        help="Compare forecast_latest hashes to sealed run manifest",
+    )
+    p_vrb.add_argument("--run-id", default=None)
+    p_vrb.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.ops.reproducibility", fromlist=["verify_rebuild"]
+                ).verify_rebuild(run_id=a.run_id),
+                indent=2,
+            )
+        )
+    )
 
     p_res = sub.add_parser(
         "write-results-archive",

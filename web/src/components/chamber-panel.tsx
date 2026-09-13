@@ -3,12 +3,20 @@
 import { ChamberForecast, pct } from "@/lib/utils";
 
 export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
-  const hist = chamber.seat_histogram;
+  const hist = chamber.seat_histogram ?? [];
   const maxP = Math.max(...hist.map((h) => h.probability), 0.01);
-  const lo = Math.min(...hist.map((h) => h.dem_seats));
-  const hi = Math.max(...hist.map((h) => h.dem_seats));
+  const lo = hist.length ? Math.min(...hist.map((h) => h.dem_seats)) : 0;
+  const hi = hist.length ? Math.max(...hist.map((h) => h.dem_seats)) : 0;
+  const expectedDem =
+    typeof chamber.expected_dem_seats === "number" &&
+    Number.isFinite(chamber.expected_dem_seats)
+      ? chamber.expected_dem_seats
+      : 0;
   const expectedRep =
-    chamber.expected_rep_seats ?? 100 - chamber.expected_dem_seats;
+    typeof chamber.expected_rep_seats === "number" &&
+    Number.isFinite(chamber.expected_rep_seats)
+      ? chamber.expected_rep_seats
+      : 100 - expectedDem;
 
   return (
     <section className="space-y-6">
@@ -35,7 +43,7 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
               Democratic seats from correlated draws (held {chamber.held_dem} /{" "}
               {chamber.held_rep} R + contested). Expected{" "}
               <span className="font-medium text-[var(--ink)]">
-                {chamber.expected_dem_seats.toFixed(1)} D
+                {expectedDem.toFixed(1)} D
               </span>
               {" / "}
               <span className="font-medium text-[var(--ink)]">
@@ -49,7 +57,8 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
           </p>
         </div>
         <div className="flex h-40 items-end gap-px overflow-x-auto">
-          {hist.map((bin) => {
+          {hist.length ? (
+            hist.map((bin) => {
             const isDemControl = bin.dem_seats >= chamber.majority_threshold;
             // Floor height so mid-range bins (incl. 50) stay visible
             const barPx = Math.max(
@@ -72,7 +81,8 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
                 />
               </div>
             );
-          })}
+          })
+          ) : null}
         </div>
         <div className="mt-2 flex justify-between text-[10px] uppercase tracking-wide text-[var(--muted)]">
           <span>{lo}</span>
