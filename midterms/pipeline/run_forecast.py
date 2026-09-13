@@ -65,6 +65,29 @@ def _load_stack_weights() -> dict[str, float]:
     }
 
 
+def _json_safe(obj: Any) -> Any:
+    """Replace NaN/Inf with None so dumps are browser-parseable (strict JSON)."""
+    if isinstance(obj, dict):
+        return {k: _json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_json_safe(v) for v in obj]
+    if isinstance(obj, (np.floating, float)):
+        val = float(obj)
+        if np.isnan(val) or np.isinf(val):
+            return None
+        return val
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if obj is None or isinstance(obj, (str, bool, int)):
+        return obj
+    try:
+        if pd.isna(obj):
+            return None
+    except (TypeError, ValueError):
+        pass
+    return obj
+
+
 def run_forecast(
     *,
     election_id: str = DEMO_ELECTION_ID,
@@ -345,7 +368,7 @@ def run_forecast(
 
     artifact_path = out_dir / f"forecast_{run_id}.json"
     demo_path = out_dir / "forecast_latest.json"
-    text = json.dumps(artifact, indent=2)
+    text = json.dumps(_json_safe(artifact), indent=2, allow_nan=False)
     artifact_path.write_text(text)
     demo_path.write_text(text)
 

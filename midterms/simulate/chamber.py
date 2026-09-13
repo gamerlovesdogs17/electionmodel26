@@ -111,7 +111,9 @@ def simulate_chamber(
         row = contested_ix.loc[rid] if rid in contested_ix.index else None
         held_by = None if row is None else str(row["held_by"])
         prior_lean = None if row is None else float(row["prior_lean"])
-        incumbent = None if row is None else row["incumbent_party"]
+        incumbent = None
+        if row is not None and not pd.isna(row["incumbent_party"]):
+            incumbent = str(row["incumbent_party"])
         is_open = None if row is None else bool(row["is_open"])
         dem_name, rep_name = ticket_for_state(state)
         mean_m = float(fit.mean_margin[i])
