@@ -431,6 +431,13 @@ def run_forecast(
         },
     }
     write_run_manifest(manifest)
+    try:
+        from midterms.ops.monitor import append_release_index, archive_release
+
+        append_release_index(manifest)
+        archive_release(manifest, text)
+    except Exception:  # noqa: BLE001
+        pass
     return {"artifact": artifact, "manifest": manifest, "paths": manifest["paths"]}
 
 

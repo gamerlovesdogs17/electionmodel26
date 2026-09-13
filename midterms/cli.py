@@ -272,6 +272,58 @@ def main(argv: list[str] | None = None) -> None:
 
     p_api.set_defaults(func=_serve)
 
+    p_mon = sub.add_parser("monitor-check", help="Health-check latest forecast artifact")
+    p_mon.add_argument("--min-polls", type=int, default=50)
+    p_mon.add_argument("--min-enop", type=float, default=5.0)
+
+    def _monitor(a: argparse.Namespace) -> None:
+        from midterms.ops.monitor import monitor_check
+
+        report = monitor_check(min_polls=a.min_polls, min_enop=a.min_enop)
+        print(json.dumps(report, indent=2))
+        if not report.get("ok"):
+            raise SystemExit(1)
+
+    p_mon.set_defaults(func=_monitor)
+
+    p_res = sub.add_parser(
+        "write-results-archive",
+        help="Build redistributable certified Senate results archive",
+    )
+    p_res.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.results_archive", fromlist=["write_results_archive"]
+                ).write_results_archive(),
+                indent=2,
+            )
+        )
+    )
+
+    p_ref = sub.add_parser(
+        "refresh",
+        help="Fetch → ingest → forecast → monitor (ops refresh chain)",
+    )
+    p_ref.add_argument("--election-id", default="senate-2026")
+    p_ref.add_argument("--as-of", default="2026-09-01")
+    p_ref.add_argument("--no-forecast", action="store_true")
+    p_ref.add_argument("--draws", type=int, default=400)
+    p_ref.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__("midterms.ops.refresh", fromlist=["run_refresh"]).run_refresh(
+                    election_id=a.election_id,
+                    as_of=a.as_of,
+                    forecast=not a.no_forecast,
+                    draws=a.draws,
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
     args = parser.parse_args(argv)
     args.func(args)
 

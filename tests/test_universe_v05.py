@@ -58,7 +58,9 @@ def test_forecast_rating_matches_probability(tmp_path):
         out_dir=tmp_path,
     )
     art = result["artifact"]
-    assert art["model_version"].endswith("v0.5") or art["model_version"].endswith("v0.6")
+    assert art["model_version"].startswith("senate-hierarchical-v0.")
+    ver = art["model_version"].rsplit("-", 1)[-1]
+    assert ver.startswith("v0.") and float(ver[1:]) >= 0.5
     states = {r["state"] for r in art["races"]}
     assert "OH" in states and "FL" in states
     for r in art["races"]:

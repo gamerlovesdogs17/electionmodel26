@@ -1,9 +1,10 @@
 {
-  "created_at": "2026-09-13T15:08:14.052679+00:00",
+  "created_at": "2026-09-13T15:27:00.342872+00:00",
   "license": "synthetic-research-fixture",
   "note": "Synthetic Senate polls/results for offline CI and blueprint-aligned development. Not for publication as real forecasts. Replace via midterms.evidence.ingest when redistributable archives (MEDSL / public poll dumps / certified results) are available.",
   "preferred_live_sources": [
     "MIT Election Lab / MEDSL research layer (results)",
+    "data/raw/external/senate_certified_results.json (curated certified margins)",
     "Public poll archives with redistributable licenses (polls)",
     "Official state certification / FEC (results)"
   ],
@@ -21,20 +22,20 @@
     "races": {
       "raw": "raw\\races.csv",
       "normalized": "normalized\\races.parquet",
-      "sha256": "06763093c3c7296fa07d138c3a45b31488ebf3af55d32b03eb83063fe22cb2bd",
+      "sha256": "eaf02b49dc5d4ab8c7351407abdbd6be6d158f8f3e11254fdd77fa33c84a5ff6",
       "n_rows": 700
     },
     "polls": {
       "raw": "raw\\polls.csv",
       "normalized": "normalized\\polls.parquet",
-      "sha256": "31e5aeab2bdd04db1629fffc3b1b59c718c61f1f611395af6650bd5934924b31",
+      "sha256": "770959a0066148fb9184f079611cd831149693f727ca9a5bd098601cd13281e3",
       "n_rows": 2135
     },
     "results": {
       "raw": "raw\\results.csv",
       "normalized": "normalized\\results.parquet",
-      "sha256": "5d72f29697ff345f8c21d0cf95f24d1545a08cd9b8234f5e0fb70521a3ec6650",
-      "n_rows": 165
+      "sha256": "05143a28330ba01e081c0df2877ea7581dd2007e4ab71da4bb3888c030ba1135",
+      "n_rows": 228
     }
   }
 }

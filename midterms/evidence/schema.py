@@ -78,7 +78,43 @@ RACE_COLUMNS = [
     "pres_approval",  # presidential net approval (cycle-level, positive = popular)
     "white_house_party",  # 'D' | 'R'
     "is_midterm",
+    # Institutional / calendar extensions (blueprint race schema)
+    "election_phase",  # general | runoff | runoff_pending | special
+    "runoff_of",  # parent race_id when this row is a runoff
+    "vacancy_reason",  # appointment | resignation | death | None
+    "ballot_status",  # nominated | withdrawn | deceased | write_in
+    "effective_election_day",  # runoff day when phase advances; else election_day
 ]
+
+
+def empty_race_row(**overrides: Any) -> dict[str, Any]:
+    row = {c: None for c in RACE_COLUMNS}
+    row.update(
+        {
+            "office": "US_SENATE",
+            "not_up": False,
+            "is_open": False,
+            "is_midterm": False,
+            "election_phase": "general",
+            "ballot_status": "nominated",
+        }
+    )
+    row.update(overrides)
+    return row
+
+
+def is_active_ballot_row(row: dict[str, Any] | Any) -> bool:
+    """True if the race should enter the joint forecast / chamber sim."""
+    get = row.get if isinstance(row, dict) else lambda k, d=None: row[k] if k in row.index else d
+    if bool(get("not_up", False)):
+        return False
+    status = str(get("ballot_status") or "nominated").lower()
+    if status in {"withdrawn", "deceased"}:
+        return False
+    phase = str(get("election_phase") or "general").lower()
+    if phase in {"runoff_pending"}:
+        return False
+    return True
 
 MANIFEST_FIELDS = [
     "run_id",

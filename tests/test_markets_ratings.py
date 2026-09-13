@@ -41,7 +41,9 @@ def test_forecast_with_real_overlays(tmp_path):
         out_dir=tmp_path,
     )
     art = result["artifact"]
-    assert art["model_version"].endswith("v0.4") or art["model_version"].endswith("v0.5") or art["model_version"].endswith("v0.6")
+    assert art["model_version"].startswith("senate-hierarchical-v0.")
+    ver = art["model_version"].rsplit("-", 1)[-1]
+    assert ver.startswith("v0.") and float(ver[1:]) >= 0.4
     assert "ablation" in art
     assert "unadjusted" in art["ablation"]
     assert "adjusted" in art["ablation"]

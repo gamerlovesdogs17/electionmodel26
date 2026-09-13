@@ -1,7 +1,19 @@
 # Model change log
 
 Immutable research release notes (blueprint §11.3 / §12). Older public artifacts
-should be preserved alongside newer ones under `data/artifacts/`.
+should be preserved alongside newer ones under `data/artifacts/` and
+`data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
+
+## 2026-09-13 — senate-hierarchical-v0.7
+
+- Redistributable results: MEDSL 2016 state aggregates + curated certified margins (2018–2024),
+  merged over synthetic fixture results by `race_id`.
+- Bitemporal as-of: poll `valid_from` / `valid_to` + latest `release_version` in `build_as_of`.
+- Continuous similarity covariance on joint shocks (`midterms.model.similarity`).
+- Institutional race fields: `election_phase`, `runoff_of`, `vacancy_reason`, `ballot_status`,
+  `effective_election_day` (OH/FL `vacancy_reason=appointment`); withdrawn / `runoff_pending` excluded.
+- Ops lite: `monitor-check`, append-only `releases.jsonl`, hashed `data/releases/`, `refresh` CLI +
+  GitHub Actions refresh workflow hook.
 
 ## 2026-09-13 — senate-hierarchical-v0.6
 

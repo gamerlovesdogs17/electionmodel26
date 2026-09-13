@@ -92,6 +92,13 @@ VoteHub normalize/merge tests require `data/raw/external/votehub_*.json` (create
 
 House, Electoral College, public auth, production cloud deploy.
 
+## Model v0.7 upgrades
+
+- Certified results archive (MEDSL 2016 + curated 2018–2024) preferred over synthetic results.
+- Bitemporal poll as-of (`valid_from`/`valid_to`); continuous similarity joint shocks.
+- Institutional race fields (runoffs / vacancies / ballot status); OH/FL marked `appointment`.
+- Ops: `monitor-check`, `refresh`, `releases.jsonl` + hashed `data/releases/`.
+
 ## Model v0.6 upgrades
 
 - Nominee ticket refresh (ME Jackson, MI El-Sayed, NE Osborn Ind, FL Nixon, CO Hickenlooper, …).

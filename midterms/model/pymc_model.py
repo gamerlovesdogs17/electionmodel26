@@ -20,6 +20,8 @@ import pandas as pd
 from midterms.evidence.warehouse import EvidenceSnapshot
 from midterms.model.fundamentals import fundamentals_mean
 from midterms.model.poll_weights import attach_poll_weights, global_enop, race_enop_summary
+from midterms.model.similarity import correlated_shocks
+from midterms.evidence.schema import is_active_ballot_row
 
 
 @dataclass
@@ -59,7 +61,9 @@ def _population_offset(population: object) -> float:
 
 
 def _prepare(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0):
-    races = snapshot.races[~snapshot.races["not_up"]].reset_index(drop=True)
+    races = snapshot.races.copy()
+    if len(races):
+        races = races[races.apply(is_active_ballot_row, axis=1)].reset_index(drop=True)
     polls = snapshot.polls.copy()
     polls = polls[polls["race_id"].isin(set(races["race_id"]))]
     polls = attach_poll_weights(polls, as_of=snapshot.as_of)
@@ -331,13 +335,28 @@ def fit_fast_approximation(
                 )
             )
 
-    # Joint draws: national + region + local Student-t shocks
+    # Joint draws: national + region + local + continuous similarity Student-t shocks
     nat = rng.standard_t(4, size=n_draws) * 2.0
     region_draws = {r: rng.standard_t(5, size=n_draws) * 1.5 for r in range(prep["n_regions"])}
-    local = rng.standard_t(5, size=(n_draws, n)) * (sds * 0.7)
+    local = rng.standard_t(5, size=(n_draws, n)) * (sds * 0.55)
+    contested = snapshot.races.set_index("race_id").loc[prep["race_ids"]].reset_index()
+    sim_shocks = correlated_shocks(
+        contested,
+        n_draws,
+        rng,
+        scale=sds * 0.35,
+        length_scale=1.75,
+        nu=5.0,
+    )
     mu = np.zeros((n_draws, n))
     for i in range(n):
-        mu[:, i] = means[i] + nat + region_draws[int(prep["region_idx"][i])] + local[:, i]
+        mu[:, i] = (
+            means[i]
+            + nat
+            + region_draws[int(prep["region_idx"][i])]
+            + local[:, i]
+            + sim_shocks[:, i]
+        )
     mu += rng.standard_t(4, size=(n_draws, 1)) * 1.2
 
     return FitResult(
@@ -359,7 +378,11 @@ def fit_fast_approximation(
             "enop_by_race_mean": float(np.mean(list(prep["enop_by_race"].values())))
             if prep["enop_by_race"]
             else 0.0,
-            "note": "fast hierarchical-t with ENOP weights, mode/pop offsets, richer fundamentals",
+            "similarity_covariance": True,
+            "note": (
+                "fast hierarchical-t with ENOP weights, mode/pop offsets, "
+                "richer fundamentals, continuous similarity covariance"
+            ),
         },
         method="fast_hierarchical_t",
     )

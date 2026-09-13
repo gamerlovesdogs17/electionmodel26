@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from midterms.evidence.tickets import ticket_for_state
+from midterms.evidence.schema import is_active_ballot_row
 from midterms.model.pymc_model import FitResult
 from midterms.model.overlays import rating_from_probability
 
@@ -51,11 +52,11 @@ def simulate_chamber(
     With a Republican VP, Dem control requires >=51 seats; dem_seats <= 50 is
     Republican control (including 50–50).
     """
-    contested = races[~races["not_up"]]
-    held = races[races["not_up"]]
-    held_ind = int((held["held_by"] == "I").sum())
-    held_dem = int((held["held_by"] == "D").sum()) + held_ind
-    held_rep = int((held["held_by"] == "R").sum())
+    contested = races[races.apply(is_active_ballot_row, axis=1)] if len(races) else races
+    held = races[races["not_up"]] if len(races) else races
+    held_ind = int((held["held_by"] == "I").sum()) if len(held) else 0
+    held_dem = int((held["held_by"] == "D").sum()) + held_ind if len(held) else 0
+    held_rep = int((held["held_by"] == "R").sum()) if len(held) else 0
 
     margins = fit.draws_margin
     n_draws, n_races = margins.shape
@@ -119,6 +120,11 @@ def simulate_chamber(
             incumbent = str(row["incumbent_party"])
         is_open = None if row is None else bool(row["is_open"])
         seat_class = None if row is None else str(row.get("seat_class", "II"))
+        election_phase = None if row is None else str(row.get("election_phase") or "general")
+        vacancy_reason = None
+        if row is not None and "vacancy_reason" in contested_ix.columns:
+            vr = row.get("vacancy_reason")
+            vacancy_reason = None if vr is None or (isinstance(vr, float) and pd.isna(vr)) else str(vr)
         ticket = ticket_for_state(state)
         dem_name = str(ticket["dem_name"])
         rep_name = str(ticket["rep_name"])
@@ -148,6 +154,8 @@ def simulate_chamber(
                 "incumbent_party": incumbent,
                 "is_open": is_open,
                 "held_by": held_by,
+                "election_phase": election_phase,
+                "vacancy_reason": vacancy_reason,
                 "dem_candidate": dem_name,
                 "rep_candidate": rep_name,
                 "dem_party": dem_party,

@@ -1,0 +1,64 @@
+{
+  "ok": true,
+  "checked_at": "2026-09-13T15:29:27.001614+00:00",
+  "model_version": "senate-hierarchical-v0.7",
+  "run_id": "senate-2026_2026-09-01_ensemble_stack+overlays_20260901",
+  "checks": [
+    {
+      "name": "has_races",
+      "ok": true,
+      "detail": 35
+    },
+    {
+      "name": "model_version_present",
+      "ok": true,
+      "detail": "senate-hierarchical-v0.7"
+    },
+    {
+      "name": "control_probs_sum_to_one",
+      "ok": true,
+      "detail": {
+        "p_dem": 0.715,
+        "p_rep": 0.285
+      }
+    },
+    {
+      "name": "expected_seats_in_range",
+      "ok": true,
+      "detail": 52.1695
+    },
+    {
+      "name": "min_polls",
+      "ok": true,
+      "detail": 304
+    },
+    {
+      "name": "min_enop",
+      "ok": true,
+      "detail": 63.52839516545164
+    },
+    {
+      "name": "has_oh_fl_specials",
+      "ok": true,
+      "detail": [
+        "FL",
+        "OH"
+      ]
+    },
+    {
+      "name": "ratings_match_p_dem",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "run_manifest_present",
+      "ok": true,
+      "detail": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\run_senate-2026_2026-09-01_ensemble_stack+overlays_20260901.json"
+    },
+    {
+      "name": "manifest_model_version",
+      "ok": true,
+      "detail": "senate-hierarchical-v0.7"
+    }
+  ]
+}

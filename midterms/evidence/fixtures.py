@@ -106,16 +106,30 @@ def _states_for_cycle(year: int) -> list[str]:
     return sorted(set(others + extra))[:34]
 
 
-def _race_struct_fields(year: int, lean: float, rng: np.random.Generator) -> dict:
+def _race_struct_fields(
+    year: int,
+    lean: float,
+    rng: np.random.Generator,
+    *,
+    election_day: str | None = None,
+    vacancy_reason: str | None = None,
+    election_phase: str = "general",
+) -> dict:
     ctx = CYCLE_CONTEXT.get(year, {"white_house_party": "D", "pres_approval": 0.0})
     # Fundraising share correlates loosely with lean + noise (matched-window proxy)
     base = 1 / (1 + np.exp(-lean / 12.0))
     share = float(np.clip(base + rng.normal(0, 0.08), 0.05, 0.95))
+    ed = election_day or _election_day(year).isoformat()
     return {
         "fundraising_share": round(share, 3),
         "pres_approval": float(ctx["pres_approval"]),
         "white_house_party": ctx["white_house_party"],
         "is_midterm": bool(year % 4 == 2),
+        "election_phase": election_phase,
+        "runoff_of": None,
+        "vacancy_reason": vacancy_reason,
+        "ballot_status": "nominated",
+        "effective_election_day": ed,
     }
 
 
@@ -141,7 +155,8 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
         lean = float(BASE_LEANS[st] + rng.normal(0, 2))
         inc = held[(st, 1)]
         is_open = bool(rng.random() < 0.18)
-        struct = _race_struct_fields(year, lean, rng)
+        ed = _election_day(year).isoformat()
+        struct = _race_struct_fields(year, lean, rng, election_day=ed)
         rows.append(
             {
                 "race_id": race_id,
@@ -149,7 +164,7 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
                 "office": "US_SENATE",
                 "state": st,
                 "seat_class": "II" if year % 4 == 2 else "I/III",
-                "election_day": _election_day(year).isoformat(),
+                "election_day": ed,
                 "incumbent_party": None if is_open else ("D" if inc == "I" else inc),
                 "is_open": is_open,
                 "prior_lean": round(lean, 2),
@@ -165,7 +180,8 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
         if st in contested and seat == 1:
             continue
         lean = float(BASE_LEANS[st])
-        struct = _race_struct_fields(year, lean, rng)
+        ed = _election_day(year).isoformat()
+        struct = _race_struct_fields(year, lean, rng, election_day=ed)
         rows.append(
             {
                 "race_id": f"senate-{year}-{st}-held{seat}",
@@ -173,7 +189,7 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
                 "office": "US_SENATE",
                 "state": st,
                 "seat_class": "held",
-                "election_day": _election_day(year).isoformat(),
+                "election_day": ed,
                 "incumbent_party": "D" if party == "I" else party,
                 "is_open": False,
                 "prior_lean": lean,
@@ -337,7 +353,7 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
         is_open = st in open_seats
         raw = float(BASE_LEANS[st])
         lean = float(np.clip(raw * 0.55, -18, 18) + rng.normal(0, 0.8))
-        struct = _race_struct_fields(2026, lean, rng)
+        struct = _race_struct_fields(2026, lean, rng, election_day=DEMO_ELECTION_DAY)
         rows.append(
             {
                 "race_id": f"senate-2026-{st}",
@@ -359,7 +375,14 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
     for st in SPECIALS_2026:
         raw = float(BASE_LEANS[st])
         lean = float(np.clip(raw * 0.55, -18, 18) + rng.normal(0, 0.8))
-        struct = _race_struct_fields(2026, lean, rng)
+        struct = _race_struct_fields(
+            2026,
+            lean,
+            rng,
+            election_day=DEMO_ELECTION_DAY,
+            vacancy_reason="appointment",
+            election_phase="special",
+        )
         rows.append(
             {
                 "race_id": f"senate-2026-{st}",
@@ -428,7 +451,7 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
     for i, st in enumerate(held_meta):
         party = held_parties[i] or "R"
         lean = float(BASE_LEANS[st])
-        struct = _race_struct_fields(2026, lean, rng)
+        struct = _race_struct_fields(2026, lean, rng, election_day=DEMO_ELECTION_DAY)
         rows.append(
             {
                 "race_id": f"senate-2026-{st}-held-{i}",
@@ -551,6 +574,11 @@ def build_fixtures(root: Path | None = None) -> dict[str, str]:
     polls_df = pd.concat(all_polls, ignore_index=True)
     results_df = pd.concat(all_results, ignore_index=True)
 
+    from midterms.evidence.results_archive import merge_certified_into_results, write_results_archive
+
+    write_results_archive()
+    results_df = merge_certified_into_results(results_df)
+
     paths = {}
     for name, df in [
         ("races", races_df),
@@ -579,6 +607,7 @@ def build_fixtures(root: Path | None = None) -> dict[str, str]:
         ),
         "preferred_live_sources": [
             "MIT Election Lab / MEDSL research layer (results)",
+            "data/raw/external/senate_certified_results.json (curated certified margins)",
             "Public poll archives with redistributable licenses (polls)",
             "Official state certification / FEC (results)",
         ],
