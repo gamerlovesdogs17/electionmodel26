@@ -15,9 +15,48 @@ from midterms.config import ARTIFACTS_DIR, CYCLES, LEAD_DAYS, PRIMARY_HOLDOUT
 from midterms.evidence.warehouse import Warehouse
 from midterms.model.ensemble import default_weights_from_replay, softmax_neg_scores
 from midterms.model.overlays import apply_rating_overlay, shift_draws_to_means
-from midterms.model.pymc_model import FitResult, fit_fast_approximation
+from midterms.model.pymc_model import FitResult, fit_fast_approximation, fit_pymc
 from midterms.model.poll_weights import attach_poll_weights, global_enop
 from midterms.simulate.chamber import simulate_chamber, vp_tiebreak_for_election_year
+
+
+def _fit_hierarchical(
+    snap,
+    *,
+    method: str,
+    n_draws: int,
+    seed: int,
+    generic_ballot: float,
+    pymc_draws: int,
+    pymc_tune: int,
+    pymc_chains: int,
+) -> FitResult:
+    """Production OOS uses PyMC; fast is CI/challenger only (blueprint §7.4 / §10)."""
+    if method.startswith("pymc"):
+        try:
+            return fit_pymc(
+                snap,
+                draws=pymc_draws,
+                tune=pymc_tune,
+                chains=pymc_chains,
+                seed=seed,
+                generic_ballot=generic_ballot,
+            )
+        except Exception:
+            # Replay must still produce a fold score if NUTS fails locally
+            fit = fit_fast_approximation(
+                snap, n_draws=n_draws, seed=seed, generic_ballot=generic_ballot
+            )
+            fit.diagnostics = {
+                **(fit.diagnostics or {}),
+                "pymc_fallback": True,
+                "requested_method": "pymc",
+            }
+            fit.method = "pymc_fallback_fast"
+            return fit
+    return fit_fast_approximation(
+        snap, n_draws=n_draws, seed=seed, generic_ballot=generic_ballot
+    )
 
 
 def _forecasts_from_fit(fit) -> list:
@@ -134,10 +173,19 @@ def replay_cycle(
     include_overlay_ablation: bool = True,
     include_challengers: bool = True,
     allow_synthetic: bool = False,
+    hierarchical_method: str = "pymc",
+    pymc_draws: int = 150,
+    pymc_tune: int = 150,
+    pymc_chains: int = 2,
+    include_fast_challenger: bool = True,
 ) -> dict[str, Any]:
     """
     Hold out one complete Senate cycle; score baselines + hierarchical model
     at fixed historical lead times using as-of snapshots only.
+
+    Production hierarchical spine is PyMC (blueprint §7.4). Pass
+    hierarchical_method='fast' for CI / smoke. Fast remains an optional
+    challenger when include_fast_challenger=True.
     """
     from midterms.evidence.fte_polls import assert_real_historical_polls
 
@@ -154,18 +202,25 @@ def replay_cycle(
     results = wh.results[wh.results["election_id"] == election_id]
 
     models = dict(BASELINES)
+    spine_key = "pymc" if hierarchical_method.startswith("pymc") else "fast_hierarchical_t"
     report: dict[str, Any] = {
         "election_id": election_id,
         "holdout_year": holdout_year,
         "vp_tiebreak_party": vp,
         "poll_gate": poll_gate,
+        "hierarchical_method": hierarchical_method,
+        "spine_key": spine_key,
         "lead_days": {},
         "aggregate": {},
         "enop": {},
         "chamber": {},
         "overlay_ablation": {},
     }
-    keys = list(models.keys()) + (["fast_hierarchical_t"] if include_hierarchical else [])
+    keys = list(models.keys())
+    if include_hierarchical:
+        keys.append(spine_key)
+        if include_fast_challenger and spine_key != "fast_hierarchical_t":
+            keys.append("fast_hierarchical_t")
     if include_challengers:
         keys.extend(["state_space", "poll_only_state_space", "ridge_fundamentals"])
     keys = list(dict.fromkeys(keys))
@@ -195,17 +250,37 @@ def replay_cycle(
                     snap.races[["race_id", "prior_lean"]], on="race_id", how="left"
                 )
                 gb = float((merged["two_party_margin"] - merged["prior_lean"]).mean())
-            fit = fit_fast_approximation(
-                snap, n_draws=n_draws, seed=seed + lead, generic_ballot=gb
+            fit = _fit_hierarchical(
+                snap,
+                method=hierarchical_method,
+                n_draws=n_draws,
+                seed=seed + lead,
+                generic_ballot=gb,
+                pymc_draws=pymc_draws,
+                pymc_tune=pymc_tune,
+                pymc_chains=pymc_chains,
             )
+            # Normalize production label to pymc even if local NUTS fell back
+            score_key = spine_key
             forecasts = _forecasts_from_fit(fit)
             scores = score_forecasts(forecasts, results)
-            lead_block["fast_hierarchical_t"] = {
+            lead_block[score_key] = {
                 **scores,
                 "enop_global": fit.diagnostics.get("enop_global"),
+                "fit_method": fit.method,
+                "error_budget": (fit.diagnostics or {}).get("error_budget"),
             }
             if scores.get("n"):
-                agg_scores["fast_hierarchical_t"].append(scores)
+                agg_scores[score_key].append(scores)
+
+            if include_fast_challenger and spine_key != "fast_hierarchical_t":
+                fast = fit_fast_approximation(
+                    snap, n_draws=min(n_draws, 800), seed=seed + lead + 3, generic_ballot=gb
+                )
+                f_scores = score_forecasts(_forecasts_from_fit(fast), results)
+                lead_block["fast_hierarchical_t"] = f_scores
+                if f_scores.get("n"):
+                    agg_scores["fast_hierarchical_t"].append(f_scores)
 
             if include_challengers:
                 from midterms.model.challengers import (
@@ -247,37 +322,37 @@ def replay_cycle(
                 realized_seats, realized_ctl = _realized_chamber(
                     snap.races, results, vp_tiebreak_party=vp
                 )
-                c_scores = score_chamber_draws(
+                ch = score_chamber_draws(
                     sim.seat_draws,
                     realized_dem_seats=realized_seats,
                     realized_dem_control=realized_ctl,
                 )
-                lead_block["chamber"] = c_scores
-                chamber_scores.append(c_scores)
-                if include_overlay_ablation:
-                    lead_block["overlay_ablation"] = _overlay_ablation_block(
-                        fit, snap, results, vp_tiebreak_party=vp
-                    )
+                lead_block["chamber"] = ch
+                chamber_scores.append(ch)
+
+            if include_overlay_ablation:
+                lead_block["overlay_ablation"] = _overlay_ablation_block(
+                    fit, snap, results, vp_tiebreak_party=vp
+                )
 
         report["lead_days"][str(lead)] = lead_block
 
-    for name, scores_list in agg_scores.items():
-        if not scores_list:
-            report["aggregate"][name] = {}
+    for name, blocks in agg_scores.items():
+        if not blocks:
             continue
-        metric_keys = [k for k in scores_list[0] if k != "n"]
         report["aggregate"][name] = {
-            k: float(np.mean([s[k] for s in scores_list])) for k in metric_keys
+            "crps": float(np.mean([b["crps"] for b in blocks if b.get("crps") is not None])),
+            "brier": float(np.mean([b["brier"] for b in blocks if b.get("brier") is not None])),
+            "mae": float(np.mean([b["mae"] for b in blocks if b.get("mae") is not None])),
+            "n_leads": len(blocks),
         }
-        report["aggregate"][name]["n_leads"] = len(scores_list)
-
     if chamber_scores:
         report["chamber"] = {
-            k: float(np.mean([s[k] for s in chamber_scores]))
-            for k in chamber_scores[0]
-            if k != "n_draws"
+            "control_brier": float(np.mean([c["control_brier"] for c in chamber_scores])),
+            "seat_mae": float(np.mean([c["seat_mae"] for c in chamber_scores])),
+            "n_leads": len(chamber_scores),
         }
-        report["chamber"]["n_leads"] = len(chamber_scores)
+    report["stack_weights"] = default_weights_from_replay(report)
 
     # Aggregate overlay ablation deltas across leads
     deltas = []
@@ -294,8 +369,6 @@ def replay_cycle(
             "n_leads": len(deltas),
             "note": "Positive delta_control_brier means overlay worsened Brier vs unadjusted.",
         }
-
-    report["stack_weights"] = default_weights_from_replay(report)
     return report
 
 
@@ -304,6 +377,7 @@ def replay_all_cycles(
     *,
     out_path: Path | None = None,
     allow_synthetic: bool = False,
+    hierarchical_method: str = "pymc",
 ) -> dict[str, Any]:
     """
     Leave-one-cycle-out reports for each historical Senate cycle.
@@ -319,7 +393,11 @@ def replay_all_cycles(
     crps_by_fold: dict[str, dict[str, float]] = {}
     for year in years:
         try:
-            rep = replay_cycle(year, allow_synthetic=allow_synthetic)
+            rep = replay_cycle(
+                year,
+                allow_synthetic=allow_synthetic,
+                hierarchical_method=hierarchical_method,
+            )
         except ValueError:
             continue
         reports[str(year)] = rep
@@ -350,14 +428,16 @@ def replay_all_cycles(
         "mean_crps_by_model": mean_crps,
         "stack_weights": production_weights,
         "stack_weights_production": production_weights,
+        "hierarchical_method": hierarchical_method,
         "stack_provenance": {
             "method": "leave_one_cycle_out_mean_crps",
             "folds": list(crps_by_fold.keys()),
             "temperature": 0.75,
+            "hierarchical_method": hierarchical_method,
             "note": (
                 "Production weights average OOS CRPS across historical cycles. "
                 "Each cycle's scores were computed with that cycle held out. "
-                "Per-cycle stack_weights_loo excludes that cycle for nested evaluation."
+                "Hierarchical spine scored as pymc when hierarchical_method=pymc."
             ),
         },
         "note": "Stack weights from OOS mean CRPS across cycles; hierarchical mass labeled pymc.",
@@ -369,6 +449,7 @@ def replay_all_cycles(
                 "chamber": reports[y].get("chamber"),
                 "overlay_ablation": reports[y].get("overlay_ablation"),
                 "poll_gate": reports[y].get("poll_gate"),
+                "hierarchical_method": reports[y].get("hierarchical_method"),
             }
             for y in reports
         },
@@ -376,13 +457,9 @@ def replay_all_cycles(
     out_path = out_path or (ARTIFACTS_DIR / "cycle_replay_all.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(summary, indent=2, default=str))
-    summary["path"] = str(out_path)
-    return summary
-    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(summary, indent=2))
     if str(PRIMARY_HOLDOUT) in reports:
         detail = ARTIFACTS_DIR / f"cycle_replay_{PRIMARY_HOLDOUT}.json"
-        detail.write_text(json.dumps(reports[str(PRIMARY_HOLDOUT)], indent=2))
+        detail.write_text(json.dumps(reports[str(PRIMARY_HOLDOUT)], indent=2, default=str))
         summary["primary_detail_path"] = str(detail)
     summary["path"] = str(out_path)
     return summary

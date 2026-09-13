@@ -1,9 +1,10 @@
 {
-  "generated_at": "2026-09-13T18:21:49.851684+00:00",
-  "n_rows": 35,
+  "generated_at": "2026-09-13T18:34:43.340381+00:00",
+  "n_rows": 70,
+  "n_revisions": 35,
   "series": [
     "RDPI_YOY_FIXTURE"
   ],
-  "parser_version": "alfred-v1",
-  "note": "ALFRED live fetch used when FRED_API_KEY is set; else fixture vintages."
+  "parser_version": "alfred-v2",
+  "note": "ALFRED multi-vintage store: observation_date vs available_at/realtime. As-of queries use latest value known by that date (blueprint section 5.3)."
 }

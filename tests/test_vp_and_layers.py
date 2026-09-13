@@ -70,6 +70,18 @@ def test_economics_fixture_yoy():
     assert -10 < float(yoy) < 10
 
 
+def test_alfred_multi_vintage_no_revision_leak():
+    """Post-election revisions must not appear in pre-election as-of queries."""
+    from midterms.evidence.economics import build_fixture_vintages, write_economic_store, yoy_growth_as_of
+
+    write_economic_store(build_fixture_vintages())
+    pre = yoy_growth_as_of("2022-09-01", election_year=2022)
+    post = yoy_growth_as_of("2023-01-15", election_year=2022)
+    assert pre is not None and post is not None
+    # Fixture revises after ED; as-of before ED must not equal the revised value
+    assert float(pre) != float(post)
+
+
 def test_fec_fixture_shares():
     df = fixture_fundraising_shares()
     assert len(df) >= 30

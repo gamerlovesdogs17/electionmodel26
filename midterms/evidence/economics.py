@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
@@ -17,7 +17,7 @@ from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 # Real disposable personal income per capita, Chained 2017 $, Seasonally Adjusted
 # ALFRED series commonly used in election fundamentals work.
 DEFAULT_SERIES = "A229RX0"  # Real Disposable Personal Income: Per Capita
-PARSER_VERSION = "alfred-v1"
+PARSER_VERSION = "alfred-v2"
 
 
 def _fred_api_key() -> str | None:
@@ -64,7 +64,10 @@ def fetch_alfred_observations(
                 "observation_date": obs["date"],
                 "realtime_start": obs.get("realtime_start"),
                 "realtime_end": obs.get("realtime_end"),
+                "available_at": obs.get("realtime_start") or as_of,
                 "value": float(obs["value"]),
+                "revision": 0,
+                "vintage_id": f"{series_id}|{obs['date']}|{obs.get('realtime_start')}",
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
                 "parser_version": PARSER_VERSION,
             }
@@ -73,7 +76,12 @@ def fetch_alfred_observations(
 
 
 def build_fixture_vintages() -> pd.DataFrame:
-    """Offline synthetic vintages shaped like YoY RDPI growth by cycle/as-of."""
+    """
+    Offline multi-vintage YoY RDPI store (blueprint §5.3).
+
+    For each cycle/lead, store a preliminary release known by `as_of` and a
+    post-election revision that must NOT leak into earlier as-of queries.
+    """
     # Approximate public YoY real disposable income growth (%) known mid-campaign
     seeds = {
         2014: {120: 1.2, 90: 1.4, 60: 1.5, 30: 1.8, 7: 2.0},
@@ -87,26 +95,54 @@ def build_fixture_vintages() -> pd.DataFrame:
     rows = []
     for year, leads in seeds.items():
         ed = date(year, 11, 1)
-        # first Tuesday after first Monday
         while ed.weekday() != 0:
             ed = date.fromordinal(ed.toordinal() + 1)
         ed = date.fromordinal(ed.toordinal() + 1)
         for lead, yoy in leads.items():
             as_of = date.fromordinal(ed.toordinal() - lead)
+            obs = as_of.isoformat()
+            # Preliminary vintage visible on as_of
             rows.append(
                 {
                     "series_id": "RDPI_YOY_FIXTURE",
-                    "observation_date": as_of.isoformat(),
+                    "observation_date": obs,
                     "realtime_start": as_of.isoformat(),
-                    "realtime_end": as_of.isoformat(),
+                    "realtime_end": (ed + timedelta(days=30)).isoformat(),
                     "available_at": as_of.isoformat(),
                     "value": float(yoy),
+                    "revision": 0,
+                    "vintage_id": f"RDPI_YOY_FIXTURE|{year}|{lead}|r0",
                     "transformation": "yoy_pct",
                     "election_year": year,
                     "lead_days": lead,
+                    "seasonal_adjustment": "SA",
+                    "release_lag_days": 30,
                     "retrieved_at": datetime.now(timezone.utc).isoformat(),
                     "parser_version": PARSER_VERSION,
-                    "status": "fixture",
+                    "status": "fixture_preliminary",
+                }
+            )
+            # Post-election revision — available only after ED (leakage canary)
+            revised = float(yoy) + (0.4 if yoy >= 0 else -0.3)
+            rev_avail = ed + timedelta(days=45)
+            rows.append(
+                {
+                    "series_id": "RDPI_YOY_FIXTURE",
+                    "observation_date": obs,
+                    "realtime_start": rev_avail.isoformat(),
+                    "realtime_end": "9999-12-31",
+                    "available_at": rev_avail.isoformat(),
+                    "value": revised,
+                    "revision": 1,
+                    "vintage_id": f"RDPI_YOY_FIXTURE|{year}|{lead}|r1",
+                    "transformation": "yoy_pct",
+                    "election_year": year,
+                    "lead_days": lead,
+                    "seasonal_adjustment": "SA",
+                    "release_lag_days": 30,
+                    "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                    "parser_version": PARSER_VERSION,
+                    "status": "fixture_revised",
                 }
             )
     return pd.DataFrame(rows)
@@ -125,15 +161,19 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
 
         safe_to_parquet(df, norm_path, index=False)
     except OSError:
-        # OneDrive lock: keep existing parquet if present
         if not norm_path.exists():
             raise
+    n_rev = int((df["revision"] > 0).sum()) if "revision" in df.columns else 0
     man = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "n_rows": int(len(df)),
+        "n_revisions": n_rev,
         "series": sorted(df["series_id"].astype(str).unique().tolist()),
         "parser_version": PARSER_VERSION,
-        "note": "ALFRED live fetch used when FRED_API_KEY is set; else fixture vintages.",
+        "note": (
+            "ALFRED multi-vintage store: observation_date vs available_at/realtime. "
+            "As-of queries use latest value known by that date (blueprint section 5.3)."
+        ),
     }
     man_path = MANIFESTS_DIR / "economics_vintages.json"
     man_path.write_text(json.dumps(man, indent=2))
@@ -141,7 +181,12 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
 
 
 def yoy_growth_as_of(as_of: str | date, *, election_year: int | None = None) -> float | None:
-    """Return vintage YoY real-income growth (%) known by as_of."""
+    """
+    Return vintage YoY real-income growth (%) known by as_of.
+
+    Uses the latest vintage with available_at/realtime_start <= as_of — never a
+    later revision (blueprint §5.3 / Table 6 leakage control).
+    """
     path = NORMALIZED_DIR / "economics_vintages.parquet"
     if not path.exists():
         write_economic_store()
@@ -149,17 +194,21 @@ def yoy_growth_as_of(as_of: str | date, *, election_year: int | None = None) -> 
     as_of_d = date.fromisoformat(as_of) if isinstance(as_of, str) else as_of
     if "available_at" in df.columns:
         avail = pd.to_datetime(df["available_at"]).dt.date
-        usable = df[avail <= as_of_d]
+        usable = df[avail <= as_of_d].copy()
+    elif "realtime_start" in df.columns:
+        avail = pd.to_datetime(df["realtime_start"]).dt.date
+        usable = df[avail <= as_of_d].copy()
     else:
-        usable = df
+        usable = df.copy()
     if election_year is not None and "election_year" in usable.columns:
         year_hit = usable[usable["election_year"] == election_year]
         if len(year_hit):
             usable = year_hit
     if usable.empty:
         return None
-    # Prefer fixture lead-matched rows, else latest observation_date
-    usable = usable.sort_values("observation_date")
+    # Prefer highest revision among those already available, then latest observation
+    sort_cols = [c for c in ("observation_date", "revision", "available_at") if c in usable.columns]
+    usable = usable.sort_values(sort_cols)
     return float(usable.iloc[-1]["value"])
 
 
@@ -170,7 +219,6 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
     if live.empty:
         paths = write_economic_store(fixtures)
         return {"live_rows": 0, "used_fixtures": True, **paths}
-    # Derive simple YoY from last two annual points if monthly/quarterly levels
     live = live.sort_values("observation_date")
     if len(live) >= 13:
         latest = float(live.iloc[-1]["value"])
@@ -191,6 +239,8 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
                     "realtime_end": as_of_d,
                     "available_at": as_of_d,
                     "value": yoy,
+                    "revision": 0,
+                    "vintage_id": f"{DEFAULT_SERIES}_YOY|{as_of_d}|r0",
                     "transformation": "yoy_pct",
                     "election_year": int(str(as_of_d)[:4]),
                     "lead_days": None,

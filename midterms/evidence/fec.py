@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Any
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -63,8 +63,14 @@ def fetch_senate_candidate_totals(cycle: int = 2026) -> tuple[pd.DataFrame, dict
                         "receipts": float(r.get("receipts") or 0.0),
                         "disbursements": float(r.get("disbursements") or 0.0),
                         "cash_on_hand_end_period": float(r.get("cash_on_hand_end_period") or 0.0),
+                        "coverage_start_date": r.get("coverage_start_date"),
                         "coverage_end_date": r.get("coverage_end_date"),
+                        "last_file_date": r.get("last_file_date") or r.get("candidate_inactive_date"),
+                        "amendment_indicator": r.get("amendment_indicator")
+                        or r.get("candidate_election_year"),
+                        "filing_id": r.get("candidate_id"),
                         "available_at": r.get("coverage_end_date")
+                        or r.get("last_file_date")
                         or datetime.now(timezone.utc).date().isoformat(),
                         "retrieved_at": datetime.now(timezone.utc).isoformat(),
                         "parser_version": PARSER_VERSION,
@@ -101,11 +107,40 @@ def fixture_fundraising_shares(election_id: str = "senate-2026") -> pd.DataFrame
     return pd.DataFrame(rows)
 
 
-def shares_from_totals(totals: pd.DataFrame, election_id: str, cycle: int) -> pd.DataFrame:
+def shares_from_totals(
+    totals: pd.DataFrame,
+    election_id: str,
+    cycle: int,
+    *,
+    as_of: str | None = None,
+) -> pd.DataFrame:
+    """
+    Build Dem fundraising shares with amendment / coverage discipline.
+
+    When multiple totals rows exist for a candidate, keep the latest
+    coverage_end_date still known by `as_of` (blueprint finance amendment chain).
+    """
     if totals.empty:
         return fixture_fundraising_shares(election_id)
+    work = totals.copy()
+    if as_of and "available_at" in work.columns:
+        work = work[pd.to_datetime(work["available_at"]).dt.date <= date.fromisoformat(str(as_of)[:10])]
+    if work.empty:
+        return fixture_fundraising_shares(election_id)
+    # Prefer latest coverage window per candidate (amendment / restatement chain)
+    chain_by_cand: dict[str, list[str]] = {}
+    if "candidate_id" in work.columns and "coverage_end_date" in work.columns:
+        for cid, cg in work.groupby("candidate_id"):
+            dates = sorted(
+                {str(x)[:10] for x in cg["coverage_end_date"].dropna().tolist() if str(x)}
+            )
+            chain_by_cand[str(cid)] = dates
+        work = work.sort_values(
+            [c for c in ("coverage_end_date", "last_file_date", "available_at") if c in work.columns]
+        )
+        work = work.groupby("candidate_id", as_index=False).tail(1)
     rows = []
-    for state, g in totals.groupby("state"):
+    for state, g in work.groupby("state"):
         dem = g[g["party"].astype(str).str.upper().str.startswith("DEM")]
         rep = g[g["party"].astype(str).str.upper().str.startswith("REP")]
         dem_rec = float(dem["receipts"].max()) if len(dem) else 0.0
@@ -118,6 +153,10 @@ def shares_from_totals(totals: pd.DataFrame, election_id: str, cycle: int) -> pd
         share = dem_rec / total if total > 0 else 0.5
         cash_tot = dem_cash + rep_cash
         cash_share = dem_cash / cash_tot if cash_tot > 0 else 0.5
+        chains = []
+        for cid in g.get("candidate_id", pd.Series(dtype=str)).dropna().astype(str).tolist():
+            chains.extend(chain_by_cand.get(cid, []))
+        cov_dates = sorted(set(chains))
         rows.append(
             {
                 "election_id": election_id,
@@ -131,8 +170,9 @@ def shares_from_totals(totals: pd.DataFrame, election_id: str, cycle: int) -> pd
                 "rep_cash_on_hand": rep_cash,
                 "dem_disbursements": dem_disb,
                 "rep_disbursements": rep_disb,
-                "matched_window_id": f"cycle-{cycle}-latest-available",
-                "amendment_chain": "latest_totals_row",
+                "matched_window_id": f"cycle-{cycle}-coverage-end-asof",
+                "amendment_chain": ">".join(cov_dates) if cov_dates else "latest_totals_row",
+                "n_filings_in_chain": int(len(cov_dates)),
                 "source": "openfec",
                 "available_at": str(g["available_at"].max()),
                 "parser_version": PARSER_VERSION,
@@ -175,13 +215,20 @@ def load_fundraising_shares() -> pd.DataFrame:
     return pd.read_parquet(path)
 
 
-def attach_fundraising_to_races(races: pd.DataFrame) -> pd.DataFrame:
+def attach_fundraising_to_races(
+    races: pd.DataFrame, *, as_of: str | date | None = None
+) -> pd.DataFrame:
     shares = load_fundraising_shares()
     out = races.copy()
     if "fundraising_share" not in out.columns:
         out["fundraising_share"] = 0.5
-    by_state = shares.set_index("state")["fundraising_share"].to_dict()
-    by_race = shares.set_index("race_id")["fundraising_share"].to_dict()
+    if as_of is not None and "available_at" in shares.columns:
+        as_of_d = date.fromisoformat(str(as_of)[:10]) if not isinstance(as_of, date) else as_of
+        shares = shares[
+            pd.to_datetime(shares["available_at"]).dt.date <= as_of_d
+        ]
+    by_state = shares.set_index("state")["fundraising_share"].to_dict() if len(shares) else {}
+    by_race = shares.set_index("race_id")["fundraising_share"].to_dict() if len(shares) else {}
     vals = []
     for _, r in out.iterrows():
         if r["race_id"] in by_race:

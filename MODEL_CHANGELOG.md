@@ -4,6 +4,15 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-13 — senate-hierarchical-v0.9.2
+
+Closed remaining blueprint Partial gaps (Senate-only):
+
+- **OOS PyMC:** `replay-cycle` defaults to hierarchical_method=`pymc` (fast remains CI/challenger).
+- **Morris §7.2 in core:** PyMC + fast use contracting `future_movement_sd` + fixed `terminal_error_sd` (national+race future path).
+- **ALFRED multi-vintage:** fixture store keeps preliminary + post-election revisions; as-of never leaks revisions.
+- **FEC amendment chain:** latest coverage_end by as-of; `amendment_chain` lineage on shares.
+
 ## 2026-09-13 — senate-hierarchical-v0.9.1
 
 Blueprint alignment pass (Senate-only):

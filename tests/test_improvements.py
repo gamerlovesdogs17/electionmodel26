@@ -102,13 +102,28 @@ def test_fundamentals_use_fundraising_and_midterm():
 
 
 def test_cycle_replay_scores_hierarchical():
+    # CI uses fast; production OOS default is pymc
     report = replay_cycle(
-        2022, lead_days=(60, 30), n_draws=400, seed=3, allow_synthetic=True
+        2022,
+        lead_days=(60, 30),
+        n_draws=400,
+        seed=3,
+        allow_synthetic=True,
+        hierarchical_method="fast",
+        include_fast_challenger=False,
     )
+    assert report["spine_key"] == "fast_hierarchical_t"
     assert "fast_hierarchical_t" in report["aggregate"]
     assert report["aggregate"]["fast_hierarchical_t"].get("n_leads", 0) >= 1
     assert "stack_weights" in report
     assert abs(sum(report["stack_weights"].values()) - 1.0) < 1e-6
+
+
+def test_cycle_replay_default_spine_is_pymc():
+    import inspect
+    from midterms.validation.cycle_replay import replay_cycle as rc
+
+    assert inspect.signature(rc).parameters["hierarchical_method"].default == "pymc"
 
 
 def test_ensemble_stack_mixture():
@@ -240,7 +255,75 @@ def test_peer_gate_control_gap_is_soft():
     assert any("informational" in r for r in rep["reasons"])
 
 
-def test_state_space_handles_nan_sample_size():
+def test_pymc_error_budget_morris_split():
+    from midterms.evidence.warehouse import Warehouse
+    from midterms.model.pymc_model import fit_fast_approximation
+
+    snap = Warehouse(ensure_fixtures=False).build_as_of("2026-09-13", "senate-2026")
+    fit = fit_fast_approximation(snap, n_draws=80, seed=7)
+    bud = fit.diagnostics["error_budget"]
+    assert "future_movement_sd" in bud
+    assert "terminal_error_sd" in bud
+    assert bud["terminal_error_sd"] == 2.5
+    # Future movement contracts toward ED
+    snap_near = Warehouse(ensure_fixtures=False).build_as_of("2026-10-27", "senate-2026")
+    fit_near = fit_fast_approximation(snap_near, n_draws=40, seed=7)
+    assert fit_near.diagnostics["error_budget"]["future_movement_sd"] < bud["future_movement_sd"]
+
+
+def test_fec_amendment_chain_prefers_latest_coverage():
+    import pandas as pd
+    from midterms.evidence.fec import shares_from_totals
+
+    totals = pd.DataFrame(
+        [
+            {
+                "candidate_id": "D1",
+                "party": "DEM",
+                "state": "TX",
+                "receipts": 1.0,
+                "disbursements": 0.0,
+                "cash_on_hand_end_period": 0.0,
+                "coverage_end_date": "2026-06-01",
+                "available_at": "2026-06-01",
+            },
+            {
+                "candidate_id": "D1",
+                "party": "DEM",
+                "state": "TX",
+                "receipts": 9.0,
+                "disbursements": 0.0,
+                "cash_on_hand_end_period": 0.0,
+                "coverage_end_date": "2026-09-01",
+                "available_at": "2026-09-01",
+            },
+            {
+                "candidate_id": "R1",
+                "party": "REP",
+                "state": "TX",
+                "receipts": 1.0,
+                "disbursements": 0.0,
+                "cash_on_hand_end_period": 0.0,
+                "coverage_end_date": "2026-06-01",
+                "available_at": "2026-06-01",
+            },
+            {
+                "candidate_id": "R1",
+                "party": "REP",
+                "state": "TX",
+                "receipts": 1.0,
+                "disbursements": 0.0,
+                "cash_on_hand_end_period": 0.0,
+                "coverage_end_date": "2026-09-01",
+                "available_at": "2026-09-01",
+            },
+        ]
+    )
+    mid = shares_from_totals(totals, "senate-2026", 2026, as_of="2026-07-01")
+    late = shares_from_totals(totals, "senate-2026", 2026, as_of="2026-09-13")
+    assert float(mid.loc[mid["state"] == "TX", "fundraising_share"].iloc[0]) == 0.5
+    assert float(late.loc[late["state"] == "TX", "fundraising_share"].iloc[0]) == 0.9
+    assert ">" in str(late.loc[late["state"] == "TX", "amendment_chain"].iloc[0])
     from midterms.model.state_space import _safe_sample_size, fit_state_space
     from midterms.evidence.warehouse import Warehouse
 

@@ -182,7 +182,13 @@ def fit_pymc(
 
     prep = _prepare(snapshot, generic_ballot=generic_ballot)
     n_races = len(prep["race_ids"])
-    future_sd = 1.2 * np.sqrt(prep["days_to_ed"] / 30.0)
+    # Blueprint §7.2 Morris split: future movement contracts; terminal ED error does not.
+    # (Same formulas as state_space.future_movement_sd / terminal_error_sd — inlined
+    # to avoid circular import with FitResult.)
+    future_sd = float(4.5 * np.sqrt(max(prep["days_to_ed"], 1) / 120.0))
+    terminal_sd = 2.5
+    # Shared national component of future drift (contracts with calendar)
+    nat_future_sd = float(0.55 * future_sd)
 
     coords = {
         "race": prep["race_ids"],
@@ -204,7 +210,12 @@ def fit_pymc(
             dims="race",
         )
 
-        future = pm.StudentT("future", nu=5, mu=0.0, sigma=future_sd, dims="race")
+        # current_latent = mu_ed - future_movement  (polls observe current)
+        future_nat = pm.StudentT("future_nat", nu=5, mu=0.0, sigma=nat_future_sd)
+        future_race = pm.StudentT(
+            "future_race", nu=5, mu=0.0, sigma=float(np.sqrt(max(future_sd**2 - nat_future_sd**2, 0.25))), dims="race"
+        )
+        future = pm.Deterministic("future", future_nat + future_race, dims="race")
         theta_now = pm.Deterministic("theta_now", mu_ed - future, dims="race")
 
         if prep["n_pollsters"]:
@@ -232,7 +243,8 @@ def fit_pymc(
                 observed=prep["poll_y"],
             )
 
-        terminal_bias = pm.StudentT("terminal_bias", nu=4, mu=0.0, sigma=2.5)
+        # Election-Day polling error does not vanish as days_to_ed → 0
+        terminal_bias = pm.StudentT("terminal_bias", nu=4, mu=0.0, sigma=terminal_sd)
         mu_final = pm.Deterministic("mu_final", mu_ed + terminal_bias, dims="race")
 
         idata = pm.sample(
@@ -279,10 +291,14 @@ def fit_pymc(
                 "sigma_nat_prior": 4.0,
                 "sigma_region_prior": 2.5,
                 "sigma_local_prior": 3.5,
-                "terminal_bias_sd": 2.5,
-                "future_sd": float(1.2 * np.sqrt(prep["days_to_ed"] / 30.0)),
+                "future_movement_sd": float(future_sd),
+                "future_nat_sd": float(nat_future_sd),
+                "terminal_error_sd": float(terminal_sd),
                 "days_to_ed": prep["days_to_ed"],
-                "note": "Blueprint Table 4-style named uncertainty components (PyMC priors)",
+                "note": (
+                    "Blueprint section 7.2 Morris split: contracting future movement "
+                    "(national+race) + fixed terminal Election-Day polling error"
+                ),
             },
         },
         method="pymc",
@@ -353,8 +369,10 @@ def fit_fast_approximation(
             )
 
     # Joint draws: national + region + local + continuous similarity Student-t shocks
-    # National path scales with days-to-ED so mid-cycle chamber uncertainty is not tiny.
-    nat_sd = float(2.8 + 0.025 * max(prep["days_to_ed"], 1))
+    # Morris split (section 7.2): contracting future path + fixed terminal ED error.
+    future_sd = float(4.5 * np.sqrt(max(prep["days_to_ed"], 1) / 120.0))
+    terminal_sd = 2.5
+    nat_sd = float(2.8 + 0.015 * max(prep["days_to_ed"], 1) + 0.35 * future_sd)
     nat = rng.standard_t(4, size=n_draws) * nat_sd
     region_draws = {r: rng.standard_t(5, size=n_draws) * 1.8 for r in range(prep["n_regions"])}
     local = rng.standard_t(5, size=(n_draws, n)) * (sds * 0.6)
@@ -376,7 +394,8 @@ def fit_fast_approximation(
             + local[:, i]
             + sim_shocks[:, i]
         )
-    mu += rng.standard_t(4, size=(n_draws, 1)) * 1.6
+    # Terminal ED polling error — does not shrink with calendar
+    mu += rng.standard_t(4, size=(n_draws, 1)) * terminal_sd
 
     return FitResult(
         race_ids=prep["race_ids"],
@@ -400,12 +419,13 @@ def fit_fast_approximation(
             "similarity_covariance": True,
             "error_budget": {
                 "national_path_sd": float(nat_sd),
+                "future_movement_sd": float(future_sd),
+                "terminal_error_sd": float(terminal_sd),
                 "region_sd": 1.8,
                 "local_scale_of_race_sd": 0.6,
                 "similarity_scale_of_race_sd": 0.4,
-                "common_shock_sd": 1.6,
                 "days_to_ed": prep["days_to_ed"],
-                "note": "Blueprint Table 4-style components for the fast approximation",
+                "note": "Blueprint section 7.2 Morris split in fast approximation",
             },
             "note": (
                 "NON-PRODUCTION approximation: fast hierarchical-t with ENOP weights, "

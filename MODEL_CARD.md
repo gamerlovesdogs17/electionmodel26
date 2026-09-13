@@ -1,4 +1,4 @@
-# Model card — Senate hierarchical v0.9.1
+# Model card — Senate hierarchical v0.9.2
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
@@ -8,7 +8,7 @@
 
 ## Update cadence
 `forecast` / `refresh`. Releases: `data/manifests/releases.jsonl` + signed `data/releases/{run_id}/`.
-Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-out`, `verify-rebuild`.
+Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-out`, `verify-rebuild`, `replay-cycle`.
 
 ## Sources
 | Domain | Source | Notes |
@@ -16,19 +16,21 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 | Polls (live 2026) | VoteHub CC BY | No `/polls/archive` — current cycle only |
 | Polls (historical) | FiveThirtyEight / ABC News Datasette (CC BY) | Required for complete-cycle replay; synthetic only behind `--allow-synthetic` |
 | Pollster quality | VoteHub + FTE fill-in | House ≠ reliability |
-| Economics | ALFRED/FRED or fixtures | Vintage YoY RDPI |
+| Economics | ALFRED/FRED or multi-vintage fixtures | Observation vs available_at; revisions do not leak |
 | Approval | Curated public-aggregate vintages | As-of store |
-| Finance | OpenFEC (receipts/cash/disbursements) | Matched-window share |
+| Finance | OpenFEC (receipts/cash/disbursements) | Matched-window share; amendment/coverage chain |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
-| Markets | Kalshi | Ablatable soft overlays; `SENATE{ST}S` tickers for FL/OH specials; chamber calibration **off** by default |
+| Markets | Kalshi | Soft overlays; `SENATE{ST}S` for FL/OH specials; chamber calibration **off** by default |
 | Demography | State research snapshot | Similarity / covariance |
 | Results | Certified archive + MEDSL 2016 + fixtures | Prefer certified |
 
 ## Core model
 - **Production spine:** PyMC hierarchical Student-t (`method=pymc`); discrete CRPS `ensemble_stack` when OOS weights available
+- **OOS replay:** `replay-cycle` defaults to scoring **pymc** folds (use `--hierarchical-method fast` for CI)
 - **Non-production:** `fast` hierarchical-t approximation (CI / `--allow-fast-fallback` only)
 - Generic ballot: VoteHub **21-day trailing weighted average** (Winsorized headline D−R), not a single poll
+- **Morris §7.2 split in core PyMC:** contracting future movement (national+race) + fixed terminal ED error
 - Forward state-space challenger: national path + calibrated future/terminal scales; mode/pop/house offsets aligned
 - Fundamentals prior (approval, income, fundraising, midterm, lean, GB)
 - ENOP / caps / study clustering / max-weight-ratio; mode/pop as **offsets only**
@@ -39,7 +41,7 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 - LA/GA runoff templates; vacancy_reason on specials; scenario sensitivity block
 
 ## Validation / ops
-- Complete-cycle replay with challenger pool; LOO stack weights
+- Complete-cycle replay with challenger pool; LOO stack weights; production PyMC OOS
 - Lead-time grid; nested Student-t df / era search; component ablations
 - Published `validation_report_latest.{json,md}` + `leave_pollster_out_latest.json`
 - Monitor alerts; Ed25519 signing; environment lock; `verify-rebuild`; correction registry

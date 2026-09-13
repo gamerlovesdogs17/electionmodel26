@@ -262,23 +262,37 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help="Allow synthetic fixture polls (CI only; production should use FTE)",
     )
+    p_cycle.add_argument(
+        "--hierarchical-method",
+        choices=["pymc", "fast"],
+        default="pymc",
+        help="OOS hierarchical spine (default pymc — blueprint production path)",
+    )
 
     def _cycle(a: argparse.Namespace) -> None:
         if a.all:
-            summary = replay_all_cycles(allow_synthetic=a.allow_synthetic)
+            summary = replay_all_cycles(
+                allow_synthetic=a.allow_synthetic,
+                hierarchical_method=a.hierarchical_method,
+            )
             print(
                 json.dumps(
                     {
                         "path": summary.get("path"),
                         "mean_crps_by_model": summary.get("mean_crps_by_model"),
                         "stack_weights": summary.get("stack_weights"),
+                        "hierarchical_method": summary.get("hierarchical_method"),
                         "cycles": summary.get("cycles"),
                     },
                     indent=2,
                 )
             )
         else:
-            report = replay_cycle(a.year, allow_synthetic=a.allow_synthetic)
+            report = replay_cycle(
+                a.year,
+                allow_synthetic=a.allow_synthetic,
+                hierarchical_method=a.hierarchical_method,
+            )
             from midterms.config import ARTIFACTS_DIR
 
             out = ARTIFACTS_DIR / f"cycle_replay_{a.year}.json"
@@ -290,6 +304,7 @@ def main(argv: list[str] | None = None) -> None:
                         "path": str(out),
                         "aggregate": report.get("aggregate"),
                         "stack_weights": report.get("stack_weights"),
+                        "hierarchical_method": report.get("hierarchical_method"),
                         "chamber": report.get("chamber"),
                         "overlay_ablation": report.get("overlay_ablation"),
                     },
