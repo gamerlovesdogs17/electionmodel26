@@ -33,6 +33,12 @@ def run_refresh(
     except Exception as exc:  # noqa: BLE001
         steps["votehub_ccby"] = {"ok": False, "error": str(exc)}
     try:
+        steps["fte_historical"] = __import__(
+            "midterms.evidence.fte_polls", fromlist=["ingest_fte_historical_into_warehouse"]
+        ).ingest_fte_historical_into_warehouse()
+    except Exception as exc:  # noqa: BLE001
+        steps["fte_historical"] = {"ok": False, "error": str(exc)}
+    try:
         steps["licensed_ratings"] = __import__(
             "midterms.evidence.licensed_ratings", fromlist=["try_ingest_licensed_ratings"]
         ).try_ingest_licensed_ratings(election_id=election_id, available_at=as_of)

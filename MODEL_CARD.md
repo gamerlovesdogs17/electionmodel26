@@ -13,7 +13,8 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`.
 ## Sources
 | Domain | Source | Notes |
 | --- | --- | --- |
-| Polls | VoteHub + sealed historical archive + fixtures | Bitemporal + correction versions |
+| Polls | VoteHub (live 2026, CC BY) + FiveThirtyEight Senate poll mirror (historical, CC BY) + fixtures | VoteHub has no archive endpoint |
+
 | Pollster quality | VoteHub + FTE fill-in | House ≠ reliability |
 | Economics | ALFRED/FRED or fixtures | Vintage YoY RDPI |
 | Approval | Curated public-aggregate vintages | As-of store |

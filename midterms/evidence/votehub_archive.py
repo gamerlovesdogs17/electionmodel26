@@ -1,10 +1,14 @@
-"""VoteHub CC BY poll dump sealing + historical import (blueprint §3).
+"""VoteHub CC BY poll dump sealing + import (current cycle).
 
-Live VoteHub currently publishes the active Senate cycle; `/polls/archive` may
-be unavailable. This module:
+VoteHub's documented API (https://votehub.com/polls/api/) exposes:
+  GET /polls, /polls/{id}, /pollsters, /subjects, /poll-types
+There is **no** /polls/archive endpoint. Historical complete-cycle polls come from
+FiveThirtyEight's public Senate poll mirror instead (`midterms.evidence.fte_polls`).
+
+This module:
   1. Seals whatever VoteHub returns into an immutable dated CC BY dump
-  2. Imports user-supplied historical VoteHub JSON dumps (same schema)
-  3. Merges third-party dumps into the warehouse preferentially over synthetic fixtures
+  2. Optionally imports user-supplied VoteHub JSON dumps (same schema)
+  3. Merges those dumps into the warehouse preferentially over synthetic fixtures
 """
 
 from __future__ import annotations
@@ -73,29 +77,19 @@ def seal_votehub_dump(
 
 
 def try_fetch_votehub_archive() -> dict[str, Any]:
-    """Best-effort call to VoteHub /polls/archive (often 500 as of 2026-09)."""
-    try:
-        payload = votehub_get("/polls/archive", {"poll_type": "us-senator"})
-        dump_dir = RAW_DIR / "external" / "votehub_dumps"
-        dump_dir.mkdir(parents=True, exist_ok=True)
-        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-        dest = dump_dir / f"votehub_archive_{stamp}.json"
-        blob = json.dumps(payload, indent=2).encode()
-        dest.write_bytes(blob)
-        return {
-            "ok": True,
-            "path": str(dest),
-            "sha256": _sha256(blob),
-            "n": len(payload.get("polls", payload) if isinstance(payload, dict) else payload or []),
-            "attribution": ATTRIBUTION,
-        }
-    except Exception as exc:  # noqa: BLE001
-        return {
-            "ok": False,
-            "error": str(exc),
-            "hint": "Drop historical VoteHub JSON dumps into data/raw/external/votehub_dumps/ and run import-votehub-dumps",
-            "attribution": ATTRIBUTION,
-        }
+    """
+    Legacy probe — VoteHub does not document /polls/archive.
+    Kept for diagnostics; prefer `midterms.evidence.fte_polls` for history.
+    """
+    return {
+        "ok": False,
+        "error": "endpoint_not_documented",
+        "hint": (
+            "VoteHub API has no /polls/archive. Use: python -m midterms.cli ingest-fte-polls"
+        ),
+        "attribution": ATTRIBUTION,
+        "docs": "https://votehub.com/polls/api/",
+    }
 
 
 def import_votehub_dump_file(

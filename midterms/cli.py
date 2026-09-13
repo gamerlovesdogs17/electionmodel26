@@ -407,6 +407,29 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
+    p_fte = sub.add_parser(
+        "ingest-fte-polls",
+        help="Fetch FiveThirtyEight Senate polls (historical CC BY) into warehouse",
+    )
+    p_fte.add_argument(
+        "--cycles",
+        default=None,
+        help="Comma-separated cycles (default: all non-2026 in the mirror)",
+    )
+    p_fte.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.fte_polls", fromlist=["ingest_fte_historical_into_warehouse"]
+                ).ingest_fte_historical_into_warehouse(
+                    cycles=[int(x) for x in a.cycles.split(",")] if a.cycles else None,
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
     p_lic = sub.add_parser(
         "ingest-licensed-ratings",
         help="Load local licensed ratings CSV (COOK_RATINGS_CSV) if present",

@@ -1,0 +1,36 @@
+{
+  "ok": true,
+  "fetched_at": "2026-09-13T16:09:52.369710+00:00",
+  "n_fte_polls": 307,
+  "elections": [
+    "senate-2020",
+    "senate-2022"
+  ],
+  "n_warehouse_polls": 1945,
+  "paths": {
+    "fte_parquet": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls_fte_historical.parquet",
+    "warehouse": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls.parquet"
+  },
+  "freeze": {
+    "generated_at": "2026-09-13T16:09:53.509737+00:00",
+    "n": 1625,
+    "elections": [
+      "senate-2014",
+      "senate-2016",
+      "senate-2018",
+      "senate-2020",
+      "senate-2022",
+      "senate-2024"
+    ],
+    "sha256": "2ef773e3750f8559e66c1c9c3629db8d74109902ae1b5b0cf060456b3d25d086",
+    "parser_version": "historical-polls-v1",
+    "paths": {
+      "raw": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\senate_historical_polls.json",
+      "normalized": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls_historical.parquet"
+    }
+  },
+  "license": "CC BY 4.0",
+  "attribution": "Polling data from FiveThirtyEight / ABC News (CC BY 4.0). https://github.com/fivethirtyeight/data/tree/master/polls",
+  "parser_version": "fte-senate-polls-v1",
+  "note": "VoteHub remains the live 2026 source; FTE Datasette covers historical cycles."
+}

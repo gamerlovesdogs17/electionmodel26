@@ -33,7 +33,15 @@ python -m midterms.cli generate-signing-keys
 export MIDTERMS_REQUIRE_SIGNING=1
 ```
 
-## Licensed ratings (Cook etc.)
+## Historical polls
 
-Never commit vendor CSVs. Place at `data/licensed/cook_senate_ratings.csv` or set
-`COOK_RATINGS_CSV`, then `python -m midterms.cli ingest-licensed-ratings`.
+VoteHub’s API ([docs](https://votehub.com/polls/api/)) covers the **current** cycle only
+(`GET /polls`, …) — there is no `/polls/archive`.
+
+For past cycles use FiveThirtyEight’s public Senate poll table (CC BY):
+
+```powershell
+python -m midterms.cli ingest-fte-polls
+```
+
+Live 2026 polls stay on VoteHub (`seal-votehub-dumps` / `ingest-polls`).

@@ -91,7 +91,13 @@ def freeze_historical_polls_from_warehouse(polls: pd.DataFrame | None = None) ->
     }
     text = json.dumps(payload, default=str)
     digest = hashlib.sha256(text.encode()).hexdigest()
-    raw_path.write_text(text)
+    try:
+        raw_path.write_text(text, encoding="utf-8")
+    except OSError:
+        # OneDrive / Windows lock fallback
+        alt = RAW_DIR / "external" / f"senate_historical_polls_{digest[:8]}.json"
+        alt.write_text(text, encoding="utf-8")
+        raw_path = alt
     out = NORMALIZED_DIR / "polls_historical.parquet"
     hist.to_parquet(out, index=False)
     man = {
