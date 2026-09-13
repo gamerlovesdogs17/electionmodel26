@@ -89,12 +89,23 @@ export function ForecastDashboard() {
           Internal research UI · {data.model_version}
         </p>
         <div className="flex flex-wrap gap-3 text-xs text-[var(--muted)]">
-          <span className="rounded-md border border-[var(--line)] px-2 py-1">
+          <span
+            className={`rounded-md border px-2 py-1 ${
+              data.method.startsWith("pymc") || data.method.startsWith("ensemble")
+                ? "border-[var(--line)]"
+                : "border-[var(--rep)] text-[var(--rep)]"
+            }`}
+          >
             method: {data.method}
           </span>
           {typeof data.diagnostics?.enop_global === "number" ? (
             <span className="rounded-md border border-[var(--line)] px-2 py-1">
               ENOP: {(data.diagnostics.enop_global as number).toFixed(1)}
+            </span>
+          ) : null}
+          {typeof data.overlays?.expert_source === "string" ? (
+            <span className="rounded-md border border-[var(--line)] px-2 py-1">
+              ratings: {String(data.overlays.expert_source)}
             </span>
           ) : null}
           {typeof data.snapshot?.kalshi_control_p_dem === "number" ? (
@@ -121,6 +132,14 @@ export function ForecastDashboard() {
             Reload artifact
           </Button>
         </div>
+        {data.warnings && data.warnings.length > 0 ? (
+          <p className="text-xs text-[var(--rep)]">
+            Layer warnings:{" "}
+            {data.warnings
+              .map((w) => `${w.layer ?? "layer"}: ${w.error ?? "error"}`)
+              .join(" · ")}
+          </p>
+        ) : null}
       </header>
 
       <SenateMap

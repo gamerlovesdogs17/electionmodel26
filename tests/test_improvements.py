@@ -98,7 +98,9 @@ def test_fundamentals_use_fundraising_and_midterm():
 
 
 def test_cycle_replay_scores_hierarchical():
-    report = replay_cycle(2022, lead_days=(60, 30), n_draws=400, seed=3)
+    report = replay_cycle(
+        2022, lead_days=(60, 30), n_draws=400, seed=3, allow_synthetic=True
+    )
     assert "fast_hierarchical_t" in report["aggregate"]
     assert report["aggregate"]["fast_hierarchical_t"].get("n_leads", 0) >= 1
     assert "stack_weights" in report
@@ -119,7 +121,9 @@ def test_ensemble_stack_mixture():
 
 
 def test_forecast_ensemble_artifact(tmp_path):
-    result = run_forecast(method="fast", draws=300, seed=19, ensemble=True, out_dir=tmp_path)
+    result = run_forecast(
+        method="fast", draws=300, seed=19, ensemble=True, out_dir=tmp_path
+    )
     art = result["artifact"]
     assert art["method"] in {"ensemble_stack", "fast_hierarchical_t"} or art["method"].startswith(
         "ensemble_stack"

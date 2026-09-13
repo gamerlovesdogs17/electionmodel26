@@ -268,7 +268,7 @@ def fit_pymc(
             if prep["enop_by_race"]
             else 0.0,
         },
-        method="pymc_nuts",
+        method="pymc",
     )
 
 
@@ -380,8 +380,9 @@ def fit_fast_approximation(
             else 0.0,
             "similarity_covariance": True,
             "note": (
-                "fast hierarchical-t with ENOP weights, mode/pop offsets, "
-                "richer fundamentals, continuous similarity covariance"
+                "NON-PRODUCTION approximation: fast hierarchical-t with ENOP weights, "
+                "mode/pop offsets, richer fundamentals, continuous similarity covariance. "
+                "Prefer pymc / ensemble_stack for published forecasts."
             ),
         },
         method="fast_hierarchical_t",

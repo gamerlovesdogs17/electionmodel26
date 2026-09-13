@@ -38,24 +38,27 @@ export MIDTERMS_REQUIRE_SIGNING=1
 VoteHub’s API ([docs](https://votehub.com/polls/api/)) covers the **current** cycle only
 (`GET /polls`, …) — there is no `/polls/archive`.
 
-For past cycles use FiveThirtyEight’s public Senate poll table (CC BY):
+Use FiveThirtyEight / ABC News Senate poll mirrors (CC BY) for complete-cycle replay:
 
-```powershell
+```bash
 python -m midterms.cli ingest-fte-polls
+python -m midterms.cli replay-cycle --all   # fails closed on synthetic for 2020+
+python -m midterms.cli validation-report --full
 ```
 
 Live 2026 polls stay on VoteHub (`seal-votehub-dumps` / `ingest-polls`).
+CI may pass `--allow-synthetic` for fixture-only environments.
 
-## Ratings (no Cook license required)
+## Forecast (v0.9)
 
-**Default:** curated research snapshot + Kalshi overlays. Display ratings are
-model-derived from `P(Dem)`. Cook is **not** required.
+Production default is **PyMC** hierarchical-t (`--method pymc`). `fast` is CI/degraded only.
 
-```powershell
+```bash
 python -m midterms.cli fetch-ratings
 python -m midterms.cli fetch-markets
-python -m midterms.cli forecast
+python -m midterms.cli forecast --method pymc
+# or: python -m midterms.cli refresh
 ```
 
-**Optional:** if you hold a vendor license, set `COOK_RATINGS_CSV` / drop a file under
-`data/licensed/` and run `ingest-licensed-ratings`. Never commit vendor CSVs.
+Expert ratings: Wikipedia multi-rater consensus (Cook/IE/Sabato core + extended WH/RCP/DDHQ/…).
+Licensed CSV adapter remains optional via `COOK_RATINGS_CSV`. Never commit vendor CSVs.

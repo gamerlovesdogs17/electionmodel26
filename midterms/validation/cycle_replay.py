@@ -132,13 +132,20 @@ def replay_cycle(
     include_hierarchical: bool = True,
     include_chamber: bool = True,
     include_overlay_ablation: bool = True,
+    include_challengers: bool = True,
+    allow_synthetic: bool = False,
 ) -> dict[str, Any]:
     """
     Hold out one complete Senate cycle; score baselines + hierarchical model
     at fixed historical lead times using as-of snapshots only.
     """
-    wh = Warehouse()
+    from midterms.evidence.fte_polls import assert_real_historical_polls
+
     election_id = f"senate-{holdout_year}"
+    poll_gate = assert_real_historical_polls(
+        election_id, allow_synthetic=allow_synthetic
+    )
+    wh = Warehouse()
     vp = vp_tiebreak_for_election_year(holdout_year)
     races = wh.races[wh.races["election_id"] == election_id]
     if races.empty:
@@ -151,6 +158,7 @@ def replay_cycle(
         "election_id": election_id,
         "holdout_year": holdout_year,
         "vp_tiebreak_party": vp,
+        "poll_gate": poll_gate,
         "lead_days": {},
         "aggregate": {},
         "enop": {},
@@ -158,6 +166,9 @@ def replay_cycle(
         "overlay_ablation": {},
     }
     keys = list(models.keys()) + (["fast_hierarchical_t"] if include_hierarchical else [])
+    if include_challengers:
+        keys.extend(["state_space", "poll_only_state_space", "ridge_fundamentals"])
+    keys = list(dict.fromkeys(keys))
     agg_scores: dict[str, list] = {k: [] for k in keys}
     chamber_scores: list[dict[str, float]] = []
 
@@ -195,6 +206,41 @@ def replay_cycle(
             }
             if scores.get("n"):
                 agg_scores["fast_hierarchical_t"].append(scores)
+
+            if include_challengers:
+                from midterms.model.challengers import (
+                    fit_poll_only_state_space,
+                    fit_ridge_fundamentals,
+                )
+                from midterms.model.state_space import fit_state_space
+
+                for cname, cfit in (
+                    (
+                        "state_space",
+                        fit_state_space(
+                            snap, n_draws=n_draws, seed=seed + lead + 11, generic_ballot=gb
+                        ),
+                    ),
+                    (
+                        "poll_only_state_space",
+                        fit_poll_only_state_space(
+                            snap, n_draws=n_draws, seed=seed + lead + 13
+                        ),
+                    ),
+                    (
+                        "ridge_fundamentals",
+                        fit_ridge_fundamentals(
+                            snap, n_draws=n_draws, seed=seed + lead + 17, generic_ballot=gb
+                        ),
+                    ),
+                ):
+                    try:
+                        c_scores = score_forecasts(_forecasts_from_fit(cfit), results)
+                        lead_block[cname] = c_scores
+                        if c_scores.get("n"):
+                            agg_scores[cname].append(c_scores)
+                    except Exception as exc:  # noqa: BLE001
+                        lead_block[cname] = {"error": str(exc), "n": 0}
 
             if include_chamber:
                 sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party=vp)
@@ -257,6 +303,7 @@ def replay_all_cycles(
     years: tuple[int, ...] | None = None,
     *,
     out_path: Path | None = None,
+    allow_synthetic: bool = False,
 ) -> dict[str, Any]:
     """Leave-one-cycle-out style reports for each historical Senate cycle."""
     years = years or CYCLES
@@ -264,7 +311,7 @@ def replay_all_cycles(
     crps_pool: dict[str, list[float]] = {}
     for year in years:
         try:
-            rep = replay_cycle(year)
+            rep = replay_cycle(year, allow_synthetic=allow_synthetic)
         except ValueError:
             continue
         reports[str(year)] = rep
@@ -277,12 +324,14 @@ def replay_all_cycles(
         "cycles": list(reports.keys()),
         "mean_crps_by_model": mean_crps,
         "stack_weights": softmax_neg_scores(mean_crps, temperature=0.75) if mean_crps else {},
+        "note": "Stack weights from OOS mean CRPS across cycles; no hand-tuned challenger mass.",
         "by_cycle": {
             y: {
                 "aggregate": reports[y].get("aggregate"),
                 "stack_weights": reports[y].get("stack_weights"),
                 "chamber": reports[y].get("chamber"),
                 "overlay_ablation": reports[y].get("overlay_ablation"),
+                "poll_gate": reports[y].get("poll_gate"),
             }
             for y in reports
         },

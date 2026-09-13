@@ -24,14 +24,17 @@ from urllib.request import Request, urlopen
 from midterms.config import MANIFESTS_DIR, RAW_DIR
 from midterms.model.overlays import RATING_ORDER
 
-PARSER_VERSION = "wiki-ratings-v1"
+PARSER_VERSION = "wiki-ratings-v2"
 WIKI_PAGE = "2026_United_States_Senate_elections"
 WIKI_URL = f"https://en.wikipedia.org/wiki/{WIKI_PAGE}"
 API = "https://en.wikipedia.org/w/api.php"
-USER_AGENT = "midterms-senate-model/0.8 (research; Wikipedia ratings ingest)"
+USER_AGENT = "midterms-senate-model/0.9 (research; Wikipedia ratings ingest)"
 
-# Prefer these columns when building the overlay consensus.
+# Core panel always drives overlay consensus (ordinal median).
 TOP_RATERS = ("Cook", "IE", "Sabato")
+# Extended panel stored for audit; optional soft pull via extended_weight.
+EXTENDED_RATERS = ("WH", "RCP", "DDHQ", "Fox", "Econ")
+SOURCE_LABEL = "wikipedia:multi-rater"
 
 STATE_NAME_TO_ABBR = {
     "Alabama": "AL",
@@ -243,7 +246,11 @@ def _parse_asof_from_header(cell: str) -> str | None:
     return f"{year:04d}-{mon:02d}-{day:02d}"
 
 
-def parse_ratings_table_html(html: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def parse_ratings_table_html(
+    html: str,
+    *,
+    extended_weight: float = 0.0,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Parse the Predictions wikitable HTML into per-state rating rows."""
     tables = re.findall(
         r'<table[^>]*class="[^"]*wikitable[^"]*"[^>]*>(.*?)</table>',
@@ -271,12 +278,13 @@ def parse_ratings_table_html(html: str) -> tuple[list[dict[str, Any]], dict[str,
                         asof = _parse_asof_from_header(c)
                         if asof:
                             header_asofs[k] = asof
-                # Also keep positional labels for State column (index 0)
                 break
         if chosen is not None:
             break
     if chosen is None:
         raise ValueError("Could not locate Cook/IE/Sabato ratings header row")
+
+    w_ext = max(0.0, min(1.0, float(extended_weight or 0.0)))
 
     out: list[dict[str, Any]] = []
     for row in chosen:
@@ -298,16 +306,23 @@ def parse_ratings_table_html(html: str) -> tuple[list[dict[str, Any]], dict[str,
         top = [by_rater.get(r) for r in TOP_RATERS]
         cons = consensus_rating(top)
         if cons is None:
-            # Fall back to any recognized rater
             cons = consensus_rating(list(by_rater.values()))
         if cons is None:
             continue
+        extended = {r: by_rater.get(r) for r in EXTENDED_RATERS if by_rater.get(r)}
+        ext_cons = consensus_rating(list(extended.values())) if extended else None
+        if w_ext > 0 and ext_cons is not None and cons in _ORD and ext_cons in _ORD:
+            # Soft ordinal blend toward extended median, then snap to nearest label
+            blended = (1.0 - w_ext) * _ORD[cons] + w_ext * _ORD[ext_cons]
+            cons = RATING_ORDER[int(round(blended))]
         out.append(
             {
                 "state": abbr,
                 "state_label": st_label,
                 "rating": cons,
                 "raters": {k: v for k, v in by_rater.items() if v},
+                "core": {r: by_rater.get(r) for r in TOP_RATERS if by_rater.get(r)},
+                "extended": extended,
                 "cook": by_rater.get("Cook"),
                 "ie": by_rater.get("IE"),
                 "sabato": by_rater.get("Sabato"),
@@ -319,6 +334,8 @@ def parse_ratings_table_html(html: str) -> tuple[list[dict[str, Any]], dict[str,
         "n": len(out),
         "header_asofs": header_asofs,
         "top_raters": list(TOP_RATERS),
+        "extended_raters": list(EXTENDED_RATERS),
+        "extended_weight": w_ext,
         "available_at": max(top_asofs) if top_asofs else (max(header_asofs.values()) if header_asofs else None),
     }
     return out, meta
@@ -373,6 +390,7 @@ def fetch_wikipedia_expert_ratings(
     *,
     election_id: str = "senate-2026",
     page: str = WIKI_PAGE,
+    extended_weight: float = 0.0,
 ) -> dict[str, Any]:
     """
     Live fetch → parse → return consensus rows ready for write_expert_ratings_store.
@@ -380,7 +398,7 @@ def fetch_wikipedia_expert_ratings(
     Also seals a raw detail JSON under data/raw/external/.
     """
     html, fetch_meta = fetch_predictions_html(page=page)
-    rows, table_meta = parse_ratings_table_html(html)
+    rows, table_meta = parse_ratings_table_html(html, extended_weight=extended_weight)
     available_at = table_meta.get("available_at") or datetime.now(timezone.utc).date().isoformat()
 
     stamped = []
@@ -390,11 +408,13 @@ def fetch_wikipedia_expert_ratings(
                 "election_id": election_id,
                 "state": r["state"],
                 "rating": r["rating"],
-                "source": "wikipedia:cook+ie+sabato",
+                "source": SOURCE_LABEL,
                 "available_at": available_at,
                 "cook": r.get("cook"),
                 "ie": r.get("ie"),
                 "sabato": r.get("sabato"),
+                "core": r.get("core") or {},
+                "extended": r.get("extended") or {},
                 "raters": r.get("raters") or {},
             }
         )
@@ -408,6 +428,8 @@ def fetch_wikipedia_expert_ratings(
             "Wikipedia page text CC BY-SA; rating labels attributed to source handicappers "
             "via the Wikipedia Predictions table — not vendor redistribution of Cook/IE feeds."
         ),
+        "core_raters": list(TOP_RATERS),
+        "extended_raters": list(EXTENDED_RATERS),
         "fetch": fetch_meta,
         "table": table_meta,
         "rows": stamped,
@@ -419,7 +441,7 @@ def fetch_wikipedia_expert_ratings(
         "election_id": election_id,
         "available_at": available_at,
         "n": len(stamped),
-        "source": "wikipedia:cook+ie+sabato",
+        "source": SOURCE_LABEL,
         "page_url": fetch_meta.get("url"),
         "revid": fetch_meta.get("revid"),
         "header_asofs": table_meta.get("header_asofs"),
@@ -437,16 +459,19 @@ def write_from_wikipedia(
     election_id: str = "senate-2026",
     *,
     available_at: str | None = None,
+    extended_weight: float = 0.0,
 ) -> dict[str, Any]:
     """Fetch Wikipedia consensus and persist via the expert ratings store."""
     from midterms.evidence.expert_ratings import write_expert_ratings_store
 
-    fetched = fetch_wikipedia_expert_ratings(election_id=election_id)
+    fetched = fetch_wikipedia_expert_ratings(
+        election_id=election_id, extended_weight=extended_weight
+    )
     avail = available_at or fetched.get("available_at") or "2026-09-01"
     man = write_expert_ratings_store(
         election_id=election_id,
         available_at=str(avail)[:10],
         rows=fetched["rows"],
-        source_label="wikipedia:cook+ie+sabato",
+        source_label=SOURCE_LABEL,
     )
     return {**man, "wiki": {k: fetched[k] for k in ("n", "revid", "page_url", "header_asofs", "raw")}}

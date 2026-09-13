@@ -140,7 +140,7 @@ def main(argv: list[str] | None = None) -> None:
     p_run = sub.add_parser("forecast", help="Fit/simulate and write forecast artifact")
     p_run.add_argument("--election-id", default="senate-2026")
     p_run.add_argument("--as-of", default="2026-09-01")
-    p_run.add_argument("--method", choices=["fast", "pymc", "state_space"], default="fast")
+    p_run.add_argument("--method", choices=["fast", "pymc", "state_space"], default="pymc")
     p_run.add_argument("--draws", type=int, default=400)
     p_run.add_argument("--tune", type=int, default=400)
     p_run.add_argument("--chains", type=int, default=2)
@@ -221,10 +221,15 @@ def main(argv: list[str] | None = None) -> None:
     )
     p_cycle.add_argument("--year", type=int, default=2022)
     p_cycle.add_argument("--all", action="store_true", help="Replay every historical cycle")
+    p_cycle.add_argument(
+        "--allow-synthetic",
+        action="store_true",
+        help="Allow synthetic fixture polls (CI only; production should use FTE)",
+    )
 
     def _cycle(a: argparse.Namespace) -> None:
         if a.all:
-            summary = replay_all_cycles()
+            summary = replay_all_cycles(allow_synthetic=a.allow_synthetic)
             print(
                 json.dumps(
                     {
@@ -237,7 +242,7 @@ def main(argv: list[str] | None = None) -> None:
                 )
             )
         else:
-            report = replay_cycle(a.year)
+            report = replay_cycle(a.year, allow_synthetic=a.allow_synthetic)
             from midterms.config import ARTIFACTS_DIR
 
             out = ARTIFACTS_DIR / f"cycle_replay_{a.year}.json"
@@ -352,11 +357,17 @@ def main(argv: list[str] | None = None) -> None:
 
     p_val = sub.add_parser("validation-report", help="Build lead-time + ablation + nested-df report")
     p_val.add_argument("--full", action="store_true", help="More draws (slower)")
+    p_val.add_argument(
+        "--allow-synthetic",
+        action="store_true",
+        help="Allow synthetic historical polls in cycle gate",
+    )
     p_val.set_defaults(
         func=lambda a: print(
             json.dumps(
                 __import__("midterms.validation.report", fromlist=["build_validation_report"]).build_validation_report(
-                    quick=not a.full
+                    quick=not a.full,
+                    allow_synthetic=a.allow_synthetic,
                 ),
                 indent=2,
                 default=str,

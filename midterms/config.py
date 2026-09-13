@@ -13,7 +13,7 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.8.1"
+MODEL_VERSION = "senate-hierarchical-v0.9"
 
 # Historical Senate cycles for holdout / replay
 CYCLES = (2014, 2016, 2018, 2020, 2022, 2024)
@@ -25,10 +25,13 @@ LEAD_DAYS = (120, 90, 60, 45, 30, 14, 7, 1)
 STUDENT_T_DF = 5.0
 ERA_WEIGHT = 1.0
 
+# Production method: pymc hierarchical-t (fast is CI/degraded fallback only)
+PRODUCTION_METHOD = "pymc"
+
 # Demo forecast target
 DEMO_ELECTION_ID = "senate-2026"
 DEMO_ELECTION_DAY = "2026-11-03"
-DEMO_AS_OF = "2026-09-01"
+DEMO_AS_OF = "2026-09-13"
 
 # Inference defaults (short chains for local/demo; override for production research fits)
 DEMO_DRAWS = 400

@@ -75,6 +75,44 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
     if not art.get("scenarios"):
         alerts.append("scenarios block missing (regenerate forecast on v0.8+)")
 
+    method = str(art.get("method") or "")
+    soft.append(
+        {
+            "name": "production_method",
+            "ok": method.startswith("pymc") or method.startswith("ensemble_stack"),
+            "detail": method,
+        }
+    )
+    if method.startswith("degraded") or method.startswith("fast"):
+        alerts.append(f"non-production method in artifact: {method}")
+
+    if art.get("warnings"):
+        alerts.append(f"layer_warnings={len(art['warnings'])}")
+        soft.append({"name": "layer_warnings", "ok": False, "detail": art["warnings"][:5]})
+
+    stack_path = ARTIFACTS_DIR / "cycle_replay_all.json"
+    if stack_path.exists():
+        age_h = (datetime.now(timezone.utc).timestamp() - stack_path.stat().st_mtime) / 3600.0
+        soft.append({"name": "stack_weights_fresh", "ok": age_h < 24 * 30, "detail": {"age_hours": age_h}})
+        if age_h >= 24 * 30:
+            alerts.append("stack weights artifact older than 30 days — rerun replay-cycle --all")
+
+    hist_man = MANIFESTS_DIR / "historical_polls.json"
+    if hist_man.exists():
+        try:
+            hm = json.loads(hist_man.read_text())
+            soft.append(
+                {
+                    "name": "historical_polls_primary",
+                    "ok": hm.get("primary_source") == "fte",
+                    "detail": hm.get("primary_source"),
+                }
+            )
+            if hm.get("primary_source") != "fte":
+                alerts.append("historical polls not FTE-primary — run ingest-fte-polls")
+        except (json.JSONDecodeError, OSError):
+            pass
+
     # Source freshness: polls parquet mtime vs artifact
     polls_path = NORMALIZED_DIR / "polls.parquet"
     if polls_path.exists():

@@ -9,7 +9,7 @@ from typing import Any
 def run_refresh(
     *,
     election_id: str = "senate-2026",
-    as_of: str = "2026-09-01",
+    as_of: str = "2026-09-13",
     forecast: bool = True,
     draws: int = 400,
 ) -> dict[str, Any]:
@@ -81,10 +81,11 @@ def run_refresh(
         steps["forecast"] = run_forecast(
             election_id=election_id,
             as_of=as_of,
-            method="fast",
+            method="pymc",
             draws=draws,
             seed=20260901,
             generic_ballot=float(gb) if gb is not None else -1.0,
+            allow_fast_fallback=True,
         )["paths"]
 
     from midterms.ops.monitor import monitor_check

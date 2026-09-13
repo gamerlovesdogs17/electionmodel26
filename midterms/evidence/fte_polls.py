@@ -282,6 +282,119 @@ def ingest_fte_historical_into_warehouse(
         "attribution": ATTRIBUTION,
         "parser_version": PARSER_VERSION,
         "note": "VoteHub remains the live 2026 source; FTE Datasette covers historical cycles.",
+        "synthetic": False,
+        "cycle_manifests": write_cycle_poll_manifests(fte),
     }
     (MANIFESTS_DIR / "fte_historical_ingest.json").write_text(json.dumps(man, indent=2, default=str))
     return man
+
+
+def write_cycle_poll_manifests(polls: pd.DataFrame) -> dict[str, Any]:
+    """Per-cycle sealed poll coverage for validation fail-closed checks."""
+    MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
+    out: dict[str, Any] = {}
+    if polls is None or polls.empty:
+        return out
+    for eid, g in polls.groupby(polls["election_id"].astype(str)):
+        if str(eid) == "senate-2026":
+            continue
+        src = g["source_url"].astype(str) if "source_url" in g.columns else pd.Series([""] * len(g))
+        synthetic_n = int(src.str.contains("synthetic", case=False, na=False).sum())
+        block = {
+            "election_id": str(eid),
+            "n_polls": int(len(g)),
+            "n_races": int(g["race_id"].nunique()) if "race_id" in g.columns else 0,
+            "n_synthetic_marked": synthetic_n,
+            "primary_source": "fte" if synthetic_n == 0 else "mixed",
+            "field_end_min": str(pd.to_datetime(g["field_end"], errors="coerce").min().date())
+            if "field_end" in g.columns and len(g)
+            else None,
+            "field_end_max": str(pd.to_datetime(g["field_end"], errors="coerce").max().date())
+            if "field_end" in g.columns and len(g)
+            else None,
+            "sha256_poll_ids": _sha256(
+                ",".join(sorted(g["poll_id"].astype(str))).encode()
+            )
+            if "poll_id" in g.columns
+            else None,
+        }
+        out[str(eid)] = block
+        (MANIFESTS_DIR / f"polls_{eid}.json").write_text(json.dumps(block, indent=2))
+    (MANIFESTS_DIR / "historical_poll_cycles.json").write_text(json.dumps(out, indent=2))
+    return out
+
+
+def assert_real_historical_polls(
+    election_id: str,
+    *,
+    allow_synthetic: bool = False,
+    min_polls: int = 5,
+) -> dict[str, Any]:
+    """
+    Fail closed when a holdout cycle would replay on synthetic fixtures.
+    Passes when FTE/sealed archive coverage exists for the election_id.
+    """
+    from midterms.config import CYCLES
+
+    year = int(str(election_id).split("-")[-1]) if "-" in str(election_id) else None
+    man_path = MANIFESTS_DIR / f"polls_{election_id}.json"
+    fte_path = NORMALIZED_DIR / "polls_fte_historical.parquet"
+    hist_path = NORMALIZED_DIR / "polls_historical.parquet"
+    polls_path = NORMALIZED_DIR / "polls.parquet"
+
+    n = 0
+    synthetic = True
+    source = "missing"
+    if man_path.exists():
+        block = json.loads(man_path.read_text())
+        n = int(block.get("n_polls") or 0)
+        synthetic = int(block.get("n_synthetic_marked") or 0) > 0 or block.get("primary_source") != "fte"
+        source = "cycle_manifest"
+        if block.get("primary_source") == "fte" and n >= min_polls:
+            synthetic = False
+    elif fte_path.exists():
+        df = pd.read_parquet(fte_path)
+        g = df[df["election_id"].astype(str) == election_id]
+        n = int(len(g))
+        source = "fte_parquet"
+        synthetic = n < min_polls
+    elif hist_path.exists() or polls_path.exists():
+        path = hist_path if hist_path.exists() else polls_path
+        df = pd.read_parquet(path)
+        g = df[df["election_id"].astype(str) == election_id]
+        n = int(len(g))
+        source = path.name
+        if n < min_polls:
+            synthetic = True
+        elif "source_url" in g.columns:
+            urls = g["source_url"].astype(str)
+            if urls.str.contains("fivethirtyeight|datasette|fte-", case=False, na=False).any():
+                synthetic = False
+                source = "fte_like_urls"
+            else:
+                synthetic = bool(urls.str.contains("synthetic", case=False, na=False).mean() > 0.5)
+        else:
+            synthetic = True
+
+    info = {
+        "election_id": election_id,
+        "year": year,
+        "n_polls": n,
+        "synthetic": synthetic,
+        "source": source,
+        "allow_synthetic": allow_synthetic,
+        "in_cycles": year in CYCLES if year else False,
+    }
+    if synthetic and not allow_synthetic and year is not None and year >= 2020:
+        raise ValueError(
+            f"Historical polls for {election_id} appear synthetic or thin (n={n}, source={source}). "
+            "Ingest FTE CC BY archive (`midterms ingest-fte-polls`) or pass allow_synthetic=True for CI."
+        )
+    if synthetic and not allow_synthetic and n < min_polls:
+        raise ValueError(
+            f"Historical polls for {election_id} are missing or synthetic "
+            f"(n={n}, source={source}). Run `midterms ingest-fte-polls` or pass allow_synthetic=True."
+        )
+    if synthetic:
+        info["warning"] = "synthetic_or_pre_fte_era"
+    return info

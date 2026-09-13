@@ -1,11 +1,24 @@
 {
-  "generated_at": "2026-09-13T16:34:51.569983+00:00",
+  "generated_at": "2026-09-13T16:57:54.940163+00:00",
   "election_id": "senate-2026",
-  "available_at": "2026-09-01",
-  "n_races": 32,
+  "available_at": "2026-09-13",
+  "n_races": 29,
   "control_p_dem": 0.485,
   "control_p_rep": 0.515,
-  "errors": [],
+  "errors": [
+    {
+      "state": "SD",
+      "error": "HTTP Error 429: Too Many Requests"
+    },
+    {
+      "state": "TN",
+      "error": "HTTP Error 429: Too Many Requests"
+    },
+    {
+      "state": "WY",
+      "error": "HTTP Error 429: Too Many Requests"
+    }
+  ],
   "control_error": null,
   "parser_version": "kalshi-v1",
   "paths": {

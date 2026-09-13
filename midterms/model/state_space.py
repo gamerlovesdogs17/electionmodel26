@@ -1,8 +1,8 @@
 """Forward state-space opinion path with future movement + terminal ED error.
 
 Blueprint §7.1–7.2: separate current latent, future movement, and Election-Day
-polling error. Implemented as a lightweight Kalman-smoothed race path with
-Student-t terminal shocks — stackable challenger / optional core method.
+polling error. National path shared across races + race residuals; Student-t
+terminal shocks — stackable challenger / optional core method.
 """
 
 from __future__ import annotations
@@ -12,12 +12,23 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
+from midterms.config import ERA_WEIGHT, STUDENT_T_DF
 from midterms.evidence.schema import is_active_ballot_row
 from midterms.evidence.warehouse import EvidenceSnapshot
 from midterms.model.fundamentals import fundamentals_mean
 from midterms.model.poll_weights import attach_poll_weights
-from midterms.model.pymc_model import FitResult
+from midterms.model.pymc_model import FitResult, _mode_offset, _population_offset
 from midterms.model.similarity import correlated_shocks
+
+
+def future_movement_sd(days_to_ed: int, *, era_weight: float = 1.0, base: float = 4.5) -> float:
+    """Future movement contracts toward Election Day (Morris-style)."""
+    return float(base * np.sqrt(max(days_to_ed, 1) / 120.0) * float(era_weight))
+
+
+def terminal_error_sd(*, era_weight: float = 1.0, base: float = 3.5) -> float:
+    """Terminal ED polling error does not vanish as days_to_ed → 0."""
+    return float(base * float(era_weight))
 
 
 def fit_state_space(
@@ -26,15 +37,18 @@ def fit_state_space(
     n_draws: int = 2000,
     seed: int = 20260901,
     generic_ballot: float = 0.0,
-    student_t_df: float = 5.0,
-    era_weight: float = 1.0,
+    student_t_df: float = STUDENT_T_DF,
+    era_weight: float = ERA_WEIGHT,
     fund_pull: float = 0.35,
     flat_prior: bool = False,
+    future_base: float = 4.5,
+    terminal_base: float = 3.5,
+    national_path_sd: float = 2.0,
 ) -> FitResult:
     """
     Per-race forward filter of poll margins → current latent, then project to ED.
 
-    future_movement_sd shrinks with days_to_ed; terminal_error_sd does not.
+    National latent path is shared; race residuals + similarity shocks remain.
     fund_pull blends the filtered latent toward the fundamentals prior at ED
     (set 0 for a poll-only challenger). flat_prior starts the filter at 0.
     """
@@ -65,15 +79,15 @@ def fit_state_space(
 
     ed = date.fromisoformat(str(races["election_day"].iloc[0])[:10])
     days_to_ed = max((ed - snapshot.as_of).days, 1)
-    # Future movement contracts; terminal ED error stays (Morris-style)
-    future_sd = 4.5 * np.sqrt(days_to_ed / 120.0) * float(era_weight)
-    terminal_sd = 3.5 * float(era_weight)
+    future_sd = future_movement_sd(days_to_ed, era_weight=era_weight, base=future_base)
+    terminal_sd = terminal_error_sd(era_weight=era_weight, base=terminal_base)
     pull = float(np.clip(fund_pull, 0.0, 1.0))
 
     means = []
     sds = []
     race_ids = races["race_id"].tolist()
     states = races["state"].astype(str).tolist()
+    house_effects: dict[str, float] = {}
 
     for i, rid in enumerate(race_ids):
         prior = 0.0 if flat_prior else float(fund.get(rid, races.iloc[i]["prior_lean"]))
@@ -84,16 +98,22 @@ def fit_state_space(
             rp = rp.sort_values("field_end")
             for _, row in rp.iterrows():
                 y = float(row["two_party_margin"])
+                # Measurement offsets (same channel as hierarchical spine)
+                y = y - _mode_offset(row.get("mode")) - _population_offset(row.get("population"))
+                if "house_effect_prior" in rp.columns and pd.notna(row.get("house_effect_prior")):
+                    he = float(row["house_effect_prior"])
+                    y = y - he
+                    pid = str(row.get("pollster_id") or "")
+                    if pid:
+                        house_effects[pid] = he
                 n = float(max(row.get("sample_size") or 500, 50))
                 qw = float(row.get("quality_weight") or 1.0)
                 iw = float(row.get("influence_weight") or 1.0) if "influence_weight" in rp.columns else 1.0
-                # Process noise between polls (days)
                 var = var + 0.8**2
                 obs_var = (100.0 / np.sqrt(n)) ** 2 / max(qw * iw, 0.05) + 2.0**2
                 k = var / (var + obs_var)
                 mu = mu + k * (y - mu)
                 var = (1 - k) * var
-        # Project to Election Day
         ed_mu = (1.0 - pull) * mu + pull * prior
         ed_sd = float(np.sqrt(var + future_sd**2 + terminal_sd**2))
         means.append(ed_mu)
@@ -101,8 +121,8 @@ def fit_state_space(
 
     means_a = np.asarray(means, dtype=float)
     sds_a = np.asarray(sds, dtype=float)
-    # Joint: national + similarity + independent terminal Student-t
-    nat = rng.standard_t(student_t_df, size=n_draws) * 2.0
+    # Shared national path + race residual + similarity (Student-t)
+    nat = rng.standard_t(student_t_df, size=n_draws) * float(national_path_sd)
     local = rng.standard_t(student_t_df, size=(n_draws, len(means_a))) * (sds_a * 0.55)
     sim = correlated_shocks(races, n_draws, rng, scale=sds_a * 0.3, nu=student_t_df)
     mu_draws = means_a[None, :] + nat[:, None] + local + sim
@@ -113,20 +133,26 @@ def fit_state_space(
         mean_margin=mu_draws.mean(axis=0),
         sd_margin=mu_draws.std(axis=0),
         draws_margin=mu_draws,
-        house_effects={},
+        house_effects=house_effects,
         diagnostics={
             "n_polls": int(len(polls)),
             "n_races": len(race_ids),
             "days_to_ed": days_to_ed,
             "future_movement_sd": float(future_sd),
             "terminal_error_sd": float(terminal_sd),
+            "national_path_sd": float(national_path_sd),
             "student_t_df": float(student_t_df),
             "era_weight": float(era_weight),
             "fund_pull": float(pull),
             "flat_prior": bool(flat_prior),
+            "future_base": float(future_base),
+            "terminal_base": float(terminal_base),
             "draws": n_draws,
             "seed": seed,
-            "note": "forward state-space with contracting future movement + terminal ED error",
+            "note": (
+                "national-path state-space: contracting future movement + fixed terminal ED error; "
+                "mode/pop/house offsets aligned with hierarchical measurement"
+            ),
         },
         method="state_space",
     )

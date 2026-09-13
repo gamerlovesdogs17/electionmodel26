@@ -48,25 +48,22 @@ def _hash_obj(obj: Any) -> str:
 
 
 def _load_stack_weights() -> dict[str, float]:
+    """Load OOS CRPS mixture weights only — no hand-tuned challenger patches."""
     path = ARTIFACTS_DIR / "cycle_replay_all.json"
     defaults = {
-        "fast_hierarchical_t": 0.55,
+        "fast_hierarchical_t": 0.45,
         "state_space": 0.20,
-        "shrinkage_polls": 0.15,
-        "last_election_swing": 0.10,
+        "poll_only_state_space": 0.10,
+        "ridge_fundamentals": 0.10,
+        "shrinkage_polls": 0.10,
+        "last_election_swing": 0.05,
     }
     if path.exists():
         try:
             payload = json.loads(path.read_text())
             weights = payload.get("stack_weights") or {}
             if weights:
-                out = {k: float(v) for k, v in weights.items()}
-                # Ensure new challengers get mass when replay archive predates them
-                if "state_space" not in out:
-                    out["state_space"] = 0.15
-                    s = sum(out.values())
-                    out = {k: v / s for k, v in out.items()}
-                return out
+                return {k: float(v) for k, v in weights.items() if float(v) > 0}
         except (json.JSONDecodeError, TypeError, ValueError):
             pass
     return defaults
@@ -99,7 +96,7 @@ def run_forecast(
     *,
     election_id: str = DEMO_ELECTION_ID,
     as_of: str = DEMO_AS_OF,
-    method: str = "fast",
+    method: str = "pymc",
     draws: int = 400,
     tune: int = 400,
     chains: int = 2,
@@ -111,6 +108,7 @@ def run_forecast(
     rating_weight: float = 0.15,
     market_weight: float = 0.10,
     out_dir: Path | None = None,
+    allow_fast_fallback: bool = True,
 ) -> dict[str, Any]:
     from midterms.evidence.economics import write_economic_store, yoy_growth_as_of
     from midterms.evidence.approval import approval_as_of, write_approval_store
@@ -182,9 +180,24 @@ def run_forecast(
     snap.races["white_house_party"] = appr["white_house_party"]
 
     if method == "pymc":
-        fit = fit_pymc(
-            snap, draws=draws, tune=tune, chains=chains, seed=seed, generic_ballot=generic_ballot
-        )
+        try:
+            fit = fit_pymc(
+                snap, draws=draws, tune=tune, chains=chains, seed=seed, generic_ballot=generic_ballot
+            )
+        except Exception as exc:  # noqa: BLE001
+            if not allow_fast_fallback:
+                raise
+            layer_warnings.append({"layer": "pymc", "error": str(exc), "degraded": "fast"})
+            fit = fit_fast_approximation(
+                snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
+            )
+            fit.diagnostics = {
+                **(fit.diagnostics or {}),
+                "degraded_from": "pymc",
+                "degraded_reason": str(exc),
+                "production_note": "fast hierarchical-t is a non-production approximation",
+            }
+            fit.method = "degraded:fast"
     elif method == "state_space":
         fit = fit_state_space(
             snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
@@ -193,13 +206,29 @@ def run_forecast(
         fit = fit_fast_approximation(
             snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
         )
+        fit.diagnostics = {
+            **(fit.diagnostics or {}),
+            "production_note": "fast hierarchical-t is a non-production approximation; prefer pymc",
+        }
 
     stack_weights = None
-    if ensemble and method in {"fast", "state_space"}:
+    if ensemble and (
+        method in {"fast", "state_space", "pymc"}
+        or str(getattr(fit, "method", "")).startswith("degraded")
+    ):
         weights = _load_stack_weights()
         component_draws: dict[str, np.ndarray] = {fit.method.split("+")[0]: fit.draws_margin}
-        if fit.method.startswith("fast") or fit.method == "fast_hierarchical_t":
+        core_name = "fast_hierarchical_t"
+        if fit.method.startswith("pymc"):
+            core_name = "pymc"
+            component_draws["pymc"] = fit.draws_margin
+        elif fit.method.startswith("fast") or fit.method.startswith("degraded"):
             component_draws["fast_hierarchical_t"] = fit.draws_margin
+        elif fit.method.startswith("state_space"):
+            core_name = "state_space"
+            component_draws["state_space"] = fit.draws_margin
+        else:
+            component_draws[core_name] = fit.draws_margin
         try:
             chall = build_challenger_draws(
                 snap, n_draws=fit.draws_margin.shape[0], seed=seed, generic_ballot=generic_ballot
@@ -219,8 +248,10 @@ def run_forecast(
                     race_ids=fit.race_ids,
                 )
         use_w = {k: v for k, v in weights.items() if k in component_draws and v > 0}
+        if core_name not in use_w and core_name in component_draws:
+            use_w[core_name] = weights.get(core_name, weights.get("fast_hierarchical_t", 0.45))
         if "fast_hierarchical_t" not in use_w and "fast_hierarchical_t" in component_draws:
-            use_w["fast_hierarchical_t"] = weights.get("fast_hierarchical_t", 0.55)
+            use_w["fast_hierarchical_t"] = weights.get("fast_hierarchical_t", 0.35)
         if len(use_w) >= 2:
             from midterms.model.ensemble import stack_margin_draws
 

@@ -97,6 +97,13 @@ House, Electoral College.
 See [`DEPLOY.md`](DEPLOY.md): Docker / Fly API with `MIDTERMS_API_KEY`, Ed25519 release
 signing, licensed ratings CSV path (`COOK_RATINGS_CSV`), VoteHub CC BY dump sealing.
 
+## Model v0.9 upgrades
+
+- PyMC production default + OOS CRPS stacking (state-space / poll-only / ridge / baselines)
+- Wikipedia **multi-rater** expert ratings (Cook/IE/Sabato core + extended panel; Tilt ladder)
+- FTE historical poll seal with fail-closed synthetic gate; published validation report
+- National-path state-space; Ind purple; layer warnings in artifacts
+
 ## Model v0.8.1 upgrades
 
 - Licensed ratings CSV adapter (`COOK_RATINGS_CSV`); VoteHub CC BY dump sealing; API bearer auth;
@@ -132,7 +139,7 @@ signing, licensed ratings CSV path (`COOK_RATINGS_CSV`), VoteHub CC BY dump seal
 ## Model v0.4 upgrades
 
 - **Kalshi markets** as a real overlay layer (`fetch-markets`): race `SENATE{ST}-26-*` + `CONTROLS-2026-*`, liquidity-scaled.
-- **Expert ratings warehouse** (`fetch-ratings`): Wikipedia Cook / Inside Elections / Sabato consensus by default (`--curated` / `--csv` overrides); map Ratings view uses these.
+- **Expert ratings warehouse** (`fetch-ratings`): Wikipedia multi-rater Cook / Inside Elections / Sabato consensus by default (`--curated` / `--csv` overrides); map Ratings view uses these.
 - Overlays **on by default** when data exists; disable with `--no-ratings` / `--no-markets`.
 - Forecast artifact includes **`ablation`** (unadjusted vs adjusted chamber).
 - **`MODEL_CARD.md`** documents estimands, sources, limitations.

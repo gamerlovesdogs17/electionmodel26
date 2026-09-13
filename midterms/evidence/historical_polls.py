@@ -76,14 +76,26 @@ def freeze_historical_polls_from_warehouse(polls: pd.DataFrame | None = None) ->
     ]
     hist = hist[list(dict.fromkeys(cols))]
 
+    src = hist["source_url"].astype(str) if "source_url" in hist.columns else pd.Series([""] * len(hist))
+    n_synthetic = int(src.str.contains("synthetic", case=False, na=False).sum())
+    n_fte = int(src.str.contains("fivethirtyeight|datasette|fte", case=False, na=False).sum())
+    primary = "fte" if n_fte > 0 and n_synthetic == 0 else ("mixed" if n_fte and n_synthetic else "synthetic")
+
     raw_path = RAW_DIR / "external" / "senate_historical_polls.json"
     records = hist.to_dict(orient="records")
     payload = {
         "parser_version": PARSER_VERSION,
-        "license": "synthetic-research-fixture (redistributable for CI/replay)",
+        "license": (
+            "CC BY 4.0 (FiveThirtyEight / ABC News)"
+            if primary == "fte"
+            else "synthetic-research-fixture (redistributable for CI/replay)"
+        ),
+        "primary_source": primary,
+        "n_synthetic": n_synthetic,
+        "n_fte_like": n_fte,
         "note": (
             "Sealed historical poll vintages for complete-cycle as-of replay. "
-            "Replace with redistributable live archives (e.g. VoteHub CC BY dumps) when available."
+            "Prefer FTE CC BY ingest (`ingest-fte-polls`); VoteHub has no /polls/archive."
         ),
         "n": len(records),
         "elections": sorted(hist["election_id"].unique()) if len(hist) else [],
@@ -106,6 +118,8 @@ def freeze_historical_polls_from_warehouse(polls: pd.DataFrame | None = None) ->
         "elections": payload["elections"],
         "sha256": digest,
         "parser_version": PARSER_VERSION,
+        "primary_source": primary,
+        "n_synthetic": n_synthetic,
         "paths": {"raw": str(raw_path), "normalized": str(out)},
     }
     (MANIFESTS_DIR / "historical_polls.json").write_text(json.dumps(man, indent=2))

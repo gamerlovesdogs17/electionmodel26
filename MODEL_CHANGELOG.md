@@ -4,6 +4,18 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-13 — senate-hierarchical-v0.9
+
+Blueprint gap-close (Senate-complete; no Cook license; House/EC still out):
+
+- **Evidence:** FTE historical poll seal + per-cycle manifests; replay fails closed on synthetic unless `--allow-synthetic`.
+- **Spine:** PyMC hierarchical-t is production default; `fast` is CI/degraded-only with explicit labeling.
+- **State-space:** National path + calibrated future/terminal scales; mode/pop/house offsets aligned with hierarchical measurement.
+- **Stacking:** OOS challenger pool (state-space, poll-only, ridge, baselines); removed hand-tuned stack weight patches.
+- **Ratings:** Wikipedia multi-rater (`wikipedia:multi-rater`) — Cook/IE/Sabato core + WH/RCP/DDHQ/Fox/Econ extended; Solid…Tilt ladder.
+- **Validation:** Richer `validation-report` (reliability, interval score, stack provenance); monitor alerts for method degradation / stale weights / non-FTE history.
+- Layer failures surface in `artifact.warnings`.
+
 ## 2026-09-13 — senate-hierarchical-v0.8.1
 
 Production-path follow-through on remaining exclusions:

@@ -68,6 +68,7 @@ export type ForecastArtifact = {
   election_id: string;
   model_version: string;
   method: string;
+  warnings?: { layer?: string; error?: string }[];
   chamber: ChamberForecast;
   races: RaceForecast[];
   diagnostics?: Record<string, unknown>;

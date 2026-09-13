@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "fetched_at": "2026-09-13T16:09:52.369710+00:00",
+  "fetched_at": "2026-09-13T16:49:23.842335+00:00",
   "n_fte_polls": 307,
   "elections": [
     "senate-2020",
@@ -12,7 +12,7 @@
     "warehouse": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls.parquet"
   },
   "freeze": {
-    "generated_at": "2026-09-13T16:09:53.509737+00:00",
+    "generated_at": "2026-09-13T16:49:25.012333+00:00",
     "n": 1625,
     "elections": [
       "senate-2014",
@@ -22,8 +22,10 @@
       "senate-2022",
       "senate-2024"
     ],
-    "sha256": "2ef773e3750f8559e66c1c9c3629db8d74109902ae1b5b0cf060456b3d25d086",
+    "sha256": "43c12aadcd6336c8b25de1868de3b0e04a5e9217518259ce3385c1b6946e66a6",
     "parser_version": "historical-polls-v1",
+    "primary_source": "mixed",
+    "n_synthetic": 1318,
     "paths": {
       "raw": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\senate_historical_polls.json",
       "normalized": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls_historical.parquet"
@@ -32,5 +34,28 @@
   "license": "CC BY 4.0",
   "attribution": "Polling data from FiveThirtyEight / ABC News (CC BY 4.0). https://github.com/fivethirtyeight/data/tree/master/polls",
   "parser_version": "fte-senate-polls-v1",
-  "note": "VoteHub remains the live 2026 source; FTE Datasette covers historical cycles."
+  "note": "VoteHub remains the live 2026 source; FTE Datasette covers historical cycles.",
+  "synthetic": false,
+  "cycle_manifests": {
+    "senate-2020": {
+      "election_id": "senate-2020",
+      "n_polls": 291,
+      "n_races": 27,
+      "n_synthetic_marked": 0,
+      "primary_source": "fte",
+      "field_end_min": "2020-10-11",
+      "field_end_max": "2020-11-02",
+      "sha256_poll_ids": "dc5c22222cb2f649e0bb894ac128a39ffa21a5de2cc6ad00696138c59fde1551"
+    },
+    "senate-2022": {
+      "election_id": "senate-2022",
+      "n_polls": 16,
+      "n_races": 5,
+      "n_synthetic_marked": 0,
+      "primary_source": "fte",
+      "field_end_min": "2021-01-12",
+      "field_end_max": "2021-03-27",
+      "sha256_poll_ids": "bd134654d79a7cd82484022a8f1755d485913aa1c9ac8add75324f6795b148a2"
+    }
+  }
 }

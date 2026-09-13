@@ -1,0 +1,684 @@
+{
+  "generated_at": "2026-09-13T16:56:45.705695+00:00",
+  "model_version": "senate-hierarchical-v0.9",
+  "primary_holdout": 2022,
+  "quick": true,
+  "lead_time_grid": {
+    "year": 2022,
+    "method": "fast",
+    "by_lead": [
+      {
+        "lead_days": 90,
+        "as_of": "2022-08-10",
+        "n_polls": 16,
+        "scores": {
+          "n": 33,
+          "crps": 2.65664489166191,
+          "log_score": -3.0346712439624834,
+          "brier": 0.03549564303168325,
+          "mae": 3.5404940920274712
+        },
+        "extended": {
+          "n": 33,
+          "crps": 2.6566448916619096,
+          "interval_score_90": 20.845195458182204,
+          "brier": 0.03549564303168325,
+          "mae": 3.5404940920274717,
+          "coverage_90": 0.9696969696969697,
+          "reliability": [
+            {
+              "bin_lo": 0.0,
+              "bin_hi": 0.1,
+              "n": 18.0,
+              "mean_p": 0.006338786304276751,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.30000000000000004,
+              "bin_hi": 0.4,
+              "n": 3.0,
+              "mean_p": 0.35145016132045503,
+              "mean_y": 0.3333333333333333
+            },
+            {
+              "bin_lo": 0.5,
+              "bin_hi": 0.6000000000000001,
+              "n": 1.0,
+              "mean_p": 0.5650491124133055,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.6000000000000001,
+              "bin_hi": 0.7000000000000001,
+              "n": 1.0,
+              "mean_p": 0.6955442833588125,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.7000000000000001,
+              "bin_hi": 0.8,
+              "n": 2.0,
+              "mean_p": 0.7404584341957476,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.8,
+              "bin_hi": 0.9,
+              "n": 1.0,
+              "mean_p": 0.8851389938611455,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.9,
+              "bin_hi": 1.0,
+              "n": 7.0,
+              "mean_p": 0.9710274850890236,
+              "mean_y": 1.0
+            }
+          ]
+        },
+        "chamber": {
+          "seat_crps": 0.5150666666666666,
+          "seat_mae": 1.7266666666666666,
+          "control_brier": 0.0,
+          "p_dem_control": 0.0,
+          "expected_dem_seats": 42.62,
+          "n_draws": 150
+        },
+        "energy_score": 18.250797041922755
+      },
+      {
+        "lead_days": 60,
+        "as_of": "2022-09-09",
+        "n_polls": 16,
+        "scores": {
+          "n": 33,
+          "crps": 2.85306886221847,
+          "log_score": -3.0730769827073177,
+          "brier": 0.036804873523734696,
+          "mae": 3.9162128192628374
+        },
+        "extended": {
+          "n": 33,
+          "crps": 2.8530688622184694,
+          "interval_score_90": 21.026307762062686,
+          "brier": 0.0368048735237347,
+          "mae": 3.9162128192628374,
+          "coverage_90": 0.9393939393939394,
+          "reliability": [
+            {
+              "bin_lo": 0.0,
+              "bin_hi": 0.1,
+              "n": 18.0,
+              "mean_p": 0.0043321911602255585,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.2,
+              "bin_hi": 0.30000000000000004,
+              "n": 2.0,
+              "mean_p": 0.2936893420894626,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.30000000000000004,
+              "bin_hi": 0.4,
+              "n": 1.0,
+              "mean_p": 0.3679733407681323,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.5,
+              "bin_hi": 0.6000000000000001,
+              "n": 1.0,
+              "mean_p": 0.5758300582359087,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.6000000000000001,
+              "bin_hi": 0.7000000000000001,
+              "n": 1.0,
+              "mean_p": 0.6373175782479523,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.7000000000000001,
+              "bin_hi": 0.8,
+              "n": 2.0,
+              "mean_p": 0.7307247309749684,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.8,
+              "bin_hi": 0.9,
+              "n": 1.0,
+              "mean_p": 0.86560339715489,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.9,
+              "bin_hi": 1.0,
+              "n": 7.0,
+              "mean_p": 0.9643235970650552,
+              "mean_y": 1.0
+            }
+          ]
+        },
+        "chamber": {
+          "seat_crps": 0.5005333333333333,
+          "seat_mae": 1.7333333333333334,
+          "control_brier": 0.0,
+          "p_dem_control": 0.0,
+          "expected_dem_seats": 42.4,
+          "n_draws": 150
+        },
+        "energy_score": 19.46105999152029
+      },
+      {
+        "lead_days": 30,
+        "as_of": "2022-10-09",
+        "n_polls": 16,
+        "scores": {
+          "n": 33,
+          "crps": 2.674328774947265,
+          "log_score": -3.033745364778619,
+          "brier": 0.03475417188539389,
+          "mae": 3.5886913363539805
+        },
+        "extended": {
+          "n": 33,
+          "crps": 2.6743287749472646,
+          "interval_score_90": 20.892855730340887,
+          "brier": 0.03475417188539389,
+          "mae": 3.5886913363539805,
+          "coverage_90": 0.9696969696969697,
+          "reliability": [
+            {
+              "bin_lo": 0.0,
+              "bin_hi": 0.1,
+              "n": 18.0,
+              "mean_p": 0.004128737694639906,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.30000000000000004,
+              "bin_hi": 0.4,
+              "n": 3.0,
+              "mean_p": 0.3367578788098142,
+              "mean_y": 0.3333333333333333
+            },
+            {
+              "bin_lo": 0.5,
+              "bin_hi": 0.6000000000000001,
+              "n": 1.0,
+              "mean_p": 0.5021968309573062,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.6000000000000001,
+              "bin_hi": 0.7000000000000001,
+              "n": 1.0,
+              "mean_p": 0.6701912844431328,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.7000000000000001,
+              "bin_hi": 0.8,
+              "n": 2.0,
+              "mean_p": 0.73312391861755,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.9,
+              "bin_hi": 1.0,
+              "n": 8.0,
+              "mean_p": 0.9602923629710953,
+              "mean_y": 1.0
+            }
+          ]
+        },
+        "chamber": {
+          "seat_crps": 0.5568444444444443,
+          "seat_mae": 1.8333333333333333,
+          "control_brier": 0.0,
+          "p_dem_control": 0.0,
+          "expected_dem_seats": 42.406666666666666,
+          "n_draws": 150
+        },
+        "energy_score": 18.479676302544043
+      },
+      {
+        "lead_days": 7,
+        "as_of": "2022-11-01",
+        "n_polls": 16,
+        "scores": {
+          "n": 33,
+          "crps": 2.7259251184749482,
+          "log_score": -3.048348034593627,
+          "brier": 0.040822738217355894,
+          "mae": 3.820161309502531
+        },
+        "extended": {
+          "n": 33,
+          "crps": 2.725925118474948,
+          "interval_score_90": 21.25364167373555,
+          "brier": 0.040822738217355894,
+          "mae": 3.820161309502531,
+          "coverage_90": 0.9696969696969697,
+          "reliability": [
+            {
+              "bin_lo": 0.0,
+              "bin_hi": 0.1,
+              "n": 18.0,
+              "mean_p": 0.00507670179005072,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.2,
+              "bin_hi": 0.30000000000000004,
+              "n": 1.0,
+              "mean_p": 0.28503700616927863,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.30000000000000004,
+              "bin_hi": 0.4,
+              "n": 2.0,
+              "mean_p": 0.3534714370997053,
+              "mean_y": 0.5
+            },
+            {
+              "bin_lo": 0.6000000000000001,
+              "bin_hi": 0.7000000000000001,
+              "n": 3.0,
+              "mean_p": 0.620663413533553,
+              "mean_y": 0.6666666666666666
+            },
+            {
+              "bin_lo": 0.7000000000000001,
+              "bin_hi": 0.8,
+              "n": 1.0,
+              "mean_p": 0.7253871487808432,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.9,
+              "bin_hi": 1.0,
+              "n": 8.0,
+              "mean_p": 0.9618562801152821,
+              "mean_y": 1.0
+            }
+          ]
+        },
+        "chamber": {
+          "seat_crps": 0.6107555555555555,
+          "seat_mae": 1.92,
+          "control_brier": 0.0,
+          "p_dem_control": 0.0,
+          "expected_dem_seats": 42.373333333333335,
+          "n_draws": 150
+        },
+        "energy_score": 18.80466033296897
+      }
+    ],
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\lead_time_grid_2022.json"
+  },
+  "component_ablations": {
+    "year": 2022,
+    "as_of": "2022-09-09",
+    "lead_days": 60,
+    "ablations": {
+      "baseline": {
+        "n": 33,
+        "crps": 2.7803403124114885,
+        "log_score": -3.1200471138397576,
+        "brier": 0.03818748917143761,
+        "mae": 3.7139836325582976
+      },
+      "no_heavy_tails": {
+        "n": 33,
+        "crps": 2.712986064108397,
+        "log_score": -3.1063816641160105,
+        "brier": 0.03931663970140218,
+        "mae": 3.5806206325660406
+      },
+      "independent_errors": {
+        "n": 33,
+        "crps": 2.7208439134971365,
+        "log_score": -3.1001250820055244,
+        "brier": 0.04169113703313758,
+        "mae": 3.5328901493768
+      },
+      "no_national_factor": {
+        "n": 33,
+        "crps": 15.700764733354118,
+        "log_score": -10.255452715302773,
+        "brier": 0.06535156115864277,
+        "mae": 18.51685633937532
+      }
+    },
+    "deltas_crps_vs_baseline": {
+      "no_heavy_tails": -0.06735424830309134,
+      "independent_errors": -0.05949639891435199,
+      "no_national_factor": 12.92042442094263
+    },
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\component_ablation_2022.json"
+  },
+  "nested_df_era": {
+    "holdout_year": 2022,
+    "train_years": [
+      2014,
+      2016,
+      2018,
+      2020,
+      2024
+    ],
+    "grid": [
+      {
+        "student_t_df": 4.0,
+        "era_weight": 0.85,
+        "train_mean_crps": 4.841748769252236,
+        "train_scores": [
+          1.948391879839898,
+          12.632902863576447,
+          3.2182588826107437,
+          2.793869063368147,
+          3.6153211568659462
+        ]
+      },
+      {
+        "student_t_df": 4.0,
+        "era_weight": 1.0,
+        "train_mean_crps": 4.843252423243532,
+        "train_scores": [
+          2.0025720339642636,
+          12.531556720846288,
+          3.234518348027564,
+          2.8363346278126493,
+          3.611280385566896
+        ]
+      },
+      {
+        "student_t_df": 4.0,
+        "era_weight": 1.15,
+        "train_mean_crps": 4.852215942308135,
+        "train_scores": [
+          2.0683515339734764,
+          12.433709955804263,
+          3.2598383197345773,
+          2.8855541892751337,
+          3.6136257127532234
+        ]
+      },
+      {
+        "student_t_df": 5.0,
+        "era_weight": 0.85,
+        "train_mean_crps": 4.859787440718799,
+        "train_scores": [
+          1.8873712839427752,
+          12.77591316123569,
+          3.2116259834048675,
+          2.7614960437077523,
+          3.6625307313029087
+        ]
+      },
+      {
+        "student_t_df": 5.0,
+        "era_weight": 1.0,
+        "train_mean_crps": 4.85666765645907,
+        "train_scores": [
+          1.9278923430399155,
+          12.682742606257792,
+          3.214388912555338,
+          2.796016243209853,
+          3.6622981772324494
+        ]
+      },
+      {
+        "student_t_df": 5.0,
+        "era_weight": 1.15,
+        "train_mean_crps": 4.860260616060956,
+        "train_scores": [
+          1.980102041529491,
+          12.59060846116795,
+          3.2261777303142285,
+          2.8364135731153053,
+          3.6680012741778056
+        ]
+      },
+      {
+        "student_t_df": 8.0,
+        "era_weight": 0.85,
+        "train_mean_crps": 4.835278598173822,
+        "train_scores": [
+          1.8973786937670698,
+          12.869543731902729,
+          3.2068408739642553,
+          2.615692363250115,
+          3.5869373279849417
+        ]
+      },
+      {
+        "student_t_df": 8.0,
+        "era_weight": 1.0,
+        "train_mean_crps": 4.825815052448979,
+        "train_scores": [
+          1.9324844601565048,
+          12.771213208209293,
+          3.2091662923867426,
+          2.6410762589678134,
+          3.575135042524538
+        ]
+      },
+      {
+        "student_t_df": 8.0,
+        "era_weight": 1.15,
+        "train_mean_crps": 4.821660332592852,
+        "train_scores": [
+          1.9767710683245052,
+          12.673559785817686,
+          3.2178806329572334,
+          2.67129720840552,
+          3.568792967459319
+        ]
+      }
+    ],
+    "selected": {
+      "student_t_df": 8.0,
+      "era_weight": 1.15,
+      "train_mean_crps": 4.821660332592852,
+      "train_scores": [
+        1.9767710683245052,
+        12.673559785817686,
+        3.2178806329572334,
+        2.67129720840552,
+        3.568792967459319
+      ]
+    },
+    "holdout_crps": 2.8063094626689224,
+    "note": "Hyperparameters selected without seeing holdout cycle",
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_df_era_2022.json"
+  },
+  "cycle_replay": {
+    "stack_weights": {
+      "last_election_swing": 0.08601003796343126,
+      "equal_weight_polls": 0.18628210919561128,
+      "shrinkage_polls": 0.17454717853584162,
+      "fast_hierarchical_t": 0.20388838308391619,
+      "state_space": 0.15357234404904524,
+      "poll_only_state_space": 6.703090946798564e-08,
+      "ridge_fundamentals": 0.195699880141245
+    },
+    "chamber": {
+      "seat_crps": 0.5522999999999999,
+      "seat_mae": 1.81,
+      "control_brier": 0.0,
+      "p_dem_control": 0.0,
+      "expected_dem_seats": 42.975,
+      "n_leads": 2
+    },
+    "poll_gate": {
+      "election_id": "senate-2022",
+      "year": 2022,
+      "n_polls": 16,
+      "synthetic": false,
+      "source": "cycle_manifest",
+      "allow_synthetic": true,
+      "in_cycles": true
+    },
+    "aggregate_keys": [
+      "last_election_swing",
+      "equal_weight_polls",
+      "shrinkage_polls",
+      "fast_hierarchical_t",
+      "state_space",
+      "poll_only_state_space",
+      "ridge_fundamentals"
+    ],
+    "error": null
+  },
+  "calibration": {
+    "n": 33,
+    "reliability": [
+      {
+        "bin_lo": 0.0,
+        "bin_hi": 0.1,
+        "n": 18.0,
+        "mean_p": 0.008709277158211137,
+        "mean_y": 0.0
+      },
+      {
+        "bin_lo": 0.2,
+        "bin_hi": 0.30000000000000004,
+        "n": 1.0,
+        "mean_p": 0.29381774264778693,
+        "mean_y": 0.0
+      },
+      {
+        "bin_lo": 0.30000000000000004,
+        "bin_hi": 0.4,
+        "n": 1.0,
+        "mean_p": 0.34445247352650543,
+        "mean_y": 0.0
+      },
+      {
+        "bin_lo": 0.4,
+        "bin_hi": 0.5,
+        "n": 1.0,
+        "mean_p": 0.4076980724477728,
+        "mean_y": 1.0
+      },
+      {
+        "bin_lo": 0.5,
+        "bin_hi": 0.6000000000000001,
+        "n": 1.0,
+        "mean_p": 0.5666478781115543,
+        "mean_y": 0.0
+      },
+      {
+        "bin_lo": 0.6000000000000001,
+        "bin_hi": 0.7000000000000001,
+        "n": 3.0,
+        "mean_p": 0.6777308313832938,
+        "mean_y": 1.0
+      },
+      {
+        "bin_lo": 0.8,
+        "bin_hi": 0.9,
+        "n": 1.0,
+        "mean_p": 0.8876220826831243,
+        "mean_y": 1.0
+      },
+      {
+        "bin_lo": 0.9,
+        "bin_hi": 1.0,
+        "n": 7.0,
+        "mean_p": 0.9603499949685324,
+        "mean_y": 1.0
+      }
+    ],
+    "mean_interval_score_90": 23.25002385480888,
+    "brier": 0.03719729638687999,
+    "margin_scores": {
+      "n": 33,
+      "crps": 2.6847249206839807,
+      "interval_score_90": 23.25002385480888,
+      "brier": 0.03719729638687999,
+      "mae": 3.5237888637442367,
+      "coverage_90": 1.0,
+      "reliability": [
+        {
+          "bin_lo": 0.0,
+          "bin_hi": 0.1,
+          "n": 18.0,
+          "mean_p": 0.008709277158211137,
+          "mean_y": 0.0
+        },
+        {
+          "bin_lo": 0.2,
+          "bin_hi": 0.30000000000000004,
+          "n": 1.0,
+          "mean_p": 0.29381774264778693,
+          "mean_y": 0.0
+        },
+        {
+          "bin_lo": 0.30000000000000004,
+          "bin_hi": 0.4,
+          "n": 1.0,
+          "mean_p": 0.34445247352650543,
+          "mean_y": 0.0
+        },
+        {
+          "bin_lo": 0.4,
+          "bin_hi": 0.5,
+          "n": 1.0,
+          "mean_p": 0.4076980724477728,
+          "mean_y": 1.0
+        },
+        {
+          "bin_lo": 0.5,
+          "bin_hi": 0.6000000000000001,
+          "n": 1.0,
+          "mean_p": 0.5666478781115543,
+          "mean_y": 0.0
+        },
+        {
+          "bin_lo": 0.6000000000000001,
+          "bin_hi": 0.7000000000000001,
+          "n": 3.0,
+          "mean_p": 0.6777308313832938,
+          "mean_y": 1.0
+        },
+        {
+          "bin_lo": 0.8,
+          "bin_hi": 0.9,
+          "n": 1.0,
+          "mean_p": 0.8876220826831243,
+          "mean_y": 1.0
+        },
+        {
+          "bin_lo": 0.9,
+          "bin_hi": 1.0,
+          "n": 7.0,
+          "mean_p": 0.9603499949685324,
+          "mean_y": 1.0
+        }
+      ]
+    }
+  },
+  "stack_weights_artifact": {
+    "last_election_swing": 0.1264075367822936,
+    "equal_weight_polls": 0.15608110823084928,
+    "shrinkage_polls": 0.17591829122496674,
+    "fast_hierarchical_t": 0.18104159247789697,
+    "state_space": 0.1940869161670225,
+    "poll_only_state_space": 3.2863477009926e-05,
+    "ridge_fundamentals": 0.16643169163996094
+  },
+  "limitations": [
+    "VoteHub documents no /polls/archive \u2014 historical polls prefer FTE CC BY Datasette.",
+    "Licensed Cook/IE feeds are not redistributed; Wikipedia multi-rater is production ratings.",
+    "House / Electoral College intentionally out of scope.",
+    "fast hierarchical-t is a non-production approximation; production prefers pymc / ensemble_stack."
+  ]
+}

@@ -172,7 +172,7 @@ def write_expert_ratings_store(
     raw_path.write_text(public_df.to_json(orient="records", indent=2))
     df.to_parquet(norm_path, index=False)
     note = (
-        "Wikipedia Cook/IE/Sabato consensus (CC BY-SA page; attributed handicappers)."
+        "Wikipedia multi-rater Cook/IE/Sabato consensus (CC BY-SA page; extended WH/RCP/DDHQ stored)."
         if str(source).startswith("wikipedia")
         else (
             "Curated research ratings for ablation overlays — replace via Wikipedia / CSV / licensed. "
