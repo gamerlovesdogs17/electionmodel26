@@ -14,4 +14,6 @@ npm install
 npm run dev   # http://127.0.0.1:4317
 ```
 
-The UI loads `NEXT_PUBLIC_API_URL` (default `http://127.0.0.1:8787`) and falls back to `public/data/forecast_latest.json`.
+Locally, set `NEXT_PUBLIC_API_URL` (e.g. `http://127.0.0.1:8787`) to hit the API; otherwise the UI loads `public/data/forecast_latest.json`.
+
+GitHub Pages builds with `GITHUB_PAGES=true` (see `next.config.ts` + `.github/workflows/deploy-pages.yml`) so assets resolve under `/electionmodel26/`.

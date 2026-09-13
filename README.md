@@ -50,6 +50,12 @@ npm run dev -- --port 4317
 
 Open [http://127.0.0.1:4317](http://127.0.0.1:4317).
 
+## Public site (GitHub Pages)
+
+The research UI is published at [https://gamerlovesdogs17.github.io/electionmodel26/](https://gamerlovesdogs17.github.io/electionmodel26/) via `.github/workflows/deploy-pages.yml` (static Next.js export of `web/`).
+
+In the repo **Settings → Pages**, set **Source** to **GitHub Actions** (not “Deploy from a branch”). Branch-root deploys only render this README.
+
 ## Regenerate forecasts
 
 ```bash

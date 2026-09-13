@@ -7,14 +7,19 @@ import { ForecastArtifact } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 
 async function loadForecast(): Promise<ForecastArtifact> {
-  const api = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8787";
-  try {
-    const res = await fetch(`${api}/forecast/latest`, { cache: "no-store" });
-    if (res.ok) return (await res.json()) as ForecastArtifact;
-  } catch {
-    // fall through to static artifact
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  const api = process.env.NEXT_PUBLIC_API_URL;
+  if (api) {
+    try {
+      const res = await fetch(`${api}/forecast/latest`, { cache: "no-store" });
+      if (res.ok) return (await res.json()) as ForecastArtifact;
+    } catch {
+      // fall through to static artifact
+    }
   }
-  const res = await fetch("/data/forecast_latest.json", { cache: "no-store" });
+  const res = await fetch(`${basePath}/data/forecast_latest.json`, {
+    cache: "no-store",
+  });
   if (!res.ok) throw new Error("Forecast artifact unavailable");
   return (await res.json()) as ForecastArtifact;
 }
