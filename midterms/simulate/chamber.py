@@ -18,6 +18,20 @@ from midterms.model.pymc_model import FitResult
 from midterms.model.overlays import rating_from_probability
 
 
+def vp_tiebreak_for_election_year(year: int) -> str:
+    """Vice President's party on November election day of `year`."""
+    y = int(year)
+    if y >= 2025:
+        return "R"  # Vance
+    if y >= 2021:
+        return "D"  # Harris
+    if y >= 2017:
+        return "R"  # Pence
+    if y >= 2009:
+        return "D"  # Biden
+    return "R"
+
+
 @dataclass
 class ChamberSimulation:
     seat_draws: np.ndarray  # dem caucus seats per draw (length n_draws)
@@ -60,18 +74,24 @@ def simulate_chamber(
 
     margins = fit.draws_margin
     n_draws, n_races = margins.shape
-    wins = (margins > 0).astype(int)
+    wins = (margins >= 0).astype(int)
+
+    # Contested seats omitted from the fit stay fixed by held_by — never invent seats.
+    fit_ids = set(fit.race_ids)
+    if len(contested):
+        omitted = contested[~contested["race_id"].isin(fit_ids)]
+        if len(omitted):
+            held_dem += int(omitted["held_by"].isin(["D", "I"]).sum())
+            held_rep += int((omitted["held_by"] == "R").sum())
+
     dem_seats = held_dem + wins.sum(axis=1)
     total = held_dem + held_rep + n_races
     if total != 100:
-        target_held = 100 - n_races
-        if held_dem + held_rep > 0:
-            ratio = held_dem / (held_dem + held_rep)
-        else:
-            ratio = 0.5
-        held_dem = int(round(target_held * ratio))
-        held_rep = target_held - held_dem
-        dem_seats = held_dem + wins.sum(axis=1)
+        raise ValueError(
+            f"Senate seat accounting must total 100 (held_dem={held_dem}, "
+            f"held_rep={held_rep}, contested_in_fit={n_races}, total={total}). "
+            "Check not_up / withdrawn / fit race_ids."
+        )
 
     hist: dict[str, int] = {}
     for s in dem_seats.astype(int):
@@ -83,11 +103,11 @@ def simulate_chamber(
         p_dem_maj = float((dem_seats >= majority_threshold).mean())
         p_rep_maj = float((dem_seats < majority_threshold).mean())  # includes 50–50
     elif vp_tiebreak_party == "D":
-        p_dem_maj = float((dem_seats >= 50).mean())  # includes 50–50
+        # Dem VP: Dem needs >=50; Rep needs <=49
+        p_dem_maj = float((dem_seats >= 50).mean())
         p_rep_maj = float((dem_seats <= 49).mean())
     else:
-        p_dem_maj = float((dem_seats >= majority_threshold).mean())
-        p_rep_maj = float((dem_seats <= 49).mean())
+        raise ValueError(f"vp_tiebreak_party must be 'R' or 'D', got {vp_tiebreak_party!r}")
 
     sim = ChamberSimulation(
         seat_draws=dem_seats,
@@ -159,7 +179,7 @@ def simulate_chamber(
                 "dem_candidate": dem_name,
                 "rep_candidate": rep_name,
                 "dem_party": dem_party,
-                "caucus": "D",  # Ind wins still count toward Dem control
+                "caucus": dem_party if favored_caucus == "D" else "R",
                 "dem_share": round(dem_share, 1),
                 "rep_share": round(rep_share, 1),
                 "rating": rating,

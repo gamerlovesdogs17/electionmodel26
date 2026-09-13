@@ -92,3 +92,5 @@ def test_rating_overlay_moves_means():
     assert out[0] > 0
     assert out[1] < 0
     assert rating_from_probability(0.96) == "Solid D"
+    assert rating_from_probability(0.58) == "Tilt D"
+    assert rating_from_probability(0.42) == "Tilt R"

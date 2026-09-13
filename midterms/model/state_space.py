@@ -28,11 +28,15 @@ def fit_state_space(
     generic_ballot: float = 0.0,
     student_t_df: float = 5.0,
     era_weight: float = 1.0,
+    fund_pull: float = 0.35,
+    flat_prior: bool = False,
 ) -> FitResult:
     """
     Per-race forward filter of poll margins → current latent, then project to ED.
 
     future_movement_sd shrinks with days_to_ed; terminal_error_sd does not.
+    fund_pull blends the filtered latent toward the fundamentals prior at ED
+    (set 0 for a poll-only challenger). flat_prior starts the filter at 0.
     """
     rng = np.random.default_rng(seed)
     races = snapshot.races.copy()
@@ -64,6 +68,7 @@ def fit_state_space(
     # Future movement contracts; terminal ED error stays (Morris-style)
     future_sd = 4.5 * np.sqrt(days_to_ed / 120.0) * float(era_weight)
     terminal_sd = 3.5 * float(era_weight)
+    pull = float(np.clip(fund_pull, 0.0, 1.0))
 
     means = []
     sds = []
@@ -71,7 +76,7 @@ def fit_state_space(
     states = races["state"].astype(str).tolist()
 
     for i, rid in enumerate(race_ids):
-        prior = float(fund.get(rid, races.iloc[i]["prior_lean"]))
+        prior = 0.0 if flat_prior else float(fund.get(rid, races.iloc[i]["prior_lean"]))
         rp = polls[polls["race_id"] == rid] if len(polls) else polls
         mu = prior
         var = 8.0**2
@@ -89,7 +94,7 @@ def fit_state_space(
                 mu = mu + k * (y - mu)
                 var = (1 - k) * var
         # Project to Election Day
-        ed_mu = (1 - 0.35) * mu + 0.35 * prior  # mild pull to fundamentals
+        ed_mu = (1.0 - pull) * mu + pull * prior
         ed_sd = float(np.sqrt(var + future_sd**2 + terminal_sd**2))
         means.append(ed_mu)
         sds.append(ed_sd)
@@ -117,6 +122,8 @@ def fit_state_space(
             "terminal_error_sd": float(terminal_sd),
             "student_t_df": float(student_t_df),
             "era_weight": float(era_weight),
+            "fund_pull": float(pull),
+            "flat_prior": bool(flat_prior),
             "draws": n_draws,
             "seed": seed,
             "note": "forward state-space with contracting future movement + terminal ED error",

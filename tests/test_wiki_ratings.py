@@ -50,15 +50,15 @@ FIXTURE_HTML = """
 
 def test_normalize_wiki_rating():
     assert normalize_wiki_rating("Safe R") == "Solid R"
-    assert normalize_wiki_rating("Tilt D (flip)") == "Lean D"
+    assert normalize_wiki_rating("Tilt D (flip)") == "Tilt D"
     assert normalize_wiki_rating("Tossup") == "Tossup"
     assert normalize_wiki_rating("Likely D") == "Likely D"
     assert normalize_wiki_rating("—") is None
 
 
 def test_consensus_median():
-    assert consensus_rating(["Lean D", "Lean D", "Likely D"]) == "Lean D"
-    assert consensus_rating(["Tossup", "Lean R", "Tossup"]) == "Tossup"
+    assert consensus_rating(["Lean D", "Tilt D", "Likely D"]) == "Lean D"
+    assert consensus_rating(["Tossup", "Tilt R", "Tossup"]) == "Tossup"
     assert consensus_rating(["Solid R", None, "Solid R"]) == "Solid R"
 
 
@@ -71,8 +71,10 @@ def test_parse_fixture_table():
     rows, meta = parse_ratings_table_html(FIXTURE_HTML)
     by = {r["state"]: r for r in rows}
     assert by["AL"]["rating"] == "Solid R"
-    assert by["GA"]["rating"] == "Lean D"  # Lean, Tilt→Lean, Likely → median Lean
+    # Lean D, Tilt D, Likely D → median Lean D
+    assert by["GA"]["rating"] == "Lean D"
     assert by["ME"]["rating"] == "Tossup"
+    assert by["ME"]["ie"] == "Tilt R"
     assert by["NC"]["rating"] == "Lean D"
     assert by["FL"]["rating"] == "Solid R"
     assert meta["header_asofs"]["Cook"] == "2026-08-20"

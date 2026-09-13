@@ -205,13 +205,15 @@ export const STATE_NAME: Record<string, string> = {
   WY: "Wyoming",
 };
 
-/** Color bands aligned with rating_from_probability thresholds. */
+/** Color bands aligned with rating_from_probability thresholds (incl. Tilt). */
 export function demFill(p: number): string {
   if (p >= 0.92) return "#143f6b"; // Solid D
-  if (p >= 0.8) return "#1f5f8b"; // Likely D
-  if (p >= 0.6) return "#3d7ea8"; // Lean D
-  if (p >= 0.4) return "#9a8f4a"; // Tossup
-  if (p >= 0.2) return "#c46a5c"; // Lean R
+  if (p >= 0.78) return "#1f5f8b"; // Likely D
+  if (p >= 0.62) return "#3d7ea8"; // Lean D
+  if (p >= 0.55) return "#6a9bb8"; // Tilt D
+  if (p >= 0.45) return "#9a8f4a"; // Tossup
+  if (p >= 0.38) return "#d48a7a"; // Tilt R
+  if (p >= 0.22) return "#c46a5c"; // Lean R
   if (p >= 0.08) return "#a33b2d"; // Likely R
   return "#7a2418"; // Solid R
 }
@@ -219,8 +221,10 @@ export function demFill(p: number): string {
 export function marginFill(m: number): string {
   if (m >= 10) return "#143f6b";
   if (m >= 4) return "#1f5f8b";
-  if (m >= 1) return "#3d7ea8";
-  if (m > -1) return "#8a9096";
+  if (m >= 2) return "#3d7ea8";
+  if (m >= 0.5) return "#6a9bb8";
+  if (m > -0.5) return "#8a9096";
+  if (m > -2) return "#d48a7a";
   if (m > -4) return "#c46a5c";
   if (m > -10) return "#a33b2d";
   return "#7a2418";
@@ -228,10 +232,12 @@ export function marginFill(m: number): string {
 
 export function ratingFromProbability(p: number): string {
   if (p >= 0.92) return "Solid D";
-  if (p >= 0.8) return "Likely D";
-  if (p >= 0.6) return "Lean D";
-  if (p >= 0.4) return "Tossup";
-  if (p >= 0.2) return "Lean R";
+  if (p >= 0.78) return "Likely D";
+  if (p >= 0.62) return "Lean D";
+  if (p >= 0.55) return "Tilt D";
+  if (p >= 0.45) return "Tossup";
+  if (p >= 0.38) return "Tilt R";
+  if (p >= 0.22) return "Lean R";
   if (p >= 0.08) return "Likely R";
   return "Solid R";
 }
@@ -251,8 +257,12 @@ export function ratingFill(rating: string): string {
       return "#1f5f8b";
     case "Lean D":
       return "#3d7ea8";
+    case "Tilt D":
+      return "#6a9bb8";
     case "Tossup":
       return "#9a8f4a";
+    case "Tilt R":
+      return "#d48a7a";
     case "Lean R":
       return "#c46a5c";
     case "Likely R":

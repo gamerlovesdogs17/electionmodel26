@@ -14,6 +14,57 @@ from midterms.pipeline.run_forecast import run_forecast
 from midterms.validation.cycle_replay import replay_cycle
 
 
+def test_expert_store_freshness_flags_stale(tmp_path, monkeypatch):
+    from midterms.evidence import expert_ratings as er
+
+    monkeypatch.setattr(er, "NORMALIZED_DIR", tmp_path)
+    monkeypatch.setattr(er, "RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(er, "MANIFESTS_DIR", tmp_path / "manifests")
+    (tmp_path / "raw" / "external").mkdir(parents=True)
+    (tmp_path / "manifests").mkdir()
+    df = pd.DataFrame(
+        [
+            {
+                "election_id": "senate-2026",
+                "state": "GA",
+                "race_id": "senate-2026-GA",
+                "rating": "Lean D",
+                "implied_margin": 4.5,
+                "source": "curated_research_snapshot",
+                "available_at": "2026-08-01",
+                "retrieved_at": "2026-08-01T00:00:00+00:00",
+                "parser_version": "expert-ratings-v1",
+            }
+        ]
+    )
+    path = tmp_path / "expert_ratings.parquet"
+    df.to_parquet(path, index=False)
+    assert not er._expert_store_is_fresh(
+        path, available_at="2026-09-13", prefer_wikipedia=True, max_age_hours=168.0
+    )
+
+
+def test_mode_pop_not_in_influence_weights():
+    """Mode/population are likelihood offsets — must not also scale influence weights."""
+    polls = pd.DataFrame(
+        {
+            "poll_id": ["a", "b"],
+            "race_id": ["r1", "r1"],
+            "pollster_id": ["P1", "P1"],
+            "study_id": ["s1", "s2"],
+            "field_end": ["2022-08-01", "2022-08-01"],
+            "sample_size": [600, 600],
+            "quality_weight": [1.0, 1.0],
+            "partisan": [False, False],
+            "mode": ["Live Phone", "IVR"],
+            "population": ["LV", "A"],
+            "two_party_margin": [2.0, 2.0],
+        }
+    )
+    w = attach_poll_weights(polls, as_of=pd.Timestamp("2022-09-01").date())
+    assert abs(float(w["influence_weight"].iloc[0]) - float(w["influence_weight"].iloc[1])) < 1e-9
+
+
 def test_enop_grows_sublinearly_under_pollster_flood():
     wh = Warehouse()
     snap = wh.build_as_of("2022-09-01", "senate-2022")

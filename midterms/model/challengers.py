@@ -19,7 +19,7 @@ def fit_poll_only_state_space(
     n_draws: int = 2000,
     seed: int = 11,
 ) -> FitResult:
-    """State-space with flat fundamentals (poll-only challenger)."""
+    """State-space with flat fundamentals and no ED fund pull (poll-only challenger)."""
     return fit_state_space(
         snapshot,
         n_draws=n_draws,
@@ -27,6 +27,8 @@ def fit_poll_only_state_space(
         generic_ballot=0.0,
         student_t_df=5.0,
         era_weight=1.0,
+        fund_pull=0.0,
+        flat_prior=True,
     )
 
 

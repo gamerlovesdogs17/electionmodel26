@@ -17,7 +17,7 @@ from midterms.model.ensemble import default_weights_from_replay, softmax_neg_sco
 from midterms.model.overlays import apply_rating_overlay, shift_draws_to_means
 from midterms.model.pymc_model import FitResult, fit_fast_approximation
 from midterms.model.poll_weights import attach_poll_weights, global_enop
-from midterms.simulate.chamber import simulate_chamber
+from midterms.simulate.chamber import simulate_chamber, vp_tiebreak_for_election_year
 
 
 def _forecasts_from_fit(fit) -> list:
@@ -40,7 +40,7 @@ def _forecasts_from_fit(fit) -> list:
     return out
 
 
-def _realized_chamber(races, results) -> tuple[float, int]:
+def _realized_chamber(races, results, *, vp_tiebreak_party: str = "R") -> tuple[float, int]:
     held = races[races["not_up"]]
     held_dem = int((held["held_by"] == "D").sum()) + int((held["held_by"] == "I").sum())
     contested = races[~races["not_up"]]
@@ -52,21 +52,29 @@ def _realized_chamber(races, results) -> tuple[float, int]:
         if by_res is None or rid not in by_res.index:
             continue
         n += 1
-        if float(by_res.loc[rid, "two_party_margin"]) > 0:
+        if float(by_res.loc[rid, "two_party_margin"]) >= 0:
             wins += 1
-    if n == 0:
-        return float(held_dem), int(held_dem >= 51)
     dem_seats = held_dem + wins
-    return float(dem_seats), int(dem_seats >= 51)
+    if n == 0:
+        dem_seats = float(held_dem)
+    if vp_tiebreak_party == "D":
+        dem_control = int(dem_seats >= 50)
+    else:
+        dem_control = int(dem_seats >= 51)
+    return float(dem_seats), dem_control
 
 
-def _overlay_ablation_block(fit: FitResult, snap, results) -> dict[str, Any]:
+def _overlay_ablation_block(
+    fit: FitResult, snap, results, *, vp_tiebreak_party: str = "R"
+) -> dict[str, Any]:
     """Compare unadjusted vs soft rating overlay chamber scores (synthetic ratings OK)."""
     from midterms.model.overlays import rating_from_probability
     from scipy.stats import norm
 
-    realized_seats, realized_ctl = _realized_chamber(snap.races, results)
-    core_sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party="R")
+    realized_seats, realized_ctl = _realized_chamber(
+        snap.races, results, vp_tiebreak_party=vp_tiebreak_party
+    )
+    core_sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party=vp_tiebreak_party)
     core_scores = score_chamber_draws(
         core_sim.seat_draws,
         realized_dem_seats=realized_seats,
@@ -99,7 +107,7 @@ def _overlay_ablation_block(fit: FitResult, snap, results) -> dict[str, Any]:
         diagnostics=fit.diagnostics,
         method=fit.method + "+rating_ablation",
     )
-    adj_sim, _ = simulate_chamber(adj_fit, snap.races, vp_tiebreak_party="R")
+    adj_sim, _ = simulate_chamber(adj_fit, snap.races, vp_tiebreak_party=vp_tiebreak_party)
     adj_scores = score_chamber_draws(
         adj_sim.seat_draws,
         realized_dem_seats=realized_seats,
@@ -131,6 +139,7 @@ def replay_cycle(
     """
     wh = Warehouse()
     election_id = f"senate-{holdout_year}"
+    vp = vp_tiebreak_for_election_year(holdout_year)
     races = wh.races[wh.races["election_id"] == election_id]
     if races.empty:
         raise ValueError(f"no races for {election_id}")
@@ -141,6 +150,7 @@ def replay_cycle(
     report: dict[str, Any] = {
         "election_id": election_id,
         "holdout_year": holdout_year,
+        "vp_tiebreak_party": vp,
         "lead_days": {},
         "aggregate": {},
         "enop": {},
@@ -187,8 +197,10 @@ def replay_cycle(
                 agg_scores["fast_hierarchical_t"].append(scores)
 
             if include_chamber:
-                sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party="R")
-                realized_seats, realized_ctl = _realized_chamber(snap.races, results)
+                sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party=vp)
+                realized_seats, realized_ctl = _realized_chamber(
+                    snap.races, results, vp_tiebreak_party=vp
+                )
                 c_scores = score_chamber_draws(
                     sim.seat_draws,
                     realized_dem_seats=realized_seats,
@@ -198,7 +210,7 @@ def replay_cycle(
                 chamber_scores.append(c_scores)
                 if include_overlay_ablation:
                     lead_block["overlay_ablation"] = _overlay_ablation_block(
-                        fit, snap, results
+                        fit, snap, results, vp_tiebreak_party=vp
                     )
 
         report["lead_days"][str(lead)] = lead_block

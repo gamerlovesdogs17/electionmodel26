@@ -137,22 +137,30 @@ def run_forecast(
     from midterms.ops.signing import sign_payload
 
     # Ensure economic + finance + ratings + markets stores exist
+    layer_warnings: list[dict[str, str]] = []
     write_economic_store()
     write_approval_store()
-    ensure_expert_ratings_store(election_id=election_id, available_at=str(as_of)[:10])
+    ratings_meta = ensure_expert_ratings_store(
+        election_id=election_id, available_at=str(as_of)[:10]
+    )
+    if ratings_meta.get("wiki_error"):
+        layer_warnings.append(
+            {"layer": "expert_ratings", "error": str(ratings_meta["wiki_error"])}
+        )
     try:
         write_finance_store(election_id=election_id)
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as exc:  # noqa: BLE001
+        layer_warnings.append({"layer": "finance", "error": str(exc)})
     markets_meta: dict[str, Any] = {}
     try:
         markets_meta = write_markets_store(election_id=election_id, available_at=str(as_of)[:10])
     except Exception as exc:  # noqa: BLE001
         markets_meta = {"error": str(exc), "n_races": 0}
+        layer_warnings.append({"layer": "markets", "error": str(exc)})
     try:
         write_peer_snapshots()
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as exc:  # noqa: BLE001
+        layer_warnings.append({"layer": "peers", "error": str(exc)})
 
     wh = Warehouse()
     snap = wh.build_as_of(as_of, election_id)
@@ -199,8 +207,8 @@ def run_forecast(
             for k, v in chall.items():
                 if v.shape[1] == fit.draws_margin.shape[1]:
                     component_draws[k] = v
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001
+            layer_warnings.append({"layer": "challengers", "error": str(exc)})
         for name in ("shrinkage_polls", "last_election_swing", "equal_weight_polls"):
             if name in weights and name in BASELINES:
                 bl = BASELINES[name](snap)
@@ -214,20 +222,13 @@ def run_forecast(
         if "fast_hierarchical_t" not in use_w and "fast_hierarchical_t" in component_draws:
             use_w["fast_hierarchical_t"] = weights.get("fast_hierarchical_t", 0.55)
         if len(use_w) >= 2:
-            means = {n: component_draws[n].mean(axis=0) for n in use_w}
-            sds = {n: component_draws[n].std(axis=0) for n in use_w}
-            blended_mean = sum(use_w[n] * means[n] for n in use_w)
-            blended_sd = sum(use_w[n] * sds[n] for n in use_w)
-            core_key = (
-                "fast_hierarchical_t"
-                if "fast_hierarchical_t" in component_draws
-                else next(iter(use_w))
+            from midterms.model.ensemble import stack_margin_draws
+
+            stacked = stack_margin_draws(
+                component_draws,
+                use_w,
+                rng=np.random.default_rng(seed + 17),
             )
-            core = component_draws[core_key]
-            core_mean = core.mean(axis=0)
-            core_sd = np.maximum(core.std(axis=0), 1e-6)
-            shocks = (core - core_mean) * (blended_sd / core_sd)
-            stacked = blended_mean + shocks
             fit = FitResult(
                 race_ids=fit.race_ids,
                 states=fit.states,
@@ -240,8 +241,8 @@ def run_forecast(
                     "ensemble": True,
                     "stack_weights": use_w,
                     "ensemble_note": (
-                        "mean/sd stack of hierarchical + state-space/challengers + baselines; "
-                        "hierarchical joint shocks preserved for chamber dependence"
+                        "discrete CRPS mixture via stack_margin_draws "
+                        "(blueprint §9 predictive stacking)"
                     ),
                 },
                 method="ensemble_stack",
@@ -263,16 +264,20 @@ def run_forecast(
     market_df = load_race_markets(as_of=as_of)
     if len(market_df) and "election_id" in market_df.columns:
         market_df = market_df[market_df["election_id"] == election_id]
-    # Align race_ids if Kalshi used slightly different ids
+    # Align markets by race_id first; state only as fallback for sparse Kalshi ids
     if len(market_df):
-        by_state = {str(r["state"]): r for _, r in market_df.iterrows()}
+        by_id = {str(r["race_id"]): r for _, r in market_df.iterrows()} if "race_id" in market_df.columns else {}
+        by_state = {str(r["state"]): r for _, r in market_df.iterrows()} if "state" in market_df.columns else {}
         aligned = []
         for rid, st in zip(fit.race_ids, fit.states):
-            if st in by_state:
-                row = dict(by_state[st])
+            src = by_id.get(rid)
+            if src is None:
+                src = by_state.get(st)
+            if src is not None:
+                row = src.to_dict() if hasattr(src, "to_dict") else dict(src)
                 row["race_id"] = rid
                 aligned.append(row)
-        market_df = pd.DataFrame(aligned) if aligned else market_df
+        market_df = pd.DataFrame(aligned) if aligned else market_df.head(0)
 
     used_ratings = bool(with_ratings and len(expert_tbl))
     used_markets = bool(with_markets and len(market_df))
@@ -402,7 +407,11 @@ def run_forecast(
         },
         "races": race_summaries,
         "baselines": baselines,
-        "diagnostics": fit.diagnostics,
+        "diagnostics": {
+            **(fit.diagnostics or {}),
+            "layer_warnings": layer_warnings,
+        },
+        "warnings": layer_warnings,
         "house_effects": fit.house_effects,
         "stack_weights": stack_weights,
         "overlays": {

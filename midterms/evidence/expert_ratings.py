@@ -198,10 +198,20 @@ def ensure_expert_ratings_store(
     *,
     available_at: str = "2026-09-01",
     prefer_wikipedia: bool = True,
+    max_age_hours: float = 168.0,
+    force_refresh: bool = False,
 ) -> dict[str, Any]:
-    """Keep an existing store; otherwise fetch Wikipedia then curated fallback."""
+    """
+    Ensure an expert-ratings store exists and is reasonably fresh.
+
+    Refreshes from Wikipedia when missing, forced, older than `max_age_hours`,
+    still on the curated snapshot while Wikipedia is preferred, or when the
+    forecast as-of is after the store's rating available_at.
+    """
     path = NORMALIZED_DIR / "expert_ratings.parquet"
-    if path.exists():
+    if path.exists() and not force_refresh and _expert_store_is_fresh(
+        path, available_at=available_at, prefer_wikipedia=prefer_wikipedia, max_age_hours=max_age_hours
+    ):
         return write_expert_ratings_store(
             election_id=election_id,
             available_at=available_at,
@@ -213,11 +223,49 @@ def ensure_expert_ratings_store(
 
             return write_from_wikipedia(election_id=election_id, available_at=available_at)
         except Exception as exc:  # noqa: BLE001
+            if path.exists():
+                kept = write_expert_ratings_store(
+                    election_id=election_id,
+                    available_at=available_at,
+                    overwrite=False,
+                )
+                return {**kept, "wiki_error": str(exc), "refreshed": False}
             curated = write_expert_ratings_store(
                 election_id=election_id, available_at=available_at
             )
             return {**curated, "wiki_error": str(exc)}
     return write_expert_ratings_store(election_id=election_id, available_at=available_at)
+
+
+def _expert_store_is_fresh(
+    path: Path,
+    *,
+    available_at: str,
+    prefer_wikipedia: bool,
+    max_age_hours: float,
+) -> bool:
+    try:
+        df = pd.read_parquet(path)
+    except Exception:  # noqa: BLE001
+        return False
+    if df.empty:
+        return False
+    sources = df["source"].astype(str) if "source" in df.columns else pd.Series(dtype=str)
+    if prefer_wikipedia and len(sources) and sources.str.startswith("curated").all():
+        return False
+    if "retrieved_at" in df.columns:
+        latest = pd.to_datetime(df["retrieved_at"], utc=True, errors="coerce").max()
+        if pd.isna(latest):
+            return False
+        age_h = (pd.Timestamp.now(tz="UTC") - latest).total_seconds() / 3600.0
+        if age_h > float(max_age_hours):
+            return False
+    if "available_at" in df.columns:
+        store_asof = pd.to_datetime(df["available_at"], errors="coerce").max()
+        want = pd.Timestamp(str(available_at)[:10])
+        if pd.notna(store_asof) and want.date() > store_asof.date():
+            return False
+    return True
 
 
 def load_expert_ratings(as_of: str | None = None, election_id: str | None = None) -> pd.DataFrame:
@@ -242,10 +290,18 @@ def ratings_for_races(
 ) -> pd.DataFrame:
     """Join expert ratings onto races; fall back to probability-derived labels."""
     expert = load_expert_ratings(as_of=as_of, election_id=election_id)
-    by_state = expert.set_index("state")["rating"].to_dict() if len(expert) else {}
+    by_id = {}
+    by_state = {}
+    if len(expert):
+        if "race_id" in expert.columns:
+            by_id = expert.set_index("race_id")["rating"].to_dict()
+        by_state = expert.set_index("state")["rating"].to_dict()
     rows = []
     for i, (rid, st) in enumerate(zip(race_ids, states)):
-        if st in by_state:
+        if rid in by_id:
+            rating = by_id[rid]
+            source = "expert"
+        elif st in by_state:
             rating = by_state[st]
             source = "expert"
         elif fallback_probs is not None:

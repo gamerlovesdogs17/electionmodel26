@@ -103,7 +103,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                     ) : null}
                   </td>
                   <td className="hidden px-3 py-2.5 text-xs text-[var(--muted)] lg:table-cell">
-                    <span className={demParty === "I" ? "text-[#5a6a3a]" : ""}>
+                    <span className={demParty === "I" ? "text-[var(--ind)]" : ""}>
                       {r.dem_candidate ?? (demParty === "I" ? "Independent" : "Dem")}
                       <span className="ml-1 opacity-70">({demParty})</span>
                     </span>

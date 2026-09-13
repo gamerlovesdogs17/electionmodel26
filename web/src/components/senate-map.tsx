@@ -313,22 +313,34 @@ export function SenateMap({
 function raceFill(race: RaceForecast | null, mode: MapMode): string {
   if (!race) return "#d5dde2";
   const fav = caucusFavored(race);
+  const indFavored = race.dem_party === "I" && fav === "D";
   if (mode === "probability") {
     if (race.is_flip) {
       return fav === "D" ? "url(#hatch-dem)" : "url(#hatch-rep)";
     }
-    return demFill(race.p_dem);
+    return indFavored ? indFill(race.p_dem) : demFill(race.p_dem);
   }
   if (mode === "margin") {
     if (race.is_flip) {
       return race.mean_margin >= 0 ? "url(#hatch-dem)" : "url(#hatch-rep)";
     }
-    return marginFill(race.mean_margin);
+    return indFavored && race.mean_margin >= 0
+      ? indFill(Math.min(0.95, 0.5 + race.mean_margin / 40))
+      : marginFill(race.mean_margin);
   }
   if (race.is_flip) {
     return fav === "D" ? "url(#hatch-dem)" : "url(#hatch-rep)";
   }
+  if (indFavored) return indFill(race.p_dem);
   return ratingFill(race.rating ?? "Tossup");
+}
+
+function indFill(p: number): string {
+  if (p >= 0.92) return "#3d2a6b";
+  if (p >= 0.78) return "#5b3d8f";
+  if (p >= 0.62) return "#6b4ea0";
+  if (p >= 0.55) return "#8570b5";
+  return "#9b7ec8";
 }
 
 function Legend({
@@ -411,7 +423,7 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
   const favoredP = favoredIndOrDem ? race.p_dem : race.p_rep;
   const favoredTone = favoredIndOrDem
     ? demParty === "I"
-      ? "text-[#5a6a3a]"
+      ? "text-[var(--ind)]"
       : "text-[var(--dem)]"
     : "text-[var(--rep)]";
 
@@ -477,13 +489,13 @@ function CandidateRow({
     party === "R"
       ? "text-[var(--rep)]"
       : party === "I"
-        ? "text-[#5a6a3a]"
+        ? "text-[var(--ind)]"
         : "text-[var(--dem)]";
   const badge =
     party === "R"
       ? "bg-[var(--rep)]"
       : party === "I"
-        ? "bg-[#7a8a4a]"
+        ? "bg-[var(--ind)]"
         : "bg-[var(--dem)]";
   return (
     <div className="grid grid-cols-[1fr_auto] items-center gap-2 py-1 text-sm">

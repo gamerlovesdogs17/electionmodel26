@@ -22,6 +22,11 @@ def attach_poll_weights(
     ENOP = (sum w)^2 / sum(w^2)  — effective number of independent poll signals.
     Within a race, prolific pollsters are soft-capped and shared study_id rows
     are down-weighted so repeated releases add sublinear information.
+
+    Weights use recency, sample size, quality, and partisan status only.
+    Mode / population corrections are applied as additive offsets in the
+    measurement model (see midterms.model.pymc_model), not here — avoiding
+    double-counting the same information as both bias and weight.
     """
     if polls.empty:
         out = polls.copy()
@@ -47,18 +52,9 @@ def attach_poll_weights(
     partisan = out["partisan"].fillna(False).astype(bool) if "partisan" in out.columns else False
     partisan_w = np.where(partisan, 0.35, 1.0)
 
-    pop = out["population"].astype(str).str.upper() if "population" in out.columns else pd.Series([""] * len(out))
-    pop_w = np.where(pop.str.contains("LV"), 1.0, np.where(pop.str.contains("RV"), 0.85, 0.7))
-
-    mode = out["mode"].astype(str) if "mode" in out.columns else pd.Series([""] * len(out))
-    mode_l = mode.str.lower()
-    mode_w = np.where(
-        mode_l.str.contains("live"),
-        1.05,
-        np.where(mode_l.str.contains("ivr"), 0.9, 1.0),
-    )
-
-    raw = recency.to_numpy() * size_w.to_numpy() * qw.to_numpy() * partisan_w * pop_w * mode_w
+    # Mode / population enter as additive measurement offsets in the likelihood
+    # (pymc_model._mode_offset / _population_offset) — not again as weights.
+    raw = recency.to_numpy() * size_w.to_numpy() * qw.to_numpy() * partisan_w
     raw = np.nan_to_num(raw, nan=0.0, posinf=0.0, neginf=0.0)
     out["raw_weight"] = raw
 

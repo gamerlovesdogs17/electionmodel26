@@ -54,10 +54,15 @@ def fundamentals_mean(
     # Incumbency / open-seat
     inc = contested["incumbent_party"]
     open_mask = contested["is_open"].astype(bool).to_numpy()
+    # Ind incumbents who caucus with Democrats get the Dem-side incumbency bump.
     bump = np.where(
         open_mask,
         0.0,
-        np.where(inc == "D", COEF["incumbency"], np.where(inc == "R", -COEF["incumbency"], 0.0)),
+        np.where(
+            inc.isin(["D", "I"]),
+            COEF["incumbency"],
+            np.where(inc == "R", -COEF["incumbency"], 0.0),
+        ),
     )
     mu = mu + bump
 

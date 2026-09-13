@@ -19,7 +19,7 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`.
 | Economics | ALFRED/FRED or fixtures | Vintage YoY RDPI |
 | Approval | Curated public-aggregate vintages | As-of store |
 | Finance | OpenFEC (receipts/cash/disbursements) | Matched-window share |
-| Expert ratings | **Wikipedia Predictions table** (Cook / IE / Sabato consensus) | Ablatable overlay; CC BY-SA page with attributed handicappers |
+| Expert ratings | **Wikipedia Predictions table** (Cook / IE / Sabato consensus) | Ablatable overlay; Solid/Likely/Lean/**Tilt**/Tossup ladder; CC BY-SA page with attributed handicappers |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Only if *you* hold a vendor license; never committed; overrides Wikipedia |
 | Markets | Kalshi | Ablatable sparse-race / control signal (Cook substitute for many uses) |
 | Markets | Kalshi | Ablatable |

@@ -8,11 +8,14 @@ import numpy as np
 import pandas as pd
 
 
+# Full IE-style ladder. Cook "Safe" maps to Solid; Tilt is first-class (not Lean).
 RATING_ORDER = (
     "Solid D",
     "Likely D",
     "Lean D",
+    "Tilt D",
     "Tossup",
+    "Tilt R",
     "Lean R",
     "Likely R",
     "Solid R",
@@ -23,7 +26,9 @@ RATING_MARGIN = {
     "Solid D": 18.0,
     "Likely D": 10.0,
     "Lean D": 4.5,
+    "Tilt D": 2.0,
     "Tossup": 0.0,
+    "Tilt R": -2.0,
     "Lean R": -4.5,
     "Likely R": -10.0,
     "Solid R": -18.0,
@@ -31,16 +36,21 @@ RATING_MARGIN = {
 
 
 def rating_from_probability(p_dem: float) -> str:
+    """Map P(Dem caucus win) onto the Solid/Likely/Lean/Tilt/Tossup ladder."""
     p = float(p_dem)
     if p >= 0.92:
         return "Solid D"
-    if p >= 0.80:
+    if p >= 0.78:
         return "Likely D"
-    if p >= 0.60:
+    if p >= 0.62:
         return "Lean D"
-    if p >= 0.40:
+    if p >= 0.55:
+        return "Tilt D"
+    if p >= 0.45:
         return "Tossup"
-    if p >= 0.20:
+    if p >= 0.38:
+        return "Tilt R"
+    if p >= 0.22:
         return "Lean R"
     if p >= 0.08:
         return "Likely R"
@@ -71,10 +81,12 @@ def apply_rating_overlay(
     """Shrink race means toward rating-implied margins. weight=0 leaves unchanged."""
     if weight <= 0 or ratings is None or ratings.empty:
         return mean_margin
-    by_id = {
-        str(r["race_id"]): RATING_MARGIN.get(str(r["rating"]), 0.0)
-        for _, r in ratings.iterrows()
-    }
+    by_id = {}
+    for _, r in ratings.iterrows():
+        label = str(r["rating"])
+        if label not in RATING_MARGIN:
+            continue
+        by_id[str(r["race_id"])] = float(RATING_MARGIN[label])
     out = mean_margin.copy()
     w = float(np.clip(weight, 0.0, 1.0))
     for i, rid in enumerate(race_ids):
@@ -105,6 +117,8 @@ def apply_market_overlay(
         if rid not in by.index:
             continue
         row = by.loc[rid]
+        if isinstance(row, pd.DataFrame):
+            row = row.iloc[0]
         p = float(np.clip(row["p_dem"], 0.02, 0.98))
         # Rough pp mapping: logit scale
         implied = 4.0 * np.log(p / (1.0 - p))  # ~±12pp at ~95%
