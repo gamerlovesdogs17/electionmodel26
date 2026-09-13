@@ -321,6 +321,7 @@ function raceFill(race: RaceForecast | null, mode: MapMode): string {
     return indFavored ? indFill(race.p_dem) : demFill(race.p_dem);
   }
   if (mode === "margin") {
+    if (typeof race.mean_margin !== "number") return "#d5dde2";
     if (race.is_flip) {
       return race.mean_margin >= 0 ? "url(#hatch-dem)" : "url(#hatch-rep)";
     }
@@ -454,21 +455,31 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
         <CandidateRow
           name={race.dem_candidate ?? (demParty === "I" ? "Independent" : "Democrat")}
           party={demParty}
-          share={race.dem_share ?? 50 + race.mean_margin / 2}
+          share={
+            race.dem_share ??
+            (typeof race.mean_margin === "number" ? 50 + race.mean_margin / 2 : 50)
+          }
         />
         <CandidateRow
           name={race.rep_candidate ?? "Republican"}
           party="R"
-          share={race.rep_share ?? 50 - race.mean_margin / 2}
+          share={
+            race.rep_share ??
+            (typeof race.mean_margin === "number" ? 50 - race.mean_margin / 2 : 50)
+          }
         />
         <div className="mt-1 flex justify-between text-sm">
           <span className="text-[var(--muted)]">Margin</span>
           <span
             className={`font-medium ${
-              race.mean_margin >= 0 ? "text-[var(--dem)]" : "text-[var(--rep)]"
+              typeof race.mean_margin === "number" && race.mean_margin >= 0
+                ? "text-[var(--dem)]"
+                : "text-[var(--rep)]"
             }`}
           >
-            {signedMargin(race.mean_margin)}
+            {typeof race.mean_margin === "number"
+              ? signedMargin(race.mean_margin)
+              : "—"}
           </span>
         </div>
       </div>

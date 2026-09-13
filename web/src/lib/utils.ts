@@ -22,10 +22,10 @@ export type RaceForecast = {
   seat_class?: string | null;
   p_dem: number;
   p_rep: number;
-  mean_margin: number;
-  sd_margin: number;
-  ci05: number;
-  ci95: number;
+  mean_margin: number | null;
+  sd_margin: number | null;
+  ci05: number | null;
+  ci95: number | null;
   prior_lean: number | null;
   incumbent_party: string | null;
   is_open: boolean | null;

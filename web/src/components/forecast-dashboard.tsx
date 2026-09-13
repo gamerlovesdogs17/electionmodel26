@@ -91,12 +91,13 @@ export function ForecastDashboard() {
         <div className="flex flex-wrap gap-3 text-xs text-[var(--muted)]">
           <span
             className={`rounded-md border px-2 py-1 ${
-              data.method.startsWith("pymc") || data.method.startsWith("ensemble")
+              (data.method ?? "").startsWith("pymc") ||
+              (data.method ?? "").startsWith("ensemble")
                 ? "border-[var(--line)]"
                 : "border-[var(--rep)] text-[var(--rep)]"
             }`}
           >
-            method: {data.method}
+            method: {data.method ?? "unknown"}
           </span>
           {typeof data.diagnostics?.enop_global === "number" ? (
             <span className="rounded-md border border-[var(--line)] px-2 py-1">

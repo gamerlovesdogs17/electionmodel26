@@ -120,6 +120,34 @@ def test_ensemble_stack_mixture():
     assert 0.2 < out.mean() < 0.8
 
 
+def test_stack_margin_draws_replaces_nan_components():
+    good = np.full((40, 2), 3.0)
+    bad = np.full((40, 2), np.nan)
+    out = stack_margin_draws(
+        {"good": good, "bad": bad},
+        {"good": 0.4, "bad": 0.6},
+        rng=np.random.default_rng(0),
+    )
+    assert np.isfinite(out).all()
+    assert np.allclose(out, 3.0)
+
+
+def test_state_space_handles_nan_sample_size():
+    from midterms.model.state_space import _safe_sample_size, fit_state_space
+    from midterms.evidence.warehouse import Warehouse
+
+    assert _safe_sample_size(float("nan")) == 500.0
+    assert _safe_sample_size(None) == 500.0
+    assert _safe_sample_size(20) == 50.0
+    wh = Warehouse(ensure_fixtures=False)
+    snap = wh.build_as_of("2026-09-13", "senate-2026")
+    fit = fit_state_space(snap, n_draws=60, seed=2, generic_ballot=-1.0)
+    assert np.isfinite(fit.mean_margin).all()
+    assert np.isfinite(fit.draws_margin).all()
+    for rid in ("senate-2026-AK", "senate-2026-VA", "senate-2026-OH"):
+        assert rid in fit.race_ids
+
+
 def test_forecast_ensemble_artifact(tmp_path):
     result = run_forecast(
         method="fast", draws=300, seed=19, ensemble=True, out_dir=tmp_path

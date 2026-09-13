@@ -46,9 +46,18 @@ def stack_margin_draws(
     w = w / w.sum()
     picks = rng.choice(len(names), size=n_draws, p=w)
     out = np.zeros((n_draws, n_races))
+    # Prefer components that are finite on every race; fall back cell-wise.
+    arrays = [component_draws[n] for n in names]
     for i, pick in enumerate(picks):
-        name = names[int(pick)]
-        out[i] = component_draws[name][i % component_draws[name].shape[0]]
+        row = arrays[int(pick)][i % arrays[int(pick)].shape[0]].astype(float, copy=True)
+        if not np.isfinite(row).all():
+            for alt in range(len(names)):
+                cand = arrays[alt][i % arrays[alt].shape[0]]
+                miss = ~np.isfinite(row)
+                row[miss] = cand[miss]
+            # Any remaining holes → 0 (neutral margin) rather than poisoning means.
+            row = np.where(np.isfinite(row), row, 0.0)
+        out[i] = row
     return out
 
 

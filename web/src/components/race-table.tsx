@@ -126,13 +126,19 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                     </div>
                   </td>
                   <td className="px-3 py-2.5 tabular-nums text-[var(--ink)]">
-                    {signedMargin(r.mean_margin)}
+                    {typeof r.mean_margin === "number"
+                      ? signedMargin(r.mean_margin)
+                      : "—"}
                     <span className="ml-1 text-xs text-[var(--muted)]">
-                      ±{r.sd_margin.toFixed(1)}
+                      {typeof r.sd_margin === "number"
+                        ? `±${r.sd_margin.toFixed(1)}`
+                        : ""}
                     </span>
                   </td>
                   <td className="hidden px-3 py-2.5 tabular-nums text-[var(--muted)] sm:table-cell">
-                    {signedMargin(r.ci05)} – {signedMargin(r.ci95)}
+                    {typeof r.ci05 === "number" && typeof r.ci95 === "number"
+                      ? `${signedMargin(r.ci05)} – ${signedMargin(r.ci95)}`
+                      : "—"}
                   </td>
                 </tr>
               );

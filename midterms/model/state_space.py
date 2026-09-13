@@ -31,6 +31,17 @@ def terminal_error_sd(*, era_weight: float = 1.0, base: float = 3.5) -> float:
     return float(base * float(era_weight))
 
 
+def _safe_sample_size(value: object, *, default: float = 500.0, floor: float = 50.0) -> float:
+    """Coerce poll N; NaN is truthy in Python so `nan or 500` must not be used."""
+    try:
+        n = float(value) if value is not None else default
+    except (TypeError, ValueError):
+        n = default
+    if not np.isfinite(n) or n <= 0:
+        n = default
+    return float(max(n, floor))
+
+
 def fit_state_space(
     snapshot: EvidenceSnapshot,
     *,
@@ -91,36 +102,75 @@ def fit_state_space(
 
     for i, rid in enumerate(race_ids):
         prior = 0.0 if flat_prior else float(fund.get(rid, races.iloc[i]["prior_lean"]))
+        if not np.isfinite(prior):
+            try:
+                prior = float(races.iloc[i]["prior_lean"] or 0.0)
+            except (TypeError, ValueError):
+                prior = 0.0
+            if not np.isfinite(prior):
+                prior = 0.0
         rp = polls[polls["race_id"] == rid] if len(polls) else polls
         mu = prior
         var = 8.0**2
         if len(rp):
             rp = rp.sort_values("field_end")
             for _, row in rp.iterrows():
-                y = float(row["two_party_margin"])
+                try:
+                    y = float(row["two_party_margin"])
+                except (TypeError, ValueError):
+                    continue
+                if not np.isfinite(y):
+                    continue
                 # Measurement offsets (same channel as hierarchical spine)
                 y = y - _mode_offset(row.get("mode")) - _population_offset(row.get("population"))
                 if "house_effect_prior" in rp.columns and pd.notna(row.get("house_effect_prior")):
                     he = float(row["house_effect_prior"])
-                    y = y - he
-                    pid = str(row.get("pollster_id") or "")
-                    if pid:
-                        house_effects[pid] = he
-                n = float(max(row.get("sample_size") or 500, 50))
-                qw = float(row.get("quality_weight") or 1.0)
-                iw = float(row.get("influence_weight") or 1.0) if "influence_weight" in rp.columns else 1.0
+                    if np.isfinite(he):
+                        y = y - he
+                        pid = str(row.get("pollster_id") or "")
+                        if pid:
+                            house_effects[pid] = he
+                n = _safe_sample_size(row.get("sample_size"))
+                try:
+                    qw = float(row.get("quality_weight") or 1.0)
+                except (TypeError, ValueError):
+                    qw = 1.0
+                if not np.isfinite(qw) or qw <= 0:
+                    qw = 1.0
+                if "influence_weight" in rp.columns:
+                    try:
+                        iw = float(row["influence_weight"])
+                    except (TypeError, ValueError):
+                        iw = 1.0
+                    if not np.isfinite(iw) or iw < 0:
+                        iw = 1.0
+                else:
+                    iw = 1.0
                 var = var + 0.8**2
-                obs_var = (100.0 / np.sqrt(n)) ** 2 / max(qw * iw, 0.05) + 2.0**2
+                obs_var = (100.0 / np.sqrt(n)) ** 2 / max(qw * max(iw, 0.0), 0.05) + 2.0**2
                 k = var / (var + obs_var)
                 mu = mu + k * (y - mu)
                 var = (1 - k) * var
+        if not np.isfinite(mu):
+            mu = prior
+        if not np.isfinite(var) or var <= 0:
+            var = 8.0**2
         ed_mu = (1.0 - pull) * mu + pull * prior
         ed_sd = float(np.sqrt(var + future_sd**2 + terminal_sd**2))
-        means.append(ed_mu)
-        sds.append(ed_sd)
+        means.append(float(ed_mu))
+        sds.append(float(ed_sd))
 
     means_a = np.asarray(means, dtype=float)
     sds_a = np.asarray(sds, dtype=float)
+    # Last-resort fill so a poisoned race cannot emit all-NaN stack columns.
+    bad = ~np.isfinite(means_a)
+    if bad.any():
+        means_a = means_a.copy()
+        means_a[bad] = 0.0
+    bad_sd = ~np.isfinite(sds_a) | (sds_a <= 0)
+    if bad_sd.any():
+        sds_a = sds_a.copy()
+        sds_a[bad_sd] = float(np.sqrt(8.0**2 + future_sd**2 + terminal_sd**2))
     # Shared national path + race residual + similarity (Student-t)
     nat = rng.standard_t(student_t_df, size=n_draws) * float(national_path_sd)
     local = rng.standard_t(student_t_df, size=(n_draws, len(means_a))) * (sds_a * 0.55)
