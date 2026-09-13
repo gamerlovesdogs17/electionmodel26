@@ -4,6 +4,28 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-13 — senate-hierarchical-v0.8.1
+
+Production-path follow-through on remaining exclusions:
+
+- Licensed ratings **adapter** (`ingest-licensed-ratings` / `COOK_RATINGS_CSV`) — no vendor data in repo.
+- VoteHub CC BY dump sealing + warehouse import (`seal-votehub-dumps`); archive endpoint probed.
+- Forecast API bearer auth + CORS env; Docker / Compose / Fly deploy sketches (`DEPLOY.md`).
+- Ed25519 signing with committed public key root; `MIDTERMS_REQUIRE_SIGNING=1` fail-closed.
+
+## 2026-09-13 — senate-hierarchical-v0.8
+
+Senate-only blueprint completion pass (House/EC still excluded):
+
+- Sealed historical poll archive + bitemporal correction versions; richer poll schema fields.
+- Presidential approval vintages; FEC cash/disbursement/matched-window fields.
+- Forward state-space challenger (future movement vs terminal ED error); stack includes state-space.
+- Demographic features in similarity covariance; turnout/multiway auxiliary layers.
+- LA/GA runoff templates + vacancy defaults; scenario sensitivity in artifact + UI.
+- Lead-time grid, component ablations, nested df/era search, validation report CLI.
+- HMAC signing, environment lock, domain hashes, correction registry, richer monitor alerts.
+- `GOVERNANCE.md` roles / change-control.
+
 ## 2026-09-13 — senate-hierarchical-v0.7
 
 - Redistributable results: MEDSL 2016 state aggregates + curated certified margins (2018–2024),

@@ -110,16 +110,29 @@ def shares_from_totals(totals: pd.DataFrame, election_id: str, cycle: int) -> pd
         rep = g[g["party"].astype(str).str.upper().str.startswith("REP")]
         dem_rec = float(dem["receipts"].max()) if len(dem) else 0.0
         rep_rec = float(rep["receipts"].max()) if len(rep) else 0.0
+        dem_cash = float(dem["cash_on_hand_end_period"].max()) if len(dem) and "cash_on_hand_end_period" in dem else 0.0
+        rep_cash = float(rep["cash_on_hand_end_period"].max()) if len(rep) and "cash_on_hand_end_period" in rep else 0.0
+        dem_disb = float(dem["disbursements"].max()) if len(dem) and "disbursements" in dem else 0.0
+        rep_disb = float(rep["disbursements"].max()) if len(rep) and "disbursements" in rep else 0.0
         total = dem_rec + rep_rec
         share = dem_rec / total if total > 0 else 0.5
+        cash_tot = dem_cash + rep_cash
+        cash_share = dem_cash / cash_tot if cash_tot > 0 else 0.5
         rows.append(
             {
                 "election_id": election_id,
                 "state": state,
                 "race_id": f"senate-{cycle}-{state}",
                 "fundraising_share": round(float(share), 3),
+                "cash_share": round(float(cash_share), 3),
                 "dem_receipts": dem_rec,
                 "rep_receipts": rep_rec,
+                "dem_cash_on_hand": dem_cash,
+                "rep_cash_on_hand": rep_cash,
+                "dem_disbursements": dem_disb,
+                "rep_disbursements": rep_disb,
+                "matched_window_id": f"cycle-{cycle}-latest-available",
+                "amendment_chain": "latest_totals_row",
                 "source": "openfec",
                 "available_at": str(g["available_at"].max()),
                 "parser_version": PARSER_VERSION,

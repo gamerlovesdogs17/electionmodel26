@@ -103,13 +103,44 @@ def write_expert_ratings_store(
         df_in = pd.read_csv(csv_path)
         rows = df_in.to_dict(orient="records")
         source = f"csv:{Path(csv_path).name}"
+        # Per-row source (e.g. licensed:cook) wins when present
+        out_rows = []
+        for r in rows:
+            row_source = str(r.get("source") or source)
+            st = str(r["state"]).upper()
+            rating = str(r["rating"])
+            avail = str(r.get("available_at") or available_at)[:10]
+            eid = str(r.get("election_id") or election_id)
+            out_rows.append(
+                {
+                    "election_id": eid,
+                    "state": st,
+                    "race_id": f"{eid}-{st}",
+                    "rating": rating,
+                    "implied_margin": float(RATING_MARGIN.get(rating, 0.0)),
+                    "source": row_source,
+                    "available_at": avail,
+                    "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                    "parser_version": PARSER_VERSION,
+                }
+            )
+        df = pd.DataFrame(out_rows)
+        source = (
+            "licensed"
+            if any(str(s).startswith("licensed") for s in df["source"])
+            else source
+        )
     else:
         rows = DEFAULT_RATINGS_2026
+        df = _stamp_rows(rows, election_id=election_id, available_at=available_at, source=source)
 
-    df = _stamp_rows(rows, election_id=election_id, available_at=available_at, source=source)
     raw_path = RAW_DIR / "external" / "expert_ratings_senate.json"
     raw_path.parent.mkdir(parents=True, exist_ok=True)
-    raw_path.write_text(df.to_json(orient="records", indent=2))
+    # Public raw file: curated only — strip licensed:* rows from git-tracked JSON
+    public_df = df[~df["source"].astype(str).str.startswith("licensed")]
+    if public_df.empty:
+        public_df = df.head(0)
+    raw_path.write_text(public_df.to_json(orient="records", indent=2))
     norm_path = NORMALIZED_DIR / "expert_ratings.parquet"
     df.to_parquet(norm_path, index=False)
     man = {
@@ -120,7 +151,7 @@ def write_expert_ratings_store(
         "source": source,
         "parser_version": PARSER_VERSION,
         "note": (
-            "Curated research ratings for ablation overlays — replace via CSV. "
+            "Curated research ratings for ablation overlays — replace via CSV / licensed path. "
             "Not Cook/IE/Sabato redistribution."
         ),
     }

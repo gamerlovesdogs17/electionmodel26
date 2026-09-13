@@ -3,6 +3,7 @@
 import { ChamberPanel } from "@/components/chamber-panel";
 import { PeerComparePanel, type PeerComparison } from "@/components/peer-compare";
 import { RaceTable } from "@/components/race-table";
+import { ScenarioPanel, type ScenarioBlock } from "@/components/scenario-panel";
 import { SenateMap } from "@/components/senate-map";
 import { Button } from "@/components/ui/button";
 import { ForecastArtifact } from "@/lib/utils";
@@ -135,6 +136,9 @@ export function ForecastDashboard() {
 
       <ChamberPanel chamber={data.chamber} />
       <RaceTable races={data.races} />
+      {data.scenarios ? (
+        <ScenarioPanel scenarios={data.scenarios as ScenarioBlock} />
+      ) : null}
       {data.peer_comparison ? (
         <PeerComparePanel peer={data.peer_comparison as PeerComparison} />
       ) : null}

@@ -136,6 +136,8 @@ def fetch_votehub_polls(*, poll_type: str = "us-senator", subject: str | None = 
     if subject:
         params["subject"] = subject
     payload = votehub_get("/polls", params)
+    if isinstance(payload, list):
+        payload = {"polls": payload}
     name = f"votehub_{poll_type.replace('-', '_')}"
     if subject:
         name += f"_{re.sub(r'[^a-z0-9]+', '_', subject.lower()).strip('_')}"

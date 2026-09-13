@@ -86,6 +86,8 @@ export type ForecastArtifact = {
     delta_p_dem_majority?: number;
   };
   snapshot?: Record<string, unknown>;
+  scenarios?: Record<string, unknown>;
+  auxiliary?: Record<string, unknown>;
   peer_comparison?: {
     as_of_peers?: string;
     disclaimer?: string;

@@ -37,6 +37,7 @@ def test_similarity_matrix_psd_and_shocks_shape():
     races = pd.DataFrame(
         {
             "race_id": ["a", "b", "c"],
+            "state": ["GA", "AL", "OH"],
             "region": ["South", "South", "Midwest"],
             "prior_lean": [2.0, 3.0, -5.0],
             "is_open": [False, True, False],

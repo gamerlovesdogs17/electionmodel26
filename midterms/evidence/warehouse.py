@@ -15,7 +15,8 @@ from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 from midterms.evidence.fixtures import build_fixtures
 from midterms.evidence.ratings import build_rating_lookup, rating_for
 from midterms.evidence.results_archive import merge_certified_into_results
-from midterms.evidence.schema import is_active_ballot_row
+from midterms.evidence.historical_polls import merge_historical_polls
+from midterms.evidence.schema import is_active_ballot_row, align_poll_frame
 
 
 def _parse_day(value: str | date | datetime | pd.Timestamp | None) -> date | None:
@@ -58,6 +59,10 @@ class Warehouse:
         if ensure_fixtures and not (self.normalized_dir / "polls.parquet").exists():
             build_fixtures()
         self.polls = pd.read_parquet(self.normalized_dir / "polls.parquet")
+        try:
+            self.polls = align_poll_frame(merge_historical_polls(self.polls))
+        except Exception:  # noqa: BLE001
+            self.polls = align_poll_frame(self.polls)
         self.races = pd.read_parquet(self.normalized_dir / "races.parquet")
         results_path = self.normalized_dir / "results.parquet"
         self.results = (

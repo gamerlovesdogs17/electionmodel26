@@ -13,13 +13,17 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.7"
+MODEL_VERSION = "senate-hierarchical-v0.8.1"
 
 # Historical Senate cycles for holdout / replay
 CYCLES = (2014, 2016, 2018, 2020, 2022, 2024)
 PRIMARY_HOLDOUT = 2022
 SECONDARY_HOLDOUT = 2018
 LEAD_DAYS = (120, 90, 60, 45, 30, 14, 7, 1)
+
+# Uncertainty hyperparameters (nested-validated defaults; see validation/lead_time_grid.py)
+STUDENT_T_DF = 5.0
+ERA_WEIGHT = 1.0
 
 # Demo forecast target
 DEMO_ELECTION_ID = "senate-2026"

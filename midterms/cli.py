@@ -114,7 +114,7 @@ def main(argv: list[str] | None = None) -> None:
     p_run = sub.add_parser("forecast", help="Fit/simulate and write forecast artifact")
     p_run.add_argument("--election-id", default="senate-2026")
     p_run.add_argument("--as-of", default="2026-09-01")
-    p_run.add_argument("--method", choices=["fast", "pymc"], default="fast")
+    p_run.add_argument("--method", choices=["fast", "pymc", "state_space"], default="fast")
     p_run.add_argument("--draws", type=int, default=400)
     p_run.add_argument("--tune", type=int, default=400)
     p_run.add_argument("--chains", type=int, default=2)
@@ -323,6 +323,143 @@ def main(argv: list[str] | None = None) -> None:
             )
         )
     )
+
+    p_val = sub.add_parser("validation-report", help="Build lead-time + ablation + nested-df report")
+    p_val.add_argument("--full", action="store_true", help="More draws (slower)")
+    p_val.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__("midterms.validation.report", fromlist=["build_validation_report"]).build_validation_report(
+                    quick=not a.full
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_lead = sub.add_parser("lead-time-grid", help="Replay LEAD_DAYS grid for one cycle")
+    p_lead.add_argument("--year", type=int, default=2022)
+    p_lead.add_argument("--draws", type=int, default=250)
+    p_lead.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.lead_time_grid", fromlist=["replay_lead_time_grid"]
+                ).replay_lead_time_grid(year=a.year, draws=a.draws),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_abl = sub.add_parser("ablate-components", help="Heavy-tails / national / independence ablations")
+    p_abl.add_argument("--year", type=int, default=2022)
+    p_abl.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__("midterms.validation.ablations", fromlist=["run_component_ablations"]).run_component_ablations(
+                    year=a.year
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_appr = sub.add_parser("fetch-approval", help="Write presidential approval vintage store")
+    p_appr.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__("midterms.evidence.approval", fromlist=["write_approval_store"]).write_approval_store(),
+                indent=2,
+            )
+        )
+    )
+
+    p_hist = sub.add_parser("freeze-historical-polls", help="Seal historical poll archive")
+    p_hist.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.historical_polls",
+                    fromlist=["freeze_historical_polls_from_warehouse"],
+                ).freeze_historical_polls_from_warehouse(),
+                indent=2,
+            )
+        )
+    )
+
+    p_vh = sub.add_parser(
+        "seal-votehub-dumps",
+        help="Seal VoteHub CC BY dumps + import into warehouse",
+    )
+    p_vh.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.votehub_archive",
+                    fromlist=["ingest_votehub_dumps_to_warehouse"],
+                ).ingest_votehub_dumps_to_warehouse(),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_lic = sub.add_parser(
+        "ingest-licensed-ratings",
+        help="Load local licensed ratings CSV (COOK_RATINGS_CSV) if present",
+    )
+    p_lic.add_argument("--election-id", default="senate-2026")
+    p_lic.add_argument("--as-of", default="2026-09-01")
+    p_lic.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.licensed_ratings", fromlist=["try_ingest_licensed_ratings"]
+                ).try_ingest_licensed_ratings(election_id=a.election_id, available_at=a.as_of),
+                indent=2,
+            )
+        )
+    )
+
+    p_keys = sub.add_parser("generate-signing-keys", help="Generate Ed25519 keypair (public committed)")
+    p_keys.add_argument(
+        "--no-private-file",
+        action="store_true",
+        help="Only write public key; print reminder to set env for private key",
+    )
+    p_keys.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__("midterms.ops.signing", fromlist=["generate_keypair"]).generate_keypair(
+                    write_private=not a.no_private_file
+                ),
+                indent=2,
+            )
+        )
+    )
+
+    p_ver = sub.add_parser("verify-signature", help="Verify an artifact .sig.json sidecar")
+    p_ver.add_argument("path", help="Path to forecast.json (sidecar path.json.sig.json)")
+
+    def _verify(a: argparse.Namespace) -> None:
+        from pathlib import Path
+
+        from midterms.ops.signing import verify_signature
+
+        path = Path(a.path)
+        sig_path = path.with_suffix(path.suffix + ".sig.json")
+        if not sig_path.exists():
+            raise SystemExit(f"missing sidecar {sig_path}")
+        meta = json.loads(sig_path.read_text())
+        ok = verify_signature(path.read_text(), meta["signature"], alg=meta.get("alg"))
+        print(json.dumps({"ok": ok, "alg": meta.get("alg"), "path": str(path)}, indent=2))
+        if not ok:
+            raise SystemExit(1)
+
+    p_ver.set_defaults(func=_verify)
 
     args = parser.parse_args(argv)
     args.func(args)

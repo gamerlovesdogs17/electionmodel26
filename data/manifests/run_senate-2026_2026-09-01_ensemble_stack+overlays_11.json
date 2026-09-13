@@ -1,25 +1,59 @@
 {
   "run_id": "senate-2026_2026-09-01_ensemble_stack+overlays_11",
-  "generated_at": "2026-09-13T15:29:13.418783+00:00",
+  "generated_at": "2026-09-13T15:47:31.813796+00:00",
   "forecast_as_of": "2026-09-01",
   "election_id": "senate-2026",
-  "model_version": "senate-hierarchical-v0.7",
-  "code_commit": "e951e3be60506876ee163e03ea029c8a2c1e667f",
+  "model_version": "senate-hierarchical-v0.8",
+  "code_commit": "cc5f2c3a58e87817d80f54c236349f6d69503f5c",
   "configuration_hash": "2199e23069520d9988816e9f76ed097afb89a250b646238ecdb54b71f35e27cf",
   "snapshot_ids": {
     "evidence": "dbf09f240167ca07"
+  },
+  "domain_hashes": {
+    "economics_vintages.parquet": "4cb3e91b33fbabc5bbaac2bcdb393388436b50d5a7a8ab18639f62841769d325",
+    "expert_ratings.parquet": "bde0208c9ffe825a616f8935af0d3c91c108a99ed3a4cfad73dc26bbaf48b0cf",
+    "fundraising_shares.parquet": "a1594df0a1f35f6a36aee6510f191395a17d36540fbc7fd01b4547a6b99fec57",
+    "markets.parquet": "751338d8f9ac9729a33f918ca08c1df75a83740a68bfaa18f6e105c5c0ba7fe5",
+    "markets_control.json": "f19efe67448c1d6665d2071a3e706baf8abe53c624f1b52b0403b4528e824f76",
+    "peer_snapshots.json": "85f420bdefd40d5a09f2a8592d241fdef076c6fd9030a6ab6ec918bb5ca04c4b",
+    "polls.parquet": "38ea6df78fae7f70e33a4ae23179742164851ed483484620861f1394aea82975",
+    "polls_historical.parquet": "24aa5f9ad1f6e0d3df16580112f348bd78ef1d530ef3e5a75d10edd419da1faf",
+    "polls_live_votehub.parquet": "3cabbdc6c9f3c6fe43be77e08349c53cfc7b727bd4d2c474da529aa978a20c24",
+    "pollster_ratings.parquet": "32a297dd345d25537781428481e1599238c8587528303354239cd353ca23b150",
+    "pres_approval.parquet": "a3b6133f4c2e8593ece569089ad94cb60652f2f52ac5975b9029031e2bc88e17",
+    "races.parquet": "0142e9d9be2291122a95d657dc01496ac7bcf50fd99be1cc1fc5765299d9e126",
+    "results.parquet": "6cce9f61f988f63e45458cc5f63367b449bd0dc8572ba02b8550dfe3b2a657e1",
+    "results_certified.parquet": "c89b17884797f506606a688c0cc37b383c8717cda8f54691f85c7dfe468a9f5e"
+  },
+  "environment_lock": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.5",
+      "scipy": "1.18.1",
+      "pymc": "6.3.2",
+      "pyarrow": "25.0.1"
+    },
+    "locked_at": "2026-09-13T15:47:31.888795+00:00"
   },
   "seed": 11,
   "draws": 2000,
   "tune": null,
   "chains": null,
   "output_hashes": {
-    "forecast_json": "1f95ebb397f121cb3eba2459daaa9fd58749a4dbfa9e89c85d940ebd0a459add",
-    "draws": "1ab61c46d9aff4b17e0aefb3fa5e3498112ec44a378e2448b904fb972d4bb63f"
+    "forecast_json": "408d484eba87d4fa6acff190c61011ecdb2c2e558ed05ced48e42edb035996ae",
+    "draws": "b976df09ec2414622826e3a37862d2b45a97cb46a70dd376e63584ba92e394c1"
   },
   "paths": {
-    "forecast": "C:\\Users\\zydlo\\AppData\\Local\\Temp\\pytest-of-zydlo\\pytest-17\\test_end_to_end_forecast_artif0\\forecast_senate-2026_2026-09-01_ensemble_stack+overlays_11.json",
-    "forecast_latest": "C:\\Users\\zydlo\\AppData\\Local\\Temp\\pytest-of-zydlo\\pytest-17\\test_end_to_end_forecast_artif0\\forecast_latest.json",
-    "draws": "C:\\Users\\zydlo\\AppData\\Local\\Temp\\pytest-of-zydlo\\pytest-17\\test_end_to_end_forecast_artif0\\draws_senate-2026_2026-09-01_ensemble_stack+overlays_11.npz"
+    "forecast": "C:\\Users\\zydlo\\AppData\\Local\\Temp\\pytest-of-zydlo\\pytest-19\\test_end_to_end_forecast_artif0\\forecast_senate-2026_2026-09-01_ensemble_stack+overlays_11.json",
+    "forecast_latest": "C:\\Users\\zydlo\\AppData\\Local\\Temp\\pytest-of-zydlo\\pytest-19\\test_end_to_end_forecast_artif0\\forecast_latest.json",
+    "draws": "C:\\Users\\zydlo\\AppData\\Local\\Temp\\pytest-of-zydlo\\pytest-19\\test_end_to_end_forecast_artif0\\draws_senate-2026_2026-09-01_ensemble_stack+overlays_11.npz"
+  },
+  "signature": {
+    "alg": "HMAC-SHA256",
+    "sha256": "81d43c717b19ccbff34c7547e1491ae8b410c28de34a3330da52303fbd045c20",
+    "signature": "cafb646513da6f24cfcecd628aef47a95a234002b987797143c961d4f7bdcc8e",
+    "key_id": "dev-default"
   }
 }

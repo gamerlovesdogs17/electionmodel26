@@ -8,13 +8,16 @@ import pandas as pd
 
 def race_feature_matrix(races: pd.DataFrame) -> np.ndarray:
     """
-    Compact features for similarity: region one-hots, lean, open, fundraising.
+    Compact features: region one-hots, lean, open, fundraising, demography.
     Rows aligned to `races` order.
     """
+    from midterms.evidence.demography import demo_feature_vector
+
     n = len(races)
     regions = sorted(races["region"].astype(str).unique())
     region_idx = {r: i for i, r in enumerate(regions)}
-    X = np.zeros((n, len(regions) + 3), dtype=float)
+    n_demo = 5
+    X = np.zeros((n, len(regions) + 3 + n_demo), dtype=float)
     for i, (_, row) in enumerate(races.iterrows()):
         X[i, region_idx[str(row["region"])]] = 1.0
         X[i, len(regions)] = float(row.get("prior_lean") or 0.0) / 20.0
@@ -24,7 +27,9 @@ def race_feature_matrix(races: pd.DataFrame) -> np.ndarray:
             X[i, len(regions) + 2] = (float(share) - 0.5) * 2.0 if share == share else 0.0
         except (TypeError, ValueError):
             X[i, len(regions) + 2] = 0.0
-    # Column-standardize non-one-hot cols lightly
+        X[i, len(regions) + 3 : len(regions) + 3 + n_demo] = demo_feature_vector(
+            str(row["state"] if "state" in row.index else row.get("state", "XX"))
+        )
     for j in range(len(regions), X.shape[1]):
         col = X[:, j]
         sd = float(col.std())

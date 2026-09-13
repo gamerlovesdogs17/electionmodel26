@@ -27,7 +27,7 @@ from midterms.config import (
     RAW_DIR,
     REGIONS,
 )
-from midterms.evidence.schema import POLL_COLUMNS, RACE_COLUMNS, RESULT_COLUMNS
+from midterms.evidence.schema import POLL_COLUMNS, RACE_COLUMNS, RESULT_COLUMNS, align_poll_frame
 
 PARSER_VERSION = "fixtures-v1"
 
@@ -325,7 +325,7 @@ def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
                 }
             )
 
-    polls = pd.DataFrame(poll_rows)[POLL_COLUMNS]
+    polls = align_poll_frame(pd.DataFrame(poll_rows))
     results = pd.DataFrame(result_rows)[RESULT_COLUMNS]
     results["raw_hash"] = results.apply(
         lambda r: _sha256_bytes(f"{r.result_id}|{r.two_party_margin}".encode()), axis=1
@@ -544,7 +544,7 @@ def generate_2026_polls(races: pd.DataFrame) -> pd.DataFrame:
                     "supersedes": None,
                 }
             )
-    return pd.DataFrame(rows)[POLL_COLUMNS]
+    return align_poll_frame(pd.DataFrame(rows))
 
 
 def build_fixtures(root: Path | None = None) -> dict[str, str]:
@@ -575,9 +575,16 @@ def build_fixtures(root: Path | None = None) -> dict[str, str]:
     results_df = pd.concat(all_results, ignore_index=True)
 
     from midterms.evidence.results_archive import merge_certified_into_results, write_results_archive
+    from midterms.evidence.historical_polls import (
+        freeze_historical_polls_from_warehouse,
+        inject_correction_versions,
+    )
+    from midterms.evidence.approval import write_approval_store
 
     write_results_archive()
     results_df = merge_certified_into_results(results_df)
+    polls_df = inject_correction_versions(polls_df)
+    write_approval_store()
 
     paths = {}
     for name, df in [
@@ -621,6 +628,10 @@ def build_fixtures(root: Path | None = None) -> dict[str, str]:
     races_df.to_csv(root / "races.csv", index=False)
     polls_df.to_csv(root / "polls.csv", index=False)
     results_df.to_csv(root / "results.csv", index=False)
+
+    # Freeze sealed historical poll archive after write
+    freeze_historical_polls_from_warehouse(polls_df)
+
     return {"provenance": str(prov_path), **{k: v["normalized"] for k, v in paths.items()}}
 
 

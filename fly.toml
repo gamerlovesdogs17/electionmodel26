@@ -1,0 +1,21 @@
+# Example Fly.io config — adjust app name before `fly launch` / `fly deploy`
+app = "electionmodel26-api"
+primary_region = "ord"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  MIDTERMS_REQUIRE_SIGNING = "1"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

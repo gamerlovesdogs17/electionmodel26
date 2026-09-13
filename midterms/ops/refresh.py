@@ -27,15 +27,32 @@ def run_refresh(
     steps["ratings"] = write_normalized_ratings()
     steps["results_archive"] = write_results_archive()
     try:
+        steps["votehub_ccby"] = __import__(
+            "midterms.evidence.votehub_archive", fromlist=["ingest_votehub_dumps_to_warehouse"]
+        ).ingest_votehub_dumps_to_warehouse()
+    except Exception as exc:  # noqa: BLE001
+        steps["votehub_ccby"] = {"ok": False, "error": str(exc)}
+    try:
+        steps["licensed_ratings"] = __import__(
+            "midterms.evidence.licensed_ratings", fromlist=["try_ingest_licensed_ratings"]
+        ).try_ingest_licensed_ratings(election_id=election_id, available_at=as_of)
+    except Exception as exc:  # noqa: BLE001
+        steps["licensed_ratings"] = {"ok": False, "error": str(exc)}
+    try:
         steps["markets"] = __import__(
             "midterms.evidence.markets", fromlist=["write_markets_store"]
         ).write_markets_store(election_id=election_id, available_at=as_of)
     except Exception as exc:  # noqa: BLE001
         steps["markets"] = {"ok": False, "error": str(exc)}
     try:
-        steps["expert_ratings"] = __import__(
-            "midterms.evidence.expert_ratings", fromlist=["write_expert_ratings_store"]
-        ).write_expert_ratings_store(election_id=election_id, available_at=as_of)
+        # Prefer licensed CSV when present; else curated snapshot
+        lic = steps.get("licensed_ratings") or {}
+        if not lic.get("licensed_present"):
+            steps["expert_ratings"] = __import__(
+                "midterms.evidence.expert_ratings", fromlist=["write_expert_ratings_store"]
+            ).write_expert_ratings_store(election_id=election_id, available_at=as_of)
+        else:
+            steps["expert_ratings"] = {"ok": True, "source": "licensed"}
     except Exception as exc:  # noqa: BLE001
         steps["expert_ratings"] = {"ok": False, "error": str(exc)}
 

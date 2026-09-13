@@ -49,20 +49,27 @@ def _hash_obj(obj: Any) -> str:
 
 def _load_stack_weights() -> dict[str, float]:
     path = ARTIFACTS_DIR / "cycle_replay_all.json"
+    defaults = {
+        "fast_hierarchical_t": 0.55,
+        "state_space": 0.20,
+        "shrinkage_polls": 0.15,
+        "last_election_swing": 0.10,
+    }
     if path.exists():
         try:
             payload = json.loads(path.read_text())
             weights = payload.get("stack_weights") or {}
             if weights:
-                return {k: float(v) for k, v in weights.items()}
+                out = {k: float(v) for k, v in weights.items()}
+                # Ensure new challengers get mass when replay archive predates them
+                if "state_space" not in out:
+                    out["state_space"] = 0.15
+                    s = sum(out.values())
+                    out = {k: v / s for k, v in out.items()}
+                return out
         except (json.JSONDecodeError, TypeError, ValueError):
             pass
-    # Default: trust hierarchical core; keep shrinkage as light challenger
-    return {
-        "fast_hierarchical_t": 0.70,
-        "shrinkage_polls": 0.20,
-        "last_election_swing": 0.10,
-    }
+    return defaults
 
 
 def _json_safe(obj: Any) -> Any:
@@ -106,6 +113,8 @@ def run_forecast(
     out_dir: Path | None = None,
 ) -> dict[str, Any]:
     from midterms.evidence.economics import write_economic_store, yoy_growth_as_of
+    from midterms.evidence.approval import approval_as_of, write_approval_store
+    from midterms.evidence.demography import attach_demo_features
     from midterms.evidence.expert_ratings import (
         ratings_for_races,
         write_expert_ratings_store,
@@ -119,9 +128,17 @@ def run_forecast(
         overlay_report,
         shift_draws_to_means,
     )
+    from midterms.model.state_space import fit_state_space
+    from midterms.model.challengers import build_challenger_draws
+    from midterms.model.scenarios import run_scenarios
+    from midterms.model.turnout import turnout_layer, undecided_allocation
+    from midterms.simulate.institutional import apply_vacancy_defaults, maybe_materialize_runoff_rows
+    from midterms.ops.reproducibility import environment_lock, snapshot_domain_hashes
+    from midterms.ops.signing import sign_payload
 
     # Ensure economic + finance + ratings + markets stores exist
     write_economic_store()
+    write_approval_store()
     write_expert_ratings_store(election_id=election_id, available_at=str(as_of)[:10])
     try:
         write_finance_store(election_id=election_id)
@@ -141,6 +158,7 @@ def run_forecast(
     snap = wh.build_as_of(as_of, election_id)
     # Overlay FEC fundraising shares onto race rows used by fundamentals
     snap.races = attach_fundraising_to_races(snap.races)
+    snap.races = attach_demo_features(apply_vacancy_defaults(snap.races))
     year = None
     try:
         year = int(str(snap.races["election_day"].iloc[0])[:4])
@@ -150,10 +168,18 @@ def run_forecast(
     if yoy is not None:
         snap.races = snap.races.copy()
         snap.races["real_income_yoy"] = yoy
+    appr = approval_as_of(as_of, election_year=year)
+    snap.races = snap.races.copy()
+    snap.races["pres_approval"] = float(appr["net_approval"])
+    snap.races["white_house_party"] = appr["white_house_party"]
 
     if method == "pymc":
         fit = fit_pymc(
             snap, draws=draws, tune=tune, chains=chains, seed=seed, generic_ballot=generic_ballot
+        )
+    elif method == "state_space":
+        fit = fit_state_space(
+            snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
         )
     else:
         fit = fit_fast_approximation(
@@ -161,9 +187,20 @@ def run_forecast(
         )
 
     stack_weights = None
-    if ensemble and method == "fast":
+    if ensemble and method in {"fast", "state_space"}:
         weights = _load_stack_weights()
-        component_draws: dict[str, np.ndarray] = {"fast_hierarchical_t": fit.draws_margin}
+        component_draws: dict[str, np.ndarray] = {fit.method.split("+")[0]: fit.draws_margin}
+        if fit.method.startswith("fast") or fit.method == "fast_hierarchical_t":
+            component_draws["fast_hierarchical_t"] = fit.draws_margin
+        try:
+            chall = build_challenger_draws(
+                snap, n_draws=fit.draws_margin.shape[0], seed=seed, generic_ballot=generic_ballot
+            )
+            for k, v in chall.items():
+                if v.shape[1] == fit.draws_margin.shape[1]:
+                    component_draws[k] = v
+        except Exception:  # noqa: BLE001
+            pass
         for name in ("shrinkage_polls", "last_election_swing", "equal_weight_polls"):
             if name in weights and name in BASELINES:
                 bl = BASELINES[name](snap)
@@ -174,12 +211,19 @@ def run_forecast(
                     race_ids=fit.race_ids,
                 )
         use_w = {k: v for k, v in weights.items() if k in component_draws and v > 0}
+        if "fast_hierarchical_t" not in use_w and "fast_hierarchical_t" in component_draws:
+            use_w["fast_hierarchical_t"] = weights.get("fast_hierarchical_t", 0.55)
         if len(use_w) >= 2:
             means = {n: component_draws[n].mean(axis=0) for n in use_w}
             sds = {n: component_draws[n].std(axis=0) for n in use_w}
             blended_mean = sum(use_w[n] * means[n] for n in use_w)
             blended_sd = sum(use_w[n] * sds[n] for n in use_w)
-            core = component_draws["fast_hierarchical_t"]
+            core_key = (
+                "fast_hierarchical_t"
+                if "fast_hierarchical_t" in component_draws
+                else next(iter(use_w))
+            )
+            core = component_draws[core_key]
             core_mean = core.mean(axis=0)
             core_sd = np.maximum(core.std(axis=0), 1e-6)
             shocks = (core - core_mean) * (blended_sd / core_sd)
@@ -195,7 +239,10 @@ def run_forecast(
                     **fit.diagnostics,
                     "ensemble": True,
                     "stack_weights": use_w,
-                    "ensemble_note": "mean/sd stack + hierarchical joint shocks (preserves race correlation; discrete mixture would break joint chamber dependence)",
+                    "ensemble_note": (
+                        "mean/sd stack of hierarchical + state-space/challengers + baselines; "
+                        "hierarchical joint shocks preserved for chamber dependence"
+                    ),
                 },
                 method="ensemble_stack",
             )
@@ -260,6 +307,17 @@ def run_forecast(
         )
 
     sim, race_summaries = simulate_chamber(fit, snap.races, vp_tiebreak_party="R")
+    contested_active = snap.races[snap.races["race_id"].isin(fit.race_ids)].copy()
+    # Align contested to fit order
+    contested_active = contested_active.set_index("race_id").loc[fit.race_ids].reset_index()
+    multiway = undecided_allocation(contested_active, fit.mean_margin)
+    turnout = turnout_layer(contested_active, seed=seed)
+    snap.races = maybe_materialize_runoff_rows(
+        snap.races,
+        multiway,
+        as_of=snap.as_of if hasattr(snap, "as_of") else None,
+    )
+    scenarios = run_scenarios(fit, snap.races, vp_tiebreak_party="R")
     # Attach expert/market fields — display rating stays model-derived
     expert_by_id = expert_tbl.set_index("race_id") if len(expert_tbl) else None
     market_by_id = market_df.set_index("race_id") if len(market_df) else None
@@ -370,6 +428,13 @@ def run_forecast(
             ),
         },
         "ablation": ablation,
+        "scenarios": scenarios,
+        "auxiliary": {
+            "multiway_shares": multiway,
+            "turnout": turnout,
+            "approval": appr,
+            "note": "Turnout/multiway are auxiliary translation layers; chamber seats use two-party joint draws.",
+        },
         "peer_comparison": compare_to_peers(
             {"chamber": {"p_dem_majority": sim.p_dem_majority}, "races": race_summaries}
         ),
@@ -416,6 +481,8 @@ def run_forecast(
             }
         ),
         "snapshot_ids": {"evidence": snap.snapshot_id},
+        "domain_hashes": snapshot_domain_hashes(),
+        "environment_lock": environment_lock(),
         "seed": seed,
         "draws": fit.diagnostics.get("draws"),
         "tune": tune if method == "pymc" else None,
@@ -430,6 +497,7 @@ def run_forecast(
             "draws": str(draws_path),
         },
     }
+    manifest["signature"] = sign_payload(manifest)
     write_run_manifest(manifest)
     try:
         from midterms.ops.monitor import append_release_index, archive_release

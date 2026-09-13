@@ -39,6 +39,17 @@ POLL_COLUMNS = [
     "parser_version",
     "normalized_at",
     "supersedes",
+    # Optional blueprint A.1 extensions (nullable; defaults filled on ingest)
+    "geography_version_id",
+    "candidate_set_version",
+    "question_id",
+    "frame",
+    "recruitment",
+    "language",
+    "design_effect",
+    "leaners_included",
+    "multiway",
+    "questionnaire_hash",
 ]
 
 RESULT_COLUMNS = [
@@ -135,5 +146,32 @@ MANIFEST_FIELDS = [
 
 def empty_poll_row(**overrides: Any) -> dict[str, Any]:
     row = {c: None for c in POLL_COLUMNS}
+    row.update(
+        {
+            "office": "US_SENATE",
+            "exclusion_status": "include",
+            "release_version": 1,
+            "geography_version_id": "state-usps-v1",
+            "candidate_set_version": "ticket-v1",
+            "question_id": "generic_two_way",
+            "language": "en",
+            "design_effect": 1.0,
+            "leaners_included": True,
+            "multiway": False,
+        }
+    )
     row.update(overrides)
     return row
+
+
+def align_poll_frame(df: "Any") -> "Any":
+    """Ensure DataFrame has all POLL_COLUMNS (fill missing with None)."""
+    import pandas as pd
+
+    if not isinstance(df, pd.DataFrame):
+        df = pd.DataFrame(df)
+    out = df.copy()
+    for c in POLL_COLUMNS:
+        if c not in out.columns:
+            out[c] = None
+    return out[POLL_COLUMNS]

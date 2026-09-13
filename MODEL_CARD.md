@@ -1,46 +1,50 @@
-# Model card — Senate hierarchical v0.7
+# Model card — Senate hierarchical v0.8
 
 ## Target
-- **Office:** U.S. Senate (Class II 2026 + OH/FL specials + historical cycles for validation)
-- **Estimands:** race two-party margins; joint Democratic seat totals; chamber **control**
-- **Control rule:** Dem control requires ≥51 seats (≤50 → Republican control, including 50–50)
-- **Independents:** Shown as Ind when there is no Dem nominee; still count toward Democratic seats
+- **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
+- **Estimands:** two-party margins; joint Dem seats; chamber control (≥51 Dem; ≤50 → R via VP)
+- **Auxiliary:** multiway shares + turnout foils (do not drive seat math)
+- **Independents:** Ind display when no Dem nominee; still Dem caucus seats
 
 ## Update cadence
-Research / on-demand via `python -m midterms.cli forecast` or `refresh`. See `MODEL_CHANGELOG.md`.
-Release index: `data/manifests/releases.jsonl` (+ per-run `data/releases/{run_id}/`).
+`forecast` / `refresh`. Releases: `data/manifests/releases.jsonl` + signed `data/releases/{run_id}/`.
+Governance: `GOVERNANCE.md`. Validation: `validation-report`.
 
 ## Sources
 | Domain | Source | Notes |
 | --- | --- | --- |
-| Polls | VoteHub API (CC BY 4.0) + synthetic fixtures | As-of via `available_at` + bitemporal `valid_from`/`valid_to` |
-| Pollster quality | VoteHub scorecards + FTE CSV fill-in | Hierarchical house / extra-SD priors |
-| Economics | ALFRED/FRED when keyed; else fixtures | YoY real disposable income |
-| Finance | OpenFEC candidate totals | Dem receipt share |
-| Expert ratings | Curated dated snapshot / CSV | Ablatable overlay **input** only |
-| Markets | Kalshi | Liquidity-scaled overlay |
-| Peers | Kalshi / DDHQ / VoteHub (comparison only) | **Not** averaged into the ensemble |
-| Results | Certified archive + MEDSL 2016 aggregates + fixtures | Prefer certified by `race_id` |
+| Polls | VoteHub + sealed historical archive + fixtures | Bitemporal + correction versions |
+| Pollster quality | VoteHub + FTE fill-in | House ≠ reliability |
+| Economics | ALFRED/FRED or fixtures | Vintage YoY RDPI |
+| Approval | Curated public-aggregate vintages | As-of store |
+| Finance | OpenFEC (receipts/cash/disbursements) | Matched-window share |
+| Expert ratings | Curated dated snapshot | Ablatable; not licensed Cook |
+| Markets | Kalshi | Ablatable |
+| Demography | State research snapshot | Similarity / covariance |
+| Results | Certified archive + MEDSL 2016 + fixtures | Prefer certified |
 
 ## Core model
-- Hierarchical latent opinion (PyMC NUTS or fast Student-t)
-- Fundamentals prior with nested drop-one ablation (`ablate-fundamentals`)
-- ENOP / pollster caps / study clustering
-- Future movement vs terminal industry bias
-- National / region / local + **continuous similarity** Student-t shocks → joint chamber simulation
-- CRPS stacking of hierarchical + baselines
-- Display ratings = `rating_from_probability(p_dem)`
-- Race schema: `election_phase`, `runoff_of`, `vacancy_reason`, `ballot_status`, `effective_election_day`
+- Hierarchical Student-t spine (+ optional PyMC / state-space)
+- Forward state-space challenger: future movement shrinks; terminal ED error remains
+- Fundamentals prior (approval, income, fundraising, midterm, lean, GB)
+- ENOP / caps / study clustering; mode/pop offsets
+- National / region / local + demographic similarity shocks
+- CRPS stacking of hierarchical + state-space + baselines
+- Ratings/Kalshi overlays with ablation
+- LA/GA runoff templates; vacancy_reason on specials
+- Scenario sensitivity block (not production forecasts)
 
 ## Validation / ops
-- Leakage canary + bitemporal poll window on `build_as_of`
-- Complete-cycle replay + nested fundamentals ablation
-- `monitor-check` health gates; `refresh` fetch→ingest→forecast→monitor chain
-- **Limit:** historical poll archives still partly synthetic; certified margins cover major contested seats
+- Complete-cycle replay; lead-time grid; nested Student-t df / era search
+- Component ablations; extended metrics (interval score, reliability, energy)
+- Monitor alerts; HMAC signatures; environment lock; correction registry
+- **Limit:** historical polls still partly synthetic (sealed for replay); no licensed ratings feed
 
-## Still deferred
-- Licensed expert feeds; GA runoff automation once triggered; House / Electoral College
-- Cryptographic signing of release archives (hash sidecars are present)
+## Out of scope
+House, Electoral College.
 
-## Contested 2026 universe
-35 contested (33 Class II + OH/FL specials) + 65 held; held Ind (ME/VT) in Dem seat math.
+## Production paths
+See `DEPLOY.md`: API bearer auth (`MIDTERMS_API_KEY`), Docker/Fly deploy, Ed25519 signing
+(`generate-signing-keys`, `MIDTERMS_REQUIRE_SIGNING=1`), licensed ratings CSV adapter
+(`COOK_RATINGS_CSV` — vendor files never committed), VoteHub CC BY dump sealing
+(`seal-votehub-dumps`).

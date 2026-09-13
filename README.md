@@ -90,7 +90,23 @@ VoteHub normalize/merge tests require `data/raw/external/votehub_*.json` (create
 
 ## Out of scope
 
-House, Electoral College, public auth, production cloud deploy.
+House, Electoral College.
+
+## Production (optional)
+
+See [`DEPLOY.md`](DEPLOY.md): Docker / Fly API with `MIDTERMS_API_KEY`, Ed25519 release
+signing, licensed ratings CSV path (`COOK_RATINGS_CSV`), VoteHub CC BY dump sealing.
+
+## Model v0.8.1 upgrades
+
+- Licensed ratings CSV adapter (`COOK_RATINGS_CSV`); VoteHub CC BY dump sealing; API bearer auth;
+  Docker/Fly sketches; Ed25519 public trust root (`generate-signing-keys`).
+
+## Model v0.8 upgrades
+
+- Senate-only blueprint completion: state-space path, sealed historical polls, approval vintages,
+  demographic similarity, runoff templates, scenarios UI, validation-report, HMAC signing, governance.
+- CLIs: `validation-report`, `lead-time-grid`, `ablate-components`, `fetch-approval`, `freeze-historical-polls`.
 
 ## Model v0.7 upgrades
 

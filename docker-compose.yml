@@ -1,0 +1,13 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      MIDTERMS_API_KEY: ${MIDTERMS_API_KEY:-}
+      MIDTERMS_CORS_ORIGINS: ${MIDTERMS_CORS_ORIGINS:-http://localhost:3000}
+      MIDTERMS_SIGNING_PRIVATE_KEY: ${MIDTERMS_SIGNING_PRIVATE_KEY:-}
+      MIDTERMS_REQUIRE_SIGNING: ${MIDTERMS_REQUIRE_SIGNING:-0}
+    volumes:
+      - ./data/artifacts:/app/data/artifacts:ro
+      - ./data/manifests:/app/data/manifests:ro
