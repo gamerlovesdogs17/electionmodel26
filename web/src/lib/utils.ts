@@ -19,6 +19,7 @@ export function signedMargin(m: number): string {
 export type RaceForecast = {
   race_id: string;
   state: string;
+  seat_class?: string | null;
   p_dem: number;
   p_rep: number;
   mean_margin: number;
@@ -31,16 +32,22 @@ export type RaceForecast = {
   held_by?: string | null;
   dem_candidate?: string;
   rep_candidate?: string;
+  dem_party?: "D" | "I" | string;
+  caucus?: string;
   dem_share?: number;
   rep_share?: number;
   rating?: string;
+  expert_rating?: string;
   is_flip?: boolean;
   favored_party?: string;
+  favored_caucus?: string;
+  market_p_dem?: number;
 };
 
 export type ChamberForecast = {
   held_dem: number;
   held_rep: number;
+  held_ind?: number;
   majority_threshold: number;
   p_dem_majority: number;
   p_rep_majority: number;
@@ -79,6 +86,13 @@ export type ForecastArtifact = {
     delta_p_dem_majority?: number;
   };
   snapshot?: Record<string, unknown>;
+  peer_comparison?: {
+    as_of_peers?: string;
+    disclaimer?: string;
+    control_p_dem?: Record<string, number | null | undefined>;
+    races?: Record<string, unknown>[];
+    sources?: Record<string, { label?: string; url?: string; note?: string }>;
+  };
 };
 
 /** Census FIPS → postal abbreviation for us-atlas states-10m */
@@ -189,15 +203,15 @@ export const STATE_NAME: Record<string, string> = {
   WY: "Wyoming",
 };
 
+/** Color bands aligned with rating_from_probability thresholds. */
 export function demFill(p: number): string {
-  // Soft→deep blue by Dem win probability
-  if (p >= 0.85) return "#143f6b";
-  if (p >= 0.7) return "#1f5f8b";
-  if (p >= 0.55) return "#3d7ea8";
-  if (p >= 0.45) return "#8a9096";
-  if (p >= 0.3) return "#c46a5c";
-  if (p >= 0.15) return "#a33b2d";
-  return "#7a2418";
+  if (p >= 0.92) return "#143f6b"; // Solid D
+  if (p >= 0.8) return "#1f5f8b"; // Likely D
+  if (p >= 0.6) return "#3d7ea8"; // Lean D
+  if (p >= 0.4) return "#9a8f4a"; // Tossup
+  if (p >= 0.2) return "#c46a5c"; // Lean R
+  if (p >= 0.08) return "#a33b2d"; // Likely R
+  return "#7a2418"; // Solid R
 }
 
 export function marginFill(m: number): string {
@@ -208,6 +222,23 @@ export function marginFill(m: number): string {
   if (m > -4) return "#c46a5c";
   if (m > -10) return "#a33b2d";
   return "#7a2418";
+}
+
+export function ratingFromProbability(p: number): string {
+  if (p >= 0.92) return "Solid D";
+  if (p >= 0.8) return "Likely D";
+  if (p >= 0.6) return "Lean D";
+  if (p >= 0.4) return "Tossup";
+  if (p >= 0.2) return "Lean R";
+  if (p >= 0.08) return "Likely R";
+  return "Solid R";
+}
+
+export function primaryRace(races: RaceForecast[]): RaceForecast | null {
+  if (!races.length) return null;
+  return [...races].sort(
+    (a, b) => Math.abs(a.p_dem - 0.5) - Math.abs(b.p_dem - 0.5),
+  )[0];
 }
 
 export function ratingFill(rating: string): string {

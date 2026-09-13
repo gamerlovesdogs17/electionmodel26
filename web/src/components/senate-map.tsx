@@ -8,6 +8,7 @@ import {
   demFill,
   marginFill,
   pct,
+  primaryRace,
   ratingFill,
   signedMargin,
 } from "@/lib/utils";
@@ -27,10 +28,18 @@ type Props = {
 
 type HoverState = {
   abbr: string;
-  race: RaceForecast | null;
+  races: RaceForecast[];
   x: number;
   y: number;
 };
+
+function caucusFavored(race: RaceForecast): "D" | "R" {
+  if (race.favored_caucus === "D" || race.favored_caucus === "R") {
+    return race.favored_caucus;
+  }
+  if (race.favored_party === "R") return "R";
+  return "D"; // D or I
+}
 
 export function SenateMap({
   races,
@@ -47,8 +56,12 @@ export function SenateMap({
   const [hover, setHover] = useState<HoverState | null>(null);
 
   const byState = useMemo(() => {
-    const m = new Map<string, RaceForecast>();
-    for (const r of races) m.set(r.state, r);
+    const m = new Map<string, RaceForecast[]>();
+    for (const r of races) {
+      const list = m.get(r.state) ?? [];
+      list.push(r);
+      m.set(r.state, list);
+    }
     return m;
   }, [races]);
 
@@ -102,7 +115,8 @@ export function SenateMap({
           controlling the Senate.
         </h2>
         <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[var(--muted)]">
-          As of {asOf} · 50–50 counts as Republican control (VP)
+          As of {asOf} · 50–50 counts as Republican control (VP) · Ind caucus
+          with Dem
         </p>
       </div>
 
@@ -115,16 +129,16 @@ export function SenateMap({
         />
       </div>
       <div className="mx-auto flex max-w-xl justify-between text-sm font-medium">
-        <span className="text-[var(--dem)]">{demLead} Democrats</span>
+        <span className="text-[var(--dem)]">{demLead} Dem caucus</span>
         <span className="text-[var(--rep)]">{repLead} Republicans</span>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-4 text-xs text-[var(--muted)]">
-          <Legend swatch="bg-[var(--dem)]" label="Dem hold" />
+          <Legend swatch="bg-[var(--dem)]" label="Dem/Ind hold" />
           <Legend
             swatch="bg-[var(--dem)] opacity-90"
-            label="Dem flip"
+            label="Dem/Ind flip"
             hatch
           />
           <Legend swatch="bg-[var(--rep)]" label="Rep hold" />
@@ -216,7 +230,8 @@ export function SenateMap({
             </pattern>
           </defs>
           {paths.map((p) => {
-            const race = byState.get(p.abbr) ?? null;
+            const stateRaces = byState.get(p.abbr) ?? [];
+            const race = primaryRace(stateRaces);
             const fill = raceFill(race, mode);
             return (
               <path
@@ -232,7 +247,7 @@ export function SenateMap({
                   ).getBoundingClientRect();
                   setHover({
                     abbr: p.abbr,
-                    race,
+                    races: stateRaces,
                     x: e.clientX - rect.left,
                     y: e.clientY - rect.top,
                   });
@@ -260,7 +275,7 @@ export function SenateMap({
         {hover ? (
           <MapTooltip
             abbr={hover.abbr}
-            race={hover.race}
+            races={hover.races}
             style={{
               left: Math.min(hover.x + 12, 640),
               top: Math.max(hover.y - 12, 8),
@@ -274,9 +289,10 @@ export function SenateMap({
 
 function raceFill(race: RaceForecast | null, mode: MapMode): string {
   if (!race) return "#d5dde2";
+  const fav = caucusFavored(race);
   if (mode === "probability") {
     if (race.is_flip) {
-      return race.favored_party === "D" ? "url(#hatch-dem)" : "url(#hatch-rep)";
+      return fav === "D" ? "url(#hatch-dem)" : "url(#hatch-rep)";
     }
     return demFill(race.p_dem);
   }
@@ -286,9 +302,8 @@ function raceFill(race: RaceForecast | null, mode: MapMode): string {
     }
     return marginFill(race.mean_margin);
   }
-  // ratings
   if (race.is_flip) {
-    return race.favored_party === "D" ? "url(#hatch-dem)" : "url(#hatch-rep)";
+    return fav === "D" ? "url(#hatch-dem)" : "url(#hatch-rep)";
   }
   return ratingFill(race.rating ?? "Tossup");
 }
@@ -322,15 +337,15 @@ function Legend({
 
 function MapTooltip({
   abbr,
-  race,
+  races,
   style,
 }: {
   abbr: string;
-  race: RaceForecast | null;
+  races: RaceForecast[];
   style: CSSProperties;
 }) {
   const name = STATE_NAME[abbr] ?? abbr;
-  if (!race) {
+  if (!races.length) {
     return (
       <div
         className="pointer-events-none absolute z-30 w-64 rounded-lg border border-[var(--line)] bg-white p-3 shadow-lg"
@@ -346,21 +361,42 @@ function MapTooltip({
     );
   }
 
-  const favoredName =
-    race.p_dem >= 0.5 ? race.dem_candidate ?? "Democrat" : race.rep_candidate ?? "Republican";
-  const favoredP = race.p_dem >= 0.5 ? race.p_dem : race.p_rep;
-  const favoredTone =
-    race.p_dem >= 0.5 ? "text-[var(--dem)]" : "text-[var(--rep)]";
-
   return (
     <div
       className="pointer-events-none absolute z-30 w-[18.5rem] rounded-lg border border-[var(--line)] bg-white p-3 shadow-lg"
       style={style}
     >
       <p className="font-display text-base leading-snug text-[var(--ink)]">
-        {name}&apos;s Senate Election
+        {name}
+        {races.length > 1 ? ` · ${races.length} contests` : " · Senate"}
       </p>
-      <div className="mt-2 flex flex-wrap gap-1.5">
+      <div className="mt-2 space-y-3">
+        {races.map((race) => (
+          <RaceTooltipBlock key={race.race_id} race={race} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RaceTooltipBlock({ race }: { race: RaceForecast }) {
+  const demParty = race.dem_party === "I" ? "I" : "D";
+  const favoredIndOrDem = race.p_dem >= 0.5;
+  const favoredName = favoredIndOrDem
+    ? (race.dem_candidate ?? (demParty === "I" ? "Independent" : "Democrat"))
+    : (race.rep_candidate ?? "Republican");
+  const favoredP = favoredIndOrDem ? race.p_dem : race.p_rep;
+  const favoredTone = favoredIndOrDem
+    ? demParty === "I"
+      ? "text-[#5a6a3a]"
+      : "text-[var(--dem)]"
+    : "text-[var(--rep)]";
+  const special =
+    race.seat_class === "special" ? "Special" : race.seat_class === "II" ? "Class II" : null;
+
+  return (
+    <div className="border-t border-[var(--line)] pt-2 first:border-t-0 first:pt-0">
+      <div className="flex flex-wrap gap-1.5">
         <span
           className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
             race.rating?.includes("D")
@@ -372,6 +408,11 @@ function MapTooltip({
         >
           {race.rating ?? "Tossup"}
         </span>
+        {special ? (
+          <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px] text-[var(--muted)]">
+            {special}
+          </span>
+        ) : null}
         {race.is_flip ? (
           <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px] text-[var(--muted)]">
             Flip
@@ -381,14 +422,10 @@ function MapTooltip({
       <p className={`mt-2 text-sm font-medium ${favoredTone}`}>
         {favoredName} has a {pct(favoredP, 1)} chance.
       </p>
-      <div className="mt-3 border-t border-[var(--line)] pt-2">
-        <div className="mb-1 grid grid-cols-[1fr_auto] gap-2 text-[10px] uppercase tracking-wide text-[var(--muted)]">
-          <span>Candidate</span>
-          <span>Est. share</span>
-        </div>
+      <div className="mt-2">
         <CandidateRow
-          name={race.dem_candidate ?? "Democrat"}
-          party="D"
+          name={race.dem_candidate ?? (demParty === "I" ? "Independent" : "Democrat")}
+          party={demParty}
           share={race.dem_share ?? 50 + race.mean_margin / 2}
         />
         <CandidateRow
@@ -396,7 +433,7 @@ function MapTooltip({
           party="R"
           share={race.rep_share ?? 50 - race.mean_margin / 2}
         />
-        <div className="mt-2 flex justify-between text-sm">
+        <div className="mt-1 flex justify-between text-sm">
           <span className="text-[var(--muted)]">Margin</span>
           <span
             className={`font-medium ${
@@ -417,11 +454,21 @@ function CandidateRow({
   share,
 }: {
   name: string;
-  party: "D" | "R";
+  party: "D" | "R" | "I";
   share: number;
 }) {
-  const tone = party === "D" ? "text-[var(--dem)]" : "text-[var(--rep)]";
-  const badge = party === "D" ? "bg-[var(--dem)]" : "bg-[var(--rep)]";
+  const tone =
+    party === "R"
+      ? "text-[var(--rep)]"
+      : party === "I"
+        ? "text-[#5a6a3a]"
+        : "text-[var(--dem)]";
+  const badge =
+    party === "R"
+      ? "bg-[var(--rep)]"
+      : party === "I"
+        ? "bg-[#7a8a4a]"
+        : "bg-[var(--dem)]";
   return (
     <div className="grid grid-cols-[1fr_auto] items-center gap-2 py-1 text-sm">
       <span className="inline-flex items-center gap-2 truncate text-[var(--ink)]">

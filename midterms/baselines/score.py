@@ -55,3 +55,39 @@ def score_forecasts(
         "brier": float(df["brier"].mean()),
         "mae": float(df["abs_err"].mean()),
     }
+
+
+def discrete_crps(samples: np.ndarray, y: float) -> float:
+    """Empirical CRPS for predictive samples of a scalar (e.g. seat total)."""
+    s = np.sort(np.asarray(samples, dtype=float))
+    n = len(s)
+    if n == 0:
+        return float("nan")
+    term1 = float(np.mean(np.abs(s - y)))
+    i = np.arange(1, n + 1)
+    term2 = float((2.0 / (n * n)) * np.sum((2 * i - n - 1) * s))
+    return term1 - 0.5 * term2
+
+
+def score_chamber_draws(
+    dem_seat_draws: np.ndarray,
+    *,
+    realized_dem_seats: float,
+    realized_dem_control: int,
+    majority_threshold: int = 51,
+    vp_tiebreak_party: str = "R",
+) -> dict[str, float]:
+    """Joint chamber scores from seat draws (blueprint Table 5)."""
+    draws = np.asarray(dem_seat_draws, dtype=float)
+    if vp_tiebreak_party == "R":
+        p_dem_ctl = float((draws >= majority_threshold).mean())
+    else:
+        p_dem_ctl = float((draws >= 50).mean())
+    return {
+        "seat_crps": discrete_crps(draws, realized_dem_seats),
+        "seat_mae": float(np.mean(np.abs(draws - realized_dem_seats))),
+        "control_brier": brier(p_dem_ctl, int(realized_dem_control)),
+        "p_dem_control": p_dem_ctl,
+        "expected_dem_seats": float(draws.mean()),
+        "n_draws": int(len(draws)),
+    }

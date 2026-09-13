@@ -38,6 +38,11 @@ CLASS_II = [
     "OR", "RI", "SC", "SD", "TN", "TX", "VA", "WV", "WY",
 ]
 
+# 2026 special elections (not Class II) — one seat each; other seat remains held
+SPECIALS_2026 = ["OH", "FL"]
+
+CONTESTED_2026 = CLASS_II + SPECIALS_2026
+
 # Approximate long-run leans (dem - rep pp) for synthetic generation
 BASE_LEANS = {
     "AL": -28, "AK": -15, "AZ": -2, "AR": -27, "CA": 22, "CO": 6, "CT": 14,
@@ -313,7 +318,7 @@ def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
 
 
 def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
-    """Build a competitive research map: 33 Class II contests + 67 held seats (=100)."""
+    """Build research map: 33 Class II + 2 specials contested + 65 held (=100)."""
     rng = rng or np.random.default_rng(2026)
     rows = []
     # Contested Class II — illustrative incumbency / openings for research demos
@@ -323,6 +328,8 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
         "MI": "D", "MN": "D", "MS": "R", "MT": "R", "NE": "R", "NH": "D", "NJ": "D",
         "NM": "D", "NC": "R", "OK": "R", "OR": "D", "RI": "D", "SC": "R", "SD": "R",
         "TN": "R", "TX": "R", "VA": "D", "WV": "R", "WY": "R",
+        # Specials: seats vacated / appointed mid-cycle
+        "OH": "R", "FL": "R",
     }
     open_seats = {"MI", "MN", "NH"}
     # Soften deep leans so joint chamber totals have mass near majority
@@ -349,30 +356,77 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
             }
         )
 
-    # Held senators not on the 2026 ballot — curated so pre-election carry is ~48 D / 19 R
-    # among the 67 held seats (competitive midterm demo; not an official chamber roster).
-    held_dem_states = [
-        "AZ", "AZ", "CA", "CA", "CT", "CT", "HI", "HI", "MD", "MD", "NV", "NV",
-        "NY", "NY", "PA", "PA", "VT", "VT", "WA", "WA", "WI", "WI", "OH", "OH",
-        "CO", "DE", "GA", "IL", "MA", "NJ", "NM", "OR", "RI", "VA", "MI", "MN",
-        "NH", "ME",  # ME held caucuses D for majority math
-    ]
-    # Remaining held slots are R (and pad to 67)
-    held_parties: list[str] = ["D"] * len(held_dem_states)
-    while len(held_parties) < 67:
-        held_parties.append("R")
-    held_parties = held_parties[:67]
+    for st in SPECIALS_2026:
+        raw = float(BASE_LEANS[st])
+        lean = float(np.clip(raw * 0.55, -18, 18) + rng.normal(0, 0.8))
+        struct = _race_struct_fields(2026, lean, rng)
+        rows.append(
+            {
+                "race_id": f"senate-2026-{st}",
+                "election_id": DEMO_ELECTION_ID,
+                "office": "US_SENATE",
+                "state": st,
+                "seat_class": "special",
+                "election_day": DEMO_ELECTION_DAY,
+                "incumbent_party": incumbency[st],
+                "is_open": False,
+                "prior_lean": round(lean, 2),
+                "region": REGIONS[st],
+                "not_up": False,
+                "held_by": incumbency[st],
+                **struct,
+            }
+        )
 
-    held_meta = []
-    # one held seat for each Class II state + two for each non-Class II
+    # Held senators not on the 2026 ballot — 65 seats (100 - 35 contested).
+    # Independents who caucus with Democrats: ME (King), VT (Sanders).
+    # Welch (VT) remains D. Parties are assigned by held_meta index below.
+    held_meta: list[str] = []
     for st in CLASS_II:
         held_meta.append(st)
-    for st in sorted(s for s in BASE_LEANS if s not in CLASS_II):
+    for st in SPECIALS_2026:
+        held_meta.append(st)  # one remaining seat each
+    for st in sorted(s for s in BASE_LEANS if s not in CLASS_II and s not in SPECIALS_2026):
         held_meta.extend([st, st])
-    assert len(held_meta) == 67
+    assert len(held_meta) == 65, len(held_meta)
+
+    # Curated caucus roster among held seats (~D+I majority carry into midterm)
+    # Mark specific Ind caucus seats by (state, occurrence) then fill D then R.
+    held_parties: list[str | None] = [None] * 65
+    # First VT occurrence → Sanders (I); second → Welch (D)
+    vt_ix = [i for i, s in enumerate(held_meta) if s == "VT"]
+    if len(vt_ix) >= 1:
+        held_parties[vt_ix[0]] = "I"
+    if len(vt_ix) >= 2:
+        held_parties[vt_ix[1]] = "D"
+    # ME Class II held seat → King (I)
+    me_ix = [i for i, s in enumerate(held_meta) if s == "ME"]
+    if me_ix:
+        held_parties[me_ix[0]] = "I"
+
+    # Remaining D caucus targets (excluding already-set I/D)
+    preferred_d = [
+        "AZ", "AZ", "CA", "CA", "CT", "CT", "HI", "HI", "MD", "MD", "NV", "NV",
+        "NY", "NY", "PA", "PA", "WA", "WA", "WI", "WI",
+        "CO", "DE", "GA", "IL", "MA", "NJ", "NM", "OR", "RI", "VA", "MI", "MN", "NH",
+    ]
+    # Count already assigned D+I
+    n_caucus = sum(1 for p in held_parties if p in {"D", "I"})
+    target_caucus = 38  # of 65 held → competitive chamber with 35 contested
+    for st in preferred_d:
+        if n_caucus >= target_caucus:
+            break
+        for i, s in enumerate(held_meta):
+            if s == st and held_parties[i] is None:
+                held_parties[i] = "D"
+                n_caucus += 1
+                break
+    for i in range(65):
+        if held_parties[i] is None:
+            held_parties[i] = "R"
 
     for i, st in enumerate(held_meta):
-        party = held_parties[i]
+        party = held_parties[i] or "R"
         lean = float(BASE_LEANS[st])
         struct = _race_struct_fields(2026, lean, rng)
         rows.append(
@@ -392,7 +446,11 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
                 **struct,
             }
         )
-    return pd.DataFrame(rows)[RACE_COLUMNS]
+    df = pd.DataFrame(rows)[RACE_COLUMNS]
+    assert int((~df["not_up"]).sum()) == 35
+    assert int(df["not_up"].sum()) == 65
+    assert len(df) == 100
+    return df
 
 
 def generate_2026_polls(races: pd.DataFrame) -> pd.DataFrame:

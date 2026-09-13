@@ -92,6 +92,14 @@ VoteHub normalize/merge tests require `data/raw/external/votehub_*.json` (create
 
 House, Electoral College, public auth, production cloud deploy.
 
+## Model v0.5 upgrades
+
+- **OH + FL specials** in the contested universe (35 races / 65 held).
+- **Model-derived display ratings** aligned with Probability map bands; expert ratings are overlay inputs only.
+- **Independent caucus display** (`dem_party=I` / held `I`) with Dem seat math unchanged.
+- **Peer comparison** panel (Kalshi / DDHQ / Economist snapshots) — not averaged into the ensemble.
+- Cycle replay adds **chamber seat CRPS / control Brier** and overlay ablation deltas.
+
 ## Model v0.4 upgrades
 
 - **Kalshi markets** as a real overlay layer (`fetch-markets`): race `SENATE{ST}-26-*` + `CONTROLS-2026-*`, liquidity-scaled.

@@ -112,6 +112,7 @@ def run_forecast(
     )
     from midterms.evidence.fec import attach_fundraising_to_races, write_finance_store
     from midterms.evidence.markets import load_control_market, load_race_markets, write_markets_store
+    from midterms.evidence.peers import compare_to_peers, write_peer_snapshots
     from midterms.model.overlays import (
         apply_market_overlay,
         apply_rating_overlay,
@@ -131,6 +132,10 @@ def run_forecast(
         markets_meta = write_markets_store(election_id=election_id, available_at=str(as_of)[:10])
     except Exception as exc:  # noqa: BLE001
         markets_meta = {"error": str(exc), "n_races": 0}
+    try:
+        write_peer_snapshots()
+    except Exception:  # noqa: BLE001
+        pass
 
     wh = Warehouse()
     snap = wh.build_as_of(as_of, election_id)
@@ -190,7 +195,7 @@ def run_forecast(
                     **fit.diagnostics,
                     "ensemble": True,
                     "stack_weights": use_w,
-                    "ensemble_note": "mean/sd stack + hierarchical joint shocks",
+                    "ensemble_note": "mean/sd stack + hierarchical joint shocks (preserves race correlation; discrete mixture would break joint chamber dependence)",
                 },
                 method="ensemble_stack",
             )
@@ -255,13 +260,13 @@ def run_forecast(
         )
 
     sim, race_summaries = simulate_chamber(fit, snap.races, vp_tiebreak_party="R")
-    # Attach expert/market display fields
+    # Attach expert/market fields — display rating stays model-derived
     expert_by_id = expert_tbl.set_index("race_id") if len(expert_tbl) else None
     market_by_id = market_df.set_index("race_id") if len(market_df) else None
     for s in race_summaries:
         if expert_by_id is not None and s["race_id"] in expert_by_id.index:
-            s["rating"] = str(expert_by_id.loc[s["race_id"], "rating"])
-            s["rating_source"] = str(expert_by_id.loc[s["race_id"], "source"])
+            s["expert_rating"] = str(expert_by_id.loc[s["race_id"], "rating"])
+            s["expert_source"] = str(expert_by_id.loc[s["race_id"], "source"])
         if market_by_id is not None and s["race_id"] in market_by_id.index:
             s["market_p_dem"] = float(market_by_id.loc[s["race_id"], "p_dem"])
             s["market_liquidity"] = float(market_by_id.loc[s["race_id"], "liquidity"])
@@ -320,6 +325,7 @@ def run_forecast(
         "chamber": {
             "held_dem": sim.held_dem,
             "held_rep": sim.held_rep,
+            "held_ind": getattr(sim, "held_ind", 0),
             "majority_threshold": sim.majority_threshold,
             "p_dem_majority": sim.p_dem_majority,
             "p_rep_majority": sim.p_rep_majority,
@@ -333,7 +339,8 @@ def run_forecast(
             "note": (
                 "Chamber totals from joint correlated draws. "
                 "50–50 counts as Republican control (VP tiebreak). "
-                "Ratings/markets overlays are ablatable; see ablation block."
+                "Independents who caucus with Democrats count toward Dem control. "
+                "Display ratings are model-derived from P(Dem); expert/Kalshi overlays are ablatable."
             ),
         },
         "races": race_summaries,
@@ -364,6 +371,9 @@ def run_forecast(
             ),
         },
         "ablation": ablation,
+        "peer_comparison": compare_to_peers(
+            {"chamber": {"p_dem_majority": sim.p_dem_majority}, "races": race_summaries}
+        ),
     }
 
     artifact_path = out_dir / f"forecast_{run_id}.json"

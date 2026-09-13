@@ -1,6 +1,7 @@
 "use client";
 
 import { ChamberPanel } from "@/components/chamber-panel";
+import { PeerComparePanel, type PeerComparison } from "@/components/peer-compare";
 import { RaceTable } from "@/components/race-table";
 import { SenateMap } from "@/components/senate-map";
 import { Button } from "@/components/ui/button";
@@ -134,6 +135,9 @@ export function ForecastDashboard() {
 
       <ChamberPanel chamber={data.chamber} />
       <RaceTable races={data.races} />
+      {data.peer_comparison ? (
+        <PeerComparePanel peer={data.peer_comparison as PeerComparison} />
+      ) : null}
     </div>
   );
 }

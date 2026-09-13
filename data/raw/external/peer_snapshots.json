@@ -1,0 +1,74 @@
+{
+  "as_of": "2026-09-12",
+  "retrieved_at": "2026-09-13T14:55:48.474133+00:00",
+  "sources": {
+    "ddhq": {
+      "label": "Decision Desk HQ",
+      "url": "https://votes.decisiondeskhq.com/forecast/2026/senate",
+      "p_dem_control": 0.48,
+      "note": "Curated research snapshot from public DDHQ Senate page (approx).",
+      "races": {
+        "ME": 0.48,
+        "TX": 0.47,
+        "OH": 0.46,
+        "FL": 0.2,
+        "NC": 0.22,
+        "GA": 0.82,
+        "NH": 0.78,
+        "MI": 0.69,
+        "AK": 0.42,
+        "IA": 0.41
+      }
+    },
+    "economist": {
+      "label": "Economist / FiftyPlusOne",
+      "url": "https://www.economist.com/interactive/2026/us-midterms/prediction-model/senate",
+      "p_dem_control": null,
+      "note": "Control probability not always published as a single scalar; race cells filled when available.",
+      "races": {}
+    },
+    "kalshi": {
+      "label": "Kalshi",
+      "url": "https://kalshi.com",
+      "p_dem_control": 0.485,
+      "note": "Filled live from markets store at write time.",
+      "races": {
+        "AL": 0.029087261785356068,
+        "AK": 0.6515151515151515,
+        "AR": 0.06393606393606394,
+        "CO": 0.9727822580645161,
+        "DE": 0.9775112443778111,
+        "GA": 0.9267803410230692,
+        "ID": 0.007287870900572618,
+        "IL": 0.975487743871936,
+        "IA": 0.385,
+        "KS": 0.20398009950248755,
+        "LA": 0.05897051474262868,
+        "ME": 0.665,
+        "MA": 0.9740777666999004,
+        "MI": 0.6119402985074628,
+        "MN": 0.8955743411238191,
+        "MT": 0.008662696264212236,
+        "NH": 0.84,
+        "NM": 0.9800796812749004,
+        "OK": 0.02634245187436677,
+        "SC": 0.135,
+        "VA": 0.9769539078156313,
+        "WY": 0.01932606541129831
+      }
+    }
+  },
+  "key_races": [
+    "ME",
+    "NC",
+    "OH",
+    "FL",
+    "TX",
+    "GA",
+    "NH",
+    "MI",
+    "AK",
+    "IA"
+  ],
+  "disclaimer": "Peer numbers are research context only \u2014 not averaged into this model's ensemble (blueprint \u00a72). Snapshots may lag live sites."
+}

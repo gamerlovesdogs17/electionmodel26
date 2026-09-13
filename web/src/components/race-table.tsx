@@ -14,7 +14,9 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
       list = list.filter(
         (r) =>
           r.state.includes(needle) ||
-          r.race_id.toUpperCase().includes(needle)
+          r.race_id.toUpperCase().includes(needle) ||
+          (r.dem_candidate ?? "").toUpperCase().includes(needle) ||
+          (r.rep_candidate ?? "").toUpperCase().includes(needle),
       );
     }
     list.sort((a, b) => {
@@ -41,15 +43,15 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
             Seat-by-seat probabilities
           </h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Two-party Dem win probability and expected margin from the joint
-            posterior draws.
+            Model-derived rating matches P(Dem). Independents without a Dem
+            nominee are labeled Ind but count toward Dem caucus control.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Filter state…"
+            placeholder="Filter state or candidate…"
             className="h-9 rounded-md border border-[var(--line)] bg-[var(--paper)] px-3 text-sm outline-none ring-[var(--accent)] focus:ring-2"
           />
           <select
@@ -69,59 +71,77 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
           <thead className="bg-[var(--panel)] text-xs uppercase tracking-wide text-[var(--muted)]">
             <tr>
               <th className="px-3 py-2 font-medium">State</th>
-              <th className="px-3 py-2 font-medium">P(Dem)</th>
+              <th className="hidden px-3 py-2 font-medium lg:table-cell">
+                Candidates
+              </th>
+              <th className="px-3 py-2 font-medium">Rating</th>
+              <th className="px-3 py-2 font-medium">P(Dem caucus)</th>
               <th className="px-3 py-2 font-medium">Margin</th>
               <th className="hidden px-3 py-2 font-medium sm:table-cell">
                 90% interval
               </th>
-              <th className="hidden px-3 py-2 font-medium md:table-cell">
-                Seat
-              </th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <tr
-                key={r.race_id}
-                className="border-t border-[var(--line)] hover:bg-[var(--panel)]/60"
-              >
-                <td className="px-3 py-2.5 font-medium text-[var(--ink)]">
-                  {r.state}
-                  {r.is_open ? (
-                    <span className="ml-2 text-xs font-normal text-[var(--muted)]">
-                      open
+            {rows.map((r) => {
+              const demParty = r.dem_party === "I" ? "I" : "D";
+              return (
+                <tr
+                  key={r.race_id}
+                  className="border-t border-[var(--line)] hover:bg-[var(--panel)]/60"
+                >
+                  <td className="px-3 py-2.5 font-medium text-[var(--ink)]">
+                    {r.state}
+                    {r.seat_class === "special" ? (
+                      <span className="ml-2 text-xs font-normal text-[var(--muted)]">
+                        special
+                      </span>
+                    ) : null}
+                    {r.is_open ? (
+                      <span className="ml-2 text-xs font-normal text-[var(--muted)]">
+                        open
+                      </span>
+                    ) : r.incumbent_party ? (
+                      <span className="ml-2 text-xs font-normal text-[var(--muted)]">
+                        {r.incumbent_party} inc.
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="hidden px-3 py-2.5 text-xs text-[var(--muted)] lg:table-cell">
+                    <span className={demParty === "I" ? "text-[#5a6a3a]" : ""}>
+                      {r.dem_candidate ?? (demParty === "I" ? "Independent" : "Dem")}
+                      <span className="ml-1 opacity-70">({demParty})</span>
                     </span>
-                  ) : r.incumbent_party ? (
-                    <span className="ml-2 text-xs font-normal text-[var(--muted)]">
-                      {r.incumbent_party} inc.
-                    </span>
-                  ) : null}
-                </td>
-                <td className="px-3 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-20 overflow-hidden rounded bg-[var(--rep)]/25 sm:w-28">
-                      <div
-                        className="h-full bg-[var(--dem)]"
-                        style={{ width: `${r.p_dem * 100}%` }}
-                      />
+                    {" / "}
+                    {r.rep_candidate ?? "Rep"}
+                    <span className="ml-1 opacity-70">(R)</span>
+                  </td>
+                  <td className="px-3 py-2.5 text-xs font-medium text-[var(--ink)]">
+                    {r.rating ?? "—"}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-20 overflow-hidden rounded bg-[var(--rep)]/25 sm:w-28">
+                        <div
+                          className="h-full bg-[var(--dem)]"
+                          style={{ width: `${r.p_dem * 100}%` }}
+                        />
+                      </div>
+                      <span className="tabular-nums">{pct(r.p_dem, 0)}</span>
                     </div>
-                    <span className="tabular-nums">{pct(r.p_dem, 0)}</span>
-                  </div>
-                </td>
-                <td className="px-3 py-2.5 tabular-nums text-[var(--ink)]">
-                  {signedMargin(r.mean_margin)}
-                  <span className="ml-1 text-xs text-[var(--muted)]">
-                    ±{r.sd_margin.toFixed(1)}
-                  </span>
-                </td>
-                <td className="hidden px-3 py-2.5 tabular-nums text-[var(--muted)] sm:table-cell">
-                  {signedMargin(r.ci05)} – {signedMargin(r.ci95)}
-                </td>
-                <td className="hidden px-3 py-2.5 text-xs text-[var(--muted)] md:table-cell">
-                  {r.race_id.replace("senate-2026-", "")}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-3 py-2.5 tabular-nums text-[var(--ink)]">
+                    {signedMargin(r.mean_margin)}
+                    <span className="ml-1 text-xs text-[var(--muted)]">
+                      ±{r.sd_margin.toFixed(1)}
+                    </span>
+                  </td>
+                  <td className="hidden px-3 py-2.5 tabular-nums text-[var(--muted)] sm:table-cell">
+                    {signedMargin(r.ci05)} – {signedMargin(r.ci95)}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

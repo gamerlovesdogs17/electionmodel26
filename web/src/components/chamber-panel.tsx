@@ -37,16 +37,21 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
               Joint seat-total distribution
             </h2>
             <p className="mt-1 max-w-xl text-sm text-[var(--muted)]">
-              Democratic seats from correlated draws (held {chamber.held_dem} D /{" "}
-              {chamber.held_rep} R + contested outcomes). Expected{" "}
+              Democratic caucus seats from correlated draws (held{" "}
+              {chamber.held_dem - (chamber.held_ind ?? 0)} D
+              {(chamber.held_ind ?? 0) > 0
+                ? ` + ${chamber.held_ind} Ind`
+                : ""}{" "}
+              / {chamber.held_rep} R + contested outcomes). Expected{" "}
               <span className="font-medium text-[var(--ink)]">
-                {chamber.expected_dem_seats.toFixed(1)} D
+                {chamber.expected_dem_seats.toFixed(1)} Dem caucus
               </span>
               {" / "}
               <span className="font-medium text-[var(--ink)]">
                 {expectedRep.toFixed(1)} R
               </span>
-              . A 50–50 chamber is Republican control under the VP tiebreak.
+              . Independents who caucus with Democrats count toward Dem control.
+              A 50–50 chamber is Republican control under the VP tiebreak.
             </p>
           </div>
           <p className="text-xs text-[var(--muted)]">

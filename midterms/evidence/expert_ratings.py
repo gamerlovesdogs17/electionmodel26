@@ -39,7 +39,8 @@ DEFAULT_RATINGS_2026: list[dict[str, Any]] = [
     {"state": "TX", "rating": "Tossup"},
     {"state": "AK", "rating": "Likely R"},
     {"state": "IA", "rating": "Likely R"},
-    {"state": "OH", "rating": "Likely R"},  # specials may vary
+    {"state": "OH", "rating": "Likely R"},
+    {"state": "FL", "rating": "Likely R"},
     # Solid / Likely R
     {"state": "AL", "rating": "Solid R"},
     {"state": "AR", "rating": "Solid R"},

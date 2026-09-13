@@ -42,7 +42,7 @@ def attach_poll_weights(
         out["quality_weight"].astype(float)
         if "quality_weight" in out.columns
         else pd.Series(np.ones(len(out)), index=out.index)
-    ).clip(0.2, 1.25)
+    ).fillna(1.0).clip(0.2, 1.25)
 
     partisan = out["partisan"].fillna(False).astype(bool) if "partisan" in out.columns else False
     partisan_w = np.where(partisan, 0.35, 1.0)
@@ -59,6 +59,7 @@ def attach_poll_weights(
     )
 
     raw = recency.to_numpy() * size_w.to_numpy() * qw.to_numpy() * partisan_w * pop_w * mode_w
+    raw = np.nan_to_num(raw, nan=0.0, posinf=0.0, neginf=0.0)
     out["raw_weight"] = raw
 
     capped = raw.copy()
@@ -99,7 +100,7 @@ def attach_poll_weights(
             normed[ix] = w / mean_w
 
     out["enop_race"] = enop
-    out["influence_weight"] = normed
+    out["influence_weight"] = np.nan_to_num(normed, nan=0.0, posinf=0.0, neginf=0.0)
     return out
 
 

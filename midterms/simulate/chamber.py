@@ -19,8 +19,8 @@ from midterms.model.overlays import rating_from_probability
 
 @dataclass
 class ChamberSimulation:
-    seat_draws: np.ndarray  # dem seats per draw (length n_draws)
-    race_win: np.ndarray  # (n_draws, n_races) 1 if dem win
+    seat_draws: np.ndarray  # dem caucus seats per draw (length n_draws)
+    race_win: np.ndarray  # (n_draws, n_races) 1 if dem-caucus win
     race_ids: list[str]
     states: list[str]
     held_dem: int
@@ -32,6 +32,7 @@ class ChamberSimulation:
     expected_dem_seats: float
     seat_histogram: dict[str, int]
     vp_tiebreak_party: str = "R"
+    held_ind: int = 0
 
 
 def simulate_chamber(
@@ -52,7 +53,8 @@ def simulate_chamber(
     """
     contested = races[~races["not_up"]]
     held = races[races["not_up"]]
-    held_dem = int((held["held_by"] == "D").sum()) + int((held["held_by"] == "I").sum())
+    held_ind = int((held["held_by"] == "I").sum())
+    held_dem = int((held["held_by"] == "D").sum()) + held_ind
     held_rep = int((held["held_by"] == "R").sum())
 
     margins = fit.draws_margin
@@ -100,6 +102,7 @@ def simulate_chamber(
         expected_dem_seats=float(dem_seats.mean()),
         seat_histogram=hist,
         vp_tiebreak_party=vp_tiebreak_party,
+        held_ind=held_ind,
     )
 
     contested_ix = contested.set_index("race_id")
@@ -115,18 +118,26 @@ def simulate_chamber(
         if row is not None and not pd.isna(row["incumbent_party"]):
             incumbent = str(row["incumbent_party"])
         is_open = None if row is None else bool(row["is_open"])
-        dem_name, rep_name = ticket_for_state(state)
+        seat_class = None if row is None else str(row.get("seat_class", "II"))
+        ticket = ticket_for_state(state)
+        dem_name = str(ticket["dem_name"])
+        rep_name = str(ticket["rep_name"])
+        dem_party = str(ticket.get("dem_party") or "D")
+        if dem_party not in {"D", "I"}:
+            dem_party = "D"
         mean_m = float(fit.mean_margin[i])
-        # Two-party shares from expected margin (pp)
         dem_share = 50.0 + mean_m / 2.0
         rep_share = 100.0 - dem_share
         rating = rating_from_probability(p_dem)
-        favored = "D" if p_dem >= 0.5 else "R"
-        is_flip = bool(held_by and favored != held_by)
+        favored_caucus = "D" if p_dem >= 0.5 else "R"
+        favored_party = dem_party if favored_caucus == "D" else "R"
+        held_caucus = "D" if held_by in {"D", "I"} else ("R" if held_by == "R" else None)
+        is_flip = bool(held_caucus and favored_caucus != held_caucus)
         summaries.append(
             {
                 "race_id": rid,
                 "state": state,
+                "seat_class": seat_class,
                 "p_dem": p_dem,
                 "p_rep": float(1.0 - p_dem),
                 "mean_margin": mean_m,
@@ -139,11 +150,14 @@ def simulate_chamber(
                 "held_by": held_by,
                 "dem_candidate": dem_name,
                 "rep_candidate": rep_name,
+                "dem_party": dem_party,
+                "caucus": "D",  # Ind wins still count toward Dem control
                 "dem_share": round(dem_share, 1),
                 "rep_share": round(rep_share, 1),
                 "rating": rating,
                 "is_flip": is_flip,
-                "favored_party": favored,
+                "favored_party": favored_party,
+                "favored_caucus": favored_caucus,
             }
         )
     summaries.sort(key=lambda x: abs(x["p_dem"] - 0.5))

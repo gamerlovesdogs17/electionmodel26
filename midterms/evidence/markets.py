@@ -16,10 +16,10 @@ from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 PARSER_VERSION = "kalshi-v1"
 KALSHI = "https://api.elections.kalshi.com/trade-api/v2"
 
-# Class II 2026 contested set (mirrors fixtures)
+# Class II 2026 contested set + specials (mirrors fixtures)
 SENATE_2026_STATES = [
-    "AL", "AK", "AR", "CO", "DE", "GA", "ID", "IL", "IA", "KS", "KY", "LA",
-    "ME", "MA", "MI", "MN", "MS", "MT", "NE", "NH", "NJ", "NM", "NC", "OK",
+    "AL", "AK", "AR", "CO", "DE", "FL", "GA", "ID", "IL", "IA", "KS", "KY", "LA",
+    "ME", "MA", "MI", "MN", "MS", "MT", "NE", "NH", "NJ", "NM", "NC", "OH", "OK",
     "OR", "RI", "SC", "SD", "TN", "TX", "VA", "WV", "WY",
 ]
 

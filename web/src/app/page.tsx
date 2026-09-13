@@ -6,10 +6,10 @@ export default function Home() {
       <ForecastDashboard />
       <footer className="mt-14 border-t border-[var(--line)] pt-6 text-xs leading-relaxed text-[var(--muted)]">
         Research system only — not a public live forecast. 50–50 chambers count as
-        Republican control (VP tiebreak). ALFRED vintages / OpenFEC shares use live
-        APIs when keyed, otherwise fixtures. Ratings and Kalshi markets are on by
-        default (disable with `--no-ratings` / `--no-markets`). House is out of
-        scope.
+        Republican control (VP tiebreak). Independents who caucus with Democrats
+        count toward Dem control. Display ratings follow model P(Dem). ALFRED /
+        OpenFEC use live APIs when keyed. Ratings/Kalshi overlays default on
+        (`--no-ratings` / `--no-markets`). House is out of scope.
       </footer>
     </main>
   );

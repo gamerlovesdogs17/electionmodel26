@@ -78,6 +78,18 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
+    p_peer = sub.add_parser("fetch-peers", help="Write peer forecast comparison snapshots")
+    p_peer.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.peers", fromlist=["write_peer_snapshots"]
+                ).write_peer_snapshots(),
+                indent=2,
+            )
+        )
+    )
+
     p_merge = sub.add_parser(
         "ingest-polls",
         help="Normalize VoteHub Senate polls + pollster ratings into the warehouse",
