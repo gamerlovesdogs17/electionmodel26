@@ -88,16 +88,24 @@ pytest -q
 Includes a **leakage canary**: future-dated polls must not survive `build_as_of`.
 VoteHub normalize/merge tests require `data/raw/external/votehub_*.json` (created by `fetch-external`).
 
-## Out of scope (this pass)
+## Out of scope
 
-House, Electoral College, expert ratings as production layers, betting markets as production layers, public auth, production cloud deploy.
+House, Electoral College, public auth, production cloud deploy.
+
+## Model v0.4 upgrades
+
+- **Kalshi markets** as a real overlay layer (`fetch-markets`): race `SENATE{ST}-26-*` + `CONTROLS-2026-*`, liquidity-scaled.
+- **Expert ratings warehouse** (`fetch-ratings`): timestamped curated snapshot / CSV override; map Ratings view uses these.
+- Overlays **on by default** when data exists; disable with `--no-ratings` / `--no-markets`.
+- Forecast artifact includes **`ablation`** (unadjusted vs adjusted chamber).
+- **`MODEL_CARD.md`** documents estimands, sources, limitations.
 
 ## Model v0.3 upgrades
 
 - **VP tiebreak:** 50–50 Senate → Republican control for the chamber-control estimand.
 - **ALFRED/fixture economic vintages** (`fetch-economics`) → real-income YoY in fundamentals.
 - **OpenFEC / fixture fundraising shares** (`fetch-finance`) → Dem receipt share prior.
-- **Optional ratings/markets overlays** (`--with-ratings`, `--with-markets`) with ablation report.
+- **Optional ratings/markets overlays** (now production layers in v0.4; flags were `--with-ratings` / `--with-markets`).
 - **Senate map** at the top of the research UI: Probability / Ratings / Margin views, flip hatching, hover tooltips.
 
 ## Model v0.2 upgrades

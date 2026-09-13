@@ -65,6 +65,20 @@ export type ForecastArtifact = {
   races: RaceForecast[];
   diagnostics?: Record<string, unknown>;
   overlays?: Record<string, unknown>;
+  ablation?: {
+    unadjusted: {
+      p_dem_majority: number;
+      p_rep_majority: number;
+      expected_dem_seats: number;
+    };
+    adjusted: {
+      p_dem_majority: number;
+      p_rep_majority: number;
+      expected_dem_seats: number;
+    };
+    delta_p_dem_majority?: number;
+  };
+  snapshot?: Record<string, unknown>;
 };
 
 /** Census FIPS → postal abbreviation for us-atlas states-10m */

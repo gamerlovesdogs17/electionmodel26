@@ -45,6 +45,39 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
+    p_mkt = sub.add_parser("fetch-markets", help="Fetch Kalshi Senate race + control markets")
+    p_mkt.add_argument("--election-id", default="senate-2026")
+    p_mkt.add_argument("--as-of", default=None, help="Stamp available_at for as-of filtering")
+    p_mkt.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.markets", fromlist=["write_markets_store"]
+                ).write_markets_store(election_id=a.election_id, available_at=a.as_of),
+                indent=2,
+            )
+        )
+    )
+
+    p_rat = sub.add_parser("fetch-ratings", help="Write timestamped expert ratings store")
+    p_rat.add_argument("--election-id", default="senate-2026")
+    p_rat.add_argument("--as-of", default="2026-09-01")
+    p_rat.add_argument("--csv", default=None, help="Optional CSV with state,rating columns")
+    p_rat.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.expert_ratings", fromlist=["write_expert_ratings_store"]
+                ).write_expert_ratings_store(
+                    election_id=a.election_id,
+                    available_at=a.as_of,
+                    csv_path=a.csv,
+                ),
+                indent=2,
+            )
+        )
+    )
+
     p_merge = sub.add_parser(
         "ingest-polls",
         help="Normalize VoteHub Senate polls + pollster ratings into the warehouse",
@@ -85,8 +118,16 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help="Disable out-of-fold stack mixture (hierarchical core only)",
     )
-    p_run.add_argument("--with-ratings", action="store_true", help="Enable expert-rating overlay")
-    p_run.add_argument("--with-markets", action="store_true", help="Enable market overlay")
+    p_run.add_argument(
+        "--no-ratings",
+        action="store_true",
+        help="Disable expert-rating overlay (on by default when ratings exist)",
+    )
+    p_run.add_argument(
+        "--no-markets",
+        action="store_true",
+        help="Disable Kalshi market overlay (on by default when markets exist)",
+    )
     p_run.add_argument("--rating-weight", type=float, default=0.15)
     p_run.add_argument("--market-weight", type=float, default=0.10)
 
@@ -107,8 +148,8 @@ def main(argv: list[str] | None = None) -> None:
             seed=a.seed,
             generic_ballot=gb,
             ensemble=not a.no_ensemble,
-            with_ratings=a.with_ratings,
-            with_markets=a.with_markets,
+            with_ratings=not a.no_ratings,
+            with_markets=not a.no_markets,
             rating_weight=a.rating_weight,
             market_weight=a.market_weight,
         )

@@ -70,6 +70,8 @@ def test_ensemble_stack_mixture():
 def test_forecast_ensemble_artifact(tmp_path):
     result = run_forecast(method="fast", draws=300, seed=19, ensemble=True, out_dir=tmp_path)
     art = result["artifact"]
-    assert art["method"] in {"ensemble_stack", "fast_hierarchical_t"}
+    assert art["method"] in {"ensemble_stack", "fast_hierarchical_t"} or art["method"].startswith(
+        "ensemble_stack"
+    ) or art["method"].startswith("fast_hierarchical_t")
     assert "enop_global" in art["diagnostics"]
     assert len(art["races"]) >= 30

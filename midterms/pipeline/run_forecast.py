@@ -76,29 +76,38 @@ def run_forecast(
     seed: int = DEMO_SEED,
     generic_ballot: float = -1.0,
     ensemble: bool = True,
-    with_ratings: bool = False,
-    with_markets: bool = False,
+    with_ratings: bool = True,
+    with_markets: bool = True,
     rating_weight: float = 0.15,
     market_weight: float = 0.10,
     out_dir: Path | None = None,
 ) -> dict[str, Any]:
     from midterms.evidence.economics import write_economic_store, yoy_growth_as_of
+    from midterms.evidence.expert_ratings import (
+        ratings_for_races,
+        write_expert_ratings_store,
+    )
     from midterms.evidence.fec import attach_fundraising_to_races, write_finance_store
+    from midterms.evidence.markets import load_control_market, load_race_markets, write_markets_store
     from midterms.model.overlays import (
         apply_market_overlay,
         apply_rating_overlay,
-        markets_from_probabilities,
         overlay_report,
-        rating_from_probability,
         shift_draws_to_means,
     )
 
-    # Ensure economic + finance stores exist (fixtures if APIs unavailable)
+    # Ensure economic + finance + ratings + markets stores exist
     write_economic_store()
+    write_expert_ratings_store(election_id=election_id, available_at=str(as_of)[:10])
     try:
         write_finance_store(election_id=election_id)
     except Exception:  # noqa: BLE001
         pass
+    markets_meta: dict[str, Any] = {}
+    try:
+        markets_meta = write_markets_store(election_id=election_id, available_at=str(as_of)[:10])
+    except Exception as exc:  # noqa: BLE001
+        markets_meta = {"error": str(exc), "n_races": 0}
 
     wh = Warehouse()
     snap = wh.build_as_of(as_of, election_id)
@@ -164,29 +173,39 @@ def run_forecast(
             )
             stack_weights = use_w
 
-    # Optional ablatable overlays (applied to means; joint shocks preserved)
+    # Core fit before overlays — keep for ablation
+    core_fit = fit
     unadjusted_means = fit.mean_margin.copy()
     adj = unadjusted_means.copy()
-    if with_ratings:
-        ratings = pd.DataFrame(
-            {
-                "race_id": fit.race_ids,
-                "rating": [rating_from_probability(float(1 / (1 + np.exp(-m / 5.0)))) for m in adj],
-            }
-        )
-        adj = apply_rating_overlay(adj, fit.race_ids, ratings, weight=rating_weight)
-    if with_markets:
-        markets = markets_from_probabilities(
-            [
-                {
-                    "race_id": rid,
-                    "p_dem": float(1 / (1 + np.exp(-m / 5.0))),
-                }
-                for rid, m in zip(fit.race_ids, adj)
-            ]
-        )
-        adj = apply_market_overlay(adj, fit.race_ids, markets, weight=market_weight)
-    if with_ratings or with_markets:
+
+    expert_tbl = ratings_for_races(
+        fit.race_ids,
+        fit.states,
+        as_of=as_of,
+        election_id=election_id,
+        fallback_probs=[float(1 / (1 + np.exp(-m / 5.0))) for m in adj],
+    )
+    market_df = load_race_markets(as_of=as_of)
+    if len(market_df) and "election_id" in market_df.columns:
+        market_df = market_df[market_df["election_id"] == election_id]
+    # Align race_ids if Kalshi used slightly different ids
+    if len(market_df):
+        by_state = {str(r["state"]): r for _, r in market_df.iterrows()}
+        aligned = []
+        for rid, st in zip(fit.race_ids, fit.states):
+            if st in by_state:
+                row = dict(by_state[st])
+                row["race_id"] = rid
+                aligned.append(row)
+        market_df = pd.DataFrame(aligned) if aligned else market_df
+
+    used_ratings = bool(with_ratings and len(expert_tbl))
+    used_markets = bool(with_markets and len(market_df))
+    if used_ratings:
+        adj = apply_rating_overlay(adj, fit.race_ids, expert_tbl, weight=rating_weight)
+    if used_markets:
+        adj = apply_market_overlay(adj, fit.race_ids, market_df, weight=market_weight)
+    if used_ratings or used_markets:
         shifted = shift_draws_to_means(fit.draws_margin, adj)
         fit = FitResult(
             race_ids=fit.race_ids,
@@ -198,17 +217,51 @@ def run_forecast(
             diagnostics={
                 **fit.diagnostics,
                 "overlays": overlay_report(
-                    used_ratings=with_ratings,
-                    used_markets=with_markets,
-                    rating_weight=rating_weight if with_ratings else 0.0,
-                    market_weight=market_weight if with_markets else 0.0,
+                    used_ratings=used_ratings,
+                    used_markets=used_markets,
+                    rating_weight=rating_weight if used_ratings else 0.0,
+                    market_weight=market_weight if used_markets else 0.0,
                 ),
                 "mean_shift_mae": float(np.mean(np.abs(adj - unadjusted_means))),
+                "n_market_races": int(len(market_df)),
+                "n_expert_ratings": int((expert_tbl["source"] == "expert").sum())
+                if len(expert_tbl)
+                else 0,
             },
-            method=fit.method + ("+overlays" if not fit.method.endswith("+overlays") else ""),
+            method=fit.method + "+overlays",
         )
 
     sim, race_summaries = simulate_chamber(fit, snap.races, vp_tiebreak_party="R")
+    # Attach expert/market display fields
+    expert_by_id = expert_tbl.set_index("race_id") if len(expert_tbl) else None
+    market_by_id = market_df.set_index("race_id") if len(market_df) else None
+    for s in race_summaries:
+        if expert_by_id is not None and s["race_id"] in expert_by_id.index:
+            s["rating"] = str(expert_by_id.loc[s["race_id"], "rating"])
+            s["rating_source"] = str(expert_by_id.loc[s["race_id"], "source"])
+        if market_by_id is not None and s["race_id"] in market_by_id.index:
+            s["market_p_dem"] = float(market_by_id.loc[s["race_id"], "p_dem"])
+            s["market_liquidity"] = float(market_by_id.loc[s["race_id"], "liquidity"])
+
+    # Ablation: unadjusted core chamber
+    core_sim, _ = simulate_chamber(core_fit, snap.races, vp_tiebreak_party="R")
+    ablation = {
+        "unadjusted": {
+            "p_dem_majority": core_sim.p_dem_majority,
+            "p_rep_majority": core_sim.p_rep_majority,
+            "p_fifty_fifty": core_sim.p_fifty_fifty,
+            "expected_dem_seats": core_sim.expected_dem_seats,
+        },
+        "adjusted": {
+            "p_dem_majority": sim.p_dem_majority,
+            "p_rep_majority": sim.p_rep_majority,
+            "p_fifty_fifty": sim.p_fifty_fifty,
+            "expected_dem_seats": sim.expected_dem_seats,
+        },
+        "delta_p_dem_majority": float(sim.p_dem_majority - core_sim.p_dem_majority),
+        "delta_expected_dem_seats": float(sim.expected_dem_seats - core_sim.expected_dem_seats),
+    }
+
     foil = independent_bernoulli_foil(
         race_summaries, sim.held_dem, n_draws=len(sim.seat_draws), seed=seed
     )
@@ -226,6 +279,7 @@ def run_forecast(
         for k, v in sorted(sim.seat_histogram.items(), key=lambda kv: int(kv[0]))
     ]
     expected_rep = 100.0 - sim.expected_dem_seats
+    control = load_control_market()
 
     artifact = {
         "run_id": run_id,
@@ -237,6 +291,8 @@ def run_forecast(
         "snapshot": {
             **snap.to_dict(),
             "real_income_yoy": yoy,
+            "n_kalshi_races": int(markets_meta.get("n_races") or len(market_df)),
+            "kalshi_control_p_dem": control.get("p_dem"),
         },
         "chamber": {
             "held_dem": sim.held_dem,
@@ -245,7 +301,7 @@ def run_forecast(
             "p_dem_majority": sim.p_dem_majority,
             "p_rep_majority": sim.p_rep_majority,
             "p_fifty_fifty": sim.p_fifty_fifty,
-            "p_tie": sim.p_fifty_fifty,  # backward-compatible alias
+            "p_tie": sim.p_fifty_fifty,
             "vp_tiebreak_party": sim.vp_tiebreak_party,
             "expected_dem_seats": sim.expected_dem_seats,
             "expected_rep_seats": expected_rep,
@@ -253,7 +309,8 @@ def run_forecast(
             "independent_bernoulli_foil_expected": float(np.mean(foil)),
             "note": (
                 "Chamber totals from joint correlated draws. "
-                "50–50 counts as Republican control (VP tiebreak)."
+                "50–50 counts as Republican control (VP tiebreak). "
+                "Ratings/markets overlays are ablatable; see ablation block."
             ),
         },
         "races": race_summaries,
@@ -261,12 +318,29 @@ def run_forecast(
         "diagnostics": fit.diagnostics,
         "house_effects": fit.house_effects,
         "stack_weights": stack_weights,
-        "overlays": overlay_report(
-            used_ratings=with_ratings,
-            used_markets=with_markets,
-            rating_weight=rating_weight if with_ratings else 0.0,
-            market_weight=market_weight if with_markets else 0.0,
-        ),
+        "overlays": {
+            **overlay_report(
+                used_ratings=used_ratings,
+                used_markets=used_markets,
+                rating_weight=rating_weight if used_ratings else 0.0,
+                market_weight=market_weight if used_markets else 0.0,
+            ),
+            "markets_meta": {
+                "n_races": int(len(market_df)),
+                "control_p_dem": control.get("p_dem"),
+                "control_p_rep": control.get("p_rep"),
+            },
+            "expert_source": (
+                None
+                if not len(expert_tbl)
+                else (
+                    "expert"
+                    if (expert_tbl["source"] == "expert").any()
+                    else str(expert_tbl["source"].iloc[0])
+                )
+            ),
+        },
+        "ablation": ablation,
     }
 
     artifact_path = out_dir / f"forecast_{run_id}.json"

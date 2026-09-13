@@ -95,6 +95,23 @@ export function ForecastDashboard() {
               ENOP: {(data.diagnostics.enop_global as number).toFixed(1)}
             </span>
           ) : null}
+          {typeof data.snapshot?.kalshi_control_p_dem === "number" ? (
+            <span className="rounded-md border border-[var(--line)] px-2 py-1">
+              Kalshi control D:{" "}
+              {((data.snapshot.kalshi_control_p_dem as number) * 100).toFixed(0)}%
+            </span>
+          ) : null}
+          {data.ablation ? (
+            <span className="rounded-md border border-[var(--line)] px-2 py-1">
+              ablation ΔDem ctl:{" "}
+              {(
+                (data.ablation.delta_p_dem_majority ??
+                  data.ablation.adjusted.p_dem_majority -
+                    data.ablation.unadjusted.p_dem_majority) * 100
+              ).toFixed(1)}
+              pp
+            </span>
+          ) : null}
           <span className="rounded-md border border-[var(--line)] px-2 py-1">
             run: {data.run_id}
           </span>
