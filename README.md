@@ -132,7 +132,7 @@ signing, licensed ratings CSV path (`COOK_RATINGS_CSV`), VoteHub CC BY dump seal
 ## Model v0.4 upgrades
 
 - **Kalshi markets** as a real overlay layer (`fetch-markets`): race `SENATE{ST}-26-*` + `CONTROLS-2026-*`, liquidity-scaled.
-- **Expert ratings warehouse** (`fetch-ratings`): timestamped curated snapshot / CSV override; map Ratings view uses these.
+- **Expert ratings warehouse** (`fetch-ratings`): Wikipedia Cook / Inside Elections / Sabato consensus by default (`--curated` / `--csv` overrides); map Ratings view uses these.
 - Overlays **on by default** when data exists; disable with `--no-ratings` / `--no-markets`.
 - Forecast artifact includes **`ablation`** (unadjusted vs adjusted chamber).
 - **`MODEL_CARD.md`** documents estimands, sources, limitations.

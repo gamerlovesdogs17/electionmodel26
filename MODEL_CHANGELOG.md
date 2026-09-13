@@ -9,6 +9,7 @@ should be preserved alongside newer ones under `data/artifacts/` and
 Production-path follow-through on remaining exclusions:
 
 - Licensed ratings **adapter** (`ingest-licensed-ratings` / `COOK_RATINGS_CSV`) — no vendor data in repo.
+- **Wikipedia Predictions table** expert ratings (`fetch-ratings` default): Cook / Inside Elections / Sabato consensus with provenance.
 - VoteHub CC BY dump sealing + warehouse import (`seal-votehub-dumps`); archive endpoint probed.
 - Forecast API bearer auth + CORS env; Docker / Compose / Fly deploy sketches (`DEPLOY.md`).
 - Ed25519 signing with committed public key root; `MIDTERMS_REQUIRE_SIGNING=1` fail-closed.

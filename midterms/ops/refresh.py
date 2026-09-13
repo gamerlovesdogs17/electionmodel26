@@ -51,14 +51,20 @@ def run_refresh(
     except Exception as exc:  # noqa: BLE001
         steps["markets"] = {"ok": False, "error": str(exc)}
     try:
-        # Prefer licensed CSV when present; else curated snapshot
+        # Prefer licensed CSV when present; else Wikipedia Cook/IE/Sabato; else curated
         lic = steps.get("licensed_ratings") or {}
-        if not lic.get("licensed_present"):
-            steps["expert_ratings"] = __import__(
-                "midterms.evidence.expert_ratings", fromlist=["write_expert_ratings_store"]
-            ).write_expert_ratings_store(election_id=election_id, available_at=as_of)
-        else:
+        if lic.get("licensed_present"):
             steps["expert_ratings"] = {"ok": True, "source": "licensed"}
+        else:
+            try:
+                steps["expert_ratings"] = __import__(
+                    "midterms.evidence.wiki_ratings", fromlist=["write_from_wikipedia"]
+                ).write_from_wikipedia(election_id=election_id, available_at=as_of)
+            except Exception as wiki_exc:  # noqa: BLE001
+                steps["expert_ratings"] = __import__(
+                    "midterms.evidence.expert_ratings", fromlist=["write_expert_ratings_store"]
+                ).write_expert_ratings_store(election_id=election_id, available_at=as_of)
+                steps["expert_ratings"]["wiki_error"] = str(wiki_exc)
     except Exception as exc:  # noqa: BLE001
         steps["expert_ratings"] = {"ok": False, "error": str(exc)}
 

@@ -45,3 +45,17 @@ python -m midterms.cli ingest-fte-polls
 ```
 
 Live 2026 polls stay on VoteHub (`seal-votehub-dumps` / `ingest-polls`).
+
+## Ratings (no Cook license required)
+
+**Default:** curated research snapshot + Kalshi overlays. Display ratings are
+model-derived from `P(Dem)`. Cook is **not** required.
+
+```powershell
+python -m midterms.cli fetch-ratings
+python -m midterms.cli fetch-markets
+python -m midterms.cli forecast
+```
+
+**Optional:** if you hold a vendor license, set `COOK_RATINGS_CSV` / drop a file under
+`data/licensed/` and run `ingest-licensed-ratings`. Never commit vendor CSVs.

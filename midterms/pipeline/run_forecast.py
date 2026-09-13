@@ -116,8 +116,8 @@ def run_forecast(
     from midterms.evidence.approval import approval_as_of, write_approval_store
     from midterms.evidence.demography import attach_demo_features
     from midterms.evidence.expert_ratings import (
+        ensure_expert_ratings_store,
         ratings_for_races,
-        write_expert_ratings_store,
     )
     from midterms.evidence.fec import attach_fundraising_to_races, write_finance_store
     from midterms.evidence.markets import load_control_market, load_race_markets, write_markets_store
@@ -139,7 +139,7 @@ def run_forecast(
     # Ensure economic + finance + ratings + markets stores exist
     write_economic_store()
     write_approval_store()
-    write_expert_ratings_store(election_id=election_id, available_at=str(as_of)[:10])
+    ensure_expert_ratings_store(election_id=election_id, available_at=str(as_of)[:10])
     try:
         write_finance_store(election_id=election_id)
     except Exception:  # noqa: BLE001

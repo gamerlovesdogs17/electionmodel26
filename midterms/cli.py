@@ -59,24 +59,50 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
-    p_rat = sub.add_parser("fetch-ratings", help="Write timestamped expert ratings store")
-    p_rat.add_argument("--election-id", default="senate-2026")
-    p_rat.add_argument("--as-of", default="2026-09-01")
-    p_rat.add_argument("--csv", default=None, help="Optional CSV with state,rating columns")
-    p_rat.set_defaults(
-        func=lambda a: print(
-            json.dumps(
-                __import__(
-                    "midterms.evidence.expert_ratings", fromlist=["write_expert_ratings_store"]
-                ).write_expert_ratings_store(
-                    election_id=a.election_id,
-                    available_at=a.as_of,
-                    csv_path=a.csv,
-                ),
-                indent=2,
-            )
-        )
+    p_rat = sub.add_parser(
+        "fetch-ratings",
+        help="Write expert ratings (Wikipedia Cook/IE/Sabato consensus by default)",
     )
+    p_rat.add_argument("--election-id", default="senate-2026")
+    p_rat.add_argument("--as-of", default=None, help="Override available_at (default: wiki header dates)")
+    p_rat.add_argument("--csv", default=None, help="Optional CSV with state,rating columns")
+    p_rat.add_argument(
+        "--curated",
+        action="store_true",
+        help="Use curated research snapshot instead of Wikipedia",
+    )
+    p_rat.add_argument(
+        "--wikipedia",
+        action="store_true",
+        help="Force Wikipedia Predictions table ingest (default when no --csv/--curated)",
+    )
+
+    def _fetch_ratings(a: argparse.Namespace) -> None:
+        if a.csv:
+            man = __import__(
+                "midterms.evidence.expert_ratings", fromlist=["write_expert_ratings_store"]
+            ).write_expert_ratings_store(
+                election_id=a.election_id,
+                available_at=a.as_of or "2026-09-01",
+                csv_path=a.csv,
+            )
+        elif a.curated:
+            man = __import__(
+                "midterms.evidence.expert_ratings", fromlist=["write_expert_ratings_store"]
+            ).write_expert_ratings_store(
+                election_id=a.election_id,
+                available_at=a.as_of or "2026-09-01",
+            )
+        else:
+            man = __import__(
+                "midterms.evidence.wiki_ratings", fromlist=["write_from_wikipedia"]
+            ).write_from_wikipedia(
+                election_id=a.election_id,
+                available_at=a.as_of,
+            )
+        print(json.dumps(man, indent=2))
+
+    p_rat.set_defaults(func=_fetch_ratings)
 
     p_peer = sub.add_parser("fetch-peers", help="Write peer forecast comparison snapshots")
     p_peer.set_defaults(

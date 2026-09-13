@@ -92,17 +92,34 @@ def write_expert_ratings_store(
     *,
     available_at: str = "2026-09-01",
     csv_path: Path | None = None,
+    rows: list[dict[str, Any]] | None = None,
+    source_label: str | None = None,
+    overwrite: bool = True,
 ) -> dict[str, Any]:
-    """Persist timestamped expert ratings (CSV override or curated defaults)."""
+    """Persist timestamped expert ratings (rows / CSV / curated defaults)."""
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
     MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    source = "curated_research_snapshot"
+    norm_path = NORMALIZED_DIR / "expert_ratings.parquet"
+    if not overwrite and norm_path.exists():
+        existing = pd.read_parquet(norm_path)
+        return {
+            "ok": True,
+            "skipped": True,
+            "n": int(len(existing)),
+            "source": "existing",
+            "path": str(norm_path),
+            "available_at": available_at,
+            "election_id": election_id,
+            "parser_version": PARSER_VERSION,
+        }
+
+    source = source_label or "curated_research_snapshot"
     if csv_path and Path(csv_path).exists():
         df_in = pd.read_csv(csv_path)
         rows = df_in.to_dict(orient="records")
-        source = f"csv:{Path(csv_path).name}"
+        source = source_label or f"csv:{Path(csv_path).name}"
         # Per-row source (e.g. licensed:cook) wins when present
         out_rows = []
         for r in rows:
@@ -130,19 +147,38 @@ def write_expert_ratings_store(
             if any(str(s).startswith("licensed") for s in df["source"])
             else source
         )
+    elif rows:
+        source = source_label or str(rows[0].get("source") or "rows")
+        df = _stamp_rows(
+            rows,
+            election_id=election_id,
+            available_at=available_at,
+            source=source,
+        )
+        # Preserve per-row source when provided
+        if any("source" in r for r in rows):
+            by_state = {str(r["state"]).upper(): str(r.get("source") or source) for r in rows}
+            df["source"] = df["state"].map(lambda s: by_state.get(str(s), source))
     else:
         rows = DEFAULT_RATINGS_2026
         df = _stamp_rows(rows, election_id=election_id, available_at=available_at, source=source)
 
     raw_path = RAW_DIR / "external" / "expert_ratings_senate.json"
     raw_path.parent.mkdir(parents=True, exist_ok=True)
-    # Public raw file: curated only — strip licensed:* rows from git-tracked JSON
+    # Public raw file — strip licensed:* rows from git-tracked JSON
     public_df = df[~df["source"].astype(str).str.startswith("licensed")]
     if public_df.empty:
         public_df = df.head(0)
     raw_path.write_text(public_df.to_json(orient="records", indent=2))
-    norm_path = NORMALIZED_DIR / "expert_ratings.parquet"
     df.to_parquet(norm_path, index=False)
+    note = (
+        "Wikipedia Cook/IE/Sabato consensus (CC BY-SA page; attributed handicappers)."
+        if str(source).startswith("wikipedia")
+        else (
+            "Curated research ratings for ablation overlays — replace via Wikipedia / CSV / licensed. "
+            "Not Cook/IE/Sabato redistribution."
+        )
+    )
     man = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "election_id": election_id,
@@ -150,14 +186,38 @@ def write_expert_ratings_store(
         "n": int(len(df)),
         "source": source,
         "parser_version": PARSER_VERSION,
-        "note": (
-            "Curated research ratings for ablation overlays — replace via CSV / licensed path. "
-            "Not Cook/IE/Sabato redistribution."
-        ),
+        "note": note,
     }
     man_path = MANIFESTS_DIR / "expert_ratings.json"
     man_path.write_text(json.dumps(man, indent=2))
     return {**man, "path": str(norm_path), "raw": str(raw_path)}
+
+
+def ensure_expert_ratings_store(
+    election_id: str = "senate-2026",
+    *,
+    available_at: str = "2026-09-01",
+    prefer_wikipedia: bool = True,
+) -> dict[str, Any]:
+    """Keep an existing store; otherwise fetch Wikipedia then curated fallback."""
+    path = NORMALIZED_DIR / "expert_ratings.parquet"
+    if path.exists():
+        return write_expert_ratings_store(
+            election_id=election_id,
+            available_at=available_at,
+            overwrite=False,
+        )
+    if prefer_wikipedia:
+        try:
+            from midterms.evidence.wiki_ratings import write_from_wikipedia
+
+            return write_from_wikipedia(election_id=election_id, available_at=available_at)
+        except Exception as exc:  # noqa: BLE001
+            curated = write_expert_ratings_store(
+                election_id=election_id, available_at=available_at
+            )
+            return {**curated, "wiki_error": str(exc)}
+    return write_expert_ratings_store(election_id=election_id, available_at=available_at)
 
 
 def load_expert_ratings(as_of: str | None = None, election_id: str | None = None) -> pd.DataFrame:

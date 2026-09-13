@@ -19,7 +19,9 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`.
 | Economics | ALFRED/FRED or fixtures | Vintage YoY RDPI |
 | Approval | Curated public-aggregate vintages | As-of store |
 | Finance | OpenFEC (receipts/cash/disbursements) | Matched-window share |
-| Expert ratings | Curated dated snapshot | Ablatable; not licensed Cook |
+| Expert ratings | **Wikipedia Predictions table** (Cook / IE / Sabato consensus) | Ablatable overlay; CC BY-SA page with attributed handicappers |
+| Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Only if *you* hold a vendor license; never committed; overrides Wikipedia |
+| Markets | Kalshi | Ablatable sparse-race / control signal (Cook substitute for many uses) |
 | Markets | Kalshi | Ablatable |
 | Demography | State research snapshot | Similarity / covariance |
 | Results | Certified archive + MEDSL 2016 + fixtures | Prefer certified |
@@ -39,7 +41,7 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`.
 - Complete-cycle replay; lead-time grid; nested Student-t df / era search
 - Component ablations; extended metrics (interval score, reliability, energy)
 - Monitor alerts; HMAC signatures; environment lock; correction registry
-- **Limit:** historical polls still partly synthetic (sealed for replay); no licensed ratings feed
+- **Limit:** FTE historical mirror can lag; licensed Cook/IE feeds are optional and local-only
 
 ## Out of scope
 House, Electoral College.
