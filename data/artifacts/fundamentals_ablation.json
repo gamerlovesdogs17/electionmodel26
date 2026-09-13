@@ -1,0 +1,84 @@
+{
+  "base_coefs": {
+    "prior_lean": 1.0,
+    "generic_ballot": 0.35,
+    "incumbency": 2.0,
+    "fundraising_logit": 1.4,
+    "pres_approval": 0.08,
+    "midterm_outparty": 1.2,
+    "real_income_yoy": 0.35
+  },
+  "ablation_keys": [
+    "fundraising_logit",
+    "pres_approval",
+    "midterm_outparty",
+    "real_income_yoy",
+    "incumbency",
+    "generic_ballot"
+  ],
+  "n_cycles": 1,
+  "by_cycle": {
+    "2022": {
+      "full_crps": 1.9080132239439949,
+      "drop_one": {
+        "fundraising_logit": {
+          "crps": 1.9009142713872418,
+          "delta_vs_full": -0.00709895255675308
+        },
+        "pres_approval": {
+          "crps": 1.9098044295839696,
+          "delta_vs_full": 0.0017912056399747023
+        },
+        "midterm_outparty": {
+          "crps": 1.9102730365795197,
+          "delta_vs_full": 0.0022598126355248827
+        },
+        "real_income_yoy": {
+          "crps": 1.909239988391129,
+          "delta_vs_full": 0.0012267644471342098
+        },
+        "incumbency": {
+          "crps": 1.914453213546599,
+          "delta_vs_full": 0.006439989602604168
+        },
+        "generic_ballot": {
+          "crps": 1.9069541052481798,
+          "delta_vs_full": -0.0010591186958150978
+        }
+      }
+    }
+  },
+  "recommendations": {
+    "fundraising_logit": {
+      "keep_votes": 0,
+      "n_cycles": 1,
+      "recommend": "drop_or_shrink"
+    },
+    "pres_approval": {
+      "keep_votes": 1,
+      "n_cycles": 1,
+      "recommend": "keep"
+    },
+    "midterm_outparty": {
+      "keep_votes": 1,
+      "n_cycles": 1,
+      "recommend": "keep"
+    },
+    "real_income_yoy": {
+      "keep_votes": 1,
+      "n_cycles": 1,
+      "recommend": "keep"
+    },
+    "incumbency": {
+      "keep_votes": 1,
+      "n_cycles": 1,
+      "recommend": "keep"
+    },
+    "generic_ballot": {
+      "keep_votes": 0,
+      "n_cycles": 1,
+      "recommend": "drop_or_shrink"
+    }
+  },
+  "note": "Positive delta_vs_full means dropping the coefficient worsened CRPS (component helps). Nested leave-one-cycle design; synthetic polls limit strength."
+}

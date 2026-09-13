@@ -331,7 +331,7 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
         # Specials: seats vacated / appointed mid-cycle
         "OH": "R", "FL": "R",
     }
-    open_seats = {"MI", "MN", "NH"}
+    open_seats = {"AL", "IL", "IA", "KY", "MI", "MN", "MT", "NH", "NC", "OK", "SC", "WY"}
     # Soften deep leans so joint chamber totals have mass near majority
     for st in CLASS_II:
         is_open = st in open_seats

@@ -37,14 +37,14 @@ def test_tickets_cover_contested_including_specials():
         assert t["dem_name"]
         assert t["rep_name"]
         assert t["dem_party"] in {"D", "I"}
-    assert "Brown" in TICKETS_2026["OH"]["dem_name"]
-    assert "Husted" in TICKETS_2026["OH"]["rep_name"]
-    assert "Vindman" in TICKETS_2026["FL"]["dem_name"]
-    assert "Moody" in TICKETS_2026["FL"]["rep_name"]
-    assert "Bennet" in TICKETS_2026["CO"]["dem_name"]
-    assert "Duckworth" in TICKETS_2026["IL"]["dem_name"]
-    assert "Warner" in TICKETS_2026["VA"]["dem_name"]
-    assert TICKETS_2026["VA"]["rep_name"] != "Republican"
+        assert "nominee" not in t["dem_name"].lower()
+        assert "nominee" not in t["rep_name"].lower()
+    assert TICKETS_2026["ME"]["dem_name"] == "Troy Jackson"
+    assert TICKETS_2026["MI"]["dem_name"] == "Abdul El-Sayed"
+    assert TICKETS_2026["NE"]["dem_name"] == "Dan Osborn"
+    assert TICKETS_2026["NE"]["dem_party"] == "I"
+    assert TICKETS_2026["FL"]["dem_name"] == "Angie Nixon"
+    assert TICKETS_2026["CO"]["dem_name"] == "John Hickenlooper"
 
 
 def test_forecast_rating_matches_probability(tmp_path):
@@ -58,7 +58,7 @@ def test_forecast_rating_matches_probability(tmp_path):
         out_dir=tmp_path,
     )
     art = result["artifact"]
-    assert art["model_version"].endswith("v0.5")
+    assert art["model_version"].endswith("v0.5") or art["model_version"].endswith("v0.6")
     states = {r["state"] for r in art["races"]}
     assert "OH" in states and "FL" in states
     for r in art["races"]:

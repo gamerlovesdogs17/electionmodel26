@@ -36,11 +36,11 @@ DEFAULT_PEER_SNAPSHOT: dict[str, Any] = {
                 "IA": 0.41,
             },
         },
-        "economist": {
-            "label": "Economist / FiftyPlusOne",
-            "url": "https://www.economist.com/interactive/2026/us-midterms/prediction-model/senate",
+        "votehub": {
+            "label": "VoteHub",
+            "url": "https://votehub.com",
             "p_dem_control": None,
-            "note": "Control probability not always published as a single scalar; race cells filled when available.",
+            "note": "Polls/power ratings source; no free public chamber-control feed — race cells left blank unless curated.",
             "races": {},
         },
         "kalshi": {

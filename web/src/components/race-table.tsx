@@ -44,7 +44,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
           </h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
             Model-derived rating matches P(Dem). Independents without a Dem
-            nominee are labeled Ind but count toward Dem caucus control.
+            nominee show as Ind and still count toward Democratic seat totals.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -75,7 +75,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                 Candidates
               </th>
               <th className="px-3 py-2 font-medium">Rating</th>
-              <th className="px-3 py-2 font-medium">P(Dem caucus)</th>
+              <th className="px-3 py-2 font-medium">P(Dem)</th>
               <th className="px-3 py-2 font-medium">Margin</th>
               <th className="hidden px-3 py-2 font-medium sm:table-cell">
                 90% interval
@@ -92,11 +92,6 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                 >
                   <td className="px-3 py-2.5 font-medium text-[var(--ink)]">
                     {r.state}
-                    {r.seat_class === "special" ? (
-                      <span className="ml-2 text-xs font-normal text-[var(--muted)]">
-                        special
-                      </span>
-                    ) : null}
                     {r.is_open ? (
                       <span className="ml-2 text-xs font-normal text-[var(--muted)]">
                         open

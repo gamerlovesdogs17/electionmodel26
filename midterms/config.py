@@ -13,7 +13,7 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.5"
+MODEL_VERSION = "senate-hierarchical-v0.6"
 
 # Historical Senate cycles for holdout / replay
 CYCLES = (2014, 2016, 2018, 2020, 2022, 2024)

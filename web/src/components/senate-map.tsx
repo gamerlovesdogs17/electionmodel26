@@ -13,7 +13,7 @@ import {
   signedMargin,
 } from "@/lib/utils";
 import { geoAlbersUsa, geoPath, type GeoPermissibleObjects } from "d3-geo";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { feature } from "topojson-client";
 
 type MapMode = "probability" | "ratings" | "margin";
@@ -41,6 +41,24 @@ function caucusFavored(race: RaceForecast): "D" | "R" {
   return "D"; // D or I
 }
 
+function clampTooltip(
+  x: number,
+  y: number,
+  boxW: number,
+  boxH: number,
+  tipW = 300,
+  tipH = 220,
+): { left: number; top: number } {
+  const pad = 8;
+  let left = x + 14;
+  let top = y - 10;
+  if (left + tipW > boxW - pad) left = x - tipW - 10;
+  if (left < pad) left = pad;
+  if (top + tipH > boxH - pad) top = boxH - tipH - pad;
+  if (top < pad) top = pad;
+  return { left, top };
+}
+
 export function SenateMap({
   races,
   pDemControl,
@@ -54,6 +72,7 @@ export function SenateMap({
     [],
   );
   const [hover, setHover] = useState<HoverState | null>(null);
+  const mapRef = useRef<HTMLDivElement | null>(null);
 
   const byState = useMemo(() => {
     const m = new Map<string, RaceForecast[]>();
@@ -115,8 +134,7 @@ export function SenateMap({
           controlling the Senate.
         </h2>
         <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[var(--muted)]">
-          As of {asOf} · 50–50 counts as Republican control (VP) · Ind caucus
-          with Dem
+          As of {asOf}
         </p>
       </div>
 
@@ -129,16 +147,16 @@ export function SenateMap({
         />
       </div>
       <div className="mx-auto flex max-w-xl justify-between text-sm font-medium">
-        <span className="text-[var(--dem)]">{demLead} Dem caucus</span>
+        <span className="text-[var(--dem)]">{demLead} Democrats</span>
         <span className="text-[var(--rep)]">{repLead} Republicans</span>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-4 text-xs text-[var(--muted)]">
-          <Legend swatch="bg-[var(--dem)]" label="Dem/Ind hold" />
+          <Legend swatch="bg-[var(--dem)]" label="Dem hold" />
           <Legend
             swatch="bg-[var(--dem)] opacity-90"
-            label="Dem/Ind flip"
+            label="Dem flip"
             hatch
           />
           <Legend swatch="bg-[var(--rep)]" label="Rep hold" />
@@ -191,7 +209,10 @@ export function SenateMap({
         </div>
       </div>
 
-      <div className="relative overflow-hidden rounded-lg border border-[var(--line)] bg-[#f7f9fa] p-2 sm:p-4">
+      <div
+        ref={mapRef}
+        className="relative overflow-visible rounded-lg border border-[var(--line)] bg-[#f7f9fa] p-2 sm:p-4"
+      >
         <svg viewBox="0 0 960 520" className="h-auto w-full" role="img">
           <defs>
             <pattern
@@ -242,9 +263,9 @@ export function SenateMap({
                 strokeWidth={1.1}
                 className="cursor-pointer transition-opacity hover:opacity-90"
                 onMouseEnter={(e) => {
-                  const rect = (
-                    e.currentTarget.ownerSVGElement as SVGSVGElement
-                  ).getBoundingClientRect();
+                  const host = mapRef.current;
+                  if (!host) return;
+                  const rect = host.getBoundingClientRect();
                   setHover({
                     abbr: p.abbr,
                     races: stateRaces,
@@ -253,9 +274,9 @@ export function SenateMap({
                   });
                 }}
                 onMouseMove={(e) => {
-                  const rect = (
-                    e.currentTarget.ownerSVGElement as SVGSVGElement
-                  ).getBoundingClientRect();
+                  const host = mapRef.current;
+                  if (!host) return;
+                  const rect = host.getBoundingClientRect();
                   setHover((h) =>
                     h
                       ? {
@@ -276,10 +297,12 @@ export function SenateMap({
           <MapTooltip
             abbr={hover.abbr}
             races={hover.races}
-            style={{
-              left: Math.min(hover.x + 12, 640),
-              top: Math.max(hover.y - 12, 8),
-            }}
+            style={clampTooltip(
+              hover.x,
+              hover.y,
+              mapRef.current?.clientWidth ?? 960,
+              mapRef.current?.clientHeight ?? 520,
+            )}
           />
         ) : null}
       </div>
@@ -391,8 +414,6 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
       ? "text-[#5a6a3a]"
       : "text-[var(--dem)]"
     : "text-[var(--rep)]";
-  const special =
-    race.seat_class === "special" ? "Special" : race.seat_class === "II" ? "Class II" : null;
 
   return (
     <div className="border-t border-[var(--line)] pt-2 first:border-t-0 first:pt-0">
@@ -408,11 +429,6 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
         >
           {race.rating ?? "Tossup"}
         </span>
-        {special ? (
-          <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px] text-[var(--muted)]">
-            {special}
-          </span>
-        ) : null}
         {race.is_flip ? (
           <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px] text-[var(--muted)]">
             Flip

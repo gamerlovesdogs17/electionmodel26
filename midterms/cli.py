@@ -223,12 +223,42 @@ def main(argv: list[str] | None = None) -> None:
                         "path": str(out),
                         "aggregate": report.get("aggregate"),
                         "stack_weights": report.get("stack_weights"),
+                        "chamber": report.get("chamber"),
+                        "overlay_ablation": report.get("overlay_ablation"),
                     },
                     indent=2,
                 )
             )
 
     p_cycle.set_defaults(func=_cycle)
+
+    p_fund = sub.add_parser(
+        "ablate-fundamentals",
+        help="Nested leave-one-cycle drop-one COEF ablation (CRPS)",
+    )
+    p_fund.add_argument(
+        "--primary-only",
+        action="store_true",
+        help="Only PRIMARY_HOLDOUT cycle (faster)",
+    )
+    p_fund.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                (
+                    __import__(
+                        "midterms.validation.fundamentals_ablation",
+                        fromlist=["run_primary_holdout_ablation", "run_fundamentals_ablation"],
+                    ).run_primary_holdout_ablation()
+                    if a.primary_only
+                    else __import__(
+                        "midterms.validation.fundamentals_ablation",
+                        fromlist=["run_fundamentals_ablation"],
+                    ).run_fundamentals_ablation()
+                ),
+                indent=2,
+            )
+        )
+    )
 
     p_api = sub.add_parser("serve-api", help="Serve forecast JSON API for the research UI")
     p_api.add_argument("--host", default="127.0.0.1")

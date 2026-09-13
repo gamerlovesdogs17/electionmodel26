@@ -92,6 +92,12 @@ VoteHub normalize/merge tests require `data/raw/external/votehub_*.json` (create
 
 House, Electoral College, public auth, production cloud deploy.
 
+## Model v0.6 upgrades
+
+- Nominee ticket refresh (ME Jackson, MI El-Sayed, NE Osborn Ind, FL Nixon, CO Hickenlooper, …).
+- UI: ≤50 seats = GOP in histogram; Democrats/Republicans labels; clamped map tooltips; VoteHub peer column.
+- Nested fundamentals ablation CLI (`ablate-fundamentals`) + `MODEL_CHANGELOG.md`.
+
 ## Model v0.5 upgrades
 
 - **OH + FL specials** in the contested universe (35 races / 65 held).

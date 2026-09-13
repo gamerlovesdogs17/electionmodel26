@@ -338,8 +338,7 @@ def run_forecast(
             "independent_bernoulli_foil_expected": float(np.mean(foil)),
             "note": (
                 "Chamber totals from joint correlated draws. "
-                "50–50 counts as Republican control (VP tiebreak). "
-                "Independents who caucus with Democrats count toward Dem control. "
+                "Independents without a Dem nominee still count toward Democratic seats. "
                 "Display ratings are model-derived from P(Dem); expert/Kalshi overlays are ablatable."
             ),
         },

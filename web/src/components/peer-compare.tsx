@@ -11,7 +11,7 @@ export type PeerComparison = {
     ours?: number | null;
     rating?: string | null;
     ddhq?: number | null;
-    economist?: number | null;
+    votehub?: number | null;
     kalshi?: number | null;
   }[];
   sources?: Record<string, { label?: string; url?: string; note?: string }>;
@@ -21,7 +21,7 @@ const COLS = [
   { key: "ours", label: "Ours" },
   { key: "kalshi", label: "Kalshi" },
   { key: "ddhq", label: "DDHQ" },
-  { key: "economist", label: "Economist" },
+  { key: "votehub", label: "VoteHub" },
 ] as const;
 
 function fmt(p: number | null | undefined): string {
@@ -91,7 +91,7 @@ export function PeerComparePanel({ peer }: { peer: PeerComparison }) {
                           ? r.kalshi
                           : c.key === "ddhq"
                             ? r.ddhq
-                            : r.economist,
+                            : r.votehub,
                     )}
                   </td>
                 ))}
