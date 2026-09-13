@@ -1,0 +1,40 @@
+{
+  "created_at": "2026-09-13T04:47:53.017684+00:00",
+  "license": "synthetic-research-fixture",
+  "note": "Synthetic Senate polls/results for offline CI and blueprint-aligned development. Not for publication as real forecasts. Replace via midterms.evidence.ingest when redistributable archives (MEDSL / public poll dumps / certified results) are available.",
+  "preferred_live_sources": [
+    "MIT Election Lab / MEDSL research layer (results)",
+    "Public poll archives with redistributable licenses (polls)",
+    "Official state certification / FEC (results)"
+  ],
+  "cycles": [
+    2014,
+    2016,
+    2018,
+    2020,
+    2022,
+    2024,
+    2026
+  ],
+  "parser_version": "fixtures-v1",
+  "artifacts": {
+    "races": {
+      "raw": "raw\\races.csv",
+      "normalized": "normalized\\races.parquet",
+      "sha256": "0c1d8615206d6dfd633ea523aa111fd989d2fd42b207b7eb9376ccfed871f11b",
+      "n_rows": 700
+    },
+    "polls": {
+      "raw": "raw\\polls.csv",
+      "normalized": "normalized\\polls.parquet",
+      "sha256": "1f8aa2888f0a9f0aec7f4ea94c7c9eadaa26150fb8872e188fa23fd571192d9d",
+      "n_rows": 2056
+    },
+    "results": {
+      "raw": "raw\\results.csv",
+      "normalized": "normalized\\results.parquet",
+      "sha256": "cca384bfb2cdf97cca04e40bca5f813d0795eff581e8fcf26d40a55a22c3630d",
+      "n_rows": 165
+    }
+  }
+}

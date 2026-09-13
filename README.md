@@ -1,0 +1,86 @@
+# Midterms Senate Probability Model
+
+Internal research system for **U.S. Senate** seat-by-seat predictive probabilities and **chamber-wide** seat totals / majority from **joint** correlated draws (never independent Bernoulli from marginals alone).
+
+Design authority: Project blueprint (`docs/us-election-forecasting-model-blueprint.pdf` in the Project Context store). Locked decisions live in `project-context.md`.
+
+## What this repo contains
+
+| Layer | Location |
+| --- | --- |
+| Evidence warehouse (bitemporal polls/results, `build_as_of`, manifests) | `midterms/evidence/` |
+| Synthetic offline fixtures + provenance | `data/` (generated) |
+| Three baselines + holdout replay | `midterms/baselines/`, `midterms replay-baselines` |
+| Hierarchical latent-opinion model (PyMC + fast hierarchical-t path) | `midterms/model/` |
+| Joint chamber simulator | `midterms/simulate/` |
+| Forecast artifacts | `data/artifacts/forecast_latest.json` |
+| Internal research UI | `web/` |
+| Forecast JSON API | `midterms/api/` (`midterms serve-api`) |
+
+## Quick start
+
+```bash
+# Python 3.11+ (PyMC NUTS needs python3-dev / a C++ compiler on Linux)
+# On Windows: if App Control blocks NumPy DLLs under OneDrive, create the venv
+# outside OneDrive, e.g. %LOCALAPPDATA%\electionmodel-venv
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
+
+# Build fixtures, pull VoteHub polls + ratings, generate forecast
+python -m midterms.cli build-fixtures
+python -m midterms.cli fetch-external
+python -m midterms.cli ingest-polls
+python -m midterms.cli replay-baselines --year 2022
+python -m midterms.cli forecast --method fast --as-of 2026-09-01
+
+# Optional: full PyMC NUTS fit (slower)
+python -m midterms.cli forecast --method pymc --draws 400 --tune 400 --chains 2
+
+# API for the UI (port 8787)
+python -m midterms.cli serve-api --port 8787
+```
+
+```bash
+# Research UI (uncommon port)
+cd web
+npm install
+npm run dev -- --port 4317
+```
+
+Open [http://127.0.0.1:4317](http://127.0.0.1:4317).
+
+## Regenerate forecasts
+
+```bash
+python -m midterms.cli forecast \
+  --election-id senate-2026 \
+  --as-of 2026-09-01 \
+  --method fast \
+  --seed 20260901 \
+  --generic-ballot -1.0
+```
+
+Artifacts land in `data/artifacts/` with a run manifest under `data/manifests/`. The UI reads `forecast_latest.json` via the API (or a vendored copy under `web/public/`).
+
+## Data / licensing
+
+- Default path uses **synthetic research fixtures** shaped like historical Senate cycles (2014–2024 + 2026 demo) so CI and offline dev never depend on restricted poll redistribution.
+- **Live polls (preferred):** VoteHub Polling API (`us-senator`, `generic-ballot`) — [CC BY 4.0](https://votehub.com/polls/api/). Attribution: Polling data from [VoteHub](https://votehub.com).
+- **Pollster ratings:** VoteHub [Pollster Scorecards](https://votehub.com/polls/pollster-scorecards/) (grades, house effect, error metrics) plus FiveThirtyEight pollster-ratings CSV as fill-in for unrated firms.
+- Ingest: `python -m midterms.cli fetch-external` then `python -m midterms.cli ingest-polls`.
+- Provenance + sha256 hashes: `data/manifests/`.
+- Best-effort public fetch also tries MEDSL context CSV when reachable.
+
+## Tests
+
+```bash
+pytest -q
+```
+
+Includes a **leakage canary**: future-dated polls must not survive `build_as_of`.
+VoteHub normalize/merge tests require `data/raw/external/votehub_*.json` (created by `fetch-external`).
+
+## Out of scope (this pass)
+
+House, Electoral College, expert ratings, betting markets, public auth, production cloud deploy.

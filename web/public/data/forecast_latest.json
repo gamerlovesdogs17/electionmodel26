@@ -1,0 +1,1381 @@
+{
+  "run_id": "senate-2026_2026-09-01_fast_hierarchical_t_20260901",
+  "generated_at": "2026-09-13T04:47:41.088318+00:00",
+  "forecast_as_of": "2026-09-01",
+  "election_id": "senate-2026",
+  "model_version": "senate-hierarchical-v0.1",
+  "method": "fast_hierarchical_t",
+  "snapshot": {
+    "as_of": "2026-09-01",
+    "election_id": "senate-2026",
+    "snapshot_id": "4bc8ac32617be00c",
+    "n_polls": 304,
+    "n_races_contested": 33,
+    "n_results_known": 0,
+    "n_rated_pollsters": 81
+  },
+  "chamber": {
+    "held_dem": 38,
+    "held_rep": 29,
+    "majority_threshold": 51,
+    "p_dem_majority": 0.895,
+    "p_rep_majority": 0.0595,
+    "p_tie": 0.0455,
+    "expected_dem_seats": 53.9835,
+    "seat_histogram": [
+      {
+        "dem_seats": 38,
+        "count": 1,
+        "probability": 0.0005
+      },
+      {
+        "dem_seats": 41,
+        "count": 1,
+        "probability": 0.0005
+      },
+      {
+        "dem_seats": 42,
+        "count": 2,
+        "probability": 0.001
+      },
+      {
+        "dem_seats": 43,
+        "count": 1,
+        "probability": 0.0005
+      },
+      {
+        "dem_seats": 44,
+        "count": 2,
+        "probability": 0.001
+      },
+      {
+        "dem_seats": 45,
+        "count": 5,
+        "probability": 0.0025
+      },
+      {
+        "dem_seats": 46,
+        "count": 9,
+        "probability": 0.0045
+      },
+      {
+        "dem_seats": 47,
+        "count": 22,
+        "probability": 0.011
+      },
+      {
+        "dem_seats": 48,
+        "count": 29,
+        "probability": 0.0145
+      },
+      {
+        "dem_seats": 49,
+        "count": 47,
+        "probability": 0.0235
+      },
+      {
+        "dem_seats": 50,
+        "count": 91,
+        "probability": 0.0455
+      },
+      {
+        "dem_seats": 51,
+        "count": 150,
+        "probability": 0.075
+      },
+      {
+        "dem_seats": 52,
+        "count": 205,
+        "probability": 0.1025
+      },
+      {
+        "dem_seats": 53,
+        "count": 243,
+        "probability": 0.1215
+      },
+      {
+        "dem_seats": 54,
+        "count": 332,
+        "probability": 0.166
+      },
+      {
+        "dem_seats": 55,
+        "count": 257,
+        "probability": 0.1285
+      },
+      {
+        "dem_seats": 56,
+        "count": 238,
+        "probability": 0.119
+      },
+      {
+        "dem_seats": 57,
+        "count": 172,
+        "probability": 0.086
+      },
+      {
+        "dem_seats": 58,
+        "count": 106,
+        "probability": 0.053
+      },
+      {
+        "dem_seats": 59,
+        "count": 45,
+        "probability": 0.0225
+      },
+      {
+        "dem_seats": 60,
+        "count": 23,
+        "probability": 0.0115
+      },
+      {
+        "dem_seats": 61,
+        "count": 10,
+        "probability": 0.005
+      },
+      {
+        "dem_seats": 62,
+        "count": 4,
+        "probability": 0.002
+      },
+      {
+        "dem_seats": 63,
+        "count": 1,
+        "probability": 0.0005
+      },
+      {
+        "dem_seats": 64,
+        "count": 2,
+        "probability": 0.001
+      },
+      {
+        "dem_seats": 68,
+        "count": 1,
+        "probability": 0.0005
+      },
+      {
+        "dem_seats": 71,
+        "count": 1,
+        "probability": 0.0005
+      }
+    ],
+    "independent_bernoulli_foil_expected": 53.995,
+    "note": "Chamber totals from joint correlated draws \u2014 not independent Bernoulli."
+  },
+  "races": [
+    {
+      "race_id": "senate-2026-MI",
+      "state": "MI",
+      "p_dem": 0.521,
+      "p_rep": 0.479,
+      "mean_margin": 0.17902405124943968,
+      "sd_margin": 4.356314473293593,
+      "ci05": -6.490502173200406,
+      "ci95": 7.046945505604377,
+      "prior_lean": 1.23,
+      "incumbent_party": null,
+      "is_open": true
+    },
+    {
+      "race_id": "senate-2026-TX",
+      "state": "TX",
+      "p_dem": 0.5655,
+      "p_rep": 0.4345,
+      "mean_margin": 0.5936233562512411,
+      "sd_margin": 4.389611280528235,
+      "ci05": -6.406975074782816,
+      "ci95": 7.712276105387984,
+      "prior_lean": -4.26,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-AK",
+      "state": "AK",
+      "p_dem": 0.666,
+      "p_rep": 0.33399999999999996,
+      "mean_margin": 1.6001448668334477,
+      "sd_margin": 4.450481318314167,
+      "ci05": -5.562759382858567,
+      "ci95": 8.561215515570508,
+      "prior_lean": -8.06,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-IA",
+      "state": "IA",
+      "p_dem": 0.302,
+      "p_rep": 0.698,
+      "mean_margin": -2.0615152864528685,
+      "sd_margin": 4.454677602032462,
+      "ci05": -9.357659685940318,
+      "ci95": 5.215210895980063,
+      "prior_lean": -3.51,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-ME",
+      "state": "ME",
+      "p_dem": 0.7725,
+      "p_rep": 0.22750000000000004,
+      "mean_margin": 2.9269653628200576,
+      "sd_margin": 4.335404261197615,
+      "ci05": -4.105930781791273,
+      "ci95": 9.945063373986681,
+      "prior_lean": 2.15,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-SC",
+      "state": "SC",
+      "p_dem": 0.1315,
+      "p_rep": 0.8685,
+      "mean_margin": -7.120274469061361,
+      "sd_margin": 7.281855246044025,
+      "ci05": -18.300743729182127,
+      "ci95": 3.852983775892965,
+      "prior_lean": -8.27,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-MS",
+      "state": "MS",
+      "p_dem": 0.1155,
+      "p_rep": 0.8845,
+      "mean_margin": -5.484881981856549,
+      "sd_margin": 4.972392865697994,
+      "ci05": -13.299089473400425,
+      "ci95": 2.123021061385374,
+      "prior_lean": -10.22,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-MN",
+      "state": "MN",
+      "p_dem": 0.898,
+      "p_rep": 0.10199999999999998,
+      "mean_margin": 5.647378460061151,
+      "sd_margin": 4.639612157032983,
+      "ci05": -1.6464958365215785,
+      "ci95": 12.999418576345652,
+      "prior_lean": 1.71,
+      "incumbent_party": null,
+      "is_open": true
+    },
+    {
+      "race_id": "senate-2026-LA",
+      "state": "LA",
+      "p_dem": 0.0955,
+      "p_rep": 0.9045,
+      "mean_margin": -8.58900936502967,
+      "sd_margin": 7.103802795910258,
+      "ci05": -19.60199631652811,
+      "ci95": 2.134048704692208,
+      "prior_lean": -9.49,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-NH",
+      "state": "NH",
+      "p_dem": 0.921,
+      "p_rep": 0.07899999999999996,
+      "mean_margin": 5.9652714049293065,
+      "sd_margin": 4.301936525238441,
+      "ci05": -1.008669016551174,
+      "ci95": 12.542334315774118,
+      "prior_lean": 0.0,
+      "incumbent_party": null,
+      "is_open": true
+    },
+    {
+      "race_id": "senate-2026-CO",
+      "state": "CO",
+      "p_dem": 0.9215,
+      "p_rep": 0.07850000000000001,
+      "mean_margin": 9.256239476424344,
+      "sd_margin": 7.113292069412135,
+      "ci05": -1.7328770251663543,
+      "ci95": 20.141469870942586,
+      "prior_lean": 4.42,
+      "incumbent_party": "D",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-NJ",
+      "state": "NJ",
+      "p_dem": 0.9285,
+      "p_rep": 0.07150000000000001,
+      "mean_margin": 9.759235387410872,
+      "sd_margin": 6.900127896050473,
+      "ci05": -1.2139885932307335,
+      "ci95": 20.980334947928363,
+      "prior_lean": 5.12,
+      "incumbent_party": "D",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-GA",
+      "state": "GA",
+      "p_dem": 0.9295,
+      "p_rep": 0.07050000000000001,
+      "mean_margin": 6.1131106401453845,
+      "sd_margin": 4.467636029906995,
+      "ci05": -0.850909384653813,
+      "ci95": 13.210262660079298,
+      "prior_lean": -0.23,
+      "incumbent_party": "D",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-ID",
+      "state": "ID",
+      "p_dem": 0.0675,
+      "p_rep": 0.9325,
+      "mean_margin": -7.637426272057692,
+      "sd_margin": 5.634054171027228,
+      "ci05": -16.658508831664513,
+      "ci95": 1.2141152276269331,
+      "prior_lean": -17.85,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-NE",
+      "state": "NE",
+      "p_dem": 0.0605,
+      "p_rep": 0.9395,
+      "mean_margin": -10.267698431007593,
+      "sd_margin": 7.131249542939582,
+      "ci05": -21.48610254901243,
+      "ci95": 0.5527992185916607,
+      "prior_lean": -11.1,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-KS",
+      "state": "KS",
+      "p_dem": 0.0585,
+      "p_rep": 0.9415,
+      "mean_margin": -8.07227960018828,
+      "sd_margin": 5.325136465462952,
+      "ci05": -16.433930147960506,
+      "ci95": 0.37213729610605956,
+      "prior_lean": -7.88,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-OR",
+      "state": "OR",
+      "p_dem": 0.944,
+      "p_rep": 0.05600000000000005,
+      "mean_margin": 10.674106522316885,
+      "sd_margin": 7.076106008113278,
+      "ci05": -0.35722262115145326,
+      "ci95": 21.408183624395,
+      "prior_lean": 6.01,
+      "incumbent_party": "D",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-KY",
+      "state": "KY",
+      "p_dem": 0.0415,
+      "p_rep": 0.9585,
+      "mean_margin": -11.784092739742958,
+      "sd_margin": 7.034207192404626,
+      "ci05": -23.03828750412614,
+      "ci95": -0.7060233931250892,
+      "prior_lean": -12.62,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-DE",
+      "state": "DE",
+      "p_dem": 0.9605,
+      "p_rep": 0.03949999999999998,
+      "mean_margin": 12.196847798582693,
+      "sd_margin": 7.059492865041412,
+      "ci05": 0.9517225093735427,
+      "ci95": 23.810827690335582,
+      "prior_lean": 7.11,
+      "incumbent_party": "D",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-SD",
+      "state": "SD",
+      "p_dem": 0.0385,
+      "p_rep": 0.9615,
+      "mean_margin": -12.213509160865163,
+      "sd_margin": 6.8349835751809485,
+      "ci05": -23.04666143445564,
+      "ci95": -1.3642111040525373,
+      "prior_lean": -13.22,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-TN",
+      "state": "TN",
+      "p_dem": 0.037,
+      "p_rep": 0.963,
+      "mean_margin": -11.912316479711894,
+      "sd_margin": 7.220174986955103,
+      "ci05": -23.397447548611353,
+      "ci95": -1.13650707036648,
+      "prior_lean": -13.08,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-IL",
+      "state": "IL",
+      "p_dem": 0.9695,
+      "p_rep": 0.03049999999999997,
+      "mean_margin": 12.947559767235763,
+      "sd_margin": 6.734053705749133,
+      "ci05": 2.1644358757761797,
+      "ci95": 23.85040560257397,
+      "prior_lean": 7.94,
+      "incumbent_party": "D",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-WV",
+      "state": "WV",
+      "p_dem": 0.0245,
+      "p_rep": 0.9755,
+      "mean_margin": -14.181354544691734,
+      "sd_margin": 7.015797837883564,
+      "ci05": -25.256137050590954,
+      "ci95": -2.9809698550906147,
+      "prior_lean": -15.42,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-OK",
+      "state": "OK",
+      "p_dem": 0.0175,
+      "p_rep": 0.9825,
+      "mean_margin": -15.75295842161035,
+      "sd_margin": 6.917545767393633,
+      "ci05": -26.602375643287207,
+      "ci95": -4.490534469482544,
+      "prior_lean": -16.62,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-NC",
+      "state": "NC",
+      "p_dem": 0.988,
+      "p_rep": 0.01200000000000001,
+      "mean_margin": 10.057528520153165,
+      "sd_margin": 4.401827085194211,
+      "ci05": 2.949940527741675,
+      "ci95": 16.98100769734185,
+      "prior_lean": -1.29,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-WY",
+      "state": "WY",
+      "p_dem": 0.011,
+      "p_rep": 0.989,
+      "mean_margin": -16.480727317667785,
+      "sd_margin": 7.012565886871623,
+      "ci05": -27.874567162758986,
+      "ci95": -5.180440468011962,
+      "prior_lean": -17.33,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-NM",
+      "state": "NM",
+      "p_dem": 0.9935,
+      "p_rep": 0.00649999999999995,
+      "mean_margin": 15.70178705868815,
+      "sd_margin": 5.630163978734968,
+      "ci05": 6.688802563678827,
+      "ci95": 24.856830526848913,
+      "prior_lean": 4.93,
+      "incumbent_party": "D",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-MT",
+      "state": "MT",
+      "p_dem": 0.0025,
+      "p_rep": 0.9975,
+      "mean_margin": -14.124777529599159,
+      "sd_margin": 4.388125602143433,
+      "ci05": -21.55867531509502,
+      "ci95": -7.347800844222323,
+      "prior_lean": -6.16,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-AL",
+      "state": "AL",
+      "p_dem": 0.002,
+      "p_rep": 0.998,
+      "mean_margin": -18.624648806519307,
+      "sd_margin": 5.54297913238749,
+      "ci05": -27.390750724169518,
+      "ci95": -9.421639169755542,
+      "prior_lean": -16.03,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-AR",
+      "state": "AR",
+      "p_dem": 0.0015,
+      "p_rep": 0.9985,
+      "mean_margin": -19.362472702079067,
+      "sd_margin": 5.113641299548929,
+      "ci05": -27.57488464557735,
+      "ci95": -11.201821014777265,
+      "prior_lean": -16.37,
+      "incumbent_party": "R",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-VA",
+      "state": "VA",
+      "p_dem": 0.9985,
+      "p_rep": 0.0014999999999999458,
+      "mean_margin": 20.283040655444196,
+      "sd_margin": 4.756949430537483,
+      "ci05": 12.592269993005962,
+      "ci95": 27.760522173553472,
+      "prior_lean": 2.36,
+      "incumbent_party": "D",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-MA",
+      "state": "MA",
+      "p_dem": 0.9995,
+      "p_rep": 0.0004999999999999449,
+      "mean_margin": 28.42081284658649,
+      "sd_margin": 4.400847899449522,
+      "ci05": 21.44830081264503,
+      "ci95": 35.43763832606706,
+      "prior_lean": 14.23,
+      "incumbent_party": "D",
+      "is_open": false
+    },
+    {
+      "race_id": "senate-2026-RI",
+      "state": "RI",
+      "p_dem": 0.9995,
+      "p_rep": 0.0004999999999999449,
+      "mean_margin": 22.28832251437356,
+      "sd_margin": 5.108494547910532,
+      "ci05": 13.953237667459208,
+      "ci95": 30.549795111757945,
+      "prior_lean": 11.36,
+      "incumbent_party": "D",
+      "is_open": false
+    }
+  ],
+  "baselines": {
+    "last_election_swing": [
+      {
+        "race_id": "senate-2026-AL",
+        "state": "AL",
+        "mean_margin": -12.094589743589745,
+        "sd": 7.0,
+        "p_dem": 0.04201217509043045
+      },
+      {
+        "race_id": "senate-2026-AK",
+        "state": "AK",
+        "mean_margin": -4.124589743589745,
+        "sd": 7.0,
+        "p_dem": 0.27785446800326224
+      },
+      {
+        "race_id": "senate-2026-AR",
+        "state": "AR",
+        "mean_margin": -12.434589743589745,
+        "sd": 7.0,
+        "p_dem": 0.03783597923724163
+      },
+      {
+        "race_id": "senate-2026-CO",
+        "state": "CO",
+        "mean_margin": 8.355410256410256,
+        "sd": 7.0,
+        "p_dem": 0.883688640438882
+      },
+      {
+        "race_id": "senate-2026-DE",
+        "state": "DE",
+        "mean_margin": 11.045410256410257,
+        "sd": 7.0,
+        "p_dem": 0.9427075170171519
+      },
+      {
+        "race_id": "senate-2026-GA",
+        "state": "GA",
+        "mean_margin": 3.7054102564102562,
+        "sd": 7.0,
+        "p_dem": 0.7017166928432028
+      },
+      {
+        "race_id": "senate-2026-ID",
+        "state": "ID",
+        "mean_margin": -13.914589743589746,
+        "sd": 7.0,
+        "p_dem": 0.02341698792954795
+      },
+      {
+        "race_id": "senate-2026-IL",
+        "state": "IL",
+        "mean_margin": 11.875410256410257,
+        "sd": 7.0,
+        "p_dem": 0.9551031719557344
+      },
+      {
+        "race_id": "senate-2026-IA",
+        "state": "IA",
+        "mean_margin": 0.4254102564102564,
+        "sd": 7.0,
+        "p_dem": 0.5242299609784801
+      },
+      {
+        "race_id": "senate-2026-KS",
+        "state": "KS",
+        "mean_margin": -3.9445897435897437,
+        "sd": 7.0,
+        "p_dem": 0.28654286626752273
+      },
+      {
+        "race_id": "senate-2026-KY",
+        "state": "KY",
+        "mean_margin": -8.684589743589743,
+        "sd": 7.0,
+        "p_dem": 0.10736648712140917
+      },
+      {
+        "race_id": "senate-2026-LA",
+        "state": "LA",
+        "mean_margin": -5.554589743589744,
+        "sd": 7.0,
+        "p_dem": 0.21373955139002276
+      },
+      {
+        "race_id": "senate-2026-ME",
+        "state": "ME",
+        "mean_margin": 6.085410256410256,
+        "sd": 7.0,
+        "p_dem": 0.8076705865315152
+      },
+      {
+        "race_id": "senate-2026-MA",
+        "state": "MA",
+        "mean_margin": 18.165410256410258,
+        "sd": 7.0,
+        "p_dem": 0.9952712604667358
+      },
+      {
+        "race_id": "senate-2026-MI",
+        "state": "MI",
+        "mean_margin": 5.165410256410256,
+        "sd": 7.0,
+        "p_dem": 0.7697171765638141
+      },
+      {
+        "race_id": "senate-2026-MN",
+        "state": "MN",
+        "mean_margin": 5.645410256410257,
+        "sd": 7.0,
+        "p_dem": 0.7900190013169137
+      },
+      {
+        "race_id": "senate-2026-MS",
+        "state": "MS",
+        "mean_margin": -6.284589743589745,
+        "sd": 7.0,
+        "p_dem": 0.18464648298049252
+      },
+      {
+        "race_id": "senate-2026-MT",
+        "state": "MT",
+        "mean_margin": -2.224589743589744,
+        "sd": 7.0,
+        "p_dem": 0.3753188810973146
+      },
+      {
+        "race_id": "senate-2026-NE",
+        "state": "NE",
+        "mean_margin": -7.164589743589744,
+        "sd": 7.0,
+        "p_dem": 0.15303272067031315
+      },
+      {
+        "race_id": "senate-2026-NH",
+        "state": "NH",
+        "mean_margin": 3.935410256410256,
+        "sd": 7.0,
+        "p_dem": 0.713010618369893
+      },
+      {
+        "race_id": "senate-2026-NJ",
+        "state": "NJ",
+        "mean_margin": 9.055410256410257,
+        "sd": 7.0,
+        "p_dem": 0.9021033788945285
+      },
+      {
+        "race_id": "senate-2026-NM",
+        "state": "NM",
+        "mean_margin": 8.865410256410255,
+        "sd": 7.0,
+        "p_dem": 0.897330641725764
+      },
+      {
+        "race_id": "senate-2026-NC",
+        "state": "NC",
+        "mean_margin": 2.645410256410256,
+        "sd": 7.0,
+        "p_dem": 0.6472534094283029
+      },
+      {
+        "race_id": "senate-2026-OK",
+        "state": "OK",
+        "mean_margin": -12.684589743589745,
+        "sd": 7.0,
+        "p_dem": 0.03498658987025376
+      },
+      {
+        "race_id": "senate-2026-OR",
+        "state": "OR",
+        "mean_margin": 9.945410256410256,
+        "sd": 7.0,
+        "p_dem": 0.9223086033565355
+      },
+      {
+        "race_id": "senate-2026-RI",
+        "state": "RI",
+        "mean_margin": 15.295410256410255,
+        "sd": 7.0,
+        "p_dem": 0.9855577251771895
+      },
+      {
+        "race_id": "senate-2026-SC",
+        "state": "SC",
+        "mean_margin": -4.334589743589744,
+        "sd": 7.0,
+        "p_dem": 0.26788337864609846
+      },
+      {
+        "race_id": "senate-2026-SD",
+        "state": "SD",
+        "mean_margin": -9.284589743589745,
+        "sd": 7.0,
+        "p_dem": 0.09235859144309155
+      },
+      {
+        "race_id": "senate-2026-TN",
+        "state": "TN",
+        "mean_margin": -9.144589743589744,
+        "sd": 7.0,
+        "p_dem": 0.09571338760983367
+      },
+      {
+        "race_id": "senate-2026-TX",
+        "state": "TX",
+        "mean_margin": -0.3245897435897436,
+        "sd": 7.0,
+        "p_dem": 0.4815076882548607
+      },
+      {
+        "race_id": "senate-2026-VA",
+        "state": "VA",
+        "mean_margin": 6.295410256410256,
+        "sd": 7.0,
+        "p_dem": 0.8157653570256546
+      },
+      {
+        "race_id": "senate-2026-WV",
+        "state": "WV",
+        "mean_margin": -11.484589743589744,
+        "sd": 7.0,
+        "p_dem": 0.05043445514786581
+      },
+      {
+        "race_id": "senate-2026-WY",
+        "state": "WY",
+        "mean_margin": -13.394589743589743,
+        "sd": 7.0,
+        "p_dem": 0.02784121691460886
+      }
+    ],
+    "equal_weight_polls": [
+      {
+        "race_id": "senate-2026-AL",
+        "state": "AL",
+        "mean_margin": -16.03,
+        "sd": 8.0,
+        "p_dem": 0.022548423649022802
+      },
+      {
+        "race_id": "senate-2026-AK",
+        "state": "AK",
+        "mean_margin": -8.06,
+        "sd": 8.0,
+        "p_dem": 0.15684727886048577
+      },
+      {
+        "race_id": "senate-2026-AR",
+        "state": "AR",
+        "mean_margin": -18.605,
+        "sd": 6.0,
+        "p_dem": 0.0009648843776610376
+      },
+      {
+        "race_id": "senate-2026-CO",
+        "state": "CO",
+        "mean_margin": 4.42,
+        "sd": 8.0,
+        "p_dem": 0.7096970827923543
+      },
+      {
+        "race_id": "senate-2026-DE",
+        "state": "DE",
+        "mean_margin": 7.11,
+        "sd": 8.0,
+        "p_dem": 0.8129312735531108
+      },
+      {
+        "race_id": "senate-2026-GA",
+        "state": "GA",
+        "mean_margin": 8.091,
+        "sd": 6.0,
+        "p_dem": 0.9112511899152581
+      },
+      {
+        "race_id": "senate-2026-ID",
+        "state": "ID",
+        "mean_margin": -17.85,
+        "sd": 8.0,
+        "p_dem": 0.01283228682492722
+      },
+      {
+        "race_id": "senate-2026-IL",
+        "state": "IL",
+        "mean_margin": 7.94,
+        "sd": 8.0,
+        "p_dem": 0.8395231602719185
+      },
+      {
+        "race_id": "senate-2026-IA",
+        "state": "IA",
+        "mean_margin": -5.336,
+        "sd": 6.0,
+        "p_dem": 0.18691198106780715
+      },
+      {
+        "race_id": "senate-2026-KS",
+        "state": "KS",
+        "mean_margin": -7.88,
+        "sd": 8.0,
+        "p_dem": 0.16231203548189926
+      },
+      {
+        "race_id": "senate-2026-KY",
+        "state": "KY",
+        "mean_margin": -12.62,
+        "sd": 8.0,
+        "p_dem": 0.057340261051915815
+      },
+      {
+        "race_id": "senate-2026-LA",
+        "state": "LA",
+        "mean_margin": -9.49,
+        "sd": 8.0,
+        "p_dem": 0.11776179293334771
+      },
+      {
+        "race_id": "senate-2026-ME",
+        "state": "ME",
+        "mean_margin": 2.15,
+        "sd": 8.0,
+        "p_dem": 0.6059389638477544
+      },
+      {
+        "race_id": "senate-2026-MA",
+        "state": "MA",
+        "mean_margin": 25.761,
+        "sd": 4.957467162439573,
+        "p_dem": 0.9999998984095338
+      },
+      {
+        "race_id": "senate-2026-MI",
+        "state": "MI",
+        "mean_margin": 4.6686,
+        "sd": 4.0,
+        "p_dem": 0.8784251005980133
+      },
+      {
+        "race_id": "senate-2026-MN",
+        "state": "MN",
+        "mean_margin": 5.747,
+        "sd": 6.0,
+        "p_dem": 0.8309265961227736
+      },
+      {
+        "race_id": "senate-2026-MS",
+        "state": "MS",
+        "mean_margin": -6.818,
+        "sd": 6.0,
+        "p_dem": 0.12790854263471296
+      },
+      {
+        "race_id": "senate-2026-MT",
+        "state": "MT",
+        "mean_margin": -6.16,
+        "sd": 8.0,
+        "p_dem": 0.22064994634264962
+      },
+      {
+        "race_id": "senate-2026-NE",
+        "state": "NE",
+        "mean_margin": -11.1,
+        "sd": 8.0,
+        "p_dem": 0.08264467556196686
+      },
+      {
+        "race_id": "senate-2026-NH",
+        "state": "NH",
+        "mean_margin": 6.35675,
+        "sd": 6.7001443952102,
+        "p_dem": 0.8286256559490615
+      },
+      {
+        "race_id": "senate-2026-NJ",
+        "state": "NJ",
+        "mean_margin": 5.12,
+        "sd": 8.0,
+        "p_dem": 0.7389137003071384
+      },
+      {
+        "race_id": "senate-2026-NM",
+        "state": "NM",
+        "mean_margin": 16.484,
+        "sd": 6.0,
+        "p_dem": 0.9969958981612601
+      },
+      {
+        "race_id": "senate-2026-NC",
+        "state": "NC",
+        "mean_margin": 6.564,
+        "sd": 4.0,
+        "p_dem": 0.9496012924024045
+      },
+      {
+        "race_id": "senate-2026-OK",
+        "state": "OK",
+        "mean_margin": -16.62,
+        "sd": 8.0,
+        "p_dem": 0.018877717620088493
+      },
+      {
+        "race_id": "senate-2026-OR",
+        "state": "OR",
+        "mean_margin": 6.01,
+        "sd": 8.0,
+        "p_dem": 0.7737488929227805
+      },
+      {
+        "race_id": "senate-2026-RI",
+        "state": "RI",
+        "mean_margin": 24.39,
+        "sd": 6.0,
+        "p_dem": 0.9999759837690073
+      },
+      {
+        "race_id": "senate-2026-SC",
+        "state": "SC",
+        "mean_margin": -8.27,
+        "sd": 8.0,
+        "p_dem": 0.15062652588532605
+      },
+      {
+        "race_id": "senate-2026-SD",
+        "state": "SD",
+        "mean_margin": -13.22,
+        "sd": 8.0,
+        "p_dem": 0.04921633256695227
+      },
+      {
+        "race_id": "senate-2026-TN",
+        "state": "TN",
+        "mean_margin": -13.08,
+        "sd": 8.0,
+        "p_dem": 0.05102452381123815
+      },
+      {
+        "race_id": "senate-2026-TX",
+        "state": "TX",
+        "mean_margin": 5.1855,
+        "sd": 4.0,
+        "p_dem": 0.9025768396028
+      },
+      {
+        "race_id": "senate-2026-VA",
+        "state": "VA",
+        "mean_margin": 2.36,
+        "sd": 8.0,
+        "p_dem": 0.6160030601464654
+      },
+      {
+        "race_id": "senate-2026-WV",
+        "state": "WV",
+        "mean_margin": -15.42,
+        "sd": 8.0,
+        "p_dem": 0.026958674028947256
+      },
+      {
+        "race_id": "senate-2026-WY",
+        "state": "WY",
+        "mean_margin": -17.33,
+        "sd": 8.0,
+        "p_dem": 0.015146044114092348
+      }
+    ],
+    "shrinkage_polls": [
+      {
+        "race_id": "senate-2026-AL",
+        "state": "AL",
+        "mean_margin": -18.80247581903276,
+        "sd": 6.241000175827232,
+        "p_dem": 0.0012945270902217257
+      },
+      {
+        "race_id": "senate-2026-AK",
+        "state": "AK",
+        "mean_margin": 1.953231952975365,
+        "sd": 3.1924871247123625,
+        "p_dem": 0.7296720364156775
+      },
+      {
+        "race_id": "senate-2026-AR",
+        "state": "AR",
+        "mean_margin": -20.43561737257717,
+        "sd": 4.722686671941129,
+        "p_dem": 7.553689131840867e-06
+      },
+      {
+        "race_id": "senate-2026-CO",
+        "state": "CO",
+        "mean_margin": 4.42,
+        "sd": 8.0,
+        "p_dem": 0.7096970827923543
+      },
+      {
+        "race_id": "senate-2026-DE",
+        "state": "DE",
+        "mean_margin": 7.11,
+        "sd": 8.0,
+        "p_dem": 0.8129312735531108
+      },
+      {
+        "race_id": "senate-2026-GA",
+        "state": "GA",
+        "mean_margin": 5.595566208878952,
+        "sd": 3.186336101568914,
+        "p_dem": 0.9604654409823923
+      },
+      {
+        "race_id": "senate-2026-ID",
+        "state": "ID",
+        "mean_margin": -6.966049382716049,
+        "sd": 6.213313379984527,
+        "p_dem": 0.13111224607576305
+      },
+      {
+        "race_id": "senate-2026-IL",
+        "state": "IL",
+        "mean_margin": 7.94,
+        "sd": 8.0,
+        "p_dem": 0.8395231602719185
+      },
+      {
+        "race_id": "senate-2026-IA",
+        "state": "IA",
+        "mean_margin": -2.0526175655510555,
+        "sd": 3.3055683737601136,
+        "p_dem": 0.26731378424703633
+      },
+      {
+        "race_id": "senate-2026-KS",
+        "state": "KS",
+        "mean_margin": -7.995441595441596,
+        "sd": 5.173876975876069,
+        "p_dem": 0.06113102840250726
+      },
+      {
+        "race_id": "senate-2026-KY",
+        "state": "KY",
+        "mean_margin": -12.62,
+        "sd": 8.0,
+        "p_dem": 0.057340261051915815
+      },
+      {
+        "race_id": "senate-2026-LA",
+        "state": "LA",
+        "mean_margin": -9.49,
+        "sd": 8.0,
+        "p_dem": 0.11776179293334771
+      },
+      {
+        "race_id": "senate-2026-ME",
+        "state": "ME",
+        "mean_margin": 3.134234807856533,
+        "sd": 3.1009192764660196,
+        "p_dem": 0.8439304564991006
+      },
+      {
+        "race_id": "senate-2026-MA",
+        "state": "MA",
+        "mean_margin": 28.61976230589668,
+        "sd": 3.2915500052208624,
+        "p_dem": 1.0
+      },
+      {
+        "race_id": "senate-2026-MI",
+        "state": "MI",
+        "mean_margin": 0.37921318949916566,
+        "sd": 3.0697621637795076,
+        "p_dem": 0.5491569955706186
+      },
+      {
+        "race_id": "senate-2026-MN",
+        "state": "MN",
+        "mean_margin": 5.37268167406468,
+        "sd": 3.5828947708864356,
+        "p_dem": 0.9331327533080221
+      },
+      {
+        "race_id": "senate-2026-MS",
+        "state": "MS",
+        "mean_margin": -5.77536842105263,
+        "sd": 4.567023922630734,
+        "p_dem": 0.10301091172068089
+      },
+      {
+        "race_id": "senate-2026-MT",
+        "state": "MT",
+        "mean_margin": -14.388439200398143,
+        "sd": 3.240062138773861,
+        "p_dem": 4.48143794111231e-06
+      },
+      {
+        "race_id": "senate-2026-NE",
+        "state": "NE",
+        "mean_margin": -11.1,
+        "sd": 8.0,
+        "p_dem": 0.08264467556196686
+      },
+      {
+        "race_id": "senate-2026-NH",
+        "state": "NH",
+        "mean_margin": 5.978859910152741,
+        "sd": 3.106095871635873,
+        "p_dem": 0.9728777752274061
+      },
+      {
+        "race_id": "senate-2026-NJ",
+        "state": "NJ",
+        "mean_margin": 5.12,
+        "sd": 8.0,
+        "p_dem": 0.7389137003071384
+      },
+      {
+        "race_id": "senate-2026-NM",
+        "state": "NM",
+        "mean_margin": 15.652776978417268,
+        "sd": 6.624478917638168,
+        "p_dem": 0.990932964858473
+      },
+      {
+        "race_id": "senate-2026-NC",
+        "state": "NC",
+        "mean_margin": 10.918634507818563,
+        "sd": 3.1202733853404405,
+        "p_dem": 0.9997667205585629
+      },
+      {
+        "race_id": "senate-2026-OK",
+        "state": "OK",
+        "mean_margin": -16.62,
+        "sd": 8.0,
+        "p_dem": 0.018877717620088493
+      },
+      {
+        "race_id": "senate-2026-OR",
+        "state": "OR",
+        "mean_margin": 6.01,
+        "sd": 8.0,
+        "p_dem": 0.7737488929227805
+      },
+      {
+        "race_id": "senate-2026-RI",
+        "state": "RI",
+        "mean_margin": 22.451458046767538,
+        "sd": 4.661528119942293,
+        "p_dem": 0.9999992688871104
+      },
+      {
+        "race_id": "senate-2026-SC",
+        "state": "SC",
+        "mean_margin": -8.27,
+        "sd": 8.0,
+        "p_dem": 0.15062652588532605
+      },
+      {
+        "race_id": "senate-2026-SD",
+        "state": "SD",
+        "mean_margin": -13.22,
+        "sd": 8.0,
+        "p_dem": 0.04921633256695227
+      },
+      {
+        "race_id": "senate-2026-TN",
+        "state": "TN",
+        "mean_margin": -13.08,
+        "sd": 8.0,
+        "p_dem": 0.05102452381123815
+      },
+      {
+        "race_id": "senate-2026-TX",
+        "state": "TX",
+        "mean_margin": 1.1183439441631313,
+        "sd": 3.081106659801834,
+        "p_dem": 0.641685705251952
+      },
+      {
+        "race_id": "senate-2026-VA",
+        "state": "VA",
+        "mean_margin": 20.266619550858653,
+        "sd": 3.876092927877526,
+        "p_dem": 0.9999999146103176
+      },
+      {
+        "race_id": "senate-2026-WV",
+        "state": "WV",
+        "mean_margin": -15.42,
+        "sd": 8.0,
+        "p_dem": 0.026958674028947256
+      },
+      {
+        "race_id": "senate-2026-WY",
+        "state": "WY",
+        "mean_margin": -17.33,
+        "sd": 8.0,
+        "p_dem": 0.015146044114092348
+      }
+    ]
+  },
+  "diagnostics": {
+    "n_polls": 273,
+    "n_races": 33,
+    "days_to_ed": 63,
+    "draws": 2000,
+    "seed": 20260901,
+    "n_rated_pollsters": 17,
+    "note": "fast hierarchical-t with VoteHub quality weights and house-effect priors"
+  },
+  "house_effects": {
+    "1892 Polling": 0.0,
+    "A2 Insights": 0.0,
+    "Alaska Survey Research": 0.0,
+    "Beacon-Shaw": 0.62,
+    "Change Research": 1.31,
+    "Cygnal": -0.20000000000000004,
+    "Data for Progress": -0.04,
+    "EPIC-MRA": 0.0,
+    "Echelon Insights": 0.57,
+    "Elon University/YouGov": 0.0,
+    "Emerson": -0.29,
+    "Fabrizio, Lee & Associates": 0.0,
+    "Fabrizio, Lee & Associates/Impact Research": 0.0,
+    "Fabrizio-Impact": -0.02,
+    "GBAO": 0.0,
+    "GBAO Strategies": 0.0,
+    "GQR": 0.0,
+    "Glengariff Group, Inc.": 0.0,
+    "GrayHouse": 0.0,
+    "Harper Polling": 0.0,
+    "Hart Research Associates": 0.0,
+    "High Point University Survey Research Center": 0.0,
+    "High Point University Survey Research Center/YouGov": 0.0,
+    "InsiderAdvantage": -0.62,
+    "J.L. Partners": -1.34,
+    "Maine People's Resource Center": 0.0,
+    "Michigan State University Institute for Public Policy and Social Research/YouGov": 0.0,
+    "Mitchell Research & Communications": 0.0,
+    "Nexus Strategies/Strategic Partners Solutions": 0.0,
+    "Normington, Petts & Associates": 0.0,
+    "Opinion Diagnostics": 0.0,
+    "Pan Atlantic SMS Group": 0.0,
+    "Praecones Analytica": 0.0,
+    "Public Opinion Strategies": 0.0,
+    "Public Policy Polling": 0.0,
+    "Quantus Insights": -0.96,
+    "Ragnar Research Partners": 0.0,
+    "Research & Polling Inc.": 0.0,
+    "Rosetta Stone": 0.0,
+    "Saint Anselm": 0.0,
+    "Saint Anselm College Survey Center": 0.0,
+    "Siena-NYT": 0.44,
+    "Slingshot Strategies": 0.0,
+    "SoCal Strategies": -0.03,
+    "Suffolk": -0.19,
+    "SurveyUSA": 2.29,
+    "Susquehanna Polling & Research": 0.0,
+    "TIPP": 0.24,
+    "Target Insyght": 0.0,
+    "Tavern Research": 0.0,
+    "Texas Politics Project at the University of Texas/YouGov": 0.0,
+    "Texas Public Opinion Research": 0.0,
+    "Texas Southern University Barbara Jordan Public Policy Research and Survey Center": 0.0,
+    "The Bullfinch Group": 0.0,
+    "The Public Sentiment Institute": 0.0,
+    "The Texas Politics Project at the University of Texas at Austin/YouGov": 0.0,
+    "Trafalgar Group": -1.38,
+    "Tulchin Research": 0.0,
+    "University of Houston/Texas Southern University": 0.0,
+    "University of Houston/YouGov": 0.0,
+    "University of Massachusetts Department of Political Science/YouGov": 0.0,
+    "University of Massachusetts Lowell-YouGov": 1.7,
+    "University of New Hampshire": 0.0,
+    "University of New Hampshire Survey Center": 0.0,
+    "University of Texas at Tyler": 0.0,
+    "Victory Insights": 0.0,
+    "WPA Intelligence": 0.0,
+    "Wedgewood Polls": 0.0,
+    "Wick": 0.0,
+    "YouGov Blue": 0.0,
+    "Zenith Research": 0.0,
+    "co/efficient": 0.0,
+    "yes. every kid.": 0.0
+  }
+}

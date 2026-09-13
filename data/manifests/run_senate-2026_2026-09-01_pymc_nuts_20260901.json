@@ -1,0 +1,25 @@
+{
+  "run_id": "senate-2026_2026-09-01_pymc_nuts_20260901",
+  "generated_at": "2026-09-13T03:34:26.083601+00:00",
+  "forecast_as_of": "2026-09-01",
+  "election_id": "senate-2026",
+  "model_version": "senate-hierarchical-v0.1",
+  "code_commit": "41adfc35ea73bdcefc0aca1d1f03aef02e1a1faa",
+  "configuration_hash": "3d384032fd917e2cc2dacf14c88a25bd06d2689bd6f9ee61b0641afdfcaaa8a3",
+  "snapshot_ids": {
+    "evidence": "04d99aba0d28f85b"
+  },
+  "seed": 20260901,
+  "draws": 200,
+  "tune": 200,
+  "chains": 2,
+  "output_hashes": {
+    "forecast_json": "495ed935885cba89f58dbeda389d0a2dd5bd7c4d79c072adf3d7a8e4fd5058db",
+    "draws": "2b6ecf819f27f45f6aa9200b3762fc0ed950c965195a9d50dbdd53e644e90ab4"
+  },
+  "paths": {
+    "forecast": "/workspace/data/artifacts/forecast_senate-2026_2026-09-01_pymc_nuts_20260901.json",
+    "forecast_latest": "/workspace/data/artifacts/forecast_latest.json",
+    "draws": "/workspace/data/artifacts/draws_senate-2026_2026-09-01_pymc_nuts_20260901.npz"
+  }
+}

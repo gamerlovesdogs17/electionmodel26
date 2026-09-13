@@ -1,0 +1,497 @@
+"""Synthetic but realistic Senate evidence fixtures (offline / CI / license-safe).
+
+These fixtures are research synthetics shaped like public historical patterns.
+They are NOT official poll releases. Manifests record provenance and sha256 hashes.
+Real ingestion hooks live in `midterms.evidence.ingest` for when redistributable
+archives are available.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+from midterms.config import (
+    CYCLES,
+    DEMO_AS_OF,
+    DEMO_ELECTION_DAY,
+    DEMO_ELECTION_ID,
+    FIXTURES_DIR,
+    MANIFESTS_DIR,
+    NORMALIZED_DIR,
+    RAW_DIR,
+    REGIONS,
+)
+from midterms.evidence.schema import POLL_COLUMNS, RACE_COLUMNS, RESULT_COLUMNS
+
+PARSER_VERSION = "fixtures-v1"
+
+# Class II states (up in 2026) — public institutional knowledge
+CLASS_II = [
+    "AL", "AK", "AR", "CO", "DE", "GA", "ID", "IL", "IA", "KS", "KY", "LA",
+    "ME", "MA", "MI", "MN", "MS", "MT", "NE", "NH", "NJ", "NM", "NC", "OK",
+    "OR", "RI", "SC", "SD", "TN", "TX", "VA", "WV", "WY",
+]
+
+# Approximate long-run leans (dem - rep pp) for synthetic generation
+BASE_LEANS = {
+    "AL": -28, "AK": -15, "AZ": -2, "AR": -27, "CA": 22, "CO": 6, "CT": 14,
+    "DE": 12, "FL": -4, "GA": 0, "HI": 28, "ID": -32, "IL": 14, "IN": -16,
+    "IA": -6, "KS": -14, "KY": -24, "LA": -18, "ME": 4, "MD": 22, "MA": 26,
+    "MI": 2, "MN": 4, "MS": -18, "MO": -14, "MT": -12, "NE": -20, "NV": 0,
+    "NH": 2, "NJ": 10, "NM": 8, "NY": 18, "NC": -2, "ND": -28, "OH": -6,
+    "OK": -30, "OR": 10, "PA": 1, "RI": 18, "SC": -14, "SD": -26, "TN": -22,
+    "TX": -8, "UT": -24, "VT": 30, "VA": 6, "WA": 12, "WV": -30, "WI": 1,
+    "WY": -40,
+}
+
+POLLSTERS = [
+    ("YouGov", 0.4, 2.2),
+    ("Quinnipiac", 0.2, 1.8),
+    ("Marist", 0.1, 2.0),
+    ("Siena", 0.0, 1.7),
+    ("Trafalgar", -2.5, 3.5),
+    ("Emerson", -0.5, 2.8),
+    ("SurveyUSA", 0.3, 2.4),
+    ("PPP", 1.2, 3.0),
+    ("Data for Progress", 1.5, 2.6),
+    ("RMG Research", -1.0, 3.2),
+]
+
+
+def _sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def _election_day(year: int) -> date:
+    # First Tuesday after first Monday in November
+    d = date(year, 11, 1)
+    while d.weekday() != 0:  # Monday
+        d += timedelta(days=1)
+    return d + timedelta(days=1)
+
+
+def _states_for_cycle(year: int) -> list[str]:
+    # Alternate class blocks roughly: even non-presidential midterms ~ Class I/II mix.
+    # For fixtures: midterms use CLASS_II-like set; presidential years use a complementary set.
+    rng = np.random.default_rng(year)
+    all_states = sorted(BASE_LEANS)
+    if year % 4 == 2:  # midterm
+        return list(CLASS_II)
+    # presidential-year Senate: ~33 other seats
+    others = [s for s in all_states if s not in CLASS_II]
+    # pad with some Class II specials for volume
+    extra = list(rng.choice(CLASS_II, size=5, replace=False))
+    return sorted(set(others + extra))[:34]
+
+
+def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> pd.DataFrame:
+    """All 100 seats for chamber composition; contested seats get race rows."""
+    rows = []
+    # Simple synthetic control of chamber: ~49-51 prior to election
+    held = {}
+    for st in sorted(BASE_LEANS):
+        lean = BASE_LEANS[st]
+        # two senators per state with sticky party
+        for seat in (1, 2):
+            p = 1 / (1 + np.exp(-lean / 10))
+            party = "D" if rng.random() < p else "R"
+            # Independents caucus with D in ME/VT occasionally
+            if st in {"ME", "VT"} and seat == 1 and rng.random() < 0.5:
+                party = "I"
+            held[(st, seat)] = party
+
+    # Map contested races onto seat 1 for simplicity
+    for st in contested:
+        race_id = f"senate-{year}-{st}"
+        lean = float(BASE_LEANS[st] + rng.normal(0, 2))
+        inc = held[(st, 1)]
+        is_open = bool(rng.random() < 0.18)
+        rows.append(
+            {
+                "race_id": race_id,
+                "election_id": f"senate-{year}",
+                "office": "US_SENATE",
+                "state": st,
+                "seat_class": "II" if year % 4 == 2 else "I/III",
+                "election_day": _election_day(year).isoformat(),
+                "incumbent_party": None if is_open else ("D" if inc == "I" else inc),
+                "is_open": is_open,
+                "prior_lean": round(lean, 2),
+                "region": REGIONS[st],
+                "not_up": False,
+                "held_by": "D" if inc == "I" else inc,
+            }
+        )
+
+    # non-contested seats for chamber carry
+    for (st, seat), party in held.items():
+        if st in contested and seat == 1:
+            continue
+        rows.append(
+            {
+                "race_id": f"senate-{year}-{st}-held{seat}",
+                "election_id": f"senate-{year}",
+                "office": "US_SENATE",
+                "state": st,
+                "seat_class": "held",
+                "election_day": _election_day(year).isoformat(),
+                "incumbent_party": "D" if party == "I" else party,
+                "is_open": False,
+                "prior_lean": float(BASE_LEANS[st]),
+                "region": REGIONS[st],
+                "not_up": True,
+                "held_by": "D" if party == "I" else party,
+            }
+        )
+    return pd.DataFrame(rows)[RACE_COLUMNS]
+
+
+def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    rng = np.random.default_rng(10_000 + year)
+    contested = _states_for_cycle(year)
+    races = _chamber_held(year, contested, rng)
+    ed = _election_day(year)
+    national_env = float(rng.normal(0 if year % 4 else 1.5, 2.5))  # midterm vs prez
+
+    poll_rows: list[dict] = []
+    result_rows: list[dict] = []
+
+    contested_races = races[~races["not_up"]].copy()
+    for _, race in contested_races.iterrows():
+        st = race["state"]
+        race_id = race["race_id"]
+        lean = float(race["prior_lean"])
+        # Election Day truth with national + regional + local shocks
+        region_shock = float(rng.normal(0, 1.5))
+        local = float(rng.normal(0, 2.5))
+        truth = lean + 0.55 * national_env + region_shock + local
+        # incumbency bump
+        if not race["is_open"] and race["incumbent_party"] == "D":
+            truth += 2.0
+        elif not race["is_open"] and race["incumbent_party"] == "R":
+            truth -= 2.0
+
+        dem_share = 50 + truth / 2
+        dem_votes = int(500_000 + abs(lean) * 8_000 + rng.integers(0, 50_000))
+        rep_votes = int(dem_votes * (100 - dem_share) / max(dem_share, 1))
+        margin = 100 * (dem_votes - rep_votes) / (dem_votes + rep_votes)
+        result_rows.append(
+            {
+                "result_id": f"res-{race_id}",
+                "election_id": f"senate-{year}",
+                "office": "US_SENATE",
+                "state": st,
+                "race_id": race_id,
+                "event_time": ed.isoformat(),
+                "available_at": (ed + timedelta(days=21)).isoformat(),  # certification lag
+                "certified_at": (ed + timedelta(days=21)).isoformat(),
+                "dem_votes": dem_votes,
+                "rep_votes": rep_votes,
+                "other_votes": int(rng.integers(1000, 20000)),
+                "two_party_margin": round(margin, 3),
+                "winner_party": "D" if margin > 0 else "R",
+                "source_url": "synthetic://fixtures/certified-results",
+                "raw_hash": "",
+                "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                "release_version": 1,
+            }
+        )
+
+        # Polls from ED-150 to ED-1
+        n_polls = int(rng.integers(4, 18))
+        for j in range(n_polls):
+            days_out = int(rng.integers(1, 150))
+            field_end = ed - timedelta(days=days_out)
+            field_start = field_end - timedelta(days=int(rng.integers(2, 5)))
+            published = field_end + timedelta(days=int(rng.integers(0, 2)))
+            pollster, house, rel = POLLSTERS[int(rng.integers(0, len(POLLSTERS)))]
+            # Opinion path: shrink toward truth as Election Day approaches
+            progress = 1 - days_out / 150
+            latent = lean + (truth - lean) * (0.3 + 0.7 * progress) + rng.normal(0, 1.2)
+            n = int(rng.choice([400, 500, 600, 750, 900, 1200]))
+            sampling = rng.normal(0, 100 / np.sqrt(n))
+            observed = latent + house + sampling + rng.normal(0, rel)
+            dem = 50 + observed / 2 + rng.normal(0, 0.3)
+            rep = 100 - dem - abs(rng.normal(2, 1))
+            total = dem + rep
+            dem_tw = 100 * dem / total
+            rep_tw = 100 * rep / total
+            margin_obs = dem_tw - rep_tw
+            poll_id = f"poll-{year}-{st}-{j}-{days_out}"
+            study_id = f"study-{year}-{st}-{pollster}-{field_end.isoformat()}"
+            payload = f"{poll_id}|{margin_obs}|{n}".encode()
+            poll_rows.append(
+                {
+                    "poll_id": poll_id,
+                    "study_id": study_id,
+                    "release_version": 1,
+                    "pollster_id": pollster,
+                    "sponsor_id": "none",
+                    "source_url": "synthetic://fixtures/polls",
+                    "raw_hash": _sha256_bytes(payload),
+                    "field_start": field_start.isoformat(),
+                    "field_end": field_end.isoformat(),
+                    "published_at": published.isoformat(),
+                    "corrected_at": None,
+                    "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                    "valid_from": published.isoformat(),
+                    "valid_to": None,
+                    "available_at": published.isoformat(),
+                    "event_time": field_end.isoformat(),
+                    "election_id": f"senate-{year}",
+                    "office": "US_SENATE",
+                    "state": st,
+                    "race_id": race_id,
+                    "population": str(rng.choice(["LV", "LV", "RV"])),
+                    "sample_size": n,
+                    "mode": str(rng.choice(["Online", "Live Phone", "IVR/Online"])),
+                    "dem_share": round(dem_tw, 2),
+                    "rep_share": round(rep_tw, 2),
+                    "undecided": round(abs(rng.normal(4, 1.5)), 2),
+                    "other_share": round(abs(rng.normal(1, 0.5)), 2),
+                    "two_party_margin": round(margin_obs, 3),
+                    "partisan": False,
+                    "exclusion_status": "include",
+                    "exclusion_reason": None,
+                    "parser_version": PARSER_VERSION,
+                    "normalized_at": datetime.now(timezone.utc).isoformat(),
+                    "supersedes": None,
+                }
+            )
+
+    polls = pd.DataFrame(poll_rows)[POLL_COLUMNS]
+    results = pd.DataFrame(result_rows)[RESULT_COLUMNS]
+    results["raw_hash"] = results.apply(
+        lambda r: _sha256_bytes(f"{r.result_id}|{r.two_party_margin}".encode()), axis=1
+    )
+    return races, polls, results
+
+
+def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
+    """Build a competitive research map: 33 Class II contests + 67 held seats (=100)."""
+    rng = rng or np.random.default_rng(2026)
+    rows = []
+    # Contested Class II — illustrative incumbency / openings for research demos
+    incumbency = {
+        "AL": "R", "AK": "R", "AR": "R", "CO": "D", "DE": "D", "GA": "D", "ID": "R",
+        "IL": "D", "IA": "R", "KS": "R", "KY": "R", "LA": "R", "ME": "R", "MA": "D",
+        "MI": "D", "MN": "D", "MS": "R", "MT": "R", "NE": "R", "NH": "D", "NJ": "D",
+        "NM": "D", "NC": "R", "OK": "R", "OR": "D", "RI": "D", "SC": "R", "SD": "R",
+        "TN": "R", "TX": "R", "VA": "D", "WV": "R", "WY": "R",
+    }
+    open_seats = {"MI", "MN", "NH"}
+    # Soften deep leans so joint chamber totals have mass near majority
+    for st in CLASS_II:
+        is_open = st in open_seats
+        raw = float(BASE_LEANS[st])
+        lean = float(np.clip(raw * 0.55, -18, 18) + rng.normal(0, 0.8))
+        rows.append(
+            {
+                "race_id": f"senate-2026-{st}",
+                "election_id": DEMO_ELECTION_ID,
+                "office": "US_SENATE",
+                "state": st,
+                "seat_class": "II",
+                "election_day": DEMO_ELECTION_DAY,
+                "incumbent_party": None if is_open else incumbency[st],
+                "is_open": is_open,
+                "prior_lean": round(lean, 2),
+                "region": REGIONS[st],
+                "not_up": False,
+                "held_by": incumbency[st],
+            }
+        )
+
+    # Held senators not on the 2026 ballot — curated so pre-election carry is ~48 D / 19 R
+    # among the 67 held seats (competitive midterm demo; not an official chamber roster).
+    held_dem_states = [
+        "AZ", "AZ", "CA", "CA", "CT", "CT", "HI", "HI", "MD", "MD", "NV", "NV",
+        "NY", "NY", "PA", "PA", "VT", "VT", "WA", "WA", "WI", "WI", "OH", "OH",
+        "CO", "DE", "GA", "IL", "MA", "NJ", "NM", "OR", "RI", "VA", "MI", "MN",
+        "NH", "ME",  # ME held caucuses D for majority math
+    ]
+    # Remaining held slots are R (and pad to 67)
+    held_parties: list[str] = ["D"] * len(held_dem_states)
+    while len(held_parties) < 67:
+        held_parties.append("R")
+    held_parties = held_parties[:67]
+
+    held_meta = []
+    # one held seat for each Class II state + two for each non-Class II
+    for st in CLASS_II:
+        held_meta.append(st)
+    for st in sorted(s for s in BASE_LEANS if s not in CLASS_II):
+        held_meta.extend([st, st])
+    assert len(held_meta) == 67
+
+    for i, st in enumerate(held_meta):
+        party = held_parties[i]
+        rows.append(
+            {
+                "race_id": f"senate-2026-{st}-held-{i}",
+                "election_id": DEMO_ELECTION_ID,
+                "office": "US_SENATE",
+                "state": st,
+                "seat_class": "held",
+                "election_day": DEMO_ELECTION_DAY,
+                "incumbent_party": party,
+                "is_open": False,
+                "prior_lean": float(BASE_LEANS[st]),
+                "region": REGIONS[st],
+                "not_up": True,
+                "held_by": party,
+            }
+        )
+    return pd.DataFrame(rows)[RACE_COLUMNS]
+
+
+def generate_2026_polls(races: pd.DataFrame) -> pd.DataFrame:
+    rng = np.random.default_rng(20260901)
+    as_of = date.fromisoformat(DEMO_AS_OF)
+    ed = date.fromisoformat(DEMO_ELECTION_DAY)
+    contested = races[~races["not_up"]]
+    rows = []
+    national = 0.5  # near-parity national environment for a competitive research demo
+    for _, race in contested.iterrows():
+        st = race["state"]
+        truthish = float(race["prior_lean"]) + 0.5 * national
+        if not race["is_open"] and race["incumbent_party"] == "D":
+            truthish += 1.5
+        elif not race["is_open"] and race["incumbent_party"] == "R":
+            truthish -= 1.5
+        n_polls = int(rng.integers(3, 12))
+        for j in range(n_polls):
+            days_out = int(rng.integers((ed - as_of).days, 120))
+            field_end = ed - timedelta(days=days_out)
+            if field_end > as_of:
+                field_end = as_of - timedelta(days=int(rng.integers(0, 5)))
+            field_start = field_end - timedelta(days=3)
+            published = min(field_end + timedelta(days=1), as_of)
+            pollster, house, rel = POLLSTERS[int(rng.integers(0, len(POLLSTERS)))]
+            n = int(rng.choice([500, 600, 800, 1000]))
+            obs = truthish + house + rng.normal(0, rel) + rng.normal(0, 100 / np.sqrt(n))
+            dem_tw = 50 + obs / 2
+            rep_tw = 100 - dem_tw
+            margin = dem_tw - rep_tw
+            poll_id = f"poll-2026-{st}-{j}"
+            payload = f"{poll_id}|{margin}|{n}".encode()
+            rows.append(
+                {
+                    "poll_id": poll_id,
+                    "study_id": f"study-2026-{st}-{pollster}-{field_end}",
+                    "release_version": 1,
+                    "pollster_id": pollster,
+                    "sponsor_id": "none",
+                    "source_url": "synthetic://fixtures/polls-2026",
+                    "raw_hash": _sha256_bytes(payload),
+                    "field_start": field_start.isoformat(),
+                    "field_end": field_end.isoformat(),
+                    "published_at": published.isoformat(),
+                    "corrected_at": None,
+                    "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                    "valid_from": published.isoformat(),
+                    "valid_to": None,
+                    "available_at": published.isoformat(),
+                    "event_time": field_end.isoformat(),
+                    "election_id": DEMO_ELECTION_ID,
+                    "office": "US_SENATE",
+                    "state": st,
+                    "race_id": race["race_id"],
+                    "population": "LV",
+                    "sample_size": n,
+                    "mode": "Online",
+                    "dem_share": round(float(dem_tw), 2),
+                    "rep_share": round(float(rep_tw), 2),
+                    "undecided": 5.0,
+                    "other_share": 1.0,
+                    "two_party_margin": round(float(margin), 3),
+                    "partisan": False,
+                    "exclusion_status": "include",
+                    "exclusion_reason": None,
+                    "parser_version": PARSER_VERSION,
+                    "normalized_at": datetime.now(timezone.utc).isoformat(),
+                    "supersedes": None,
+                }
+            )
+    return pd.DataFrame(rows)[POLL_COLUMNS]
+
+
+def build_fixtures(root: Path | None = None) -> dict[str, str]:
+    """Write immutable raw + normalized fixtures and a provenance manifest."""
+    root = root or FIXTURES_DIR
+    raw = RAW_DIR
+    norm = NORMALIZED_DIR
+    man = MANIFESTS_DIR
+    for p in (root, raw, norm, man):
+        p.mkdir(parents=True, exist_ok=True)
+
+    all_races = []
+    all_polls = []
+    all_results = []
+    for year in CYCLES:
+        races, polls, results = _generate_cycle(year)
+        all_races.append(races)
+        all_polls.append(polls)
+        all_results.append(results)
+
+    races_2026 = generate_2026_races()
+    polls_2026 = generate_2026_polls(races_2026)
+    all_races.append(races_2026)
+    all_polls.append(polls_2026)
+
+    races_df = pd.concat(all_races, ignore_index=True)
+    polls_df = pd.concat(all_polls, ignore_index=True)
+    results_df = pd.concat(all_results, ignore_index=True)
+
+    paths = {}
+    for name, df in [
+        ("races", races_df),
+        ("polls", polls_df),
+        ("results", results_df),
+    ]:
+        raw_path = raw / f"{name}.csv"
+        norm_path = norm / f"{name}.parquet"
+        csv_bytes = df.to_csv(index=False).encode()
+        raw_path.write_bytes(csv_bytes)
+        df.to_parquet(norm_path, index=False)
+        paths[name] = {
+            "raw": str(raw_path.relative_to(raw_path.parents[1])),
+            "normalized": str(norm_path.relative_to(norm_path.parents[1])),
+            "sha256": _sha256_bytes(csv_bytes),
+            "n_rows": int(len(df)),
+        }
+
+    provenance = {
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "license": "synthetic-research-fixture",
+        "note": (
+            "Synthetic Senate polls/results for offline CI and blueprint-aligned development. "
+            "Not for publication as real forecasts. Replace via midterms.evidence.ingest when "
+            "redistributable archives (MEDSL / public poll dumps / certified results) are available."
+        ),
+        "preferred_live_sources": [
+            "MIT Election Lab / MEDSL research layer (results)",
+            "Public poll archives with redistributable licenses (polls)",
+            "Official state certification / FEC (results)",
+        ],
+        "cycles": list(CYCLES) + [2026],
+        "parser_version": PARSER_VERSION,
+        "artifacts": paths,
+    }
+    prov_path = man / "fixtures_provenance.json"
+    prov_path.write_text(json.dumps(provenance, indent=2))
+    # also copy tidy CSVs into fixtures for easy inspection
+    races_df.to_csv(root / "races.csv", index=False)
+    polls_df.to_csv(root / "polls.csv", index=False)
+    results_df.to_csv(root / "results.csv", index=False)
+    return {"provenance": str(prov_path), **{k: v["normalized"] for k, v in paths.items()}}
+
+
+if __name__ == "__main__":
+    print(build_fixtures())
