@@ -1,19 +1,21 @@
 {
   "ok": true,
-  "fetched_at": "2026-09-13T18:18:49.317194+00:00",
-  "n_fte_polls": 307,
+  "fetched_at": "2026-09-13T19:59:54.922375+00:00",
+  "n_fte_polls": 3081,
   "elections": [
+    "senate-2018",
     "senate-2020",
-    "senate-2022"
+    "senate-2022",
+    "senate-2024"
   ],
-  "n_warehouse_polls": 1885,
+  "n_warehouse_polls": 4139,
   "paths": {
     "fte_parquet": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls_fte_historical.parquet",
     "warehouse": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls.parquet"
   },
   "freeze": {
-    "generated_at": "2026-09-13T18:18:50.493194+00:00",
-    "n": 1625,
+    "generated_at": "2026-09-13T20:00:10.942298+00:00",
+    "n": 3879,
     "elections": [
       "senate-2014",
       "senate-2016",
@@ -22,40 +24,72 @@
       "senate-2022",
       "senate-2024"
     ],
-    "sha256": "ab79e14579be921001ed9d194f00b30bb9d401e9cb94758ef14dee72c946af82",
+    "sha256": "0a5f763d0d14821300aaa6284aab753582e53d18dfc8a647a5d62f7ffa2ab7be",
     "parser_version": "historical-polls-v1",
     "primary_source": "mixed",
-    "n_synthetic": 1318,
+    "n_synthetic": 798,
     "paths": {
       "raw": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\senate_historical_polls.json",
       "normalized": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls_historical.parquet"
     }
   },
+  "poll_coverage": {
+    "ok": false,
+    "failures": [
+      "2018",
+      "2022"
+    ],
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\poll_coverage_latest.json"
+  },
   "license": "CC BY 4.0",
   "attribution": "Polling data from FiveThirtyEight / ABC News (CC BY 4.0). https://github.com/fivethirtyeight/data/tree/master/polls",
-  "parser_version": "fte-senate-polls-v1",
-  "note": "VoteHub remains the live 2026 source; FTE Datasette covers historical cycles.",
+  "parser_version": "fte-senate-polls-v2",
+  "note": "VoteHub remains the live 2026 source; FTE polls-page / Wayback covers historical cycles.",
   "synthetic": false,
   "cycle_manifests": {
-    "senate-2020": {
-      "election_id": "senate-2020",
-      "n_polls": 291,
-      "n_races": 27,
+    "senate-2018": {
+      "election_id": "senate-2018",
+      "n_polls": 789,
+      "n_races": 30,
+      "n_with_candidate_identity": 789,
       "n_synthetic_marked": 0,
       "primary_source": "fte",
-      "field_end_min": "2020-10-11",
+      "field_end_min": "2016-11-17",
+      "field_end_max": "2018-11-05",
+      "sha256_poll_ids": "300f79161ae67591d939c39fa2cdb77415183aaa726f1caad8388003877bd65b"
+    },
+    "senate-2020": {
+      "election_id": "senate-2020",
+      "n_polls": 685,
+      "n_races": 30,
+      "n_with_candidate_identity": 685,
+      "n_synthetic_marked": 0,
+      "primary_source": "fte",
+      "field_end_min": "2019-03-10",
       "field_end_max": "2020-11-02",
-      "sha256_poll_ids": "dc5c22222cb2f649e0bb894ac128a39ffa21a5de2cc6ad00696138c59fde1551"
+      "sha256_poll_ids": "12cd211ca0f147adb22866e410017c9f0b2d79c2aac60a94bf6da9bb0f57aee3"
     },
     "senate-2022": {
       "election_id": "senate-2022",
-      "n_polls": 16,
-      "n_races": 5,
+      "n_polls": 671,
+      "n_races": 30,
+      "n_with_candidate_identity": 671,
       "n_synthetic_marked": 0,
       "primary_source": "fte",
-      "field_end_min": "2021-01-12",
-      "field_end_max": "2021-03-27",
-      "sha256_poll_ids": "bd134654d79a7cd82484022a8f1755d485913aa1c9ac8add75324f6795b148a2"
+      "field_end_min": "2021-02-22",
+      "field_end_max": "2022-11-07",
+      "sha256_poll_ids": "5287ff188a217be590da4e81c50535e90d558b18177501f61411779e34a4ba28"
+    },
+    "senate-2024": {
+      "election_id": "senate-2024",
+      "n_polls": 936,
+      "n_races": 31,
+      "n_with_candidate_identity": 936,
+      "n_synthetic_marked": 0,
+      "primary_source": "fte",
+      "field_end_min": "2022-12-20",
+      "field_end_max": "2024-11-04",
+      "sha256_poll_ids": "305b59baf7ce004e5057647a3be95362a58c6f06e2543d0fe42da1bdd46f7610"
     }
   }
 }

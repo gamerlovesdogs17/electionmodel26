@@ -13,7 +13,7 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.9.2"
+MODEL_VERSION = "senate-hierarchical-v0.9.16"
 
 # Historical Senate cycles for holdout / replay
 CYCLES = (2014, 2016, 2018, 2020, 2022, 2024)
@@ -33,11 +33,16 @@ DEMO_ELECTION_ID = "senate-2026"
 DEMO_ELECTION_DAY = "2026-11-03"
 DEMO_AS_OF = "2026-09-13"
 
-# Inference defaults (short chains for local/demo; override for production research fits)
-DEMO_DRAWS = 400
-DEMO_TUNE = 400
+# Inference defaults — raised for P2.3 MCSE/convergence (demo still local-friendly)
+DEMO_DRAWS = 800
+DEMO_TUNE = 800
 DEMO_CHAINS = 2
 DEMO_SEED = 20260901
+
+# Publishable / research floors (see midterms.validation.numerical_quality)
+PRODUCTION_DRAWS = 1000
+PRODUCTION_TUNE = 1000
+PRODUCTION_CHAINS = 4
 
 REGIONS = {
     "AL": "South",

@@ -99,6 +99,22 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
     ]
     add("finite_race_margins", len(null_m) == 0, null_m[:5], "null mean/sd margins in races")
 
+    nq = art.get("numerical_quality") or diag.get("numerical_quality") or {}
+    if nq:
+        add(
+            "numerical_quality_g9",
+            bool(nq.get("ok")),
+            {
+                "alerts": nq.get("alerts"),
+                "mcse_control": (nq.get("chamber_mcse") or {}).get("mcse_p_dem_control"),
+                "n_draws": (nq.get("chamber_mcse") or {}).get("n_draws"),
+            },
+            "numerical quality gate failed: " + "; ".join(nq.get("alerts") or []),
+        )
+    else:
+        soft.append({"name": "numerical_quality_g9", "ok": False, "detail": "missing"})
+        alerts.append("numerical_quality block missing (regenerate forecast on v0.9.11+)")
+
     if art.get("generic_ballot") is None and art.get("snapshot", {}).get("generic_ballot") is None:
         soft.append({"name": "generic_ballot_recorded", "ok": False, "detail": None})
         alerts.append("generic_ballot missing from artifact")
@@ -147,12 +163,133 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
         alerts.append(f"layer_warnings={len(art['warnings'])}")
         soft.append({"name": "layer_warnings", "ok": False, "detail": art["warnings"][:5]})
 
+    # Official ballot + 100-seat chamber reconciliation (audit P0.2)
+    try:
+        from midterms.validation.chamber_reconcile import reconcile_all_cycles
+
+        chamber_rec = reconcile_all_cycles()
+        add(
+            "chamber_reconcile",
+            bool(chamber_rec.get("ok")),
+            {
+                "failures": chamber_rec.get("failures"),
+                "gate_years": chamber_rec.get("gate_years"),
+            },
+            "official ballot / 100-seat chamber reconciliation failed: "
+            + ", ".join(chamber_rec.get("failures") or []),
+        )
+    except Exception as exc:  # noqa: BLE001
+        add("chamber_reconcile", False, str(exc), f"chamber reconcile error: {exc}")
+
+    # Historical poll contest/nominee/horizon coverage (audit P0.3)
+    try:
+        from midterms.validation.poll_coverage import write_poll_coverage_report
+
+        poll_cov = write_poll_coverage_report()
+        add(
+            "poll_coverage",
+            bool(poll_cov.get("ok")),
+            {"failures": poll_cov.get("failures")},
+            "historical poll coverage failed: " + ", ".join(poll_cov.get("failures") or []),
+        )
+    except Exception as exc:  # noqa: BLE001
+        add("poll_coverage", False, str(exc), f"poll coverage error: {exc}")
+
+    # Evidence eligibility / run class (audit P0.4)
+    try:
+        from midterms.evidence.eligibility import write_eligibility_report
+
+        elig = write_eligibility_report(str(art.get("election_id") or "senate-2026"))
+        run_class = art.get("run_class") or elig.get("run_class")
+        publishable = art.get("publishable")
+        if publishable is None:
+            publishable = elig.get("publishable")
+        # Soft: non-publication is allowed for research, but must be labeled
+        if art.get("run_class") is None and not elig.get("publishable"):
+            alerts.append(
+                "artifact missing run_class while evidence is non-publication — regenerate forecast"
+            )
+        soft.append(
+            {
+                "name": "evidence_eligibility",
+                "ok": bool(elig.get("publishable")),
+                "detail": {
+                    "run_class": run_class,
+                    "reasons": elig.get("reasons"),
+                    "artifact_publishable": publishable,
+                },
+            }
+        )
+        if not elig.get("publishable"):
+            alerts.append(
+                "evidence not publication-eligible: " + "; ".join(elig.get("reasons") or [])
+            )
+        # Hard fail if artifact claims publishable while eligibility says no
+        claimed = bool(art.get("publishable")) and str(art.get("run_class") or "") == "publication"
+        add(
+            "publishable_claim_consistent",
+            (not claimed) or bool(elig.get("publishable")),
+            {"claimed": claimed, "eligible": elig.get("publishable")},
+            "artifact claims publication but evidence tiers are ineligible",
+        )
+    except Exception as exc:  # noqa: BLE001
+        soft.append({"name": "evidence_eligibility", "ok": False, "detail": str(exc)})
+        alerts.append(f"evidence eligibility error: {exc}")
+
+    # Acceptance gates summary (Milestone-0 / G1–G11)
+    try:
+        from midterms.validation.acceptance_gates import evaluate_acceptance_gates
+
+        acc = evaluate_acceptance_gates(write=False)
+        soft.append(
+            {
+                "name": "acceptance_gates",
+                "ok": bool(acc.get("ok")),
+                "detail": {
+                    "n_pass": acc.get("n_pass"),
+                    "n_partial": acc.get("n_partial"),
+                    "n_fail": acc.get("n_fail"),
+                    "failures": acc.get("failures"),
+                    "partials": acc.get("partials"),
+                },
+            }
+        )
+        if not acc.get("ok"):
+            alerts.append(
+                "acceptance gates failed: " + ", ".join(acc.get("failures") or [])
+            )
+        claimed_pub = bool(art.get("publishable")) and str(art.get("run_class") or "") == "publication"
+        add(
+            "acceptance_gates_for_publication",
+            (not claimed_pub) or bool(acc.get("ok")),
+            {"claimed_publication": claimed_pub, "acceptance_ok": acc.get("ok")},
+            "publication claim blocked: acceptance gates not green",
+        )
+    except Exception as exc:  # noqa: BLE001
+        soft.append({"name": "acceptance_gates", "ok": False, "detail": str(exc)})
+        alerts.append(f"acceptance gates error: {exc}")
+
     stack_path = ARTIFACTS_DIR / "cycle_replay_all.json"
     if stack_path.exists():
         age_h = (datetime.now(timezone.utc).timestamp() - stack_path.stat().st_mtime) / 3600.0
         soft.append({"name": "stack_weights_fresh", "ok": age_h < 24 * 30, "detail": {"age_hours": age_h}})
         if age_h >= 24 * 30:
             alerts.append("stack weights artifact older than 30 days — rerun replay-cycle --all")
+        try:
+            stack_doc = json.loads(stack_path.read_text())
+            if stack_doc.get("comparable") is False or stack_doc.get("validation_status") == "pre_official_ballot":
+                soft.append(
+                    {
+                        "name": "cycle_replay_comparable",
+                        "ok": False,
+                        "detail": stack_doc.get("validation_status") or "non_comparable",
+                    }
+                )
+                alerts.append(
+                    "cycle_replay_all.json marked non-comparable (pre-official-ballot / synthetic universe) — rerun after P0.3"
+                )
+        except (json.JSONDecodeError, OSError):
+            pass
 
     hist_man = MANIFESTS_DIR / "historical_polls.json"
     if hist_man.exists():
@@ -247,13 +384,16 @@ def archive_release(manifest: dict[str, Any], artifact_text: str) -> dict[str, A
     releases = Path(__file__).resolve().parents[2] / "data" / "releases" / run_id
     releases.mkdir(parents=True, exist_ok=True)
     forecast_path = releases / "forecast.json"
-    forecast_path.write_text(artifact_text)
-    digest = hashlib.sha256(artifact_text.encode()).hexdigest()
-    (releases / "forecast.sha256").write_text(digest + "\n")
-    write_signature_sidecar(forecast_path, artifact_text)
+    # Normalize to LF bytes so Windows text-mode does not break sha256 seals.
+    payload = artifact_text.replace("\r\n", "\n").encode("utf-8")
+    forecast_path.write_bytes(payload)
+    digest = hashlib.sha256(payload).hexdigest()
+    (releases / "forecast.sha256").write_bytes((digest + "\n").encode("utf-8"))
+    write_signature_sidecar(forecast_path, payload.decode("utf-8"))
     man_path = releases / "run_manifest.json"
-    man_path.write_text(json.dumps(manifest, indent=2, default=str))
-    write_signature_sidecar(man_path, man_path.read_text())
+    man_text = json.dumps(manifest, indent=2, default=str)
+    man_path.write_bytes(man_text.encode("utf-8"))
+    write_signature_sidecar(man_path, man_text)
     draws = Path(str((manifest.get("paths") or {}).get("draws") or ""))
     if draws.exists():
         shutil.copy2(draws, releases / draws.name)

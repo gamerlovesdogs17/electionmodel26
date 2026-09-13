@@ -1,0 +1,114 @@
+{
+  "audit_item": "P2.2",
+  "temperature": 0.75,
+  "excluded_structural": [
+    "hier_no_similarity",
+    "hier_no_terminal_race"
+  ],
+  "excluded_g8_disable": [
+    "equal_weight_polls",
+    "poll_only_state_space",
+    "shrinkage_polls"
+  ],
+  "excluded_extra": [],
+  "filtered_crps_by_fold": {
+    "2018": {
+      "fast_hierarchical_t": 6.714272875979365,
+      "state_space": 4.339311447671166,
+      "ridge_fundamentals": 4.133725598700485,
+      "last_election_swing": 4.354568661374708
+    },
+    "2020": {
+      "fast_hierarchical_t": 4.628971761731295,
+      "state_space": 3.4575220404943243,
+      "ridge_fundamentals": 3.2171612683782724,
+      "last_election_swing": 4.044752544067934
+    },
+    "2022": {
+      "fast_hierarchical_t": 4.896493903027352,
+      "state_space": 3.93200785334313,
+      "ridge_fundamentals": 3.3385098222224903,
+      "last_election_swing": 3.824786681478069
+    },
+    "2024": {
+      "fast_hierarchical_t": 6.285242458672358,
+      "state_space": 4.659253533156997,
+      "ridge_fundamentals": 3.169416299518496,
+      "last_election_swing": 4.165349498734946
+    }
+  },
+  "mean_crps_eligible": {
+    "state_space": 4.097023718666405,
+    "ridge_fundamentals": 3.4647032472049357,
+    "fast_hierarchical_t": 5.631245249852592,
+    "last_election_swing": 4.097364346413915
+  },
+  "stack_weights": {
+    "fast_hierarchical_t": 0.02904033200787478,
+    "state_space": 0.22459849262758413,
+    "ridge_fundamentals": 0.5218646655479378,
+    "last_election_swing": 0.2244965098166034
+  },
+  "stack_weights_production": {
+    "fast_hierarchical_t": 0.02904033200787478,
+    "state_space": 0.22459849262758413,
+    "ridge_fundamentals": 0.5218646655479378,
+    "last_election_swing": 0.2244965098166034
+  },
+  "stack_weights_loo": {
+    "2018": {
+      "fast_hierarchical_t": 0.037553952806582545,
+      "state_space": 0.19988559387236152,
+      "ridge_fundamentals": 0.5614366620075613,
+      "last_election_swing": 0.20112379131349475
+    },
+    "2020": {
+      "fast_hierarchical_t": 0.02127229275923283,
+      "state_space": 0.1933043790812635,
+      "ridge_fundamentals": 0.5346243298510108,
+      "last_election_swing": 0.2507989983084929
+    },
+    "2022": {
+      "fast_hierarchical_t": 0.02272338347195971,
+      "state_space": 0.22638542815640184,
+      "ridge_fundamentals": 0.5351715559755588,
+      "last_election_swing": 0.21571963239607966
+    },
+    "2024": {
+      "fast_hierarchical_t": 0.038214957949880786,
+      "state_space": 0.2837433714503541,
+      "ridge_fundamentals": 0.45035925512386116,
+      "last_election_swing": 0.2276824154759039
+    }
+  },
+  "matrix_sha256": "7fb5ccf8dee3fd801752946742dfbaf8d5bd982923c268ee1642bbfc1f80def3",
+  "no_weight_remapping": true,
+  "note": "Weights from OOF CRPS softmax under nonnegative simplex. Component identity preserved; fast_hierarchical_t is never relabeled pymc.",
+  "source_nested_loo": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+  "source_spine_label": "fast_hierarchical_t",
+  "source_hierarchical_method": "fast",
+  "source_years": [
+    2018,
+    2020,
+    2022,
+    2024
+  ],
+  "reproduction": {
+    "ok": true,
+    "max_abs_weight_delta": 0.0,
+    "fingerprint_ok": true,
+    "recomputed": {
+      "fast_hierarchical_t": 0.02904033200787478,
+      "state_space": 0.22459849262758413,
+      "ridge_fundamentals": 0.5218646655479378,
+      "last_election_swing": 0.2244965098166034
+    },
+    "stored": {
+      "fast_hierarchical_t": 0.02904033200787478,
+      "state_space": 0.22459849262758413,
+      "ridge_fundamentals": 0.5218646655479378,
+      "last_election_swing": 0.2244965098166034
+    }
+  },
+  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"
+}

@@ -50,6 +50,16 @@ POLL_COLUMNS = [
     "leaners_included",
     "multiway",
     "questionnaire_hash",
+    # Audit P0.3 — candidate / matchup identity
+    "dem_candidate_id",
+    "dem_candidate_name",
+    "rep_candidate_id",
+    "rep_candidate_name",
+    "matchup_id",
+    "hypothetical",
+    "contest_kind",  # regular | special
+    "seat_name",
+    "election_stage",  # general | runoff | ...
 ]
 
 RESULT_COLUMNS = [

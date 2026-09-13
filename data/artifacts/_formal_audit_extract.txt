@@ -1,0 +1,1162 @@
+ELECTIONMODEL26
+Independent Technical Audit
+Forecast validity, model design, comparative methods, and a prioritized remediation
+program
+AUDIT DATE
+13 September 2026
+SUBJECT
+Supplied electionmodel26 software archive
+SCOPE
+2026 U.S. Senate forecasting platform and historical validation system
+AUDIT TYPE
+Independent technical and methodological review
+VERSION
+Report 1.0
+CONFIDENTIAL WORKING ASSESSMENT
+The review evaluates the integrity of the forecasting system. It does not endorse or report live candidate probabilities.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 2
+Contents and reading guide
+2
+Contents and reading guide
+3
+1. Executive verdict
+4
+2. Scorecard
+5
+3. Scope and audit method
+6
+4. Intended system and blueprint alignment
+7
+5. Critical finding 1 - historical truth is invalid
+8
+6. Critical finding 2 - historical polling is insufficient
+9
+7. Finding 3 - the core is hierarchical, not dynamic
+10
+8. Finding 4 - correlation and tail risk are incomplete
+11
+9. Finding 5 - fundamentals and provenance
+12
+10. Finding 6 - ensemble and validation claims
+13
+11. Operational and reproducibility findings
+14
+12. Comparison with leading public methodologies
+15
+13. Strengths worth preserving
+16
+14. Recommended target architecture
+17
+15. Prioritized remediation roadmap
+18
+16. Validation and release acceptance gates
+19
+17. Suggested implementation sequence
+20
+Appendix A. Evidence register
+21
+Appendix B. Risk register
+22
+Appendix C. References and methodological notes
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 3
+1. Executive verdict
+ElectionModel26 is a strong research-engineering prototype, but it is not yet a trustworthy
+public election forecast. The architecture is thoughtful, modular, and unusually transparent. The
+current empirical foundation is not capable of validating it.
+ 69
+ automated tests passed
+ A-
+ architecture grade
+ F
+ validation grade
+ 3/10
+ production readiness
+RELEASE DECISION
+Do not publish or promote the current probabilities as validated forecasts. Preserve the engineering shell, rebuild the
+historical evidence base, and regenerate every score, calibration chart, ensemble weight, and release gate from official
+race and result data.
+Why the verdict is severe
+The historical race universe is generated from approximate fixture logic rather than the actual Senate ballot for each
+cycle. Synthetic races are then joined to a partial results archive and treated as realized history. In 2022 this process
+constructs the wrong contested seats and the wrong chamber outcome. A backtest can be perfectly leak-free and still be
+invalid when it replays the wrong election.
+Why the project is worth repairing
+The system already contains many of the difficult structural elements: bitemporal evidence records, pollster concentration
+controls, effective-number-of-polls diagnostics, hierarchical models, heavy-tail concepts, joint seat simulation, release
+manifests, model cards, signing, scenario tooling, and an extensive test suite. The largest required change is not a
+wholesale rewrite. It is an evidence and validation reset, followed by statistical re-estimation.
+Audit conclusion in one sentence
+ The codebase demonstrates forecasting maturity; the packaged validation results do not.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 4
+2. Scorecard
+Architecture
+8.5
+Poll processing
+8.0
+Data provenance
+4.0
+Statistical core
+6.5
+Correlation
+7.0
+Validation
+2.0
+Operations
+8.5
+0
+2
+4
+6
+8
+10
+Figure 1. Scores reflect the supplied archive as audited, not the theoretical potential of the design.
+Area
+Grade
+Finding
+Publication consequence
+Architecture
+A-
+Clear modular layers and explicit uncertainty concepts.
+Preserve.
+Poll processing
+B+
+Recency, quality, concentration, study clustering, and ENOP.
+Retain after real-data
+validation.
+Data provenance
+D
+Fixtures and curated approximations can appear as valid evidence.
+Release blocker.
+Statistical core
+B-
+Hierarchical, but the production model is not date-dynamic.
+Revise or relabel.
+Correlation
+B
+Good concepts; richer covariance is not consistently in production.
+Calibrate on real cycles.
+Validation
+F
+Wrong historical universe and outcomes invalidate reported scores.
+Invalidate current reports.
+Operations
+A-
+Cards, manifests, signing, API, and governance are unusually strong.
+Preserve and tighten.
+Interpretation
+The production-readiness score is lower than the average component score because validation integrity is multiplicative,
+not additive. A sophisticated model attached to an incorrect historical truth set cannot provide calibrated probabilities.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 5
+3. Scope and audit method
+Materials reviewed
+ - The supplied electionmodel26 archive, including authored Python, API and web code, tests, model cards, release
+ artifacts, manifests, and validation reports.
+- The previously developed high-integrity election-model blueprint.
+ - Public primary-source methodologies from The Economist, Harvard Data Science Review, Silver Bulletin, VoteHub,
+ Decision Desk HQ, and the Federal Election Commission.
+Procedures performed
+ Procedure
+Result
+Archive inventory
+47,427 entries; 503,075,372 compressed bytes; approximately 1.33 GB uncompressed.
+Safe source extraction
+294 authored/relevant files extracted for review; dependencies, git history, caches, and build outputs
+excluded.
+Static review
+Evidence ingestion, race construction, results archive, poll processing, PyMC and challenger models,
+ensemble, simulation, forecast runner, release logic, and validation.
+Automated tests
+69 passed; 2 dependency deprecation warnings; runtime approximately 4 minutes 7 seconds.
+Artifact reconciliation
+Model versions, validation modes, historical coverage, output claims, and source provenance
+compared across packaged reports.
+External comparison
+Architecture and practices compared against published methodologies, not forecast outcomes.
+Interpretive boundary
+DOCUMENTS ARE EVIDENCE
+Readme files, model cards, agent notes, and other instructional text inside the archive were treated as claims or
+evidence about the model. They were not treated as instructions governing this audit.
+Limitations
+This was a technical audit of the supplied snapshot, not a live prospective scoring exercise. It did not independently
+operate every external data connector, audit every UI route, or estimate candidate-specific probabilities. Findings about
+external methodologies are limited to their publicly documented designs.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 6
+4. Intended system and blueprint alignment
+Evidence
+warehouse
+Poll +
+fundamental
+measurement
+Latent
+opinion
+Error and
+correlation
+Joint chamber
+ simulation
+Calibration +
+ release
+Target architecture
+Every optional component must earn inclusion through historically honest out-of-sample testing.
+Figure 2. The blueprint treats forecasting as an evidence-to-calibration chain. A failure in historical truth construction breaks the chain even when downstream
+code is correct.
+Blueprint requirement
+ElectionModel26 implementation
+Assessment
+Bitemporal evidence
+Observation, availability, validity, and retrieval timestamps are represented.
+Strong
+Poll quality and concentration
+Recency, sample size, quality, partisan discount, study clustering, pollster share
+caps, and ENOP.
+Strong
+Dynamic latent opinion
+Production PyMC model uses a race latent and future shift; poll date is mainly
+reflected in weights.
+Incomplete
+Regularized fundamentals
+Broad feature set, but coefficients are substantially prescribed rather than learned
+across held-out cycles.
+Partial
+Separated uncertainty
+Future, terminal, heavy-tail, and common-shock concepts exist.
+Promising
+Cross-race covariance
+National/region/local factors plus richer similarity code in challenger paths.
+Partial
+Institutional simulation
+Joint Senate draws, seat accounting, VP tiebreak, specials and runoff templates.
+Good within scope
+Empirical ensembles
+CRPS-weighted draw mixture; component evidence is remapped in packaged
+provenance.
+Weak
+Historical-date backtests
+Replay and leakage canary exist, but the historical election universe is invalid.
+Failed
+Immutable publication
+Manifests, cards, signing, changelog, and correction registry.
+Strong foundation
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 7
+5. Critical finding 1 - historical truth is invalid
+SEVERITY: CRITICAL
+The current race-level and chamber-level validation metrics are not evidence of real-world forecast accuracy.
+What the code does
+The cycle fixture code constructs a recurring set of states from a seat-class approximation and pads presidential years
+with randomly chosen complements. It then maps races to a simplified seat representation and generates synthetic truths
+and polls. The source itself identifies these records as synthetic research fixtures and states that they are not for
+publication as real forecasts.
+Evidence
+Archive location
+Audit implication
+Approximate state list per cycle
+midterms/evidence/fixtures.py:95-106
+Not an authoritative ballot universe.
+Simplified seat assignment
+midterms/evidence/fixtures.py:152-180
+Cannot reliably represent regular versus special
+seats.
+Synthetic truths and polling
+midterms/evidence/fixtures.py:205-228
+Valid for software tests only.
+Explicit non-publication
+provenance
+midterms/evidence/fixtures.py:607-614
+Conflicts with use in validation artifacts.
+Partial hard-coded result margins
+midterms/evidence/results_archive.py:33-60
+Does not repair an incorrect race universe.
+Outcome aggregation without
+coverage reconciliation
+midterms/validation/cycle_replay.py:82-102
+Can produce a plausible-looking but false
+chamber truth.
+Observed 2022 failure
+The normalized 2022 data contain a Class-II-like set of contested states rather than the actual Class III ballot plus special
+elections. Within that constructed universe, the validation path counts 31 Democratic/independent held seats and 12
+Democratic-winning rows, yielding approximately 43 seats and no Democratic control. The actual election retained
+Democratic Senate control. Because the model also assigned no control in the packaged artifact, the reported chamber
+Brier score of zero rewards agreement with an incorrect truth.
+Required control
+Each cycle must begin with an independently sourced, versioned ballot table. Before scoring, the pipeline must reconcile
+all continuing seats, regular contests, special contests, runoffs, party changes, and the resulting 100-seat chamber
+against official certified results. Any mismatch must stop validation.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 8
+6. Critical finding 2 - historical polling is insufficient
+SEVERITY: CRITICAL
+The historical polling gate checks quantity and source label, not whether the polls represent the actual election at the
+requested historical date.
+ 291
+ 2020 rows
+ 27
+ 2020 races
+ 16
+ 2022 rows
+ 5
+ 2022 races
+Coverage defects
+ - The 2022 rows are dated from January through March 2021, not the closing period of the 2022 general election.
+ - The same 16 rows appear at 90-, 60-, 30-, and 7-day validation horizons, creating the appearance of a time grid
+ without new time-relevant evidence.
+- Several rows represent hypothetical candidate matchups. Candidate identities are discarded during normalization, so a
+ poll can survive after the matchup it measured becomes irrelevant.
+- The gate in midterms/evidence/fte_polls.py:327-400 requires a small number of polls and a source label, but no
+ nominee, race-universe, recency, or horizon coverage test.
+Minimum historical poll contract
+ Field
+Required behavior
+Candidate identity
+Stable candidate ID, party, ballot status, and matchup version.
+Contest identity
+State, seat class/seat ID, regular or special status, round, and election date.
+Timing
+Field start/end, publication, ingestion, correction, and first-known timestamps.
+Method
+Population, mode, sponsor, partisan affiliation, sample size, weighting description, and pollster ID.
+Question structure
+Head-to-head, multiway, leaners, undecided treatment, and likely-voter screen.
+Historical gate
+Coverage by true contest and nominee at each replay date, plus explicit missingness diagnostics.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 9
+7. Finding 3 - the core is hierarchical, not dynamic
+SEVERITY: HIGH
+The production PyMC model should either implement a date-indexed latent opinion path or be described as a static
+hierarchical Election-Day measurement model.
+Current formulation
+In midterms/model/pymc_model.py:172-305, each race receives an Election-Day latent margin and a future component.
+Polls, regardless of field date, effectively observe the same current race state after that component is removed. Date
+enters mainly through externally computed recency weights rather than through a stochastic opinion path.
+Dimension
+ElectionModel26
+Stronger target
+Latent time
+One race state plus a future shift.
+Daily or weekly latent state theta[r,t].
+Movement
+Encoded through fixed future variance.
+Random walk, Gaussian process, or local-linear trend
+scaled by elapsed time.
+Irregular timing
+Recency weights.
+State transition variance proportional to calendar gap.
+National information
+National and regional factors.
+Dynamic national path with state/race deviations.
+Election-Day bridge
+Terminal common shift.
+National, state/race, and similarity-correlated terminal
+layers.
+Why the distinction matters
+A recency-weighted static state can summarize current evidence, but it cannot estimate the trajectory of opinion,
+distinguish genuine movement from irregular polling density, or correctly propagate early-campaign uncertainty. The
+challenger state-space code is closer to the target, although its process variance should depend on elapsed time rather
+than on the number of poll observations.
+Recommended specification
+Use a dynamic national path plus partially pooled race deviations. Separate measurement error from process movement.
+Estimate or hierarchically shrink the path volatility by campaign stage, then introduce Election-Day error as a distinct
+terminal draw. Validate the dynamic model against a static baseline at every historical lead time.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 10
+8. Finding 4 - correlation and tail risk are incomplete
+SEVERITY: HIGH
+The model contains the right vocabulary of uncertainty, but the production covariance structure and its scales have not
+earned their place through valid historical testing.
+What is strong
+ - Joint simulation is performed across the chamber rather than treating races as independent.
+ - National and regional factors create coherent movement.
+ - Heavy-tailed distributions and common shocks reduce the danger of overconfident Gaussian tails.
+ - Similarity-based demographic and geographic covariance exists in the codebase.
+ 
+What is missing or inconsistent
+ - The production PyMC terminal bias is primarily a single common scalar rather than national plus race/state and
+ demographic-similarity terminal layers.
+- The richer similarity covariance is used by challenger implementations but is not consistently part of the production
+ core.
+- Key uncertainty scales are substantially hand-set.
+ - Packaged 2022 ablations show improved CRPS when heavy tails or correlated errors are removed. Because that
+ replay is invalid, the result cannot justify either retaining or removing those components.
+Target error budget
+ Layer
+Interpretation
+Correlation
+Measurement
+Sampling, design, mode, population, pollster, sponsor, study cluster.
+Within pollster/study and methodology.
+Opinion drift
+Movement from forecast date to Election Day.
+National path plus race-specific
+deviations.
+National terminal
+Election-wide polling miss or turnout shock.
+Common to all races.
+Race/state terminal
+Local polling miss or turnout implementation.
+Partially pooled by region and race
+type.
+Similarity terminal
+Shared miss among demographically or geographically similar
+electorates.
+Continuous learned covariance.
+Tail regime
+Rare structural failure or methodological shock.
+Mixture or heavy-tailed common
+component.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 11
+9. Finding 5 - fundamentals and provenance
+SEVERITY: HIGH
+Production inputs must never silently degrade to deterministic fixtures, stale snapshots, or undocumented curated
+estimates.
+Fundamentals
+The model includes partisan lean, generic ballot, incumbency, fundraising, presidential approval, midterm environment,
+and income. Breadth is not the same as validation: coefficients are largely prescribed in midterms/model/fundamentals.py
+rather than estimated and shrunk using training cycles.
+Component
+Packaged behavior
+Audit concern
+Partisan lean
+Strong coefficient and central prior role.
+Conceptually sound; requires vintaged construction and
+held-out calibration.
+Generic ballot
+National environment adjustment.
+Potentially useful; must avoid double counting with polls
+and ratings.
+Incumbency
+Fixed advantage.
+Should vary by candidate status, cycle, and election type.
+Fundraising
+Can use deterministic hash-based fixture fallback.
+Synthetic values can look valid and produce no warning.
+Approval
+Curated research snapshots.
+Insufficient source URL and vintage lineage.
+Economics
+Can use RDPI fixture vintages.
+Revised-vintage leakage and fixture contamination risk.
+Ratings/markets
+Optional overlay with fixed mappings and weights.
+May double count national environment; should be learned
+and ablated.
+Fail-closed policy
+Every evidence row should carry an explicit tier: official, first-party, reputable aggregator, curated with citation, imputed, or
+synthetic. Publishable runs must reject synthetic or untraceable inputs. A fallback may support development, but it must
+change the run class to non-publication and generate an unavoidable warning in the artifact and UI.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 12
+10. Finding 6 - ensemble and validation claims
+SEVERITY: CRITICAL
+The packaged ensemble is a CRPS-weighted mixture, not independently validated predictive stacking. Its production
+weights cannot be relied upon.
+Current mechanism
+midterms/model/ensemble.py converts mean component CRPS values into softmax weights and samples an entire
+component distribution for each joint draw. This is a legitimate mixture design, but it does not optimize the held-out
+predictive density in the way the term stacking ordinarily implies.
+Provenance failure
+The packaged stack provenance covers only 2018, 2020, and 2022 and states that mass assigned to the fast hierarchical
+implementation was remapped onto PyMC. A model must receive only the weight earned by its own out-of-fold forecasts.
+If PyMC fails or is too expensive to run, the report must say that it was not scored; it must not inherit another
+implementation's score.
+Additional validation defects
+ - The latest validation report is marked quick and uses only 150 draws at lead-time checkpoints, which is insufficient for
+ stable tail or chamber probabilities.
+- The primary calibration summary contains only 33 constructed 2022 races, with many probability bins containing one to
+ three observations.
+- The expert-rating ablation uses a model-derived synthetic rating shift rather than a true historical ratings archive.
+ - The peer gate relies partly on hard-coded approximate probabilities rather than immutable primary-source snapshots.
+ - A validation path can silently fall back from PyMC to the fast model while retaining the PyMC label.
+ 
+Correct ensemble protocol
+Generate predictions from every component inside each outer historical-cycle holdout. Select hyperparameters and
+ensemble weights only from inner training cycles. Optimize a proper score such as log score or CRPS under nonnegative
+simplex constraints, or use regularized out-of-fold meta-learning. Preserve component identity and record failures
+explicitly.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 13
+11. Operational and reproducibility findings
+Finding
+Risk
+Recommended control
+Forecast execution can refresh or
+rewrite evidence stores.
+A repeated run at the same nominal as-of time
+may not use the same inputs.
+Separate ingestion from forecast execution; require
+immutable snapshot IDs.
+Seed derivation uses Python
+hash(name).
+Process-level hash randomization can change
+results despite a fixed nominal seed.
+Use a stable cryptographic digest or explicit
+numeric component IDs.
+Snapshot ID hashes poll IDs and
+count but omits broad domain
+content.
+Corrections to values or fundamentals can
+preserve the same snapshot label.
+Hash canonical serialized content for every input
+domain.
+Broad exception handling can
+suppress merge failures.
+A run may silently use stale, synthetic, or partial
+inputs.
+Raise typed exceptions; record and display
+degraded-run state.
+Model card and forecast artifact
+versions drift.
+Readers cannot unambiguously match code,
+weights, data, and output.
+One release manifest must bind code commit,
+model version, data hashes, and report.
+Archive includes git history,
+dependencies, caches, and
+builds.
+Large, difficult-to-review handoff with
+unnecessary security and licensing surface.
+Publish a clean source bundle and separately
+reproducible environment lockfiles.
+Positive operational controls
+The release design is materially better than many research prototypes. It includes model cards, a changelog, correction
+registry, manifest hashing, signature support, API authentication, historical as-of concepts, and a documented distinction
+between production and challenger models. These controls should be retained and made fail-closed.
+Test interpretation
+The 69 passing tests establish that the code behaves consistently against its expected fixtures and invariants. They do
+not establish that the fixtures correspond to real elections, that the probabilities are calibrated, or that live external data
+are complete. Future tests should include official-history reconciliation and golden files derived independently of the
+implementation.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 14
+12. Comparison with leading public methodologies
+System
+Distinctive strengths
+ElectionModel26 comparison
+Priority lesson
+The Economist 2020 /
+Morris
+Open-source dynamic hierarchical
+Bayesian time series; cross-state
+information sharing; empirical correlation.
+Hierarchical structure is similar, but the
+production latent state is not genuinely
+time-indexed.
+Implement and validate a
+true temporal opinion path.
+Silver / FiveThirtyEight /
+FLIPR
+Empirical poll adjustments; separation of
+drift and Election-Day error; national,
+local, and demographic error layers;
+extensive joint simulation.
+Good conceptual overlap, but error layers
+are thinner in production and mostly
+hand-scaled.
+Estimate a transparent error
+budget from real historical
+cycles.
+VoteHub 2026
+Continuous similarity covariance;
+separate Legacy and Complete models;
+time/ENOP/liquidity-aware inputs;
+out-of-fold ridge stacking.
+Similarity code and overlays exist, but
+ensemble evidence is remapped and
+historical validation is compromised.
+Preserve component
+identities and use actual
+out-of-fold predictions.
+Decision Desk HQ
+Large feature set; candidate traits and
+FEC data; regularized regression and
+machine-learning challengers; correlated
+simulation.
+Comparable breadth, but more components
+are fixed or fixture-backed rather than
+empirically trained.
+Build a vintaged feature
+store and benchmark
+simple regularized
+baselines.
+Blueprint target
+Validation-first hybrid: dynamic
+measurement, regularized fundamentals,
+fat tails, learned covariance, joint
+simulation, nested cycle holdouts.
+Architecture approximates the target; the
+historical evidence contract is the central
+break.
+Repair truth and backtesting
+before increasing model
+complexity.
+Comparative judgment
+ElectionModel26 is more operationally mature than many public research repositories. Statistically, it contains most of the
+expected building blocks. What separates leading systems is not the presence of those blocks, but the quality of the
+historical data, the empirical estimation of their interactions, and the credibility of prospective or held-out calibration.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 15
+13. Strengths worth preserving
+Asset
+Why it matters
+Preserve by
+Bitemporal data concepts
+Historical forecasts must know when evidence became
+available, not merely when it was later recorded.
+Applying the same contract to every
+domain and correction.
+Poll concentration controls
+Ten near-duplicate polls should not behave like ten
+independent measurements.
+Validating study clustering, pollster caps,
+and ENOP on real archives.
+Joint chamber simulation
+Control probabilities depend on shared national and regional
+shocks.
+Expanding and calibrating the covariance
+structure rather than replacing the
+simulator.
+Institutional accounting
+Seat continuity, specials, runoffs, and tiebreaks are first-class
+forecast logic.
+Testing each mechanism against historical
+cases.
+Optional overlays
+Ratings and markets can be studied without contaminating
+the core model.
+Maintaining a pure model and separate
+enhanced outputs with learned weights.
+Governance artifacts
+Cards, signatures, manifests, and corrections make forecasts
+auditable.
+Binding them to immutable data and model
+hashes.
+Challenger framework
+Alternative models prevent the production model from
+becoming an unquestioned monoculture.
+Scoring every challenger under identical
+out-of-fold conditions.
+Broad tests
+A sound base for regression protection.
+Adding independent official-history fixtures
+and acceptance tests.
+PRESERVATION PRINCIPLE
+Fix the evidence contract first. Rewriting the entire model before rebuilding historical truth would discard valuable
+infrastructure and still leave the central validity problem unresolved.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 16
+14. Recommended target architecture
+Evidence
+warehouse
+Poll +
+fundamental
+measurement
+Latent
+opinion
+Error and
+correlation
+Joint chamber
+ simulation
+Calibration +
+ release
+Target architecture
+Every optional component must earn inclusion through historically honest out-of-sample testing.
+Layer
+Required design
+Admission test
+Race registry
+Official contest IDs, seat continuity, nominees, specials, rounds, certified
+results.
+Cycle reconciles to official ballot and
+100-seat chamber.
+Evidence warehouse
+Immutable snapshots, bitemporal fields, complete provenance, explicit
+evidence tier.
+Replay returns byte-identical inputs for
+a pinned snapshot.
+Poll measurement
+Estimated/shrunk house, mode, population and sponsor effects; study
+dependence.
+Improves held-out proper score or
+simplifies without loss.
+Opinion dynamics
+National temporal path plus partially pooled race deviations.
+Beats static baseline at multiple lead
+times without miscalibration.
+Fundamentals
+Regularized coefficients trained on past cycles using vintage-correct
+features.
+Positive nested holdout contribution
+with stable signs and intervals.
+Error budget
+Distinct measurement, drift, national terminal, local terminal, similarity, and
+tail layers.
+Reliability and multivariate score
+improve in held-out cycles.
+Simulation
+Joint ballots and institutions with deterministic reproducibility and MC
+diagnostics.
+Accounting invariants and MCSE
+thresholds pass.
+Ensemble
+Component-specific out-of-fold predictions and constrained predictive
+weighting.
+Weights reproduce from held-out
+prediction matrix.
+Publication
+Frozen artifacts, release manifest, warnings, change log, and prospective
+archive.
+Independent rerun recreates the
+published report.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 17
+15. Prioritized remediation roadmap
+P0
+Rebuild truth
+Official races, results, polls, fail-closed inputs
+P1
+Re-estimate model
+Dynamic path, effects, fundamentals, covariance
+P2
+Revalidate
+Nested cycle holdouts, real stacking, MC error
+P3
+Publish safely
+Frozen snapshots, audit trail, monitoring
+Figure 3. Work should proceed from historical truth to modeling, validation, and only then publication.
+Priority
+Work package
+Exit condition
+P0.1
+Replace fixture race generation with official per-cycle contest tables, including specials
+and runoffs.
+Every replay contest matches the certified
+ballot.
+P0.2
+Replace partial result margins with sourced certified results and chamber continuity.
+Automated 100-seat and control
+reconciliation passes.
+P0.3
+Rebuild historical polls with candidate and matchup identity.
+Coverage report passes at each cycle and
+lead time.
+P0.4
+Fail closed on fixture, synthetic, stale, or untraceable production evidence.
+No publishable run can contain an ineligible
+evidence tier.
+P0.5
+Archive current validation outputs as synthetic/non-comparable.
+UI and docs no longer describe them as
+real backtests.
+P1.1
+Implement date-indexed national and race latent paths.
+Static and dynamic models are compared
+honestly out of sample.
+P1.2
+Estimate poll and fundamental effects with hierarchical shrinkage.
+No manually fixed effect remains without
+documented validation.
+P1.3
+Calibrate terminal and similarity covariance.
+Multivariate and chamber scores improve
+without reliability loss.
+P2.1
+Run nested leave-one-cycle-out evaluation for every component.
+Predictions are frozen before the held-out
+truth is read.
+P2.2
+Fit genuine predictive ensemble weights.
+Weights reproduce from the OOF
+prediction matrix.
+P2.3
+Increase simulations and add MCSE/convergence checks.
+Published probabilities meet numerical
+error thresholds.
+P3
+Prospective shadow publication and independent audit.
+At least one cycle of frozen, timestamped
+evaluation is retained.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 18
+16. Validation and release acceptance gates
+Gate
+Pass criterion
+Failure behavior
+G1 Race universe
+Official contest registry matches ballot, rounds, seat IDs, and candidates for every cycle.
+Stop replay.
+G2 Chamber truth
+Continuing plus elected seats reconcile to 100 and official post-election control.
+Stop scoring.
+G3 Poll coverage
+Candidate-valid and horizon-valid observations with explicit missingness by race.
+Mark thin races; prohibit
+complete-cycle claim.
+G4 Vintage integrity
+Every feature value was knowable by the as-of timestamp; revisions are separately
+vintaged.
+Leakage failure.
+G5 Model identity
+Reported model equals executed model; no silent fallback or weight remapping.
+Invalidate run.
+G6 Proper scores
+Race CRPS/log score/Brier and chamber Brier computed on official outcomes.
+No calibration claim.
+G7 Reliability
+Calibration plots include sample sizes and uncertainty; no material systematic
+overconfidence.
+Recalibrate or widen.
+G8 Ablation
+Each optional component improves a predeclared metric across outer folds or is
+removed.
+Disable component.
+G9 Numerical quality
+Convergence diagnostics, effective sample sizes, MCSE, and deterministic replay pass.
+Do not publish.
+G10 Reproducibility
+Independent rerun from manifest recreates inputs and output within declared tolerance.
+Reject release.
+G11 Transparency
+Data sources, limitations, model version, corrections, and missingness are visible.
+Withhold public artifact.
+Recommended score suite
+Use race-level log score, Brier score, CRPS, interval coverage, calibration slope/intercept, and probability integral
+transform diagnostics. At the chamber level use control Brier/log score, seat-distribution CRPS or ranked probability
+score, tail coverage, and multivariate energy or variogram scores. Always report sample sizes, uncertainty across cycles,
+and numerical Monte Carlo error.
+Pre-registration discipline
+Before each outer holdout or prospective forecast, freeze the feature definitions, eligible sources, hyperparameter search,
+scoring rule, tie handling, and correction policy. This prevents selecting the validation story after observing the election.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 19
+17. Suggested implementation sequence
+Sprint
+Deliverable
+Key files or modules
+Verification
+1
+Authoritative cycle registry and
+results schema.
+New official registry; replace fixtures.py and
+results_archive.py production use.
+2014-2024 ballot and chamber
+reconciliation tests.
+2
+Historical poll identity and
+coverage pipeline.
+fte_polls.py, poll schema, candidate/ticket registry.
+Nominee/date/horizon coverage
+dashboard.
+3
+Evidence eligibility and immutable
+manifests.
+warehouse.py, forecast runner, release manifest.
+Fixture injection causes hard
+non-publication failure.
+4
+Clean baseline replay.
+cycle_replay.py and scoring utilities.
+Simple lean-only and poll-average
+baselines reproduce independently.
+5
+Dynamic hierarchical spine.
+pymc_model.py or new temporal model.
+Static versus dynamic OOF
+comparison.
+6
+Learned fundamentals and poll
+effects.
+fundamentals.py and poll measurement model.
+Nested ablation and coefficient
+stability report.
+7
+Error covariance and simulation
+calibration.
+similarity.py, terminal shocks, joint simulator.
+Multivariate score and coverage
+report.
+8
+True ensemble and release
+automation.
+ensemble.py, provenance, signing, publication gates.
+Reproducible OOF weights and
+signed frozen artifact.
+Stop conditions
+ - Do not tune the model to compensate for unresolved race or result mismatches.
+ - Do not publish a chamber-control probability from a run that contains fixture evidence.
+ - Do not describe an ensemble as stacked unless every weight derives from model-specific out-of-fold predictions.
+ - Do not accept a passing aggregate score if a simpler baseline wins or calibration materially fails.
+ 
+First publishable milestone
+RECOMMENDED MILESTONE
+A frozen shadow forecast using an official 2014-2024 historical archive, reproducible nested holdouts, a clearly
+identified model spine, and no fixture inputs. Public-facing live probabilities should follow, not precede, this milestone.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 20
+Appendix A. Evidence register
+ID
+Evidence
+Location
+Supports
+A-01
+Approximate cycle state
+construction
+midterms/evidence/fixtures.py:95-106
+Invalid race-universe finding
+A-02
+Simplified seat mapping
+midterms/evidence/fixtures.py:152-180
+Seat identity risk
+A-03
+Synthetic truths and polls
+midterms/evidence/fixtures.py:205-228
+Synthetic history finding
+A-04
+Fixture non-publication statement
+midterms/evidence/fixtures.py:607-614
+Provenance conflict
+A-05
+Curated hard-coded results
+midterms/evidence/results_archive.py:33-60
+Partial truth archive
+A-06
+Historical poll gate
+midterms/evidence/fte_polls.py:327-400
+Coverage-gate weakness
+A-07
+Historical poll manifest
+Packaged FTE manifest
+2020/2022 row and race counts
+A-08
+Production PyMC model
+midterms/model/pymc_model.py:172-305
+Static latent-state finding
+A-09
+Similarity covariance
+midterms/model/similarity.py
+Challenger/production inconsistency
+A-10
+Ensemble weighting
+midterms/model/ensemble.py
+Softmax mixture finding
+A-11
+Forecast model selection and
+seeding
+run_forecast.py:50-86; 250-314
+Weight loading and reproducibility
+A-12
+Snapshot ID construction
+midterms/evidence/warehouse.py:166-170
+Incomplete content hashing
+A-13
+Fundamental specification
+midterms/model/fundamentals.py
+Prescribed coefficients
+A-14
+Finance fixture fallback
+midterms/evidence/fec.py:88-103
+Production provenance risk
+A-15
+Economic fixture fallback
+midterms/evidence/economics.py:151-180
+Vintage/provenance risk
+A-16
+Packaged validation report
+validation_report_latest.json/.md
+Quick mode, 2022 truth and draw
+counts
+A-17
+Packaged stack provenance
+Production stack provenance artifact
+Model-weight remapping
+A-18
+Automated test suite
+Full extracted authored test set
+69 passes, 2 warnings
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 21
+Appendix B. Risk register
+Risk
+Likelihood
+Impact
+Rating
+Owner action
+Incorrect historical race universe
+Observed
+Invalid calibration and model selection
+Critical
+Rebuild official registry
+Incorrect chamber truth
+Observed
+False chamber scores
+Critical
+100-seat reconciliation
+Thin or irrelevant historical polls
+Observed
+Unrepresentative lead-time validation
+Critical
+Matchup-aware archive
+Synthetic production fallback
+High
+Misleading live probability
+Critical
+Fail closed
+Model label/fallback mismatch
+Medium
+Incorrect performance attribution
+High
+Typed failure and identity check
+Non-deterministic seed derivation
+Medium
+Irreproducible output
+High
+Stable hash
+Static model described as dynamic
+Observed
+Methodology overclaim
+High
+Implement or relabel
+Hand-set error/fundamental scales
+High
+Overfit or miscalibrated forecast
+High
+Nested estimation
+Incomplete snapshot hashing
+Medium
+Audit ambiguity
+High
+Canonical domain hashes
+Broad exception swallowing
+Medium
+Silent degraded state
+High
+Typed exceptions and warnings
+Too few simulation draws
+High
+Unstable tail probabilities
+Medium
+MCSE-based stopping
+Archive bloat
+Observed
+Review, security, and distribution
+friction
+Medium
+Clean release packaging
+Residual-risk principle
+Election forecasting cannot eliminate uncertainty. The goal is to represent it honestly. Residual risk becomes acceptable
+only when data lineage is explicit, historical scoring is valid, uncertainty is calibrated, and the published artifact clearly
+states what the model does not know.
+
+ELECTIONMODEL26 TECHNICAL AUDIT
+Independent technical review
+Technical audit - 13 September 2026
+Page 22
+Appendix C. References and methodological notes
+ID
+Reference
+R-01
+Designing a High-Integrity U.S. Election Forecasting System. Internal blueprint prepared in this workstream, 2026.
+R-02
+Federal Election Commission. Federal Elections 2022: Election Results for the U.S. Senate and the U.S. House of
+Representatives. https://www.fec.gov/resources/cms-content/documents/federalelections2022.pdf
+R-03
+Federal Election Commission. Election Results and Voting Information archive.
+https://www.fec.gov/introduction-campaign-finance/election-results-and-voting-information/
+R-04
+The Economist. U.S. presidential election forecasting model, open-source repository.
+https://github.com/TheEconomist/us-potus-model
+R-05
+Heidemanns, Gelman, and Morris. An Updated Dynamic Bayesian Forecasting Model for the U.S. Presidential Election. Harvard
+Data Science Review. https://hdsr.mitpress.mit.edu/pub/nw1dzd02/release/2
+R-06
+Silver, Nate. FLIPR midterms model methodology. Silver Bulletin, 2026.
+https://www.natesilver.net/p/flipr-midterms-model-methodology
+R-07
+VoteHub. 2026 Midterm Forecast Methodology.
+https://votehub.com/wp-content/uploads/2026/05/2026_votehub_midterm_methodology.pdf
+R-08
+Decision Desk HQ. 2024 Forecast Methodology. https://daily-wire-embeds.decisiondeskhq.com/forecast/2024/methodology
+R-09
+Brier, G. W. Verification of forecasts expressed in terms of probability. Monthly Weather Review 78(1), 1950, 1-3.
+R-10
+Gneiting, T., and Raftery, A. E. Strictly proper scoring rules, prediction, and estimation. Journal of the American Statistical
+Association 102(477), 2007, 359-378.
+R-11
+Yao, Y., Vehtari, A., Simpson, D., and Gelman, A. Using stacking to average Bayesian predictive distributions. Bayesian Analysis
+13(3), 2018, 917-1007.
+R-12
+Vehtari, A., Gelman, A., and Gabry, J. Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC.
+Statistics and Computing 27, 2017, 1413-1432.
+Methodological note on grades
+Letter grades are audit judgments, not posterior estimates. They summarize the supplied implementation against the
+blueprint and published peer practices. Production readiness is deliberately constrained by the weakest validity-critical
+layer; it is not the arithmetic mean of the component grades.
+Final recommendation
+PROCEED WITH A CONTROLLED REBUILD
+Retain the warehouse concepts, poll controls, joint simulator, governance artifacts, and challenger framework. Replace
+the historical truth and poll archives, make evidence eligibility fail closed, re-estimate the model, and require a clean
+nested validation report before any public forecast release.

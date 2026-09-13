@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "publishable": true,
+  "run_class": "publication",
+  "election_id": "senate-2026",
+  "as_of": null,
+  "reasons": [],
+  "domains": {
+    "races": {
+      "tier": "curated",
+      "n": 100,
+      "eligible": true
+    },
+    "polls": {
+      "n": 320,
+      "tier_counts": {
+        "aggregator": 320
+      },
+      "blocked_n": 0,
+      "eligible_n": 320,
+      "stale": false,
+      "latest_age_hours": 92.26699157222222
+    },
+    "results": {
+      "n": 0,
+      "tier_counts": {},
+      "blocked_n": 0
+    }
+  },
+  "chamber_reconcile_ok": null,
+  "poll_coverage_ok": null,
+  "tiers": [
+    "official",
+    "first_party",
+    "aggregator",
+    "curated",
+    "imputed",
+    "synthetic",
+    "untraceable"
+  ],
+  "publication_eligible_tiers": [
+    "aggregator",
+    "curated",
+    "first_party",
+    "official"
+  ],
+  "publication_blocked_tiers": [
+    "imputed",
+    "synthetic",
+    "untraceable"
+  ],
+  "note": "Audit P0.4: publishable runs reject synthetic/imputed/untraceable evidence. Development may continue with run_class=non_publication.",
+  "checked_at": "2026-09-13T20:16:01.169660+00:00"
+}

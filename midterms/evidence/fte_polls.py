@@ -1,13 +1,16 @@
 """FiveThirtyEight / ABC News Senate polls as redistributable historical archive.
 
 VoteHub's documented API has no /polls/archive (only live /polls for the current
-cycle). For complete-cycle replay we ingest the public Senate poll table mirrored
-at FiveThirtyEight Datasette (CC BY 4.0 — attribute FiveThirtyEight / ABC News).
+cycle). For complete-cycle replay we ingest FTE's public Senate poll tables
+(CC BY 4.0 — attribute FiveThirtyEight / ABC News).
 
-Primary source:
-  https://fivethirtyeight.datasettes.com/polls/senate_polls.csv
-Docs:
-  https://github.com/fivethirtyeight/data/blob/master/polls/README.md
+Primary sources (tried in order):
+  1. Sealed local CSVs under data/raw/external/
+  2. Wayback Machine copies of projects.fivethirtyeight.com/polls-page/data/
+  3. GitHub mirror (simonw/fivethirtyeight-polls) — often incomplete for late cycles
+  4. Datasette pagination (may 503 / 1000-row cap)
+
+Docs: https://github.com/fivethirtyeight/data/blob/master/polls/README.md
 """
 
 from __future__ import annotations
@@ -15,9 +18,11 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
@@ -27,13 +32,19 @@ from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 from midterms.evidence.candidates import canonicalize_pollster
 from midterms.evidence.schema import align_poll_frame, empty_poll_row
 
-PARSER_VERSION = "fte-senate-polls-v1"
+PARSER_VERSION = "fte-senate-polls-v2"
 ATTRIBUTION = (
     "Polling data from FiveThirtyEight / ABC News (CC BY 4.0). "
     "https://github.com/fivethirtyeight/data/tree/master/polls"
 )
-DATASETTE_CSV = "https://fivethirtyeight.datasettes.com/polls/senate_polls.csv?_size=max"
-DATASETTE_SQL = "https://fivethirtyeight.datasettes.com/polls.csv?sql="
+FTE_HISTORICAL_URL = (
+    "https://projects.fivethirtyeight.com/polls-page/data/senate_polls_historical.csv"
+)
+FTE_CURRENT_URL = "https://projects.fivethirtyeight.com/polls-page/data/senate_polls.csv"
+GITHUB_MIRROR_CSV = (
+    "https://raw.githubusercontent.com/simonw/fivethirtyeight-polls/main/senate_polls.csv"
+)
+DATASETTE_JSON = "https://fivethirtyeight.datasettes.com/polls/senate_polls.json"
 
 STATE_NAME_TO_ABBR = {
     "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR", "california": "CA",
@@ -55,34 +66,190 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def _get(url: str) -> bytes:
-    req = Request(url, headers={"User-Agent": "midterms-senate-model/0.8 (research; FTE CC-BY)"})
-    with urlopen(req, timeout=120) as resp:
+def _get(url: str, *, timeout: int = 180) -> bytes:
+    req = Request(
+        url,
+        headers={"User-Agent": "midterms-senate-model/0.9 (research; FTE CC-BY)"},
+    )
+    with urlopen(req, timeout=timeout) as resp:
         return resp.read()
 
 
-def fetch_fte_senate_polls_csv(*, dest: Path | None = None) -> dict[str, Any]:
-    """Download the Datasette mirror of FTE senate_polls and seal it."""
+def _is_csv_blob(blob: bytes) -> bool:
+    head = blob.lstrip()[:80].lower()
+    if not head or head[:1] == b"<":
+        return False
+    text = head.decode("utf-8", errors="ignore")
+    return "poll_id" in text or "question_id" in text or "cycle" in text
+
+
+def _wayback_latest_csv(original_url: str) -> tuple[bytes, str] | None:
+    """Return (csv_bytes, wayback_url) for the largest 200 text/csv snapshot."""
+    cdx = (
+        "https://web.archive.org/cdx/search/cdx"
+        f"?url={quote(original_url, safe='')}&output=json&filter=statuscode:200"
+        "&filter=mimetype:text/csv&limit=20"
+    )
+    try:
+        raw = _get(cdx, timeout=60)
+        rows = json.loads(raw)
+    except (HTTPError, URLError, json.JSONDecodeError, TimeoutError, OSError):
+        return None
+    if not rows or len(rows) < 2:
+        return None
+    best = max(rows[1:], key=lambda r: int(r[6]) if len(r) > 6 and str(r[6]).isdigit() else 0)
+    ts = best[1]
+    wb = f"https://web.archive.org/web/{ts}id_/{original_url}"
+    try:
+        blob = _get(wb, timeout=180)
+    except (HTTPError, URLError, TimeoutError, OSError):
+        return None
+    if not _is_csv_blob(blob):
+        return None
+    return blob, wb
+
+
+def _fetch_datasette_paginated() -> bytes | None:
+    rows: list[dict[str, Any]] = []
+    next_token: str | None = None
+    for _ in range(30):
+        url = f"{DATASETTE_JSON}?_size=1000"
+        if next_token:
+            url += f"&_next={quote(str(next_token), safe='')}"
+        try:
+            data = json.loads(_get(url, timeout=120))
+        except (HTTPError, URLError, json.JSONDecodeError, TimeoutError, OSError):
+            return None
+        cols = data.get("columns") or []
+        batch = data.get("rows") or []
+        if not batch:
+            break
+        if cols and isinstance(batch[0], list):
+            rows.extend(dict(zip(cols, r)) for r in batch)
+        elif isinstance(batch[0], dict):
+            rows.extend(batch)
+        else:
+            return None
+        next_token = data.get("next")
+        if not next_token:
+            break
+        time.sleep(0.2)
+    if not rows:
+        return None
+    return pd.DataFrame(rows).to_csv(index=False).encode("utf-8")
+
+
+def fetch_fte_senate_polls_csv(*, dest: Path | None = None, force: bool = False) -> dict[str, Any]:
+    """
+    Seal a complete FTE Senate poll CSV (historical + current when available).
+
+    Prefers already-sealed local files when large enough (>= 2000 rows) unless force=True.
+    """
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
     dest = dest or (RAW_DIR / "external" / "fte_senate_polls.csv")
-    blob = _get(DATASETTE_CSV)
-    # Guard against HTML interstitial
-    if blob.lstrip()[:1] == b"<":
-        raise RuntimeError("FTE datasette returned HTML, not CSV — try again later")
+    hist_path = RAW_DIR / "external" / "fte_senate_polls_historical.csv"
+    cur_path = RAW_DIR / "external" / "fte_senate_polls_current.csv"
+
+    sources_tried: list[str] = []
+    blob: bytes | None = None
+    source_url = ""
+
+    if not force and dest.exists():
+        existing = dest.read_bytes()
+        if _is_csv_blob(existing):
+            try:
+                n = len(pd.read_csv(io.BytesIO(existing)))
+            except Exception:  # noqa: BLE001
+                n = 0
+            if n >= 2000:
+                man = {
+                    "fetched_at": datetime.now(timezone.utc).isoformat(),
+                    "url": "local:fte_senate_polls.csv",
+                    "path": str(dest),
+                    "sha256": _sha256(existing),
+                    "bytes": len(existing),
+                    "n_rows": n,
+                    "license": "CC BY 4.0",
+                    "attribution": ATTRIBUTION,
+                    "parser_version": PARSER_VERSION,
+                    "note": "Reused sealed local CSV (>=2000 rows).",
+                    "sources_tried": ["local"],
+                }
+                (MANIFESTS_DIR / "fte_senate_polls_fetch.json").write_text(json.dumps(man, indent=2))
+                return man
+
+    parts: list[pd.DataFrame] = []
+    for p in (hist_path, cur_path):
+        if p.exists() and _is_csv_blob(p.read_bytes()):
+            parts.append(pd.read_csv(p))
+            sources_tried.append(f"local:{p.name}")
+    if parts:
+        df = pd.concat(parts, ignore_index=True).drop_duplicates()
+        if len(df) >= 2000 or force:
+            blob = df.to_csv(index=False).encode("utf-8")
+            source_url = "local:historical+current"
+
+    if blob is None:
+        sources_tried.append("wayback")
+        frames: list[pd.DataFrame] = []
+        urls: list[str] = []
+        for original in (FTE_HISTORICAL_URL, FTE_CURRENT_URL):
+            hit = _wayback_latest_csv(original)
+            if not hit:
+                continue
+            b, wb = hit
+            frames.append(pd.read_csv(io.BytesIO(b)))
+            urls.append(wb)
+            if "historical" in original:
+                hist_path.write_bytes(b)
+            else:
+                cur_path.write_bytes(b)
+        if frames:
+            df = pd.concat(frames, ignore_index=True).drop_duplicates()
+            blob = df.to_csv(index=False).encode("utf-8")
+            source_url = "|".join(urls)
+
+    if blob is None:
+        sources_tried.append("github_mirror")
+        try:
+            b = _get(GITHUB_MIRROR_CSV)
+            if _is_csv_blob(b):
+                blob = b
+                source_url = GITHUB_MIRROR_CSV
+        except (HTTPError, URLError, TimeoutError, OSError):
+            pass
+
+    if blob is None:
+        sources_tried.append("datasette_paginated")
+        blob = _fetch_datasette_paginated()
+        source_url = DATASETTE_JSON
+
+    if blob is None or not _is_csv_blob(blob):
+        raise RuntimeError(
+            "Unable to fetch FTE Senate polls CSV "
+            f"(tried {sources_tried}). Place a sealed CSV at {dest}."
+        )
+
     dest.write_bytes(blob)
+    try:
+        n_rows = int(len(pd.read_csv(io.BytesIO(blob))))
+    except Exception:  # noqa: BLE001
+        n_rows = -1
     man = {
         "fetched_at": datetime.now(timezone.utc).isoformat(),
-        "url": DATASETTE_CSV,
+        "url": source_url,
         "path": str(dest),
         "sha256": _sha256(blob),
         "bytes": len(blob),
+        "n_rows": n_rows,
         "license": "CC BY 4.0",
         "attribution": ATTRIBUTION,
         "parser_version": PARSER_VERSION,
+        "sources_tried": sources_tried,
         "note": (
-            "Alternative to VoteHub historical archive (VoteHub documents no /polls/archive). "
-            "Mirror may lag the latest cycle."
+            "VoteHub has no /polls/archive. Prefer Wayback / sealed FTE polls-page CSVs "
+            "over the incomplete Datasette/GitHub mirrors."
         ),
     }
     (MANIFESTS_DIR / "fte_senate_polls_fetch.json").write_text(json.dumps(man, indent=2))
@@ -107,15 +274,69 @@ def _parse_day(value: object) -> str | None:
     return ts.date().isoformat()
 
 
+def _party_series(g: pd.DataFrame) -> pd.Series:
+    if "candidate_party" in g.columns:
+        return g["candidate_party"].astype(str).str.upper()
+    if "party" in g.columns:
+        return g["party"].astype(str).str.upper()
+    return pd.Series([""] * len(g), index=g.index)
+
+
+def _seat_class_token(seat_name: object) -> str | None:
+    if seat_name is None or (isinstance(seat_name, float) and pd.isna(seat_name)):
+        return None
+    s = str(seat_name).strip().upper().replace("CLASS", "").strip()
+    if s in {"I", "II", "III"}:
+        return s
+    return None
+
+
+def map_fte_to_official_race_id(
+    *,
+    cycle: int,
+    state: str,
+    seat_name: object = None,
+) -> tuple[str | None, str | None]:
+    """Map an FTE poll question to an official race_id (race_id, contest_kind)."""
+    from midterms.evidence.official_ballot import CYCLE_META, contested_contests
+
+    meta = CYCLE_META.get(cycle)
+    if meta is None and cycle != 2026:
+        return None, None
+    contests = contested_contests(cycle)
+    by_state = [c for c in contests if c["state"] == state]
+    if not by_state:
+        return None, None
+    seat = _seat_class_token(seat_name)
+    up = (meta or {}).get("seat_class_up")
+    specials = [c for c in by_state if c.get("kind") == "special"]
+    regulars = [c for c in by_state if c.get("kind") == "regular"]
+    if seat and up and seat != up and specials:
+        return specials[0]["race_id"], "special"
+    if seat and specials and regulars:
+        for sp in specials:
+            if str(sp.get("seat_class")) == seat:
+                return sp["race_id"], "special"
+    if regulars:
+        return regulars[0]["race_id"], "regular"
+    if specials:
+        return specials[0]["race_id"], "special"
+    return None, None
+
+
 def normalize_fte_senate_polls(
     df: pd.DataFrame | None = None,
     *,
     path: Path | None = None,
     cycles: list[int] | None = None,
+    include_hypothetical: bool = False,
+    stages: tuple[str, ...] = ("general",),
 ) -> pd.DataFrame:
     """
     Collapse candidate-level FTE rows into two-party margin poll records.
-    Keeps general-stage polls only.
+
+    Keeps candidate identity, maps to official race_ids, and drops hypothetical
+    matchups by default (audit P0.3).
     """
     if df is None:
         path = path or (RAW_DIR / "external" / "fte_senate_polls.csv")
@@ -127,13 +348,42 @@ def normalize_fte_senate_polls(
         df = df[df["cycle"].astype(int).isin(cycles)]
 
     if "stage" in df.columns:
-        df = df[df["stage"].astype(str).str.lower().eq("general")]
+        stage_ok = df["stage"].astype(str).str.lower().isin({s.lower() for s in stages})
+        df = df[stage_ok]
+
+    if "hypothetical" in df.columns and not include_hypothetical:
+        hyp = df["hypothetical"].fillna(False)
+        if hyp.dtype != bool:
+            hyp = hyp.astype(str).str.lower().isin({"1", "true", "yes", "t"})
+        df = df[~hyp]
 
     now = datetime.now(timezone.utc).isoformat()
     rows: list[dict[str, Any]] = []
 
-    # Group by poll question
-    group_cols = [c for c in ("poll_id", "question_id", "cycle", "state", "pollster", "end_date", "start_date", "created_at", "sample_size", "population", "methodology", "url", "sponsors") if c in df.columns]
+    group_cols = [
+        c
+        for c in (
+            "poll_id",
+            "question_id",
+            "cycle",
+            "state",
+            "pollster",
+            "end_date",
+            "start_date",
+            "created_at",
+            "sample_size",
+            "population",
+            "methodology",
+            "url",
+            "sponsors",
+            "seat_name",
+            "seat_number",
+            "stage",
+            "hypothetical",
+            "notes",
+        )
+        if c in df.columns
+    ]
     for key, g in df.groupby(group_cols, dropna=False):
         meta = dict(zip(group_cols, key if isinstance(key, tuple) else (key,)))
         st = _state_abbr(meta.get("state"))
@@ -144,12 +394,21 @@ def normalize_fte_senate_polls(
         except (TypeError, ValueError):
             continue
         election_id = f"senate-{cycle}"
-        dem = g[g["candidate_party"].astype(str).str.upper().str.startswith("DEM")]
-        rep = g[g["candidate_party"].astype(str).str.upper().str.startswith("REP")]
+        race_id, contest_kind = map_fte_to_official_race_id(
+            cycle=cycle, state=st, seat_name=meta.get("seat_name")
+        )
+        if not race_id:
+            continue
+
+        parties = _party_series(g)
+        dem = g[parties.str.startswith("DEM")]
+        rep = g[parties.str.startswith("REP")]
         if dem.empty or rep.empty:
             continue
-        dem_pct = float(dem["pct"].max())
-        rep_pct = float(rep["pct"].max())
+        dem_row = dem.loc[dem["pct"].astype(float).idxmax()]
+        rep_row = rep.loc[rep["pct"].astype(float).idxmax()]
+        dem_pct = float(dem_row["pct"])
+        rep_pct = float(rep_row["pct"])
         tot = dem_pct + rep_pct
         if tot <= 0:
             continue
@@ -174,8 +433,18 @@ def normalize_fte_senate_polls(
             pop = "RV"
         else:
             pop = "LV"
+        dem_id = str(dem_row.get("candidate_id") or "")
+        rep_id = str(rep_row.get("candidate_id") or "")
+        dem_name = str(dem_row.get("candidate_name") or dem_row.get("answer") or "")
+        rep_name = str(rep_row.get("candidate_name") or rep_row.get("answer") or "")
+        matchup_id = f"{dem_id}|{rep_id}" if dem_id and rep_id else f"{dem_name}|{rep_name}"
+        hyp_raw = meta.get("hypothetical")
+        if isinstance(hyp_raw, bool):
+            hypothetical = hyp_raw
+        else:
+            hypothetical = str(hyp_raw).lower() in {"1", "true", "yes", "t"}
         poll_id = f"fte-{meta.get('poll_id')}-{meta.get('question_id')}"
-        payload = f"{poll_id}|{margin}|{sample_size}".encode()
+        payload = f"{poll_id}|{margin}|{sample_size}|{matchup_id}".encode()
         rows.append(
             empty_poll_row(
                 poll_id=poll_id,
@@ -195,7 +464,7 @@ def normalize_fte_senate_polls(
                 election_id=election_id,
                 office="US_SENATE",
                 state=st,
-                race_id=f"{election_id}-{st}",
+                race_id=race_id,
                 population=pop,
                 sample_size=sample_size,
                 mode=str(meta.get("methodology") or "") or None,
@@ -209,8 +478,17 @@ def normalize_fte_senate_polls(
                 parser_version=PARSER_VERSION,
                 normalized_at=now,
                 geography_version_id="state-usps-v1",
-                candidate_set_version="fte-ticket",
+                candidate_set_version=f"fte:{matchup_id}",
                 question_id=str(meta.get("question_id")),
+                dem_candidate_id=dem_id or None,
+                dem_candidate_name=dem_name or None,
+                rep_candidate_id=rep_id or None,
+                rep_candidate_name=rep_name or None,
+                matchup_id=matchup_id,
+                hypothetical=hypothetical,
+                contest_kind=contest_kind,
+                seat_name=str(meta.get("seat_name") or "") or None,
+                election_stage=str(meta.get("stage") or "general").lower(),
             )
         )
 
@@ -247,7 +525,6 @@ def ingest_fte_historical_into_warehouse(
         return man
 
     fte_elections = set(fte["election_id"].astype(str))
-    # Never clobber live 2026 VoteHub with FTE (mirror may be incomplete)
     fte_elections = {e for e in fte_elections if e != "senate-2026"}
     fte = fte[fte["election_id"].astype(str).isin(fte_elections)]
 
@@ -262,13 +539,19 @@ def ingest_fte_historical_into_warehouse(
     merged = align_poll_frame(merged)
     merged.to_parquet(polls_path, index=False)
 
-    # Refresh sealed historical archive used by warehouse merge helpers
     from midterms.evidence.historical_polls import freeze_historical_polls_from_warehouse
 
     try:
         freeze = freeze_historical_polls_from_warehouse(merged)
     except OSError as exc:
         freeze = {"ok": False, "error": str(exc)}
+
+    try:
+        from midterms.validation.poll_coverage import write_poll_coverage_report
+
+        coverage = write_poll_coverage_report()
+    except Exception as exc:  # noqa: BLE001
+        coverage = {"ok": False, "error": str(exc)}
 
     man = {
         "ok": True,
@@ -278,10 +561,15 @@ def ingest_fte_historical_into_warehouse(
         "n_warehouse_polls": int(len(merged)),
         "paths": {"fte_parquet": str(out_fte), "warehouse": str(polls_path)},
         "freeze": freeze,
+        "poll_coverage": {
+            "ok": coverage.get("ok"),
+            "failures": coverage.get("failures"),
+            "path": coverage.get("path"),
+        },
         "license": "CC BY 4.0",
         "attribution": ATTRIBUTION,
         "parser_version": PARSER_VERSION,
-        "note": "VoteHub remains the live 2026 source; FTE Datasette covers historical cycles.",
+        "note": "VoteHub remains the live 2026 source; FTE polls-page / Wayback covers historical cycles.",
         "synthetic": False,
         "cycle_manifests": write_cycle_poll_manifests(fte),
     }
@@ -300,10 +588,14 @@ def write_cycle_poll_manifests(polls: pd.DataFrame) -> dict[str, Any]:
             continue
         src = g["source_url"].astype(str) if "source_url" in g.columns else pd.Series([""] * len(g))
         synthetic_n = int(src.str.contains("synthetic", case=False, na=False).sum())
+        n_identity = (
+            int(g["dem_candidate_name"].notna().sum()) if "dem_candidate_name" in g.columns else 0
+        )
         block = {
             "election_id": str(eid),
             "n_polls": int(len(g)),
             "n_races": int(g["race_id"].nunique()) if "race_id" in g.columns else 0,
+            "n_with_candidate_identity": n_identity,
             "n_synthetic_marked": synthetic_n,
             "primary_source": "fte" if synthetic_n == 0 else "mixed",
             "field_end_min": str(pd.to_datetime(g["field_end"], errors="coerce").min().date())
@@ -312,9 +604,7 @@ def write_cycle_poll_manifests(polls: pd.DataFrame) -> dict[str, Any]:
             "field_end_max": str(pd.to_datetime(g["field_end"], errors="coerce").max().date())
             if "field_end" in g.columns and len(g)
             else None,
-            "sha256_poll_ids": _sha256(
-                ",".join(sorted(g["poll_id"].astype(str))).encode()
-            )
+            "sha256_poll_ids": _sha256(",".join(sorted(g["poll_id"].astype(str))).encode())
             if "poll_id" in g.columns
             else None,
         }
@@ -329,10 +619,11 @@ def assert_real_historical_polls(
     *,
     allow_synthetic: bool = False,
     min_polls: int = 5,
+    require_coverage: bool = True,
 ) -> dict[str, Any]:
     """
-    Fail closed when a holdout cycle would replay on synthetic fixtures.
-    Passes when FTE/sealed archive coverage exists for the election_id.
+    Fail closed when a holdout cycle would replay on synthetic fixtures
+    or (by default) when official-contest / nominee coverage fails (P0.3).
     """
     from midterms.config import CYCLES
 
@@ -368,7 +659,7 @@ def assert_real_historical_polls(
             synthetic = True
         elif "source_url" in g.columns:
             urls = g["source_url"].astype(str)
-            if urls.str.contains("fivethirtyeight|datasette|fte-", case=False, na=False).any():
+            if urls.str.contains("fivethirtyeight|datasette|fte-|projects.fivethirtyeight", case=False, na=False).any():
                 synthetic = False
                 source = "fte_like_urls"
             else:
@@ -376,7 +667,7 @@ def assert_real_historical_polls(
         else:
             synthetic = True
 
-    info = {
+    info: dict[str, Any] = {
         "election_id": election_id,
         "year": year,
         "n_polls": n,
@@ -397,4 +688,9 @@ def assert_real_historical_polls(
         )
     if synthetic:
         info["warning"] = "synthetic_or_pre_fte_era"
+
+    if require_coverage and not allow_synthetic and year is not None and year >= 2018:
+        from midterms.validation.poll_coverage import assert_poll_coverage
+
+        info["coverage"] = assert_poll_coverage(election_id, allow_thin=False)
     return info

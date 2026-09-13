@@ -1,0 +1,64 @@
+{
+  "ok": true,
+  "mode": "independent",
+  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260915",
+  "manifest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\releases\\senate-2026_2026-09-13_ensemble_stack+overlays_20260915\\run_manifest.json",
+  "release_dir": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\releases\\senate-2026_2026-09-13_ensemble_stack+overlays_20260915",
+  "configuration": {
+    "election_id": "senate-2026",
+    "as_of": "2026-09-13",
+    "method": "pymc",
+    "draws": 1000,
+    "tune": 1000,
+    "chains": 4,
+    "seed": 20260915,
+    "generic_ballot": 5.852513615064197,
+    "ensemble": true,
+    "with_ratings": true,
+    "with_markets": true,
+    "rating_weight": 0.15,
+    "market_weight": 0.12,
+    "control_weight": 0.15,
+    "control_calibrate": false,
+    "allow_fast_fallback": false
+  },
+  "domain_ok": true,
+  "domain_mismatches": [],
+  "comparison": {
+    "ok": true,
+    "checks": [
+      {
+        "name": "p_dem_majority",
+        "ok": true,
+        "delta": 0.0004999999999999449,
+        "tol": 0.01
+      },
+      {
+        "name": "expected_dem_seats",
+        "ok": true,
+        "delta": 0.009250000000001535,
+        "tol": 0.15
+      },
+      {
+        "name": "max_race_p_dem",
+        "ok": true,
+        "delta": 0.008500000000000008,
+        "tol": 0.02
+      }
+    ],
+    "mean_abs_race_p_dem": 0.0026642857142857163,
+    "n_races_compared": 35
+  },
+  "lite_hash_seal": {
+    "ok": true,
+    "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260915",
+    "forecast_hash_expected": "69310825283f25cef23ef3f98676341e33f772e602bee0c033c61c379e177c1a",
+    "forecast_hash_actual": "69310825283f25cef23ef3f98676341e33f772e602bee0c033c61c379e177c1a",
+    "draws_ok": true,
+    "manifest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\run_senate-2026_2026-09-13_ensemble_stack+overlays_20260915.json",
+    "newline_normalized": true
+  },
+  "rebuild_out_dir": "C:\\Users\\zydlo\\AppData\\Local\\Temp\\midterms_rebuild_hmghbgjv",
+  "generated_at": "2026-09-13T22:55:48.579194+00:00",
+  "note": "G10 hard: re-executes run_forecast under rebuild_mode; compares probabilities within MCSE tolerances (not byte-identical JSON)."
+}

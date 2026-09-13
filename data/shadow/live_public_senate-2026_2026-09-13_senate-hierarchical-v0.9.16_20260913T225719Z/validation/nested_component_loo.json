@@ -1,0 +1,851 @@
+{
+  "audit_item": "P2.1",
+  "g8_metric": "crps",
+  "years": [
+    2018,
+    2020,
+    2022,
+    2024
+  ],
+  "lead_days": [
+    60,
+    30
+  ],
+  "hierarchical_method": "pymc",
+  "spine_label": "pymc",
+  "n_draws": 400,
+  "freeze_before_truth": true,
+  "no_weight_remapping": true,
+  "crps_by_fold": {
+    "2018": {
+      "pymc": 5.843836792075293,
+      "hier_no_similarity": 6.7594359713794185,
+      "hier_no_terminal_race": 6.741670752952535,
+      "state_space": 4.339311447671166,
+      "poll_only_state_space": 10.290460985307265,
+      "ridge_fundamentals": 4.133725598700485,
+      "last_election_swing": 4.354568661374708,
+      "equal_weight_polls": 7.110294474838097,
+      "shrinkage_polls": 7.709075227980975
+    },
+    "2020": {
+      "pymc": 4.424922254363451,
+      "hier_no_similarity": 4.766238078507609,
+      "hier_no_terminal_race": 4.718213608768362,
+      "state_space": 3.4575220404943243,
+      "poll_only_state_space": 11.705995544724399,
+      "ridge_fundamentals": 3.2171612683782724,
+      "last_election_swing": 4.044752544067934,
+      "equal_weight_polls": 4.739597227921372,
+      "shrinkage_polls": 5.354400334211286
+    },
+    "2022": {
+      "pymc": 4.0595628226666784,
+      "hier_no_similarity": 4.940029409540783,
+      "hier_no_terminal_race": 4.940648795553131,
+      "state_space": 3.93200785334313,
+      "poll_only_state_space": 10.908436949561054,
+      "ridge_fundamentals": 3.3385098222224903,
+      "last_election_swing": 3.824786681478069,
+      "equal_weight_polls": 5.074941506802503,
+      "shrinkage_polls": 5.465341706446331
+    },
+    "2024": {
+      "pymc": 5.045768523243341,
+      "hier_no_similarity": 6.214463218225218,
+      "hier_no_terminal_race": 6.225617417363788,
+      "state_space": 4.659253533156997,
+      "poll_only_state_space": 9.118053992683564,
+      "ridge_fundamentals": 3.169416299518496,
+      "last_election_swing": 4.165349498734946,
+      "equal_weight_polls": 5.903374066262348,
+      "shrinkage_polls": 6.827980955879246
+    }
+  },
+  "mean_crps_by_component": {
+    "last_election_swing": 4.097364346413915,
+    "hier_no_similarity": 5.670041669413257,
+    "equal_weight_polls": 5.707051818956081,
+    "pymc": 4.8435225980871905,
+    "ridge_fundamentals": 3.4647032472049357,
+    "state_space": 4.097023718666405,
+    "poll_only_state_space": 10.50573686806907,
+    "shrinkage_polls": 6.33919955612946,
+    "hier_no_terminal_race": 5.656537643659455
+  },
+  "oof_mixture_weights_honest": {
+    "pymc": 0.07235928406321124,
+    "hier_no_similarity": 0.024037577569918,
+    "hier_no_terminal_race": 0.024474302893459584,
+    "state_space": 0.19577687259151136,
+    "poll_only_state_space": 3.808345815606319e-05,
+    "ridge_fundamentals": 0.45489633942646673,
+    "last_election_swing": 0.19568797673313618,
+    "equal_weight_polls": 0.02288019002785301,
+    "shrinkage_polls": 0.009849373236287933
+  },
+  "g8_recommendations": {
+    "state_space": {
+      "keep_votes": 4,
+      "n_folds": 4,
+      "recommend": "keep",
+      "deltas_spine_minus_component": {
+        "2018": 1.5045253444041267,
+        "2020": 0.9674002138691264,
+        "2022": 0.12755496932354848,
+        "2024": 0.3865149900863436
+      }
+    },
+    "poll_only_state_space": {
+      "keep_votes": 0,
+      "n_folds": 4,
+      "recommend": "disable",
+      "deltas_spine_minus_component": {
+        "2018": -4.446624193231972,
+        "2020": -7.281073290360948,
+        "2022": -6.848874126894375,
+        "2024": -4.072285469440223
+      }
+    },
+    "ridge_fundamentals": {
+      "keep_votes": 4,
+      "n_folds": 4,
+      "recommend": "keep",
+      "deltas_spine_minus_component": {
+        "2018": 1.710111193374808,
+        "2020": 1.2077609859851783,
+        "2022": 0.7210530004441882,
+        "2024": 1.8763522237248451
+      }
+    },
+    "last_election_swing": {
+      "keep_votes": 4,
+      "n_folds": 4,
+      "recommend": "keep",
+      "deltas_spine_minus_component": {
+        "2018": 1.4892681307005846,
+        "2020": 0.38016971029551705,
+        "2022": 0.23477614118860934,
+        "2024": 0.8804190245083952
+      }
+    },
+    "equal_weight_polls": {
+      "keep_votes": 0,
+      "n_folds": 4,
+      "recommend": "disable",
+      "deltas_spine_minus_component": {
+        "2018": -1.2664576827628045,
+        "2020": -0.3146749735579215,
+        "2022": -1.0153786841358245,
+        "2024": -0.857605543019007
+      }
+    },
+    "shrinkage_polls": {
+      "keep_votes": 0,
+      "n_folds": 4,
+      "recommend": "disable",
+      "deltas_spine_minus_component": {
+        "2018": -1.865238435905682,
+        "2020": -0.9294780798478355,
+        "2022": -1.4057788837796528,
+        "2024": -1.7822124326359052
+      }
+    },
+    "similarity_terminal": {
+      "ablation_component": "hier_no_similarity",
+      "keep_votes": 4,
+      "n_folds": 4,
+      "recommend": "keep",
+      "deltas_spine_minus_ablation": {
+        "2018": -0.9155991793041256,
+        "2020": -0.34131582414415806,
+        "2022": -0.8804665868741042,
+        "2024": -1.1686946949818768
+      }
+    },
+    "terminal_race": {
+      "ablation_component": "hier_no_terminal_race",
+      "keep_votes": 4,
+      "n_folds": 4,
+      "recommend": "keep",
+      "deltas_spine_minus_ablation": {
+        "2018": -0.8978339608772421,
+        "2020": -0.2932913544049116,
+        "2022": -0.8810859728864529,
+        "2024": -1.1798488941204468
+      }
+    }
+  },
+  "failures": [],
+  "by_fold": {
+    "2018": {
+      "election_id": "senate-2018",
+      "spine": "pymc",
+      "leads": {
+        "60": {
+          "pymc": {
+            "status": "ok",
+            "n": 33,
+            "crps": 5.325306652063174,
+            "log_score": -3.637875326145002,
+            "brier": 0.11649178465213716,
+            "mae": 7.0013267569376705
+          },
+          "hier_no_similarity": {
+            "status": "ok",
+            "n": 33,
+            "crps": 6.46772072575075,
+            "log_score": -4.401920753516596,
+            "brier": 0.13866220795035789,
+            "mae": 8.45067752100982
+          },
+          "hier_no_terminal_race": {
+            "status": "ok",
+            "n": 33,
+            "crps": 6.503500707511248,
+            "log_score": -4.50400769374896,
+            "brier": 0.14215390272884887,
+            "mae": 8.489044393118188
+          },
+          "state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.250313857197983,
+            "log_score": -3.5627849806693037,
+            "brier": 0.07447042861940616,
+            "mae": 5.659735099118166
+          },
+          "poll_only_state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 10.767634590925727,
+            "log_score": -6.052604733733157,
+            "brier": 0.1873495469465585,
+            "mae": 13.063269261465786
+          },
+          "ridge_fundamentals": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.141141862274964,
+            "log_score": -3.409000513212529,
+            "brier": 0.03032579104316229,
+            "mae": 5.797545199362041
+          },
+          "last_election_swing": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.322007429721704,
+            "log_score": -3.45973157328197,
+            "brier": 0.07839913191133449,
+            "mae": 6.093000000000001
+          },
+          "equal_weight_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 6.74073034184963,
+            "log_score": -4.780404459193032,
+            "brier": 0.14206774838244435,
+            "mae": 8.991177272727272
+          },
+          "shrinkage_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 7.448033886136644,
+            "log_score": -6.326350885185157,
+            "brier": 0.1574280591306656,
+            "mae": 9.22861468333536
+          }
+        },
+        "30": {
+          "pymc": {
+            "status": "ok",
+            "n": 33,
+            "crps": 6.362366932087411,
+            "log_score": -4.3387434027942255,
+            "brier": 0.13839629561405595,
+            "mae": 8.149465645852608
+          },
+          "hier_no_similarity": {
+            "status": "ok",
+            "n": 33,
+            "crps": 7.051151217008087,
+            "log_score": -4.779354100804017,
+            "brier": 0.14839074141891276,
+            "mae": 8.978107732016957
+          },
+          "hier_no_terminal_race": {
+            "status": "ok",
+            "n": 33,
+            "crps": 6.979840798393823,
+            "log_score": -4.583070177455787,
+            "brier": 0.1445383834738222,
+            "mae": 8.873565559202074
+          },
+          "state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.4283090381443495,
+            "log_score": -3.8513605610349937,
+            "brier": 0.09000783333107494,
+            "mae": 5.604123193162684
+          },
+          "poll_only_state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 9.813287379688802,
+            "log_score": -6.413212983917909,
+            "brier": 0.1770510955477874,
+            "mae": 11.87460796399671
+          },
+          "ridge_fundamentals": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.126309335126007,
+            "log_score": -3.4057076246721674,
+            "brier": 0.030368082685743265,
+            "mae": 5.776678813189903
+          },
+          "last_election_swing": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.387129893027713,
+            "log_score": -3.4761347361207453,
+            "brier": 0.08035906076906886,
+            "mae": 6.201917949799621
+          },
+          "equal_weight_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 7.479858607826566,
+            "log_score": -6.3623064275864305,
+            "brier": 0.12580906834692843,
+            "mae": 9.535241245791244
+          },
+          "shrinkage_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 7.970116569825307,
+            "log_score": -7.593211249495115,
+            "brier": 0.1590335016882215,
+            "mae": 9.569856426094644
+          }
+        }
+      },
+      "mean_crps": {
+        "pymc": 5.843836792075293,
+        "hier_no_similarity": 6.7594359713794185,
+        "hier_no_terminal_race": 6.741670752952535,
+        "state_space": 4.339311447671166,
+        "poll_only_state_space": 10.290460985307265,
+        "ridge_fundamentals": 4.133725598700485,
+        "last_election_swing": 4.354568661374708,
+        "equal_weight_polls": 7.110294474838097,
+        "shrinkage_polls": 7.709075227980975
+      },
+      "freeze_before_truth": true
+    },
+    "2020": {
+      "election_id": "senate-2020",
+      "spine": "pymc",
+      "leads": {
+        "60": {
+          "pymc": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.371683389001969,
+            "log_score": -3.4850993038597364,
+            "brier": 0.06488404375791525,
+            "mae": 6.280815380142503
+          },
+          "hier_no_similarity": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.770977595154081,
+            "log_score": -3.537613105015776,
+            "brier": 0.07423325061497156,
+            "mae": 6.88853193180466
+          },
+          "hier_no_terminal_race": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.743480829435679,
+            "log_score": -3.5388993879666524,
+            "brier": 0.07248999094800912,
+            "mae": 6.816383791887872
+          },
+          "state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 3.425310837496986,
+            "log_score": -3.226328126860106,
+            "brier": 0.05122643373324951,
+            "mae": 4.72137463977937
+          },
+          "poll_only_state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 12.135801138921734,
+            "log_score": -5.7570841138082605,
+            "brier": 0.1678535222746283,
+            "mae": 15.245049918697903
+          },
+          "ridge_fundamentals": {
+            "status": "ok",
+            "n": 33,
+            "crps": 3.2175459219761366,
+            "log_score": -3.2200684968938655,
+            "brier": 0.0438515542203727,
+            "mae": 4.136432782597762
+          },
+          "last_election_swing": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.068258620149714,
+            "log_score": -3.4092594255037345,
+            "brier": 0.05749724543922401,
+            "mae": 5.814695335093676
+          },
+          "equal_weight_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.29562318983848,
+            "log_score": -3.528141923287074,
+            "brier": 0.07007113662093388,
+            "mae": 5.76834175084175
+          },
+          "shrinkage_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 5.2669337588219305,
+            "log_score": -4.439740951839581,
+            "brier": 0.09208866659754296,
+            "mae": 6.938507390956998
+          }
+        },
+        "30": {
+          "pymc": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.478161119724932,
+            "log_score": -3.5565553213003804,
+            "brier": 0.06810771900918654,
+            "mae": 6.430195445330558
+          },
+          "hier_no_similarity": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.761498561861136,
+            "log_score": -3.5438395520874315,
+            "brier": 0.07650299262144587,
+            "mae": 6.805346941260589
+          },
+          "hier_no_terminal_race": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.692946388101045,
+            "log_score": -3.535327973408727,
+            "brier": 0.07375691281650008,
+            "mae": 6.670289816429376
+          },
+          "state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 3.489733243491662,
+            "log_score": -3.259426122325153,
+            "brier": 0.058663310343021836,
+            "mae": 4.8879423322710345
+          },
+          "poll_only_state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 11.276189950527062,
+            "log_score": -6.137178736899441,
+            "brier": 0.15822556337894542,
+            "mae": 14.078311573814267
+          },
+          "ridge_fundamentals": {
+            "status": "ok",
+            "n": 33,
+            "crps": 3.2167766147804087,
+            "log_score": -3.2198276584615035,
+            "brier": 0.04384143757609812,
+            "mae": 4.1333456462750835
+          },
+          "last_election_swing": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.0212464679861535,
+            "log_score": -3.3979797886176515,
+            "brier": 0.05676064736259219,
+            "mae": 5.744867251604517
+          },
+          "equal_weight_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 5.1835712660042645,
+            "log_score": -4.052113261049855,
+            "brier": 0.10350235672452032,
+            "mae": 6.874717881900234
+          },
+          "shrinkage_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 5.441866909600642,
+            "log_score": -4.5779005690110814,
+            "brier": 0.0967720253292341,
+            "mae": 7.086951500464381
+          }
+        }
+      },
+      "mean_crps": {
+        "pymc": 4.424922254363451,
+        "hier_no_similarity": 4.766238078507609,
+        "hier_no_terminal_race": 4.718213608768362,
+        "state_space": 3.4575220404943243,
+        "poll_only_state_space": 11.705995544724399,
+        "ridge_fundamentals": 3.2171612683782724,
+        "last_election_swing": 4.044752544067934,
+        "equal_weight_polls": 4.739597227921372,
+        "shrinkage_polls": 5.354400334211286
+      },
+      "freeze_before_truth": true
+    },
+    "2022": {
+      "election_id": "senate-2022",
+      "spine": "pymc",
+      "leads": {
+        "60": {
+          "pymc": {
+            "status": "ok",
+            "n": 35,
+            "crps": 3.475345065908458,
+            "log_score": -3.2353294932429724,
+            "brier": 0.04109254887304585,
+            "mae": 4.930183726105899
+          },
+          "hier_no_similarity": {
+            "status": "ok",
+            "n": 35,
+            "crps": 4.8285593065954435,
+            "log_score": -3.635359156866393,
+            "brier": 0.05344538081309961,
+            "mae": 6.551799879462284
+          },
+          "hier_no_terminal_race": {
+            "status": "ok",
+            "n": 35,
+            "crps": 4.783261201560754,
+            "log_score": -3.6319072626208175,
+            "brier": 0.05235584291285675,
+            "mae": 6.42995799748127
+          },
+          "state_space": {
+            "status": "ok",
+            "n": 35,
+            "crps": 3.922376935442576,
+            "log_score": -3.417206568499955,
+            "brier": 0.046112907995008764,
+            "mae": 5.4014446773740845
+          },
+          "poll_only_state_space": {
+            "status": "ok",
+            "n": 35,
+            "crps": 11.979440225722671,
+            "log_score": -5.7983314683290335,
+            "brier": 0.14488535705627942,
+            "mae": 14.860515130638184
+          },
+          "ridge_fundamentals": {
+            "status": "ok",
+            "n": 35,
+            "crps": 3.337949841242301,
+            "log_score": -3.2322254245482065,
+            "brier": 0.05659170039852028,
+            "mae": 4.529548455486544
+          },
+          "last_election_swing": {
+            "status": "ok",
+            "n": 35,
+            "crps": 3.790105845616526,
+            "log_score": -3.3266919341529477,
+            "brier": 0.05152856949249244,
+            "mae": 5.357863354037267
+          },
+          "equal_weight_polls": {
+            "status": "ok",
+            "n": 35,
+            "crps": 5.128742560262647,
+            "log_score": -4.068444289911578,
+            "brier": 0.07179687158705413,
+            "mae": 6.705961904761905
+          },
+          "shrinkage_polls": {
+            "status": "ok",
+            "n": 35,
+            "crps": 5.221902208629651,
+            "log_score": -4.706652692597197,
+            "brier": 0.05240500664652481,
+            "mae": 6.729970237461766
+          }
+        },
+        "30": {
+          "pymc": {
+            "status": "ok",
+            "n": 35,
+            "crps": 4.643780579424899,
+            "log_score": -3.8860289208553938,
+            "brier": 0.02943775199306847,
+            "mae": 6.222344316690145
+          },
+          "hier_no_similarity": {
+            "status": "ok",
+            "n": 35,
+            "crps": 5.051499512486122,
+            "log_score": -3.7273046586383387,
+            "brier": 0.037284536503348,
+            "mae": 6.546190133416415
+          },
+          "hier_no_terminal_race": {
+            "status": "ok",
+            "n": 35,
+            "crps": 5.098036389545508,
+            "log_score": -3.852642303348732,
+            "brier": 0.03419875098958579,
+            "mae": 6.6299904815276305
+          },
+          "state_space": {
+            "status": "ok",
+            "n": 35,
+            "crps": 3.9416387712436833,
+            "log_score": -3.515042340316275,
+            "brier": 0.028821593373877522,
+            "mae": 5.2335430236977265
+          },
+          "poll_only_state_space": {
+            "status": "ok",
+            "n": 35,
+            "crps": 9.837433673399437,
+            "log_score": -5.739946450806789,
+            "brier": 0.08271641325088674,
+            "mae": 11.99566027215368
+          },
+          "ridge_fundamentals": {
+            "status": "ok",
+            "n": 35,
+            "crps": 3.3390698032026798,
+            "log_score": -3.232566607816202,
+            "brier": 0.05632341918685959,
+            "mae": 4.527676100840337
+          },
+          "last_election_swing": {
+            "status": "ok",
+            "n": 35,
+            "crps": 3.8594675173396125,
+            "log_score": -3.343630641221722,
+            "brier": 0.05203228198033298,
+            "mae": 5.467828571428571
+          },
+          "equal_weight_polls": {
+            "status": "ok",
+            "n": 35,
+            "crps": 5.021140453342359,
+            "log_score": -4.448780842435494,
+            "brier": 0.0529820486862251,
+            "mae": 6.589993197278912
+          },
+          "shrinkage_polls": {
+            "status": "ok",
+            "n": 35,
+            "crps": 5.708781204263011,
+            "log_score": -5.539514478204813,
+            "brier": 0.03310944895938564,
+            "mae": 7.241503183113589
+          }
+        }
+      },
+      "mean_crps": {
+        "pymc": 4.0595628226666784,
+        "hier_no_similarity": 4.940029409540783,
+        "hier_no_terminal_race": 4.940648795553131,
+        "state_space": 3.93200785334313,
+        "poll_only_state_space": 10.908436949561054,
+        "ridge_fundamentals": 3.3385098222224903,
+        "last_election_swing": 3.824786681478069,
+        "equal_weight_polls": 5.074941506802503,
+        "shrinkage_polls": 5.465341706446331
+      },
+      "freeze_before_truth": true
+    },
+    "2024": {
+      "election_id": "senate-2024",
+      "spine": "pymc",
+      "leads": {
+        "60": {
+          "pymc": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.690917241608771,
+            "log_score": -3.6029636793579476,
+            "brier": 0.15481615971998422,
+            "mae": 6.568508327795931
+          },
+          "hier_no_similarity": {
+            "status": "ok",
+            "n": 33,
+            "crps": 6.517443016452843,
+            "log_score": -4.299117754135924,
+            "brier": 0.1579149588129827,
+            "mae": 8.557535977798493
+          },
+          "hier_no_terminal_race": {
+            "status": "ok",
+            "n": 33,
+            "crps": 6.578718672146022,
+            "log_score": -4.45350784391723,
+            "brier": 0.16434050702086314,
+            "mae": 8.657210808931367
+          },
+          "state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.841909992849705,
+            "log_score": -3.772892282248212,
+            "brier": 0.14128438379952632,
+            "mae": 6.511377440499635
+          },
+          "poll_only_state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 9.75757481916461,
+            "log_score": -5.595379484775399,
+            "brier": 0.22437601753284145,
+            "mae": 12.710761332647248
+          },
+          "ridge_fundamentals": {
+            "status": "ok",
+            "n": 33,
+            "crps": 3.164394602341038,
+            "log_score": -3.2000071360712123,
+            "brier": 0.06383528348744555,
+            "mae": 4.194353256138622
+          },
+          "last_election_swing": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.125421286176003,
+            "log_score": -3.390864335569103,
+            "brier": 0.09849656807512473,
+            "mae": 6.02687443541102
+          },
+          "equal_weight_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 5.93118852119748,
+            "log_score": -5.426790412134422,
+            "brier": 0.18743631926275098,
+            "mae": 7.29706657046657
+          },
+          "shrinkage_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 7.184123527004593,
+            "log_score": -7.997459845224312,
+            "brier": 0.2074375758078184,
+            "mae": 8.319611818202212
+          }
+        },
+        "30": {
+          "pymc": {
+            "status": "ok",
+            "n": 33,
+            "crps": 5.400619804877911,
+            "log_score": -4.5133888407552405,
+            "brier": 0.16795351086808244,
+            "mae": 7.019264159972982
+          },
+          "hier_no_similarity": {
+            "status": "ok",
+            "n": 33,
+            "crps": 5.911483419997593,
+            "log_score": -4.301478511970661,
+            "brier": 0.16039374400619083,
+            "mae": 7.955269432614197
+          },
+          "hier_no_terminal_race": {
+            "status": "ok",
+            "n": 33,
+            "crps": 5.872516162581553,
+            "log_score": -4.483480836279181,
+            "brier": 0.16054651188549784,
+            "mae": 7.764312448259144
+          },
+          "state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.47659707346429,
+            "log_score": -3.8898055304757104,
+            "brier": 0.13776255356045322,
+            "mae": 5.859543660843164
+          },
+          "poll_only_state_space": {
+            "status": "ok",
+            "n": 33,
+            "crps": 8.478533166202515,
+            "log_score": -5.8765875391616085,
+            "brier": 0.19657364747797862,
+            "mae": 10.706116107919435
+          },
+          "ridge_fundamentals": {
+            "status": "ok",
+            "n": 33,
+            "crps": 3.1744379966959535,
+            "log_score": -3.2019587992026546,
+            "brier": 0.06427756671804184,
+            "mae": 4.218785602524346
+          },
+          "last_election_swing": {
+            "status": "ok",
+            "n": 33,
+            "crps": 4.2052777112938875,
+            "log_score": -3.4090708002105066,
+            "brier": 0.10083926402009259,
+            "mae": 6.155195582394864
+          },
+          "equal_weight_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 5.875559611327215,
+            "log_score": -5.045795387226213,
+            "brier": 0.1813963162882464,
+            "mae": 7.468935948520291
+          },
+          "shrinkage_polls": {
+            "status": "ok",
+            "n": 33,
+            "crps": 6.471838384753898,
+            "log_score": -7.8725493864873695,
+            "brier": 0.19919443173004303,
+            "mae": 7.8155417446547055
+          }
+        }
+      },
+      "mean_crps": {
+        "pymc": 5.045768523243341,
+        "hier_no_similarity": 6.214463218225218,
+        "hier_no_terminal_race": 6.225617417363788,
+        "state_space": 4.659253533156997,
+        "poll_only_state_space": 9.118053992683564,
+        "ridge_fundamentals": 3.169416299518496,
+        "last_election_swing": 4.165349498734946,
+        "equal_weight_polls": 5.903374066262348,
+        "shrinkage_polls": 6.827980955879246
+      },
+      "freeze_before_truth": true
+    }
+  },
+  "n_frozen_predictions": 72,
+  "exit_condition": "Predictions are frozen before the held-out truth is read.",
+  "note": "Outer leave-one-cycle-out for every stackable component + structural terminal ablations. Failures recorded; fast is never relabeled as pymc. OOF matrix feeds P2.2 genuine stacking (no remapping).",
+  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+  "frozen_index_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo_frozen.json"
+}

@@ -1,4 +1,4 @@
-# Model card — Senate hierarchical v0.9.2
+# Model card — Senate hierarchical v0.9.16
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
@@ -8,13 +8,16 @@
 
 ## Update cadence
 `forecast` / `refresh`. Releases: `data/manifests/releases.jsonl` + signed `data/releases/{run_id}/`.
-Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-out`, `verify-rebuild`, `replay-cycle`.
+Shadow publications (audit P3): `data/manifests/shadow_publications.jsonl` + write-once `data/shadow/{shadow_id}/`.
+Acceptance gates (Milestone-0): `acceptance-gates` → `data/artifacts/acceptance_gates_latest.json` (G1–G11).
+Public live: `publish-live` → stamps `public_release` on forecast + `publication_latest.json` (requires green gates).
+Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-out`, `verify-rebuild`, `replay-cycle`, `shadow-verify`.
 
 ## Sources
 | Domain | Source | Notes |
 | --- | --- | --- |
-| Polls (live 2026) | VoteHub CC BY | No `/polls/archive` — current cycle only |
-| Polls (historical) | FiveThirtyEight / ABC News Datasette (CC BY) | Required for complete-cycle replay; synthetic only behind `--allow-synthetic` |
+| Polls (live 2026) | VoteHub CC BY | Required for `run_class=publication`; fixtures are non-publication |
+| Polls (historical) | FiveThirtyEight / ABC News (CC BY; Wayback/sealed) | Candidate identity + official race_id map; `--allow-synthetic` CI only |
 | Pollster quality | VoteHub + FTE fill-in | House ≠ reliability |
 | Economics | ALFRED/FRED or multi-vintage fixtures | Observation vs available_at; revisions do not leak |
 | Approval | Curated public-aggregate vintages | As-of store |
@@ -24,10 +27,17 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 | Markets | Kalshi | Soft overlays; `SENATE{ST}S` for FL/OH specials; chamber calibration **off** by default |
 | Demography | State research snapshot | Similarity / covariance |
 | Results | Certified archive + MEDSL 2016 + fixtures | Prefer certified |
+| Race universe | Official class/special ballots | Chamber reconcile gate **2014–2024** (poll coverage production 2018–2024) |
+
+## Evidence eligibility (P0.4)
+- Tiers: `official` › `first_party` › `aggregator` › `curated` › `imputed` › `synthetic` › `untraceable`
+- Publishable runs reject synthetic/imputed/untraceable; `evidence-eligibility` / `--require-publishable`
+- Development may continue with `run_class=non_publication` (UI banner mandatory)
 
 ## Core model
-- **Production spine:** PyMC hierarchical Student-t (`method=pymc`); discrete CRPS `ensemble_stack` when OOS weights available
-- **OOS replay:** `replay-cycle` defaults to scoring **pymc** folds (use `--hierarchical-method fast` for CI)
+- **Production spine (default):** PyMC hierarchical Student-t (`method=pymc`) — static Election-Day latent (`latent_path=static_election_day`)
+- **Dynamic spine (P1.1):** weekly national+race RW (`method=pymc_dynamic`); compare with `compare-static-dynamic`
+- **OOS replay:** `replay-cycle` defaults to scoring **pymc** folds (`--hierarchical-method pymc_dynamic` available)
 - **Non-production:** `fast` hierarchical-t approximation (CI / `--allow-fast-fallback` only)
 - Generic ballot: VoteHub **21-day trailing weighted average** (Winsorized headline D−R), not a single poll
 - **Morris §7.2 split in core PyMC:** contracting future movement (national+race) + fixed terminal ED error
@@ -45,6 +55,7 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 - Lead-time grid; nested Student-t df / era search; component ablations
 - Published `validation_report_latest.{json,md}` + `leave_pollster_out_latest.json`
 - Monitor alerts; Ed25519 signing; environment lock; `verify-rebuild`; correction registry
+- **Pre-P0 cycle_replay artifacts are non-comparable** — not validated backtests (`VALIDATION_ARCHIVE_NOTICE.md`)
 - **Limits:** VoteHub has no historical archive; no Cook redistribution; House/EC out of scope; peer panel is compare-only (never averaged)
 
 ## Out of scope

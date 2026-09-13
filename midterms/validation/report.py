@@ -104,11 +104,52 @@ def build_validation_report(
 
     stack_path = ARTIFACTS_DIR / "cycle_replay_all.json"
     stack_weights = None
+    stack_meta: dict[str, Any] = {}
     if stack_path.exists():
         try:
-            stack_weights = json.loads(stack_path.read_text()).get("stack_weights")
+            stack_doc = json.loads(stack_path.read_text())
+            stack_weights = stack_doc.get("stack_weights")
+            stack_meta = {
+                "comparable": stack_doc.get("comparable"),
+                "validation_status": stack_doc.get("validation_status"),
+                "archive_note": stack_doc.get("archive_note"),
+            }
         except (json.JSONDecodeError, OSError):
             stack_weights = None
+
+    chamber_reconcile = None
+    try:
+        from midterms.validation.chamber_reconcile import reconcile_all_cycles
+
+        chamber_reconcile = reconcile_all_cycles()
+    except Exception as exc:  # noqa: BLE001
+        chamber_reconcile = {"ok": False, "error": str(exc)}
+
+    poll_coverage = None
+    try:
+        from midterms.validation.poll_coverage import write_poll_coverage_report
+
+        poll_coverage = write_poll_coverage_report()
+    except Exception as exc:  # noqa: BLE001
+        poll_coverage = {"ok": False, "error": str(exc)}
+
+    nested_loo = None
+    nested_loo_path = ARTIFACTS_DIR / "nested_component_loo.json"
+    if nested_loo_path.exists():
+        try:
+            nested_loo = json.loads(nested_loo_path.read_text())
+            nested_loo = {
+                "path": str(nested_loo_path),
+                "audit_item": nested_loo.get("audit_item"),
+                "spine_label": nested_loo.get("spine_label"),
+                "freeze_before_truth": nested_loo.get("freeze_before_truth"),
+                "no_weight_remapping": nested_loo.get("no_weight_remapping"),
+                "mean_crps_by_component": nested_loo.get("mean_crps_by_component"),
+                "g8_recommendations": nested_loo.get("g8_recommendations"),
+                "n_failures": len(nested_loo.get("failures") or []),
+            }
+        except Exception as exc:  # noqa: BLE001
+            nested_loo = {"ok": False, "error": str(exc)}
 
     report = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -118,22 +159,33 @@ def build_validation_report(
         "lead_time_grid": lead,
         "component_ablations": abl,
         "nested_df_era": nested,
+        "nested_component_loo": nested_loo,
         "cycle_replay": {
             "stack_weights": (cycle or {}).get("stack_weights"),
             "chamber": (cycle or {}).get("chamber"),
             "poll_gate": (cycle or {}).get("poll_gate"),
             "aggregate_keys": list(((cycle or {}).get("aggregate") or {}).keys()),
             "error": (cycle or {}).get("error"),
+            "comparable": (cycle or {}).get("comparable"),
+            "validation_status": (cycle or {}).get("validation_status"),
         },
         "calibration": calibration,
         "stack_weights_artifact": stack_weights,
+        "stack_weights_meta": stack_meta,
+        "chamber_reconcile": chamber_reconcile,
+        "poll_coverage": poll_coverage,
         "peer_gate": None,
+        "acceptance_gates": None,
         "limitations": [
-            "VoteHub documents no /polls/archive — historical polls prefer FTE CC BY Datasette.",
+            "VoteHub documents no /polls/archive — historical polls prefer FTE CC BY (Wayback/sealed polls-page).",
             "Licensed Cook/IE feeds are not redistributed; Wikipedia multi-rater is production ratings.",
             "House / Electoral College intentionally out of scope.",
             "fast hierarchical-t is a non-production approximation; production prefers pymc / ensemble_stack.",
             "Peer Brier/CRPS is a release gate only — peers are never averaged into the ensemble.",
+            "Pre-P0.3 cycle_replay artifacts may be non-comparable (wrong historical race universe / synthetic polls).",
+            "Chamber reconcile + poll coverage gates (2018–2024) are required before treating holdout scores as validated.",
+            "P2.1 nested-component-loo: freeze-before-truth; no fast→pymc weight remapping.",
+            "Milestone-0 archive scope is 2018–2024; 2014/2016 provisional. Public live probabilities wait on gate green + pymc shadow.",
         ],
     }
     try:
@@ -150,6 +202,12 @@ def build_validation_report(
         report["peer_gate"] = write_peer_gate_report()
     except Exception as exc:  # noqa: BLE001
         report["peer_gate"] = {"ok": False, "error": str(exc)}
+    try:
+        from midterms.validation.acceptance_gates import evaluate_acceptance_gates
+
+        report["acceptance_gates"] = evaluate_acceptance_gates(write=True)
+    except Exception as exc:  # noqa: BLE001
+        report["acceptance_gates"] = {"ok": False, "error": str(exc)}
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     path = ARTIFACTS_DIR / "validation_report_latest.json"
     path.write_text(json.dumps(report, indent=2, default=str))
@@ -184,6 +242,24 @@ def _to_markdown(report: dict[str, Any]) -> str:
         "```json",
         json.dumps(report.get("peer_gate"), indent=2, default=str),
         "```",
+        "",
+        "## Chamber reconcile (audit P0.2)",
+        "",
+        f"- ok: {(report.get('chamber_reconcile') or {}).get('ok')}",
+        f"- failures: {(report.get('chamber_reconcile') or {}).get('failures')}",
+        "",
+        "## Poll coverage (audit P0.3)",
+        "",
+        f"- ok: {(report.get('poll_coverage') or {}).get('ok')}",
+        f"- failures: {(report.get('poll_coverage') or {}).get('failures')}",
+        "",
+        "## Acceptance gates (Milestone-0 / G1–G11)",
+        "",
+        f"- ok: {(report.get('acceptance_gates') or {}).get('ok')}",
+        f"- pass/partial/fail: {(report.get('acceptance_gates') or {}).get('n_pass')}/"
+        f"{(report.get('acceptance_gates') or {}).get('n_partial')}/"
+        f"{(report.get('acceptance_gates') or {}).get('n_fail')}",
+        f"- failures: {(report.get('acceptance_gates') or {}).get('failures')}",
         "",
         "## Limitations",
         "",

@@ -70,9 +70,26 @@ export type ForecastArtifact = {
   election_id: string;
   model_version: string;
   method: string;
+  run_class?: string;
+  publishable?: boolean;
+  publication_surface?: string;
+  public_release?: {
+    enabled?: boolean;
+    surface?: string;
+    publication_id?: string;
+    published_at?: string;
+    disclaimer?: string;
+    model_version?: string;
+  };
+  evidence_eligibility?: {
+    publishable?: boolean;
+    run_class?: string;
+    reasons?: string[];
+    domains?: Record<string, unknown>;
+  };
   generic_ballot?: number | null;
   generic_ballot_meta?: Record<string, unknown>;
-  warnings?: { layer?: string; error?: string }[];
+  warnings?: { layer?: string; error?: string; run_class?: string }[];
   chamber: ChamberForecast;
   races: RaceForecast[];
   diagnostics?: Record<string, unknown>;

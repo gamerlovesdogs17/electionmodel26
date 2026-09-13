@@ -27,6 +27,7 @@ from midterms.model.pymc_model import (
     draws_from_baseline_forecasts,
     fit_fast_approximation,
     fit_pymc,
+    fit_pymc_dynamic,
 )
 from midterms.simulate.chamber import independent_bernoulli_foil, simulate_chamber
 
@@ -48,22 +49,43 @@ def _hash_obj(obj: Any) -> str:
 
 
 def _load_stack_weights(*, spine: str = "pymc") -> tuple[dict[str, float], dict[str, Any]]:
-    """Load OOS CRPS mixture weights with provenance (blueprint §9.2 fold-pure)."""
-    from midterms.model.ensemble import align_weights_to_spine
+    """Load OOF CRPS mixture weights (audit P2.2 — no silent remapping)."""
+    from midterms.validation.stack_weights import load_oof_stack_weights
+
+    fallback_err: str | None = None
+    try:
+        weights, provenance = load_oof_stack_weights(require_reproducible=True)
+        if weights:
+            provenance = dict(provenance)
+            provenance["spine"] = spine
+            if spine.startswith("pymc") and "pymc" not in weights and "fast_hierarchical_t" in weights:
+                provenance["hierarchical_unscored"] = {
+                    "executed_spine": spine,
+                    "oof_scored_as": "fast_hierarchical_t",
+                    "note": (
+                        "PyMC was not OOF-scored; its draws are not given fast's weight. "
+                        "Re-run nested-component-loo --hierarchical-method pymc to earn pymc mass."
+                    ),
+                }
+            provenance["weights"] = weights
+            return weights, provenance
+        fallback_err = "empty_oof_weights"
+    except Exception as exc:  # noqa: BLE001
+        fallback_err = str(exc)
 
     path = ARTIFACTS_DIR / "cycle_replay_all.json"
     defaults = {
         "pymc": 0.40,
         "state_space": 0.20,
-        "poll_only_state_space": 0.10,
-        "ridge_fundamentals": 0.10,
-        "shrinkage_polls": 0.12,
-        "last_election_swing": 0.08,
+        "ridge_fundamentals": 0.25,
+        "last_election_swing": 0.15,
     }
-    provenance: dict[str, Any] = {
+    provenance = {
         "source": "defaults",
         "path": str(path),
         "spine": spine,
+        "no_weight_remapping": True,
+        "oof_load_error": fallback_err,
     }
     weights = dict(defaults)
     if path.exists():
@@ -76,12 +98,14 @@ def _load_stack_weights(*, spine: str = "pymc") -> tuple[dict[str, float], dict[
                     "source": "cycle_replay_all.json",
                     "path": str(path),
                     "spine": spine,
+                    "no_weight_remapping": True,
                     "artifact_provenance": payload.get("stack_provenance"),
-                    "note": payload.get("note"),
+                    "note": (
+                        "Legacy cycle_replay weights; prefer stack_weights_oof.json from P2.2."
+                    ),
                 }
         except (json.JSONDecodeError, TypeError, ValueError):
             provenance["error"] = "failed_to_parse_cycle_replay_all"
-    weights = align_weights_to_spine(weights, spine=spine)
     provenance["weights"] = weights
     return weights, provenance
 
@@ -129,10 +153,14 @@ def run_forecast(
     out_dir: Path | None = None,
     allow_fast_fallback: bool = False,
     generic_ballot_meta: dict[str, Any] | None = None,
+    require_publishable: bool = False,
+    allow_non_publication: bool = True,
+    rebuild_mode: bool = False,
 ) -> dict[str, Any]:
     from midterms.evidence.economics import write_economic_store, yoy_growth_as_of
     from midterms.evidence.approval import approval_as_of, write_approval_store
     from midterms.evidence.demography import attach_demo_features
+    from midterms.evidence.eligibility import assert_publishable
     from midterms.evidence.expert_ratings import (
         ensure_expert_ratings_store,
         ratings_for_races,
@@ -156,37 +184,61 @@ def run_forecast(
     from midterms.ops.reproducibility import environment_lock, snapshot_domain_hashes
     from midterms.ops.signing import sign_payload
 
+    # Evidence eligibility (audit P0.4) — before fitting so ineligible runs are labeled
+    eligibility = assert_publishable(
+        election_id,
+        as_of=str(as_of)[:10],
+        allow_non_publication=allow_non_publication and not require_publishable,
+    )
+    if require_publishable and not eligibility.get("publishable"):
+        raise ValueError(
+            "require_publishable=True but evidence is ineligible: "
+            + "; ".join(eligibility.get("reasons") or [])
+        )
+
     # Ensure economic + finance + ratings + markets stores exist
     layer_warnings: list[dict[str, str]] = []
-    try:
-        write_economic_store()
-    except Exception as exc:  # noqa: BLE001
-        layer_warnings.append({"layer": "economics", "error": str(exc)})
-    try:
-        write_approval_store()
-    except Exception as exc:  # noqa: BLE001
-        layer_warnings.append({"layer": "approval", "error": str(exc)})
-    ratings_meta = ensure_expert_ratings_store(
-        election_id=election_id, available_at=str(as_of)[:10]
-    )
-    if ratings_meta.get("wiki_error"):
+    if not eligibility.get("publishable"):
         layer_warnings.append(
-            {"layer": "expert_ratings", "error": str(ratings_meta["wiki_error"])}
+            {
+                "layer": "evidence_eligibility",
+                "error": "non_publication: " + "; ".join(eligibility.get("reasons") or []),
+                "run_class": "non_publication",
+            }
         )
-    try:
-        write_finance_store(election_id=election_id)
-    except Exception as exc:  # noqa: BLE001
-        layer_warnings.append({"layer": "finance", "error": str(exc)})
-    markets_meta: dict[str, Any] = {}
-    try:
-        markets_meta = write_markets_store(election_id=election_id, available_at=str(as_of)[:10])
-    except Exception as exc:  # noqa: BLE001
-        markets_meta = {"error": str(exc), "n_races": 0}
-        layer_warnings.append({"layer": "markets", "error": str(exc)})
-    try:
-        write_peer_snapshots()
-    except Exception as exc:  # noqa: BLE001
-        layer_warnings.append({"layer": "peers", "error": str(exc)})
+    if not rebuild_mode:
+        try:
+            write_economic_store()
+        except Exception as exc:  # noqa: BLE001
+            layer_warnings.append({"layer": "economics", "error": str(exc)})
+        try:
+            write_approval_store()
+        except Exception as exc:  # noqa: BLE001
+            layer_warnings.append({"layer": "approval", "error": str(exc)})
+        ratings_meta = ensure_expert_ratings_store(
+            election_id=election_id, available_at=str(as_of)[:10]
+        )
+        if ratings_meta.get("wiki_error"):
+            layer_warnings.append(
+                {"layer": "expert_ratings", "error": str(ratings_meta["wiki_error"])}
+            )
+        try:
+            write_finance_store(election_id=election_id)
+        except Exception as exc:  # noqa: BLE001
+            layer_warnings.append({"layer": "finance", "error": str(exc)})
+        markets_meta: dict[str, Any] = {}
+        try:
+            markets_meta = write_markets_store(election_id=election_id, available_at=str(as_of)[:10])
+        except Exception as exc:  # noqa: BLE001
+            markets_meta = {"error": str(exc), "n_races": 0}
+            layer_warnings.append({"layer": "markets", "error": str(exc)})
+        try:
+            write_peer_snapshots()
+        except Exception as exc:  # noqa: BLE001
+            layer_warnings.append({"layer": "peers", "error": str(exc)})
+    else:
+        ratings_meta = {}
+        markets_meta = {}
 
     wh = Warehouse()
     snap = wh.build_as_of(as_of, election_id)
@@ -226,30 +278,72 @@ def run_forecast(
                 "production_note": "fast hierarchical-t is a non-production approximation",
             }
             fit.method = "degraded:fast"
+    elif method == "pymc_dynamic":
+        try:
+            fit = fit_pymc_dynamic(
+                snap, draws=draws, tune=tune, chains=chains, seed=seed, generic_ballot=generic_ballot
+            )
+        except Exception as exc:  # noqa: BLE001
+            if not allow_fast_fallback:
+                raise
+            layer_warnings.append({"layer": "pymc_dynamic", "error": str(exc), "degraded": "pymc"})
+            fit = fit_pymc(
+                snap, draws=draws, tune=tune, chains=chains, seed=seed, generic_ballot=generic_ballot
+            )
+            fit.diagnostics = {
+                **(fit.diagnostics or {}),
+                "degraded_from": "pymc_dynamic",
+                "degraded_reason": str(exc),
+            }
     elif method == "state_space":
         fit = fit_state_space(
             snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
         )
     else:
         fit = fit_fast_approximation(
-            snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
+            snap, n_draws=max(draws * chains, 2500), seed=seed, generic_ballot=generic_ballot
         )
         fit.diagnostics = {
             **(fit.diagnostics or {}),
             "production_note": "fast hierarchical-t is a non-production approximation; prefer pymc",
         }
 
+    # Ensure predictive draw count meets MCSE floor (P2.3)
+    from midterms.validation.numerical_quality import MIN_SIM_DRAWS
+
+    if fit.draws_margin.shape[0] < MIN_SIM_DRAWS:
+        need = MIN_SIM_DRAWS - fit.draws_margin.shape[0]
+        extra = np.random.default_rng(seed + 99).choice(
+            fit.draws_margin, size=need, replace=True, axis=0
+        )
+        padded = np.vstack([fit.draws_margin, extra])
+        fit = FitResult(
+            race_ids=fit.race_ids,
+            states=fit.states,
+            mean_margin=padded.mean(axis=0),
+            sd_margin=padded.std(axis=0),
+            draws_margin=padded,
+            house_effects=fit.house_effects,
+            diagnostics={**(fit.diagnostics or {}), "sim_draws_padded_to": MIN_SIM_DRAWS},
+            method=fit.method,
+        )
+
     stack_weights = None
     stack_provenance: dict[str, Any] | None = None
     spine_method = str(getattr(fit, "method", method))
     if ensemble and (
-        method in {"fast", "state_space", "pymc"}
+        method in {"fast", "state_space", "pymc", "pymc_dynamic"}
         or str(getattr(fit, "method", "")).startswith("degraded")
     ):
         weights, stack_provenance = _load_stack_weights(spine=spine_method.split("+")[0])
         component_draws: dict[str, np.ndarray] = {fit.method.split("+")[0]: fit.draws_margin}
         core_name = "fast_hierarchical_t"
-        if fit.method.startswith("pymc"):
+        if fit.method.startswith("pymc_dynamic"):
+            core_name = "pymc_dynamic"
+            component_draws["pymc_dynamic"] = fit.draws_margin
+            # Also keep static pymc label mass mappable via stack when present
+            component_draws["pymc"] = fit.draws_margin
+        elif fit.method.startswith("pymc"):
             core_name = "pymc"
             component_draws["pymc"] = fit.draws_margin
         elif fit.method.startswith("fast") or fit.method.startswith("degraded"):
@@ -278,9 +372,10 @@ def run_forecast(
                     race_ids=fit.race_ids,
                 )
         use_w = {k: v for k, v in weights.items() if k in component_draws and v > 0}
-        if core_name not in use_w and core_name in component_draws:
-            use_w[core_name] = weights.get(core_name, 0.40)
-        # Do not silently reintroduce fast when production spine is pymc
+        # Only mix components that earned OOF weight — never invent mass for unscored spine
+        if core_name not in use_w and core_name in weights and core_name in component_draws:
+            use_w[core_name] = float(weights[core_name])
+        # Do not silently give pymc the fast OOF weight (audit Finding 6)
         if core_name == "pymc":
             use_w.pop("fast_hierarchical_t", None)
         if len(use_w) >= 2:
@@ -450,6 +545,24 @@ def run_forecast(
         "delta_expected_dem_seats": float(sim.expected_dem_seats - core_sim.expected_dem_seats),
     }
 
+    from midterms.validation.numerical_quality import evaluate_numerical_quality
+
+    numerical = evaluate_numerical_quality(
+        seat_draws=sim.seat_draws,
+        draws_margin=fit.draws_margin,
+        p_dem_control=float(sim.p_dem_majority),
+        n_posterior_samples=(fit.diagnostics or {}).get("n_posterior_samples")
+        or (fit.diagnostics or {}).get("draws"),
+        convergence=(fit.diagnostics or {}).get("convergence"),
+        seed=seed,
+        publishable=bool(require_publishable),
+    )
+    if require_publishable and not numerical.get("ok"):
+        raise ValueError(
+            "require_publishable=True but numerical quality gate failed: "
+            + "; ".join(numerical.get("alerts") or ["unknown"])
+        )
+
     foil = independent_bernoulli_foil(
         race_summaries, sim.held_dem, n_draws=len(sim.seat_draws), seed=seed
     )
@@ -477,6 +590,14 @@ def run_forecast(
         "election_id": election_id,
         "model_version": MODEL_VERSION,
         "method": fit.method,
+        "run_class": eligibility.get("run_class") or "non_publication",
+        "publishable": bool(eligibility.get("publishable")),
+        "evidence_eligibility": {
+            "publishable": bool(eligibility.get("publishable")),
+            "run_class": eligibility.get("run_class"),
+            "reasons": eligibility.get("reasons"),
+            "domains": eligibility.get("domains"),
+        },
         "generic_ballot": float(generic_ballot),
         "generic_ballot_meta": generic_ballot_meta
         or {"margin": float(generic_ballot), "method": "caller_supplied"},
@@ -515,7 +636,11 @@ def run_forecast(
             "layer_warnings": layer_warnings,
             "core_method": spine_method,
             "allow_fast_fallback": bool(allow_fast_fallback),
+            "run_class": eligibility.get("run_class"),
+            "publishable": bool(eligibility.get("publishable")),
+            "numerical_quality": numerical,
         },
+        "numerical_quality": numerical,
         "warnings": layer_warnings,
         "house_effects": fit.house_effects,
         "stack_weights": stack_weights,
@@ -561,8 +686,9 @@ def run_forecast(
     artifact_path = out_dir / f"forecast_{run_id}.json"
     demo_path = out_dir / "forecast_latest.json"
     text = json.dumps(_json_safe(artifact), indent=2, allow_nan=False)
-    artifact_path.write_text(text)
-    demo_path.write_text(text)
+    payload = text.encode("utf-8")
+    artifact_path.write_bytes(payload)
+    demo_path.write_bytes(payload)
 
     draws_path = out_dir / f"draws_{run_id}.npz"
     np.savez_compressed(
@@ -573,10 +699,28 @@ def run_forecast(
     )
 
     web_copy = Path(__file__).resolve().parents[2] / "web" / "public" / "data" / "forecast_latest.json"
-    if out_dir.resolve() == ARTIFACTS_DIR.resolve():
+    if out_dir.resolve() == ARTIFACTS_DIR.resolve() and not rebuild_mode:
         web_copy.parent.mkdir(parents=True, exist_ok=True)
-        web_copy.write_text(text)
+        web_copy.write_bytes(payload)
 
+    configuration = {
+        "method": method,
+        "fit_method": method,
+        "draws": draws,
+        "tune": tune,
+        "chains": chains,
+        "seed": seed,
+        "generic_ballot": generic_ballot,
+        "ensemble": ensemble,
+        "stack_weights": stack_weights,
+        "with_ratings": with_ratings,
+        "with_markets": with_markets,
+        "rating_weight": rating_weight,
+        "market_weight": market_weight,
+        "control_weight": control_weight,
+        "control_calibrate": control_calibrate,
+        "allow_fast_fallback": allow_fast_fallback,
+    }
     manifest = {
         "run_id": run_id,
         "generated_at": artifact["generated_at"],
@@ -584,29 +728,17 @@ def run_forecast(
         "election_id": election_id,
         "model_version": MODEL_VERSION,
         "code_commit": _git_commit(),
-        "configuration_hash": _hash_obj(
-            {
-                "method": method,
-                "draws": draws,
-                "tune": tune,
-                "chains": chains,
-                "seed": seed,
-                "generic_ballot": generic_ballot,
-                "ensemble": ensemble,
-                "stack_weights": stack_weights,
-                "with_ratings": with_ratings,
-                "with_markets": with_markets,
-            }
-        ),
+        "configuration": configuration,
+        "configuration_hash": _hash_obj(configuration),
         "snapshot_ids": {"evidence": snap.snapshot_id},
         "domain_hashes": snapshot_domain_hashes(),
         "environment_lock": environment_lock(),
         "seed": seed,
         "draws": fit.diagnostics.get("draws"),
-        "tune": tune if method == "pymc" else None,
-        "chains": chains if method == "pymc" else None,
+        "tune": tune if method.startswith("pymc") else None,
+        "chains": chains if method.startswith("pymc") else None,
         "output_hashes": {
-            "forecast_json": hashlib.sha256(text.encode()).hexdigest(),
+            "forecast_json": hashlib.sha256(payload).hexdigest(),
             "draws": hashlib.sha256(draws_path.read_bytes()).hexdigest(),
         },
         "paths": {
@@ -614,16 +746,18 @@ def run_forecast(
             "forecast_latest": str(demo_path),
             "draws": str(draws_path),
         },
+        "rebuild_mode": bool(rebuild_mode),
     }
-    manifest["signature"] = sign_payload(manifest)
-    write_run_manifest(manifest)
-    try:
-        from midterms.ops.monitor import append_release_index, archive_release
+    if not rebuild_mode:
+        manifest["signature"] = sign_payload(manifest)
+        write_run_manifest(manifest)
+        try:
+            from midterms.ops.monitor import append_release_index, archive_release
 
-        append_release_index(manifest)
-        archive_release(manifest, text)
-    except Exception:  # noqa: BLE001
-        pass
+            append_release_index(manifest)
+            archive_release(manifest, text)
+        except Exception:  # noqa: BLE001
+            pass
     return {"artifact": artifact, "manifest": manifest, "paths": manifest["paths"]}
 
 

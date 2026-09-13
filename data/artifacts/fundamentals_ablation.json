@@ -19,31 +19,31 @@
   "n_cycles": 1,
   "by_cycle": {
     "2022": {
-      "full_crps": 2.6991428136302824,
+      "full_crps": 4.8458078066379,
       "drop_one": {
         "fundraising_logit": {
-          "crps": 2.3852847120612237,
-          "delta_vs_full": -0.3138581015690587
+          "crps": 4.8458078066379,
+          "delta_vs_full": 0.0
         },
         "pres_approval": {
-          "crps": 2.5272137652412336,
-          "delta_vs_full": -0.17192904838904877
+          "crps": 4.8458078066379,
+          "delta_vs_full": 0.0
         },
         "midterm_outparty": {
-          "crps": 2.496034018175772,
-          "delta_vs_full": -0.20310879545451055
+          "crps": 4.884953412423949,
+          "delta_vs_full": 0.03914560578604842
         },
         "real_income_yoy": {
-          "crps": 2.577377303540911,
-          "delta_vs_full": -0.12176551008937153
+          "crps": 4.862262190971576,
+          "delta_vs_full": 0.01645438433367552
         },
         "incumbency": {
-          "crps": 2.726270078753638,
-          "delta_vs_full": 0.027127265123355393
+          "crps": 4.8458078066379,
+          "delta_vs_full": 0.0
         },
         "generic_ballot": {
-          "crps": 2.9330839993215645,
-          "delta_vs_full": 0.23394118569128208
+          "crps": 4.835686624345532,
+          "delta_vs_full": -0.01012118229236858
         }
       }
     }
@@ -60,24 +60,24 @@
       "recommend": "drop_or_shrink"
     },
     "midterm_outparty": {
-      "keep_votes": 0,
+      "keep_votes": 1,
       "n_cycles": 1,
-      "recommend": "drop_or_shrink"
+      "recommend": "keep"
     },
     "real_income_yoy": {
+      "keep_votes": 1,
+      "n_cycles": 1,
+      "recommend": "keep"
+    },
+    "incumbency": {
       "keep_votes": 0,
       "n_cycles": 1,
       "recommend": "drop_or_shrink"
     },
-    "incumbency": {
-      "keep_votes": 1,
-      "n_cycles": 1,
-      "recommend": "keep"
-    },
     "generic_ballot": {
-      "keep_votes": 1,
+      "keep_votes": 0,
       "n_cycles": 1,
-      "recommend": "keep"
+      "recommend": "drop_or_shrink"
     }
   },
   "note": "Positive delta_vs_full means dropping the coefficient worsened CRPS (component helps). Nested leave-one-cycle design; synthetic polls limit strength."

@@ -1,0 +1,118 @@
+{
+  "ok": true,
+  "year": 2022,
+  "election_id": "senate-2022",
+  "draws": 100,
+  "by_lead": {
+    "90": {
+      "as_of": "2022-08-10",
+      "static": {
+        "method": "pymc",
+        "latent_path": "static_election_day",
+        "scores": {
+          "n": 35,
+          "crps": 3.231081188498482,
+          "log_score": -3.1271313866454613,
+          "brier": 0.028911541603013312,
+          "mae": 4.584711291638289
+        }
+      },
+      "dynamic": {
+        "method": "pymc_dynamic",
+        "latent_path": "weekly_random_walk",
+        "n_weeks": 27,
+        "scores": {
+          "n": 35,
+          "crps": 5.627936248622674,
+          "log_score": -3.6873259026457608,
+          "brier": 0.0712030221506849,
+          "mae": 8.414116021342178
+        }
+      },
+      "delta_crps_dynamic_minus_static": 2.396855060124192
+    },
+    "60": {
+      "as_of": "2022-09-09",
+      "static": {
+        "method": "pymc",
+        "latent_path": "static_election_day",
+        "scores": {
+          "n": 35,
+          "crps": 3.5103813807912894,
+          "log_score": -3.2242224763169243,
+          "brier": 0.03625154249048158,
+          "mae": 4.96457346277571
+        }
+      },
+      "dynamic": {
+        "method": "pymc_dynamic",
+        "latent_path": "weekly_random_walk",
+        "n_weeks": 27,
+        "scores": {
+          "n": 35,
+          "crps": 3.9564854278743544,
+          "log_score": -3.3486170229598557,
+          "brier": 0.057200727190476884,
+          "mae": 5.761628282587463
+        }
+      },
+      "delta_crps_dynamic_minus_static": 0.44610404708306506
+    },
+    "30": {
+      "as_of": "2022-10-09",
+      "static": {
+        "method": "pymc",
+        "latent_path": "static_election_day",
+        "scores": {
+          "n": 35,
+          "crps": 4.697676858280943,
+          "log_score": -4.187898004302398,
+          "brier": 0.02474673893938881,
+          "mae": 6.165191089532219
+        }
+      },
+      "dynamic": {
+        "method": "pymc_dynamic",
+        "latent_path": "weekly_random_walk",
+        "n_weeks": 27,
+        "scores": {
+          "n": 35,
+          "crps": 4.877781230260935,
+          "log_score": -4.327277672411422,
+          "brier": 0.02858823176626826,
+          "mae": 6.520041088949102
+        }
+      },
+      "delta_crps_dynamic_minus_static": 0.18010437197999263
+    },
+    "7": {
+      "as_of": "2022-11-01",
+      "static": {
+        "method": "pymc",
+        "latent_path": "static_election_day",
+        "scores": {
+          "n": 35,
+          "crps": 4.376382932752065,
+          "log_score": -4.433029727857644,
+          "brier": 0.018870354216369904,
+          "mae": 5.626102572760752
+        }
+      },
+      "dynamic": {
+        "method": "pymc_dynamic",
+        "latent_path": "weekly_random_walk",
+        "n_weeks": 27,
+        "scores": {
+          "n": 35,
+          "crps": 3.920113279689179,
+          "log_score": -3.7910150715699995,
+          "brier": 0.03519340826625728,
+          "mae": 5.331556070076572
+        }
+      },
+      "delta_crps_dynamic_minus_static": -0.45626965306288625
+    }
+  },
+  "mean_delta_crps_dynamic_minus_static": 0.6416984565310908,
+  "note": "Negative delta_crps means dynamic beats static. Both models are scored on the same as-of snapshots and certified margins."
+}

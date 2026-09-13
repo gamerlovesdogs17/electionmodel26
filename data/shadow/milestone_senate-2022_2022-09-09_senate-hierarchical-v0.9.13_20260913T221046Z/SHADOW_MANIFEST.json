@@ -1,0 +1,76 @@
+{
+  "audit_item": "Milestone-0",
+  "shadow_id": "milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z",
+  "mode": "milestone_first_publishable",
+  "milestone": "first_publishable",
+  "election_id": "senate-2022",
+  "as_of": "2022-09-09",
+  "lead_days": 60,
+  "model_version": "senate-hierarchical-v0.9.13",
+  "code_commit": "295e1c7e0a41e18d7ffd44a20e74e5fc42abd7dd",
+  "frozen_at": "2026-09-13T22:11:17.455412+00:00",
+  "scored_at": "2026-09-13T22:11:17.499134+00:00",
+  "freeze_before_truth": true,
+  "hierarchical_method": "pymc",
+  "spine_label": "pymc",
+  "spine_only": true,
+  "notes": [
+    "Shadow forecast spine is pymc (production). Nested LOO / OOF stack weights remain fast-scored until a later refresh \u2014 no silent remapping.",
+    "Archive scope: 2018\u20132024 official; 2014/2016 provisional.",
+    "Not a public live probability product.",
+    "Acceptance gates overall ok=True (fail=[] partial=['G5', 'G9', 'G10'])"
+  ],
+  "environment": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.5",
+      "scipy": "1.18.1",
+      "pymc": "6.3.2",
+      "pyarrow": "25.0.1"
+    },
+    "locked_at": "2026-09-13T22:11:17.607181+00:00"
+  },
+  "domain_hashes": {
+    "economics_vintages.parquet": "48649a5fc787694138bcf3068bcad6de98e90694719b0a9394484298faa82999",
+    "expert_ratings.parquet": "7cb463e742f0e1ca454672f3ece284f0dd1917a0d4128c40205e6ae02fc241d3",
+    "fundraising_shares.parquet": "a1594df0a1f35f6a36aee6510f191395a17d36540fbc7fd01b4547a6b99fec57",
+    "markets.parquet": "138e1db8fa75e1e6333ae0e30fba14c86967b4fbeb1b301c9e4dc340d6ca4279",
+    "markets_control.json": "953f824fe4875034ca78ba2a860403a0a447c8cf09d766b6ba37e6b169d25a18",
+    "peer_snapshots.json": "e3c057640b0dc04d297664046c68fa8116545856256a8f306654e353896aa53b",
+    "polls.parquet": "175e20e2075325259732f09a45f1a032cb916a70e20124d9a3b3aa5b437fcecc",
+    "polls_fte_historical.parquet": "e561324a2a4f39345e0fcb73c3ac74f73397d7e2770f88689ebeefddf47bc15f",
+    "polls_historical.parquet": "2192be81d2988afb91f9681b984839769342b19708ea7c9827ae06e19ca5db92",
+    "polls_live_votehub.parquet": "4fdcf081c1e1aaff4bc05862a08c99819c4b2c27ae1782fc54918d2188b53dfe",
+    "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
+    "pollster_ratings.parquet": "32a297dd345d25537781428481e1599238c8587528303354239cd353ca23b150",
+    "pres_approval.parquet": "9c0c31dd3e141e71dfc253345da7eccc20e1c9b2c1afbf7ead080888131e397a",
+    "races.parquet": "2074526330cf64cbee12429fe73e9eb9c42a88aec75b44fd83235010d847ae3a",
+    "races_official.parquet": "7252f894509351232281c76b515a94a7a519aaab232f3c7d0b4f4192c12f2193",
+    "results.parquet": "d166100b3c980f3cd05de03122cb697e4fdd80de4ddfaf1c676372687330fba8",
+    "results_certified.parquet": "4f36d0bc820283c5d6607d5483c6bbca7d7a8c329d3b16386e45359c26f2537d"
+  },
+  "file_hashes": {
+    "frozen_predictions.json": "ff7073d22eb9cb35b037f67c54b82548ef187d79f58b029a958e327e70a3303a",
+    "frozen_predictions.json.sig.json": "2b65c6f9079a11615b6de66cd98e62b0b0e401e095793518adc69b88dbc5596b",
+    "evaluation.json": "631eda41f67c8f0f9370efd0420721c93e29ebc3ae8987dac923f574e63e3b8e",
+    "validation/nested_component_loo.json": "62426b7855607ec805f8ccd368ef83a76cb1259cd8f8666957a0b9cd75d08657",
+    "validation/stack_weights_oof.json": "0e2d5fe54eba21655f80c767e6886e5c49c79e7e5858a56e78ac07218c5b7ea7",
+    "validation/covariance_calibration.json": "34a2e4726d17ee987c1ec6174eb9cf48124c3413ad879c593320ac9cbc098f07",
+    "validation/coefficient_stability.json": "07b932ead6425726e0002a753ebfd57a47f7439495384b0916d6cc74a16b33e2",
+    "validation/poll_coverage_latest.json": "4aefae6dfc5cc98def4d5b2a1dc9ca54c1195bf36a2f126ba6cdbcf08b984775",
+    "validation/chamber_reconcile_latest.json": "ded22f49303cca067908adba4b2a0dc7daa2cd2ae1948c131511823d77bbf115",
+    "validation/acceptance_gates_latest.json": "0006497aeae142e33578020ffa719a284169582d1d1305fccc91d4299e7f5fe7",
+    "validation/evidence_eligibility_latest.json": "2e823165bdc67227a02e64edeb2c79d3af288c4e8371a330753b61f10f11966b",
+    "AUDIT_NOTICE.md": "8e44070460bddf4bb74dd87ed47be2155e3f8a4abc6a1ec7fa0884db7c33e93c"
+  },
+  "paths": {
+    "shadow_dir": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z",
+    "frozen_predictions": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z\\frozen_predictions.json",
+    "evaluation": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z\\evaluation.json"
+  },
+  "spine_crps": 3.588344785515356,
+  "exit_condition": "First publishable milestone: pymc-spine frozen evaluation + G1\u2013G11 acceptance.",
+  "write_once": true
+}

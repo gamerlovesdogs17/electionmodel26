@@ -93,17 +93,19 @@ def _election_day(year: int) -> date:
 
 
 def _states_for_cycle(year: int) -> list[str]:
-    # Alternate class blocks roughly: even non-presidential midterms ~ Class I/II mix.
-    # For fixtures: midterms use CLASS_II-like set; presidential years use a complementary set.
-    rng = np.random.default_rng(year)
-    all_states = sorted(BASE_LEANS)
-    if year % 4 == 2:  # midterm
-        return list(CLASS_II)
-    # presidential-year Senate: ~33 other seats
-    others = [s for s in all_states if s not in CLASS_II]
-    # pad with some Class II specials for volume
-    extra = list(rng.choice(CLASS_II, size=5, replace=False))
-    return sorted(set(others + extra))[:34]
+    """Official contested states for historical cycles (audit P0.1)."""
+    try:
+        from midterms.evidence.official_ballot import contested_contests
+
+        return [c["state"] for c in contested_contests(year) if c.get("kind") == "regular"]
+    except Exception:
+        rng = np.random.default_rng(year)
+        all_states = sorted(BASE_LEANS)
+        if year % 4 == 2:
+            return list(CLASS_II)
+        others = [s for s in all_states if s not in CLASS_II]
+        extra = list(rng.choice(CLASS_II, size=5, replace=False))
+        return sorted(set(others + extra))[:34]
 
 
 def _race_struct_fields(
@@ -204,8 +206,18 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
 
 def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     rng = np.random.default_rng(10_000 + year)
-    contested = _states_for_cycle(year)
-    races = _chamber_held(year, contested, rng)
+    # Audit P0.1: official class/special ballot when metadata exists
+    try:
+        from midterms.evidence.official_ballot import CYCLE_META, build_official_races_frame
+
+        if year in CYCLE_META:
+            races = build_official_races_frame(year)
+        else:
+            contested = _states_for_cycle(year)
+            races = _chamber_held(year, contested, rng)
+    except Exception:
+        contested = _states_for_cycle(year)
+        races = _chamber_held(year, contested, rng)
     ed = _election_day(year)
     national_env = float(rng.normal(0 if year % 4 else 1.5, 2.5))  # midterm vs prez
 
@@ -583,6 +595,19 @@ def build_fixtures(root: Path | None = None) -> dict[str, str]:
 
     write_results_archive()
     results_df = merge_certified_into_results(results_df)
+    # Prefer official historical ballots in the normalized races store
+    try:
+        from midterms.evidence.official_ballot import (
+            merge_official_into_races,
+            write_official_ballot_store,
+        )
+
+        write_official_ballot_store()
+        races_df = merge_official_into_races(races_df)
+    except Exception as exc:  # noqa: BLE001
+        provenance_extra = {"official_ballot_error": str(exc)}
+    else:
+        provenance_extra = {"official_ballot": True}
     polls_df = inject_correction_versions(polls_df)
     write_approval_store()
 
@@ -621,6 +646,7 @@ def build_fixtures(root: Path | None = None) -> dict[str, str]:
         "cycles": list(CYCLES) + [2026],
         "parser_version": PARSER_VERSION,
         "artifacts": paths,
+        **provenance_extra,
     }
     prov_path = man / "fixtures_provenance.json"
     prov_path.write_text(json.dumps(provenance, indent=2))

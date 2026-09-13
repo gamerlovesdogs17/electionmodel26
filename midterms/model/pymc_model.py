@@ -1,12 +1,17 @@
 """Hierarchical Bayesian latent-opinion model for Senate margins (PyMC).
 
-Economist / Linzer-style spine:
-- Election-Day latent margin per race with national + region + state hierarchy
-- Fundamentals prior as ED anchor
-- Poll measurement with hierarchical house effects, Student-t overdispersion,
-  influence weights (ENOP / pollster caps / study clustering), and mode/population shifts
-- Future-movement noise from as-of to Election Day (Morris-style split)
-- Industrywide terminal bias that does not vanish on Election Day
+Two production-capable spines (audit Finding 3 / P1.1):
+
+- ``fit_pymc`` — **static** Election-Day hierarchical measurement model.
+  Polls observe a single current latent; date enters via recency weights and a
+  Morris future/terminal split. Labeled ``latent_path=static_election_day``.
+- ``fit_pymc_dynamic`` — **weekly** national + race random walks with calendar-
+  scaled innovations; polls observe θ[r, t_poll]. Labeled
+  ``latent_path=weekly_random_walk``. Compare via ``compare-static-dynamic``.
+
+Shared features: fundamentals prior, hierarchical house effects, Student-t
+measurement, ENOP / pollster influence weights, hierarchical mode/population
+effects (audit P1.2; prior means documented in ``midterms.model.effects``).
 """
 
 from __future__ import annotations
@@ -18,9 +23,22 @@ import numpy as np
 import pandas as pd
 
 from midterms.evidence.warehouse import EvidenceSnapshot
+from midterms.model.effects import (
+    MODE_ORDER,
+    POP_ORDER,
+    encode_mode_pop,
+    fixed_mode_offset,
+    fixed_population_offset,
+)
 from midterms.model.fundamentals import fundamentals_mean
 from midterms.model.poll_weights import attach_poll_weights, global_enop, race_enop_summary
-from midterms.model.similarity import correlated_shocks
+from midterms.model.terminal import (
+    active_scales,
+    add_similarity_terminal,
+    add_terminal_layers,
+    error_budget_block,
+    scales_kwargs,
+)
 from midterms.evidence.schema import is_active_ballot_row
 
 
@@ -37,27 +55,33 @@ class FitResult:
 
 
 def _mode_offset(mode: object) -> float:
-    if mode is None or (isinstance(mode, float) and np.isnan(mode)):
-        return 0.0
-    m = str(mode).lower()
-    if "live" in m:
-        return 0.0
-    if "ivr" in m:
-        return -0.4
-    if "online" in m or "web" in m:
-        return 0.3
-    return 0.0
+    """Prior-mean mode offset for fast/state-space paths (PyMC estimates hierarchically)."""
+    return fixed_mode_offset(mode)
 
 
 def _population_offset(population: object) -> float:
-    if population is None or (isinstance(population, float) and np.isnan(population)):
-        return 0.0
-    p = str(population).upper()
-    if "LV" in p:
-        return 0.0
-    if "RV" in p:
-        return 0.5
-    return 0.8
+    """Prior-mean population offset for fast/state-space paths."""
+    return fixed_population_offset(population)
+
+
+def _measurement_effects(pm, prep: dict):
+    """Hierarchical mode + population effects shrunk toward documented priors."""
+    coords_extra = {"mode": list(MODE_ORDER), "pop": list(POP_ORDER)}
+    sigma_mode = pm.HalfNormal("sigma_mode", 0.6)
+    sigma_pop = pm.HalfNormal("sigma_pop", 0.6)
+    mode_eff = pm.Normal(
+        "mode_eff",
+        mu=prep["mode_prior"],
+        sigma=sigma_mode,
+        dims="mode",
+    )
+    pop_eff = pm.Normal(
+        "pop_eff",
+        mu=prep["pop_prior"],
+        sigma=sigma_pop,
+        dims="pop",
+    )
+    return mode_eff, pop_eff, coords_extra
 
 
 def _prepare(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0):
@@ -93,17 +117,20 @@ def _prepare(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0):
     pollster_ids = sorted(polls["pollster_id"].unique()) if len(polls) else []
     pollster_index = {p: i for i, p in enumerate(pollster_ids)}
 
+    mode_idx, pop_idx, mode_prior, pop_prior = encode_mode_pop(polls)
     if len(polls):
         poll_race = polls["race_id"].map(race_index).astype(int).to_numpy()
         poll_house = polls["pollster_id"].map(pollster_index).astype(int).to_numpy()
-        # Adjust observed margins for mode/population prior offsets before likelihood
-        mode_adj = polls["mode"].astype(str).map(_mode_offset).to_numpy() if "mode" in polls.columns else 0.0
-        pop_adj = (
-            polls["population"].astype(str).map(_population_offset).to_numpy()
-            if "population" in polls.columns
-            else 0.0
-        )
-        poll_y = polls["two_party_margin"].astype(float).to_numpy() - mode_adj - pop_adj
+        # Raw margins — mode/pop enter as hierarchical likelihood effects (P1.2)
+        poll_y = polls["two_party_margin"].astype(float).to_numpy()
+        poll_field_end = []
+        for v in polls["field_end"].tolist() if "field_end" in polls.columns else []:
+            try:
+                poll_field_end.append(date.fromisoformat(str(v)[:10]))
+            except ValueError:
+                poll_field_end.append(None)
+        while len(poll_field_end) < len(poll_y):
+            poll_field_end.append(None)
         n_raw = pd.to_numeric(polls["sample_size"], errors="coerce")
         n = n_raw.where(np.isfinite(n_raw) & (n_raw > 0), 500.0).clip(lower=50.0).to_numpy(dtype=float)
         qw = (
@@ -142,6 +169,7 @@ def _prepare(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0):
         house_mu = np.zeros(0)
         extra_mu = np.zeros(0)
         influence = np.zeros(0)
+        poll_field_end = []
 
     prior_mu = np.array([float(fund.loc[r]) for r in race_ids])
     region_idx = races["region"].map(region_index).astype(int).to_numpy()
@@ -154,14 +182,21 @@ def _prepare(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0):
         "n_regions": len(regions),
         "poll_race": poll_race,
         "poll_house": poll_house,
+        "poll_mode": mode_idx,
+        "poll_pop": pop_idx,
+        "mode_prior": mode_prior,
+        "pop_prior": pop_prior,
         "poll_y": poll_y,
         "poll_se": poll_se,
+        "poll_field_end": poll_field_end,
         "influence": influence,
         "n_pollsters": len(pollster_ids),
         "pollster_ids": pollster_ids,
         "house_mu": house_mu,
         "extra_mu": extra_mu,
         "days_to_ed": days_to_ed,
+        "election_day": ed,
+        "as_of": snapshot.as_of,
         "enop_global": global_enop(polls),
         "enop_by_race": race_enop_summary(polls),
         "n_polls_raw": int(len(snapshot.polls)),
@@ -177,23 +212,23 @@ def fit_pymc(
     chains: int = 2,
     seed: int = 20260901,
     generic_ballot: float = 0.0,
+    terminal_scales: dict | None = None,
 ) -> FitResult:
     import pymc as pm
 
     prep = _prepare(snapshot, generic_ballot=generic_ballot)
     n_races = len(prep["race_ids"])
     # Blueprint §7.2 Morris split: future movement contracts; terminal ED error does not.
-    # (Same formulas as state_space.future_movement_sd / terminal_error_sd — inlined
-    # to avoid circular import with FitResult.)
     future_sd = float(4.5 * np.sqrt(max(prep["days_to_ed"], 1) / 120.0))
-    terminal_sd = 2.5
-    # Shared national component of future drift (contracts with calendar)
     nat_future_sd = float(0.55 * future_sd)
+    scales = active_scales(**scales_kwargs(terminal_scales))
 
     coords = {
         "race": prep["race_ids"],
         "region": list(range(prep["n_regions"])),
         "pollster": prep["pollster_ids"] or ["_none"],
+        "mode": list(MODE_ORDER),
+        "pop": list(POP_ORDER),
     }
 
     with pm.Model(coords=coords) as model:  # noqa: F841
@@ -233,19 +268,38 @@ def fit_pymc(
                 "extra_sd", pm.math.exp(pm.Normal("log_extra", -0.2, 0.4, shape=1))
             )
 
+        mode_eff, pop_eff, _ = _measurement_effects(pm, prep)
+
         if len(prep["poll_y"]):
             sigma_obs = pm.math.sqrt(prep["poll_se"] ** 2 + extra[prep["poll_house"]] ** 2)
+            mu_poll = (
+                theta_now[prep["poll_race"]]
+                + house[prep["poll_house"]]
+                + mode_eff[prep["poll_mode"]]
+                + pop_eff[prep["poll_pop"]]
+            )
             pm.StudentT(
                 "polls",
                 nu=5,
-                mu=theta_now[prep["poll_race"]] + house[prep["poll_house"]],
+                mu=mu_poll,
                 sigma=sigma_obs,
                 observed=prep["poll_y"],
             )
 
-        # Election-Day polling error does not vanish as days_to_ed → 0
-        terminal_bias = pm.StudentT("terminal_bias", nu=4, mu=0.0, sigma=terminal_sd)
-        mu_final = pm.Deterministic("mu_final", mu_ed + terminal_bias, dims="race")
+        # Layered terminal: national + race in-model; similarity post-draw (P1.3)
+        terminal_nat = pm.StudentT(
+            "terminal_nat", nu=4, mu=0.0, sigma=scales["terminal_nat_sd"]
+        )
+        terminal_race = pm.StudentT(
+            "terminal_race",
+            nu=5,
+            mu=0.0,
+            sigma=scales["terminal_race_sd"],
+            dims="race",
+        )
+        mu_final = pm.Deterministic(
+            "mu_final", mu_ed + terminal_nat + terminal_race, dims="race"
+        )
 
         idata = pm.sample(
             draws=draws,
@@ -258,14 +312,41 @@ def fit_pymc(
             compute_convergence_checks=False,
         )
 
+    from midterms.validation.numerical_quality import idata_convergence
+
+    conv = idata_convergence(idata, var_name="mu_final")
+
     posterior = idata.posterior
     mu = posterior["mu_final"].stack(sample=("chain", "draw")).values.T
+    contested = prep["races"].set_index("race_id").loc[prep["race_ids"]].reset_index()
+    rng = np.random.default_rng(seed + 17)
+    mu = add_similarity_terminal(mu, contested, rng, **scales)
     mean = mu.mean(axis=0)
     sd = mu.std(axis=0)
     house_mean = {}
     if prep["pollster_ids"] and "house" in posterior:
         h = posterior["house"].stack(sample=("chain", "draw")).mean(dim="sample").values
         house_mean = {p: float(h[i]) for i, p in enumerate(prep["pollster_ids"])}
+    mode_mean = {}
+    pop_mean = {}
+    if "mode_eff" in posterior:
+        m = posterior["mode_eff"].stack(sample=("chain", "draw")).mean(dim="sample").values
+        mode_mean = {MODE_ORDER[i]: float(m[i]) for i in range(len(MODE_ORDER))}
+    if "pop_eff" in posterior:
+        p = posterior["pop_eff"].stack(sample=("chain", "draw")).mean(dim="sample").values
+        pop_mean = {POP_ORDER[i]: float(p[i]) for i in range(len(POP_ORDER))}
+
+    budget = error_budget_block(scales)
+    budget.update(
+        {
+            "sigma_nat_prior": 4.0,
+            "sigma_region_prior": 2.5,
+            "sigma_local_prior": 3.5,
+            "future_movement_sd": float(future_sd),
+            "future_nat_sd": float(nat_future_sd),
+            "days_to_ed": prep["days_to_ed"],
+        }
+    )
 
     return FitResult(
         race_ids=prep["race_ids"],
@@ -283,25 +364,254 @@ def fit_pymc(
             "tune": tune,
             "chains": chains,
             "seed": seed,
+            "n_posterior_samples": int(draws * chains),
+            "latent_path": "static_election_day",
+            "measurement_effects": "hierarchical_mode_pop",
+            "terminal_layers": "national+race+similarity",
+            "convergence": conv,
+            "mode_effects_mean": mode_mean,
+            "pop_effects_mean": pop_mean,
             "enop_global": prep["enop_global"],
             "enop_by_race_mean": float(np.mean(list(prep["enop_by_race"].values())))
             if prep["enop_by_race"]
             else 0.0,
-            "error_budget": {
-                "sigma_nat_prior": 4.0,
-                "sigma_region_prior": 2.5,
-                "sigma_local_prior": 3.5,
-                "future_movement_sd": float(future_sd),
-                "future_nat_sd": float(nat_future_sd),
-                "terminal_error_sd": float(terminal_sd),
-                "days_to_ed": prep["days_to_ed"],
-                "note": (
-                    "Blueprint section 7.2 Morris split: contracting future movement "
-                    "(national+race) + fixed terminal Election-Day polling error"
-                ),
-            },
+            "error_budget": budget,
         },
         method="pymc",
+    )
+
+
+def _prepare_weekly_path(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0) -> dict:
+    """Extend _prepare with a weekly calendar index for dynamic latent paths."""
+    from datetime import timedelta
+
+    prep = _prepare(snapshot, generic_ballot=generic_ballot)
+    ed = prep["election_day"]
+    as_of = prep["as_of"]
+    field_ends = [d for d in prep.get("poll_field_end") or [] if d is not None]
+    origin = min([as_of, ed] + field_ends) if field_ends else min(as_of, ed)
+    max_lookback = 180
+    if (ed - origin).days > max_lookback:
+        origin = ed - timedelta(days=max_lookback)
+    n_weeks = max(int(np.ceil((ed - origin).days / 7.0)) + 1, 2)
+    week_ends = [origin + timedelta(days=7 * i) for i in range(n_weeks)]
+    if week_ends[-1] < ed:
+        week_ends.append(ed)
+        n_weeks = len(week_ends)
+
+    def week_of(d: date) -> int:
+        idx = int((d - origin).days // 7)
+        return int(np.clip(idx, 0, n_weeks - 1))
+
+    as_of_week = week_of(as_of)
+    poll_week = np.full(len(prep["poll_y"]), as_of_week, dtype=int)
+    for i, d in enumerate(prep.get("poll_field_end") or []):
+        if i >= len(poll_week):
+            break
+        if d is not None:
+            poll_week[i] = week_of(d)
+
+    day_gaps = np.ones(n_weeks, dtype=float)
+    for i in range(1, n_weeks):
+        day_gaps[i] = max((week_ends[i] - week_ends[i - 1]).days, 1)
+    day_gaps[0] = max(float(day_gaps[1] if n_weeks > 1 else 7.0), 1.0)
+
+    prep.update(
+        {
+            "origin": origin,
+            "n_weeks": n_weeks,
+            "week_ends": [d.isoformat() for d in week_ends],
+            "poll_week": poll_week,
+            "as_of_week": as_of_week,
+            "ed_week": n_weeks - 1,
+            "day_gaps": day_gaps,
+        }
+    )
+    return prep
+
+
+def fit_pymc_dynamic(
+    snapshot: EvidenceSnapshot,
+    *,
+    draws: int = 300,
+    tune: int = 300,
+    chains: int = 2,
+    seed: int = 20260901,
+    generic_ballot: float = 0.0,
+    terminal_scales: dict | None = None,
+) -> FitResult:
+    """
+    Date-indexed hierarchical opinion path (audit P1.1 / Finding 3).
+
+    Weekly national random walk + partially pooled race random walks. Process
+    innovation scale ∝ sqrt(calendar days). Polls observe theta[r, t_poll];
+    Election-Day outcome is theta[r, T] plus layered terminal (nat+race+similarity).
+    """
+    import pymc as pm
+
+    prep = _prepare_weekly_path(snapshot, generic_ballot=generic_ballot)
+    n_races = len(prep["race_ids"])
+    t_weeks = int(prep["n_weeks"])
+    day_gaps = np.asarray(prep["day_gaps"], dtype=float)
+    step_scale = np.sqrt(day_gaps / 7.0)
+    scales = active_scales(**scales_kwargs(terminal_scales))
+
+    coords = {
+        "race": prep["race_ids"],
+        "region": list(range(prep["n_regions"])),
+        "week": list(range(t_weeks)),
+        "pollster": prep["pollster_ids"] or ["_none"],
+        "mode": list(MODE_ORDER),
+        "pop": list(POP_ORDER),
+    }
+
+    with pm.Model(coords=coords) as model:  # noqa: F841
+        # Anchors (partial pooling) — level around fundamentals
+        sigma_region = pm.HalfNormal("sigma_region", 2.5)
+        region_eff = pm.StudentT("region_eff", nu=5, mu=0.0, sigma=sigma_region, dims="region")
+        sigma_local0 = pm.HalfNormal("sigma_local0", 3.0)
+        local0 = pm.StudentT("local0", nu=5, mu=0.0, sigma=sigma_local0, dims="race")
+
+        # National weekly RW (process sd per sqrt-week)
+        sigma_nat_step = pm.HalfNormal("sigma_nat_step", 1.8)
+        nat_innov = pm.Normal("nat_innov", 0.0, 1.0, dims="week")
+        nat_steps = sigma_nat_step * nat_innov * step_scale
+        nat = pm.Deterministic("nat", pm.math.cumsum(nat_steps), dims="week")
+
+        # Race weekly RW deviations (smaller than national)
+        sigma_race_step = pm.HalfNormal("sigma_race_step", 1.0)
+        race_innov = pm.Normal("race_innov", 0.0, 1.0, dims=("race", "week"))
+        race_steps = sigma_race_step * race_innov * step_scale[None, :]
+        race_rw = pm.Deterministic("race_rw", pm.math.cumsum(race_steps, axis=1), dims=("race", "week"))
+
+        level = prep["prior_mu"] + region_eff[prep["region_idx"]] + local0  # (race,)
+        # theta[r,t] = level[r] + nat[t] + race_rw[r,t]
+        theta = pm.Deterministic(
+            "theta",
+            level[:, None] + nat[None, :] + race_rw,
+            dims=("race", "week"),
+        )
+
+        if prep["n_pollsters"]:
+            house = pm.Normal("house", mu=prep["house_mu"], sigma=1.0, dims="pollster")
+            log_extra = pm.Normal(
+                "log_extra",
+                mu=np.log(np.clip(prep["extra_mu"], 1.0, 4.5)),
+                sigma=0.35,
+                dims="pollster",
+            )
+            extra = pm.Deterministic("extra_sd", pm.math.exp(log_extra), dims="pollster")
+        else:
+            house = pm.Normal("house", 0.0, 1.5, shape=1)
+            extra = pm.Deterministic(
+                "extra_sd", pm.math.exp(pm.Normal("log_extra", -0.2, 0.4, shape=1))
+            )
+
+        mode_eff, pop_eff, _ = _measurement_effects(pm, prep)
+
+        if len(prep["poll_y"]):
+            sigma_obs = pm.math.sqrt(prep["poll_se"] ** 2 + extra[prep["poll_house"]] ** 2)
+            mu_poll = (
+                theta[prep["poll_race"], prep["poll_week"]]
+                + house[prep["poll_house"]]
+                + mode_eff[prep["poll_mode"]]
+                + pop_eff[prep["poll_pop"]]
+            )
+            pm.StudentT(
+                "polls",
+                nu=5,
+                mu=mu_poll,
+                sigma=sigma_obs,
+                observed=prep["poll_y"],
+            )
+
+        # Distinct terminal ED layer (nat+race in-model; similarity post-draw)
+        terminal_nat = pm.StudentT(
+            "terminal_nat", nu=4, mu=0.0, sigma=scales["terminal_nat_sd"]
+        )
+        terminal_race = pm.StudentT(
+            "terminal_race",
+            nu=5,
+            mu=0.0,
+            sigma=scales["terminal_race_sd"],
+            dims="race",
+        )
+        mu_final = pm.Deterministic(
+            "mu_final",
+            theta[:, prep["ed_week"]] + terminal_nat + terminal_race,
+            dims="race",
+        )
+        # Snapshot current as-of latent for diagnostics
+        pm.Deterministic("theta_as_of", theta[:, prep["as_of_week"]], dims="race")
+
+        idata = pm.sample(
+            draws=draws,
+            tune=tune,
+            chains=chains,
+            random_seed=seed,
+            target_accept=0.9,
+            progressbar=False,
+            return_inferencedata=True,
+            compute_convergence_checks=False,
+        )
+
+    from midterms.validation.numerical_quality import idata_convergence
+
+    conv = idata_convergence(idata, var_name="mu_final")
+
+    posterior = idata.posterior
+    mu = posterior["mu_final"].stack(sample=("chain", "draw")).values.T
+    contested = prep["races"].set_index("race_id").loc[prep["race_ids"]].reset_index()
+    rng = np.random.default_rng(seed + 19)
+    mu = add_similarity_terminal(mu, contested, rng, **scales)
+    mean = mu.mean(axis=0)
+    sd = mu.std(axis=0)
+    house_mean = {}
+    if prep["pollster_ids"] and "house" in posterior:
+        h = posterior["house"].stack(sample=("chain", "draw")).mean(dim="sample").values
+        house_mean = {p: float(h[i]) for i, p in enumerate(prep["pollster_ids"])}
+
+    budget = error_budget_block(scales)
+    budget.update(
+        {
+            "sigma_nat_step_prior": 1.8,
+            "sigma_race_step_prior": 1.0,
+            "n_weeks": t_weeks,
+        }
+    )
+
+    return FitResult(
+        race_ids=prep["race_ids"],
+        states=prep["states"],
+        mean_margin=mean,
+        sd_margin=sd,
+        draws_margin=mu,
+        house_effects=house_mean,
+        diagnostics={
+            "n_polls": int(len(prep["poll_y"])),
+            "n_polls_raw": prep["n_polls_raw"],
+            "n_races": n_races,
+            "days_to_ed": prep["days_to_ed"],
+            "n_weeks": t_weeks,
+            "origin": str(prep["origin"]),
+            "as_of_week": int(prep["as_of_week"]),
+            "ed_week": int(prep["ed_week"]),
+            "draws": draws,
+            "tune": tune,
+            "chains": chains,
+            "seed": seed,
+            "n_posterior_samples": int(draws * chains),
+            "latent_path": "weekly_random_walk",
+            "measurement_effects": "hierarchical_mode_pop",
+            "terminal_layers": "national+race+similarity",
+            "convergence": conv,
+            "enop_global": prep["enop_global"],
+            "enop_by_race_mean": float(np.mean(list(prep["enop_by_race"].values())))
+            if prep["enop_by_race"]
+            else 0.0,
+            "error_budget": budget,
+        },
+        method="pymc_dynamic",
     )
 
 
@@ -311,11 +621,13 @@ def fit_fast_approximation(
     n_draws: int = 2000,
     seed: int = 20260901,
     generic_ballot: float = 0.0,
+    terminal_scales: dict | None = None,
 ) -> FitResult:
     """
     Principled fallback when PyMC sampling is too heavy: hierarchical shrinkage
     posterior with heavy-tailed national / regional / local shocks matching the
-    generative story. Uses ENOP-aware influence weights and mode/population offsets.
+    generative story. Uses ENOP-aware influence weights and layered terminal
+    (national + race + similarity; audit P1.3).
     """
     rng = np.random.default_rng(seed)
     prep = _prepare(snapshot, generic_ballot=generic_ballot)
@@ -327,6 +639,7 @@ def fit_fast_approximation(
     house_effects: dict[str, float] = {}
     if prep["n_pollsters"]:
         house_effects = {p: float(prep["house_mu"][i]) for i, p in enumerate(prep["pollster_ids"])}
+    scales = active_scales(**scales_kwargs(terminal_scales))
 
     for i, rid in enumerate(prep["race_ids"]):
         rp = polls[polls["race_id"] == rid] if len(polls) else polls
@@ -368,23 +681,13 @@ def fit_fast_approximation(
                 )
             )
 
-    # Joint draws: national + region + local + continuous similarity Student-t shocks
-    # Morris split (section 7.2): contracting future path + fixed terminal ED error.
+    # Path shocks (opinion / future); terminal layers applied separately (P1.3)
     future_sd = float(4.5 * np.sqrt(max(prep["days_to_ed"], 1) / 120.0))
-    terminal_sd = 2.5
     nat_sd = float(2.8 + 0.015 * max(prep["days_to_ed"], 1) + 0.35 * future_sd)
     nat = rng.standard_t(4, size=n_draws) * nat_sd
     region_draws = {r: rng.standard_t(5, size=n_draws) * 1.8 for r in range(prep["n_regions"])}
     local = rng.standard_t(5, size=(n_draws, n)) * (sds * 0.6)
     contested = snapshot.races.set_index("race_id").loc[prep["race_ids"]].reset_index()
-    sim_shocks = correlated_shocks(
-        contested,
-        n_draws,
-        rng,
-        scale=sds * 0.4,
-        length_scale=1.75,
-        nu=5.0,
-    )
     mu = np.zeros((n_draws, n))
     for i in range(n):
         mu[:, i] = (
@@ -392,10 +695,19 @@ def fit_fast_approximation(
             + nat
             + region_draws[int(prep["region_idx"][i])]
             + local[:, i]
-            + sim_shocks[:, i]
         )
-    # Terminal ED polling error — does not shrink with calendar
-    mu += rng.standard_t(4, size=(n_draws, 1)) * terminal_sd
+    mu = add_terminal_layers(mu, contested, rng, **scales)
+
+    budget = error_budget_block(scales)
+    budget.update(
+        {
+            "national_path_sd": float(nat_sd),
+            "future_movement_sd": float(future_sd),
+            "region_sd": 1.8,
+            "local_scale_of_race_sd": 0.6,
+            "days_to_ed": prep["days_to_ed"],
+        }
+    )
 
     return FitResult(
         race_ids=prep["race_ids"],
@@ -417,19 +729,12 @@ def fit_fast_approximation(
             if prep["enop_by_race"]
             else 0.0,
             "similarity_covariance": True,
-            "error_budget": {
-                "national_path_sd": float(nat_sd),
-                "future_movement_sd": float(future_sd),
-                "terminal_error_sd": float(terminal_sd),
-                "region_sd": 1.8,
-                "local_scale_of_race_sd": 0.6,
-                "similarity_scale_of_race_sd": 0.4,
-                "days_to_ed": prep["days_to_ed"],
-                "note": "Blueprint section 7.2 Morris split in fast approximation",
-            },
+            "terminal_layers": "national+race+similarity",
+            "error_budget": budget,
+            "measurement_effects": "prior_mean_mode_pop",
             "note": (
                 "NON-PRODUCTION approximation: fast hierarchical-t with ENOP weights, "
-                "mode/pop offsets, richer fundamentals, continuous similarity covariance. "
+                "mode/pop prior-mean offsets, layered terminal + similarity (P1.3). "
                 "Prefer pymc / ensemble_stack for published forecasts."
             ),
         },

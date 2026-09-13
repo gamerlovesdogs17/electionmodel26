@@ -5,760 +5,1083 @@
   "poll_gate": {
     "election_id": "senate-2022",
     "year": 2022,
-    "n_polls": 16,
+    "n_polls": 671,
     "synthetic": false,
     "source": "cycle_manifest",
-    "allow_synthetic": true,
-    "in_cycles": true
+    "allow_synthetic": false,
+    "in_cycles": true,
+    "coverage": {
+      "ok": true,
+      "year": 2022,
+      "election_id": "senate-2022",
+      "n_official_contests": 35,
+      "n_polled_universe": 29,
+      "n_poll_rows": 671,
+      "n_polls_with_candidate_identity": 671,
+      "n_inferred_nominee_races": 27,
+      "nominees_sample": {
+        "senate-2022-AK": {
+          "dem_candidate_id": "30151",
+          "dem_candidate_name": "Patricia R. Chesbro",
+          "rep_candidate_id": "21152",
+          "rep_candidate_name": "Lisa Murkowski",
+          "n_late_polls": 4
+        },
+        "senate-2022-AL": {
+          "dem_candidate_id": "30186",
+          "dem_candidate_name": "Will Boyd",
+          "rep_candidate_id": "30185",
+          "rep_candidate_name": "Katie Britt",
+          "n_late_polls": 1
+        },
+        "senate-2022-AR": {
+          "dem_candidate_id": "30184",
+          "dem_candidate_name": "Natalie James",
+          "rep_candidate_id": "29276",
+          "rep_candidate_name": "John Boozman",
+          "n_late_polls": 2
+        },
+        "senate-2022-AZ": {
+          "dem_candidate_id": "20633",
+          "dem_candidate_name": "Mark Kelly",
+          "rep_candidate_id": "28668",
+          "rep_candidate_name": "Blake Masters",
+          "n_late_polls": 44
+        },
+        "senate-2022-CA": {
+          "dem_candidate_id": "29277",
+          "dem_candidate_name": "Alex Padilla",
+          "rep_candidate_id": "29384",
+          "rep_candidate_name": "Mark P. Meuser",
+          "n_late_polls": 6
+        },
+        "senate-2022-CO": {
+          "dem_candidate_id": "28366",
+          "dem_candidate_name": "Michael Bennet",
+          "rep_candidate_id": "30404",
+          "rep_candidate_name": "Joe O'Dea",
+          "n_late_polls": 16
+        },
+        "senate-2022-CT": {
+          "dem_candidate_id": "29278",
+          "dem_candidate_name": "Richard Blumenthal",
+          "rep_candidate_id": "30165",
+          "rep_candidate_name": "Leora R. Levy",
+          "n_late_polls": 4
+        },
+        "senate-2022-FL": {
+          "dem_candidate_id": "25620",
+          "dem_candidate_name": "Val Demings",
+          "rep_candidate_id": "25621",
+          "rep_candidate_name": "Marco Rubio",
+          "n_late_polls": 19
+        }
+      },
+      "by_lead": {
+        "90": {
+          "as_of": "2022-08-10",
+          "lead_days": 90,
+          "n_polls": 152,
+          "n_contests_with_polls": 18,
+          "n_contests_expected": 29,
+          "coverage_share": 0.6206896551724138,
+          "min_share_required": 0.4,
+          "missing_contests": [
+            "senate-2022-AL",
+            "senate-2022-AR",
+            "senate-2022-CA",
+            "senate-2022-IN",
+            "senate-2022-KS",
+            "senate-2022-MD",
+            "senate-2022-OK",
+            "senate-2022-OK-special",
+            "senate-2022-OR",
+            "senate-2022-SC",
+            "senate-2022-VT"
+          ],
+          "n_missing_contests": 11,
+          "nominee_mismatch_races": [],
+          "n_nominee_mismatches": 0,
+          "median_field_end": "2022-05-16",
+          "max_field_end": "2022-08-08",
+          "n_recent_21d": 34,
+          "recency_ok": true,
+          "ok": true
+        },
+        "60": {
+          "as_of": "2022-09-09",
+          "lead_days": 60,
+          "n_polls": 207,
+          "n_contests_with_polls": 21,
+          "n_contests_expected": 29,
+          "coverage_share": 0.7241379310344828,
+          "min_share_required": 0.55,
+          "missing_contests": [
+            "senate-2022-AL",
+            "senate-2022-AR",
+            "senate-2022-CA",
+            "senate-2022-MD",
+            "senate-2022-OK",
+            "senate-2022-OK-special",
+            "senate-2022-OR",
+            "senate-2022-SC"
+          ],
+          "n_missing_contests": 8,
+          "nominee_mismatch_races": [],
+          "n_nominee_mismatches": 0,
+          "median_field_end": "2022-07-04",
+          "max_field_end": "2022-09-07",
+          "n_recent_21d": 33,
+          "recency_ok": true,
+          "ok": true
+        },
+        "30": {
+          "as_of": "2022-10-09",
+          "lead_days": 30,
+          "n_polls": 340,
+          "n_contests_with_polls": 27,
+          "n_contests_expected": 29,
+          "coverage_share": 0.9310344827586207,
+          "min_share_required": 0.7,
+          "missing_contests": [
+            "senate-2022-AL",
+            "senate-2022-CA"
+          ],
+          "n_missing_contests": 2,
+          "nominee_mismatch_races": [],
+          "n_nominee_mismatches": 0,
+          "median_field_end": "2022-08-17",
+          "max_field_end": "2022-10-07",
+          "n_recent_21d": 77,
+          "recency_ok": true,
+          "ok": true
+        },
+        "7": {
+          "as_of": "2022-11-01",
+          "lead_days": 7,
+          "n_polls": 544,
+          "n_contests_with_polls": 29,
+          "n_contests_expected": 29,
+          "coverage_share": 1.0,
+          "min_share_required": 0.7,
+          "missing_contests": [],
+          "n_missing_contests": 0,
+          "nominee_mismatch_races": [],
+          "n_nominee_mismatches": 0,
+          "median_field_end": "2022-09-19",
+          "max_field_end": "2022-10-31",
+          "n_recent_21d": 172,
+          "recency_ok": true,
+          "ok": true
+        }
+      },
+      "failures": [],
+      "note": "Coverage scored on contests with in-cycle non-hypothetical polls (safe unpolled seats excluded). Nominee checks apply near Election Day; close leads require recent median field dates.",
+      "meta_source": "Wikipedia: 2022 United States Senate elections"
+    }
   },
+  "hierarchical_method": "pymc",
+  "spine_key": "pymc",
   "lead_days": {
     "120": {
       "last_election_swing": {
-        "n": 33,
-        "crps": 2.985169200841347,
-        "log_score": -3.125884174838836,
-        "brier": 0.06295749568624684,
-        "mae": 4.377666666666667
+        "n": 35,
+        "crps": 3.3963243175401274,
+        "log_score": -3.2302633811159067,
+        "brier": 0.05159333313191134,
+        "mae": 4.687980375180375
       },
       "equal_weight_polls": {
-        "n": 33,
-        "crps": 2.4055705277269004,
-        "log_score": -3.076537741264742,
-        "brier": 0.0485615693918826,
-        "mae": 2.870854545454545
+        "n": 35,
+        "crps": 4.112497154224565,
+        "log_score": -3.6256694673851078,
+        "brier": 0.05403090761903883,
+        "mae": 5.355088095238096
       },
       "shrinkage_polls": {
-        "n": 33,
-        "crps": 2.454370906399554,
-        "log_score": -3.090288464592718,
-        "brier": 0.0475371491732147,
-        "mae": 2.9919275728789225
+        "n": 35,
+        "crps": 4.310327508745083,
+        "log_score": -3.905291478845561,
+        "brier": 0.03988555331625774,
+        "mae": 5.747935322713366
+      },
+      "pymc": {
+        "n": 35,
+        "crps": 3.248921375448851,
+        "log_score": -3.1881058507260955,
+        "brier": 0.04368460646005475,
+        "mae": 4.51239453990226,
+        "enop_global": 44.61686273385059,
+        "fit_method": "pymc",
+        "error_budget": {
+          "sigma_nat_prior": 4.0,
+          "sigma_region_prior": 2.5,
+          "sigma_local_prior": 3.5,
+          "future_movement_sd": 4.5,
+          "future_nat_sd": 2.475,
+          "terminal_error_sd": 2.5,
+          "days_to_ed": 120,
+          "note": "Blueprint section 7.2 Morris split: contracting future movement (national+race) + fixed terminal Election-Day polling error"
+        }
       },
       "fast_hierarchical_t": {
-        "n": 33,
-        "crps": 2.3461480142527305,
-        "log_score": -2.970505426808412,
-        "brier": 0.03907787469529832,
-        "mae": 2.9472364675156255,
-        "enop_global": 4.912023467325748
+        "n": 35,
+        "crps": 4.207884881908077,
+        "log_score": -3.52323028453086,
+        "brier": 0.04041161893052461,
+        "mae": 5.439823696907569
       },
       "state_space": {
-        "n": 33,
-        "crps": 2.503026320336639,
-        "log_score": -3.112043699101086,
-        "brier": 0.04309605358711634,
-        "mae": 2.810572857088726
+        "n": 35,
+        "crps": 3.5931147050581296,
+        "log_score": -3.363399259855481,
+        "brier": 0.037971567460611616,
+        "mae": 4.724433993368649
       },
       "poll_only_state_space": {
-        "n": 33,
-        "crps": 13.313007111334464,
-        "log_score": -5.9157250792238205,
-        "brier": 0.24074829713576537,
-        "mae": 16.908880198824694
+        "n": 35,
+        "crps": 12.944962707197751,
+        "log_score": -5.324255355263823,
+        "brier": 0.17387554867963673,
+        "mae": 16.639088989897136
       },
       "ridge_fundamentals": {
-        "n": 33,
-        "crps": 2.368580511846652,
-        "log_score": -3.0419796923257123,
-        "brier": 0.04935986845318903,
-        "mae": 2.749736249861961
+        "n": 35,
+        "crps": 3.3422935681383223,
+        "log_score": -3.232294104446916,
+        "brier": 0.05906017526685394,
+        "mae": 4.5448236421356425
       },
       "chamber": {
-        "seat_crps": 0.5413187499999998,
-        "seat_mae": 1.8375,
-        "control_brier": 0.0,
-        "p_dem_control": 0.0,
-        "expected_dem_seats": 42.975833333333334,
-        "n_draws": 1200
+        "seat_crps": 1.0051666666666665,
+        "seat_mae": 2.8233333333333333,
+        "control_brier": 0.2988444444444444,
+        "p_dem_control": 0.4533333333333333,
+        "expected_dem_seats": 49.64333333333333,
+        "n_draws": 300
       },
       "overlay_ablation": {
         "unadjusted": {
-          "seat_crps": 0.5413187499999998,
-          "seat_mae": 1.8375,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 42.975833333333334,
-          "n_draws": 1200
+          "seat_crps": 1.0051666666666665,
+          "seat_mae": 2.8233333333333333,
+          "control_brier": 0.2988444444444444,
+          "p_dem_control": 0.4533333333333333,
+          "expected_dem_seats": 49.64333333333333,
+          "n_draws": 300
         },
         "rating_overlay": {
-          "seat_crps": 0.5324055555555556,
-          "seat_mae": 1.79,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 43.123333333333335,
-          "n_draws": 1200
+          "seat_crps": 0.9428777777777777,
+          "seat_mae": 2.6766666666666667,
+          "control_brier": 0.28090000000000004,
+          "p_dem_control": 0.47,
+          "expected_dem_seats": 49.763333333333335,
+          "n_draws": 300
         },
-        "delta_control_brier": 0.0,
-        "delta_seat_crps": -0.008913194444444272
+        "delta_control_brier": -0.017944444444444374,
+        "delta_seat_crps": -0.06228888888888884
       }
     },
     "90": {
       "last_election_swing": {
-        "n": 33,
-        "crps": 2.985169200841347,
-        "log_score": -3.125884174838836,
-        "brier": 0.06295749568624684,
-        "mae": 4.377666666666667
+        "n": 35,
+        "crps": 3.7410933475341746,
+        "log_score": -3.314731940846271,
+        "brier": 0.05122276624578895,
+        "mae": 5.282702067669174
       },
       "equal_weight_polls": {
-        "n": 33,
-        "crps": 2.4055705277269004,
-        "log_score": -3.076537741264742,
-        "brier": 0.0485615693918826,
-        "mae": 2.870854545454545
+        "n": 35,
+        "crps": 4.421859323688773,
+        "log_score": -3.6921656792920414,
+        "brier": 0.0721737576698358,
+        "mae": 5.939692619047619
       },
       "shrinkage_polls": {
-        "n": 33,
-        "crps": 2.454370906399554,
-        "log_score": -3.0902884645927178,
-        "brier": 0.0475371491732147,
-        "mae": 2.9919275728789216
+        "n": 35,
+        "crps": 4.265240400550941,
+        "log_score": -3.999367426970949,
+        "brier": 0.04477496356996144,
+        "mae": 5.576569247493024
+      },
+      "pymc": {
+        "n": 35,
+        "crps": 3.270486434841411,
+        "log_score": -3.133016530335661,
+        "brier": 0.032347941369636854,
+        "mae": 4.752087894714809,
+        "enop_global": 69.93722417970555,
+        "fit_method": "pymc",
+        "error_budget": {
+          "sigma_nat_prior": 4.0,
+          "sigma_region_prior": 2.5,
+          "sigma_local_prior": 3.5,
+          "future_movement_sd": 3.8971143170299736,
+          "future_nat_sd": 2.1434128743664855,
+          "terminal_error_sd": 2.5,
+          "days_to_ed": 90,
+          "note": "Blueprint section 7.2 Morris split: contracting future movement (national+race) + fixed terminal Election-Day polling error"
+        }
       },
       "fast_hierarchical_t": {
-        "n": 33,
-        "crps": 2.3243808336618312,
-        "log_score": -2.9727855628027653,
-        "brier": 0.03869963042056196,
-        "mae": 2.8517356219556786,
-        "enop_global": 4.9120234673257555
+        "n": 35,
+        "crps": 4.094003388778593,
+        "log_score": -3.492639583827068,
+        "brier": 0.04081389823842398,
+        "mae": 5.343023787321173
       },
       "state_space": {
-        "n": 33,
-        "crps": 2.5412275842523186,
-        "log_score": -3.1038688678073565,
-        "brier": 0.043227571954687384,
-        "mae": 2.951948034643332
+        "n": 35,
+        "crps": 3.451348682178032,
+        "log_score": -3.2997775170214205,
+        "brier": 0.036517719370609464,
+        "mae": 4.606065499750194
       },
       "poll_only_state_space": {
-        "n": 33,
-        "crps": 13.343226750454805,
-        "log_score": -5.966311958464493,
-        "brier": 0.2393488313808685,
-        "mae": 16.877018863493635
+        "n": 35,
+        "crps": 12.361021159682172,
+        "log_score": -5.282790725518278,
+        "brier": 0.16177049966591361,
+        "mae": 15.884753510494011
       },
       "ridge_fundamentals": {
-        "n": 33,
-        "crps": 2.368580511846652,
-        "log_score": -3.0419796923257123,
-        "brier": 0.04935986845318903,
-        "mae": 2.749736249861961
+        "n": 35,
+        "crps": 3.337347191855101,
+        "log_score": -3.2320198043417734,
+        "brier": 0.05679770174815584,
+        "mae": 4.530951466165414
       },
       "chamber": {
-        "seat_crps": 0.5239444444444443,
-        "seat_mae": 1.805,
-        "control_brier": 0.0,
-        "p_dem_control": 0.0,
-        "expected_dem_seats": 43.026666666666664,
-        "n_draws": 1200
+        "seat_crps": 0.6785222222222222,
+        "seat_mae": 2.316666666666667,
+        "control_brier": 0.12721111111111114,
+        "p_dem_control": 0.6433333333333333,
+        "expected_dem_seats": 51.15,
+        "n_draws": 300
       },
       "overlay_ablation": {
         "unadjusted": {
-          "seat_crps": 0.5239444444444443,
-          "seat_mae": 1.805,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 43.026666666666664,
-          "n_draws": 1200
+          "seat_crps": 0.6785222222222222,
+          "seat_mae": 2.316666666666667,
+          "control_brier": 0.12721111111111114,
+          "p_dem_control": 0.6433333333333333,
+          "expected_dem_seats": 51.15,
+          "n_draws": 300
         },
         "rating_overlay": {
-          "seat_crps": 0.5158090277777776,
-          "seat_mae": 1.7508333333333332,
-          "control_brier": 6.944444444444446e-07,
-          "p_dem_control": 0.0008333333333333334,
-          "expected_dem_seats": 43.17583333333334,
-          "n_draws": 1200
+          "seat_crps": 0.6812444444444443,
+          "seat_mae": 2.1933333333333334,
+          "control_brier": 0.10239999999999996,
+          "p_dem_control": 0.68,
+          "expected_dem_seats": 51.39333333333333,
+          "n_draws": 300
         },
-        "delta_control_brier": 6.944444444444446e-07,
-        "delta_seat_crps": -0.008135416666666728
+        "delta_control_brier": -0.024811111111111173,
+        "delta_seat_crps": 0.0027222222222220704
       }
     },
     "60": {
       "last_election_swing": {
-        "n": 33,
-        "crps": 2.985169200841347,
-        "log_score": -3.125884174838836,
-        "brier": 0.06295749568624684,
-        "mae": 4.377666666666667
+        "n": 35,
+        "crps": 3.790105845616526,
+        "log_score": -3.3266919341529477,
+        "brier": 0.05152856949249244,
+        "mae": 5.357863354037267
       },
       "equal_weight_polls": {
-        "n": 33,
-        "crps": 2.4055705277269004,
-        "log_score": -3.076537741264742,
-        "brier": 0.0485615693918826,
-        "mae": 2.870854545454545
+        "n": 35,
+        "crps": 5.128742560262647,
+        "log_score": -4.068444289911578,
+        "brier": 0.07179687158705413,
+        "mae": 6.705961904761905
       },
       "shrinkage_polls": {
-        "n": 33,
-        "crps": 2.454370906399554,
-        "log_score": -3.0902884645927178,
-        "brier": 0.0475371491732147,
-        "mae": 2.9919275728789216
+        "n": 35,
+        "crps": 5.221902208629651,
+        "log_score": -4.706652692597197,
+        "brier": 0.05240500664652481,
+        "mae": 6.729970237461766
+      },
+      "pymc": {
+        "n": 35,
+        "crps": 3.483401339945381,
+        "log_score": -3.1847948476123924,
+        "brier": 0.03761153142662192,
+        "mae": 5.051484217499728,
+        "enop_global": 100.22025123935138,
+        "fit_method": "pymc",
+        "error_budget": {
+          "sigma_nat_prior": 4.0,
+          "sigma_region_prior": 2.5,
+          "sigma_local_prior": 3.5,
+          "future_movement_sd": 3.1819805153394642,
+          "future_nat_sd": 1.7500892834367054,
+          "terminal_error_sd": 2.5,
+          "days_to_ed": 60,
+          "note": "Blueprint section 7.2 Morris split: contracting future movement (national+race) + fixed terminal Election-Day polling error"
+        }
       },
       "fast_hierarchical_t": {
-        "n": 33,
-        "crps": 2.3886679861625195,
-        "log_score": -2.985913494563303,
-        "brier": 0.03808654109172369,
-        "mae": 3.017918050946134,
-        "enop_global": 4.9120234673257555
+        "n": 35,
+        "crps": 4.744050584429707,
+        "log_score": -3.627876084499087,
+        "brier": 0.051426498709176406,
+        "mae": 6.311602784313
       },
       "state_space": {
-        "n": 33,
-        "crps": 2.54544787685262,
-        "log_score": -3.0945541268529193,
-        "brier": 0.04415496651978037,
-        "mae": 3.0400553870615945
+        "n": 35,
+        "crps": 3.8619926191660534,
+        "log_score": -3.384645305715367,
+        "brier": 0.04523366933503601,
+        "mae": 5.2919412228944935
       },
       "poll_only_state_space": {
-        "n": 33,
-        "crps": 13.447213587328063,
-        "log_score": -6.204983965199283,
-        "brier": 0.23844690030630014,
-        "mae": 16.878175465753344
+        "n": 35,
+        "crps": 11.901272212895778,
+        "log_score": -5.584487943005254,
+        "brier": 0.14832595333227117,
+        "mae": 14.921799178738516
       },
       "ridge_fundamentals": {
-        "n": 33,
-        "crps": 2.368580511846652,
-        "log_score": -3.0419796923257123,
-        "brier": 0.04935986845318903,
-        "mae": 2.749736249861961
+        "n": 35,
+        "crps": 3.337949841242301,
+        "log_score": -3.2322254245482065,
+        "brier": 0.05659170039852028,
+        "mae": 4.529548455486544
       },
       "chamber": {
-        "seat_crps": 0.5271520833333332,
-        "seat_mae": 1.8425,
-        "control_brier": 2.7777777777777783e-06,
-        "p_dem_control": 0.0016666666666666668,
-        "expected_dem_seats": 42.94916666666666,
-        "n_draws": 1200
+        "seat_crps": 0.5240777777777776,
+        "seat_mae": 1.9433333333333334,
+        "control_brier": 0.07111111111111114,
+        "p_dem_control": 0.7333333333333333,
+        "expected_dem_seats": 51.45666666666666,
+        "n_draws": 300
       },
       "overlay_ablation": {
         "unadjusted": {
-          "seat_crps": 0.5271520833333332,
-          "seat_mae": 1.8425,
-          "control_brier": 2.7777777777777783e-06,
-          "p_dem_control": 0.0016666666666666668,
-          "expected_dem_seats": 42.94916666666666,
-          "n_draws": 1200
+          "seat_crps": 0.5240777777777776,
+          "seat_mae": 1.9433333333333334,
+          "control_brier": 0.07111111111111114,
+          "p_dem_control": 0.7333333333333333,
+          "expected_dem_seats": 51.45666666666666,
+          "n_draws": 300
         },
         "rating_overlay": {
-          "seat_crps": 0.5138118055555554,
-          "seat_mae": 1.7641666666666667,
-          "control_brier": 2.7777777777777783e-06,
-          "p_dem_control": 0.0016666666666666668,
-          "expected_dem_seats": 43.13583333333333,
-          "n_draws": 1200
+          "seat_crps": 0.540111111111111,
+          "seat_mae": 1.8466666666666667,
+          "control_brier": 0.05601111111111112,
+          "p_dem_control": 0.7633333333333333,
+          "expected_dem_seats": 51.62,
+          "n_draws": 300
         },
-        "delta_control_brier": 0.0,
-        "delta_seat_crps": -0.013340277777777798
+        "delta_control_brier": -0.015100000000000016,
+        "delta_seat_crps": 0.016033333333333344
       }
     },
     "45": {
       "last_election_swing": {
-        "n": 33,
-        "crps": 2.985169200841347,
-        "log_score": -3.125884174838836,
-        "brier": 0.06295749568624684,
-        "mae": 4.377666666666667
+        "n": 35,
+        "crps": 3.836188133458379,
+        "log_score": -3.337943530715309,
+        "brier": 0.0518548526833585,
+        "mae": 5.430488786482334
       },
       "equal_weight_polls": {
-        "n": 33,
-        "crps": 2.4055705277269004,
-        "log_score": -3.076537741264742,
-        "brier": 0.0485615693918826,
-        "mae": 2.870854545454545
+        "n": 35,
+        "crps": 5.591488977330706,
+        "log_score": -5.4784341037851485,
+        "brier": 0.037230856710850704,
+        "mae": 6.892662426303855
       },
       "shrinkage_polls": {
-        "n": 33,
-        "crps": 2.454370906399554,
-        "log_score": -3.090288464592718,
-        "brier": 0.047537149173214714,
-        "mae": 2.9919275728789225
+        "n": 35,
+        "crps": 5.4375063912514925,
+        "log_score": -5.272898910116202,
+        "brier": 0.03089144096613337,
+        "mae": 6.707488846490904
+      },
+      "pymc": {
+        "n": 35,
+        "crps": 4.15386433721637,
+        "log_score": -3.307415032969042,
+        "brier": 0.029064892439286595,
+        "mae": 5.731076179707171,
+        "enop_global": 138.2205963398653,
+        "fit_method": "pymc",
+        "error_budget": {
+          "sigma_nat_prior": 4.0,
+          "sigma_region_prior": 2.5,
+          "sigma_local_prior": 3.5,
+          "future_movement_sd": 2.7556759606310752,
+          "future_nat_sd": 1.5156217783470916,
+          "terminal_error_sd": 2.5,
+          "days_to_ed": 45,
+          "note": "Blueprint section 7.2 Morris split: contracting future movement (national+race) + fixed terminal Election-Day polling error"
+        }
       },
       "fast_hierarchical_t": {
-        "n": 33,
-        "crps": 2.3647330072611052,
-        "log_score": -2.9729114351230397,
-        "brier": 0.038428181621845546,
-        "mae": 2.982324166348902,
-        "enop_global": 4.912023467325743
+        "n": 35,
+        "crps": 5.025661383642237,
+        "log_score": -3.8016166895020547,
+        "brier": 0.0384088368125173,
+        "mae": 6.307184689414269
       },
       "state_space": {
-        "n": 33,
-        "crps": 2.5078607411740745,
-        "log_score": -3.0857034698261416,
-        "brier": 0.04391473240914264,
-        "mae": 2.9463091028812434
+        "n": 35,
+        "crps": 3.9148496086522755,
+        "log_score": -3.4664996193677657,
+        "brier": 0.03258513313350121,
+        "mae": 5.276277052233946
       },
       "poll_only_state_space": {
-        "n": 33,
-        "crps": 13.46768423575112,
-        "log_score": -6.213477374452238,
-        "brier": 0.23953590290927998,
-        "mae": 16.89748990282758
+        "n": 35,
+        "crps": 9.99189061521363,
+        "log_score": -5.391441360559702,
+        "brier": 0.09400549967110045,
+        "mae": 12.277065179863806
       },
       "ridge_fundamentals": {
-        "n": 33,
-        "crps": 2.368580511846652,
-        "log_score": -3.0419796923257123,
-        "brier": 0.04935986845318903,
-        "mae": 2.749736249861961
+        "n": 35,
+        "crps": 3.3386621230694784,
+        "log_score": -3.2324461199542682,
+        "brier": 0.05641070268220416,
+        "mae": 4.528291109062979
       },
       "chamber": {
-        "seat_crps": 0.5250743055555556,
-        "seat_mae": 1.8025,
-        "control_brier": 0.0,
-        "p_dem_control": 0.0,
-        "expected_dem_seats": 42.92916666666667,
-        "n_draws": 1200
+        "seat_crps": 0.8332111111111111,
+        "seat_mae": 2.4633333333333334,
+        "control_brier": 0.13201111111111108,
+        "p_dem_control": 0.6366666666666667,
+        "expected_dem_seats": 51.69,
+        "n_draws": 300
       },
       "overlay_ablation": {
         "unadjusted": {
-          "seat_crps": 0.5250743055555556,
-          "seat_mae": 1.8025,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 42.92916666666667,
-          "n_draws": 1200
+          "seat_crps": 0.8332111111111111,
+          "seat_mae": 2.4633333333333334,
+          "control_brier": 0.13201111111111108,
+          "p_dem_control": 0.6366666666666667,
+          "expected_dem_seats": 51.69,
+          "n_draws": 300
         },
         "rating_overlay": {
-          "seat_crps": 0.5093659722222221,
-          "seat_mae": 1.7158333333333333,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 43.130833333333335,
-          "n_draws": 1200
+          "seat_crps": 0.8260222222222222,
+          "seat_mae": 2.2733333333333334,
+          "control_brier": 0.10027777777777777,
+          "p_dem_control": 0.6833333333333333,
+          "expected_dem_seats": 51.94,
+          "n_draws": 300
         },
-        "delta_control_brier": 0.0,
-        "delta_seat_crps": -0.015708333333333435
+        "delta_control_brier": -0.03173333333333331,
+        "delta_seat_crps": -0.007188888888888911
       }
     },
     "30": {
       "last_election_swing": {
-        "n": 33,
-        "crps": 2.985169200841347,
-        "log_score": -3.125884174838836,
-        "brier": 0.06295749568624684,
-        "mae": 4.377666666666667
+        "n": 35,
+        "crps": 3.8594675173396125,
+        "log_score": -3.343630641221722,
+        "brier": 0.05203228198033298,
+        "mae": 5.467828571428571
       },
       "equal_weight_polls": {
-        "n": 33,
-        "crps": 2.4055705277269004,
-        "log_score": -3.076537741264742,
-        "brier": 0.0485615693918826,
-        "mae": 2.870854545454545
+        "n": 35,
+        "crps": 5.021140453342359,
+        "log_score": -4.448780842435494,
+        "brier": 0.0529820486862251,
+        "mae": 6.589993197278912
       },
       "shrinkage_polls": {
-        "n": 33,
-        "crps": 2.454370906399554,
-        "log_score": -3.0902884645927178,
-        "brier": 0.0475371491732147,
-        "mae": 2.9919275728789216
+        "n": 35,
+        "crps": 5.708781204263011,
+        "log_score": -5.539514478204813,
+        "brier": 0.03310944895938564,
+        "mae": 7.241503183113589
+      },
+      "pymc": {
+        "n": 35,
+        "crps": 4.685778505533821,
+        "log_score": -4.089973189558717,
+        "brier": 0.026645495119777218,
+        "mae": 6.1706476563457695,
+        "enop_global": 175.59346944660234,
+        "fit_method": "pymc",
+        "error_budget": {
+          "sigma_nat_prior": 4.0,
+          "sigma_region_prior": 2.5,
+          "sigma_local_prior": 3.5,
+          "future_movement_sd": 2.25,
+          "future_nat_sd": 1.2375,
+          "terminal_error_sd": 2.5,
+          "days_to_ed": 30,
+          "note": "Blueprint section 7.2 Morris split: contracting future movement (national+race) + fixed terminal Election-Day polling error"
+        }
       },
       "fast_hierarchical_t": {
-        "n": 33,
-        "crps": 2.2882813711506182,
-        "log_score": -2.955583598542043,
-        "brier": 0.03826964265461757,
-        "mae": 2.8438991382487844,
-        "enop_global": 4.9120234673257555
+        "n": 35,
+        "crps": 5.093078501419359,
+        "log_score": -3.7661398466987204,
+        "brier": 0.03639989170434372,
+        "mae": 6.655783703832
       },
       "state_space": {
-        "n": 33,
-        "crps": 2.4630477561621014,
-        "log_score": -3.0716513665819676,
-        "brier": 0.042800535075876334,
-        "mae": 2.867637474824894
+        "n": 35,
+        "crps": 3.97935963453741,
+        "log_score": -3.5017601566545036,
+        "brier": 0.029358025691073982,
+        "mae": 5.260585130778608
       },
       "poll_only_state_space": {
-        "n": 33,
-        "crps": 13.528074768038692,
-        "log_score": -6.302881708329187,
-        "brier": 0.2410561660098528,
-        "mae": 16.932727635434727
+        "n": 35,
+        "crps": 9.78666185838517,
+        "log_score": -5.577412784167019,
+        "brier": 0.08248295736137048,
+        "mae": 12.009152537686637
       },
       "ridge_fundamentals": {
-        "n": 33,
-        "crps": 2.368580511846652,
-        "log_score": -3.0419796923257123,
-        "brier": 0.04935986845318903,
-        "mae": 2.749736249861961
+        "n": 35,
+        "crps": 3.3390698032026793,
+        "log_score": -3.232566607816202,
+        "brier": 0.05632341918685959,
+        "mae": 4.527676100840336
       },
       "chamber": {
-        "seat_crps": 0.5293812500000001,
-        "seat_mae": 1.7875,
-        "control_brier": 0.0,
-        "p_dem_control": 0.0,
-        "expected_dem_seats": 43.160833333333336,
-        "n_draws": 1200
+        "seat_crps": 0.6998666666666669,
+        "seat_mae": 2.046666666666667,
+        "control_brier": 0.09201111111111111,
+        "p_dem_control": 0.6966666666666667,
+        "expected_dem_seats": 51.86666666666667,
+        "n_draws": 300
       },
       "overlay_ablation": {
         "unadjusted": {
-          "seat_crps": 0.5293812500000001,
-          "seat_mae": 1.7875,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 43.160833333333336,
-          "n_draws": 1200
+          "seat_crps": 0.6998666666666669,
+          "seat_mae": 2.046666666666667,
+          "control_brier": 0.09201111111111111,
+          "p_dem_control": 0.6966666666666667,
+          "expected_dem_seats": 51.86666666666667,
+          "n_draws": 300
         },
         "rating_overlay": {
-          "seat_crps": 0.5270645833333334,
-          "seat_mae": 1.7191666666666667,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 43.3525,
-          "n_draws": 1200
+          "seat_crps": 0.7090444444444444,
+          "seat_mae": 1.9266666666666667,
+          "control_brier": 0.0576,
+          "p_dem_control": 0.76,
+          "expected_dem_seats": 52.07333333333333,
+          "n_draws": 300
         },
-        "delta_control_brier": 0.0,
-        "delta_seat_crps": -0.0023166666666667446
+        "delta_control_brier": -0.034411111111111115,
+        "delta_seat_crps": 0.009177777777777507
       }
     },
     "14": {
       "last_election_swing": {
-        "n": 33,
-        "crps": 2.985169200841347,
-        "log_score": -3.125884174838836,
-        "brier": 0.06295749568624684,
-        "mae": 4.377666666666667
+        "n": 35,
+        "crps": 3.8261708080964913,
+        "log_score": -3.3354970054669835,
+        "brier": 0.05178101112906698,
+        "mae": 5.414177142857143
       },
       "equal_weight_polls": {
-        "n": 33,
-        "crps": 2.4055705277269004,
-        "log_score": -3.076537741264742,
-        "brier": 0.0485615693918826,
-        "mae": 2.870854545454545
+        "n": 35,
+        "crps": 4.529643161918112,
+        "log_score": -4.4646020485348865,
+        "brier": 0.02218780655904048,
+        "mae": 5.872357032570604
       },
       "shrinkage_polls": {
-        "n": 33,
-        "crps": 2.454370906399554,
-        "log_score": -3.090288464592718,
-        "brier": 0.0475371491732147,
-        "mae": 2.9919275728789225
+        "n": 35,
+        "crps": 5.200005650692175,
+        "log_score": -5.460635103430324,
+        "brier": 0.018185942468576837,
+        "mae": 6.619011578693834
+      },
+      "pymc": {
+        "n": 35,
+        "crps": 4.446711475594506,
+        "log_score": -3.9282843667519973,
+        "brier": 0.019555639186890742,
+        "mae": 5.78776512927671,
+        "enop_global": 242.8383661013772,
+        "fit_method": "pymc",
+        "error_budget": {
+          "sigma_nat_prior": 4.0,
+          "sigma_region_prior": 2.5,
+          "sigma_local_prior": 3.5,
+          "future_movement_sd": 1.5370426148939396,
+          "future_nat_sd": 0.8453734381916669,
+          "terminal_error_sd": 2.5,
+          "days_to_ed": 14,
+          "note": "Blueprint section 7.2 Morris split: contracting future movement (national+race) + fixed terminal Election-Day polling error"
+        }
       },
       "fast_hierarchical_t": {
-        "n": 33,
-        "crps": 2.3096957481378917,
-        "log_score": -2.9646532743437617,
-        "brier": 0.03803894865458824,
-        "mae": 2.8365231101225317,
-        "enop_global": 4.91202346732575
+        "n": 35,
+        "crps": 4.737169610614375,
+        "log_score": -3.762723255741052,
+        "brier": 0.03250112094448375,
+        "mae": 6.327959104317344
       },
       "state_space": {
-        "n": 33,
-        "crps": 2.4764883143315717,
-        "log_score": -3.0685718549067067,
-        "brier": 0.04136418123215254,
-        "mae": 2.940027267019925
+        "n": 35,
+        "crps": 3.8667519349235624,
+        "log_score": -3.5213748518034476,
+        "brier": 0.03186203186418563,
+        "mae": 5.26821005063055
       },
       "poll_only_state_space": {
-        "n": 33,
-        "crps": 13.561862313650808,
-        "log_score": -6.335582581529575,
-        "brier": 0.2421746448477131,
-        "mae": 16.966032569615425
+        "n": 35,
+        "crps": 8.935706735476227,
+        "log_score": -5.470067145270297,
+        "brier": 0.07042067046818257,
+        "mae": 10.864608427005336
       },
       "ridge_fundamentals": {
-        "n": 33,
-        "crps": 2.368580511846652,
-        "log_score": -3.0419796923257123,
-        "brier": 0.04935986845318903,
-        "mae": 2.749736249861961
+        "n": 35,
+        "crps": 3.3384962525277806,
+        "log_score": -3.2323960707313795,
+        "brier": 0.05644908947965833,
+        "mae": 4.528559771428571
       },
       "chamber": {
-        "seat_crps": 0.5482069444444444,
-        "seat_mae": 1.8533333333333333,
-        "control_brier": 0.0,
-        "p_dem_control": 0.0,
-        "expected_dem_seats": 43.11333333333334,
-        "n_draws": 1200
+        "seat_crps": 0.6033,
+        "seat_mae": 1.9766666666666666,
+        "control_brier": 0.22089999999999999,
+        "p_dem_control": 0.53,
+        "expected_dem_seats": 51.123333333333335,
+        "n_draws": 300
       },
       "overlay_ablation": {
         "unadjusted": {
-          "seat_crps": 0.5482069444444444,
-          "seat_mae": 1.8533333333333333,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 43.11333333333334,
-          "n_draws": 1200
+          "seat_crps": 0.6033,
+          "seat_mae": 1.9766666666666666,
+          "control_brier": 0.22089999999999999,
+          "p_dem_control": 0.53,
+          "expected_dem_seats": 51.123333333333335,
+          "n_draws": 300
         },
         "rating_overlay": {
-          "seat_crps": 0.5550340277777777,
-          "seat_mae": 1.8125,
-          "control_brier": 6.944444444444446e-07,
-          "p_dem_control": 0.0008333333333333334,
-          "expected_dem_seats": 43.28916666666667,
-          "n_draws": 1200
+          "seat_crps": 0.4845666666666666,
+          "seat_mae": 1.63,
+          "control_brier": 0.17921111111111113,
+          "p_dem_control": 0.5766666666666667,
+          "expected_dem_seats": 51.223333333333336,
+          "n_draws": 300
         },
-        "delta_control_brier": 6.944444444444446e-07,
-        "delta_seat_crps": 0.0068270833333332615
+        "delta_control_brier": -0.04168888888888886,
+        "delta_seat_crps": -0.11873333333333336
       }
     },
     "7": {
       "last_election_swing": {
-        "n": 33,
-        "crps": 2.985169200841347,
-        "log_score": -3.125884174838836,
-        "brier": 0.06295749568624684,
-        "mae": 4.377666666666667
+        "n": 35,
+        "crps": 3.7336774836148665,
+        "log_score": -3.312922777037077,
+        "brier": 0.05118064040891576,
+        "mae": 5.270976890756302
       },
       "equal_weight_polls": {
-        "n": 33,
-        "crps": 2.4055705277269004,
-        "log_score": -3.076537741264742,
-        "brier": 0.0485615693918826,
-        "mae": 2.870854545454545
+        "n": 35,
+        "crps": 4.02449715766247,
+        "log_score": -4.077965421223757,
+        "brier": 0.028616011307202864,
+        "mae": 5.288363108910231
       },
       "shrinkage_polls": {
-        "n": 33,
-        "crps": 2.454370906399554,
-        "log_score": -3.090288464592718,
-        "brier": 0.0475371491732147,
-        "mae": 2.9919275728789225
+        "n": 35,
+        "crps": 4.494149692068908,
+        "log_score": -5.037449801776921,
+        "brier": 0.020660545538725723,
+        "mae": 5.840336532334061
+      },
+      "pymc": {
+        "n": 35,
+        "crps": 4.075971707760699,
+        "log_score": -4.1726720636291965,
+        "brier": 0.0200925717794142,
+        "mae": 5.371829012624209,
+        "enop_global": 294.7299185739515,
+        "fit_method": "pymc",
+        "error_budget": {
+          "sigma_nat_prior": 4.0,
+          "sigma_region_prior": 2.5,
+          "sigma_local_prior": 3.5,
+          "future_movement_sd": 1.086853255964208,
+          "future_nat_sd": 0.5977692907803144,
+          "terminal_error_sd": 2.5,
+          "days_to_ed": 7,
+          "note": "Blueprint section 7.2 Morris split: contracting future movement (national+race) + fixed terminal Election-Day polling error"
+        }
       },
       "fast_hierarchical_t": {
-        "n": 33,
-        "crps": 2.2997840801783074,
-        "log_score": -2.964877463209888,
-        "brier": 0.037574205109529316,
-        "mae": 2.7953521018788825,
-        "enop_global": 4.912023467325749
+        "n": 35,
+        "crps": 4.13911182619639,
+        "log_score": -3.6260193203441777,
+        "brier": 0.03660807648723571,
+        "mae": 5.564429045626291
       },
       "state_space": {
-        "n": 33,
-        "crps": 2.4084541549410092,
-        "log_score": -3.0376900851920965,
-        "brier": 0.04097276373884984,
-        "mae": 2.8597192539133713
+        "n": 35,
+        "crps": 3.657555909494072,
+        "log_score": -3.4806864672908104,
+        "brier": 0.04055254782427688,
+        "mae": 5.0602742551488
       },
       "poll_only_state_space": {
-        "n": 33,
-        "crps": 13.58061015573805,
-        "log_score": -6.521651145282823,
-        "brier": 0.23921580505088455,
-        "mae": 16.90919756710725
+        "n": 35,
+        "crps": 7.963342369271157,
+        "log_score": -5.2395303947463825,
+        "brier": 0.07656206553865437,
+        "mae": 9.977192879251392
       },
       "ridge_fundamentals": {
-        "n": 33,
-        "crps": 2.368580511846652,
-        "log_score": -3.0419796923257123,
-        "brier": 0.04935986845318903,
-        "mae": 2.749736249861961
+        "n": 35,
+        "crps": 3.3372714526983995,
+        "log_score": -3.2319915928934524,
+        "brier": 0.05683022080230648,
+        "mae": 4.531170336134453
       },
       "chamber": {
-        "seat_crps": 0.5161416666666667,
-        "seat_mae": 1.7833333333333334,
-        "control_brier": 6.944444444444446e-07,
-        "p_dem_control": 0.0008333333333333334,
-        "expected_dem_seats": 43.11666666666667,
-        "n_draws": 1200
+        "seat_crps": 0.5893444444444442,
+        "seat_mae": 2.01,
+        "control_brier": 0.17921111111111113,
+        "p_dem_control": 0.5766666666666667,
+        "expected_dem_seats": 51.00333333333333,
+        "n_draws": 300
       },
       "overlay_ablation": {
         "unadjusted": {
-          "seat_crps": 0.5161416666666667,
-          "seat_mae": 1.7833333333333334,
-          "control_brier": 6.944444444444446e-07,
-          "p_dem_control": 0.0008333333333333334,
-          "expected_dem_seats": 43.11666666666667,
-          "n_draws": 1200
+          "seat_crps": 0.5893444444444442,
+          "seat_mae": 2.01,
+          "control_brier": 0.17921111111111113,
+          "p_dem_control": 0.5766666666666667,
+          "expected_dem_seats": 51.00333333333333,
+          "n_draws": 300
         },
         "rating_overlay": {
-          "seat_crps": 0.5188555555555554,
-          "seat_mae": 1.7366666666666666,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 43.25666666666667,
-          "n_draws": 1200
+          "seat_crps": 0.511511111111111,
+          "seat_mae": 1.7466666666666666,
+          "control_brier": 0.17640000000000003,
+          "p_dem_control": 0.58,
+          "expected_dem_seats": 51.02,
+          "n_draws": 300
         },
-        "delta_control_brier": -6.944444444444446e-07,
-        "delta_seat_crps": 0.0027138888888886825
+        "delta_control_brier": -0.0028111111111110976,
+        "delta_seat_crps": -0.0778333333333332
       }
     },
     "1": {
       "last_election_swing": {
-        "n": 33,
-        "crps": 2.985169200841347,
-        "log_score": -3.125884174838836,
-        "brier": 0.06295749568624684,
-        "mae": 4.377666666666667
+        "n": 35,
+        "crps": 3.6238288729420325,
+        "log_score": -3.286125696220948,
+        "brier": 0.050714272369017876,
+        "mae": 5.083916612798966
       },
       "equal_weight_polls": {
-        "n": 33,
-        "crps": 2.4055705277269004,
-        "log_score": -3.076537741264742,
-        "brier": 0.0485615693918826,
-        "mae": 2.870854545454545
+        "n": 35,
+        "crps": 4.020892985252733,
+        "log_score": -4.063072314052217,
+        "brier": 0.029387016415843493,
+        "mae": 5.464699221814096
       },
       "shrinkage_polls": {
-        "n": 33,
-        "crps": 2.454370906399554,
-        "log_score": -3.0902884645927178,
-        "brier": 0.0475371491732147,
-        "mae": 2.9919275728789216
+        "n": 35,
+        "crps": 4.400170363775037,
+        "log_score": -4.920655000013191,
+        "brier": 0.021731833648584643,
+        "mae": 5.7741283861945325
+      },
+      "pymc": {
+        "n": 35,
+        "crps": 4.034872377543762,
+        "log_score": -4.018846439957463,
+        "brier": 0.020483549087239213,
+        "mae": 5.462079076761235,
+        "enop_global": 364.088743207976,
+        "fit_method": "pymc",
+        "error_budget": {
+          "sigma_nat_prior": 4.0,
+          "sigma_region_prior": 2.5,
+          "sigma_local_prior": 3.5,
+          "future_movement_sd": 0.41079191812887456,
+          "future_nat_sd": 0.22593555497088103,
+          "terminal_error_sd": 2.5,
+          "days_to_ed": 1,
+          "note": "Blueprint section 7.2 Morris split: contracting future movement (national+race) + fixed terminal Election-Day polling error"
+        }
       },
       "fast_hierarchical_t": {
-        "n": 33,
-        "crps": 2.2762698883923003,
-        "log_score": -2.953920340795916,
-        "brier": 0.03908925972883269,
-        "mae": 2.7471811119568783,
-        "enop_global": 4.9120234673257555
+        "n": 35,
+        "crps": 3.9640312079077815,
+        "log_score": -3.6116808841312085,
+        "brier": 0.03323219323172028,
+        "mae": 5.437893919278509
       },
       "state_space": {
-        "n": 33,
-        "crps": 2.419725306027397,
-        "log_score": -3.0384891192072487,
-        "brier": 0.040658638236638095,
-        "mae": 2.8762585704041586
+        "n": 35,
+        "crps": 3.5691020000344262,
+        "log_score": -3.4643491129295803,
+        "brier": 0.042898144645821513,
+        "mae": 5.010821338291778
       },
       "poll_only_state_space": {
-        "n": 33,
-        "crps": 13.554120888641137,
-        "log_score": -6.379833813972849,
-        "brier": 0.24034042626863925,
-        "mae": 16.924624529693965
+        "n": 35,
+        "crps": 7.729296826347656,
+        "log_score": -5.059772333778763,
+        "brier": 0.07230639131821552,
+        "mae": 9.797932725450837
       },
       "ridge_fundamentals": {
-        "n": 33,
-        "crps": 2.368580511846652,
-        "log_score": -3.0419796923257123,
-        "brier": 0.04935986845318903,
-        "mae": 2.749736249861961
+        "n": 35,
+        "crps": 3.336730104044777,
+        "log_score": -3.2316826009282376,
+        "brier": 0.057362930241478566,
+        "mae": 4.534662127989658
       },
       "chamber": {
-        "seat_crps": 0.542573611111111,
-        "seat_mae": 1.805,
-        "control_brier": 0.0,
-        "p_dem_control": 0.0,
-        "expected_dem_seats": 43.175,
-        "n_draws": 1200
+        "seat_crps": 0.6313111111111112,
+        "seat_mae": 2.06,
+        "control_brier": 0.28801111111111105,
+        "p_dem_control": 0.4633333333333333,
+        "expected_dem_seats": 50.38666666666666,
+        "n_draws": 300
       },
       "overlay_ablation": {
         "unadjusted": {
-          "seat_crps": 0.542573611111111,
-          "seat_mae": 1.805,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 43.175,
-          "n_draws": 1200
+          "seat_crps": 0.6313111111111112,
+          "seat_mae": 2.06,
+          "control_brier": 0.28801111111111105,
+          "p_dem_control": 0.4633333333333333,
+          "expected_dem_seats": 50.38666666666666,
+          "n_draws": 300
         },
         "rating_overlay": {
-          "seat_crps": 0.5526340277777777,
-          "seat_mae": 1.7425,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 43.380833333333335,
-          "n_draws": 1200
+          "seat_crps": 0.5332777777777777,
+          "seat_mae": 1.7766666666666666,
+          "control_brier": 0.28090000000000004,
+          "p_dem_control": 0.47,
+          "expected_dem_seats": 50.50333333333333,
+          "n_draws": 300
         },
-        "delta_control_brier": 0.0,
-        "delta_seat_crps": 0.010060416666666683
+        "delta_control_brier": -0.007111111111111013,
+        "delta_seat_crps": -0.09803333333333342
       }
     }
   },
   "aggregate": {
     "last_election_swing": {
-      "crps": 2.985169200841347,
-      "log_score": -3.125884174838836,
-      "brier": 0.06295749568624684,
-      "mae": 4.377666666666667,
+      "crps": 3.7258570407677762,
+      "brier": 0.051488465930110604,
+      "mae": 5.249491725151266,
       "n_leads": 8
     },
     "equal_weight_polls": {
-      "crps": 2.4055705277269004,
-      "log_score": -3.076537741264742,
-      "brier": 0.0485615693918826,
-      "mae": 2.870854545454545,
+      "crps": 4.606345221710296,
+      "brier": 0.04605065956938642,
+      "mae": 6.0136022007406655,
       "n_leads": 8
     },
     "shrinkage_polls": {
-      "crps": 2.454370906399554,
-      "log_score": -3.090288464592718,
-      "brier": 0.04753714917321471,
-      "mae": 2.991927572878922,
+      "crps": 4.879760427497037,
+      "brier": 0.032705591889268776,
+      "mae": 6.279617916811885,
+      "n_leads": 8
+    },
+    "pymc": {
+      "crps": 3.9250009442355998,
+      "brier": 0.028685778358615188,
+      "mae": 5.354920463353986,
       "n_leads": 8
     },
     "fast_hierarchical_t": {
-      "crps": 2.324745116149663,
-      "log_score": -2.9676438245236407,
-      "brier": 0.03840803549712467,
-      "mae": 2.877771221121677,
+      "crps": 4.500623923112064,
+      "brier": 0.038725266882303225,
+      "mae": 5.9234625913762695,
       "n_leads": 8
     },
     "state_space": {
-      "crps": 2.483159756759717,
-      "log_score": -3.0765715736844403,
-      "brier": 0.042523680344280446,
-      "mae": 2.9115659934796554,
+      "crps": 3.7367593867554953,
+      "brier": 0.03712235491563954,
+      "mae": 5.062326067887128,
       "n_leads": 8
     },
     "poll_only_state_space": {
-      "crps": 13.47447497636714,
-      "log_score": -6.230055953306784,
-      "brier": 0.24010837173866295,
-      "mae": 16.911768341593827,
+      "crps": 10.201769310558694,
+      "brier": 0.1099686982544181,
+      "mae": 12.79644917854846,
       "n_leads": 8
     },
     "ridge_fundamentals": {
-      "crps": 2.368580511846652,
-      "log_score": -3.0419796923257123,
-      "brier": 0.04935986845318903,
-      "mae": 2.749736249861961,
+      "crps": 3.338477542097355,
+      "brier": 0.05697824247575465,
+      "mae": 4.53196037615545,
       "n_leads": 8
     }
   },
   "enop": {
     "120": {
-      "n_polls": 16,
-      "enop_global": 12.173518066489313
+      "n_polls": 99,
+      "enop_global": 44.61686273385059
     },
     "90": {
-      "n_polls": 16,
-      "enop_global": 12.173518066489322
+      "n_polls": 152,
+      "enop_global": 69.93722417970555
     },
     "60": {
-      "n_polls": 16,
-      "enop_global": 12.173518066489322
+      "n_polls": 207,
+      "enop_global": 100.22025123935138
     },
     "45": {
-      "n_polls": 16,
-      "enop_global": 12.173518066489303
+      "n_polls": 279,
+      "enop_global": 138.2205963398653
     },
     "30": {
-      "n_polls": 16,
-      "enop_global": 12.17351806648932
+      "n_polls": 340,
+      "enop_global": 175.59346944660234
     },
     "14": {
-      "n_polls": 16,
-      "enop_global": 12.173518066489313
+      "n_polls": 455,
+      "enop_global": 242.8383661013772
     },
     "7": {
-      "n_polls": 16,
-      "enop_global": 12.17351806648931
+      "n_polls": 544,
+      "enop_global": 294.7299185739515
     },
     "1": {
-      "n_polls": 16,
-      "enop_global": 12.173518066489322
+      "n_polls": 663,
+      "enop_global": 364.088743207976
     }
   },
   "chamber": {
-    "seat_crps": 0.5317241319444443,
-    "seat_mae": 1.8145833333333332,
-    "control_brier": 4.3402777777777785e-07,
-    "p_dem_control": 0.0003125,
-    "expected_dem_seats": 43.05583333333333,
+    "control_brier": 0.1761638888888889,
+    "seat_mae": 2.205,
     "n_leads": 8
   },
   "overlay_ablation": {
-    "mean_delta_control_brier": 8.680555555555557e-08,
-    "mean_delta_seat_crps": -0.003601562500000044,
+    "mean_delta_control_brier": -0.021951388888888868,
+    "mean_delta_seat_crps": -0.0420180555555556,
     "n_leads": 8,
     "note": "Positive delta_control_brier means overlay worsened Brier vs unadjusted."
   },
   "stack_weights": {
-    "last_election_swing": 0.08448987407697031,
-    "equal_weight_polls": 0.18298971051985038,
-    "shrinkage_polls": 0.1714621860910452,
-    "fast_hierarchical_t": 0.20381182466431108,
-    "state_space": 0.16500530406230565,
-    "poll_only_state_space": 7.126470741478741e-08,
-    "ridge_fundamentals": 0.19224102932081
+    "last_election_swing": 0.18837827739559015,
+    "equal_weight_polls": 0.05823390899119836,
+    "shrinkage_polls": 0.04044383437589515,
+    "pymc": 0.21149844225904119,
+    "state_space": 0.18565973074824227,
+    "poll_only_state_space": 3.3503758982675524e-05,
+    "ridge_fundamentals": 0.3157523024710503
+  },
+  "comparable": true,
+  "validation_status": "official_ballot_fte_polls",
+  "archive_note": "Official race universe + FTE candidate-identity polls (P0.3). Regenerate nested OOS artifacts before peer publication claims.",
+  "stack_weights_loo": {
+    "last_election_swing": 0.19070220283638828,
+    "equal_weight_polls": 0.02604916956669685,
+    "shrinkage_polls": 0.008929549337403631,
+    "pymc": 0.08243061378393061,
+    "state_space": 0.2124421735300613,
+    "poll_only_state_space": 8.702652967290153e-05,
+    "ridge_fundamentals": 0.4793592644158463
   }
 }

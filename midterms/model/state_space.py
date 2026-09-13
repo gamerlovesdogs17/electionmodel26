@@ -18,7 +18,7 @@ from midterms.evidence.warehouse import EvidenceSnapshot
 from midterms.model.fundamentals import fundamentals_mean
 from midterms.model.poll_weights import attach_poll_weights
 from midterms.model.pymc_model import FitResult, _mode_offset, _population_offset
-from midterms.model.similarity import correlated_shocks
+from midterms.model.terminal import add_terminal_layers, error_budget_block
 
 
 def future_movement_sd(days_to_ed: int, *, era_weight: float = 1.0, base: float = 4.5) -> float:
@@ -173,12 +173,28 @@ def fit_state_space(
     if bad_sd.any():
         sds_a = sds_a.copy()
         sds_a[bad_sd] = float(np.sqrt(8.0**2 + future_sd**2 + terminal_sd**2))
-    # Shared national path + race residual + similarity (Student-t)
+    # Shared national path + race residual; layered terminal (nat+race+similarity)
     nat = rng.standard_t(student_t_df, size=n_draws) * float(national_path_sd)
     local = rng.standard_t(student_t_df, size=(n_draws, len(means_a))) * (sds_a * 0.55)
-    sim = correlated_shocks(races, n_draws, rng, scale=sds_a * 0.3, nu=student_t_df)
-    mu_draws = means_a[None, :] + nat[:, None] + local + sim
+    mu_draws = means_a[None, :] + nat[:, None] + local
+    # Path already embeds future+terminal variance in sds; add correlated terminal
+    # layers at calibrated absolute scales (similarity + residual nat/race).
+    from midterms.model.terminal import active_scales
 
+    scales = active_scales()
+    # Race residual already in local; use similarity + light national only
+    mu_draws = add_terminal_layers(
+        mu_draws,
+        races,
+        rng,
+        terminal_nat_sd=scales["terminal_nat_sd"] * 0.35,
+        terminal_race_sd=0.0,
+        sim_scale=scales["sim_scale"],
+        length_scale=scales["length_scale"],
+        nu=student_t_df,
+    )
+
+    budget = error_budget_block(scales)
     return FitResult(
         race_ids=race_ids,
         states=states,
@@ -199,11 +215,13 @@ def fit_state_space(
             "flat_prior": bool(flat_prior),
             "future_base": float(future_base),
             "terminal_base": float(terminal_base),
+            "terminal_layers": "national+race+similarity",
+            "error_budget": budget,
             "draws": n_draws,
             "seed": seed,
             "note": (
-                "national-path state-space: contracting future movement + fixed terminal ED error; "
-                "mode/pop/house offsets aligned with hierarchical measurement"
+                "national-path state-space: contracting future movement + layered "
+                "terminal (P1.3); mode/pop/house offsets aligned with hierarchical measurement"
             ),
         },
         method="state_space",

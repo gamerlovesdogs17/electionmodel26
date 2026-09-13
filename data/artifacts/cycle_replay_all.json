@@ -2,303 +2,1100 @@
   "cycles": [
     "2018",
     "2020",
-    "2022"
+    "2022",
+    "2024"
   ],
   "mean_crps_by_model": {
-    "last_election_swing": 2.987601428058747,
-    "equal_weight_polls": 2.8294529103225314,
-    "shrinkage_polls": 2.739720033215438,
-    "fast_hierarchical_t": 2.718189659669454,
-    "state_space": 2.666005197683396,
-    "poll_only_state_space": 9.17877977718979,
-    "ridge_fundamentals": 2.7812960342267634
+    "equal_weight_polls": 5.4156168425387525,
+    "last_election_swing": 4.0757107615881525,
+    "pymc": 4.80841811719152,
+    "state_space": 4.017710668948461,
+    "shrinkage_polls": 6.086194372483746,
+    "ridge_fundamentals": 3.460388665504892,
+    "poll_only_state_space": 10.021582453230106,
+    "fast_hierarchical_t": 5.3946928179867975
   },
   "stack_weights": {
-    "last_election_swing": 0.1264075367822936,
-    "equal_weight_polls": 0.15608110823084928,
-    "shrinkage_polls": 0.17591829122496674,
-    "state_space": 0.1940869161670225,
-    "poll_only_state_space": 3.2863477009926e-05,
-    "ridge_fundamentals": 0.16643169163996094,
-    "pymc": 0.18104159247789697
+    "last_election_swing": 0.19466485083338164,
+    "equal_weight_polls": 0.032613878705476926,
+    "shrinkage_polls": 0.01333823271636273,
+    "pymc": 0.10682012920103916,
+    "state_space": 0.2103163494311376,
+    "poll_only_state_space": 7.018999103367987e-05,
+    "ridge_fundamentals": 0.44217636912156827
   },
-  "note": "Stack weights from OOS mean CRPS across cycles; no hand-tuned challenger mass.",
+  "stack_weights_production": {
+    "last_election_swing": 0.19466485083338164,
+    "equal_weight_polls": 0.032613878705476926,
+    "shrinkage_polls": 0.01333823271636273,
+    "pymc": 0.10682012920103916,
+    "state_space": 0.2103163494311376,
+    "poll_only_state_space": 7.018999103367987e-05,
+    "ridge_fundamentals": 0.44217636912156827
+  },
+  "hierarchical_method": "pymc",
+  "comparable": true,
+  "validation_status": "official_ballot_fte_polls",
+  "archive_note": "Race universe uses official ballots; historical polls are FTE with candidate identity (P0.3). Still not a peer-published claim until nested OOS scores are regenerated.",
+  "stack_provenance": {
+    "method": "leave_one_cycle_out_mean_crps",
+    "folds": [
+      "2018",
+      "2020",
+      "2022",
+      "2024"
+    ],
+    "temperature": 0.75,
+    "hierarchical_method": "pymc",
+    "note": "Production weights average OOS CRPS across historical cycles. Each cycle's scores were computed with that cycle held out. Hierarchical spine scored as pymc when hierarchical_method=pymc."
+  },
+  "note": "Stack weights from OOS mean CRPS across cycles; hierarchical mass labeled pymc.",
   "by_cycle": {
     "2018": {
       "aggregate": {
         "last_election_swing": {
-          "crps": 3.0522027149477484,
-          "log_score": -3.1599672142691064,
-          "brier": 0.03041473471949528,
-          "mae": 4.118240109635741,
+          "crps": 4.485639189210927,
+          "brier": 0.0814903968027672,
+          "mae": 6.313765668905364,
           "n_leads": 8
         },
         "equal_weight_polls": {
-          "crps": 3.686715655366937,
-          "log_score": -3.4124602863009508,
-          "brier": 0.03387150269558145,
-          "mae": 5.049048033910534,
+          "crps": 6.972468781236733,
+          "brier": 0.12465185639433081,
+          "mae": 9.203696642057137,
           "n_leads": 8
         },
         "shrinkage_polls": {
-          "crps": 3.345805732428196,
-          "log_score": -3.4811301404828123,
-          "brier": 0.019423263935350876,
-          "mae": 4.485040277727003,
+          "crps": 7.472833726869467,
+          "brier": 0.15126472721835682,
+          "mae": 9.223026683036547,
+          "n_leads": 8
+        },
+        "pymc": {
+          "crps": 5.696778544308771,
+          "brier": 0.1250578049936658,
+          "mae": 7.152349419317892,
           "n_leads": 8
         },
         "fast_hierarchical_t": {
-          "crps": 3.291582134970069,
-          "log_score": -3.270196954199035,
-          "brier": 0.022547098834989995,
-          "mae": 4.487388036598658,
+          "crps": 6.456087252310785,
+          "brier": 0.13477491855501522,
+          "mae": 8.218874795180891,
           "n_leads": 8
         },
         "state_space": {
-          "crps": 2.9822457467668553,
-          "log_score": -3.191509781306295,
-          "brier": 0.017570416505301,
-          "mae": 3.9535790008471876,
+          "crps": 4.3573849642433675,
+          "brier": 0.08421902514881896,
+          "mae": 5.518839341458539,
           "n_leads": 8
         },
         "poll_only_state_space": {
-          "crps": 3.3653354146477055,
-          "log_score": -3.224253278882288,
-          "brier": 0.02679878588460866,
-          "mae": 4.746548867845011,
+          "crps": 10.46410681223217,
+          "brier": 0.1961092321558951,
+          "mae": 12.893248237792735,
           "n_leads": 8
         },
         "ridge_fundamentals": {
-          "crps": 3.464307697991356,
-          "log_score": -3.291798098611517,
-          "brier": 0.02554390382527526,
-          "mae": 4.529932397026391,
+          "crps": 4.1295278224466525,
+          "brier": 0.030533967730209177,
+          "mae": 5.789636775783487,
           "n_leads": 8
         }
       },
       "stack_weights": {
-        "last_election_swing": 0.19358701467164907,
-        "equal_weight_polls": 0.0830721781133827,
-        "shrinkage_polls": 0.1308767982939229,
-        "fast_hierarchical_t": 0.14068938816824775,
-        "state_space": 0.21251297752178558,
-        "poll_only_state_space": 0.12751281040924858,
-        "ridge_fundamentals": 0.11174883282176333
+        "last_election_swing": 0.24267764901666228,
+        "equal_weight_polls": 0.008810650079748586,
+        "shrinkage_polls": 0.004521337988657138,
+        "pymc": 0.06581319486811851,
+        "state_space": 0.28793640757734723,
+        "poll_only_state_space": 8.378040339130158e-05,
+        "ridge_fundamentals": 0.3901569800660749
+      },
+      "stack_weights_loo": {
+        "last_election_swing": 0.17615355143704775,
+        "equal_weight_polls": 0.04913435120799541,
+        "shrinkage_polls": 0.018630592668991128,
+        "pymc": 0.12256564063480876,
+        "state_space": 0.18446605523010878,
+        "poll_only_state_space": 6.44422519027286e-05,
+        "ridge_fundamentals": 0.4489853665691454
       },
       "chamber": {
-        "seat_crps": 0.4286940972222222,
-        "seat_mae": 1.4410416666666666,
-        "control_brier": 8.593749999999999e-06,
-        "p_dem_control": 0.002604166666666667,
-        "expected_dem_seats": 44.76145833333334,
+        "control_brier": 0.16344166666666665,
+        "seat_mae": 3.13,
         "n_leads": 8
       },
       "overlay_ablation": {
-        "mean_delta_control_brier": -3.038194444444444e-06,
-        "mean_delta_seat_crps": -0.050770312499999956,
+        "mean_delta_control_brier": 0.007894444444444449,
+        "mean_delta_seat_crps": 0.1328180555555555,
         "n_leads": 8,
         "note": "Positive delta_control_brier means overlay worsened Brier vs unadjusted."
       },
       "poll_gate": {
         "election_id": "senate-2018",
         "year": 2018,
-        "n_polls": 0,
-        "synthetic": true,
-        "source": "fte_parquet",
-        "allow_synthetic": true,
+        "n_polls": 789,
+        "synthetic": false,
+        "source": "cycle_manifest",
+        "allow_synthetic": false,
         "in_cycles": true,
-        "warning": "synthetic_or_pre_fte_era"
-      }
+        "coverage": {
+          "ok": true,
+          "year": 2018,
+          "election_id": "senate-2018",
+          "n_official_contests": 33,
+          "n_polled_universe": 30,
+          "n_poll_rows": 789,
+          "n_polls_with_candidate_identity": 789,
+          "n_inferred_nominee_races": 28,
+          "nominees_sample": {
+            "senate-2018-AZ": {
+              "dem_candidate_id": "12409",
+              "dem_candidate_name": "Kyrsten Sinema",
+              "rep_candidate_id": "12410",
+              "rep_candidate_name": "Martha McSally",
+              "n_late_polls": 43
+            },
+            "senate-2018-CT": {
+              "dem_candidate_id": "12436",
+              "dem_candidate_name": "Christopher S. Murphy",
+              "rep_candidate_id": "12437",
+              "rep_candidate_name": "Matthew M. Corey",
+              "n_late_polls": 4
+            },
+            "senate-2018-FL": {
+              "dem_candidate_id": "12413",
+              "dem_candidate_name": "Bill Nelson",
+              "rep_candidate_id": "12414",
+              "rep_candidate_name": "Rick Scott",
+              "n_late_polls": 56
+            },
+            "senate-2018-IN": {
+              "dem_candidate_id": "11128",
+              "dem_candidate_name": "Joe Donnelly",
+              "rep_candidate_id": "11129",
+              "rep_candidate_name": "Mike Braun",
+              "n_late_polls": 26
+            },
+            "senate-2018-MA": {
+              "dem_candidate_id": "12480",
+              "dem_candidate_name": "Elizabeth Ann Warren",
+              "rep_candidate_id": "12481",
+              "rep_candidate_name": "Geoff Diehl",
+              "n_late_polls": 6
+            },
+            "senate-2018-MD": {
+              "dem_candidate_id": "12578",
+              "dem_candidate_name": "Benjamin L. Cardin",
+              "rep_candidate_id": "12579",
+              "rep_candidate_name": "Tony Campbell",
+              "n_late_polls": 1
+            },
+            "senate-2018-ME": {
+              "dem_candidate_id": "11393",
+              "dem_candidate_name": "Zak Ringelstein",
+              "rep_candidate_id": "11394",
+              "rep_candidate_name": "Eric L. Brakey",
+              "n_late_polls": 4
+            },
+            "senate-2018-MI": {
+              "dem_candidate_id": "11408",
+              "dem_candidate_name": "Debbie Stabenow",
+              "rep_candidate_id": "11409",
+              "rep_candidate_name": "John James",
+              "n_late_polls": 17
+            }
+          },
+          "by_lead": {
+            "90": {
+              "as_of": "2018-08-08",
+              "lead_days": 90,
+              "n_polls": 92,
+              "n_contests_with_polls": 15,
+              "n_contests_expected": 30,
+              "coverage_share": 0.5,
+              "min_share_required": 0.4,
+              "missing_contests": [
+                "senate-2018-AZ",
+                "senate-2018-CT",
+                "senate-2018-DE",
+                "senate-2018-FL",
+                "senate-2018-MA",
+                "senate-2018-MD",
+                "senate-2018-MI",
+                "senate-2018-MN",
+                "senate-2018-MO",
+                "senate-2018-MS",
+                "senate-2018-NM",
+                "senate-2018-RI",
+                "senate-2018-WA",
+                "senate-2018-WI",
+                "senate-2018-WY"
+              ],
+              "n_missing_contests": 15,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2018-05-16",
+              "max_field_end": "2018-08-06",
+              "n_recent_21d": 7,
+              "recency_ok": true,
+              "ok": true
+            },
+            "60": {
+              "as_of": "2018-09-07",
+              "lead_days": 60,
+              "n_polls": 285,
+              "n_contests_with_polls": 27,
+              "n_contests_expected": 30,
+              "coverage_share": 0.9,
+              "min_share_required": 0.55,
+              "missing_contests": [
+                "senate-2018-MD",
+                "senate-2018-RI",
+                "senate-2018-WY"
+              ],
+              "n_missing_contests": 3,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2018-07-02",
+              "max_field_end": "2018-09-04",
+              "n_recent_21d": 35,
+              "recency_ok": true,
+              "ok": true
+            },
+            "30": {
+              "as_of": "2018-10-07",
+              "lead_days": 30,
+              "n_polls": 431,
+              "n_contests_with_polls": 29,
+              "n_contests_expected": 30,
+              "coverage_share": 0.9666666666666667,
+              "min_share_required": 0.7,
+              "missing_contests": [
+                "senate-2018-WY"
+              ],
+              "n_missing_contests": 1,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2018-07-07",
+              "max_field_end": "2018-10-05",
+              "n_recent_21d": 86,
+              "recency_ok": true,
+              "ok": true
+            },
+            "7": {
+              "as_of": "2018-10-30",
+              "lead_days": 7,
+              "n_polls": 599,
+              "n_contests_with_polls": 29,
+              "n_contests_expected": 30,
+              "coverage_share": 0.9666666666666667,
+              "min_share_required": 0.7,
+              "missing_contests": [
+                "senate-2018-WY"
+              ],
+              "n_missing_contests": 1,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2018-09-07",
+              "max_field_end": "2018-10-29",
+              "n_recent_21d": 119,
+              "recency_ok": true,
+              "ok": true
+            }
+          },
+          "failures": [],
+          "note": "Coverage scored on contests with in-cycle non-hypothetical polls (safe unpolled seats excluded). Nominee checks apply near Election Day; close leads require recent median field dates.",
+          "meta_source": "Wikipedia: 2018 United States Senate elections"
+        }
+      },
+      "hierarchical_method": "pymc"
     },
     "2020": {
       "aggregate": {
         "last_election_swing": {
-          "crps": 2.9254323683871437,
-          "log_score": -3.1196584411002126,
-          "brier": 0.0741333525990566,
-          "mae": 3.8657117520722166,
+          "crps": 4.026885153932119,
+          "brier": 0.056841848443543286,
+          "mae": 5.749249168701374,
           "n_leads": 8
         },
         "equal_weight_polls": {
-          "crps": 2.396072547873757,
-          "log_score": -3.0871931610271552,
-          "brier": 0.06837942753525539,
-          "mae": 2.431219400267628,
+          "crps": 4.865591090179441,
+          "brier": 0.08264217438826166,
+          "mae": 6.592177189786107,
           "n_leads": 8
         },
         "shrinkage_polls": {
-          "crps": 2.4189834608185654,
-          "log_score": -3.112200651308411,
-          "brier": 0.07031380495435129,
-          "mae": 2.4338792949228036,
+          "crps": 5.53157864093073,
+          "brier": 0.09299574294767413,
+          "mae": 7.169007981573035,
+          "n_leads": 8
+        },
+        "pymc": {
+          "crps": 4.46019861286005,
+          "brier": 0.06494284795896665,
+          "mae": 6.279364913734997,
           "n_leads": 8
         },
         "fast_hierarchical_t": {
-          "crps": 2.5382417278886296,
-          "log_score": -3.0093676210660547,
-          "brier": 0.05487304328027493,
-          "mae": 3.480611721860364,
+          "crps": 4.806550849322681,
+          "brier": 0.07117138099668566,
+          "mae": 6.810716724080779,
           "n_leads": 8
         },
         "state_space": {
-          "crps": 2.532610089523616,
-          "log_score": -3.0714787996258646,
-          "brier": 0.052650800113705806,
-          "mae": 3.2224999498144715,
+          "crps": 3.4675782198194236,
+          "brier": 0.05128472497360867,
+          "mae": 4.792855297605653,
           "n_leads": 8
         },
         "poll_only_state_space": {
-          "crps": 10.696528940554526,
-          "log_score": -5.487957505879279,
-          "brier": 0.24236024157442604,
-          "mae": 13.638608764987179,
+          "crps": 10.858918858579596,
+          "brier": 0.15041779301369904,
+          "mae": 13.889139589868005,
           "n_leads": 8
         },
         "ridge_fundamentals": {
-          "crps": 2.5109998928422828,
-          "log_score": -3.0667658166274228,
-          "brier": 0.04772925248025778,
-          "mae": 3.1839982244177447,
+          "crps": 3.217089938003429,
+          "brier": 0.043846963287283464,
+          "mae": 4.13350014589146,
           "n_leads": 8
         }
       },
       "stack_weights": {
-        "last_election_swing": 0.09908925868411671,
-        "equal_weight_polls": 0.20070459307612648,
-        "shrinkage_polls": 0.19466619221319484,
-        "fast_hierarchical_t": 0.1660477228579409,
-        "state_space": 0.16729924335344043,
-        "poll_only_state_space": 3.1340128043901263e-06,
-        "ridge_fundamentals": 0.17218985580237633
+        "last_election_swing": 0.13462396749768776,
+        "equal_weight_polls": 0.04400093502737759,
+        "shrinkage_polls": 0.018105712266436792,
+        "pymc": 0.1231501154396978,
+        "state_space": 0.2837881601304977,
+        "poll_only_state_space": 1.4892570614086686e-05,
+        "ridge_fundamentals": 0.3963162170676884
+      },
+      "stack_weights_loo": {
+        "last_election_swing": 0.21727480269457658,
+        "equal_weight_polls": 0.029132834257486213,
+        "shrinkage_polls": 0.011890294737506761,
+        "pymc": 0.1010581822600356,
+        "state_space": 0.18785931165671343,
+        "poll_only_state_space": 0.00011615657489943869,
+        "ridge_fundamentals": 0.45266841781878187
       },
       "chamber": {
-        "seat_crps": 0.8906253472222222,
-        "seat_mae": 1.9729166666666667,
-        "control_brier": 0.0,
-        "p_dem_control": 0.0,
-        "expected_dem_seats": 40.525416666666665,
+        "control_brier": 0.6794125,
+        "seat_mae": 2.725416666666667,
         "n_leads": 8
       },
       "overlay_ablation": {
-        "mean_delta_control_brier": 0.0,
-        "mean_delta_seat_crps": 0.008224305555555422,
+        "mean_delta_control_brier": 0.07813333333333335,
+        "mean_delta_seat_crps": 0.09019027777777783,
         "n_leads": 8,
         "note": "Positive delta_control_brier means overlay worsened Brier vs unadjusted."
       },
       "poll_gate": {
         "election_id": "senate-2020",
         "year": 2020,
-        "n_polls": 291,
+        "n_polls": 685,
         "synthetic": false,
         "source": "cycle_manifest",
-        "allow_synthetic": true,
-        "in_cycles": true
-      }
+        "allow_synthetic": false,
+        "in_cycles": true,
+        "coverage": {
+          "ok": true,
+          "year": 2020,
+          "election_id": "senate-2020",
+          "n_official_contests": 33,
+          "n_polled_universe": 30,
+          "n_poll_rows": 685,
+          "n_polls_with_candidate_identity": 685,
+          "n_inferred_nominee_races": 29,
+          "nominees_sample": {
+            "senate-2020-AK": {
+              "dem_candidate_id": "14697",
+              "dem_candidate_name": "Al Gross",
+              "rep_candidate_id": "13462",
+              "rep_candidate_name": "Dan Sullivan",
+              "n_late_polls": 9
+            },
+            "senate-2020-AL": {
+              "dem_candidate_id": "13612",
+              "dem_candidate_name": "Gordon Douglas Jones",
+              "rep_candidate_id": "13614",
+              "rep_candidate_name": "Tommy Tuberville",
+              "n_late_polls": 10
+            },
+            "senate-2020-CO": {
+              "dem_candidate_id": "13474",
+              "dem_candidate_name": "John Wright Hickenlooper",
+              "rep_candidate_id": "13475",
+              "rep_candidate_name": "Cory Gardner",
+              "n_late_polls": 13
+            },
+            "senate-2020-DE": {
+              "dem_candidate_id": "14761",
+              "dem_candidate_name": "Christopher A. Coons",
+              "rep_candidate_id": "16064",
+              "rep_candidate_name": "Lauren E. Witzke",
+              "n_late_polls": 1
+            },
+            "senate-2020-GA": {
+              "dem_candidate_id": "14567",
+              "dem_candidate_name": "Jon Ossoff",
+              "rep_candidate_id": "14568",
+              "rep_candidate_name": "David A. Perdue",
+              "n_late_polls": 42
+            },
+            "senate-2020-IA": {
+              "dem_candidate_id": "13466",
+              "dem_candidate_name": "Theresa Greenfield",
+              "rep_candidate_id": "13467",
+              "rep_candidate_name": "Joni K. Ernst",
+              "n_late_polls": 29
+            },
+            "senate-2020-IL": {
+              "dem_candidate_id": "13501",
+              "dem_candidate_name": "Richard J. Durbin",
+              "rep_candidate_id": "15646",
+              "rep_candidate_name": "Mark C. Curran",
+              "n_late_polls": 2
+            },
+            "senate-2020-KS": {
+              "dem_candidate_id": "13698",
+              "dem_candidate_name": "Barbara Goolsbee Bollier",
+              "rep_candidate_id": "14604",
+              "rep_candidate_name": "Roger Marshall",
+              "n_late_polls": 12
+            }
+          },
+          "by_lead": {
+            "90": {
+              "as_of": "2020-08-05",
+              "lead_days": 90,
+              "n_polls": 185,
+              "n_contests_with_polls": 19,
+              "n_contests_expected": 30,
+              "coverage_share": 0.6333333333333333,
+              "min_share_required": 0.4,
+              "missing_contests": [
+                "senate-2020-DE",
+                "senate-2020-ID",
+                "senate-2020-IL",
+                "senate-2020-MA",
+                "senate-2020-NE",
+                "senate-2020-OR",
+                "senate-2020-SD",
+                "senate-2020-TN",
+                "senate-2020-VA",
+                "senate-2020-WV",
+                "senate-2020-WY"
+              ],
+              "n_missing_contests": 11,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2020-06-04",
+              "max_field_end": "2020-08-03",
+              "n_recent_21d": 48,
+              "recency_ok": true,
+              "ok": true
+            },
+            "60": {
+              "as_of": "2020-09-04",
+              "lead_days": 60,
+              "n_polls": 241,
+              "n_contests_with_polls": 20,
+              "n_contests_expected": 30,
+              "coverage_share": 0.6666666666666666,
+              "min_share_required": 0.55,
+              "missing_contests": [
+                "senate-2020-DE",
+                "senate-2020-ID",
+                "senate-2020-IL",
+                "senate-2020-MA",
+                "senate-2020-NE",
+                "senate-2020-OR",
+                "senate-2020-SD",
+                "senate-2020-TN",
+                "senate-2020-WV",
+                "senate-2020-WY"
+              ],
+              "n_missing_contests": 10,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2020-06-28",
+              "max_field_end": "2020-09-04",
+              "n_recent_21d": 25,
+              "recency_ok": true,
+              "ok": true
+            },
+            "30": {
+              "as_of": "2020-10-04",
+              "lead_days": 30,
+              "n_polls": 373,
+              "n_contests_with_polls": 23,
+              "n_contests_expected": 30,
+              "coverage_share": 0.7666666666666667,
+              "min_share_required": 0.7,
+              "missing_contests": [
+                "senate-2020-DE",
+                "senate-2020-IL",
+                "senate-2020-NE",
+                "senate-2020-SD",
+                "senate-2020-TN",
+                "senate-2020-WV",
+                "senate-2020-WY"
+              ],
+              "n_missing_contests": 7,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2020-07-31",
+              "max_field_end": "2020-10-01",
+              "n_recent_21d": 99,
+              "recency_ok": true,
+              "ok": true
+            },
+            "7": {
+              "as_of": "2020-10-27",
+              "lead_days": 7,
+              "n_polls": 551,
+              "n_contests_with_polls": 27,
+              "n_contests_expected": 30,
+              "coverage_share": 0.9,
+              "min_share_required": 0.7,
+              "missing_contests": [
+                "senate-2020-IL",
+                "senate-2020-SD",
+                "senate-2020-WY"
+              ],
+              "n_missing_contests": 3,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2020-09-11",
+              "max_field_end": "2020-10-27",
+              "n_recent_21d": 145,
+              "recency_ok": true,
+              "ok": true
+            }
+          },
+          "failures": [],
+          "note": "Coverage scored on contests with in-cycle non-hypothetical polls (safe unpolled seats excluded). Nominee checks apply near Election Day; close leads require recent median field dates.",
+          "meta_source": "Wikipedia: 2020 United States Senate elections"
+        }
+      },
+      "hierarchical_method": "pymc"
     },
     "2022": {
       "aggregate": {
         "last_election_swing": {
-          "crps": 2.985169200841347,
-          "log_score": -3.125884174838836,
-          "brier": 0.06295749568624684,
-          "mae": 4.377666666666667,
+          "crps": 3.7258570407677762,
+          "brier": 0.051488465930110604,
+          "mae": 5.249491725151266,
           "n_leads": 8
         },
         "equal_weight_polls": {
-          "crps": 2.4055705277269004,
-          "log_score": -3.076537741264742,
-          "brier": 0.0485615693918826,
-          "mae": 2.870854545454545,
+          "crps": 4.606345221710296,
+          "brier": 0.04605065956938642,
+          "mae": 6.0136022007406655,
           "n_leads": 8
         },
         "shrinkage_polls": {
-          "crps": 2.454370906399554,
-          "log_score": -3.090288464592718,
-          "brier": 0.04753714917321471,
-          "mae": 2.991927572878922,
+          "crps": 4.879760427497037,
+          "brier": 0.032705591889268776,
+          "mae": 6.279617916811885,
+          "n_leads": 8
+        },
+        "pymc": {
+          "crps": 3.9250009442355998,
+          "brier": 0.028685778358615188,
+          "mae": 5.354920463353986,
           "n_leads": 8
         },
         "fast_hierarchical_t": {
-          "crps": 2.324745116149663,
-          "log_score": -2.9676438245236407,
-          "brier": 0.03840803549712467,
-          "mae": 2.877771221121677,
+          "crps": 4.500623923112064,
+          "brier": 0.038725266882303225,
+          "mae": 5.9234625913762695,
           "n_leads": 8
         },
         "state_space": {
-          "crps": 2.483159756759717,
-          "log_score": -3.0765715736844403,
-          "brier": 0.042523680344280446,
-          "mae": 2.9115659934796554,
+          "crps": 3.7367593867554953,
+          "brier": 0.03712235491563954,
+          "mae": 5.062326067887128,
           "n_leads": 8
         },
         "poll_only_state_space": {
-          "crps": 13.47447497636714,
-          "log_score": -6.230055953306784,
-          "brier": 0.24010837173866295,
-          "mae": 16.911768341593827,
+          "crps": 10.201769310558694,
+          "brier": 0.1099686982544181,
+          "mae": 12.79644917854846,
           "n_leads": 8
         },
         "ridge_fundamentals": {
-          "crps": 2.368580511846652,
-          "log_score": -3.0419796923257123,
-          "brier": 0.04935986845318903,
-          "mae": 2.749736249861961,
+          "crps": 3.338477542097355,
+          "brier": 0.05697824247575465,
+          "mae": 4.53196037615545,
           "n_leads": 8
         }
       },
       "stack_weights": {
-        "last_election_swing": 0.08448987407697031,
-        "equal_weight_polls": 0.18298971051985038,
-        "shrinkage_polls": 0.1714621860910452,
-        "fast_hierarchical_t": 0.20381182466431108,
-        "state_space": 0.16500530406230565,
-        "poll_only_state_space": 7.126470741478741e-08,
-        "ridge_fundamentals": 0.19224102932081
+        "last_election_swing": 0.18837827739559015,
+        "equal_weight_polls": 0.05823390899119836,
+        "shrinkage_polls": 0.04044383437589515,
+        "pymc": 0.21149844225904119,
+        "state_space": 0.18565973074824227,
+        "poll_only_state_space": 3.3503758982675524e-05,
+        "ridge_fundamentals": 0.3157523024710503
+      },
+      "stack_weights_loo": {
+        "last_election_swing": 0.19070220283638828,
+        "equal_weight_polls": 0.02604916956669685,
+        "shrinkage_polls": 0.008929549337403631,
+        "pymc": 0.08243061378393061,
+        "state_space": 0.2124421735300613,
+        "poll_only_state_space": 8.702652967290153e-05,
+        "ridge_fundamentals": 0.4793592644158463
       },
       "chamber": {
-        "seat_crps": 0.5317241319444443,
-        "seat_mae": 1.8145833333333332,
-        "control_brier": 4.3402777777777785e-07,
-        "p_dem_control": 0.0003125,
-        "expected_dem_seats": 43.05583333333333,
+        "control_brier": 0.1761638888888889,
+        "seat_mae": 2.205,
         "n_leads": 8
       },
       "overlay_ablation": {
-        "mean_delta_control_brier": 8.680555555555557e-08,
-        "mean_delta_seat_crps": -0.003601562500000044,
+        "mean_delta_control_brier": -0.021951388888888868,
+        "mean_delta_seat_crps": -0.0420180555555556,
         "n_leads": 8,
         "note": "Positive delta_control_brier means overlay worsened Brier vs unadjusted."
       },
       "poll_gate": {
         "election_id": "senate-2022",
         "year": 2022,
-        "n_polls": 16,
+        "n_polls": 671,
         "synthetic": false,
         "source": "cycle_manifest",
-        "allow_synthetic": true,
-        "in_cycles": true
-      }
+        "allow_synthetic": false,
+        "in_cycles": true,
+        "coverage": {
+          "ok": true,
+          "year": 2022,
+          "election_id": "senate-2022",
+          "n_official_contests": 35,
+          "n_polled_universe": 29,
+          "n_poll_rows": 671,
+          "n_polls_with_candidate_identity": 671,
+          "n_inferred_nominee_races": 27,
+          "nominees_sample": {
+            "senate-2022-AK": {
+              "dem_candidate_id": "30151",
+              "dem_candidate_name": "Patricia R. Chesbro",
+              "rep_candidate_id": "21152",
+              "rep_candidate_name": "Lisa Murkowski",
+              "n_late_polls": 4
+            },
+            "senate-2022-AL": {
+              "dem_candidate_id": "30186",
+              "dem_candidate_name": "Will Boyd",
+              "rep_candidate_id": "30185",
+              "rep_candidate_name": "Katie Britt",
+              "n_late_polls": 1
+            },
+            "senate-2022-AR": {
+              "dem_candidate_id": "30184",
+              "dem_candidate_name": "Natalie James",
+              "rep_candidate_id": "29276",
+              "rep_candidate_name": "John Boozman",
+              "n_late_polls": 2
+            },
+            "senate-2022-AZ": {
+              "dem_candidate_id": "20633",
+              "dem_candidate_name": "Mark Kelly",
+              "rep_candidate_id": "28668",
+              "rep_candidate_name": "Blake Masters",
+              "n_late_polls": 44
+            },
+            "senate-2022-CA": {
+              "dem_candidate_id": "29277",
+              "dem_candidate_name": "Alex Padilla",
+              "rep_candidate_id": "29384",
+              "rep_candidate_name": "Mark P. Meuser",
+              "n_late_polls": 6
+            },
+            "senate-2022-CO": {
+              "dem_candidate_id": "28366",
+              "dem_candidate_name": "Michael Bennet",
+              "rep_candidate_id": "30404",
+              "rep_candidate_name": "Joe O'Dea",
+              "n_late_polls": 16
+            },
+            "senate-2022-CT": {
+              "dem_candidate_id": "29278",
+              "dem_candidate_name": "Richard Blumenthal",
+              "rep_candidate_id": "30165",
+              "rep_candidate_name": "Leora R. Levy",
+              "n_late_polls": 4
+            },
+            "senate-2022-FL": {
+              "dem_candidate_id": "25620",
+              "dem_candidate_name": "Val Demings",
+              "rep_candidate_id": "25621",
+              "rep_candidate_name": "Marco Rubio",
+              "n_late_polls": 19
+            }
+          },
+          "by_lead": {
+            "90": {
+              "as_of": "2022-08-10",
+              "lead_days": 90,
+              "n_polls": 152,
+              "n_contests_with_polls": 18,
+              "n_contests_expected": 29,
+              "coverage_share": 0.6206896551724138,
+              "min_share_required": 0.4,
+              "missing_contests": [
+                "senate-2022-AL",
+                "senate-2022-AR",
+                "senate-2022-CA",
+                "senate-2022-IN",
+                "senate-2022-KS",
+                "senate-2022-MD",
+                "senate-2022-OK",
+                "senate-2022-OK-special",
+                "senate-2022-OR",
+                "senate-2022-SC",
+                "senate-2022-VT"
+              ],
+              "n_missing_contests": 11,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2022-05-16",
+              "max_field_end": "2022-08-08",
+              "n_recent_21d": 34,
+              "recency_ok": true,
+              "ok": true
+            },
+            "60": {
+              "as_of": "2022-09-09",
+              "lead_days": 60,
+              "n_polls": 207,
+              "n_contests_with_polls": 21,
+              "n_contests_expected": 29,
+              "coverage_share": 0.7241379310344828,
+              "min_share_required": 0.55,
+              "missing_contests": [
+                "senate-2022-AL",
+                "senate-2022-AR",
+                "senate-2022-CA",
+                "senate-2022-MD",
+                "senate-2022-OK",
+                "senate-2022-OK-special",
+                "senate-2022-OR",
+                "senate-2022-SC"
+              ],
+              "n_missing_contests": 8,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2022-07-04",
+              "max_field_end": "2022-09-07",
+              "n_recent_21d": 33,
+              "recency_ok": true,
+              "ok": true
+            },
+            "30": {
+              "as_of": "2022-10-09",
+              "lead_days": 30,
+              "n_polls": 340,
+              "n_contests_with_polls": 27,
+              "n_contests_expected": 29,
+              "coverage_share": 0.9310344827586207,
+              "min_share_required": 0.7,
+              "missing_contests": [
+                "senate-2022-AL",
+                "senate-2022-CA"
+              ],
+              "n_missing_contests": 2,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2022-08-17",
+              "max_field_end": "2022-10-07",
+              "n_recent_21d": 77,
+              "recency_ok": true,
+              "ok": true
+            },
+            "7": {
+              "as_of": "2022-11-01",
+              "lead_days": 7,
+              "n_polls": 544,
+              "n_contests_with_polls": 29,
+              "n_contests_expected": 29,
+              "coverage_share": 1.0,
+              "min_share_required": 0.7,
+              "missing_contests": [],
+              "n_missing_contests": 0,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2022-09-19",
+              "max_field_end": "2022-10-31",
+              "n_recent_21d": 172,
+              "recency_ok": true,
+              "ok": true
+            }
+          },
+          "failures": [],
+          "note": "Coverage scored on contests with in-cycle non-hypothetical polls (safe unpolled seats excluded). Nominee checks apply near Election Day; close leads require recent median field dates.",
+          "meta_source": "Wikipedia: 2022 United States Senate elections"
+        }
+      },
+      "hierarchical_method": "pymc"
+    },
+    "2024": {
+      "aggregate": {
+        "last_election_swing": {
+          "crps": 4.064461662441789,
+          "brier": 0.09658413842178064,
+          "mae": 5.929082344478983,
+          "n_leads": 8
+        },
+        "equal_weight_polls": {
+          "crps": 5.21806227702854,
+          "brier": 0.15652447627590768,
+          "mae": 6.683203417471856,
+          "n_leads": 8
+        },
+        "shrinkage_polls": {
+          "crps": 6.4606046946377464,
+          "brier": 0.1953574710016744,
+          "mae": 7.748310666924765,
+          "n_leads": 8
+        },
+        "pymc": {
+          "crps": 5.151694367361662,
+          "brier": 0.15512066844781985,
+          "mae": 6.755274546332878,
+          "n_leads": 8
+        },
+        "fast_hierarchical_t": {
+          "crps": 5.8155092472016605,
+          "brier": 0.1486086582947786,
+          "mae": 7.594930347643398,
+          "n_leads": 8
+        },
+        "state_space": {
+          "crps": 4.509120104975558,
+          "brier": 0.13277308919377812,
+          "mae": 5.956299906396051,
+          "n_leads": 8
+        },
+        "poll_only_state_space": {
+          "crps": 8.561534831549963,
+          "brier": 0.19517821278834746,
+          "mae": 11.049197849058146,
+          "n_leads": 8
+        },
+        "ridge_fundamentals": {
+          "crps": 3.1564593594721324,
+          "brier": 0.063471218015827,
+          "mae": 4.175976537280585,
+          "n_leads": 8
+        }
+      },
+      "stack_weights": {
+        "last_election_swing": 0.18187775731493655,
+        "equal_weight_polls": 0.03906397338819192,
+        "shrinkage_polls": 0.007451962511353041,
+        "pymc": 0.060290751666105,
+        "state_space": 0.10053006881377839,
+        "poll_only_state_space": 0.0004525926612759298,
+        "ridge_fundamentals": 0.6103328936443593
+      },
+      "stack_weights_loo": {
+        "last_election_swing": 0.19118747849849282,
+        "equal_weight_polls": 0.0294858544650718,
+        "shrinkage_polls": 0.015549272954045536,
+        "pymc": 0.12416810857132714,
+        "state_space": 0.2582664385777341,
+        "poll_only_state_space": 3.6207649612911214e-05,
+        "ridge_fundamentals": 0.3813066392837157
+      },
+      "chamber": {
+        "control_brier": 0.6478263888888889,
+        "seat_mae": 4.574999999999999,
+        "n_leads": 8
+      },
+      "overlay_ablation": {
+        "mean_delta_control_brier": 0.11105277777777779,
+        "mean_delta_seat_crps": 0.3811791666666668,
+        "n_leads": 8,
+        "note": "Positive delta_control_brier means overlay worsened Brier vs unadjusted."
+      },
+      "poll_gate": {
+        "election_id": "senate-2024",
+        "year": 2024,
+        "n_polls": 936,
+        "synthetic": false,
+        "source": "cycle_manifest",
+        "allow_synthetic": false,
+        "in_cycles": true,
+        "coverage": {
+          "ok": true,
+          "year": 2024,
+          "election_id": "senate-2024",
+          "n_official_contests": 33,
+          "n_polled_universe": 31,
+          "n_poll_rows": 936,
+          "n_polls_with_candidate_identity": 936,
+          "n_inferred_nominee_races": 28,
+          "nominees_sample": {
+            "senate-2024-AZ": {
+              "dem_candidate_id": "30920",
+              "dem_candidate_name": "Ruben Gallego",
+              "rep_candidate_id": "30921",
+              "rep_candidate_name": "Kari Lake",
+              "n_late_polls": 56
+            },
+            "senate-2024-CA": {
+              "dem_candidate_id": "30942",
+              "dem_candidate_name": "Adam B. Schiff",
+              "rep_candidate_id": "31183",
+              "rep_candidate_name": "Steve Garvey",
+              "n_late_polls": 13
+            },
+            "senate-2024-FL": {
+              "dem_candidate_id": "31615",
+              "dem_candidate_name": "Debbie Mucarsel-Powell",
+              "rep_candidate_id": "31048",
+              "rep_candidate_name": "Rick Scott",
+              "n_late_polls": 30
+            },
+            "senate-2024-IN": {
+              "dem_candidate_id": "31088",
+              "dem_candidate_name": "Valerie McCray",
+              "rep_candidate_id": "31089",
+              "rep_candidate_name": "Jim Banks",
+              "n_late_polls": 3
+            },
+            "senate-2024-MA": {
+              "dem_candidate_id": "31002",
+              "dem_candidate_name": "Elizabeth Ann Warren",
+              "rep_candidate_id": "31821",
+              "rep_candidate_name": "John Deaton",
+              "n_late_polls": 7
+            },
+            "senate-2024-MD": {
+              "dem_candidate_id": "31370",
+              "dem_candidate_name": "Angela Alsobrooks",
+              "rep_candidate_id": "31674",
+              "rep_candidate_name": "Larry Hogan",
+              "n_late_polls": 11
+            },
+            "senate-2024-ME": {
+              "dem_candidate_id": "36287",
+              "dem_candidate_name": "David Allen Costello",
+              "rep_candidate_id": "36288",
+              "rep_candidate_name": "Demi Kouzounas",
+              "n_late_polls": 2
+            },
+            "senate-2024-MI": {
+              "dem_candidate_id": "31025",
+              "dem_candidate_name": "Elissa Slotkin",
+              "rep_candidate_id": "31045",
+              "rep_candidate_name": "Mike Rogers",
+              "n_late_polls": 64
+            }
+          },
+          "by_lead": {
+            "90": {
+              "as_of": "2024-08-07",
+              "lead_days": 90,
+              "n_polls": 263,
+              "n_contests_with_polls": 24,
+              "n_contests_expected": 31,
+              "coverage_share": 0.7741935483870968,
+              "min_share_required": 0.4,
+              "missing_contests": [
+                "senate-2024-CT",
+                "senate-2024-DE",
+                "senate-2024-MS",
+                "senate-2024-NE",
+                "senate-2024-RI",
+                "senate-2024-UT",
+                "senate-2024-WY"
+              ],
+              "n_missing_contests": 7,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2024-05-09",
+              "max_field_end": "2024-08-05",
+              "n_recent_21d": 34,
+              "recency_ok": true,
+              "ok": true
+            },
+            "60": {
+              "as_of": "2024-09-06",
+              "lead_days": 60,
+              "n_polls": 369,
+              "n_contests_with_polls": 26,
+              "n_contests_expected": 31,
+              "coverage_share": 0.8387096774193549,
+              "min_share_required": 0.55,
+              "missing_contests": [
+                "senate-2024-CT",
+                "senate-2024-DE",
+                "senate-2024-MS",
+                "senate-2024-RI",
+                "senate-2024-WY"
+              ],
+              "n_missing_contests": 5,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2024-06-19",
+              "max_field_end": "2024-09-05",
+              "n_recent_21d": 59,
+              "recency_ok": true,
+              "ok": true
+            },
+            "30": {
+              "as_of": "2024-10-06",
+              "lead_days": 30,
+              "n_polls": 557,
+              "n_contests_with_polls": 29,
+              "n_contests_expected": 31,
+              "coverage_share": 0.9354838709677419,
+              "min_share_required": 0.7,
+              "missing_contests": [
+                "senate-2024-MS",
+                "senate-2024-WY"
+              ],
+              "n_missing_contests": 2,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2024-08-08",
+              "max_field_end": "2024-10-05",
+              "n_recent_21d": 139,
+              "recency_ok": true,
+              "ok": true
+            },
+            "7": {
+              "as_of": "2024-10-29",
+              "lead_days": 7,
+              "n_polls": 756,
+              "n_contests_with_polls": 30,
+              "n_contests_expected": 31,
+              "coverage_share": 0.967741935483871,
+              "min_share_required": 0.7,
+              "missing_contests": [
+                "senate-2024-WY"
+              ],
+              "n_missing_contests": 1,
+              "nominee_mismatch_races": [],
+              "n_nominee_mismatches": 0,
+              "median_field_end": "2024-09-05",
+              "max_field_end": "2024-10-29",
+              "n_recent_21d": 145,
+              "recency_ok": true,
+              "ok": true
+            }
+          },
+          "failures": [],
+          "note": "Coverage scored on contests with in-cycle non-hypothetical polls (safe unpolled seats excluded). Nominee checks apply near Election Day; close leads require recent median field dates.",
+          "meta_source": "Wikipedia: 2024 United States Senate elections"
+        }
+      },
+      "hierarchical_method": "pymc"
     }
-  },
-  "stack_weights_production": {
-    "last_election_swing": 0.1264075367822936,
-    "equal_weight_polls": 0.15608110823084928,
-    "shrinkage_polls": 0.17591829122496674,
-    "state_space": 0.1940869161670225,
-    "poll_only_state_space": 3.2863477009926e-05,
-    "ridge_fundamentals": 0.16643169163996094,
-    "pymc": 0.18104159247789697
-  },
-  "stack_provenance": {
-    "method": "leave_one_cycle_out_mean_crps",
-    "folds": [
-      "2018",
-      "2020",
-      "2022"
-    ],
-    "temperature": 0.75,
-    "note": "Remapped fast_hierarchical_t mass to pymc; full LOO table regenerated on next replay-cycle --all",
-    "remapped_at": "2026-09-13"
   }
 }

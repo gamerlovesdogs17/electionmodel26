@@ -60,20 +60,16 @@ def align_weights_to_spine(
     spine: str = "pymc",
 ) -> dict[str, float]:
     """
-    Map validation-spine labels onto the production core name.
+    DEPRECATED for production (audit P2.2 / Finding 6).
 
-    Historical replay scores `fast_hierarchical_t`; production spine is `pymc`.
-    Transfer that mass rather than dropping the hierarchical core.
+    Historically remapped ``fast_hierarchical_t`` → ``pymc``. Production stacking
+    must use ``midterms.validation.stack_weights`` with honest component labels.
+    This helper now only renormalizes positive weights without remapping.
     """
     out = {k: float(v) for k, v in weights.items() if float(v) > 0}
-    if spine.startswith("pymc"):
-        if "pymc" not in out and "fast_hierarchical_t" in out:
-            out["pymc"] = out.pop("fast_hierarchical_t")
-        elif "pymc" in out and "fast_hierarchical_t" in out:
-            out["pymc"] = out.get("pymc", 0.0) + out.pop("fast_hierarchical_t")
     total = sum(out.values())
     if total <= 0:
-        return {spine: 1.0}
+        return {spine: 1.0} if spine else {}
     return {k: v / total for k, v in out.items()}
 
 

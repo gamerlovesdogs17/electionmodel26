@@ -1,0 +1,241 @@
+{
+  "audit_item": "P1.2",
+  "ridge_lambda": 25.0,
+  "prior_coefs": {
+    "prior_lean": 1.0,
+    "generic_ballot": 0.28,
+    "incumbency": 2.0,
+    "fundraising_logit": 1.4,
+    "pres_approval": 0.08,
+    "midterm_outparty": 1.2,
+    "real_income_yoy": 0.35
+  },
+  "full_sample": {
+    "coefs": {
+      "prior_lean": 1.0,
+      "generic_ballot": 0.3568304503258178,
+      "incumbency": 2.0,
+      "fundraising_logit": 1.4,
+      "pres_approval": 0.08,
+      "midterm_outparty": 2.3425601693193046,
+      "real_income_yoy": -0.12978984440050195
+    },
+    "prior": {
+      "prior_lean": 1.0,
+      "generic_ballot": 0.28,
+      "incumbency": 2.0,
+      "fundraising_logit": 1.4,
+      "pres_approval": 0.08,
+      "midterm_outparty": 1.2,
+      "real_income_yoy": 0.35
+    },
+    "train_years": [
+      2018,
+      2020,
+      2022,
+      2024
+    ],
+    "holdout_year": null,
+    "n_rows": 134,
+    "ridge_lambda": 25.0,
+    "shrinkable_keys": [
+      "generic_ballot",
+      "incumbency",
+      "fundraising_logit",
+      "pres_approval",
+      "midterm_outparty",
+      "real_income_yoy"
+    ],
+    "fixed_keys": {
+      "prior_lean": "Identity scale of vintaged lean into margin units; lean construction is the calibrated object, not a free slope in production."
+    },
+    "delta_vs_prior": {
+      "prior_lean": 0.0,
+      "generic_ballot": 0.07683045032581776,
+      "incumbency": 0.0,
+      "fundraising_logit": 0.0,
+      "pres_approval": 0.0,
+      "midterm_outparty": 1.1425601693193046,
+      "real_income_yoy": -0.47978984440050193
+    }
+  },
+  "by_holdout": {
+    "2018": {
+      "coefs": {
+        "prior_lean": 1.0,
+        "generic_ballot": 0.188080490035619,
+        "incumbency": 2.0,
+        "fundraising_logit": 1.4,
+        "pres_approval": 0.08,
+        "midterm_outparty": -0.37256075010356987,
+        "real_income_yoy": 0.028261855452542683
+      },
+      "delta_vs_prior": {
+        "prior_lean": 0.0,
+        "generic_ballot": -0.09191950996438103,
+        "incumbency": 0.0,
+        "fundraising_logit": 0.0,
+        "pres_approval": 0.0,
+        "midterm_outparty": -1.5725607501035699,
+        "real_income_yoy": -0.3217381445474573
+      },
+      "n_rows": 168,
+      "train_years": [
+        2014,
+        2016,
+        2020,
+        2022,
+        2024
+      ]
+    },
+    "2020": {
+      "coefs": {
+        "prior_lean": 1.0,
+        "generic_ballot": 0.5544872923836414,
+        "incumbency": 2.0,
+        "fundraising_logit": 1.4,
+        "pres_approval": 0.08,
+        "midterm_outparty": 0.6373526823592371,
+        "real_income_yoy": -0.37098967821918405
+      },
+      "delta_vs_prior": {
+        "prior_lean": 0.0,
+        "generic_ballot": 0.27448729238364133,
+        "incumbency": 0.0,
+        "fundraising_logit": 0.0,
+        "pres_approval": 0.0,
+        "midterm_outparty": -0.5626473176407628,
+        "real_income_yoy": -0.720989678219184
+      },
+      "n_rows": 168,
+      "train_years": [
+        2014,
+        2016,
+        2018,
+        2022,
+        2024
+      ]
+    },
+    "2022": {
+      "coefs": {
+        "prior_lean": 1.0,
+        "generic_ballot": 0.5460344999681241,
+        "incumbency": 2.0,
+        "fundraising_logit": 1.4,
+        "pres_approval": 0.08,
+        "midterm_outparty": 0.6817528301285537,
+        "real_income_yoy": 0.03424957255613447
+      },
+      "delta_vs_prior": {
+        "prior_lean": 0.0,
+        "generic_ballot": 0.2660344999681241,
+        "incumbency": 0.0,
+        "fundraising_logit": 0.0,
+        "pres_approval": 0.0,
+        "midterm_outparty": -0.5182471698714463,
+        "real_income_yoy": -0.3157504274438655
+      },
+      "n_rows": 166,
+      "train_years": [
+        2014,
+        2016,
+        2018,
+        2020,
+        2024
+      ]
+    },
+    "2024": {
+      "coefs": {
+        "prior_lean": 1.0,
+        "generic_ballot": 0.7061021251090166,
+        "incumbency": 2.0,
+        "fundraising_logit": 1.4,
+        "pres_approval": 0.08,
+        "midterm_outparty": 1.1146846650802755,
+        "real_income_yoy": 0.3897542388083101
+      },
+      "delta_vs_prior": {
+        "prior_lean": 0.0,
+        "generic_ballot": 0.42610212510901657,
+        "incumbency": 0.0,
+        "fundraising_logit": 0.0,
+        "pres_approval": 0.0,
+        "midterm_outparty": -0.08531533491972443,
+        "real_income_yoy": 0.03975423880831014
+      },
+      "n_rows": 168,
+      "train_years": [
+        2014,
+        2016,
+        2018,
+        2020,
+        2022
+      ]
+    }
+  },
+  "dispersion": {
+    "prior_lean": {
+      "loo_mean": 1.0,
+      "loo_sd": 0.0,
+      "prior": 1.0,
+      "full_sample": 1.0
+    },
+    "generic_ballot": {
+      "loo_mean": 0.4986761018741003,
+      "loo_sd": 0.1902977246740597,
+      "prior": 0.28,
+      "full_sample": 0.3568304503258178
+    },
+    "incumbency": {
+      "loo_mean": 2.0,
+      "loo_sd": 0.0,
+      "prior": 2.0,
+      "full_sample": 2.0
+    },
+    "fundraising_logit": {
+      "loo_mean": 1.4,
+      "loo_sd": 0.0,
+      "prior": 1.4,
+      "full_sample": 1.4
+    },
+    "pres_approval": {
+      "loo_mean": 0.08,
+      "loo_sd": 0.0,
+      "prior": 0.08,
+      "full_sample": 0.08
+    },
+    "midterm_outparty": {
+      "loo_mean": 0.5153073568661242,
+      "loo_sd": 0.5454727513864153,
+      "prior": 1.2,
+      "full_sample": 2.3425601693193046
+    },
+    "real_income_yoy": {
+      "loo_mean": 0.020318997149450804,
+      "loo_sd": 0.2691941804383407,
+      "prior": 0.35,
+      "full_sample": -0.12978984440050195
+    }
+  },
+  "poll_measurement_priors": {
+    "mode": {
+      "live": 0.0,
+      "ivr": -0.4,
+      "online": 0.3,
+      "other": 0.0
+    },
+    "population": {
+      "LV": 0.0,
+      "RV": 0.5,
+      "A": 0.8
+    },
+    "estimation": "Hierarchical Normal(prior, sigma) in fit_pymc / fit_pymc_dynamic; sigma_mode / sigma_pop learned. Fast/state-space use prior means."
+  },
+  "remaining_fixed_effects": {
+    "prior_lean": "Identity scale of vintaged lean into margin units; lean construction is the calibrated object, not a free slope in production.",
+    "prior_lean_scale": "Identity map of vintaged lean into margin units; lean construction is the calibrated object.",
+    "recency_half_life_days": "Influence weight half-life; nested lead-time grid can ablate 14/28/45.",
+    "max_pollster_share": "Soft cap so one firm cannot dominate a race's ENOP."
+  },
+  "note": "Fundamentals: nested leave-one-cycle ridge toward PRIOR_COEF. Poll mode/population: hierarchical in PyMC (no pre-subtracted fixed offsets). Any remaining fixed effect is listed with rationale."
+}

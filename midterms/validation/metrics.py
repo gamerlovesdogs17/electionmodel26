@@ -50,6 +50,120 @@ def reliability_bins(
     return rows
 
 
+def calibration_slope_intercept(
+    probs: np.ndarray,
+    outcomes: np.ndarray,
+) -> dict[str, Any]:
+    """
+    Linear calibration: E[y] ≈ intercept + slope * p.
+
+    Ideal: intercept ≈ 0, slope ≈ 1. Uses OLS on finite probs in (0, 1).
+    """
+    p = np.asarray(probs, dtype=float).ravel()
+    y = np.asarray(outcomes, dtype=float).ravel()
+    n = min(len(p), len(y))
+    if n < 3:
+        return {"n": int(n), "slope": float("nan"), "intercept": float("nan"), "ok": False}
+    p = p[:n]
+    y = y[:n]
+    mask = np.isfinite(p) & np.isfinite(y)
+    p, y = p[mask], y[mask]
+    if len(p) < 3 or float(np.std(p)) < 1e-8:
+        return {"n": int(len(p)), "slope": float("nan"), "intercept": float("nan"), "ok": False}
+    # OLS: [1, p] @ [a, b] = y
+    x = np.column_stack([np.ones(len(p)), p])
+    coef, _, _, _ = np.linalg.lstsq(x, y, rcond=None)
+    intercept, slope = float(coef[0]), float(coef[1])
+    return {
+        "n": int(len(p)),
+        "slope": slope,
+        "intercept": intercept,
+        "ok": True,
+        "ideal": {"slope": 1.0, "intercept": 0.0},
+    }
+
+
+def pit_gaussian(y: float, mean: float, sd: float) -> float:
+    """Probability integral transform under Normal(mean, sd)."""
+    sd = max(float(sd), 1e-6)
+    return float(norm.cdf(y, loc=mean, scale=sd))
+
+
+def pit_summary(
+    means: np.ndarray,
+    sds: np.ndarray,
+    y: np.ndarray,
+    *,
+    n_bins: int = 10,
+) -> dict[str, Any]:
+    """PIT histogram + uniformity diagnostics for Gaussian margin forecasts."""
+    means = np.asarray(means, dtype=float)
+    sds = np.asarray(sds, dtype=float)
+    y = np.asarray(y, dtype=float)
+    n = min(len(means), len(sds), len(y))
+    if n == 0:
+        return {"n": 0, "ok": False}
+    pits = np.array([pit_gaussian(y[i], means[i], sds[i]) for i in range(n)])
+    pits = pits[np.isfinite(pits)]
+    if len(pits) == 0:
+        return {"n": 0, "ok": False}
+    edges = np.linspace(0, 1, n_bins + 1)
+    hist = []
+    for i in range(n_bins):
+        mask = (pits >= edges[i]) & (pits < edges[i + 1] if i < n_bins - 1 else pits <= edges[i + 1])
+        hist.append({"bin_lo": float(edges[i]), "bin_hi": float(edges[i + 1]), "n": float(mask.sum())})
+    # Simple uniformity: mean near 0.5, var near 1/12
+    return {
+        "n": int(len(pits)),
+        "mean": float(np.mean(pits)),
+        "var": float(np.var(pits)),
+        "expected_mean": 0.5,
+        "expected_var": 1.0 / 12.0,
+        "histogram": hist,
+        "ok": True,
+    }
+
+
+def reliability_overconfidence(
+    bins: list[dict[str, float]],
+    *,
+    min_bin_n: float = 5.0,
+    gap_threshold: float = 0.15,
+) -> dict[str, Any]:
+    """
+    Flag material overconfidence: mean_p ≫ mean_y in disclosed bins.
+
+    G7: calibration claim fails if overconfident bins lack sample-size disclosure
+    or gap exceeds threshold on bins with adequate n.
+    """
+    issues: list[dict[str, Any]] = []
+    disclosed = True
+    for b in bins or []:
+        n = float(b.get("n") or 0)
+        if "n" not in b:
+            disclosed = False
+        mean_p = float(b.get("mean_p") or 0)
+        mean_y = float(b.get("mean_y") or 0)
+        gap = mean_p - mean_y
+        if n >= min_bin_n and gap > gap_threshold:
+            issues.append(
+                {
+                    "bin_lo": b.get("bin_lo"),
+                    "bin_hi": b.get("bin_hi"),
+                    "n": n,
+                    "mean_p": mean_p,
+                    "mean_y": mean_y,
+                    "gap": gap,
+                }
+            )
+    return {
+        "sample_sizes_disclosed": disclosed,
+        "overconfident_bins": issues,
+        "n_overconfident": len(issues),
+        "calibration_claim_allowed": disclosed and len(issues) == 0,
+    }
+
+
 def energy_score(samples: np.ndarray, y: np.ndarray) -> float:
     """
     Energy score for multivariate predictive samples.
@@ -104,11 +218,20 @@ def score_margins_extended(
     outcomes = (y[:n] > 0).astype(float)
     if probs is None:
         probs = np.array([float(norm.sf(0, loc=means[i], scale=max(sds[i], 0.5))) for i in range(n)])
+    rel = reliability_bins(probs[:n], outcomes)
     return {
         "n": n,
         "crps": float(np.mean(crps)),
         "interval_score_90": float(np.mean(ints)),
         "brier": float(np.mean([(probs[i] - outcomes[i]) ** 2 for i in range(n)])),
+        "log_score": float(
+            np.mean(
+                [
+                    np.log(max(float(probs[i]) if outcomes[i] > 0.5 else 1.0 - float(probs[i]), 1e-12))
+                    for i in range(n)
+                ]
+            )
+        ),
         "mae": float(np.mean(np.abs(y[:n] - means[:n]))),
         "coverage_90": float(
             np.mean(
@@ -118,5 +241,8 @@ def score_margins_extended(
                 ]
             )
         ),
-        "reliability": reliability_bins(probs[:n], outcomes),
+        "reliability": rel,
+        "calibration_slope_intercept": calibration_slope_intercept(probs[:n], outcomes),
+        "pit": pit_summary(means[:n], sds[:n], y[:n]),
+        "reliability_gate": reliability_overconfidence(rel),
     }

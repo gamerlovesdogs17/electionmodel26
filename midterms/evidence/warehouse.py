@@ -64,6 +64,12 @@ class Warehouse:
         except Exception:  # noqa: BLE001
             self.polls = align_poll_frame(self.polls)
         self.races = pd.read_parquet(self.normalized_dir / "races.parquet")
+        try:
+            from midterms.evidence.official_ballot import merge_official_into_races
+
+            self.races = merge_official_into_races(self.races)
+        except Exception:  # noqa: BLE001
+            pass
         results_path = self.normalized_dir / "results.parquet"
         self.results = (
             pd.read_parquet(results_path) if results_path.exists() else pd.DataFrame()

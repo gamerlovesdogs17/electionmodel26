@@ -1,0 +1,535 @@
+{
+  "audit_item": "Milestone-0",
+  "model_version": "senate-hierarchical-v0.9.13",
+  "generated_at": "2026-09-13T22:10:46.732992+00:00",
+  "archive_scope": "2018-2024",
+  "archive_note": "Milestone archive scope is 2018\u20132024 official ballots + certified margins. 2014/2016 remain provisional and are outside the production gate.",
+  "gates": {
+    "G1": {
+      "id": "G1",
+      "name": "Race universe",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "gate_years": [
+          2018,
+          2020,
+          2022,
+          2024
+        ],
+        "problem_cycles": [],
+        "failures": []
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+      ],
+      "failure_behavior": "Stop replay.",
+      "notes": [
+        "Milestone archive scope is 2018\u20132024 official ballots + certified margins. 2014/2016 remain provisional and are outside the production gate."
+      ]
+    },
+    "G2": {
+      "id": "G2",
+      "name": "Chamber truth",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "gate_years": [
+          2018,
+          2020,
+          2022,
+          2024
+        ],
+        "failures": []
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+      ],
+      "failure_behavior": "Stop scoring.",
+      "notes": [
+        "Milestone archive scope is 2018\u20132024 official ballots + certified margins. 2014/2016 remain provisional and are outside the production gate."
+      ]
+    },
+    "G3": {
+      "id": "G3",
+      "name": "Poll coverage",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "failures": [],
+        "years": [
+          "2018",
+          "2020",
+          "2022",
+          "2024"
+        ]
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\poll_coverage_latest.json"
+      ],
+      "failure_behavior": "Mark thin races; prohibit complete-cycle claim.",
+      "notes": []
+    },
+    "G4": {
+      "id": "G4",
+      "name": "Vintage integrity",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "publishable": true,
+        "run_class": "publication",
+        "reasons": []
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\evidence_eligibility_latest.json"
+      ],
+      "failure_behavior": "Leakage failure.",
+      "notes": [
+        "Publishable runs must reject synthetic/imputed/untraceable tiers."
+      ]
+    },
+    "G5": {
+      "id": "G5",
+      "name": "Model identity",
+      "ok": true,
+      "status": "partial",
+      "detail": {
+        "nested_spine": "fast_hierarchical_t",
+        "nested_method": "fast",
+        "no_weight_remapping": true,
+        "stack_source_spine": "fast_hierarchical_t",
+        "reproduction_ok": true,
+        "matrix_sha256": "7fb5ccf8dee3fd801752946742dfbaf8d5bd982923c268ee1642bbfc1f80def3",
+        "forecast_method": "ensemble_stack+overlays",
+        "forecast_core": "pymc"
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"
+      ],
+      "failure_behavior": "Invalidate run.",
+      "notes": [
+        "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
+      ]
+    },
+    "G6": {
+      "id": "G6",
+      "name": "Proper scores",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "g8_metric": "crps",
+        "mean_crps": null,
+        "n_folds": 4,
+        "freeze_before_truth": true,
+        "validation_calibration": {
+          "n": 33,
+          "brier": 0.03719729638687999,
+          "has_margin_scores": true,
+          "log_score": null,
+          "calibration_slope_intercept": null,
+          "pit": null
+        },
+        "shadow_evaluations": [
+          {
+            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z\\evaluation.json",
+            "spine_crps": 4.854064061143937
+          }
+        ]
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+      ],
+      "failure_behavior": "No calibration claim.",
+      "notes": [
+        "Race CRPS/Brier/log + chamber scores required before calibration claims."
+      ]
+    },
+    "G7": {
+      "id": "G7",
+      "name": "Reliability",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "n_bins": 8,
+        "reliability_gate": {
+          "sample_sizes_disclosed": true,
+          "overconfident_bins": [],
+          "n_overconfident": 0,
+          "calibration_claim_allowed": true
+        },
+        "sample_sizes_disclosed": true
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+      ],
+      "failure_behavior": "Recalibrate or widen.",
+      "notes": [
+        "Calibration plots must disclose sample sizes; overconfidence blocks claims."
+      ]
+    },
+    "G8": {
+      "id": "G8",
+      "name": "Ablation",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "keep": [
+          "state_space",
+          "ridge_fundamentals",
+          "last_election_swing",
+          "similarity_terminal",
+          "terminal_race"
+        ],
+        "disable": [
+          "poll_only_state_space",
+          "equal_weight_polls",
+          "shrinkage_polls"
+        ],
+        "n_components": 8
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
+      ],
+      "failure_behavior": "Disable component.",
+      "notes": []
+    },
+    "G9": {
+      "id": "G9",
+      "name": "Numerical quality",
+      "ok": false,
+      "status": "partial",
+      "detail": "missing numerical_quality on forecast_latest",
+      "evidence": [],
+      "failure_behavior": "Do not publish.",
+      "notes": [
+        "Regenerate forecast on v0.9.11+; required before publish."
+      ]
+    },
+    "G10": {
+      "id": "G10",
+      "name": "Reproducibility",
+      "ok": true,
+      "status": "partial",
+      "detail": {
+        "mode": "hash_seal_lite",
+        "verify_rebuild": {
+          "ok": false,
+          "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+          "error": null
+        },
+        "shadow_verify": [
+          {
+            "shadow_id": "shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z",
+            "ok": true,
+            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z"
+          }
+        ],
+        "note": "Independent re-fit from manifest is deferred; G10 currently verifies sealed hashes (releases + shadow bundles)."
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\shadow_publications.jsonl"
+      ],
+      "failure_behavior": "Reject release.",
+      "notes": []
+    },
+    "G11": {
+      "id": "G11",
+      "name": "Transparency",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "model_card": true,
+        "model_version": "senate-hierarchical-v0.9.13",
+        "run_class": "publication",
+        "publishable": true,
+        "has_limitations": false,
+        "validation_limitations_n": 4,
+        "poll_coverage_present": true
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\MODEL_CARD.md"
+      ],
+      "failure_behavior": "Withhold public artifact.",
+      "notes": [
+        "Model card, run_class, and missingness must be visible before public artifact."
+      ]
+    }
+  },
+  "gate_list": [
+    {
+      "id": "G1",
+      "name": "Race universe",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "gate_years": [
+          2018,
+          2020,
+          2022,
+          2024
+        ],
+        "problem_cycles": [],
+        "failures": []
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+      ],
+      "failure_behavior": "Stop replay.",
+      "notes": [
+        "Milestone archive scope is 2018\u20132024 official ballots + certified margins. 2014/2016 remain provisional and are outside the production gate."
+      ]
+    },
+    {
+      "id": "G2",
+      "name": "Chamber truth",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "gate_years": [
+          2018,
+          2020,
+          2022,
+          2024
+        ],
+        "failures": []
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+      ],
+      "failure_behavior": "Stop scoring.",
+      "notes": [
+        "Milestone archive scope is 2018\u20132024 official ballots + certified margins. 2014/2016 remain provisional and are outside the production gate."
+      ]
+    },
+    {
+      "id": "G3",
+      "name": "Poll coverage",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "failures": [],
+        "years": [
+          "2018",
+          "2020",
+          "2022",
+          "2024"
+        ]
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\poll_coverage_latest.json"
+      ],
+      "failure_behavior": "Mark thin races; prohibit complete-cycle claim.",
+      "notes": []
+    },
+    {
+      "id": "G4",
+      "name": "Vintage integrity",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "publishable": true,
+        "run_class": "publication",
+        "reasons": []
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\evidence_eligibility_latest.json"
+      ],
+      "failure_behavior": "Leakage failure.",
+      "notes": [
+        "Publishable runs must reject synthetic/imputed/untraceable tiers."
+      ]
+    },
+    {
+      "id": "G5",
+      "name": "Model identity",
+      "ok": true,
+      "status": "partial",
+      "detail": {
+        "nested_spine": "fast_hierarchical_t",
+        "nested_method": "fast",
+        "no_weight_remapping": true,
+        "stack_source_spine": "fast_hierarchical_t",
+        "reproduction_ok": true,
+        "matrix_sha256": "7fb5ccf8dee3fd801752946742dfbaf8d5bd982923c268ee1642bbfc1f80def3",
+        "forecast_method": "ensemble_stack+overlays",
+        "forecast_core": "pymc"
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"
+      ],
+      "failure_behavior": "Invalidate run.",
+      "notes": [
+        "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
+      ]
+    },
+    {
+      "id": "G6",
+      "name": "Proper scores",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "g8_metric": "crps",
+        "mean_crps": null,
+        "n_folds": 4,
+        "freeze_before_truth": true,
+        "validation_calibration": {
+          "n": 33,
+          "brier": 0.03719729638687999,
+          "has_margin_scores": true,
+          "log_score": null,
+          "calibration_slope_intercept": null,
+          "pit": null
+        },
+        "shadow_evaluations": [
+          {
+            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z\\evaluation.json",
+            "spine_crps": 4.854064061143937
+          }
+        ]
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+      ],
+      "failure_behavior": "No calibration claim.",
+      "notes": [
+        "Race CRPS/Brier/log + chamber scores required before calibration claims."
+      ]
+    },
+    {
+      "id": "G7",
+      "name": "Reliability",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "n_bins": 8,
+        "reliability_gate": {
+          "sample_sizes_disclosed": true,
+          "overconfident_bins": [],
+          "n_overconfident": 0,
+          "calibration_claim_allowed": true
+        },
+        "sample_sizes_disclosed": true
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+      ],
+      "failure_behavior": "Recalibrate or widen.",
+      "notes": [
+        "Calibration plots must disclose sample sizes; overconfidence blocks claims."
+      ]
+    },
+    {
+      "id": "G8",
+      "name": "Ablation",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "keep": [
+          "state_space",
+          "ridge_fundamentals",
+          "last_election_swing",
+          "similarity_terminal",
+          "terminal_race"
+        ],
+        "disable": [
+          "poll_only_state_space",
+          "equal_weight_polls",
+          "shrinkage_polls"
+        ],
+        "n_components": 8
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
+      ],
+      "failure_behavior": "Disable component.",
+      "notes": []
+    },
+    {
+      "id": "G9",
+      "name": "Numerical quality",
+      "ok": false,
+      "status": "partial",
+      "detail": "missing numerical_quality on forecast_latest",
+      "evidence": [],
+      "failure_behavior": "Do not publish.",
+      "notes": [
+        "Regenerate forecast on v0.9.11+; required before publish."
+      ]
+    },
+    {
+      "id": "G10",
+      "name": "Reproducibility",
+      "ok": true,
+      "status": "partial",
+      "detail": {
+        "mode": "hash_seal_lite",
+        "verify_rebuild": {
+          "ok": false,
+          "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+          "error": null
+        },
+        "shadow_verify": [
+          {
+            "shadow_id": "shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z",
+            "ok": true,
+            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z"
+          }
+        ],
+        "note": "Independent re-fit from manifest is deferred; G10 currently verifies sealed hashes (releases + shadow bundles)."
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\shadow_publications.jsonl"
+      ],
+      "failure_behavior": "Reject release.",
+      "notes": []
+    },
+    {
+      "id": "G11",
+      "name": "Transparency",
+      "ok": true,
+      "status": "pass",
+      "detail": {
+        "model_card": true,
+        "model_version": "senate-hierarchical-v0.9.13",
+        "run_class": "publication",
+        "publishable": true,
+        "has_limitations": false,
+        "validation_limitations_n": 4,
+        "poll_coverage_present": true
+      },
+      "evidence": [
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\MODEL_CARD.md"
+      ],
+      "failure_behavior": "Withhold public artifact.",
+      "notes": [
+        "Model card, run_class, and missingness must be visible before public artifact."
+      ]
+    }
+  ],
+  "ok": true,
+  "n_pass": 8,
+  "n_partial": 3,
+  "n_fail": 0,
+  "failures": [],
+  "partials": [
+    "G5",
+    "G9",
+    "G10"
+  ],
+  "milestone": {
+    "name": "first_publishable",
+    "public_live_probabilities": false,
+    "requirements": [
+      "frozen shadow with identified spine",
+      "nested holdouts",
+      "official 2018-2024 archive",
+      "no fixture inputs for publication claims",
+      "G1-G11 acceptance report"
+    ]
+  },
+  "exit_condition": "Unified G1\u2013G11 acceptance artifact retained; milestone shadow uses production spine."
+}

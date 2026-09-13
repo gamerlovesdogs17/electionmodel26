@@ -27,9 +27,8 @@ def attach_poll_weights(
     dominate (~half-life 28d default).
 
     Weights use recency, sample size, quality, and partisan status only.
-    Mode / population corrections are applied as additive offsets in the
-    measurement model (see midterms.model.pymc_model), not here — avoiding
-    double-counting the same information as both bias and weight.
+    Mode / population corrections are hierarchical measurement effects in the
+    PyMC likelihood (see midterms.model.effects) — not applied here as weights.
     """
     if polls.empty:
         out = polls.copy()
@@ -56,8 +55,9 @@ def attach_poll_weights(
     partisan = out["partisan"].fillna(False).astype(bool) if "partisan" in out.columns else False
     partisan_w = np.where(partisan, 0.35, 1.0)
 
-    # Mode / population enter as additive measurement offsets in the likelihood
-    # (pymc_model._mode_offset / _population_offset) — not again as weights.
+    # Mode / population enter as hierarchical measurement effects in PyMC
+    # (midterms.model.effects / pymc_model._measurement_effects). Fast and
+    # state-space paths use documented prior means — not again as weights.
     raw = recency.to_numpy() * size_w.to_numpy() * qw.to_numpy() * partisan_w
     raw = np.nan_to_num(raw, nan=0.0, posinf=0.0, neginf=0.0)
     out["raw_weight"] = raw

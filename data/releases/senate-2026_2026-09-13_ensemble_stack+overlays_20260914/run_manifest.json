@@ -1,0 +1,76 @@
+{
+  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260914",
+  "generated_at": "2026-09-13T22:25:51.675235+00:00",
+  "forecast_as_of": "2026-09-13",
+  "election_id": "senate-2026",
+  "model_version": "senate-hierarchical-v0.9.15",
+  "code_commit": "295e1c7e0a41e18d7ffd44a20e74e5fc42abd7dd",
+  "configuration_hash": "c80562116e514ebc452285d3ca946aba14ed9d4d3edcdeeffd54ac0318d8b89c",
+  "snapshot_ids": {
+    "evidence": "643eb7eb47f2026b"
+  },
+  "domain_hashes": {
+    "economics_vintages.parquet": "3feab361ebec5426012b3e0c8e84761ff13163c438ea23c11242d3c01e4825df",
+    "expert_ratings.parquet": "7cb463e742f0e1ca454672f3ece284f0dd1917a0d4128c40205e6ae02fc241d3",
+    "fundraising_shares.parquet": "a1594df0a1f35f6a36aee6510f191395a17d36540fbc7fd01b4547a6b99fec57",
+    "markets.parquet": "88df6e0fc0e4bafd0068dbf35efe57e1a15071804e311b55bf93c09962c99ce5",
+    "markets_control.json": "6bb2964d7fd8895c552feb44c2cd47188634590d10f6bf9fc3600bb7765e6787",
+    "peer_snapshots.json": "0bfb4f56d5db56ef97e25b38ac84814d78e9e85db84284513a80ae4f4c691b5c",
+    "polls.parquet": "175e20e2075325259732f09a45f1a032cb916a70e20124d9a3b3aa5b437fcecc",
+    "polls_fte_historical.parquet": "e561324a2a4f39345e0fcb73c3ac74f73397d7e2770f88689ebeefddf47bc15f",
+    "polls_historical.parquet": "2192be81d2988afb91f9681b984839769342b19708ea7c9827ae06e19ca5db92",
+    "polls_live_votehub.parquet": "4fdcf081c1e1aaff4bc05862a08c99819c4b2c27ae1782fc54918d2188b53dfe",
+    "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
+    "pollster_ratings.parquet": "32a297dd345d25537781428481e1599238c8587528303354239cd353ca23b150",
+    "pres_approval.parquet": "f011746296c3834bcef4c0697c2aa51a7ed6abd924ecd100703b04fc299d9d2e",
+    "races.parquet": "2074526330cf64cbee12429fe73e9eb9c42a88aec75b44fd83235010d847ae3a",
+    "races_official.parquet": "7252f894509351232281c76b515a94a7a519aaab232f3c7d0b4f4192c12f2193",
+    "results.parquet": "d166100b3c980f3cd05de03122cb697e4fdd80de4ddfaf1c676372687330fba8",
+    "results_certified.parquet": "4f36d0bc820283c5d6607d5483c6bbca7d7a8c329d3b16386e45359c26f2537d"
+  },
+  "environment_lock": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.5",
+      "scipy": "1.18.1",
+      "pymc": "6.3.2",
+      "pyarrow": "25.0.1"
+    },
+    "locked_at": "2026-09-13T22:25:51.811813+00:00"
+  },
+  "seed": 20260914,
+  "draws": 1000,
+  "tune": 1000,
+  "chains": 4,
+  "output_hashes": {
+    "forecast_json": "e058025009b7e3a0f889b6fcb39b5931ad70004127d561cb159352dc73ce52d5",
+    "draws": "fba7ffc6007d49077fb71773ce416b14823fd267f9a6d3de36fa20d9f4500f46"
+  },
+  "paths": {
+    "forecast": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_senate-2026_2026-09-13_ensemble_stack+overlays_20260914.json",
+    "forecast_latest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json",
+    "draws": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\draws_senate-2026_2026-09-13_ensemble_stack+overlays_20260914.npz"
+  },
+  "signature": {
+    "alg": "Ed25519",
+    "sha256": "bef72e16fe130a2d52ba14c560afd80f3b7bceb641d7268d9839e82344b5a729",
+    "signature": "v07djVJwlQmq+OlC23e2QPJwg0S52+wSFTuzNGsD7hVTgQK6BuocO2XuHqW0F60h3cVQaCTnytBhTyi2n3Q/CA==",
+    "key_id": "signing_public_key.pem",
+    "public_key_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\signing_public_key.pem"
+  },
+  "public_release": {
+    "enabled": true,
+    "surface": "live",
+    "publication_id": "public_senate-2026__senate-hierarchical-v0.9.15_20260913T223026Z",
+    "published_at": "2026-09-13T22:30:26.791212+00:00",
+    "model_version": "senate-hierarchical-v0.9.15",
+    "code_commit": "295e1c7e0a41e18d7ffd44a20e74e5fc42abd7dd",
+    "acceptance_gates_ok": true,
+    "disclaimer": "Probabilistic Senate forecast for research and public information. Not betting advice. Chamber control uses \u226551 Dem seats; 50\u201350 is Republican via the Vice President. Independents without a Dem nominee still count toward Democratic caucus seats when applicable.",
+    "limitations_url_hint": "MODEL_CARD.md / acceptance_gates_latest.md",
+    "archive_scope": "2018-2024 official for validation; live target is senate-2026"
+  },
+  "publication_surface": "live"
+}

@@ -2,11 +2,17 @@
 
 Blueprint §§11–12 roles and change control (Senate research production).
 
+## Public live probabilities
+After Milestone-0 (green G1–G11), production may promote a publication-eligible
+forecast with `python -m midterms.cli publish-live`. That stamps `public_release`
+on the artifact, syncs the UI JSON, and seals a prospective live shadow. Do not
+label research-only or non-publication runs as live.
+
 ## Roles
 | Role | Responsibility |
 | --- | --- |
 | Research | Spec changes, challengers, nested validation, ablations |
-| Production | Scheduled ingest/forecast, monitoring, release archives |
+| Production | Scheduled ingest/forecast, monitoring, release archives, `publish-live` |
 | Editorial / presentation | UI copy, rounding, scenario labels (not new forecasts) |
 | Approval | Review current-cycle overlays, new sources, recalibrations |
 

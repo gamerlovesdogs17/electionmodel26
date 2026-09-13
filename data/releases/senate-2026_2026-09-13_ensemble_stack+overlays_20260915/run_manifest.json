@@ -1,0 +1,100 @@
+{
+  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260915",
+  "generated_at": "2026-09-13T22:53:32.093741+00:00",
+  "forecast_as_of": "2026-09-13",
+  "election_id": "senate-2026",
+  "model_version": "senate-hierarchical-v0.9.16",
+  "code_commit": "295e1c7e0a41e18d7ffd44a20e74e5fc42abd7dd",
+  "configuration": {
+    "method": "pymc",
+    "fit_method": "pymc",
+    "draws": 1000,
+    "tune": 1000,
+    "chains": 4,
+    "seed": 20260915,
+    "generic_ballot": 5.852513615064197,
+    "ensemble": true,
+    "stack_weights": {
+      "pymc": 0.07876093567562756,
+      "state_space": 0.2130973221830859,
+      "ridge_fundamentals": 0.49514118046480254,
+      "last_election_swing": 0.21300056167648387
+    },
+    "with_ratings": true,
+    "with_markets": true,
+    "rating_weight": 0.15,
+    "market_weight": 0.12,
+    "control_weight": 0.15,
+    "control_calibrate": false,
+    "allow_fast_fallback": false
+  },
+  "configuration_hash": "a5c0a2759d84753661935ddc89abc872ff355768f84ab1188ec13a9bcaaee353",
+  "snapshot_ids": {
+    "evidence": "643eb7eb47f2026b"
+  },
+  "domain_hashes": {
+    "economics_vintages.parquet": "8d76763cf83899469b80cf1209c0d5127157b59324a25cfbc16a888c0d28ff2b",
+    "expert_ratings.parquet": "7cb463e742f0e1ca454672f3ece284f0dd1917a0d4128c40205e6ae02fc241d3",
+    "fundraising_shares.parquet": "a1594df0a1f35f6a36aee6510f191395a17d36540fbc7fd01b4547a6b99fec57",
+    "markets.parquet": "f7d816ae5e3a7145ed504d2865053bfdd89448cb7f3927e49f9b400ed7f057d6",
+    "markets_control.json": "9642c03a24a6752268b98fa17518c7e3b63e2a03d85f7a4d6a1c8580469d8dac",
+    "peer_snapshots.json": "0ddc9904d03c668558e35fdc3addde6889961bcd13bc645f4a0d72b9cce4c878",
+    "polls.parquet": "175e20e2075325259732f09a45f1a032cb916a70e20124d9a3b3aa5b437fcecc",
+    "polls_fte_historical.parquet": "e561324a2a4f39345e0fcb73c3ac74f73397d7e2770f88689ebeefddf47bc15f",
+    "polls_historical.parquet": "2192be81d2988afb91f9681b984839769342b19708ea7c9827ae06e19ca5db92",
+    "polls_live_votehub.parquet": "4fdcf081c1e1aaff4bc05862a08c99819c4b2c27ae1782fc54918d2188b53dfe",
+    "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
+    "pollster_ratings.parquet": "32a297dd345d25537781428481e1599238c8587528303354239cd353ca23b150",
+    "pres_approval.parquet": "de0cd0680301a403133f84235a3eac53d18f91934c55fe717f0d9dafb252ec69",
+    "races.parquet": "2074526330cf64cbee12429fe73e9eb9c42a88aec75b44fd83235010d847ae3a",
+    "races_official.parquet": "870288741fbfb68d1c8faf8f3c00ce273f2397bd8dec32e87cfeac20df43c972",
+    "results.parquet": "d166100b3c980f3cd05de03122cb697e4fdd80de4ddfaf1c676372687330fba8",
+    "results_certified.parquet": "f7172bd238d7ce7ecdef27e9087107d312ed6e6b85a4035d277530928db4445e"
+  },
+  "environment_lock": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.5",
+      "scipy": "1.18.1",
+      "pymc": "6.3.2",
+      "pyarrow": "25.0.1"
+    },
+    "locked_at": "2026-09-13T22:53:32.239029+00:00"
+  },
+  "seed": 20260915,
+  "draws": 1000,
+  "tune": 1000,
+  "chains": 4,
+  "output_hashes": {
+    "forecast_json": "f55acc18a6fa5004a93577cad50e5f8c1d0939cfccdb25ca917d5d5fc2b98c81",
+    "draws": "31d42950fb5290152f4c621fd498f18f8a3c406d82257a3022da5cbaaf30337c"
+  },
+  "paths": {
+    "forecast": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_senate-2026_2026-09-13_ensemble_stack+overlays_20260915_public.json",
+    "forecast_latest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json",
+    "draws": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\draws_senate-2026_2026-09-13_ensemble_stack+overlays_20260915.npz"
+  },
+  "rebuild_mode": false,
+  "signature": {
+    "alg": "Ed25519",
+    "sha256": "fda8e9a7156e789c49d2061b94486bf5c79ad221b8faa0b606b267a8be955215",
+    "signature": "0KE+d3wCK4Nf1jB+H/QvaTz6s1SROo6SfPAKjzz1x3RyO07duqfQe2nXE6uGy9cCDz7RRJ0I97qKuebEw628Bw==",
+    "key_id": "signing_public_key.pem",
+    "public_key_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\signing_public_key.pem"
+  },
+  "public_release": {
+    "enabled": true,
+    "surface": "live",
+    "publication_id": "public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z",
+    "published_at": "2026-09-13T22:57:19.251769+00:00",
+    "model_version": "senate-hierarchical-v0.9.16",
+    "code_commit": "295e1c7e0a41e18d7ffd44a20e74e5fc42abd7dd",
+    "acceptance_gates_ok": true,
+    "disclaimer": "Probabilistic Senate forecast for research and public information. Not betting advice. Chamber control uses \u226551 Dem seats; 50\u201350 is Republican via the Vice President. Independents without a Dem nominee still count toward Democratic caucus seats when applicable.",
+    "limitations_url_hint": "MODEL_CARD.md / acceptance_gates_latest.md",
+    "archive_scope": "2018-2024 official for validation; live target is senate-2026"
+  },
+  "publication_surface": "live"
+}

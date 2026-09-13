@@ -142,10 +142,12 @@ def main(argv: list[str] | None = None) -> None:
     from midterms.config import DEMO_AS_OF as _DEMO_AS_OF
 
     p_run.add_argument("--as-of", default=_DEMO_AS_OF)
-    p_run.add_argument("--method", choices=["fast", "pymc", "state_space"], default="pymc")
-    p_run.add_argument("--draws", type=int, default=400)
-    p_run.add_argument("--tune", type=int, default=400)
-    p_run.add_argument("--chains", type=int, default=2)
+    p_run.add_argument("--method", choices=["fast", "pymc", "pymc_dynamic", "state_space"], default="pymc")
+    from midterms.config import DEMO_CHAINS, DEMO_DRAWS, DEMO_TUNE
+
+    p_run.add_argument("--draws", type=int, default=DEMO_DRAWS)
+    p_run.add_argument("--tune", type=int, default=DEMO_TUNE)
+    p_run.add_argument("--chains", type=int, default=DEMO_CHAINS)
     p_run.add_argument("--seed", type=int, default=20260901)
     p_run.add_argument(
         "--generic-ballot",
@@ -186,6 +188,11 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help="Allow degraded fast hierarchical-t if PyMC fails (off by default)",
     )
+    p_run.add_argument(
+        "--require-publishable",
+        action="store_true",
+        help="Hard-fail if evidence tiers are synthetic/stale/untraceable (audit P0.4)",
+    )
 
     def _forecast(a: argparse.Namespace) -> None:
         gb_meta = None
@@ -218,6 +225,7 @@ def main(argv: list[str] | None = None) -> None:
             control_weight=a.control_weight,
             control_calibrate=bool(a.control_calibrate),
             allow_fast_fallback=bool(a.allow_fast_fallback) or a.method == "fast",
+            require_publishable=bool(a.require_publishable),
         )
         print(
             json.dumps(
@@ -227,6 +235,8 @@ def main(argv: list[str] | None = None) -> None:
                     "generic_ballot": gb,
                     "generic_ballot_meta": gb_meta,
                     "method": result["artifact"]["method"],
+                    "run_class": result["artifact"].get("run_class"),
+                    "publishable": result["artifact"].get("publishable"),
                     "stack_weights": result["artifact"].get("stack_weights"),
                     "diagnostics": {
                         k: result["artifact"]["diagnostics"].get(k)
@@ -264,9 +274,9 @@ def main(argv: list[str] | None = None) -> None:
     )
     p_cycle.add_argument(
         "--hierarchical-method",
-        choices=["pymc", "fast"],
+        choices=["pymc", "pymc_dynamic", "fast"],
         default="pymc",
-        help="OOS hierarchical spine (default pymc — blueprint production path)",
+        help="OOS hierarchical spine (default pymc; pymc_dynamic = weekly RW path)",
     )
 
     def _cycle(a: argparse.Namespace) -> None:
@@ -342,6 +352,32 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
+    p_est = sub.add_parser(
+        "estimate-fundamentals",
+        help="Nested LOO ridge fundamentals coefs + stability report (audit P1.2)",
+    )
+    p_est.add_argument("--ridge-lambda", type=float, default=25.0)
+    p_est.add_argument(
+        "--apply",
+        action="store_true",
+        help="Set working COEF from full-sample estimate (session only)",
+    )
+    p_est.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.coefficient_stability",
+                    fromlist=["run_coefficient_stability"],
+                ).run_coefficient_stability(
+                    ridge_lambda=a.ridge_lambda,
+                    apply_full_sample=a.apply,
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
     p_api = sub.add_parser("serve-api", help="Serve forecast JSON API for the research UI")
     p_api.add_argument("--host", default="127.0.0.1")
     p_api.add_argument("--port", type=int, default=8787)
@@ -387,21 +423,82 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
-    p_vrb = sub.add_parser(
-        "verify-rebuild",
-        help="Compare forecast_latest hashes to sealed run manifest",
+    p_rec = sub.add_parser(
+        "reconcile-chamber",
+        help="Official ballot + 100-seat/control reconciliation gate (audit P0.2)",
     )
-    p_vrb.add_argument("--run-id", default=None)
-    p_vrb.set_defaults(
+    p_rec.add_argument("--year", type=int, default=None, help="Single year; default gate years 2018–2024")
+    p_rec.add_argument(
+        "--all-meta",
+        action="store_true",
+        help="Include provisional CYCLE_META years (2014/2016) outside the production gate",
+    )
+    p_rec.set_defaults(
         func=lambda a: print(
             json.dumps(
-                __import__(
-                    "midterms.ops.reproducibility", fromlist=["verify_rebuild"]
-                ).verify_rebuild(run_id=a.run_id),
+                (
+                    __import__(
+                        "midterms.validation.chamber_reconcile", fromlist=["reconcile_cycle"]
+                    ).reconcile_cycle(a.year)
+                    if a.year
+                    else __import__(
+                        "midterms.validation.chamber_reconcile", fromlist=["reconcile_all_cycles"]
+                    ).reconcile_all_cycles(
+                        years=(
+                            tuple(
+                                sorted(
+                                    __import__(
+                                        "midterms.evidence.official_ballot",
+                                        fromlist=["CYCLE_META"],
+                                    ).CYCLE_META
+                                )
+                            )
+                            if a.all_meta
+                            else None
+                        )
+                    )
+                ),
                 indent=2,
+                default=str,
             )
         )
     )
+
+    p_vrb = sub.add_parser(
+        "verify-rebuild",
+        help="Hash-seal lite and/or independent rebuild from sealed manifest (G10)",
+    )
+    p_vrb.add_argument("--run-id", default=None)
+    p_vrb.add_argument(
+        "--independent",
+        action="store_true",
+        help="Re-execute forecast from sealed knobs and compare within tolerances",
+    )
+    p_vrb.add_argument("--release-dir", default=None)
+    p_vrb.add_argument(
+        "--method-override",
+        default=None,
+        help="Optional fit method override for independent rebuild (e.g. fast)",
+    )
+
+    def _verify_rebuild(a: argparse.Namespace) -> None:
+        from pathlib import Path
+
+        from midterms.ops.reproducibility import independent_rebuild, verify_rebuild
+
+        if a.independent:
+            out = independent_rebuild(
+                run_id=a.run_id,
+                release_dir=Path(a.release_dir) if a.release_dir else None,
+                method_override=a.method_override,
+            )
+        else:
+            out = verify_rebuild(run_id=a.run_id)
+        print(json.dumps(out, indent=2, default=str))
+        if not out.get("ok"):
+            raise SystemExit(1)
+
+    p_vrb.set_defaults(func=_verify_rebuild)
 
     p_res = sub.add_parser(
         "write-results-archive",
@@ -552,6 +649,316 @@ def main(argv: list[str] | None = None) -> None:
             )
         )
     )
+
+    p_pcov = sub.add_parser(
+        "poll-coverage",
+        help="Official contest/nominee/horizon poll coverage gate (audit P0.3)",
+    )
+    p_pcov.add_argument("--year", type=int, default=None)
+    p_pcov.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                (
+                    __import__(
+                        "midterms.validation.poll_coverage", fromlist=["poll_coverage_report"]
+                    ).poll_coverage_report(a.year)
+                    if a.year
+                    else __import__(
+                        "midterms.validation.poll_coverage", fromlist=["write_poll_coverage_report"]
+                    ).write_poll_coverage_report()
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_elig = sub.add_parser(
+        "evidence-eligibility",
+        help="Classify evidence tiers and publication eligibility (audit P0.4)",
+    )
+    p_elig.add_argument("--election-id", default="senate-2026")
+    p_elig.add_argument("--as-of", default=None)
+    p_elig.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.eligibility", fromlist=["write_eligibility_report"]
+                ).write_eligibility_report(a.election_id, as_of=a.as_of),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_svd = sub.add_parser(
+        "compare-static-dynamic",
+        help="OOS score static PyMC vs weekly dynamic PyMC (audit P1.1)",
+    )
+    p_svd.add_argument("--year", type=int, default=2022)
+    p_svd.add_argument("--draws", type=int, default=150)
+    p_svd.add_argument("--tune", type=int, default=150)
+    p_svd.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.static_vs_dynamic",
+                    fromlist=["compare_static_vs_dynamic"],
+                ).compare_static_vs_dynamic(
+                    a.year, draws=a.draws, tune=a.tune, chains=2
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_cov = sub.add_parser(
+        "calibrate-covariance",
+        help="Nested terminal+similarity scale grid (audit P1.3)",
+    )
+    p_cov.add_argument("--draws", type=int, default=800)
+    p_cov.add_argument("--max-configs", type=int, default=None)
+    p_cov.add_argument(
+        "--no-apply",
+        action="store_true",
+        help="Do not update module defaults when gate passes",
+    )
+    p_cov.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.covariance_calibration",
+                    fromlist=["run_covariance_calibration"],
+                ).run_covariance_calibration(
+                    n_draws=a.draws,
+                    max_configs=a.max_configs,
+                    apply_defaults=not a.no_apply,
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_nloo = sub.add_parser(
+        "nested-component-loo",
+        help="Freeze-then-score nested LOO for every component (audit P2.1)",
+    )
+    p_nloo.add_argument("--draws", type=int, default=600)
+    p_nloo.add_argument(
+        "--hierarchical-method",
+        default="fast",
+        choices=("fast", "pymc"),
+        help="Hierarchical spine for LOO (fast default; pymc for publishable claims)",
+    )
+    p_nloo.add_argument("--years", default="2018,2020,2022,2024")
+    p_nloo.add_argument("--leads", default="60,30")
+    p_nloo.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.nested_component_loo",
+                    fromlist=["run_nested_component_loo"],
+                ).run_nested_component_loo(
+                    years=tuple(int(x) for x in a.years.split(",") if x.strip()),
+                    lead_days=tuple(int(x) for x in a.leads.split(",") if x.strip()),
+                    hierarchical_method=a.hierarchical_method,
+                    n_draws=a.draws,
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_sw = sub.add_parser(
+        "fit-stack-weights",
+        help="Fit reproducible OOF ensemble weights from nested LOO matrix (audit P2.2)",
+    )
+    p_sw.add_argument("--temperature", type=float, default=0.75)
+    p_sw.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.stack_weights",
+                    fromlist=["fit_stack_weights_from_nested_loo"],
+                ).fit_stack_weights_from_nested_loo(temperature=a.temperature),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_nq = sub.add_parser(
+        "numerical-check",
+        help="MCSE / convergence gate on latest forecast (audit P2.3 / G9)",
+    )
+    p_nq.add_argument("--publishable", action="store_true")
+
+    def _numerical_check(a: argparse.Namespace) -> None:
+        from midterms.config import ARTIFACTS_DIR
+        from midterms.validation.numerical_quality import evaluate_numerical_quality
+
+        art = json.loads((ARTIFACTS_DIR / "forecast_latest.json").read_text())
+        existing = art.get("numerical_quality")
+        if existing and not a.publishable:
+            print(json.dumps(existing, indent=2, default=str))
+            return
+        chamber = art.get("chamber") or {}
+        diag = art.get("diagnostics") or {}
+        report = evaluate_numerical_quality(
+            p_dem_control=float(chamber.get("p_dem_majority") or 0.5),
+            n_posterior_samples=diag.get("n_posterior_samples") or diag.get("draws"),
+            convergence=diag.get("convergence"),
+            seed=art.get("seed"),
+            publishable=bool(a.publishable),
+        )
+        # Re-attach chamber MCSE if seat histogram implies draw count
+        hist = chamber.get("seat_histogram") or []
+        n = int(sum(int(h.get("count") or 0) for h in hist)) if hist else 0
+        if n > 0:
+            from midterms.validation.numerical_quality import mcse_bernoulli, mcse_mean
+
+            p = float(chamber.get("p_dem_majority") or 0.5)
+            seats = float(chamber.get("expected_dem_seats") or 50.0)
+            report["chamber_mcse"] = {
+                "n_draws": float(n),
+                "mcse_p_dem_control": mcse_bernoulli(p, n),
+                "mcse_expected_dem_seats": float("nan"),  # need full draws
+                "p_dem_control": p,
+                "expected_dem_seats": seats,
+                "note": "recomputed from artifact histogram counts",
+            }
+            report["checks"] = [
+                c
+                for c in report["checks"]
+                if c["name"] not in {"mcse_control", "mcse_seats", "min_sim_draws"}
+            ]
+            report["checks"].append(
+                {
+                    "name": "mcse_control",
+                    "ok": report["chamber_mcse"]["mcse_p_dem_control"]
+                    <= report["thresholds"]["mcse_control_max"],
+                    "detail": report["chamber_mcse"]["mcse_p_dem_control"],
+                }
+            )
+            report["checks"].append(
+                {
+                    "name": "min_sim_draws",
+                    "ok": n >= report["thresholds"]["min_sim_draws"],
+                    "detail": n,
+                }
+            )
+            report["ok"] = all(c["ok"] for c in report["checks"])
+        print(json.dumps(report, indent=2, default=str))
+
+    p_nq.set_defaults(func=_numerical_check)
+
+    p_acc = sub.add_parser(
+        "acceptance-gates",
+        help="Aggregate G1–G11 acceptance report (first publishable milestone)",
+    )
+    p_acc.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.acceptance_gates",
+                    fromlist=["evaluate_acceptance_gates"],
+                ).evaluate_acceptance_gates(),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_pub = sub.add_parser(
+        "publish-live",
+        help="Publish public-facing live probabilities (requires green G1–G11)",
+    )
+    p_pub.add_argument("--no-shadow", action="store_true", help="Skip live shadow seal")
+    p_pub.add_argument("--no-web", action="store_true", help="Skip web/public sync")
+
+    def _publish_live(a: argparse.Namespace) -> None:
+        from midterms.ops.public_publish import publish_live
+
+        out = publish_live(seal_shadow=not a.no_shadow, sync_web=not a.no_web)
+        print(json.dumps(out, indent=2, default=str))
+
+    p_pub.set_defaults(func=_publish_live)
+
+    p_shadow = sub.add_parser(
+        "shadow-publish",
+        help="Freeze timestamped shadow publication (audit P3 / Milestone-0)",
+    )
+    p_shadow.add_argument(
+        "--mode",
+        choices=("historical", "live", "ensure", "milestone"),
+        default="ensure",
+        help="historical|live|ensure|milestone (pymc spine first-publishable seal)",
+    )
+    p_shadow.add_argument("--year", type=int, default=2022)
+    p_shadow.add_argument("--lead-days", type=int, default=60)
+    p_shadow.add_argument("--method", default="fast", choices=("fast", "pymc", "pymc_dynamic"))
+    p_shadow.add_argument("--draws", type=int, default=400)
+    p_shadow.add_argument("--full-components", action="store_true", help="Freeze all LOO components")
+
+    def _shadow_publish(a: argparse.Namespace) -> None:
+        from midterms.ops.shadow_publish import (
+            ensure_retained_shadow,
+            publish_historical_shadow,
+            publish_live_shadow,
+            publish_milestone_shadow,
+        )
+
+        if a.mode == "live":
+            out = publish_live_shadow()
+        elif a.mode == "milestone":
+            out = publish_milestone_shadow(
+                year=a.year,
+                lead_days=a.lead_days,
+                n_draws=max(a.draws, 800),
+            )
+        elif a.mode == "historical":
+            out = publish_historical_shadow(
+                year=a.year,
+                lead_days=a.lead_days,
+                hierarchical_method=a.method,
+                n_draws=a.draws,
+                spine_only=not a.full_components,
+            )
+        else:
+            out = ensure_retained_shadow(
+                year=a.year,
+                lead_days=a.lead_days,
+                hierarchical_method=a.method,
+                n_draws=a.draws,
+            )
+        print(json.dumps(out, indent=2, default=str))
+
+    p_shadow.set_defaults(func=_shadow_publish)
+
+    p_sver = sub.add_parser(
+        "shadow-verify",
+        help="Verify sealed shadow publication hashes (audit P3)",
+    )
+    p_sver.add_argument("--shadow-id", default=None)
+    p_sver.add_argument("--path", default=None)
+
+    def _shadow_verify(a: argparse.Namespace) -> None:
+        from pathlib import Path
+
+        from midterms.ops.shadow_publish import verify_shadow
+
+        out = verify_shadow(
+            a.shadow_id,
+            path=Path(a.path) if a.path else None,
+        )
+        print(json.dumps(out, indent=2, default=str))
+        if not out.get("ok"):
+            raise SystemExit(1)
+
+    p_sver.set_defaults(func=_shadow_verify)
 
     p_lic = sub.add_parser(
         "ingest-licensed-ratings",

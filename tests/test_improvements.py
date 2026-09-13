@@ -200,12 +200,13 @@ def test_peer_gate_rejects_null_margins():
 
 
 
-def test_align_weights_maps_fast_to_pymc():
+def test_align_weights_no_silent_fast_to_pymc_remap():
     from midterms.model.ensemble import align_weights_to_spine, weights_from_oof_scores
 
     w = align_weights_to_spine({"fast_hierarchical_t": 0.4, "state_space": 0.6}, spine="pymc")
-    assert "fast_hierarchical_t" not in w
-    assert abs(w["pymc"] - 0.4) < 1e-9
+    # P2.2: honest labels — no remapping onto pymc
+    assert "pymc" not in w
+    assert abs(w["fast_hierarchical_t"] - 0.4) < 1e-9
     assert abs(w["state_space"] - 0.6) < 1e-9
     # Fold-pure: excluding a fold must not peek at its scores
     folds = {
@@ -263,8 +264,10 @@ def test_pymc_error_budget_morris_split():
     fit = fit_fast_approximation(snap, n_draws=80, seed=7)
     bud = fit.diagnostics["error_budget"]
     assert "future_movement_sd" in bud
-    assert "terminal_error_sd" in bud
-    assert bud["terminal_error_sd"] == 2.5
+    assert "terminal_layers" in bud or bud.get("terminal_layers") == "national+race+similarity"
+    assert "terminal_nat_sd" in bud
+    assert "similarity_terminal_sd" in bud
+    assert bud["terminal_rss"] > 0
     # Future movement contracts toward ED
     snap_near = Warehouse(ensure_fixtures=False).build_as_of("2026-10-27", "senate-2026")
     fit_near = fit_fast_approximation(snap_near, n_draws=40, seed=7)

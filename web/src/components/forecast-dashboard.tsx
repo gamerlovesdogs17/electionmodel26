@@ -86,8 +86,54 @@ export function ForecastDashboard() {
     <div className="space-y-10">
       <header className="space-y-3 border-b border-[var(--line)] pb-6">
         <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">
-          Internal research UI · {data.model_version}
+          {data.public_release?.enabled || data.publication_surface === "live"
+            ? `Live Senate forecast · ${data.model_version}`
+            : `Internal research UI · ${data.model_version}`}
         </p>
+        {data.publishable === false ||
+        data.run_class === "non_publication" ||
+        (data.evidence_eligibility &&
+          data.evidence_eligibility.publishable === false) ? (
+          <div
+            className="rounded-md border border-[var(--rep)] bg-[var(--panel)] px-3 py-2 text-sm text-[var(--rep)]"
+            role="status"
+          >
+            <strong className="font-medium">Non-publication run.</strong> Evidence
+            tiers include synthetic, stale, or untraceable inputs
+            {data.evidence_eligibility?.reasons?.length
+              ? ` — ${data.evidence_eligibility.reasons.slice(0, 2).join("; ")}`
+              : ""}
+            . Not a validated public forecast. Pre-P0 cycle_replay scores are not
+            real backtests.
+          </div>
+        ) : data.public_release?.enabled || data.publication_surface === "live" ? (
+          <div
+            className="rounded-md border border-[var(--line)] bg-[var(--panel)] px-3 py-2 text-sm text-[var(--ink)]"
+            role="status"
+          >
+            <strong className="font-medium">Public live forecast.</strong>{" "}
+            {data.public_release?.disclaimer ??
+              "Probabilistic Senate forecast. Not betting advice."}
+            {data.public_release?.published_at ? (
+              <span className="mt-1 block text-xs text-[var(--muted)]">
+                Published {data.public_release.published_at}
+                {data.public_release.publication_id
+                  ? ` · ${data.public_release.publication_id}`
+                  : ""}
+              </span>
+            ) : null}
+          </div>
+        ) : (
+          <div
+            className="rounded-md border border-[var(--line)] bg-[var(--panel)] px-3 py-2 text-xs text-[var(--muted)]"
+            role="note"
+          >
+            Publication-eligible research artifact — run{" "}
+            <code className="text-[var(--ink)]">publish-live</code> to promote to
+            the public live surface. Pre-P0 cycle_replay scores are not validated
+            backtests.
+          </div>
+        )}
         <div className="flex flex-wrap gap-3 text-xs text-[var(--muted)]">
           <span
             className={`rounded-md border px-2 py-1 ${
@@ -99,6 +145,22 @@ export function ForecastDashboard() {
           >
             method: {data.method ?? "unknown"}
           </span>
+          {data.run_class ? (
+            <span
+              className={`rounded-md border px-2 py-1 ${
+                data.run_class === "publication"
+                  ? "border-[var(--line)]"
+                  : "border-[var(--rep)] text-[var(--rep)]"
+              }`}
+            >
+              run: {data.run_class}
+            </span>
+          ) : null}
+          {data.publication_surface === "live" || data.public_release?.enabled ? (
+            <span className="rounded-md border border-[var(--line)] px-2 py-1">
+              surface: live
+            </span>
+          ) : null}
           {typeof data.generic_ballot === "number" &&
           Number.isFinite(data.generic_ballot) ? (
             <span className="rounded-md border border-[var(--line)] px-2 py-1">

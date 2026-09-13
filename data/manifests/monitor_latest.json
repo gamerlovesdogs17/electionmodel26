@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "checked_at": "2026-09-13T18:38:50.883923+00:00",
-  "model_version": "senate-hierarchical-v0.9.1",
+  "checked_at": "2026-09-13T20:16:01.176662+00:00",
+  "model_version": "senate-hierarchical-v0.9.5",
   "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
   "checks": [
     {
@@ -12,30 +12,30 @@
     {
       "name": "model_version_present",
       "ok": true,
-      "detail": "senate-hierarchical-v0.9.1"
+      "detail": "senate-hierarchical-v0.9.5"
     },
     {
       "name": "control_probs_sum_to_one",
       "ok": true,
       "detail": {
-        "p_dem": 0.425,
-        "p_rep": 0.575
+        "p_dem": 0.77625,
+        "p_rep": 0.22375
       }
     },
     {
       "name": "expected_seats_in_range",
       "ok": true,
-      "detail": 50.18125
+      "detail": 52.2975
     },
     {
       "name": "min_polls",
       "ok": true,
-      "detail": 260
+      "detail": 320
     },
     {
       "name": "min_enop",
       "ok": true,
-      "detail": 199.83773609977055
+      "detail": 144.68380050572844
     },
     {
       "name": "has_oh_fl_specials",
@@ -71,13 +71,41 @@
     {
       "name": "peer_release_gate",
       "ok": true,
-      "detail": 0.06
+      "detail": 0.29625
+    },
+    {
+      "name": "chamber_reconcile",
+      "ok": true,
+      "detail": {
+        "failures": [],
+        "gate_years": [
+          2018,
+          2020,
+          2022,
+          2024
+        ]
+      }
+    },
+    {
+      "name": "poll_coverage",
+      "ok": true,
+      "detail": {
+        "failures": []
+      }
+    },
+    {
+      "name": "publishable_claim_consistent",
+      "ok": true,
+      "detail": {
+        "claimed": true,
+        "eligible": true
+      }
     },
     {
       "name": "polls_file_present",
       "ok": true,
       "detail": {
-        "age_hours": 0.32
+        "age_hours": 0.03
       }
     },
     {
@@ -88,7 +116,7 @@
     {
       "name": "manifest_model_version",
       "ok": true,
-      "detail": "senate-hierarchical-v0.9.1"
+      "detail": "senate-hierarchical-v0.9.5"
     }
   ],
   "soft_checks": [
@@ -111,37 +139,53 @@
       "name": "peer_brier_crps_gate",
       "ok": true,
       "detail": {
-        "max_abs_control_gap": 0.06,
+        "max_abs_control_gap": 0.29625,
         "race_scores": {
           "ddhq": {
             "n": 10,
-            "brier_vs_peer_favorite": 0.12233578125,
-            "mae": 0.15612499999999999,
-            "crps_proxy": 0.15612499999999999,
-            "ok": true
+            "brier_vs_peer_favorite": 0.26158828125,
+            "mae": 0.147875,
+            "crps_proxy": 0.147875,
+            "ok": false
           },
           "kalshi": {
-            "n": 10,
-            "brier_vs_peer_favorite": 0.26108578125000004,
-            "mae": 0.18449666017076136,
-            "crps_proxy": 0.18449666017076136,
-            "ok": false
+            "n": 8,
+            "brier_vs_peer_favorite": 0.094440625,
+            "mae": 0.061566088843934,
+            "crps_proxy": 0.061566088843934,
+            "ok": true
           }
         },
-        "reasons": []
+        "reasons": [
+          "control gap vs primary peer large (gap=0.291 > 0.25); gaps={'ddhq': 0.29625, 'kalshi': 0.29125} \u2014 informational under blueprint \u00a72 (peers not averaged)"
+        ]
+      }
+    },
+    {
+      "name": "evidence_eligibility",
+      "ok": true,
+      "detail": {
+        "run_class": "publication",
+        "reasons": [],
+        "artifact_publishable": true
       }
     },
     {
       "name": "stack_weights_fresh",
       "ok": true,
       "detail": {
-        "age_hours": 0.5411925276120504
+        "age_hours": 0.576794463660982
       }
+    },
+    {
+      "name": "cycle_replay_comparable",
+      "ok": false,
+      "detail": "pre_official_ballot"
     },
     {
       "name": "historical_polls_primary",
       "ok": false,
-      "detail": "synthetic"
+      "detail": "mixed"
     },
     {
       "name": "has_environment_lock",
@@ -155,6 +199,7 @@
     }
   ],
   "alerts": [
+    "cycle_replay_all.json marked non-comparable (pre-official-ballot / synthetic universe) \u2014 rerun after P0.3",
     "historical polls not FTE-primary \u2014 run ingest-fte-polls"
   ]
 }

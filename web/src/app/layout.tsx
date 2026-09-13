@@ -13,9 +13,9 @@ const body = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "Senate Probability Lab",
+  title: "Senate Probability Forecast",
   description:
-    "Internal research UI for U.S. Senate seat-by-seat and chamber-wide joint probability forecasts.",
+    "U.S. Senate seat-by-seat and chamber-wide joint probability forecast (public live surface when published).",
 };
 
 export default function RootLayout({
