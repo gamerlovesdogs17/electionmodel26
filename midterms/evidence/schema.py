@@ -74,6 +74,10 @@ RACE_COLUMNS = [
     "region",
     "not_up",  # seats not contested this cycle but held for chamber totals
     "held_by",  # for chamber composition: D/R/I
+    "fundraising_share",  # Dem share of matched-window receipts in [0, 1]
+    "pres_approval",  # presidential net approval (cycle-level, positive = popular)
+    "white_house_party",  # 'D' | 'R'
+    "is_midterm",
 ]
 
 MANIFEST_FIELDS = [

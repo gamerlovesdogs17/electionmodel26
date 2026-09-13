@@ -7,22 +7,24 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
   const maxP = Math.max(...hist.map((h) => h.probability), 0.01);
   const lo = Math.min(...hist.map((h) => h.dem_seats));
   const hi = Math.max(...hist.map((h) => h.dem_seats));
+  const pFifty = chamber.p_fifty_fifty ?? chamber.p_tie ?? 0;
+  const expectedRep = chamber.expected_rep_seats ?? 100 - chamber.expected_dem_seats;
 
   return (
     <section className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat
-          label="Dem majority (≥51)"
+          label="Dem control (≥51)"
           value={pct(chamber.p_dem_majority, 1)}
           tone="dem"
         />
         <Stat
-          label="50–50 tie"
-          value={pct(chamber.p_tie, 1)}
+          label="50–50 (R via VP)"
+          value={pct(pFifty, 1)}
           tone="neutral"
         />
         <Stat
-          label="Rep majority (≥51)"
+          label="Rep control (≤50)"
           value={pct(chamber.p_rep_majority, 1)}
           tone="rep"
         />
@@ -38,9 +40,13 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
               Democratic seats from correlated draws (held {chamber.held_dem} D /{" "}
               {chamber.held_rep} R + contested outcomes). Expected{" "}
               <span className="font-medium text-[var(--ink)]">
-                {chamber.expected_dem_seats.toFixed(1)}
-              </span>{" "}
-              Dem seats.
+                {chamber.expected_dem_seats.toFixed(1)} D
+              </span>
+              {" / "}
+              <span className="font-medium text-[var(--ink)]">
+                {expectedRep.toFixed(1)} R
+              </span>
+              . A 50–50 chamber is Republican control under the VP tiebreak.
             </p>
           </div>
           <p className="text-xs text-[var(--muted)]">
@@ -49,20 +55,20 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
         </div>
         <div className="flex h-40 items-end gap-px overflow-x-auto">
           {hist.map((bin) => {
-            const isMaj = bin.dem_seats >= chamber.majority_threshold;
-            const isTie = bin.dem_seats === 50;
+            const isDemControl = bin.dem_seats >= chamber.majority_threshold;
+            const isFifty = bin.dem_seats === 50;
             const barPx = Math.max(2, Math.round((bin.probability / maxP) * 152));
             return (
               <div
                 key={bin.dem_seats}
                 className="group relative flex h-full min-w-[10px] flex-1 flex-col items-center justify-end"
-                title={`${bin.dem_seats} seats: ${pct(bin.probability, 1)}`}
+                title={`${bin.dem_seats} Dem seats: ${pct(bin.probability, 1)}`}
               >
                 <div
                   className={`w-full rounded-t-sm transition ${
-                    isTie
-                      ? "bg-[var(--accent)]"
-                      : isMaj
+                    isFifty
+                      ? "bg-[var(--rep)]/80"
+                      : isDemControl
                         ? "bg-[var(--dem)]"
                         : "bg-[var(--rep)]"
                   }`}

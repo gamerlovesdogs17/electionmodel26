@@ -32,6 +32,7 @@ python -m midterms.cli build-fixtures
 python -m midterms.cli fetch-external
 python -m midterms.cli ingest-polls
 python -m midterms.cli replay-baselines --year 2022
+python -m midterms.cli replay-cycle --all
 python -m midterms.cli forecast --method fast --as-of 2026-09-01
 
 # Optional: full PyMC NUTS fit (slower)
@@ -89,4 +90,21 @@ VoteHub normalize/merge tests require `data/raw/external/votehub_*.json` (create
 
 ## Out of scope (this pass)
 
-House, Electoral College, expert ratings, betting markets, public auth, production cloud deploy.
+House, Electoral College, expert ratings as production layers, betting markets as production layers, public auth, production cloud deploy.
+
+## Model v0.3 upgrades
+
+- **VP tiebreak:** 50–50 Senate → Republican control for the chamber-control estimand.
+- **ALFRED/fixture economic vintages** (`fetch-economics`) → real-income YoY in fundamentals.
+- **OpenFEC / fixture fundraising shares** (`fetch-finance`) → Dem receipt share prior.
+- **Optional ratings/markets overlays** (`--with-ratings`, `--with-markets`) with ablation report.
+- **Senate map** at the top of the research UI: Probability / Ratings / Margin views, flip hatching, hover tooltips.
+
+## Model v0.2 upgrades
+
+- **ENOP / pollster caps / study clustering** — influence weights so prolific firms and repeated releases add sublinear information (`midterms/model/poll_weights.py`).
+- **Richer fundamentals** — fundraising share (logit), presidential approval, midterm out-party shift (`midterms/model/fundamentals.py`).
+- **Mode / population offsets** in the measurement path.
+- **Complete-cycle replay** of baselines + hierarchical model with CRPS/Brier and learned stack weights:
+  `python -m midterms.cli replay-cycle --all`
+- **Predictive stacking** — mixture of hierarchical core + baselines using holdout CRPS weights (`--no-ensemble` to disable).

@@ -9,6 +9,7 @@ from midterms.evidence.fixtures import build_fixtures
 from midterms.evidence.ingest import merge_live_polls_into_warehouse, try_fetch_preferred
 from midterms.evidence.ratings import write_normalized_ratings
 from midterms.pipeline.run_forecast import replay_baselines, run_forecast
+from midterms.validation.cycle_replay import replay_all_cycles, replay_cycle
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -23,6 +24,26 @@ def main(argv: list[str] | None = None) -> None:
         help="Fetch VoteHub polls/ratings (+ MEDSL/FTE archives when reachable)",
     )
     p_fetch.set_defaults(func=lambda a: print(json.dumps(try_fetch_preferred(), indent=2)))
+
+    p_econ = sub.add_parser("fetch-economics", help="Build ALFRED/fixture economic vintage store")
+    p_econ.set_defaults(
+        func=lambda a: print(
+            json.dumps((__import__("midterms.evidence.economics", fromlist=["try_refresh_alfred"]).try_refresh_alfred()), indent=2)
+        )
+    )
+
+    p_fec = sub.add_parser("fetch-finance", help="Fetch OpenFEC Senate totals → fundraising shares")
+    p_fec.add_argument("--cycle", type=int, default=2026)
+    p_fec.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__("midterms.evidence.fec", fromlist=["write_finance_store"]).write_finance_store(
+                    cycle=a.cycle
+                ),
+                indent=2,
+            )
+        )
+    )
 
     p_merge = sub.add_parser(
         "ingest-polls",
@@ -57,8 +78,17 @@ def main(argv: list[str] | None = None) -> None:
         "--generic-ballot",
         type=float,
         default=None,
-        help="Dem−Rep generic ballot margin (pp). Default: VoteHub latest if available, else -1.0",
+        help="Dem-Rep generic ballot margin (pp). Default: VoteHub latest if available, else -1.0",
     )
+    p_run.add_argument(
+        "--no-ensemble",
+        action="store_true",
+        help="Disable out-of-fold stack mixture (hierarchical core only)",
+    )
+    p_run.add_argument("--with-ratings", action="store_true", help="Enable expert-rating overlay")
+    p_run.add_argument("--with-markets", action="store_true", help="Enable market overlay")
+    p_run.add_argument("--rating-weight", type=float, default=0.15)
+    p_run.add_argument("--market-weight", type=float, default=0.10)
 
     def _forecast(a: argparse.Namespace) -> None:
         gb = a.generic_ballot
@@ -76,6 +106,11 @@ def main(argv: list[str] | None = None) -> None:
             chains=a.chains,
             seed=a.seed,
             generic_ballot=gb,
+            ensemble=not a.no_ensemble,
+            with_ratings=a.with_ratings,
+            with_markets=a.with_markets,
+            rating_weight=a.rating_weight,
+            market_weight=a.market_weight,
         )
         print(
             json.dumps(
@@ -83,6 +118,12 @@ def main(argv: list[str] | None = None) -> None:
                     "paths": result["paths"],
                     "chamber": result["artifact"]["chamber"],
                     "generic_ballot": gb,
+                    "method": result["artifact"]["method"],
+                    "stack_weights": result["artifact"].get("stack_weights"),
+                    "diagnostics": {
+                        k: result["artifact"]["diagnostics"].get(k)
+                        for k in ("enop_global", "enop_by_race_mean", "n_polls", "ensemble")
+                    },
                     "n_polls": result["artifact"]["snapshot"]["n_polls"],
                 },
                 indent=2,
@@ -94,6 +135,47 @@ def main(argv: list[str] | None = None) -> None:
     p_rep = sub.add_parser("replay-baselines", help="Holdout as-of baseline replay")
     p_rep.add_argument("--year", type=int, default=2022)
     p_rep.set_defaults(func=lambda a: print(json.dumps(replay_baselines(a.year), indent=2)))
+
+    p_cycle = sub.add_parser(
+        "replay-cycle",
+        help="Complete-cycle replay of baselines + hierarchical model (proper scores)",
+    )
+    p_cycle.add_argument("--year", type=int, default=2022)
+    p_cycle.add_argument("--all", action="store_true", help="Replay every historical cycle")
+
+    def _cycle(a: argparse.Namespace) -> None:
+        if a.all:
+            summary = replay_all_cycles()
+            print(
+                json.dumps(
+                    {
+                        "path": summary.get("path"),
+                        "mean_crps_by_model": summary.get("mean_crps_by_model"),
+                        "stack_weights": summary.get("stack_weights"),
+                        "cycles": summary.get("cycles"),
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            report = replay_cycle(a.year)
+            from midterms.config import ARTIFACTS_DIR
+
+            out = ARTIFACTS_DIR / f"cycle_replay_{a.year}.json"
+            ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(report, indent=2))
+            print(
+                json.dumps(
+                    {
+                        "path": str(out),
+                        "aggregate": report.get("aggregate"),
+                        "stack_weights": report.get("stack_weights"),
+                    },
+                    indent=2,
+                )
+            )
+
+    p_cycle.set_defaults(func=_cycle)
 
     p_api = sub.add_parser("serve-api", help="Serve forecast JSON API for the research UI")
     p_api.add_argument("--host", default="127.0.0.1")

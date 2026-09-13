@@ -2,6 +2,7 @@
 
 import { ChamberPanel } from "@/components/chamber-panel";
 import { RaceTable } from "@/components/race-table";
+import { SenateMap } from "@/components/senate-map";
 import { Button } from "@/components/ui/button";
 import { ForecastArtifact } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
@@ -81,24 +82,19 @@ export function ForecastDashboard() {
 
   return (
     <div className="space-y-10">
-      <header className="space-y-3 border-b border-[var(--line)] pb-8">
+      <header className="space-y-3 border-b border-[var(--line)] pb-6">
         <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">
           Internal research UI · {data.model_version}
-        </p>
-        <h1 className="font-display text-4xl leading-tight text-[var(--ink)] sm:text-5xl">
-          Senate Probability Lab
-        </h1>
-        <p className="max-w-2xl text-base text-[var(--muted)] sm:text-lg">
-          Seat-by-seat and chamber-wide probabilities for{" "}
-          <span className="text-[var(--ink)]">{data.election_id}</span>, as of{" "}
-          <span className="text-[var(--ink)]">{data.forecast_as_of}</span>.
-          Chamber totals come from joint correlated draws — not independent
-          race calls.
         </p>
         <div className="flex flex-wrap gap-3 text-xs text-[var(--muted)]">
           <span className="rounded-md border border-[var(--line)] px-2 py-1">
             method: {data.method}
           </span>
+          {typeof data.diagnostics?.enop_global === "number" ? (
+            <span className="rounded-md border border-[var(--line)] px-2 py-1">
+              ENOP: {(data.diagnostics.enop_global as number).toFixed(1)}
+            </span>
+          ) : null}
           <span className="rounded-md border border-[var(--line)] px-2 py-1">
             run: {data.run_id}
           </span>
@@ -107,6 +103,17 @@ export function ForecastDashboard() {
           </Button>
         </div>
       </header>
+
+      <SenateMap
+        races={data.races}
+        pDemControl={data.chamber.p_dem_majority}
+        expectedDem={data.chamber.expected_dem_seats}
+        expectedRep={
+          data.chamber.expected_rep_seats ??
+          100 - data.chamber.expected_dem_seats
+        }
+        asOf={data.forecast_as_of}
+      />
 
       <ChamberPanel chamber={data.chamber} />
       <RaceTable races={data.races} />

@@ -1,0 +1,75 @@
+"""ENOP / poll weights, fundamentals, cycle replay, and ensemble tests."""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+
+from midterms.evidence.warehouse import Warehouse
+from midterms.model.ensemble import softmax_neg_scores, stack_margin_draws
+from midterms.model.fundamentals import fundamentals_mean
+from midterms.model.poll_weights import attach_poll_weights, global_enop
+from midterms.model.pymc_model import fit_fast_approximation
+from midterms.pipeline.run_forecast import run_forecast
+from midterms.validation.cycle_replay import replay_cycle
+
+
+def test_enop_grows_sublinearly_under_pollster_flood():
+    wh = Warehouse()
+    snap = wh.build_as_of("2022-09-01", "senate-2022")
+    assert len(snap.polls) > 0
+    base = attach_poll_weights(snap.polls, as_of=snap.as_of)
+    enop0 = global_enop(base)
+
+    # Flood: duplicate one race's polls many times from a single pollster/study
+    race_id = snap.polls["race_id"].iloc[0]
+    seed_row = snap.polls[snap.polls["race_id"] == race_id].iloc[0]
+    clones = []
+    for i in range(25):
+        row = seed_row.copy()
+        row["poll_id"] = f"FLOOD-{i}"
+        row["study_id"] = "FLOOD-STUDY"
+        row["pollster_id"] = "FloodPollster"
+        clones.append(row)
+    flooded = pd.concat([snap.polls, pd.DataFrame(clones)], ignore_index=True)
+    flooded_w = attach_poll_weights(flooded, as_of=snap.as_of)
+    enop1 = global_enop(flooded_w)
+    # Information must not scale linearly with 25 clones
+    assert enop1 < enop0 + 8
+
+
+def test_fundamentals_use_fundraising_and_midterm():
+    wh = Warehouse()
+    snap = wh.build_as_of("2022-09-01", "senate-2022")
+    mu = fundamentals_mean(snap.races, generic_ballot=-2.0)
+    assert len(mu) == (~snap.races["not_up"]).sum()
+    assert np.isfinite(mu.to_numpy()).all()
+
+
+def test_cycle_replay_scores_hierarchical():
+    report = replay_cycle(2022, lead_days=(60, 30), n_draws=400, seed=3)
+    assert "fast_hierarchical_t" in report["aggregate"]
+    assert report["aggregate"]["fast_hierarchical_t"].get("n_leads", 0) >= 1
+    assert "stack_weights" in report
+    assert abs(sum(report["stack_weights"].values()) - 1.0) < 1e-6
+
+
+def test_ensemble_stack_mixture():
+    w = softmax_neg_scores({"a": 2.0, "b": 4.0, "c": 3.0})
+    assert abs(sum(w.values()) - 1.0) < 1e-9
+    assert w["a"] > w["b"]
+    draws = {
+        "a": np.zeros((100, 3)),
+        "b": np.ones((100, 3)),
+    }
+    out = stack_margin_draws(draws, {"a": 0.5, "b": 0.5}, rng=np.random.default_rng(0))
+    assert out.shape == (100, 3)
+    assert 0.2 < out.mean() < 0.8
+
+
+def test_forecast_ensemble_artifact(tmp_path):
+    result = run_forecast(method="fast", draws=300, seed=19, ensemble=True, out_dir=tmp_path)
+    art = result["artifact"]
+    assert art["method"] in {"ensemble_stack", "fast_hierarchical_t"}
+    assert "enop_global" in art["diagnostics"]
+    assert len(art["races"]) >= 30

@@ -85,15 +85,22 @@ def baseline_equal_weight_polls(snapshot: EvidenceSnapshot, window_days: int = 2
 
 
 def baseline_shrinkage_polls(snapshot: EvidenceSnapshot, prior_strength: float = 40.0) -> list[RaceForecast]:
-    """Shrinkage polling average toward prior lean with sample-size weights."""
+    """Shrinkage polling average toward prior lean with ENOP-aware influence weights."""
+    from midterms.model.poll_weights import attach_poll_weights
+
     races = _contested(snapshot)
-    polls = snapshot.polls
+    polls = attach_poll_weights(snapshot.polls.copy(), as_of=snapshot.as_of) if len(snapshot.polls) else snapshot.polls
     out = []
     for _, r in races.iterrows():
         prior = float(r["prior_lean"])
         rp = polls[polls["race_id"] == r["race_id"]] if len(polls) else polls
         if len(rp):
-            w = rp["sample_size"].astype(float).clip(lower=100)
+            iw = (
+                rp["influence_weight"].astype(float)
+                if "influence_weight" in rp.columns
+                else pd.Series(np.ones(len(rp)), index=rp.index)
+            )
+            w = rp["sample_size"].astype(float).clip(lower=100) * iw.clip(0.05, 3.0)
             y = rp["two_party_margin"].astype(float)
             mu = (prior_strength * prior + float((w * y).sum())) / (prior_strength + float(w.sum()))
             n_eff = float(w.sum()) / 500.0

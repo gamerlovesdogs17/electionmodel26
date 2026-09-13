@@ -1,0 +1,252 @@
+{
+  "cycles": [
+    "2014",
+    "2016",
+    "2018",
+    "2020",
+    "2022",
+    "2024"
+  ],
+  "mean_crps_by_model": {
+    "last_election_swing": 2.355363785318386,
+    "equal_weight_polls": 2.662993553423091,
+    "shrinkage_polls": 2.1222976642553877,
+    "fast_hierarchical_t": 2.13047913153606
+  },
+  "stack_weights": {
+    "last_election_swing": 0.22843351692216063,
+    "equal_weight_polls": 0.15157373246127587,
+    "shrinkage_polls": 0.31168717534262963,
+    "fast_hierarchical_t": 0.30830557527393393
+  },
+  "by_cycle": {
+    "2014": {
+      "aggregate": {
+        "last_election_swing": {
+          "crps": 2.568820911339852,
+          "log_score": -3.043857423914155,
+          "brier": 0.061609162007094646,
+          "mae": 3.34586476823633,
+          "n_leads": 8
+        },
+        "equal_weight_polls": {
+          "crps": 2.678409581113103,
+          "log_score": -3.034939314987599,
+          "brier": 0.05862629980167683,
+          "mae": 3.5783069444444444,
+          "n_leads": 8
+        },
+        "shrinkage_polls": {
+          "crps": 2.2430723095459415,
+          "log_score": -2.765598031613226,
+          "brier": 0.07009064530713198,
+          "mae": 3.159799028611237,
+          "n_leads": 8
+        },
+        "fast_hierarchical_t": {
+          "crps": 2.0963851005356884,
+          "log_score": -2.7726890459756834,
+          "brier": 0.05525154052452525,
+          "mae": 2.973904710390173,
+          "n_leads": 8
+        }
+      },
+      "stack_weights": {
+        "last_election_swing": 0.1891991509404006,
+        "equal_weight_polls": 0.1634785751010067,
+        "shrinkage_polls": 0.29211034888980925,
+        "fast_hierarchical_t": 0.35521192506878346
+      }
+    },
+    "2016": {
+      "aggregate": {
+        "last_election_swing": {
+          "crps": 1.9791252419996967,
+          "log_score": -2.9279134687373753,
+          "brier": 0.03813046380197529,
+          "mae": 2.0536007146746664,
+          "n_leads": 8
+        },
+        "equal_weight_polls": {
+          "crps": 2.3512735748885376,
+          "log_score": -2.9453568881266983,
+          "brier": 0.05066128286341505,
+          "mae": 2.8689268398268397,
+          "n_leads": 8
+        },
+        "shrinkage_polls": {
+          "crps": 1.7032098642788165,
+          "log_score": -2.559717806815157,
+          "brier": 0.046304830816761025,
+          "mae": 2.3650971441908335,
+          "n_leads": 8
+        },
+        "fast_hierarchical_t": {
+          "crps": 1.790399762586398,
+          "log_score": -2.682618829330329,
+          "brier": 0.04714479825560878,
+          "mae": 2.3669809930107055,
+          "n_leads": 8
+        }
+      },
+      "stack_weights": {
+        "last_election_swing": 0.2304335722590284,
+        "equal_weight_polls": 0.14029745594112666,
+        "shrinkage_polls": 0.3329025489751159,
+        "fast_hierarchical_t": 0.2963664228247291
+      }
+    },
+    "2018": {
+      "aggregate": {
+        "last_election_swing": {
+          "crps": 2.714036933228652,
+          "log_score": -3.075744520966297,
+          "brier": 0.030418345660278498,
+          "mae": 3.6332296567626106,
+          "n_leads": 8
+        },
+        "equal_weight_polls": {
+          "crps": 2.9926531867126207,
+          "log_score": -3.1153542991636343,
+          "brier": 0.03389595538016373,
+          "mae": 4.1016136994949495,
+          "n_leads": 8
+        },
+        "shrinkage_polls": {
+          "crps": 2.507674061033751,
+          "log_score": -2.892192070245337,
+          "brier": 0.019605299491181023,
+          "mae": 3.4962687506731567,
+          "n_leads": 8
+        },
+        "fast_hierarchical_t": {
+          "crps": 2.549802063860494,
+          "log_score": -2.9273051049682497,
+          "brier": 0.022932213367625867,
+          "mae": 3.5154703890024166,
+          "n_leads": 8
+        }
+      },
+      "stack_weights": {
+        "last_election_swing": 0.2352253745325602,
+        "equal_weight_polls": 0.1622365989565437,
+        "shrinkage_polls": 0.309728030482146,
+        "fast_hierarchical_t": 0.2928099960287501
+      }
+    },
+    "2020": {
+      "aggregate": {
+        "last_election_swing": {
+          "crps": 2.0536642578970015,
+          "log_score": -2.94190037046113,
+          "brier": 0.049252283903669855,
+          "mae": 2.362097970061593,
+          "n_leads": 8
+        },
+        "equal_weight_polls": {
+          "crps": 2.629893082886336,
+          "log_score": -3.0577355102472095,
+          "brier": 0.05076130579060215,
+          "mae": 3.297558901515152,
+          "n_leads": 8
+        },
+        "shrinkage_polls": {
+          "crps": 2.161213972949139,
+          "log_score": -2.7450581530020477,
+          "brier": 0.03647982864802471,
+          "mae": 3.0468370561907334,
+          "n_leads": 8
+        },
+        "fast_hierarchical_t": {
+          "crps": 2.1680511405320155,
+          "log_score": -2.7960821122201702,
+          "brier": 0.038429933763054154,
+          "mae": 3.014675772314628,
+          "n_leads": 8
+        }
+      },
+      "stack_weights": {
+        "last_election_swing": 0.3136023562023263,
+        "equal_weight_polls": 0.1454483007061314,
+        "shrinkage_polls": 0.2717075167786162,
+        "fast_hierarchical_t": 0.2692418263129261
+      }
+    },
+    "2022": {
+      "aggregate": {
+        "last_election_swing": {
+          "crps": 2.326354509267918,
+          "log_score": -2.9942092473610855,
+          "brier": 0.05542401959636964,
+          "mae": 2.978161683667291,
+          "n_leads": 8
+        },
+        "equal_weight_polls": {
+          "crps": 2.598612696603941,
+          "log_score": -2.9989045790543347,
+          "brier": 0.05716640471492449,
+          "mae": 3.4716101551226553,
+          "n_leads": 8
+        },
+        "shrinkage_polls": {
+          "crps": 2.018014851139203,
+          "log_score": -2.685890384202524,
+          "brier": 0.04958020815992484,
+          "mae": 2.890970904196923,
+          "n_leads": 8
+        },
+        "fast_hierarchical_t": {
+          "crps": 2.081262170164552,
+          "log_score": -2.76654554689113,
+          "brier": 0.0496230608061875,
+          "mae": 2.942465648229671,
+          "n_leads": 8
+        }
+      },
+      "stack_weights": {
+        "last_election_swing": 0.21783670933501792,
+        "equal_weight_polls": 0.1515226056338459,
+        "shrinkage_polls": 0.32860791309199044,
+        "fast_hierarchical_t": 0.3020327719391458
+      }
+    },
+    "2024": {
+      "aggregate": {
+        "last_election_swing": {
+          "crps": 2.4901808581771956,
+          "log_score": -3.0327139050449183,
+          "brier": 0.08584691146935125,
+          "mae": 2.767463850311695,
+          "n_leads": 8
+        },
+        "equal_weight_polls": {
+          "crps": 2.727119198334007,
+          "log_score": -3.0249578069189287,
+          "brier": 0.06746576472740021,
+          "mae": 3.7438078125,
+          "n_leads": 8
+        },
+        "shrinkage_polls": {
+          "crps": 2.1006009265854746,
+          "log_score": -2.7091910572393902,
+          "brier": 0.0785912252418778,
+          "mae": 2.982129832637116,
+          "n_leads": 8
+        },
+        "fast_hierarchical_t": {
+          "crps": 2.0969745515372145,
+          "log_score": -2.766668292761074,
+          "brier": 0.06997373873520718,
+          "mae": 2.9105858787100356,
+          "n_leads": 8
+        }
+      },
+      "stack_weights": {
+        "last_election_swing": 0.19610000033806166,
+        "equal_weight_polls": 0.1429803127993712,
+        "shrinkage_polls": 0.32966093076730635,
+        "fast_hierarchical_t": 0.33125875609526084
+      }
+    }
+  }
+}

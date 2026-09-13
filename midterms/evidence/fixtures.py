@@ -63,6 +63,17 @@ POLLSTERS = [
     ("RMG Research", -1.0, 3.2),
 ]
 
+# Approximate White House party + net approval by cycle (research fixtures)
+CYCLE_CONTEXT = {
+    2014: {"white_house_party": "D", "pres_approval": -8.0},
+    2016: {"white_house_party": "D", "pres_approval": 4.0},
+    2018: {"white_house_party": "R", "pres_approval": -6.0},
+    2020: {"white_house_party": "R", "pres_approval": -10.0},
+    2022: {"white_house_party": "D", "pres_approval": -12.0},
+    2024: {"white_house_party": "D", "pres_approval": -14.0},
+    2026: {"white_house_party": "R", "pres_approval": -8.0},
+}
+
 
 def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -90,6 +101,19 @@ def _states_for_cycle(year: int) -> list[str]:
     return sorted(set(others + extra))[:34]
 
 
+def _race_struct_fields(year: int, lean: float, rng: np.random.Generator) -> dict:
+    ctx = CYCLE_CONTEXT.get(year, {"white_house_party": "D", "pres_approval": 0.0})
+    # Fundraising share correlates loosely with lean + noise (matched-window proxy)
+    base = 1 / (1 + np.exp(-lean / 12.0))
+    share = float(np.clip(base + rng.normal(0, 0.08), 0.05, 0.95))
+    return {
+        "fundraising_share": round(share, 3),
+        "pres_approval": float(ctx["pres_approval"]),
+        "white_house_party": ctx["white_house_party"],
+        "is_midterm": bool(year % 4 == 2),
+    }
+
+
 def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> pd.DataFrame:
     """All 100 seats for chamber composition; contested seats get race rows."""
     rows = []
@@ -112,6 +136,7 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
         lean = float(BASE_LEANS[st] + rng.normal(0, 2))
         inc = held[(st, 1)]
         is_open = bool(rng.random() < 0.18)
+        struct = _race_struct_fields(year, lean, rng)
         rows.append(
             {
                 "race_id": race_id,
@@ -126,6 +151,7 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
                 "region": REGIONS[st],
                 "not_up": False,
                 "held_by": "D" if inc == "I" else inc,
+                **struct,
             }
         )
 
@@ -133,6 +159,8 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
     for (st, seat), party in held.items():
         if st in contested and seat == 1:
             continue
+        lean = float(BASE_LEANS[st])
+        struct = _race_struct_fields(year, lean, rng)
         rows.append(
             {
                 "race_id": f"senate-{year}-{st}-held{seat}",
@@ -143,10 +171,11 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
                 "election_day": _election_day(year).isoformat(),
                 "incumbent_party": "D" if party == "I" else party,
                 "is_open": False,
-                "prior_lean": float(BASE_LEANS[st]),
+                "prior_lean": lean,
                 "region": REGIONS[st],
                 "not_up": True,
                 "held_by": "D" if party == "I" else party,
+                **struct,
             }
         )
     return pd.DataFrame(rows)[RACE_COLUMNS]
@@ -203,14 +232,25 @@ def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
             }
         )
 
-        # Polls from ED-150 to ED-1
+        # Polls from ED-150 to ED-1 — occasionally flood one prolific pollster / shared study
         n_polls = int(rng.integers(4, 18))
+        flood_pollster = POLLSTERS[int(rng.integers(0, len(POLLSTERS)))]
+        shared_study_end = ed - timedelta(days=int(rng.integers(20, 60)))
         for j in range(n_polls):
             days_out = int(rng.integers(1, 150))
             field_end = ed - timedelta(days=days_out)
             field_start = field_end - timedelta(days=int(rng.integers(2, 5)))
             published = field_end + timedelta(days=int(rng.integers(0, 2)))
-            pollster, house, rel = POLLSTERS[int(rng.integers(0, len(POLLSTERS)))]
+            if j < 4 and rng.random() < 0.7:
+                pollster, house, rel = flood_pollster
+                # Same study series / tracker reuse → clustered in ENOP
+                study_id = f"study-{year}-{st}-{pollster}-tracker"
+                field_end = shared_study_end - timedelta(days=j)
+                field_start = field_end - timedelta(days=3)
+                published = field_end + timedelta(days=1)
+            else:
+                pollster, house, rel = POLLSTERS[int(rng.integers(0, len(POLLSTERS)))]
+                study_id = f"study-{year}-{st}-{pollster}-{field_end.isoformat()}"
             # Opinion path: shrink toward truth as Election Day approaches
             progress = 1 - days_out / 150
             latent = lean + (truth - lean) * (0.3 + 0.7 * progress) + rng.normal(0, 1.2)
@@ -224,7 +264,6 @@ def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
             rep_tw = 100 * rep / total
             margin_obs = dem_tw - rep_tw
             poll_id = f"poll-{year}-{st}-{j}-{days_out}"
-            study_id = f"study-{year}-{st}-{pollster}-{field_end.isoformat()}"
             payload = f"{poll_id}|{margin_obs}|{n}".encode()
             poll_rows.append(
                 {
@@ -291,6 +330,7 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
         is_open = st in open_seats
         raw = float(BASE_LEANS[st])
         lean = float(np.clip(raw * 0.55, -18, 18) + rng.normal(0, 0.8))
+        struct = _race_struct_fields(2026, lean, rng)
         rows.append(
             {
                 "race_id": f"senate-2026-{st}",
@@ -305,6 +345,7 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
                 "region": REGIONS[st],
                 "not_up": False,
                 "held_by": incumbency[st],
+                **struct,
             }
         )
 
@@ -332,6 +373,8 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
 
     for i, st in enumerate(held_meta):
         party = held_parties[i]
+        lean = float(BASE_LEANS[st])
+        struct = _race_struct_fields(2026, lean, rng)
         rows.append(
             {
                 "race_id": f"senate-2026-{st}-held-{i}",
@@ -342,10 +385,11 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
                 "election_day": DEMO_ELECTION_DAY,
                 "incumbent_party": party,
                 "is_open": False,
-                "prior_lean": float(BASE_LEANS[st]),
+                "prior_lean": lean,
                 "region": REGIONS[st],
                 "not_up": True,
                 "held_by": party,
+                **struct,
             }
         )
     return pd.DataFrame(rows)[RACE_COLUMNS]
