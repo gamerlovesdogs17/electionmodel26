@@ -1,18 +1,24 @@
 {
-  "generated_at": "2026-09-13T22:55:23.445354+00:00",
-  "n": 204,
-  "elections": [
-    "senate-2014",
-    "senate-2016",
-    "senate-2018",
-    "senate-2020",
-    "senate-2022",
-    "senate-2024"
+  "generated_at": "2026-09-15T01:27:34.951038+00:00",
+  "parser_version": "official-ledger-v2",
+  "ledger_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\official_senate_ledger.json",
+  "ledger_sha256": "e37916a6420d83c31c316500b12e241435628cc7b88290e4cfea956e70f03927",
+  "expectations_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\independent_chamber_expectations.json",
+  "expectations_sha256": "d2893b11f89e919b47ebcad6f3a4ab88a17543b27958aa2be9c184c2de9ec291",
+  "n_races": 600,
+  "n_results": 210,
+  "cycles": [
+    2014,
+    2016,
+    2018,
+    2020,
+    2022,
+    2024
   ],
-  "parser_version": "results-archive-v1",
   "paths": {
-    "raw": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\senate_certified_results.json",
-    "normalized": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\results_certified.parquet"
+    "races_official": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\races_official.parquet",
+    "results_certified": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\results_certified.parquet",
+    "raw_results": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\senate_certified_results.json"
   },
-  "note": "Overlays fixture results by race_id when present (prefer certified)."
+  "note": "Official contests + vote-count-derived margins from external ledger; held seats from independent expectations (not sync_held)."
 }

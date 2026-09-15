@@ -1,0 +1,86 @@
+{
+  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260917",
+  "generated_at": "2026-09-15T02:14:28.680005+00:00",
+  "forecast_as_of": "2026-09-13",
+  "election_id": "senate-2026",
+  "model_version": "senate-hierarchical-v0.9.18",
+  "code_commit": "740dc02f467e6cd79a363a58777215729ceb6ba7",
+  "configuration": {
+    "method": "pymc",
+    "fit_method": "pymc",
+    "draws": 2000,
+    "tune": 2000,
+    "chains": 4,
+    "seed": 20260917,
+    "generic_ballot": 5.852513615064197,
+    "ensemble": true,
+    "stack_weights": {
+      "state_space": 0.20865374528545225,
+      "ridge_fundamentals": 0.3874008020820497,
+      "last_election_swing": 0.40394214983083676
+    },
+    "with_ratings": true,
+    "with_markets": true,
+    "rating_weight": 0.15,
+    "market_weight": 0.12,
+    "control_weight": 0.15,
+    "control_calibrate": false,
+    "allow_fast_fallback": false
+  },
+  "configuration_hash": "7dac474d857a6f80fe8be350da36b499b93f3eb53536194b9917965ee2be0446",
+  "snapshot_ids": {
+    "evidence": "643eb7eb47f2026b"
+  },
+  "domain_hashes": {
+    "economics_vintages.parquet": "8034a55274b47258f7db54cddb5e79f327ce2768b44f297916b448b4a154d2a5",
+    "expert_ratings.parquet": "7cb463e742f0e1ca454672f3ece284f0dd1917a0d4128c40205e6ae02fc241d3",
+    "fundraising_shares.parquet": "503f3be052b8d7dd83b4cc5673be3aae929a4f919106c6e5d971a7e175ce11f6",
+    "markets.parquet": "c701c6b77b98dccabc287541bfb29a97353384981709d33bf3654a0ee4cb1807",
+    "markets_control.json": "9984c80380caf3ac7268efbd624209544f6573d6645c99ffe01efe6b6cfacb4f",
+    "peer_snapshots.json": "93baa0a9042eae25df92c7145c0d7acf902f9da5b2e7705e5ba2c954404009a3",
+    "polls.parquet": "175e20e2075325259732f09a45f1a032cb916a70e20124d9a3b3aa5b437fcecc",
+    "polls_fte_historical.parquet": "e561324a2a4f39345e0fcb73c3ac74f73397d7e2770f88689ebeefddf47bc15f",
+    "polls_historical.parquet": "250c3e031d9be197372ef028748e1d78f28c369c2f0add88e01d05fc5921c579",
+    "polls_live_votehub.parquet": "4fdcf081c1e1aaff4bc05862a08c99819c4b2c27ae1782fc54918d2188b53dfe",
+    "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
+    "pollster_ratings.parquet": "32a297dd345d25537781428481e1599238c8587528303354239cd353ca23b150",
+    "pres_approval.parquet": "e3cf3d76cd572583e1d6ac2bb44ebf3c9016e06f50fd9c50da111a0ddfb5b8f0",
+    "races.parquet": "eadb812386cefe0cec4798e64c513f3d4c9ae0b9e2dd4d38de2d6555e1dfbce3",
+    "races_official.parquet": "eadb812386cefe0cec4798e64c513f3d4c9ae0b9e2dd4d38de2d6555e1dfbce3",
+    "results.parquet": "5aca10284138b7a8f57cb640fdbbc7823bb3e4906090bfa9f1b4a994d09a4056",
+    "results_certified.parquet": "a6c2cc92d348062a273b5b5a93390a5799656e2ce5dd118c25afc35d1901d206"
+  },
+  "environment_lock": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.5",
+      "scipy": "1.18.1",
+      "pymc": "6.3.2",
+      "pyarrow": "25.0.1"
+    },
+    "locked_at": "2026-09-15T02:14:28.875958+00:00"
+  },
+  "seed": 20260917,
+  "draws": 2000,
+  "tune": 2000,
+  "chains": 4,
+  "output_hashes": {
+    "forecast_json": "2fb8660a01b444018fa6639869cf83893e4dedc23cc6ffee3b67c5c261dedcb4",
+    "draws": "3ebd9da3dc9c12853c9e73aa8b1eeaa4ecadff0bb89948d99686b78dd52b00c0"
+  },
+  "paths": {
+    "forecast": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_senate-2026_2026-09-13_ensemble_stack+overlays_20260917.json",
+    "forecast_latest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json",
+    "draws": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\draws_senate-2026_2026-09-13_ensemble_stack+overlays_20260917.npz"
+  },
+  "rebuild_mode": false,
+  "signature": {
+    "alg": "Ed25519",
+    "sha256": "cbf78d59a18541aa0fd395d228a62b856fb0ff26497574c19ffad93fdd39934a",
+    "signature": "zkWhDvMr3RY2ofJXeOGk/x/s5eV0u1BwDZefKc8A7so7kMi6kh5Ri91f6cxOhV55aqV3AHBdQ33Q8T+izw6kAw==",
+    "key_id": "signing_public_key.pem",
+    "public_key_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\signing_public_key.pem"
+  }
+}

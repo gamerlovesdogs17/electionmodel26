@@ -1,18 +1,22 @@
-"""Official 100-seat chamber + ballot reconciliation (audit P0.2)."""
+"""Official 100-seat chamber + ballot reconciliation (fresh audit R-01/R-02/R-03).
+
+Expectations come from ``independent_chamber_expectations.json``. Observed races
+and results come from the warehouse / official ledger. The two paths are
+independent: changing a certified winner must break reconcile rather than
+adjusting held seats.
+"""
 
 from __future__ import annotations
 
 import json
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
 from midterms.config import ARTIFACTS_DIR
-from midterms.evidence.official_ballot import CYCLE_META, contested_contests
+from midterms.evidence.official_ledger import load_expectations
 from midterms.simulate.chamber import vp_tiebreak_for_election_year
 
-# Production gate years (full certified margins + official ballots).
 GATE_YEARS: tuple[int, ...] = (2014, 2016, 2018, 2020, 2022, 2024)
 
 
@@ -22,14 +26,14 @@ def reconcile_cycle(
     races: pd.DataFrame | None = None,
     results: pd.DataFrame | None = None,
 ) -> dict[str, Any]:
-    """
-    Fail closed if the packaged race universe / results cannot reproduce the
-    official ballot and certified chamber outcome.
-    """
+    """Fail closed unless warehouse matches independent expectations + vote counts."""
     election_id = f"senate-{year}"
-    meta = CYCLE_META.get(year)
-    if meta is None:
-        return {"ok": False, "year": year, "error": "no CYCLE_META"}
+    try:
+        exp = (load_expectations().get("cycles") or {}).get(str(year))
+    except FileNotFoundError as exc:
+        return {"ok": False, "year": year, "error": str(exc)}
+    if not exp:
+        return {"ok": False, "year": year, "error": "no independent expectations"}
 
     if races is None or results is None:
         from midterms.evidence.warehouse import Warehouse
@@ -42,11 +46,7 @@ def reconcile_cycle(
     if rr.empty:
         return {"ok": False, "year": year, "error": "no races for election_id"}
 
-    contests = contested_contests(year)
-    expected_ids = {c["race_id"] for c in contests}
-    expected_states_regular = {
-        c["state"] for c in contests if c.get("kind") == "regular"
-    }
+    expected_ids = set(exp.get("expected_race_ids") or [])
     contested = rr[~rr["not_up"]] if "not_up" in rr.columns else rr
     held = rr[rr["not_up"]] if "not_up" in rr.columns else rr.iloc[0:0]
     got_ids = set(contested["race_id"].astype(str))
@@ -68,25 +68,22 @@ def reconcile_cycle(
     )
     dem_wins = 0
     missing_results: list[str] = []
+    zero_vote: list[str] = []
     for rid in sorted(expected_ids):
         if by_id is None or rid not in by_id.index:
-            # Fall back to state match for single-seat states
-            st = rid.rsplit("-", 1)[-1]
-            if st == "special" or "special" in rid:
-                missing_results.append(rid)
-                continue
-            hit = res[res["state"].astype(str) == st] if len(res) else res
-            if len(hit) == 0:
-                missing_results.append(rid)
-                continue
-            margin = float(hit.iloc[0]["two_party_margin"])
-        else:
-            margin = float(by_id.loc[rid, "two_party_margin"])
+            missing_results.append(rid)
+            continue
+        row = by_id.loc[rid]
+        dem_v = float(row.get("dem_votes") or 0)
+        rep_v = float(row.get("rep_votes") or 0)
+        if dem_v <= 0 and rep_v <= 0:
+            zero_vote.append(rid)
+        margin = float(row["two_party_margin"])
         if margin >= 0:
             dem_wins += 1
 
     realized_dem = held_dem + dem_wins
-    vp = meta.get("vp_tiebreak_party") or vp_tiebreak_for_election_year(year)
+    vp = exp.get("vp_tiebreak_party") or vp_tiebreak_for_election_year(year)
     if vp == "D":
         dem_control = realized_dem >= 50
     else:
@@ -105,39 +102,69 @@ def reconcile_cycle(
         reasons.append(
             f"seat accounting {total} != 100 (held_dem={held_dem}, held_rep={held_rep}, contested={n_contested})"
         )
-    if held_dem != int(meta["held_dem"]) or held_rep != int(meta["held_rep"]):
+    if held_dem != int(exp["held_dem"]) or held_rep != int(exp["held_rep"]):
         ok = False
         reasons.append(
             f"held caucus mismatch got D={held_dem}/R={held_rep} "
-            f"expected D={meta['held_dem']}/R={meta['held_rep']}"
+            f"expected D={exp['held_dem']}/R={exp['held_rep']}"
+        )
+    if n_contested != int(exp["n_contested_expected"]):
+        ok = False
+        reasons.append(
+            f"contested count {n_contested} != expected {exp['n_contested_expected']}"
         )
     if missing_results:
         ok = False
         reasons.append(f"missing certified results for: {missing_results[:8]}")
-    if int(meta["post_dem_seats"]) != realized_dem:
+    if zero_vote:
+        ok = False
+        reasons.append(f"zero vote counts for: {zero_vote[:8]}")
+    if int(exp["post_dem_seats"]) != realized_dem:
         ok = False
         reasons.append(
-            f"post-election Dem seats {realized_dem} != certified {meta['post_dem_seats']}"
+            f"post-election Dem seats {realized_dem} != certified {exp['post_dem_seats']}"
         )
-    if bool(meta["post_dem_control"]) != bool(dem_control):
+    if bool(exp["post_dem_control"]) != bool(dem_control):
         ok = False
         reasons.append(
-            f"control mismatch got dem_control={dem_control} expected {meta['post_dem_control']}"
+            f"control mismatch got dem_control={dem_control} expected {exp['post_dem_control']}"
         )
 
-    # Wrong-class canary (2022 must not look like Class II)
-    if year == 2022 and "PA" not in expected_states_regular:
+    # Official canaries (audit R-03)
+    canary_failures: list[str] = []
+    for can in exp.get("canaries") or []:
+        rid = str(can["race_id"])
+        if by_id is None or rid not in by_id.index:
+            canary_failures.append(f"{rid}: missing")
+            continue
+        row = by_id.loc[rid]
+        dem_v = float(row.get("dem_votes") or 0)
+        rep_v = float(row.get("rep_votes") or 0)
+        margin = float(row["two_party_margin"])
+        winner = str(row.get("winner_party") or ("D" if margin > 0 else "R"))
+        if can.get("winner_party") and winner != can["winner_party"]:
+            canary_failures.append(f"{rid}: winner {winner} != {can['winner_party']}")
+        if can.get("dem_votes") is not None and int(dem_v) != int(can["dem_votes"]):
+            canary_failures.append(f"{rid}: dem_votes {int(dem_v)} != {can['dem_votes']}")
+        if can.get("rep_votes") is not None and int(rep_v) != int(can["rep_votes"]):
+            canary_failures.append(f"{rid}: rep_votes {int(rep_v)} != {can['rep_votes']}")
+        if can.get("min_margin_pp") is not None and margin < float(can["min_margin_pp"]):
+            canary_failures.append(f"{rid}: margin {margin:.2f} < {can['min_margin_pp']}")
+    if canary_failures:
         ok = False
-        reasons.append("internal: 2022 expected_states missing PA")
-    if year == 2022 and "DE" in expected_states_regular and "PA" not in set(contested["state"]):
-        ok = False
-        reasons.append("2022 contested set still looks Class-II-like (DE without PA)")
+        reasons.append("canary failures: " + "; ".join(canary_failures[:6]))
 
-    report = {
+    # Required specials present
+    for sid in exp.get("expected_special_ids") or []:
+        if sid not in got_ids:
+            ok = False
+            reasons.append(f"missing required special/unexpired: {sid}")
+
+    return {
         "ok": ok,
         "year": year,
         "election_id": election_id,
-        "n_contested_expected": len(expected_ids),
+        "n_contested_expected": int(exp["n_contested_expected"]),
         "n_contested_got": n_contested,
         "missing_race_ids": missing,
         "extra_race_ids": extra,
@@ -146,15 +173,18 @@ def reconcile_cycle(
         "held_ind": held_ind,
         "dem_wins_certified": dem_wins,
         "realized_dem_seats": realized_dem,
-        "expected_dem_seats": meta["post_dem_seats"],
+        "expected_dem_seats": exp["post_dem_seats"],
         "dem_control": dem_control,
-        "expected_dem_control": meta["post_dem_control"],
+        "expected_dem_control": exp["post_dem_control"],
         "vp_tiebreak_party": vp,
+        "canary_failures": canary_failures,
         "reasons": reasons,
-        "source": meta.get("source"),
-        "note": meta.get("note"),
+        "expectations_source": "independent_chamber_expectations.json",
+        "independence_note": (
+            "Expected IDs/held/post from independent expectations; observed from warehouse. "
+            "Held seats are not solved from winners."
+        ),
     }
-    return report
 
 
 def reconcile_all_cycles(years: tuple[int, ...] | None = None) -> dict[str, Any]:
@@ -168,8 +198,8 @@ def reconcile_all_cycles(years: tuple[int, ...] | None = None) -> dict[str, Any]
         "by_cycle": by,
         "failures": [y for y, v in by.items() if not v.get("ok")],
         "note": (
-            "Default gate is 2018–2024 (official ballots + certified margins). "
-            "Pass years=(2014,2016,...) for provisional older cycles."
+            "Gate years 2014–2024 against independent expectations + vote-count ledger "
+            "(fresh audit R-01/R-02/R-03)."
         ),
     }
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)

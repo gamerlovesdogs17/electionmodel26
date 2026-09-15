@@ -1,6 +1,7 @@
 {
   "audit_item": "P2.2",
   "temperature": 0.75,
+  "stacking_mode": "predictive_mixture_crps",
   "excluded_structural": [
     "hier_no_similarity",
     "hier_no_terminal_race"
@@ -13,80 +14,81 @@
   "excluded_extra": [],
   "filtered_crps_by_fold": {
     "2018": {
-      "pymc": 5.843836792075293,
-      "state_space": 4.339311447671166,
-      "ridge_fundamentals": 4.133725598700485,
-      "last_election_swing": 4.354568661374708
+      "fast_hierarchical_t": 6.208100773788843,
+      "state_space": 4.015334930055216,
+      "ridge_fundamentals": 5.945925144394869,
+      "last_election_swing": 4.036314134416643
     },
     "2020": {
-      "pymc": 4.424922254363451,
-      "state_space": 3.4575220404943243,
-      "ridge_fundamentals": 3.2171612683782724,
-      "last_election_swing": 4.044752544067934
+      "fast_hierarchical_t": 4.586682183564597,
+      "state_space": 3.4243084554791277,
+      "ridge_fundamentals": 3.164426179026026,
+      "last_election_swing": 3.9431075575341694
     },
     "2022": {
-      "pymc": 4.0595628226666784,
-      "state_space": 3.93200785334313,
-      "ridge_fundamentals": 3.3385098222224903,
+      "fast_hierarchical_t": 4.890940265985678,
+      "state_space": 3.920091836076569,
+      "ridge_fundamentals": 4.011554465803391,
       "last_election_swing": 3.824786681478069
     },
     "2024": {
-      "pymc": 5.045768523243341,
-      "state_space": 4.659253533156997,
-      "ridge_fundamentals": 3.169416299518496,
-      "last_election_swing": 4.165349498734946
+      "fast_hierarchical_t": 6.042164228144339,
+      "state_space": 4.597057371051923,
+      "ridge_fundamentals": 3.295774956058028,
+      "last_election_swing": 4.140645160608465
     }
   },
   "mean_crps_eligible": {
-    "ridge_fundamentals": 3.4647032472049357,
-    "last_election_swing": 4.097364346413915,
-    "state_space": 4.097023718666405,
-    "pymc": 4.8435225980871905
+    "last_election_swing": 3.9862133835093365,
+    "fast_hierarchical_t": 5.431971862870864,
+    "state_space": 3.989198148165709,
+    "ridge_fundamentals": 4.104420186320579
   },
   "stack_weights": {
-    "pymc": 0.07876093567562756,
-    "state_space": 0.2130973221830859,
-    "ridge_fundamentals": 0.49514118046480254,
-    "last_election_swing": 0.21300056167648387
+    "fast_hierarchical_t": 3.3028016613430385e-06,
+    "state_space": 0.20865374528545225,
+    "ridge_fundamentals": 0.3874008020820497,
+    "last_election_swing": 0.40394214983083676
   },
   "stack_weights_production": {
-    "pymc": 0.07876093567562756,
-    "state_space": 0.2130973221830859,
-    "ridge_fundamentals": 0.49514118046480254,
-    "last_election_swing": 0.21300056167648387
+    "fast_hierarchical_t": 3.3028016613430385e-06,
+    "state_space": 0.20865374528545225,
+    "ridge_fundamentals": 0.3874008020820497,
+    "last_election_swing": 0.40394214983083676
   },
   "stack_weights_loo": {
     "2018": {
-      "pymc": 0.09707426305181312,
-      "state_space": 0.18752411907018574,
-      "ridge_fundamentals": 0.5267158749014337,
-      "last_election_swing": 0.18868574297656757
+      "fast_hierarchical_t": 0.04923603138118851,
+      "state_space": 0.24153011177535028,
+      "ridge_fundamentals": 0.4641441017280873,
+      "last_election_swing": 0.245089755115374
     },
     "2020": {
-      "pymc": 0.07452717822394156,
-      "state_space": 0.1827862313966318,
-      "ridge_fundamentals": 0.5055341577405994,
-      "last_election_swing": 0.23715243263882718
+      "fast_hierarchical_t": 0.041318906467700145,
+      "state_space": 0.320422578195542,
+      "ridge_fundamentals": 0.23259488948077403,
+      "last_election_swing": 0.40566362585598387
     },
     "2022": {
-      "pymc": 0.06105689333579296,
-      "state_space": 0.21750549805627084,
-      "ridge_fundamentals": 0.514179542278643,
-      "last_election_swing": 0.20725806632929317
+      "fast_hierarchical_t": 0.04041062264257098,
+      "state_space": 0.34122276861907874,
+      "ridge_fundamentals": 0.2895553362932902,
+      "last_election_swing": 0.3288112724450601
     },
     "2024": {
-      "pymc": 0.08501768468307072,
-      "state_space": 0.26993575031285166,
-      "ridge_fundamentals": 0.42844371243212254,
-      "last_election_swing": 0.2166028525719551
+      "fast_hierarchical_t": 0.06032293532993887,
+      "state_space": 0.4125567282083881,
+      "ridge_fundamentals": 0.18851673830305007,
+      "last_election_swing": 0.338603598158623
     }
   },
-  "matrix_sha256": "bec6c8f0290dbd4aa7aff2e465ece1ea86fff65c18aeaff165e57df87b0e2970",
+  "matrix_sha256": "e1fe9e4cf32e6192f3dac448aca59a1ad6da30e70997176c538da4f5dc000ef3",
   "no_weight_remapping": true,
-  "note": "Weights from OOF CRPS softmax under nonnegative simplex. Component identity preserved; fast_hierarchical_t is never relabeled pymc.",
+  "predictive_stack_fn": "midterms.model.ensemble.predictive_stack_weights",
+  "note": "Weights from race-level predictive mixture when oof_means present; else OOF CRPS softmax. Component identity preserved.",
   "source_nested_loo": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
-  "source_spine_label": "pymc",
-  "source_hierarchical_method": "pymc",
+  "source_spine_label": "fast_hierarchical_t",
+  "source_hierarchical_method": "fast",
   "source_years": [
     2018,
     2020,
@@ -98,16 +100,16 @@
     "max_abs_weight_delta": 0.0,
     "fingerprint_ok": true,
     "recomputed": {
-      "pymc": 0.07876093567562756,
-      "state_space": 0.2130973221830859,
-      "ridge_fundamentals": 0.49514118046480254,
-      "last_election_swing": 0.21300056167648387
+      "fast_hierarchical_t": 3.3028016613430385e-06,
+      "state_space": 0.20865374528545225,
+      "ridge_fundamentals": 0.3874008020820497,
+      "last_election_swing": 0.40394214983083676
     },
     "stored": {
-      "pymc": 0.07876093567562756,
-      "state_space": 0.2130973221830859,
-      "ridge_fundamentals": 0.49514118046480254,
-      "last_election_swing": 0.21300056167648387
+      "fast_hierarchical_t": 3.3028016613430385e-06,
+      "state_space": 0.20865374528545225,
+      "ridge_fundamentals": 0.3874008020820497,
+      "last_election_swing": 0.40394214983083676
     }
   },
   "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"

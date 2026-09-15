@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from midterms.evidence.official_ballot import CLASS_II, contested_contests
-from midterms.evidence.results_archive import CERTIFIED_MARGINS
 from midterms.ops.reproducibility import compare_forecast_artifacts
 from midterms.validation.chamber_reconcile import GATE_YEARS, reconcile_cycle
 
@@ -13,13 +12,20 @@ def test_2014_includes_class_iii_specials():
     assert len(contests) == 36
     regs = {c["state"] for c in contests if c["kind"] == "regular"}
     assert regs == set(CLASS_II)
-    specials = {c["race_id"] for c in contests if c["kind"] == "special"}
+    specials = {c["race_id"] for c in contests if c["kind"] == "special" or "special" in c["race_id"]}
     assert specials == {
         "senate-2014-HI-special",
         "senate-2014-OK-special",
         "senate-2014-SC-special",
     }
-    margins = CERTIFIED_MARGINS["senate-2014"]
+    from midterms.evidence.official_ledger import load_ledger
+
+    margins = {
+        c["race_id"].replace("senate-2014-", ""): 100.0
+        * (c["dem_votes"] - c["rep_votes"])
+        / max(c["dem_votes"] + c["rep_votes"], 1)
+        for c in load_ledger()["cycles"]["2014"]["contests"]
+    }
     for c in contests:
         key = c["race_id"].replace("senate-2014-", "")
         assert key in margins
@@ -28,10 +34,18 @@ def test_2014_includes_class_iii_specials():
 def test_2016_certified_margins_cover_class_iii():
     contests = contested_contests(2016)
     assert len(contests) == 34
-    margins = CERTIFIED_MARGINS["senate-2016"]
-    assert "AK" in margins and "KS" in margins
-    assert margins["CA"] < 50  # not jungle +100 artifact
-    assert margins["AZ"] > -40  # not MEDSL bad cell
+    from midterms.evidence.official_ledger import load_ledger
+
+    by = {c["state"]: c for c in load_ledger()["cycles"]["2016"]["contests"]}
+    assert "AK" in by and "KS" in by
+    ca_m = 100.0 * (by["CA"]["dem_votes"] - by["CA"]["rep_votes"]) / (
+        by["CA"]["dem_votes"] + by["CA"]["rep_votes"]
+    )
+    az_m = 100.0 * (by["AZ"]["dem_votes"] - by["AZ"]["rep_votes"]) / (
+        by["AZ"]["dem_votes"] + by["AZ"]["rep_votes"]
+    )
+    assert ca_m < 50
+    assert az_m > -40
 
 
 def test_gate_years_include_2014_2016():

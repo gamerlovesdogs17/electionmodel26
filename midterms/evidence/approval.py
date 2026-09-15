@@ -56,6 +56,9 @@ def write_approval_store() -> dict[str, Any]:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "n": int(len(df)),
         "parser_version": PARSER_VERSION,
+        "source_url": "https://projects.fivethirtyeight.com/trump-approval-ratings/",
+        "tier": "curated",
+        "note": "Curated public-aggregate net approval vintages for as-of fundamentals.",
         "paths": {"raw": str(raw), "normalized": str(out)},
     }
     (MANIFESTS_DIR / "pres_approval.json").write_text(json.dumps(man, indent=2))

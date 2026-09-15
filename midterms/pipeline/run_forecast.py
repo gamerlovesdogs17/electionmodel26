@@ -20,6 +20,8 @@ from midterms.config import (
     DEMO_SEED,
     MODEL_VERSION,
     PRIMARY_HOLDOUT,
+    PUBLIC_LIVE_ENABLED,
+    PUBLICATION_SURFACE_DEFAULT,
 )
 from midterms.evidence.warehouse import Warehouse, write_run_manifest
 from midterms.model.pymc_model import (
@@ -157,7 +159,7 @@ def run_forecast(
     allow_non_publication: bool = True,
     rebuild_mode: bool = False,
 ) -> dict[str, Any]:
-    from midterms.evidence.economics import write_economic_store, yoy_growth_as_of
+    from midterms.evidence.economics import try_refresh_alfred, yoy_growth_as_of
     from midterms.evidence.approval import approval_as_of, write_approval_store
     from midterms.evidence.demography import attach_demo_features
     from midterms.evidence.eligibility import assert_publishable
@@ -208,7 +210,16 @@ def run_forecast(
         )
     if not rebuild_mode:
         try:
-            write_economic_store()
+            # Never call write_economic_store() bare — that clobbers FRED with fixtures.
+            econ_meta = try_refresh_alfred(as_of=str(as_of)[:10])
+            if econ_meta.get("used_fixtures") and not econ_meta.get("live_rows"):
+                layer_warnings.append(
+                    {
+                        "layer": "economics",
+                        "error": econ_meta.get("error")
+                        or "FRED refresh unavailable; fixture canaries only",
+                    }
+                )
         except Exception as exc:  # noqa: BLE001
             layer_warnings.append({"layer": "economics", "error": str(exc)})
         try:
@@ -680,6 +691,42 @@ def run_forecast(
         },
         "peer_comparison": compare_to_peers(
             {"chamber": {"p_dem_majority": sim.p_dem_majority}, "races": race_summaries}
+        ),
+        "publication_surface": (
+            "live"
+            if PUBLIC_LIVE_ENABLED and bool(eligibility.get("publishable"))
+            else PUBLICATION_SURFACE_DEFAULT
+        ),
+        "limitations": [
+            (
+                "PUBLIC_LIVE_ENABLED=False (fresh audit Stage-0 containment)."
+                if not PUBLIC_LIVE_ENABLED
+                else "Public live enabled; see public_release stamp."
+            ),
+            (
+                "Finance uses curated FEC-browse estimates when OpenFEC rate-limits; "
+                "not full candidate-level digitization for every race."
+            ),
+            (
+                "Historical ledger uses scaled two-party counts for non-digitized FEC races; "
+                "OH2018/AZ2024 are exact canvass totals."
+            ),
+            (
+                "Ensemble stack OOF may score fast hierarchical-t; PyMC production spine "
+                "does not inherit fast's weight unless pymc nested LOO is re-run."
+            ),
+            (
+                "Production spine is static Election-Day latent; dynamic challenger "
+                "selection is comparative only until multi-cycle gate clears."
+            ),
+        ],
+        "research_only_notice": (
+            None
+            if PUBLIC_LIVE_ENABLED and bool(eligibility.get("publishable"))
+            else (
+                "Research use only. Do not treat chamber or race probabilities as a "
+                "public live product until independent re-audit clears live publish."
+            )
         ),
     }
 

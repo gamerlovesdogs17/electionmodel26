@@ -13,7 +13,12 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.9.16"
+MODEL_VERSION = "senate-hierarchical-v0.9.18"
+
+# Fresh audit Stage-0: public live probabilities remain locked until an independent
+# reviewer clears P0 truth + all-domain eligibility on a fresh archive.
+PUBLIC_LIVE_ENABLED = False
+PUBLICATION_SURFACE_DEFAULT = "research_only"
 
 # Historical Senate cycles for holdout / replay
 CYCLES = (2014, 2016, 2018, 2020, 2022, 2024)
@@ -40,8 +45,8 @@ DEMO_CHAINS = 2
 DEMO_SEED = 20260901
 
 # Publishable / research floors (see midterms.validation.numerical_quality)
-PRODUCTION_DRAWS = 1000
-PRODUCTION_TUNE = 1000
+PRODUCTION_DRAWS = 2000
+PRODUCTION_TUNE = 2000
 PRODUCTION_CHAINS = 4
 
 REGIONS = {

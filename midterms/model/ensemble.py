@@ -24,6 +24,72 @@ def softmax_neg_scores(scores: dict[str, float], temperature: float = 1.0) -> di
     return {k: float(wi) for k, wi in zip(keys, w)}
 
 
+def predictive_stack_weights(
+    oof_means: dict[str, dict[str, float]],
+    truths: dict[str, float],
+    *,
+    temperature: float | None = None,
+) -> dict[str, float]:
+    """
+    Optimize simplex mixture weights on race-level OOF predictive means (R-08).
+
+    ``oof_means``: {model: {race_id: mean_margin}} across held-out races.
+    Minimizes mean Gaussian CRPS of the mixture mean (equal component SD).
+    Falls back to equal weights if the design is underdetermined.
+    """
+    models = [m for m, d in oof_means.items() if d]
+    races = sorted({rid for d in oof_means.values() for rid in d if rid in truths})
+    if len(models) < 2 or len(races) < 5:
+        if not models:
+            return {"pymc": 1.0}
+        return {m: 1.0 / len(models) for m in models}
+
+    Y = np.array([float(truths[r]) for r in races], dtype=float)
+    M = np.column_stack(
+        [np.array([float(oof_means[m].get(r, np.nan)) for r in races]) for m in models]
+    )
+    # Drop races with any missing component
+    ok = np.isfinite(M).all(axis=1) & np.isfinite(Y)
+    M = M[ok]
+    Y = Y[ok]
+    if len(Y) < 5:
+        return {m: 1.0 / len(models) for m in models}
+
+    def objective(w_raw: np.ndarray) -> float:
+        # softmax to simplex
+        e = np.exp(w_raw - w_raw.max())
+        w = e / e.sum()
+        pred = M @ w
+        # Empirical CRPS for Normal(pred, sd=6) vs point truth
+        sd = 6.0
+        z = (Y - pred) / sd
+        from scipy.stats import norm as sp_norm
+
+        crps = sd * (
+            z * (2 * sp_norm.cdf(z) - 1)
+            + 2 * sp_norm.pdf(z)
+            - 1.0 / np.sqrt(np.pi)
+        )
+        return float(np.mean(crps))
+
+    # Init from inverse-CRPS softmax of component means
+    init_scores = {
+        m: float(np.mean((M[:, i] - Y) ** 2)) for i, m in enumerate(models)
+    }
+    w0 = softmax_neg_scores(init_scores, temperature=temperature or 0.75)
+    x0 = np.log([max(w0.get(m, 1e-3), 1e-6) for m in models])
+    try:
+        from scipy.optimize import minimize
+
+        res = minimize(objective, x0, method="Nelder-Mead")
+        x = res.x if res.success else x0
+    except Exception:  # noqa: BLE001
+        x = x0
+    e = np.exp(x - np.max(x))
+    w = e / e.sum()
+    return {m: float(wi) for m, wi in zip(models, w)}
+
+
 def weights_from_oof_scores(
     crps_by_fold: dict[str, dict[str, float]],
     *,

@@ -3,10 +3,14 @@
 Blueprint §§11–12 roles and change control (Senate research production).
 
 ## Public live probabilities
-After Milestone-0 (green G1–G11), production may promote a publication-eligible
-forecast with `python -m midterms.cli publish-live`. That stamps `public_release`
-on the artifact, syncs the UI JSON, and seals a prospective live shadow. Do not
-label research-only or non-publication runs as live.
+**HOLD (fresh audit 14 Sep 2026 / v0.9.18):** `PUBLIC_LIVE_ENABLED=False`.
+`publish-live` fail-closes until an independent reviewer clears the vote-count
+ledger and all-domain eligibility on a fresh archive. Current surface is
+`research_only` even when evidence is publication-eligible.
+
+When re-enabled after clearance: green G1–G11 + publication-eligible evidence +
+`python -m midterms.cli publish-live` stamps `public_release`, syncs UI JSON, and
+seals a prospective live shadow. Do not label research-only runs as live.
 
 ## Roles
 | Role | Responsibility |

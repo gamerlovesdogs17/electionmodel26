@@ -54,14 +54,30 @@ def assert_public_ready(
     """
     Fail closed unless acceptance gates, eligibility, and numerical quality pass.
     """
+    from midterms.config import PUBLIC_LIVE_ENABLED
+
     art = artifact or _load_forecast()
     gates = gates or evaluate_acceptance_gates(write=False)
     reasons: list[str] = []
+
+    if not PUBLIC_LIVE_ENABLED:
+        reasons.append(
+            "PUBLIC_LIVE_ENABLED=False (fresh audit Stage-0 containment — "
+            "research_only until independent truth + all-domain eligibility cleared)"
+        )
 
     if not gates.get("ok"):
         reasons.append(
             "acceptance gates not green: " + ", ".join(gates.get("failures") or ["unknown"])
         )
+    # Auditor-strict: any fail / not_evaluable / partial on P0-mapped gates blocks
+    for g in gates.get("gate_list") or list((gates.get("gates") or {}).values()):
+        if not isinstance(g, dict):
+            continue
+        if g.get("status") in {"fail", "not_evaluable"} or (
+            g.get("id") in {"G1", "G2", "G3", "G4", "G11"} and g.get("status") != "pass"
+        ):
+            reasons.append(f"auditor gate {g.get('id')} status={g.get('status')}")
 
     run_class = str(art.get("run_class") or "")
     publishable = bool(art.get("publishable"))
@@ -98,6 +114,7 @@ def assert_public_ready(
                 n_posterior_samples=(art.get("diagnostics") or {}).get("n_posterior_samples")
                 or (art.get("diagnostics") or {}).get("draws")
                 or n_draws,
+
                 convergence=(nq.get("convergence") if isinstance(nq.get("convergence"), dict) else None)
                 or (art.get("diagnostics") or {}).get("convergence"),
                 seed=art.get("seed"),

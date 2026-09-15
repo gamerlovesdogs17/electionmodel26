@@ -7,20 +7,47 @@ common terminal (~2.5 pp): nat² + race² + sim² ≈ 6.25.
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
+from midterms.config import ARTIFACTS_DIR
 from midterms.model.similarity import correlated_shocks
 
-# Documented defaults (nested covariance calibration 2026-09-13 — gate passed).
-# Winner: race sd 1.4→1.8; chamber_objective improved with coverage_90 unchanged.
+# Documented source defaults (overridden by sealed calibration JSON when present).
 TERMINAL_NAT_SD = 1.8
 TERMINAL_RACE_SD = 1.8
 SIM_SCALE = 1.0
 LENGTH_SCALE = 1.75
 NU = 5.0
+
+CALIBRATED_DEFAULTS_PATH = ARTIFACTS_DIR / "terminal_defaults.json"
+
+
+def _load_persisted_defaults() -> None:
+    global TERMINAL_NAT_SD, TERMINAL_RACE_SD, SIM_SCALE, LENGTH_SCALE, NU
+    if not CALIBRATED_DEFAULTS_PATH.exists():
+        return
+    try:
+        payload = json.loads(CALIBRATED_DEFAULTS_PATH.read_text(encoding="utf-8"))
+        scales = payload.get("scales") or payload
+        if "terminal_nat_sd" in scales:
+            TERMINAL_NAT_SD = float(scales["terminal_nat_sd"])
+        if "terminal_race_sd" in scales:
+            TERMINAL_RACE_SD = float(scales["terminal_race_sd"])
+        if "sim_scale" in scales:
+            SIM_SCALE = float(scales["sim_scale"])
+        if "length_scale" in scales:
+            LENGTH_SCALE = float(scales["length_scale"])
+        if "nu" in scales:
+            NU = float(scales["nu"])
+    except Exception:  # noqa: BLE001
+        return
+
+
+_load_persisted_defaults()
 
 
 def scales_kwargs(d: dict[str, float] | None) -> dict[str, float]:
@@ -154,3 +181,15 @@ def set_defaults_from_calibration(scales: dict[str, float]) -> None:
         LENGTH_SCALE = float(scales["length_scale"])
     if "nu" in scales:
         NU = float(scales["nu"])
+    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    CALIBRATED_DEFAULTS_PATH.write_text(
+        json.dumps(
+            {
+                "scales": active_scales(),
+                "source": "covariance_calibration",
+                "note": "Persisted winning scales so subsequent processes load the same defaults.",
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )

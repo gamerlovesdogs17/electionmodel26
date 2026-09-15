@@ -2,13 +2,13 @@
   "n": 72,
   "entries": [
     {
-      "component": "pymc",
+      "component": "fast_hierarchical_t",
       "holdout_year": 2018,
       "lead_days": 60,
       "as_of": "2018-09-07",
       "status": "ok",
-      "n_races": 33,
-      "method": "pymc",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
       "error": null
     },
     {
@@ -17,7 +17,7 @@
       "lead_days": 60,
       "as_of": "2018-09-07",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "fast_hierarchical_t",
       "error": null
     },
@@ -27,7 +27,7 @@
       "lead_days": 60,
       "as_of": "2018-09-07",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "fast_hierarchical_t",
       "error": null
     },
@@ -37,7 +37,7 @@
       "lead_days": 60,
       "as_of": "2018-09-07",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "state_space",
       "error": null
     },
@@ -47,7 +47,7 @@
       "lead_days": 60,
       "as_of": "2018-09-07",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "state_space",
       "error": null
     },
@@ -57,7 +57,7 @@
       "lead_days": 60,
       "as_of": "2018-09-07",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "ridge_fundamentals",
       "error": null
     },
@@ -67,7 +67,7 @@
       "lead_days": 60,
       "as_of": "2018-09-07",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "last_election_swing",
       "error": null
     },
@@ -77,7 +77,7 @@
       "lead_days": 60,
       "as_of": "2018-09-07",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "equal_weight_polls",
       "error": null
     },
@@ -86,379 +86,379 @@
       "holdout_year": 2018,
       "lead_days": 60,
       "as_of": "2018-09-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "shrinkage_polls",
-      "error": null
-    },
-    {
-      "component": "pymc",
-      "holdout_year": 2018,
-      "lead_days": 30,
-      "as_of": "2018-10-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "pymc",
-      "error": null
-    },
-    {
-      "component": "hier_no_similarity",
-      "holdout_year": 2018,
-      "lead_days": 30,
-      "as_of": "2018-10-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "fast_hierarchical_t",
-      "error": null
-    },
-    {
-      "component": "hier_no_terminal_race",
-      "holdout_year": 2018,
-      "lead_days": 30,
-      "as_of": "2018-10-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "fast_hierarchical_t",
-      "error": null
-    },
-    {
-      "component": "state_space",
-      "holdout_year": 2018,
-      "lead_days": 30,
-      "as_of": "2018-10-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "state_space",
-      "error": null
-    },
-    {
-      "component": "poll_only_state_space",
-      "holdout_year": 2018,
-      "lead_days": 30,
-      "as_of": "2018-10-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "state_space",
-      "error": null
-    },
-    {
-      "component": "ridge_fundamentals",
-      "holdout_year": 2018,
-      "lead_days": 30,
-      "as_of": "2018-10-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "ridge_fundamentals",
-      "error": null
-    },
-    {
-      "component": "last_election_swing",
-      "holdout_year": 2018,
-      "lead_days": 30,
-      "as_of": "2018-10-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "last_election_swing",
-      "error": null
-    },
-    {
-      "component": "equal_weight_polls",
-      "holdout_year": 2018,
-      "lead_days": 30,
-      "as_of": "2018-10-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "equal_weight_polls",
-      "error": null
-    },
-    {
-      "component": "shrinkage_polls",
-      "holdout_year": 2018,
-      "lead_days": 30,
-      "as_of": "2018-10-07",
-      "status": "ok",
-      "n_races": 33,
-      "method": "shrinkage_polls",
-      "error": null
-    },
-    {
-      "component": "pymc",
-      "holdout_year": 2020,
-      "lead_days": 60,
-      "as_of": "2020-09-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "pymc",
-      "error": null
-    },
-    {
-      "component": "hier_no_similarity",
-      "holdout_year": 2020,
-      "lead_days": 60,
-      "as_of": "2020-09-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "fast_hierarchical_t",
-      "error": null
-    },
-    {
-      "component": "hier_no_terminal_race",
-      "holdout_year": 2020,
-      "lead_days": 60,
-      "as_of": "2020-09-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "fast_hierarchical_t",
-      "error": null
-    },
-    {
-      "component": "state_space",
-      "holdout_year": 2020,
-      "lead_days": 60,
-      "as_of": "2020-09-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "state_space",
-      "error": null
-    },
-    {
-      "component": "poll_only_state_space",
-      "holdout_year": 2020,
-      "lead_days": 60,
-      "as_of": "2020-09-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "state_space",
-      "error": null
-    },
-    {
-      "component": "ridge_fundamentals",
-      "holdout_year": 2020,
-      "lead_days": 60,
-      "as_of": "2020-09-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "ridge_fundamentals",
-      "error": null
-    },
-    {
-      "component": "last_election_swing",
-      "holdout_year": 2020,
-      "lead_days": 60,
-      "as_of": "2020-09-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "last_election_swing",
-      "error": null
-    },
-    {
-      "component": "equal_weight_polls",
-      "holdout_year": 2020,
-      "lead_days": 60,
-      "as_of": "2020-09-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "equal_weight_polls",
-      "error": null
-    },
-    {
-      "component": "shrinkage_polls",
-      "holdout_year": 2020,
-      "lead_days": 60,
-      "as_of": "2020-09-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "shrinkage_polls",
-      "error": null
-    },
-    {
-      "component": "pymc",
-      "holdout_year": 2020,
-      "lead_days": 30,
-      "as_of": "2020-10-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "pymc",
-      "error": null
-    },
-    {
-      "component": "hier_no_similarity",
-      "holdout_year": 2020,
-      "lead_days": 30,
-      "as_of": "2020-10-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "fast_hierarchical_t",
-      "error": null
-    },
-    {
-      "component": "hier_no_terminal_race",
-      "holdout_year": 2020,
-      "lead_days": 30,
-      "as_of": "2020-10-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "fast_hierarchical_t",
-      "error": null
-    },
-    {
-      "component": "state_space",
-      "holdout_year": 2020,
-      "lead_days": 30,
-      "as_of": "2020-10-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "state_space",
-      "error": null
-    },
-    {
-      "component": "poll_only_state_space",
-      "holdout_year": 2020,
-      "lead_days": 30,
-      "as_of": "2020-10-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "state_space",
-      "error": null
-    },
-    {
-      "component": "ridge_fundamentals",
-      "holdout_year": 2020,
-      "lead_days": 30,
-      "as_of": "2020-10-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "ridge_fundamentals",
-      "error": null
-    },
-    {
-      "component": "last_election_swing",
-      "holdout_year": 2020,
-      "lead_days": 30,
-      "as_of": "2020-10-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "last_election_swing",
-      "error": null
-    },
-    {
-      "component": "equal_weight_polls",
-      "holdout_year": 2020,
-      "lead_days": 30,
-      "as_of": "2020-10-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "equal_weight_polls",
-      "error": null
-    },
-    {
-      "component": "shrinkage_polls",
-      "holdout_year": 2020,
-      "lead_days": 30,
-      "as_of": "2020-10-04",
-      "status": "ok",
-      "n_races": 33,
-      "method": "shrinkage_polls",
-      "error": null
-    },
-    {
-      "component": "pymc",
-      "holdout_year": 2022,
-      "lead_days": 60,
-      "as_of": "2022-09-09",
-      "status": "ok",
-      "n_races": 35,
-      "method": "pymc",
-      "error": null
-    },
-    {
-      "component": "hier_no_similarity",
-      "holdout_year": 2022,
-      "lead_days": 60,
-      "as_of": "2022-09-09",
-      "status": "ok",
-      "n_races": 35,
-      "method": "fast_hierarchical_t",
-      "error": null
-    },
-    {
-      "component": "hier_no_terminal_race",
-      "holdout_year": 2022,
-      "lead_days": 60,
-      "as_of": "2022-09-09",
-      "status": "ok",
-      "n_races": 35,
-      "method": "fast_hierarchical_t",
-      "error": null
-    },
-    {
-      "component": "state_space",
-      "holdout_year": 2022,
-      "lead_days": 60,
-      "as_of": "2022-09-09",
-      "status": "ok",
-      "n_races": 35,
-      "method": "state_space",
-      "error": null
-    },
-    {
-      "component": "poll_only_state_space",
-      "holdout_year": 2022,
-      "lead_days": 60,
-      "as_of": "2022-09-09",
-      "status": "ok",
-      "n_races": 35,
-      "method": "state_space",
-      "error": null
-    },
-    {
-      "component": "ridge_fundamentals",
-      "holdout_year": 2022,
-      "lead_days": 60,
-      "as_of": "2022-09-09",
-      "status": "ok",
-      "n_races": 35,
-      "method": "ridge_fundamentals",
-      "error": null
-    },
-    {
-      "component": "last_election_swing",
-      "holdout_year": 2022,
-      "lead_days": 60,
-      "as_of": "2022-09-09",
-      "status": "ok",
-      "n_races": 35,
-      "method": "last_election_swing",
-      "error": null
-    },
-    {
-      "component": "equal_weight_polls",
-      "holdout_year": 2022,
-      "lead_days": 60,
-      "as_of": "2022-09-09",
-      "status": "ok",
-      "n_races": 35,
-      "method": "equal_weight_polls",
-      "error": null
-    },
-    {
-      "component": "shrinkage_polls",
-      "holdout_year": 2022,
-      "lead_days": 60,
-      "as_of": "2022-09-09",
       "status": "ok",
       "n_races": 35,
       "method": "shrinkage_polls",
       "error": null
     },
     {
-      "component": "pymc",
+      "component": "fast_hierarchical_t",
+      "holdout_year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "hier_no_similarity",
+      "holdout_year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "hier_no_terminal_race",
+      "holdout_year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "state_space",
+      "holdout_year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "status": "ok",
+      "n_races": 35,
+      "method": "state_space",
+      "error": null
+    },
+    {
+      "component": "poll_only_state_space",
+      "holdout_year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "status": "ok",
+      "n_races": 35,
+      "method": "state_space",
+      "error": null
+    },
+    {
+      "component": "ridge_fundamentals",
+      "holdout_year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "status": "ok",
+      "n_races": 35,
+      "method": "ridge_fundamentals",
+      "error": null
+    },
+    {
+      "component": "last_election_swing",
+      "holdout_year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "status": "ok",
+      "n_races": 35,
+      "method": "last_election_swing",
+      "error": null
+    },
+    {
+      "component": "equal_weight_polls",
+      "holdout_year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "status": "ok",
+      "n_races": 35,
+      "method": "equal_weight_polls",
+      "error": null
+    },
+    {
+      "component": "shrinkage_polls",
+      "holdout_year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "status": "ok",
+      "n_races": 35,
+      "method": "shrinkage_polls",
+      "error": null
+    },
+    {
+      "component": "fast_hierarchical_t",
+      "holdout_year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "hier_no_similarity",
+      "holdout_year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "hier_no_terminal_race",
+      "holdout_year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "state_space",
+      "holdout_year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "state_space",
+      "error": null
+    },
+    {
+      "component": "poll_only_state_space",
+      "holdout_year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "state_space",
+      "error": null
+    },
+    {
+      "component": "ridge_fundamentals",
+      "holdout_year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "ridge_fundamentals",
+      "error": null
+    },
+    {
+      "component": "last_election_swing",
+      "holdout_year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "last_election_swing",
+      "error": null
+    },
+    {
+      "component": "equal_weight_polls",
+      "holdout_year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "equal_weight_polls",
+      "error": null
+    },
+    {
+      "component": "shrinkage_polls",
+      "holdout_year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "shrinkage_polls",
+      "error": null
+    },
+    {
+      "component": "fast_hierarchical_t",
+      "holdout_year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "hier_no_similarity",
+      "holdout_year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "hier_no_terminal_race",
+      "holdout_year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "state_space",
+      "holdout_year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "state_space",
+      "error": null
+    },
+    {
+      "component": "poll_only_state_space",
+      "holdout_year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "state_space",
+      "error": null
+    },
+    {
+      "component": "ridge_fundamentals",
+      "holdout_year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "ridge_fundamentals",
+      "error": null
+    },
+    {
+      "component": "last_election_swing",
+      "holdout_year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "last_election_swing",
+      "error": null
+    },
+    {
+      "component": "equal_weight_polls",
+      "holdout_year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "equal_weight_polls",
+      "error": null
+    },
+    {
+      "component": "shrinkage_polls",
+      "holdout_year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "status": "ok",
+      "n_races": 35,
+      "method": "shrinkage_polls",
+      "error": null
+    },
+    {
+      "component": "fast_hierarchical_t",
+      "holdout_year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "hier_no_similarity",
+      "holdout_year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "hier_no_terminal_race",
+      "holdout_year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "status": "ok",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
+      "error": null
+    },
+    {
+      "component": "state_space",
+      "holdout_year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "status": "ok",
+      "n_races": 35,
+      "method": "state_space",
+      "error": null
+    },
+    {
+      "component": "poll_only_state_space",
+      "holdout_year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "status": "ok",
+      "n_races": 35,
+      "method": "state_space",
+      "error": null
+    },
+    {
+      "component": "ridge_fundamentals",
+      "holdout_year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "status": "ok",
+      "n_races": 35,
+      "method": "ridge_fundamentals",
+      "error": null
+    },
+    {
+      "component": "last_election_swing",
+      "holdout_year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "status": "ok",
+      "n_races": 35,
+      "method": "last_election_swing",
+      "error": null
+    },
+    {
+      "component": "equal_weight_polls",
+      "holdout_year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "status": "ok",
+      "n_races": 35,
+      "method": "equal_weight_polls",
+      "error": null
+    },
+    {
+      "component": "shrinkage_polls",
+      "holdout_year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "status": "ok",
+      "n_races": 35,
+      "method": "shrinkage_polls",
+      "error": null
+    },
+    {
+      "component": "fast_hierarchical_t",
       "holdout_year": 2022,
       "lead_days": 30,
       "as_of": "2022-10-09",
       "status": "ok",
       "n_races": 35,
-      "method": "pymc",
+      "method": "fast_hierarchical_t",
       "error": null
     },
     {
@@ -542,13 +542,13 @@
       "error": null
     },
     {
-      "component": "pymc",
+      "component": "fast_hierarchical_t",
       "holdout_year": 2024,
       "lead_days": 60,
       "as_of": "2024-09-06",
       "status": "ok",
-      "n_races": 33,
-      "method": "pymc",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
       "error": null
     },
     {
@@ -557,7 +557,7 @@
       "lead_days": 60,
       "as_of": "2024-09-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "fast_hierarchical_t",
       "error": null
     },
@@ -567,7 +567,7 @@
       "lead_days": 60,
       "as_of": "2024-09-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "fast_hierarchical_t",
       "error": null
     },
@@ -577,7 +577,7 @@
       "lead_days": 60,
       "as_of": "2024-09-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "state_space",
       "error": null
     },
@@ -587,7 +587,7 @@
       "lead_days": 60,
       "as_of": "2024-09-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "state_space",
       "error": null
     },
@@ -597,7 +597,7 @@
       "lead_days": 60,
       "as_of": "2024-09-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "ridge_fundamentals",
       "error": null
     },
@@ -607,7 +607,7 @@
       "lead_days": 60,
       "as_of": "2024-09-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "last_election_swing",
       "error": null
     },
@@ -617,7 +617,7 @@
       "lead_days": 60,
       "as_of": "2024-09-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "equal_weight_polls",
       "error": null
     },
@@ -627,18 +627,18 @@
       "lead_days": 60,
       "as_of": "2024-09-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "shrinkage_polls",
       "error": null
     },
     {
-      "component": "pymc",
+      "component": "fast_hierarchical_t",
       "holdout_year": 2024,
       "lead_days": 30,
       "as_of": "2024-10-06",
       "status": "ok",
-      "n_races": 33,
-      "method": "pymc",
+      "n_races": 35,
+      "method": "fast_hierarchical_t",
       "error": null
     },
     {
@@ -647,7 +647,7 @@
       "lead_days": 30,
       "as_of": "2024-10-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "fast_hierarchical_t",
       "error": null
     },
@@ -657,7 +657,7 @@
       "lead_days": 30,
       "as_of": "2024-10-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "fast_hierarchical_t",
       "error": null
     },
@@ -667,7 +667,7 @@
       "lead_days": 30,
       "as_of": "2024-10-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "state_space",
       "error": null
     },
@@ -677,7 +677,7 @@
       "lead_days": 30,
       "as_of": "2024-10-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "state_space",
       "error": null
     },
@@ -687,7 +687,7 @@
       "lead_days": 30,
       "as_of": "2024-10-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "ridge_fundamentals",
       "error": null
     },
@@ -697,7 +697,7 @@
       "lead_days": 30,
       "as_of": "2024-10-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "last_election_swing",
       "error": null
     },
@@ -707,7 +707,7 @@
       "lead_days": 30,
       "as_of": "2024-10-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "equal_weight_polls",
       "error": null
     },
@@ -717,7 +717,7 @@
       "lead_days": 30,
       "as_of": "2024-10-06",
       "status": "ok",
-      "n_races": 33,
+      "n_races": 35,
       "method": "shrinkage_polls",
       "error": null
     }

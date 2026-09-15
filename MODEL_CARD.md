@@ -1,4 +1,4 @@
-# Model card — Senate hierarchical v0.9.16
+# Model card — Senate hierarchical v0.9.18
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
@@ -58,8 +58,20 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 - **Pre-P0 cycle_replay artifacts are non-comparable** — not validated backtests (`VALIDATION_ARCHIVE_NOTICE.md`)
 - **Limits:** VoteHub has no historical archive; no Cook redistribution; House/EC out of scope; peer panel is compare-only (never averaged)
 
-## Out of scope
-House, Electoral College, governors.
+## Limitations
+- **Public live probabilities are locked** (`PUBLIC_LIVE_ENABLED=False`). Current surface is `research_only` until an independent reviewer clears the vote-count ledger and all-domain eligibility on a fresh archive.
+- Historical margins for non-digitized FEC races use two-party counts scaled to certified margins pending full FEC PDF digitization; OH 2018 and AZ 2024 use exact canvass totals.
+- Production economics use FRED public CSV (`A229RX0` + YoY); fixture RDPI series remain as leakage canaries only.
+- Live 2026 finance uses curated FEC-browse estimates when OpenFEC rate-limits (eligible curated tier, not `fixture_hash`); full candidate-level digitization is incomplete.
+- Ensemble stack OOF may score `fast_hierarchical_t`; PyMC production draws do not inherit that weight until `nested-component-loo --hierarchical-method pymc` is re-run.
+- Production PyMC spine remains a static Election-Day latent; weekly dynamic is a challenger (2022 compare: static better CRPS).
+- Poll coverage for 2014/2016 is not production-gated (no FTE identity archive yet).
+- Peer snapshots are compare-only and never averaged into the ensemble.
+- House, governors, and Electoral College are out of scope.
+
+## Known limitations
+See **Limitations** above (retained heading for acceptance G11).
+
 
 ## Production paths
 See `DEPLOY.md`: API bearer auth (`MIDTERMS_API_KEY`), Docker/Fly deploy, Ed25519 signing

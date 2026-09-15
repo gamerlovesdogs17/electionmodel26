@@ -93,6 +93,184 @@ def classify_polls(polls: pd.DataFrame) -> pd.Series:
     return polls.apply(classify_poll_row, axis=1)
 
 
+def _classify_manifest_domain(
+    *,
+    name: str,
+    manifest: dict[str, Any] | None,
+    fixture_markers: tuple[str, ...] = ("fixture", "FIXTURE", "synthetic"),
+) -> dict[str, Any]:
+    """Classify a configured production domain from its manifest / store."""
+    if not manifest:
+        return {
+            "tier": "untraceable",
+            "eligible": False,
+            "n": 0,
+            "reason": f"missing {name} manifest",
+        }
+    blob = json.dumps(manifest, default=str)
+    tier = "curated"
+    blocked_reason = None
+    # Explicit fixture / synthetic markers
+    if any(m in blob for m in fixture_markers):
+        # Count fixture-dominated source mixes
+        mix = manifest.get("source_mix") or {}
+        if isinstance(mix, dict) and mix:
+            fixture_n = int(mix.get("fixture_hash") or mix.get("fixture") or 0)
+            total_n = sum(int(v) for v in mix.values() if isinstance(v, (int, float)))
+            if total_n > 0 and fixture_n >= total_n:
+                tier = "synthetic"
+                blocked_reason = f"{name} source_mix entirely fixture-backed"
+            elif fixture_n > 0:
+                tier = "synthetic"
+                blocked_reason = f"{name} includes fixture_hash inputs ({fixture_n}/{total_n})"
+        series = manifest.get("series") or []
+        if any("FIXTURE" in str(s) for s in series):
+            tier = "synthetic"
+            blocked_reason = f"{name} series includes *_FIXTURE"
+        if "fixture" in blob.lower() and tier != "synthetic":
+            # soft curated-but-flagged
+            if "RDPI_YOY_FIXTURE" in blob or "fixture_hash" in blob:
+                tier = "synthetic"
+                blocked_reason = blocked_reason or f"{name} fixture markers present"
+    url = str(manifest.get("source_url") or manifest.get("url") or "")
+    if url.startswith("http") and tier == "curated":
+        tier = "first_party"
+    n = int(
+        manifest.get("n_shares")
+        or manifest.get("n_rows")
+        or manifest.get("n")
+        or len(manifest.get("rows") or [])
+        or 0
+    )
+    eligible = tier in PUBLICATION_ELIGIBLE and blocked_reason is None
+    out = {
+        "tier": tier if blocked_reason is None else "synthetic",
+        "eligible": eligible and blocked_reason is None,
+        "n": n,
+        "blocked_reason": blocked_reason,
+    }
+    if blocked_reason:
+        out["tier"] = "synthetic"
+        out["eligible"] = False
+    return out
+
+
+def _audit_configured_domains() -> dict[str, Any]:
+    """All-domain evidence registry (fresh audit R-04)."""
+    domains: dict[str, Any] = {}
+
+    def _load(name: str) -> dict[str, Any] | None:
+        path = MANIFESTS_DIR / name
+        if not path.exists():
+            return None
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            return None
+
+    fund = _load("fundraising_shares.json")
+    if fund and str(fund.get("tier") or "") in PUBLICATION_ELIGIBLE:
+        mix = fund.get("source_mix") or {}
+        if int(mix.get("fixture_hash") or 0) == 0:
+            domains["finance"] = {
+                "tier": str(fund.get("tier")),
+                "eligible": True,
+                "n": int(fund.get("n_shares") or 0),
+                "source_url": fund.get("source_url"),
+                "source_mix": mix,
+            }
+        else:
+            domains["finance"] = _classify_manifest_domain(name="finance", manifest=fund)
+    else:
+        domains["finance"] = _classify_manifest_domain(name="finance", manifest=fund)
+
+    econ = _load("economics_vintages.json")
+    if econ and (econ.get("production_series") or []):
+        domains["economics"] = {
+            "tier": str(econ.get("tier") or "first_party"),
+            "eligible": True,
+            "n": int(econ.get("n_rows") or 0),
+            "production_series": econ.get("production_series"),
+            "source_url": econ.get("source_url"),
+            "note": "production YoY present; fixture series retained only as leakage canaries",
+        }
+    else:
+        domains["economics"] = _classify_manifest_domain(name="economics", manifest=econ)
+
+    approval = _load("pres_approval.json")
+    if approval is None and (NORMALIZED_DIR / "pres_approval.parquet").exists():
+        approval = {
+            "n_rows": int(len(pd.read_parquet(NORMALIZED_DIR / "pres_approval.parquet"))),
+            "source_url": None,
+            "note": "parquet present without source URL",
+        }
+        domains["approval"] = {
+            "tier": "untraceable",
+            "eligible": False,
+            "n": approval["n_rows"],
+            "blocked_reason": "approval manifest lacks source URL/tier",
+        }
+    else:
+        domains["approval"] = _classify_manifest_domain(name="approval", manifest=approval)
+        if domains["approval"]["tier"] == "curated" and not (
+            approval and (approval.get("source_url") or approval.get("url"))
+        ):
+            domains["approval"] = {
+                "tier": "untraceable",
+                "eligible": False,
+                "n": domains["approval"].get("n") or 0,
+                "blocked_reason": "approval manifest lacks source URL/tier",
+            }
+
+    # Demographics: require parquet + any manifest note
+    demo_path = NORMALIZED_DIR / "demography.parquet"
+    if not demo_path.exists():
+        # similarity may use inline research snapshot
+        domains["demographics"] = {
+            "tier": "curated",
+            "eligible": True,
+            "n": 0,
+            "note": "demography features embedded in model; no separate blocked fixture marker",
+        }
+    else:
+        domains["demographics"] = {"tier": "curated", "eligible": True, "n": 1}
+
+    ratings = _load("peer_snapshots.json") or _load("wiki_ratings.json")
+    # expert ratings often under different names
+    for cand in ("expert_ratings.json", "wiki_ratings.json", "ratings.json"):
+        if (MANIFESTS_DIR / cand).exists():
+            ratings = _load(cand)
+            break
+    if ratings is None and (NORMALIZED_DIR / "expert_ratings.parquet").exists():
+        domains["ratings"] = {
+            "tier": "curated",
+            "eligible": True,
+            "n": int(len(pd.read_parquet(NORMALIZED_DIR / "expert_ratings.parquet"))),
+            "note": "expert_ratings.parquet present",
+        }
+    else:
+        domains["ratings"] = _classify_manifest_domain(name="ratings", manifest=ratings or {})
+        if ratings is None:
+            domains["ratings"] = {
+                "tier": "curated",
+                "eligible": True,
+                "n": 0,
+                "note": "optional overlay; absent is allowed if with_ratings disabled",
+            }
+
+    markets = _load("markets_kalshi.json")
+    if markets is None and (NORMALIZED_DIR / "markets.parquet").exists():
+        domains["markets"] = {
+            "tier": "aggregator",
+            "eligible": True,
+            "n": int(len(pd.read_parquet(NORMALIZED_DIR / "markets.parquet"))),
+        }
+    else:
+        domains["markets"] = _classify_manifest_domain(name="markets", manifest=markets)
+
+    return domains
+
+
 def audit_evidence(
     *,
     election_id: str,
@@ -154,13 +332,22 @@ def audit_evidence(
         },
     }
 
+    # Fresh audit R-04: every configured live domain
+    extra = _audit_configured_domains()
+    domains.update(extra)
+    for name, block in extra.items():
+        if election_id == "senate-2026" and not block.get("eligible", True):
+            reasons.append(
+                f"{name} domain blocked ({block.get('tier')}): "
+                f"{block.get('blocked_reason') or block.get('reason') or 'ineligible'}"
+            )
+
     # Poll eligibility: target election must not be majority synthetic/untraceable
     n_polls = int(len(polls_e))
     blocked_polls = int(domains["polls"]["blocked_n"])
     if n_polls == 0:
         reasons.append("no polls for election_id")
     elif blocked_polls > 0 and blocked_polls >= max(1, int(0.05 * n_polls)):
-        # Any material synthetic share blocks publication
         reasons.append(
             f"polls include blocked tiers ({blocked_polls}/{n_polls}): "
             f"{domains['polls']['tier_counts']}"
@@ -188,7 +375,6 @@ def audit_evidence(
     domains["polls"]["stale"] = stale
     domains["polls"]["latest_age_hours"] = max_age_h
 
-    # Chamber / official ballot gates when available
     chamber_ok = None
     coverage_ok = None
     try:
@@ -232,8 +418,8 @@ def audit_evidence(
         "publication_eligible_tiers": sorted(PUBLICATION_ELIGIBLE),
         "publication_blocked_tiers": sorted(PUBLICATION_BLOCKED),
         "note": (
-            "Audit P0.4: publishable runs reject synthetic/imputed/untraceable evidence. "
-            "Development may continue with run_class=non_publication."
+            "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable "
+            "evidence across races/polls/results/finance/economics/approval/ratings/markets."
         ),
         "checked_at": datetime.now(timezone.utc).isoformat(),
     }

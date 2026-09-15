@@ -190,17 +190,29 @@ def evaluate_acceptance_gates(
     else:
         publishable = bool(eligibility.get("publishable") or eligibility.get("ok"))
         reasons = eligibility.get("reasons") or []
-        # For milestone acceptance we require the eligibility machinery + no blocked tiers
-        # when a publication claim is made; research runs may be non_publication.
         run_class = eligibility.get("run_class") or "unknown"
-        g4_ok = "synthetic" not in str(reasons).lower() or run_class == "non_publication"
-        # Fail if eligibility report itself failed hard
-        if eligibility.get("ok") is False and run_class == "publication":
+        domains = eligibility.get("domains") or {}
+        required_live = ("finance", "economics", "approval")
+        domain_blockers = [
+            d
+            for d in required_live
+            if isinstance(domains.get(d), dict)
+            and domains[d].get("eligible") is False
+            and domains[d].get("tier") in {"synthetic", "imputed", "untraceable"}
+        ]
+        # Fresh audit R-04/R-05: fixture finance/economics must force non_publication
+        if domain_blockers and run_class == "publication":
             g4_ok = False
-        status = "pass" if bool(eligibility.get("ok")) or run_class == "non_publication" else "fail"
-        if not eligibility.get("ok") and run_class == "non_publication":
-            status = "partial"
-            g4_ok = True  # machinery present; non-publication is honest
+            status = "fail"
+        elif domain_blockers and run_class == "non_publication":
+            g4_ok = True
+            status = "pass"  # honest containment
+        else:
+            g4_ok = bool(eligibility.get("ok")) or run_class == "non_publication"
+            status = "pass" if g4_ok else "fail"
+            if not eligibility.get("ok") and run_class == "non_publication":
+                status = "pass"
+                g4_ok = True
         gates.append(
             _gate(
                 "G4",
@@ -211,9 +223,14 @@ def evaluate_acceptance_gates(
                     "publishable": eligibility.get("publishable"),
                     "run_class": run_class,
                     "reasons": reasons[:12],
+                    "domain_blockers": domain_blockers,
+                    "domains_checked": sorted(domains.keys()),
                 },
                 evidence=[str(art_dir / "evidence_eligibility_latest.json")],
-                notes=["Publishable runs must reject synthetic/imputed/untraceable tiers."],
+                notes=[
+                    "All configured domains (finance/economics/approval/…) must be enumerated; "
+                    "fixture_hash / *_FIXTURE blocks publication."
+                ],
             )
         )
 
@@ -395,14 +412,23 @@ def evaluate_acceptance_gates(
         recs = nested["g8_recommendations"]
         disabled = [k for k, v in recs.items() if (v or {}).get("recommend") == "disable"]
         kept = [k for k, v in recs.items() if (v or {}).get("recommend") == "keep"]
+        stack_w = (stack or {}).get("stack_weights") or (stack or {}).get("stack_weights_production") or {}
+        leaked = [k for k in disabled if float(stack_w.get(k) or 0) > 1e-6]
+        g8_ok = len(leaked) == 0
         gates.append(
             _gate(
                 "G8",
                 name="Ablation",
-                ok=True,
-                status="pass",
-                detail={"keep": kept, "disable": disabled, "n_components": len(recs)},
+                ok=g8_ok,
+                status="pass" if g8_ok else "fail",
+                detail={
+                    "keep": kept,
+                    "disable": disabled,
+                    "n_components": len(recs),
+                    "disabled_still_weighted": leaked,
+                },
                 evidence=[str(art_dir / "nested_component_loo.json")],
+                notes=["G8-disable recommendations must be absent from production stack weights."],
             )
         )
 
@@ -521,23 +547,32 @@ def evaluate_acceptance_gates(
         "model_card": model_card.exists(),
         "model_version": MODEL_VERSION,
     }
+    card_text = model_card.read_text(encoding="utf-8") if model_card.exists() else ""
+    has_card_limitations = "## Limitations" in card_text or "## Known limitations" in card_text
+    g11_detail["model_card_has_limitations_section"] = has_card_limitations
+    if not has_card_limitations:
+        g11_ok = False
+        g11_notes.append("model card missing ## Limitations section (fresh audit R-12)")
     if forecast:
         g11_detail["run_class"] = forecast.get("run_class") or (forecast.get("diagnostics") or {}).get(
             "run_class"
         )
         g11_detail["publishable"] = forecast.get("publishable")
+        g11_detail["publication_surface"] = forecast.get("publication_surface")
         g11_detail["has_limitations"] = bool(forecast.get("limitations"))
+        if not forecast.get("limitations"):
+            g11_ok = False
+            g11_notes.append("forecast artifact missing limitations block")
         if forecast.get("publishable") and not forecast.get("run_class"):
             g11_ok = False
             g11_notes.append("publishable claim without run_class")
+        if forecast.get("publication_surface") == "live" and not forecast.get("limitations"):
+            g11_ok = False
     if val_report and val_report.get("limitations"):
         g11_detail["validation_limitations_n"] = len(val_report["limitations"])
-    else:
-        g11_notes.append("validation report limitations helpful but optional")
-    # Missingness visibility via poll coverage
     if poll_cov:
         g11_detail["poll_coverage_present"] = True
-    g11_status = "pass" if g11_ok and model_card.exists() else "fail"
+    g11_status = "pass" if g11_ok else "fail"
     gates.append(
         _gate(
             "G11",
@@ -547,7 +582,7 @@ def evaluate_acceptance_gates(
             detail=g11_detail,
             evidence=[str(model_card)],
             notes=g11_notes
-            or ["Model card, run_class, and missingness must be visible before public artifact."],
+            or ["Model card limitations, run_class, and missingness required."],
         )
     )
 

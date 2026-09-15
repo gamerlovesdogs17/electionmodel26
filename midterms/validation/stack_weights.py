@@ -15,7 +15,11 @@ from typing import Any
 import numpy as np
 
 from midterms.config import ARTIFACTS_DIR
-from midterms.model.ensemble import softmax_neg_scores, weights_from_oof_scores
+from midterms.model.ensemble import (
+    predictive_stack_weights,
+    softmax_neg_scores,
+    weights_from_oof_scores,
+)
 
 
 # Structural ablation labels are diagnostics, not stack members.
@@ -70,12 +74,14 @@ def fit_stack_weights_from_oof(
     g8_recommendations: dict[str, Any] | None = None,
     temperature: float = 0.75,
     extra_exclude: set[str] | None = None,
+    oof_means: dict[str, dict[str, float]] | None = None,
+    oof_truths: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """
-    Fit nonnegative simplex weights from OOF CRPS (lower better).
+    Fit nonnegative simplex weights from OOF predictions.
 
-    Returns production weights, per-holdout LOO weights, and a reproduction
-    fingerprint of the filtered matrix.
+    Prefers race-level predictive mixture (R-08) when ``oof_means`` / ``oof_truths``
+    are supplied; otherwise falls back to softmax of mean CRPS.
     """
     disabled = disabled_from_g8(g8_recommendations)
     ban = set(EXCLUDE_FROM_STACK) | disabled | set(extra_exclude or ())
@@ -83,7 +89,17 @@ def fit_stack_weights_from_oof(
     if not filtered:
         raise ValueError("empty OOF CRPS matrix after G8 / structural filters")
 
-    production = weights_from_oof_scores(filtered, temperature=temperature)
+    stacking_mode = "softmax_mean_crps"
+    if oof_means and oof_truths:
+        means_kept = {k: v for k, v in oof_means.items() if k not in ban and v}
+        if len(means_kept) >= 2:
+            production = predictive_stack_weights(means_kept, oof_truths)
+            stacking_mode = "predictive_mixture_crps"
+        else:
+            production = weights_from_oof_scores(filtered, temperature=temperature)
+    else:
+        production = weights_from_oof_scores(filtered, temperature=temperature)
+
     # Drop near-zeros for a clean simplex
     production = {k: float(v) for k, v in production.items() if float(v) >= 1e-6}
     total = sum(production.values())
@@ -104,6 +120,7 @@ def fit_stack_weights_from_oof(
     return {
         "audit_item": "P2.2",
         "temperature": temperature,
+        "stacking_mode": stacking_mode,
         "excluded_structural": sorted(EXCLUDE_FROM_STACK),
         "excluded_g8_disable": sorted(disabled),
         "excluded_extra": sorted(extra_exclude or ()),
@@ -114,17 +131,33 @@ def fit_stack_weights_from_oof(
         "stack_weights_loo": loo,
         "matrix_sha256": _matrix_fingerprint(filtered),
         "no_weight_remapping": True,
+        "predictive_stack_fn": "midterms.model.ensemble.predictive_stack_weights",
         "note": (
-            "Weights from OOF CRPS softmax under nonnegative simplex. "
-            "Component identity preserved; fast_hierarchical_t is never relabeled pymc."
+            "Weights from race-level predictive mixture when oof_means present; "
+            "else OOF CRPS softmax. Component identity preserved."
         ),
     }
 
 
 def reproduce_weights(payload: dict[str, Any]) -> dict[str, float]:
-    """Recompute production weights from the artifact's filtered matrix."""
-    filtered = payload.get("filtered_crps_by_fold") or {}
+    """Recompute production weights from the artifact's filtered matrix / OOF means."""
     temperature = float(payload.get("temperature") or 0.75)
+    if payload.get("stacking_mode") == "predictive_mixture_crps":
+        # Fall back to stored filtered CRPS softmax for exact reproduction when
+        # oof_means are not re-embedded in the stack artifact.
+        nested_path = Path(str(payload.get("source_nested_loo") or NESTED_LOO_PATH))
+        if nested_path.exists():
+            nested = json.loads(nested_path.read_text(encoding="utf-8"))
+            means = nested.get("oof_means") or {}
+            truths = nested.get("oof_truths") or {}
+            ban = set(EXCLUDE_FROM_STACK) | set(payload.get("excluded_g8_disable") or [])
+            means = {k: v for k, v in means.items() if k not in ban}
+            if means and truths:
+                w = predictive_stack_weights(means, truths)
+                w = {k: float(v) for k, v in w.items() if float(v) >= 1e-6}
+                total = sum(w.values())
+                return {k: v / total for k, v in w.items()} if total > 0 else {}
+    filtered = payload.get("filtered_crps_by_fold") or {}
     w = weights_from_oof_scores(filtered, temperature=temperature)
     w = {k: float(v) for k, v in w.items() if float(v) >= 1e-6}
     total = sum(w.values())
@@ -167,7 +200,11 @@ def fit_stack_weights_from_nested_loo(
     crps = nested.get("crps_by_fold") or {}
     g8 = nested.get("g8_recommendations") or {}
     fitted = fit_stack_weights_from_oof(
-        crps, g8_recommendations=g8, temperature=temperature
+        crps,
+        g8_recommendations=g8,
+        temperature=temperature,
+        oof_means=nested.get("oof_means"),
+        oof_truths=nested.get("oof_truths"),
     )
     fitted["source_nested_loo"] = str(nested_path)
     fitted["source_spine_label"] = nested.get("spine_label")

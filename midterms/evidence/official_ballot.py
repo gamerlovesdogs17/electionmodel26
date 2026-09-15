@@ -185,37 +185,85 @@ CYCLE_META: dict[int, dict[str, Any]] = {
 
 
 def sync_held_counts_from_certified() -> None:
-    """Set held_dem/held_rep so certified contested winners reproduce post_dem_seats."""
-    from midterms.evidence.results_archive import CERTIFIED_MARGINS
+    """DEPRECATED (fresh audit R-02).
 
-    for year, meta in CYCLE_META.items():
-        margins = CERTIFIED_MARGINS.get(f"senate-{year}")
-        if not margins:
-            continue
-        contests = contested_contests(year)
-        n_cont = len(contests)
-        dem_wins = 0
-        for c in contests:
-            key = c["race_id"].replace(f"senate-{year}-", "")
-            m = margins.get(key)
-            if m is None and c.get("kind") == "regular":
-                m = margins.get(c["state"])
-            if m is not None and float(m) >= 0:
-                dem_wins += 1
-        post = int(meta["post_dem_seats"])
-        held_dem = post - dem_wins
-        held_total = 100 - n_cont
-        held_rep = held_total - held_dem
-        held_ind = min(int(meta.get("held_ind") or 0), max(held_dem, 0))
-        if held_dem < 0 or held_rep < 0:
-            raise ValueError(
-                f"{year}: inconsistent certified margins vs post_dem_seats "
-                f"(dem_wins={dem_wins}, post={post}, held_total={held_total})"
-            )
-        meta["held_dem"] = held_dem
-        meta["held_rep"] = held_rep
-        meta["held_ind"] = held_ind
-        meta["certified_dem_wins"] = dem_wins
+    Previously solved held seats from post_dem_seats − contested Dem wins, making
+    chamber reconcile tautological. Held seats now come only from
+    ``independent_chamber_expectations.json``.
+    """
+    return
+
+
+def load_cycle_expectations(year: int) -> dict[str, Any]:
+    from midterms.evidence.official_ledger import load_expectations
+
+    block = (load_expectations().get("cycles") or {}).get(str(year))
+    if not block:
+        raise ValueError(f"no independent chamber expectations for {year}")
+    return block
+
+
+def build_held_rows_from_expectations(
+    year: int,
+    exp: dict[str, Any],
+    *,
+    election_day: str,
+) -> list[dict[str, Any]]:
+    """Materialize not-up seats from independent expectations (not winner-solved)."""
+    n_held_dem = int(exp["held_dem"])
+    n_held_ind = int(exp.get("held_ind") or 0)
+    n_held_d_party = max(0, n_held_dem - n_held_ind)
+    n_held_rep = int(exp["held_rep"])
+    held_parties = (["D"] * n_held_d_party) + (["I"] * n_held_ind) + (["R"] * n_held_rep)
+    up = (CYCLE_META.get(year) or {}).get("seat_class_up")
+    held_slots: list[tuple[str, str]] = []
+    for st, (c1, c2) in sorted(STATE_CLASSES.items()):
+        for sc in (c1, c2):
+            if up and sc == up:
+                continue
+            if year == 2022 and st == "OK" and sc == "II":
+                continue
+            if year == 2018 and st in {"MN", "MS"} and sc == "II":
+                continue
+            if year == 2020 and st == "AZ" and sc == "III":
+                continue
+            if year == 2020 and st == "GA" and sc == "III":
+                continue
+            if year == 2024 and st == "NE" and sc == "II":
+                continue
+            held_slots.append((st, sc))
+    while len(held_slots) < len(held_parties):
+        held_slots.append(("XX", "held"))
+    held_slots = held_slots[: len(held_parties)]
+    rows: list[dict[str, Any]] = []
+    for i, ((st, sc), party) in enumerate(zip(held_slots, held_parties)):
+        lean = float(BASE_LEANS.get(st, 0.0)) if st in BASE_LEANS else 0.0
+        rows.append(
+            {
+                "race_id": f"senate-{year}-held-{st}-{sc}-{i}",
+                "election_id": f"senate-{year}",
+                "office": "US_SENATE",
+                "state": st if st != "XX" else "AL",
+                "seat_class": sc if sc != "held" else "held",
+                "election_day": election_day,
+                "incumbent_party": party,
+                "is_open": False,
+                "held_by": party,
+                "prior_lean": lean,
+                "region": _region(st if st != "XX" else "AL"),
+                "not_up": True,
+                "fundraising_share": 0.5,
+                "pres_approval": 0.0,
+                "white_house_party": "D" if year in {2014, 2016, 2022, 2024} else "R",
+                "is_midterm": bool(year % 4 == 2),
+                "election_phase": "general",
+                "runoff_of": None,
+                "vacancy_reason": None,
+                "ballot_status": "nominated",
+                "effective_election_day": election_day,
+            }
+        )
+    return rows
 
 
 def class_states(seat_class: str) -> list[str]:
@@ -227,7 +275,7 @@ def class_states(seat_class: str) -> list[str]:
 
 
 def contested_contests(year: int) -> list[dict[str, Any]]:
-    """Official contested race descriptors for a Senate cycle."""
+    """Official contested race descriptors — loaded from external ledger when present."""
     if year == 2026:
         from midterms.evidence.fixtures import CLASS_II as C2, SPECIALS_2026
 
@@ -254,6 +302,26 @@ def contested_contests(year: int) -> list[dict[str, Any]]:
             )
         return rows
 
+    try:
+        from midterms.evidence.official_ledger import contests_for_year, LEDGER_PATH
+
+        if LEDGER_PATH.exists():
+            return [
+                {
+                    "state": c["state"],
+                    "seat_class": c.get("seat_class"),
+                    "kind": c.get("kind") or "regular",
+                    "race_id": c["race_id"],
+                    "election_day": c.get("election_day"),
+                    "vacancy_reason": c.get("vacancy_reason"),
+                    "term_type": c.get("term_type"),
+                }
+                for c in contests_for_year(year)
+            ]
+    except Exception:
+        pass
+
+    # Legacy fallback (should be unused once ledger is written)
     meta = CYCLE_META.get(year)
     if not meta:
         raise ValueError(f"no official ballot metadata for {year}")
@@ -286,39 +354,32 @@ def contested_contests(year: int) -> list[dict[str, Any]]:
 
 
 def build_official_races_frame(year: int) -> pd.DataFrame:
-    """
-    100-seat race table: contested official contests + held seats.
-
-    Held seats are materialized to exact pre-election caucus counts from CYCLE_META
-    (audit P0.2 continuity). Geographic labels on held seats are continuity fillers;
-    contested rows are the authoritative ballot.
-    """
-    sync_held_counts_from_certified()
+    """100-seat race table from external ledger + independent held expectations."""
     if year == 2026:
         from midterms.evidence.fixtures import generate_2026_races
 
         return generate_2026_races()
 
-    meta = CYCLE_META[year]
-    ed = election_day(year).isoformat()
-    contests = contested_contests(year)
-    contested_ids = {c["race_id"] for c in contests}
-    rows: list[dict[str, Any]] = []
+    from midterms.evidence.official_ledger import contests_for_year
 
+    ed = election_day(year).isoformat()
+    contests = contests_for_year(year)
+    exp = load_cycle_expectations(year)
+    rows: list[dict[str, Any]] = []
     for c in contests:
         st = c["state"]
-        lean = float(BASE_LEANS.get(st, 0.0))
+        lean = float(c.get("prior_lean") if c.get("prior_lean") is not None else BASE_LEANS.get(st, 0.0))
         rows.append(
             {
                 "race_id": c["race_id"],
                 "election_id": f"senate-{year}",
                 "office": "US_SENATE",
                 "state": st,
-                "seat_class": c["seat_class"],
+                "seat_class": c.get("seat_class"),
                 "election_day": ed,
-                "incumbent_party": None,
-                "is_open": False,
-                "held_by": "R" if lean < 0 else "D",
+                "incumbent_party": c.get("incumbent_party"),
+                "is_open": bool(c.get("is_open", False)),
+                "held_by": c.get("held_by") or ("R" if lean < 0 else "D"),
                 "prior_lean": lean,
                 "region": _region(st),
                 "not_up": False,
@@ -327,73 +388,14 @@ def build_official_races_frame(year: int) -> pd.DataFrame:
                 "white_house_party": "D" if year in {2014, 2016, 2022, 2024} else "R",
                 "is_midterm": bool(year % 4 == 2),
                 "election_phase": "general",
-                "runoff_of": None,
+                "runoff_of": c.get("runoff_of"),
                 "vacancy_reason": c.get("vacancy_reason"),
                 "ballot_status": "nominated",
                 "effective_election_day": ed,
             }
         )
-
-    # Held seats: exact caucus counts
-    n_held_dem = int(meta["held_dem"])  # includes I in caucus count for simulator
-    n_held_ind = int(meta.get("held_ind") or 0)
-    n_held_d_party = n_held_dem - n_held_ind
-    n_held_rep = int(meta["held_rep"])
-    assert n_held_dem + n_held_rep == 100 - len(contests), (
-        f"{year}: held+contested must be 100 "
-        f"(held={n_held_dem + n_held_rep}, contested={len(contests)})"
-    )
-
-    held_parties = (["D"] * n_held_d_party) + (["I"] * n_held_ind) + (["R"] * n_held_rep)
-    # Prefer labeling held seats with states whose class is not up
-    up = meta["seat_class_up"]
-    held_slots: list[tuple[str, str]] = []
-    for st, (c1, c2) in sorted(STATE_CLASSES.items()):
-        for sc in (c1, c2):
-            if sc == up:
-                continue
-            # Skip OK Class II when 2022 special contests that seat
-            if year == 2022 and st == "OK" and sc == "II":
-                continue
-            held_slots.append((st, sc))
-    # Pad if short (should not happen often)
-    while len(held_slots) < len(held_parties):
-        held_slots.append(("XX", "held"))
-    held_slots = held_slots[: len(held_parties)]
-
-    for i, ((st, sc), party) in enumerate(zip(held_slots, held_parties)):
-        rid = f"senate-{year}-held-{st}-{sc}-{i}"
-        if rid in contested_ids:
-            continue
-        lean = float(BASE_LEANS.get(st, 0.0)) if st in BASE_LEANS else 0.0
-        rows.append(
-            {
-                "race_id": rid,
-                "election_id": f"senate-{year}",
-                "office": "US_SENATE",
-                "state": st if st != "XX" else "AL",
-                "seat_class": sc if sc != "held" else "held",
-                "election_day": ed,
-                "incumbent_party": party if party != "I" else "I",
-                "is_open": False,
-                "held_by": party,
-                "prior_lean": lean,
-                "region": _region(st if st != "XX" else "AL"),
-                "not_up": True,
-                "fundraising_share": 0.5,
-                "pres_approval": 0.0,
-                "white_house_party": "D" if year in {2014, 2016, 2022, 2024} else "R",
-                "is_midterm": bool(year % 4 == 2),
-                "election_phase": "general",
-                "runoff_of": None,
-                "vacancy_reason": None,
-                "ballot_status": "nominated",
-                "effective_election_day": ed,
-            }
-        )
-
+    rows.extend(build_held_rows_from_expectations(year, exp, election_day=ed))
     df = pd.DataFrame(rows)
-    # Align to schema columns present
     for col in RACE_COLUMNS:
         if col not in df.columns:
             df[col] = None
@@ -410,46 +412,26 @@ def _region(st: str) -> str:
 
 
 def write_official_ballot_store(years: tuple[int, ...] | None = None) -> dict[str, Any]:
-    """Persist official races for historical cycles + reconciliation manifest."""
-    from midterms.config import CYCLES
-
-    years = years or tuple(y for y in CYCLES if y in CYCLE_META)
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
-    NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
-    MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
-
-    frames = [build_official_races_frame(y) for y in years]
-    # Keep 2026 from existing generator when building full store
+    """Persist official races from the external ledger (fresh audit R-01)."""
+    from midterms.evidence.build_official_ledger import build_and_write
     from midterms.evidence.fixtures import generate_2026_races
+    from midterms.evidence.official_ledger import write_ledger_normalized
 
-    frames.append(generate_2026_races())
-    races = pd.concat(frames, ignore_index=True)
-
-    raw_path = RAW_DIR / "external" / "official_senate_ballots.json"
-    payload = {
-        "parser_version": PARSER_VERSION,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "cycles": {
-            str(y): {
-                "meta": CYCLE_META.get(y),
-                "contested": contested_contests(y),
-                "n_races_rows": int((races["election_id"] == f"senate-{y}").sum()),
-            }
-            for y in list(years) + [2026]
-        },
-    }
-    raw_path.write_text(json.dumps(payload, indent=2, default=str))
-
-    out = NORMALIZED_DIR / "races_official.parquet"
-    races.to_parquet(out, index=False)
-    man = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "parser_version": PARSER_VERSION,
-        "years": list(years) + [2026],
-        "n_rows": int(len(races)),
-        "paths": {"raw": str(raw_path), "normalized": str(out)},
-        "note": "Official class/special ballots; replaces fixture Class-II midterm approximation.",
-    }
+    build_and_write()
+    man = write_ledger_normalized()
+    # Append 2026 curated races into races_official
+    path = NORMALIZED_DIR / "races_official.parquet"
+    hist = pd.read_parquet(path)
+    cur = generate_2026_races()
+    races = pd.concat([hist[hist["election_id"] != "senate-2026"], cur], ignore_index=True)
+    for col in RACE_COLUMNS:
+        if col not in races.columns:
+            races[col] = None
+    races = races[RACE_COLUMNS]
+    races.to_parquet(path, index=False)
+    man["years"] = sorted({int(str(e).split("-")[-1]) for e in races["election_id"].unique()})
+    man["n_rows"] = int(len(races))
+    man["includes_2026"] = True
     (MANIFESTS_DIR / "official_senate_ballots.json").write_text(json.dumps(man, indent=2))
     return man
 
@@ -462,11 +444,6 @@ def merge_official_into_races(races: pd.DataFrame) -> pd.DataFrame:
     official = pd.read_parquet(path)
     if official.empty:
         return races
-    # Drop fixture rows for election_ids present in official store
     eids = set(official["election_id"].unique())
     keep = races[~races["election_id"].isin(eids)] if len(races) else races
     return pd.concat([keep, official], ignore_index=True)
-
-
-# Finalize held caucus counts from certified margins (must run after contested_contests exists)
-sync_held_counts_from_certified()

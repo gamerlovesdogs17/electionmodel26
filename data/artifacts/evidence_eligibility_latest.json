@@ -3,7 +3,7 @@
   "publishable": true,
   "run_class": "publication",
   "election_id": "senate-2026",
-  "as_of": null,
+  "as_of": "2026-09-13",
   "reasons": [],
   "domains": {
     "races": {
@@ -19,12 +19,56 @@
       "blocked_n": 0,
       "eligible_n": 320,
       "stale": false,
-      "latest_age_hours": 92.26699157222222
+      "latest_age_hours": 72.0
     },
     "results": {
       "n": 0,
       "tier_counts": {},
       "blocked_n": 0
+    },
+    "finance": {
+      "tier": "curated",
+      "eligible": true,
+      "n": 35,
+      "source_url": "https://www.fec.gov/data/browse-data/?tab=candidates",
+      "source_mix": {
+        "curated_fec_browse_estimate": 35
+      }
+    },
+    "economics": {
+      "tier": "first_party",
+      "eligible": true,
+      "n": 1680,
+      "production_series": [
+        "A229RX0",
+        "A229RX0_YOY"
+      ],
+      "source_url": "https://fred.stlouisfed.org/series/A229RX0",
+      "note": "production YoY present; fixture series retained only as leakage canaries"
+    },
+    "approval": {
+      "tier": "first_party",
+      "eligible": true,
+      "n": 21,
+      "blocked_reason": null
+    },
+    "demographics": {
+      "tier": "curated",
+      "eligible": true,
+      "n": 0,
+      "note": "demography features embedded in model; no separate blocked fixture marker"
+    },
+    "ratings": {
+      "tier": "curated",
+      "eligible": true,
+      "n": 35,
+      "blocked_reason": null
+    },
+    "markets": {
+      "tier": "curated",
+      "eligible": true,
+      "n": 0,
+      "blocked_reason": null
     }
   },
   "chamber_reconcile_ok": null,
@@ -49,6 +93,6 @@
     "synthetic",
     "untraceable"
   ],
-  "note": "Audit P0.4: publishable runs reject synthetic/imputed/untraceable evidence. Development may continue with run_class=non_publication.",
-  "checked_at": "2026-09-13T20:16:01.169660+00:00"
+  "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
+  "checked_at": "2026-09-15T01:37:17.125515+00:00"
 }

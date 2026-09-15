@@ -1,7 +1,7 @@
 {
   "audit_item": "Milestone-0",
-  "model_version": "senate-hierarchical-v0.9.16",
-  "generated_at": "2026-09-13T22:58:10.756219+00:00",
+  "model_version": "senate-hierarchical-v0.9.18",
+  "generated_at": "2026-09-15T02:15:59.035996+00:00",
   "archive_scope": "2014-2024",
   "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
   "gates": {
@@ -82,28 +82,40 @@
       "detail": {
         "publishable": true,
         "run_class": "publication",
-        "reasons": []
+        "reasons": [],
+        "domain_blockers": [],
+        "domains_checked": [
+          "approval",
+          "demographics",
+          "economics",
+          "finance",
+          "markets",
+          "polls",
+          "races",
+          "ratings",
+          "results"
+        ]
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\evidence_eligibility_latest.json"
       ],
       "failure_behavior": "Leakage failure.",
       "notes": [
-        "Publishable runs must reject synthetic/imputed/untraceable tiers."
+        "All configured domains (finance/economics/approval/\u2026) must be enumerated; fixture_hash / *_FIXTURE blocks publication."
       ]
     },
     "G5": {
       "id": "G5",
       "name": "Model identity",
       "ok": true,
-      "status": "pass",
+      "status": "partial",
       "detail": {
-        "nested_spine": "pymc",
-        "nested_method": "pymc",
+        "nested_spine": "fast_hierarchical_t",
+        "nested_method": "fast",
         "no_weight_remapping": true,
-        "stack_source_spine": "pymc",
+        "stack_source_spine": "fast_hierarchical_t",
         "reproduction_ok": true,
-        "matrix_sha256": "bec6c8f0290dbd4aa7aff2e465ece1ea86fff65c18aeaff165e57df87b0e2970",
+        "matrix_sha256": "e1fe9e4cf32e6192f3dac448aca59a1ad6da30e70997176c538da4f5dc000ef3",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
@@ -113,7 +125,7 @@
       ],
       "failure_behavior": "Invalidate run.",
       "notes": [
-        "OOF stack / nested LOO spine is pymc (aligned with production)."
+        "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
       ]
     },
     "G6": {
@@ -195,13 +207,16 @@
           "equal_weight_polls",
           "shrinkage_polls"
         ],
-        "n_components": 8
+        "n_components": 8,
+        "disabled_still_weighted": []
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
       ],
       "failure_behavior": "Disable component.",
-      "notes": []
+      "notes": [
+        "G8-disable recommendations must be absent from production stack weights."
+      ]
     },
     "G9": {
       "id": "G9",
@@ -210,7 +225,7 @@
       "status": "pass",
       "detail": {
         "alerts": [],
-        "mcse_control": 0.00679558220463854
+        "mcse_control": 0.004152445627277978
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json"
@@ -227,10 +242,10 @@
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
           "ok": true,
-          "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260915",
+          "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260917",
           "error": null,
-          "forecast_hash_expected": "f55acc18a6fa5004a93577cad50e5f8c1d0939cfccdb25ca917d5d5fc2b98c81",
-          "forecast_hash_actual": "f55acc18a6fa5004a93577cad50e5f8c1d0939cfccdb25ca917d5d5fc2b98c81"
+          "forecast_hash_expected": "2fb8660a01b444018fa6639869cf83893e4dedc23cc6ffee3b67c5c261dedcb4",
+          "forecast_hash_actual": "2fb8660a01b444018fa6639869cf83893e4dedc23cc6ffee3b67c5c261dedcb4"
         },
         "independent_rebuild": {
           "ok": true,
@@ -241,23 +256,23 @@
               {
                 "name": "p_dem_majority",
                 "ok": true,
-                "delta": 0.0004999999999999449,
+                "delta": 0.0031250000000000444,
                 "tol": 0.01
               },
               {
                 "name": "expected_dem_seats",
                 "ok": true,
-                "delta": 0.009250000000001535,
+                "delta": 0.012125000000004604,
                 "tol": 0.15
               },
               {
                 "name": "max_race_p_dem",
                 "ok": true,
-                "delta": 0.008500000000000008,
+                "delta": 0.0050000000000000044,
                 "tol": 0.02
               }
             ],
-            "mean_abs_race_p_dem": 0.0026642857142857163,
+            "mean_abs_race_p_dem": 0.001896428571428562,
             "n_races_compared": 35
           },
           "domain_ok": true,
@@ -300,10 +315,12 @@
       "status": "pass",
       "detail": {
         "model_card": true,
-        "model_version": "senate-hierarchical-v0.9.16",
+        "model_version": "senate-hierarchical-v0.9.18",
+        "model_card_has_limitations_section": true,
         "run_class": "publication",
         "publishable": true,
-        "has_limitations": false,
+        "publication_surface": "research_only",
+        "has_limitations": true,
         "validation_limitations_n": 4,
         "poll_coverage_present": true
       },
@@ -312,7 +329,7 @@
       ],
       "failure_behavior": "Withhold public artifact.",
       "notes": [
-        "Model card, run_class, and missingness must be visible before public artifact."
+        "Model card limitations, run_class, and missingness required."
       ]
     }
   },
@@ -394,28 +411,40 @@
       "detail": {
         "publishable": true,
         "run_class": "publication",
-        "reasons": []
+        "reasons": [],
+        "domain_blockers": [],
+        "domains_checked": [
+          "approval",
+          "demographics",
+          "economics",
+          "finance",
+          "markets",
+          "polls",
+          "races",
+          "ratings",
+          "results"
+        ]
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\evidence_eligibility_latest.json"
       ],
       "failure_behavior": "Leakage failure.",
       "notes": [
-        "Publishable runs must reject synthetic/imputed/untraceable tiers."
+        "All configured domains (finance/economics/approval/\u2026) must be enumerated; fixture_hash / *_FIXTURE blocks publication."
       ]
     },
     {
       "id": "G5",
       "name": "Model identity",
       "ok": true,
-      "status": "pass",
+      "status": "partial",
       "detail": {
-        "nested_spine": "pymc",
-        "nested_method": "pymc",
+        "nested_spine": "fast_hierarchical_t",
+        "nested_method": "fast",
         "no_weight_remapping": true,
-        "stack_source_spine": "pymc",
+        "stack_source_spine": "fast_hierarchical_t",
         "reproduction_ok": true,
-        "matrix_sha256": "bec6c8f0290dbd4aa7aff2e465ece1ea86fff65c18aeaff165e57df87b0e2970",
+        "matrix_sha256": "e1fe9e4cf32e6192f3dac448aca59a1ad6da30e70997176c538da4f5dc000ef3",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
@@ -425,7 +454,7 @@
       ],
       "failure_behavior": "Invalidate run.",
       "notes": [
-        "OOF stack / nested LOO spine is pymc (aligned with production)."
+        "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
       ]
     },
     {
@@ -507,13 +536,16 @@
           "equal_weight_polls",
           "shrinkage_polls"
         ],
-        "n_components": 8
+        "n_components": 8,
+        "disabled_still_weighted": []
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
       ],
       "failure_behavior": "Disable component.",
-      "notes": []
+      "notes": [
+        "G8-disable recommendations must be absent from production stack weights."
+      ]
     },
     {
       "id": "G9",
@@ -522,7 +554,7 @@
       "status": "pass",
       "detail": {
         "alerts": [],
-        "mcse_control": 0.00679558220463854
+        "mcse_control": 0.004152445627277978
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json"
@@ -539,10 +571,10 @@
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
           "ok": true,
-          "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260915",
+          "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260917",
           "error": null,
-          "forecast_hash_expected": "f55acc18a6fa5004a93577cad50e5f8c1d0939cfccdb25ca917d5d5fc2b98c81",
-          "forecast_hash_actual": "f55acc18a6fa5004a93577cad50e5f8c1d0939cfccdb25ca917d5d5fc2b98c81"
+          "forecast_hash_expected": "2fb8660a01b444018fa6639869cf83893e4dedc23cc6ffee3b67c5c261dedcb4",
+          "forecast_hash_actual": "2fb8660a01b444018fa6639869cf83893e4dedc23cc6ffee3b67c5c261dedcb4"
         },
         "independent_rebuild": {
           "ok": true,
@@ -553,23 +585,23 @@
               {
                 "name": "p_dem_majority",
                 "ok": true,
-                "delta": 0.0004999999999999449,
+                "delta": 0.0031250000000000444,
                 "tol": 0.01
               },
               {
                 "name": "expected_dem_seats",
                 "ok": true,
-                "delta": 0.009250000000001535,
+                "delta": 0.012125000000004604,
                 "tol": 0.15
               },
               {
                 "name": "max_race_p_dem",
                 "ok": true,
-                "delta": 0.008500000000000008,
+                "delta": 0.0050000000000000044,
                 "tol": 0.02
               }
             ],
-            "mean_abs_race_p_dem": 0.0026642857142857163,
+            "mean_abs_race_p_dem": 0.001896428571428562,
             "n_races_compared": 35
           },
           "domain_ok": true,
@@ -612,10 +644,12 @@
       "status": "pass",
       "detail": {
         "model_card": true,
-        "model_version": "senate-hierarchical-v0.9.16",
+        "model_version": "senate-hierarchical-v0.9.18",
+        "model_card_has_limitations_section": true,
         "run_class": "publication",
         "publishable": true,
-        "has_limitations": false,
+        "publication_surface": "research_only",
+        "has_limitations": true,
         "validation_limitations_n": 4,
         "poll_coverage_present": true
       },
@@ -624,20 +658,22 @@
       ],
       "failure_behavior": "Withhold public artifact.",
       "notes": [
-        "Model card, run_class, and missingness must be visible before public artifact."
+        "Model card limitations, run_class, and missingness required."
       ]
     }
   ],
   "ok": true,
-  "n_pass": 11,
-  "n_partial": 0,
+  "n_pass": 10,
+  "n_partial": 1,
   "n_fail": 0,
   "failures": [],
-  "partials": [],
+  "partials": [
+    "G5"
+  ],
   "milestone": {
     "name": "first_publishable",
-    "public_live_probabilities": true,
-    "public_publication_id": "public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z",
+    "public_live_probabilities": false,
+    "public_publication_id": null,
     "requirements": [
       "frozen shadow with identified spine",
       "nested holdouts",

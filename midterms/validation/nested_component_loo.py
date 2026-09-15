@@ -433,6 +433,8 @@ def run_nested_component_loo(
     spine = "pymc" if hierarchical_method.startswith("pymc") else "fast_hierarchical_t"
     by_fold: dict[str, Any] = {}
     crps_by_fold: dict[str, dict[str, float]] = {}
+    oof_means_by_fold: dict[str, dict[str, dict[str, float]]] = {}
+    truths_by_fold: dict[str, dict[str, float]] = {}
     failures: list[dict[str, Any]] = []
     frozen_archive: list[dict[str, Any]] = []
 
@@ -473,23 +475,40 @@ def run_nested_component_loo(
 
         # Truth contact — after all freezes for this cycle
         results = wh.results[wh.results["election_id"] == election_id]
+        truth_by_id = {
+            str(r.race_id): float(r.two_party_margin)
+            for r in results.itertuples()
+            if getattr(r, "two_party_margin", None) == getattr(r, "two_party_margin", None)
+        }
         fold_scores_acc: dict[str, list[float]] = {}
         lead_blocks: dict[str, Any] = {}
+        oof_means_fold: dict[str, dict[str, float]] = {}
         for lead, frozen in lead_frozen.items():
             scored = score_frozen_predictions(frozen, results)
             lead_blocks[lead] = scored
             for name, sc in scored.items():
                 if sc.get("status") == "ok" and sc.get("n") and np.isfinite(sc.get(G8_METRIC, np.nan)):
                     fold_scores_acc.setdefault(name, []).append(float(sc[G8_METRIC]))
+            # Race-level OOF means (prefer closer lead when multiple)
+            for name, fp in frozen.items():
+                if fp.status != "ok":
+                    continue
+                block = oof_means_fold.setdefault(name, {})
+                for rid, mu in zip(fp.race_ids, fp.means):
+                    if rid in truth_by_id:
+                        block[str(rid)] = float(mu)
 
         fold_mean = {k: float(np.mean(v)) for k, v in fold_scores_acc.items() if v}
         crps_by_fold[str(year)] = fold_mean
+        oof_means_by_fold[str(year)] = oof_means_fold
+        truths_by_fold[str(year)] = truth_by_id
         by_fold[str(year)] = {
             "election_id": election_id,
             "spine": spine,
             "leads": lead_blocks,
             "mean_crps": fold_mean,
             "freeze_before_truth": True,
+            "n_oof_races": len(truth_by_id),
         }
         print(f"[nested-loo] year={year} components={len(fold_mean)}", flush=True)
 
@@ -500,6 +519,17 @@ def run_nested_component_loo(
     # Honest OOF weights — no spine remapping
     oof_weights = weights_from_oof_scores(crps_by_fold)
     g8 = _g8_recommendations(crps_by_fold, spine=spine)
+
+    # Flatten race-level OOF means / truths across folds for predictive stacking (R-08)
+    oof_means_flat: dict[str, dict[str, float]] = {}
+    truths_flat: dict[str, float] = {}
+    for year, by_comp in oof_means_by_fold.items():
+        for comp, races in by_comp.items():
+            dest = oof_means_flat.setdefault(comp, {})
+            for rid, mu in races.items():
+                dest[f"{year}:{rid}"] = float(mu)
+        for rid, y in (truths_by_fold.get(year) or {}).items():
+            truths_flat[f"{year}:{rid}"] = float(y)
 
     report = {
         "audit_item": "P2.1",
@@ -512,6 +542,8 @@ def run_nested_component_loo(
         "freeze_before_truth": True,
         "no_weight_remapping": True,
         "crps_by_fold": crps_by_fold,
+        "oof_means": oof_means_flat,
+        "oof_truths": truths_flat,
         "mean_crps_by_component": mean_crps,
         "oof_mixture_weights_honest": oof_weights,
         "g8_recommendations": g8,
@@ -521,8 +553,7 @@ def run_nested_component_loo(
         "exit_condition": "Predictions are frozen before the held-out truth is read.",
         "note": (
             "Outer leave-one-cycle-out for every stackable component + structural "
-            "terminal ablations. Failures recorded; fast is never relabeled as pymc. "
-            "OOF matrix feeds P2.2 genuine stacking (no remapping)."
+            "terminal ablations. Race-level oof_means feed predictive stacking (R-08)."
         ),
     }
     out_path = out_path or (ARTIFACTS_DIR / "nested_component_loo.json")

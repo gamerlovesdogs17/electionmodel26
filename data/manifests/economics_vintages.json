@@ -1,10 +1,18 @@
 {
-  "generated_at": "2026-09-13T22:52:57.396394+00:00",
-  "n_rows": 70,
+  "generated_at": "2026-09-15T02:13:34.055716+00:00",
+  "n_rows": 1680,
   "n_revisions": 35,
   "series": [
+    "A229RX0",
+    "A229RX0_YOY",
     "RDPI_YOY_FIXTURE"
   ],
+  "production_series": [
+    "A229RX0",
+    "A229RX0_YOY"
+  ],
+  "source_url": "https://fred.stlouisfed.org/series/A229RX0",
+  "tier": "first_party",
   "parser_version": "alfred-v2",
-  "note": "ALFRED multi-vintage store: observation_date vs available_at/realtime. As-of queries use latest value known by that date (blueprint section 5.3)."
+  "note": "Production YoY from FRED/ALFRED public levels when available; RDPI_YOY_FIXTURE retained only for historical leakage canaries."
 }

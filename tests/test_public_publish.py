@@ -29,11 +29,24 @@ def _base_artifact(**overrides):
     return art
 
 
-def test_assert_public_ready_passes():
+def test_assert_public_ready_passes(monkeypatch):
+    import midterms.config as cfg
+
+    monkeypatch.setattr(cfg, "PUBLIC_LIVE_ENABLED", True)
     gates = {"ok": True, "failures": []}
     out = assert_public_ready(artifact=_base_artifact(), gates=gates)
-    assert out["ok"] is True
+    assert out["ok"] is True, out.get("reasons")
     assert out["reasons"] == []
+
+
+def test_assert_public_ready_contained_when_live_locked():
+    from midterms.config import PUBLIC_LIVE_ENABLED
+
+    if PUBLIC_LIVE_ENABLED:
+        pytest.skip("live publish unlocked")
+    out = assert_public_ready(artifact=_base_artifact(), gates={"ok": True, "failures": []})
+    assert out["ok"] is False
+    assert any("PUBLIC_LIVE_ENABLED" in r for r in out["reasons"])
 
 
 def test_assert_public_ready_fails_on_red_gates():

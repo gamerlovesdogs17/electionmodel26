@@ -3,34 +3,54 @@
   "generated_at": "2026-09-13T22:53:32.093741+00:00",
   "forecast_as_of": "2026-09-13",
   "election_id": "senate-2026",
-  "model_version": "senate-hierarchical-v0.9.16",
+  "model_version": "senate-hierarchical-v0.9.17",
   "method": "ensemble_stack+overlays",
-  "run_class": "publication",
-  "publishable": true,
+  "run_class": "non_publication",
+  "publishable": false,
   "evidence_eligibility": {
-    "publishable": true,
-    "run_class": "publication",
-    "reasons": [],
+    "publishable": false,
+    "run_class": "non_publication",
+    "reasons": [
+      "finance domain blocked (synthetic): finance source_mix entirely fixture-backed",
+      "economics domain blocked (synthetic): economics series includes *_FIXTURE",
+      "approval domain blocked (untraceable): approval manifest lacks source URL/tier"
+    ],
     "domains": {
       "races": {
         "tier": "curated",
-        "n": 100,
         "eligible": true
       },
       "polls": {
-        "n": 320,
-        "tier_counts": {
-          "aggregator": 320
-        },
-        "blocked_n": 0,
-        "eligible_n": 320,
-        "stale": false,
-        "latest_age_hours": 72.0
+        "tier": null,
+        "eligible": null
       },
       "results": {
-        "n": 0,
-        "tier_counts": {},
-        "blocked_n": 0
+        "tier": null,
+        "eligible": null
+      },
+      "finance": {
+        "tier": "synthetic",
+        "eligible": false
+      },
+      "economics": {
+        "tier": "synthetic",
+        "eligible": false
+      },
+      "approval": {
+        "tier": "untraceable",
+        "eligible": false
+      },
+      "demographics": {
+        "tier": "curated",
+        "eligible": true
+      },
+      "ratings": {
+        "tier": "curated",
+        "eligible": true
+      },
+      "markets": {
+        "tier": "curated",
+        "eligible": true
       }
     }
   },
@@ -3218,5 +3238,13 @@
         "note": "Filled live from markets store at write time."
       }
     }
-  }
+  },
+  "publication_surface": "research_only",
+  "limitations": [
+    "PUBLIC_LIVE_ENABLED=False (fresh audit Stage-0 containment).",
+    "Live finance/economics currently fixture-backed and block publication.",
+    "Historical ledger uses scaled two-party counts for non-digitized FEC races; OH2018/AZ2024 are exact canvass totals.",
+    "Production spine is static Election-Day latent; dynamic challenger not yet multi-cycle selected."
+  ],
+  "research_only_notice": "Research use only. Do not treat chamber or race probabilities as a public live product until independent truth + all-domain eligibility are cleared."
 }

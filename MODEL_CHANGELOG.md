@@ -4,6 +4,30 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-14 — senate-hierarchical-v0.9.18
+
+Post-audit unblockers on the repaired truth ledger:
+
+- FRED public CSV economics (`A229RX0` + YoY) as production series; fixtures retained only as leakage canaries.
+- Forecast no longer clobbers economics with bare `write_economic_store()`; refresh prefers FRED and preserves production rows.
+- Curated FEC-browse finance shares when OpenFEC 429s (no `fixture_hash`); approval manifest gains `source_url`/`tier`.
+- Nested LOO emits race-level `oof_means`/`oof_truths`; stack weights use predictive mixture CRPS (R-08).
+- Multi-cycle covariance calibration persists winning terminal scales to `terminal_defaults.json`; static/dynamic comparison re-run on the new ledger (static preferred on 2022).
+- Production floors raised to 2000 draws × 4 chains for G9 ESS/R-hat.
+- Live publish remains locked (`PUBLIC_LIVE_ENABLED=False`) pending independent re-audit.
+
+## 2026-09-14 — senate-hierarchical-v0.9.17
+
+Fresh audit (14 Sep 2026) all-in remediation:
+
+- **R-01/R-03:** External `official_senate_ledger.json` with vote-count margins; 2018 MN/MS specials, 2020 AZ/GA specials, 2024 CA/NE unexpired terms; OH 2018 / AZ 2024 canaries.
+- **R-02:** Deleted winner-solved `sync_held_counts`; held seats from `independent_chamber_expectations.json`.
+- **R-04:** Eligibility enumerates finance/economics/approval/ratings/markets; fixture_hash / `*_FIXTURE` blocks publication.
+- **R-05 / Stage-0:** `PUBLIC_LIVE_ENABLED=False`; publish-live fail-closed; research_only surface.
+- **R-06:** Poll coverage denominator = full official ballot; nominees from ledger.
+- **R-07/R-08:** Ridge fundamentals actually fits fold coefficients; predictive mixture objective added.
+- **R-12:** G11 requires model-card + forecast limitations; G8 enforces disable∉stack.
+
 ## 2026-09-13 — senate-hierarchical-v0.9.16
 
 2014/2016 certified archive + G10 independent rebuild:
