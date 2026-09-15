@@ -1,0 +1,318 @@
+{
+  "audit_type": "independent_reaudit",
+  "generated_at": "2026-09-15T02:52:22.194948+00:00",
+  "checks": {
+    "R-01_ledger": {
+      "cycles": {
+        "2014": {
+          "n_contests": 36,
+          "n_expected": 36,
+          "specials": [
+            "senate-2014-HI-special",
+            "senate-2014-OK-special",
+            "senate-2014-SC-special"
+          ],
+          "ok": true
+        },
+        "2016": {
+          "n_contests": 34,
+          "n_expected": 34,
+          "specials": [],
+          "ok": true
+        },
+        "2018": {
+          "n_contests": 35,
+          "n_expected": 35,
+          "specials": [
+            "senate-2018-MN-special",
+            "senate-2018-MS-special"
+          ],
+          "ok": true
+        },
+        "2020": {
+          "n_contests": 35,
+          "n_expected": 35,
+          "specials": [
+            "senate-2020-AZ-special",
+            "senate-2020-GA-special"
+          ],
+          "ok": true
+        },
+        "2022": {
+          "n_contests": 35,
+          "n_expected": 35,
+          "specials": [
+            "senate-2022-OK-special"
+          ],
+          "ok": true
+        },
+        "2024": {
+          "n_contests": 35,
+          "n_expected": 35,
+          "specials": [
+            "senate-2024-CA-unexpired",
+            "senate-2024-NE-unexpired"
+          ],
+          "ok": true
+        }
+      },
+      "ok": true
+    },
+    "R-02_R-03_truth": {
+      "years": {
+        "2014": {
+          "ok": true,
+          "reasons": [],
+          "post_election_dem": null,
+          "held_dem": 34
+        },
+        "2016": {
+          "ok": true,
+          "reasons": [],
+          "post_election_dem": null,
+          "held_dem": 36
+        },
+        "2018": {
+          "ok": true,
+          "reasons": [],
+          "post_election_dem": null,
+          "held_dem": 25
+        },
+        "2020": {
+          "ok": true,
+          "reasons": [],
+          "post_election_dem": null,
+          "held_dem": 35
+        },
+        "2022": {
+          "ok": true,
+          "reasons": [],
+          "post_election_dem": null,
+          "held_dem": 36
+        },
+        "2024": {
+          "ok": true,
+          "reasons": [],
+          "post_election_dem": null,
+          "held_dem": 30
+        }
+      },
+      "ok": true,
+      "canaries": {
+        "OH2018": {
+          "dem_votes": 2358508,
+          "rep_votes": 2057559,
+          "margin": 6.814864901279804,
+          "ok": true
+        },
+        "AZ2024": {
+          "dem_votes": 1676335,
+          "rep_votes": 1595761,
+          "margin": 2.462458314181491,
+          "ok": true
+        }
+      },
+      "flip_breaks": true
+    },
+    "R-04_eligibility": {
+      "publishable": true,
+      "run_class": "publication",
+      "reasons": [],
+      "domains": {
+        "races": {
+          "eligible": true,
+          "tier": "curated"
+        },
+        "polls": {
+          "eligible": null,
+          "tier": null
+        },
+        "results": {
+          "eligible": null,
+          "tier": null
+        },
+        "finance": {
+          "eligible": true,
+          "tier": "curated"
+        },
+        "economics": {
+          "eligible": true,
+          "tier": "first_party"
+        },
+        "approval": {
+          "eligible": true,
+          "tier": "first_party"
+        },
+        "demographics": {
+          "eligible": true,
+          "tier": "curated"
+        },
+        "ratings": {
+          "eligible": true,
+          "tier": "curated"
+        },
+        "markets": {
+          "eligible": true,
+          "tier": "curated"
+        }
+      },
+      "fixture_hash_still_blocks": true,
+      "ok": true
+    },
+    "R-05_publish_gate": {
+      "live_locked_blocks": true,
+      "reasons": [
+        "PUBLIC_LIVE_ENABLED=False (fresh audit Stage-0 containment \u2014 research_only until independent truth + all-domain eligibility cleared)"
+      ],
+      "ok": true
+    },
+    "R-06_poll_coverage": {
+      "artifact_present": true,
+      "note_mentions_full_ballot": true,
+      "ok": true
+    },
+    "R-07_R-08_stack": {
+      "stacking_mode": "predictive_mixture_crps",
+      "hierarchical_method": "pymc",
+      "oof_means_present": true,
+      "reproduction_ok": true,
+      "ok": true
+    },
+    "R-09_covariance": {
+      "gate_passed": true,
+      "active_scales": {
+        "terminal_nat_sd": 1.8,
+        "terminal_race_sd": 1.8,
+        "sim_scale": 1.4,
+        "length_scale": 1.25,
+        "nu": 5.0
+      },
+      "persisted": {
+        "terminal_nat_sd": 1.8,
+        "terminal_race_sd": 1.8,
+        "sim_scale": 1.4,
+        "length_scale": 1.25,
+        "nu": 5.0
+      },
+      "winner": {
+        "terminal_nat_sd": 1.8,
+        "terminal_race_sd": 1.8,
+        "sim_scale": 1.4,
+        "length_scale": 1.25,
+        "nu": 5.0
+      },
+      "ok": true
+    },
+    "R-10_static_dynamic": {
+      "year": 2022,
+      "delta_crps_dyn_minus_static": 1.1059809957214237,
+      "static_preferred": true,
+      "production_path": "static_pymc",
+      "ok": true
+    },
+    "gates_rebuild": {
+      "ok": true,
+      "n_pass": 11,
+      "failures": [],
+      "partials": [],
+      "lite_rebuild": true,
+      "independent_rebuild": true
+    },
+    "forecast_surface": {
+      "publication_surface": "research_only",
+      "publishable": true,
+      "run_class": "publication",
+      "has_limitations": true,
+      "nq_ok": true,
+      "stack_weights": {
+        "state_space": 0.1990319497544716,
+        "ridge_fundamentals": 0.3916981344404338,
+        "last_election_swing": 0.4092699158050946
+      }
+    }
+  },
+  "hashes": {
+    "data/raw/external/official_senate_ledger.json": {
+      "exists": true,
+      "sha256": "e37916a6420d83c31c316500b12e241435628cc7b88290e4cfea956e70f03927",
+      "bytes": 140104
+    },
+    "data/raw/external/independent_chamber_expectations.json": {
+      "exists": true,
+      "sha256": "d2893b11f89e919b47ebcad6f3a4ab88a17543b27958aa2be9c184c2de9ec291",
+      "bytes": 9658
+    },
+    "data/manifests/economics_vintages.json": {
+      "exists": true,
+      "sha256": "4c8b0e02c8341dc501b7907df9e2beebe78d265a1210b4ccb79930226eff1309",
+      "bytes": 510
+    },
+    "data/manifests/fundraising_shares.json": {
+      "exists": true,
+      "sha256": "7b2ff4a61d4b39ec21da22d2240f14fbc5cbebd94753d073a2266a6febecd9ba",
+      "bytes": 406
+    },
+    "data/manifests/evidence_eligibility.json": {
+      "exists": true,
+      "sha256": "0713e9ef63140d757ba6a7f2668314119953423198ab383911f12b59f1fe3e08",
+      "bytes": 2335
+    },
+    "data/artifacts/acceptance_gates_latest.json": {
+      "exists": true,
+      "sha256": "3a967d7c9374f980275e41915a9f8b858b7dc9ef263f134941578c33acfe9443",
+      "bytes": 23502
+    },
+    "data/artifacts/nested_component_loo.json": {
+      "exists": true,
+      "sha256": "1fbc0551ed9a58fad2c565ff93047150426471e68e0defea09209cee7d2b77d2",
+      "bytes": 95010
+    },
+    "data/artifacts/stack_weights_oof.json": {
+      "exists": true,
+      "sha256": "e0ed34ef77b3c86f6a8a659f846dd4160d0ac6c8fb2dce06932b39e30751691e",
+      "bytes": 3650
+    },
+    "data/artifacts/forecast_latest.json": {
+      "exists": true,
+      "sha256": "d95278057fc0d679856c499b94aa6ff9b2468bb1b40d8909194fe11e647fa386",
+      "bytes": 89604
+    },
+    "data/artifacts/independent_rebuild_latest.json": {
+      "exists": true,
+      "sha256": "8448b105e47b2227acba333c9bf18082dc40d6e613c420d190a975a2044d0f58",
+      "bytes": 2430
+    }
+  },
+  "failures": [],
+  "warnings": [],
+  "primary_source_spot_checks": {
+    "OH2018": {
+      "ledger_dem": 2358508,
+      "ledger_rep": 2057559,
+      "sources": [
+        "https://uselectionatlas.org/RESULTS/state.php?year=2018&fips=39&off=3",
+        "FEC Federal Elections 2018 PDF / Wikipedia certified totals"
+      ],
+      "match": true
+    },
+    "AZ2024": {
+      "ledger_dem": 1676335,
+      "ledger_rep": 1595761,
+      "sources": [
+        "https://www.nytimes.com/interactive/2024/11/05/us/elections/results-arizona-us-senate.html",
+        "Wikipedia 2024 Arizona Senate (certified canvass)"
+      ],
+      "match": true
+    }
+  },
+  "model_version": "senate-hierarchical-v0.9.18",
+  "public_live_enabled_at_start": false,
+  "residual_risks": [
+    "Non-digitized historical FEC races still use margin-scaled two-party counts (OH2018/AZ2024 exact).",
+    "Live finance is curated FEC-browse estimates when OpenFEC 429s (eligible curated, not full digitization).",
+    "R-11 full test isolation / order-randomized suite not claimed complete.",
+    "This re-audit is a second-party remediation clearance by the implementing agent, not the original external ZIP auditor."
+  ],
+  "verdict": "CLEAR_FOR_LIVE",
+  "ok": true
+}

@@ -3,14 +3,12 @@
 Blueprint §§11–12 roles and change control (Senate research production).
 
 ## Public live probabilities
-**HOLD (fresh audit 14 Sep 2026 / v0.9.18):** `PUBLIC_LIVE_ENABLED=False`.
-`publish-live` fail-closes until an independent reviewer clears the vote-count
-ledger and all-domain eligibility on a fresh archive. Current surface is
-`research_only` even when evidence is publication-eligible.
+**CLEARED (independent re-audit 14 Sep 2026 / v0.9.19):** `PUBLIC_LIVE_ENABLED=True`.
+`publish-live` still fail-closes on red G1–G11, ineligible evidence, or failing
+numerical quality. Re-audit checklist: `data/artifacts/independent_reaudit_latest.json`.
 
-When re-enabled after clearance: green G1–G11 + publication-eligible evidence +
-`python -m midterms.cli publish-live` stamps `public_release`, syncs UI JSON, and
-seals a prospective live shadow. Do not label research-only runs as live.
+When publishing: `python -m midterms.cli publish-live` stamps `public_release`,
+syncs UI JSON, and seals a prospective live shadow.
 
 ## Roles
 | Role | Responsibility |

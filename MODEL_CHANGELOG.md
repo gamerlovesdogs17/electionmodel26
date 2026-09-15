@@ -4,6 +4,15 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-14 — senate-hierarchical-v0.9.19
+
+Independent re-audit clearance for public live:
+
+- Re-audit checklist green (`independent_reaudit_latest.json`): R-01…R-10 + G1–G11.
+- Primary-source canaries confirmed (OH 2018 Brown 2,358,508 / Renacci 2,057,559; AZ 2024 Gallego 1,676,335).
+- Covariance artifact restored after smoke-test overwrite; winning scales `sim_scale=1.4`, `length_scale=1.25`.
+- `PUBLIC_LIVE_ENABLED=True`; publish-live still fail-closed on red gates / ineligible evidence / NQ.
+
 ## 2026-09-14 — senate-hierarchical-v0.9.18
 
 Post-audit unblockers on the repaired truth ledger:
@@ -12,6 +21,7 @@ Post-audit unblockers on the repaired truth ledger:
 - Forecast no longer clobbers economics with bare `write_economic_store()`; refresh prefers FRED and preserves production rows.
 - Curated FEC-browse finance shares when OpenFEC 429s (no `fixture_hash`); approval manifest gains `source_url`/`tier`.
 - Nested LOO emits race-level `oof_means`/`oof_truths`; stack weights use predictive mixture CRPS (R-08).
+- Nested LOO + stack re-fit with **pymc** spine (G5 identity aligned); pymc OOF CRPS did not earn mixture mass vs challengers.
 - Multi-cycle covariance calibration persists winning terminal scales to `terminal_defaults.json`; static/dynamic comparison re-run on the new ledger (static preferred on 2022).
 - Production floors raised to 2000 draws × 4 chains for G9 ESS/R-hat.
 - Live publish remains locked (`PUBLIC_LIVE_ENABLED=False`) pending independent re-audit.

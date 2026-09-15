@@ -1,4 +1,4 @@
-# Model card — Senate hierarchical v0.9.18
+# Model card — Senate hierarchical v0.9.19
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
@@ -59,12 +59,12 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 - **Limits:** VoteHub has no historical archive; no Cook redistribution; House/EC out of scope; peer panel is compare-only (never averaged)
 
 ## Limitations
-- **Public live probabilities are locked** (`PUBLIC_LIVE_ENABLED=False`). Current surface is `research_only` until an independent reviewer clears the vote-count ledger and all-domain eligibility on a fresh archive.
+- **Public live probabilities are enabled** (`PUBLIC_LIVE_ENABLED=True`) after the 14 Sep 2026 independent re-audit checklist. Live publish still fail-closes on red acceptance gates, ineligible evidence, or failing numerical quality.
 - Historical margins for non-digitized FEC races use two-party counts scaled to certified margins pending full FEC PDF digitization; OH 2018 and AZ 2024 use exact canvass totals.
 - Production economics use FRED public CSV (`A229RX0` + YoY); fixture RDPI series remain as leakage canaries only.
 - Live 2026 finance uses curated FEC-browse estimates when OpenFEC rate-limits (eligible curated tier, not `fixture_hash`); full candidate-level digitization is incomplete.
-- Ensemble stack OOF may score `fast_hierarchical_t`; PyMC production draws do not inherit that weight until `nested-component-loo --hierarchical-method pymc` is re-run.
-- Production PyMC spine remains a static Election-Day latent; weekly dynamic is a challenger (2022 compare: static better CRPS).
+- Nested LOO / stack OOF now use a **pymc** spine (aligned with production); predictive mixture currently puts mass on last_election_swing / ridge / state_space (pymc OOF CRPS did not earn mixture weight).
+- Production hierarchical fit remains a static Election-Day latent; weekly dynamic is a challenger (2022 compare: static better CRPS).
 - Poll coverage for 2014/2016 is not production-gated (no FTE identity archive yet).
 - Peer snapshots are compare-only and never averaged into the ensemble.
 - House, governors, and Electoral College are out of scope.

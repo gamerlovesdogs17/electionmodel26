@@ -77,7 +77,7 @@ def test_error_budget_block_has_layers():
     assert bud["terminal_rss"] > 0
 
 
-def test_covariance_calibration_smoke():
+def test_covariance_calibration_smoke(tmp_path):
     from midterms.validation.covariance_calibration import run_covariance_calibration
 
     report = run_covariance_calibration(
@@ -87,6 +87,7 @@ def test_covariance_calibration_smoke():
         max_configs=3,
         apply_defaults=False,
         seed=7,
+        out_path=tmp_path / "covariance_calibration_smoke.json",
     )
     assert report["audit_item"] == "P1.3"
     assert "baseline" in report

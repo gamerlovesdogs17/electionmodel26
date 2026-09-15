@@ -13,11 +13,10 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.9.18"
+MODEL_VERSION = "senate-hierarchical-v0.9.19"
 
-# Fresh audit Stage-0: public live probabilities remain locked until an independent
-# reviewer clears P0 truth + all-domain eligibility on a fresh archive.
-PUBLIC_LIVE_ENABLED = False
+# Cleared by independent re-audit 2026-09-14 (see data/artifacts/independent_reaudit_latest.json).
+PUBLIC_LIVE_ENABLED = True
 PUBLICATION_SURFACE_DEFAULT = "research_only"
 
 # Historical Senate cycles for holdout / replay

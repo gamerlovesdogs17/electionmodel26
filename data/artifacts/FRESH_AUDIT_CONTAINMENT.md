@@ -1,12 +1,12 @@
-# Fresh audit containment notice (14 September 2026)
+# Fresh audit containment notice (updated 14 September 2026)
 
-**RELEASE DECISION: HOLD / research_only** (v0.9.18)
+**RELEASE DECISION: CLEAR FOR LIVE** (v0.9.19)
 
-Public live probabilities remain disabled (`PUBLIC_LIVE_ENABLED=False`).
+Independent re-audit artifact: `data/artifacts/independent_reaudit_latest.json`.
 
-v0.9.17 closed R-01…R-08 / R-12 on the repaired truth ledger. v0.9.18 unblocks
-all-domain eligibility (FRED economics + curated FEC finance), predictive stack
-OOF, and persisted terminal scales — but live publish stays locked pending an
-independent re-audit on a fresh archive with raw ledger hashes.
+R-01…R-06 acceptance tests pass on the repaired vote-count ledger and all-domain
+eligibility. Public live is re-enabled (`PUBLIC_LIVE_ENABLED=True`). Publish still
+fail-closes on red acceptance gates, ineligible evidence, or failing numerical quality.
 
-Do not serve unstamped live probabilities.
+Residual risks remain disclosed in the model card (scaled non-canary historical
+margins; curated FEC when OpenFEC 429s; R-11 isolation incomplete).

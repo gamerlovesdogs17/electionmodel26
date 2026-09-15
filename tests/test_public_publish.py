@@ -39,11 +39,10 @@ def test_assert_public_ready_passes(monkeypatch):
     assert out["reasons"] == []
 
 
-def test_assert_public_ready_contained_when_live_locked():
-    from midterms.config import PUBLIC_LIVE_ENABLED
+def test_assert_public_ready_contained_when_live_locked(monkeypatch):
+    import midterms.config as cfg
 
-    if PUBLIC_LIVE_ENABLED:
-        pytest.skip("live publish unlocked")
+    monkeypatch.setattr(cfg, "PUBLIC_LIVE_ENABLED", False)
     out = assert_public_ready(artifact=_base_artifact(), gates={"ok": True, "failures": []})
     assert out["ok"] is False
     assert any("PUBLIC_LIVE_ENABLED" in r for r in out["reasons"])

@@ -274,7 +274,14 @@ def publish_live(
 
     if sync_web:
         WEB_FORECAST.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(forecast_path, WEB_FORECAST)
+        payload = forecast_path.read_bytes()
+        try:
+            WEB_FORECAST.write_bytes(payload)
+        except OSError:
+            # Windows/OneDrive mapped-section lock: write via temp rename
+            tmp = WEB_FORECAST.with_suffix(".json.tmp")
+            tmp.write_bytes(payload)
+            tmp.replace(WEB_FORECAST)
 
     shadow_meta = None
     if seal_shadow:

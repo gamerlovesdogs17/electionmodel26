@@ -699,9 +699,10 @@ def run_forecast(
         ),
         "limitations": [
             (
-                "PUBLIC_LIVE_ENABLED=False (fresh audit Stage-0 containment)."
-                if not PUBLIC_LIVE_ENABLED
-                else "Public live enabled; see public_release stamp."
+                "PUBLIC_LIVE_ENABLED=True after independent re-audit; publish still "
+                "fail-closes on red gates / ineligible evidence / numerical quality."
+                if PUBLIC_LIVE_ENABLED
+                else "PUBLIC_LIVE_ENABLED=False (fresh audit Stage-0 containment)."
             ),
             (
                 "Finance uses curated FEC-browse estimates when OpenFEC rate-limits; "
@@ -712,8 +713,9 @@ def run_forecast(
                 "OH2018/AZ2024 are exact canvass totals."
             ),
             (
-                "Ensemble stack OOF may score fast hierarchical-t; PyMC production spine "
-                "does not inherit fast's weight unless pymc nested LOO is re-run."
+                "Ensemble predictive mixture OOF-scored with pymc spine; "
+                "current weights favor last_election_swing / ridge / state_space "
+                "(pymc did not earn mixture mass on mean CRPS)."
             ),
             (
                 "Production spine is static Election-Day latent; dynamic challenger "
