@@ -1,4 +1,4 @@
-# Model card — Senate hierarchical v0.9.19
+# Model card — Senate hierarchical v0.9.20
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
@@ -59,8 +59,8 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 - **Limits:** VoteHub has no historical archive; no Cook redistribution; House/EC out of scope; peer panel is compare-only (never averaged)
 
 ## Limitations
-- **Public live probabilities are enabled** (`PUBLIC_LIVE_ENABLED=True`) after the 14 Sep 2026 independent re-audit checklist. Live publish still fail-closes on red acceptance gates, ineligible evidence, or failing numerical quality.
-- Historical margins for non-digitized FEC races use two-party counts scaled to certified margins pending full FEC PDF digitization; OH 2018 and AZ 2024 use exact canvass totals.
+- **Public live probabilities are locked** (`PUBLIC_LIVE_ENABLED=False`) after the 14 Sep 2026 blueprint-first audit of v0.9.19. The prior live stamp is superseded; surface is `research_only` until exact truth, vintages, and fold-pure validation clear a fresh review.
+- Historical margins for non-digitized FEC races must not use 1e6-scaled synthetic counts for publication claims; OH 2018 and AZ 2024 remain exact canvass canaries while the certified vote ingest expands.
 - Production economics use FRED public CSV (`A229RX0` + YoY); fixture RDPI series remain as leakage canaries only.
 - Live 2026 finance uses curated FEC-browse estimates when OpenFEC rate-limits (eligible curated tier, not `fixture_hash`); full candidate-level digitization is incomplete.
 - Nested LOO / stack OOF now use a **pymc** spine (aligned with production); predictive mixture currently puts mass on last_election_swing / ridge / state_space (pymc OOF CRPS did not earn mixture weight).

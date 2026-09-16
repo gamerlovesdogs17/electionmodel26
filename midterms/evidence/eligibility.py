@@ -27,8 +27,9 @@ TIERS = (
     "untraceable",
 )
 
-PUBLICATION_ELIGIBLE = frozenset({"official", "first_party", "aggregator", "curated"})
-PUBLICATION_BLOCKED = frozenset({"synthetic", "imputed", "untraceable"})
+# Curated is research-traceable but not publication-eligible by default (A-04).
+PUBLICATION_ELIGIBLE = frozenset({"official", "first_party", "aggregator"})
+PUBLICATION_BLOCKED = frozenset({"synthetic", "imputed", "untraceable", "curated"})
 
 
 def classify_poll_row(row: dict[str, Any] | pd.Series) -> str:
@@ -108,7 +109,9 @@ def _classify_manifest_domain(
             "reason": f"missing {name} manifest",
         }
     blob = json.dumps(manifest, default=str)
-    tier = "curated"
+    declared = str(manifest.get("tier") or "").strip().lower()
+    # Respect an explicit declared tier; never upgrade curated/hand-entered via URL (A-04).
+    tier = declared if declared in TIERS else "curated"
     blocked_reason = None
     # Explicit fixture / synthetic markers
     if any(m in blob for m in fixture_markers):
@@ -132,12 +135,10 @@ def _classify_manifest_domain(
             if "RDPI_YOY_FIXTURE" in blob or "fixture_hash" in blob:
                 tier = "synthetic"
                 blocked_reason = blocked_reason or f"{name} fixture markers present"
-    url = str(manifest.get("source_url") or manifest.get("url") or "")
-    if url.startswith("http") and tier == "curated":
-        tier = "first_party"
     n = int(
         manifest.get("n_shares")
         or manifest.get("n_rows")
+        or manifest.get("n_races")
         or manifest.get("n")
         or len(manifest.get("rows") or [])
         or 0
@@ -152,6 +153,9 @@ def _classify_manifest_domain(
     if blocked_reason:
         out["tier"] = "synthetic"
         out["eligible"] = False
+    elif tier not in PUBLICATION_ELIGIBLE:
+        out["eligible"] = False
+        out["blocked_reason"] = out.get("blocked_reason") or f"{name} tier={tier} not publication-eligible"
     return out
 
 

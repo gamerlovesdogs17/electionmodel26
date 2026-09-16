@@ -100,8 +100,8 @@ def test_require_publishable_raises_on_fixture_2026():
         assert out["publishable"] is True
 
 
-def test_public_live_unlocked_after_reaudit():
-    assert PUBLIC_LIVE_ENABLED is True
-    # With live unlocked, readiness still depends on gates/eligibility/NQ.
+def test_public_live_contained():
+    assert PUBLIC_LIVE_ENABLED is False
     ready = assert_public_ready()
-    assert "PUBLIC_LIVE_ENABLED" not in " ".join(ready.get("reasons") or [])
+    assert ready["ok"] is False
+    assert any("PUBLIC_LIVE_ENABLED" in r for r in ready["reasons"])

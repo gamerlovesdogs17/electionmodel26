@@ -173,6 +173,8 @@ SPECIAL_META: dict[int, list[dict[str, Any]]] = {
     ],
     2022: [
         {"key": "OK-special", "state": "OK", "seat_class": "II", "vacancy_reason": "resignation"},
+        {"key": "CA-special", "state": "CA", "seat_class": "III", "vacancy_reason": "appointment",
+         "dem_nominee": "Alex Padilla", "rep_nominee": "Mark Meuser"},
     ],
     2024: [
         {"key": "CA-unexpired", "state": "CA", "seat_class": "I", "term_type": "unexpired",
@@ -206,7 +208,7 @@ HELD = {
     2016: {"held_dem": 36, "held_rep": 30, "held_ind": 2},  # 34 contested → 66 held; post 48
     2018: {"held_dem": 25, "held_rep": 40, "held_ind": 2},  # 35 contested → 65 held; post 47
     2020: {"held_dem": 35, "held_rep": 30, "held_ind": 2},  # 35 contested → 65 held; post 50
-    2022: {"held_dem": 36, "held_rep": 29, "held_ind": 2},  # 35 contested → 65 held; post 51
+    2022: {"held_dem": 35, "held_rep": 29, "held_ind": 2},  # 36 contested (incl CA special) → 64 held; post 51
     2024: {"held_dem": 30, "held_rep": 35, "held_ind": 1},  # 35 contested → 65 held; post 47
 }
 

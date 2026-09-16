@@ -1,12 +1,17 @@
-# Fresh audit containment notice (updated 14 September 2026)
+# Blueprint audit containment (v0.9.19 review → v0.9.20)
 
-**RELEASE DECISION: CLEAR FOR LIVE** (v0.9.19)
+**RELEASE DECISION: HOLD LIVE PUBLICATION**
 
-Independent re-audit artifact: `data/artifacts/independent_reaudit_latest.json`.
+Source: `electionmodel26-v0.9.19-blueprint-audit-2026-09-14.pdf`
 
-R-01…R-06 acceptance tests pass on the repaired vote-count ledger and all-domain
-eligibility. Public live is re-enabled (`PUBLIC_LIVE_ENABLED=True`). Publish still
-fail-closes on red acceptance gates, ineligible evidence, or failing numerical quality.
+`PUBLIC_LIVE_ENABLED=False`. The v0.9.19 live stamp is superseded. Current surface is
+`research_only` / `non_publication` until:
 
-Residual risks remain disclosed in the model card (scaled non-canary historical
-margins; curated FEC when OpenFEC 429s; R-11 isolation incomplete).
+- Exact vote-count truth replaces margin-scaled ledger rows (A-02)
+- Seat rosters are independently built (A-03)
+- Eligibility validates evidence semantics, not labels (A-04…A-06)
+- G3 fail-closed aggregation (A-07)
+- Version-coherent clearance artifacts (A-08)
+- Rolling-origin validation + distribution stacking (A-09…A-12)
+
+Do not serve live probabilities from this tree.

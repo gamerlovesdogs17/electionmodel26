@@ -256,13 +256,12 @@ def poll_coverage_report(
     if len(polls) and "dem_candidate_name" in polls.columns:
         n_with_identity = int(polls["dem_candidate_name"].notna().sum())
 
-    # Soften complete-cycle claim: require coverage on polled+competitive subset,
-    # but always *report* never-polled on the official denominator.
+    # A-07: top-level ok fails if ANY required cycle-lead block fails (no late-only soft rule).
     lead_ok = all(v.get("ok") for v in by_lead.values()) if by_lead else False
-    # With full-ballot denominator, early leads often miss safe seats — require
-    # that never-polled are explicitly listed and late leads still pass.
-    late = by_lead.get("7") or by_lead.get("30") or {}
-    ok = bool(late.get("ok")) and n_with_identity >= 50
+    failures = [f"lead_{k}" for k, v in by_lead.items() if not v.get("ok")]
+    if n_with_identity < 50:
+        failures.append("candidate_identity")
+    ok = bool(lead_ok) and n_with_identity >= 50
     report = {
         "ok": ok,
         "year": year,
@@ -279,10 +278,11 @@ def poll_coverage_report(
         "nominee_source": "official_ledger",
         "by_lead": by_lead,
         "lead_ok_all": lead_ok,
-        "failures": [f"lead_{k}" for k, v in by_lead.items() if not v.get("ok")],
+        "failures": failures,
         "note": (
             "Coverage denominator is the full official ballot; never-polled contests "
-            "appear at 0% rather than disappearing (fresh audit R-06)."
+            "appear at 0% rather than disappearing (fresh audit R-06). "
+            "Top-level ok requires every lead block ok (A-07)."
         ),
         "meta_source": (CYCLE_META.get(year) or {}).get("source"),
     }

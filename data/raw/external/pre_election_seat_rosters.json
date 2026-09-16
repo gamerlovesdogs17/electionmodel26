@@ -1,15 +1,11 @@
 {
-  "parser_version": "chamber-expectations-v3-roster",
-  "generated_at": "2026-09-16T00:44:32.568325+00:00",
-  "source": "C:/Users/zydlo/OneDrive/Desktop/electionmodel26/data/raw/external/pre_election_seat_rosters.json",
-  "source_sha256": "78375eedeb08d8f307e102deb30a472b9fa41057fba239ca8f2889f2380a4213",
-  "note": "Independent of result vote ingestion; built from pre_election_seat_rosters.json only.",
+  "parser_version": "seat-roster-v1",
+  "note": "Pre-election held seats and contested race_id lists. Must not be regenerated from vote margins. Held seats locked from build_official_ledger.HELD constants (separate from vote ingestion).",
   "cycles": {
     "2014": {
       "held_dem": 34,
       "held_rep": 30,
       "held_ind": 2,
-      "n_contested_expected": 36,
       "contested_race_ids": [
         "senate-2014-AK",
         "senate-2014-AL",
@@ -48,13 +44,12 @@
         "senate-2014-WV",
         "senate-2014-WY"
       ],
-      "post_election_dem_seats": null
+      "n_contested_expected": 36
     },
     "2016": {
       "held_dem": 36,
       "held_rep": 30,
       "held_ind": 2,
-      "n_contested_expected": 34,
       "contested_race_ids": [
         "senate-2016-AK",
         "senate-2016-AL",
@@ -91,13 +86,12 @@
         "senate-2016-WA",
         "senate-2016-WI"
       ],
-      "post_election_dem_seats": null
+      "n_contested_expected": 34
     },
     "2018": {
       "held_dem": 25,
       "held_rep": 40,
       "held_ind": 2,
-      "n_contested_expected": 35,
       "contested_race_ids": [
         "senate-2018-AZ",
         "senate-2018-CA",
@@ -135,13 +129,12 @@
         "senate-2018-WV",
         "senate-2018-WY"
       ],
-      "post_election_dem_seats": null
+      "n_contested_expected": 35
     },
     "2020": {
       "held_dem": 35,
       "held_rep": 30,
       "held_ind": 2,
-      "n_contested_expected": 35,
       "contested_race_ids": [
         "senate-2020-AK",
         "senate-2020-AL",
@@ -179,13 +172,12 @@
         "senate-2020-WV",
         "senate-2020-WY"
       ],
-      "post_election_dem_seats": null
+      "n_contested_expected": 35
     },
     "2022": {
       "held_dem": 35,
       "held_rep": 29,
       "held_ind": 2,
-      "n_contested_expected": 36,
       "contested_race_ids": [
         "senate-2022-AK",
         "senate-2022-AL",
@@ -224,13 +216,12 @@
         "senate-2022-WA",
         "senate-2022-WI"
       ],
-      "post_election_dem_seats": null
+      "n_contested_expected": 36
     },
     "2024": {
       "held_dem": 30,
       "held_rep": 35,
       "held_ind": 1,
-      "n_contested_expected": 35,
       "contested_race_ids": [
         "senate-2024-AZ",
         "senate-2024-CA",
@@ -268,7 +259,7 @@
         "senate-2024-WV",
         "senate-2024-WY"
       ],
-      "post_election_dem_seats": null
+      "n_contested_expected": 35
     }
   }
 }

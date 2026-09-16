@@ -4,6 +4,18 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-15 — senate-hierarchical-v0.9.20
+
+Blueprint-first audit (v0.9.19 review) all-in remediation:
+
+- **A-01:** `PUBLIC_LIVE_ENABLED=False`; supersede v0.9.19 live with research_only.
+- **A-02…A-08:** Exact vote-count truth path, independent seat rosters, curated≠publication,
+  OpenFEC fail → sealed-or-disable (no BASE_LEANS finance), ALFRED/lagged economics,
+  G3 fail-closed, version-coherent clearance.
+- **A-09…A-13:** Rolling-origin ridge, hybrid fundamentals labeling, distribution-aware
+  stacking, nested covariance outer holdout, multiway contest flags.
+- Live publish remains locked pending a fresh independent review of the repaired evidence chain.
+
 ## 2026-09-14 — senate-hierarchical-v0.9.19
 
 Independent re-audit clearance for public live:

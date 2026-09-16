@@ -13,10 +13,11 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.9.19"
+MODEL_VERSION = "senate-hierarchical-v0.9.20"
 
-# Cleared by independent re-audit 2026-09-14 (see data/artifacts/independent_reaudit_latest.json).
-PUBLIC_LIVE_ENABLED = True
+# Blueprint audit 14 Sep 2026 (v0.9.19 review): HOLD live until truth ledger,
+# vintages, fold purity, and version-coherent release clearance are repaired.
+PUBLIC_LIVE_ENABLED = False
 PUBLICATION_SURFACE_DEFAULT = "research_only"
 
 # Historical Senate cycles for holdout / replay

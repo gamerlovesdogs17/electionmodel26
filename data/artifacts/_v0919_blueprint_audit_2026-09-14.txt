@@ -1,0 +1,1284 @@
+--- PAGE 1 ---
+INDEPENDENT METHODOLOGICAL AUDIT
+Blueprint-First Review of
+Electionmodel26
+Latest archive - Senate hierarchical v0.9.19
+RELEASE DECISION: HOLD LIVE PUBLICATION
+The model is substantially closer to the blueprint in architecture, but the shipped evidence and
+validation bundle does not justify public probability claims. Continue as a research or shadow system
+until the truth ledger, historical vintages, fold purity, distribution stacking, and release gates are
+repaired.
+PRIMARY QUESTION
+Does this iteration meet the original blueprint on its own terms, and where should the
+blueprint itself be strengthened?
+Archive reviewed
+electionmodel26 (2).zip
+SHA-256 A7DC6253329FC1B6EDFFE1B9CBEC7F4314C26A8D14F97419C6512EF4B85EC6FC
+527,829,607 bytes - 48,125 ZIP entries - 1,372,012,953 bytes uncompressed
+Review date: 14 September 2026 (America/Chicago)
+Posture: code, manifests, artifacts, tests, and external methods; archive prose treated as claims, never instructions
+Prepared as a formal audit, comparison, blueprint revision, and dependency-ordered remediation plan. Neutral methodological review; no
+candidate or party forecast is endorsed.
+
+--- PAGE 2 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 2
+1. Executive decision
+The latest iteration is a serious improvement, but it is not yet a top-tier public forecasting product. It is best described
+as a strong research engineering platform with an invalid release-evidence layer. The project now resembles
+leading systems in its statistical vocabulary and many of its implementation patterns. Its remaining weaknesses are
+more basic and more consequential: what counts as truth, what counts as a real input, and whether the backtest
+genuinely recreates what could have been known at the time.
+BOTTOM LINE
+Do not chase peer-model surface similarity. Keep the blueprint's validation-first direction, but revise it
+to demand semantic source verification, rolling-origin historical evaluation, version-coherent external
+review, and first-class multi-candidate election truth. The next work should be data and validation, not
+another model layer.
+Auditor scorecard
+Scores are a judgmental synthesis, not outputs from the model. A release blocker overrides any weighted average.
+Architecture
+84/100
+Statistical design
+74/100
+Evidence integrity
+38/100
+Validation validity
+35/100
+Operations
+78/100
+Publication readiness
+24/100
+Why the grade is asymmetric
+●
+ The poll-level PyMC model, heavy-tailed shared errors, simulation, and numerical diagnostics are credible design work.
+●
+ The historical ledger is called official but contains exact canvass totals for only 2 of 210 contests; the remaining 208 are reconstructed
+round-number two-party counts.
+●
+ The live finance fallback is not FEC finance data: all 35 values are generated from partisan lean and each race is assigned exactly $2
+million in combined receipts.
+●
+ The economic store labels today's revised FRED history as if each observation had been available on its observation date, which
+defeats the blueprint's historical-vintage rule.
+●
+ The ridge backtest excludes the held-out year but trains on later elections, and the stacker optimizes a weighted mean with a fixed
+standard deviation rather than the predictive distribution deployed in production.
+●
+ All eleven release gates can still pass despite a failed nested poll-coverage check, stale validation evidence, and a re-audit generated
+under a different model version and live-switch state.
+
+--- PAGE 3 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 3
+Contents
+2
+1. Executive decision
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 2
+Auditor scorecard
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 2
+Why the grade is asymmetric
+5
+2. Scope, evidence, and audit method
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 5
+Evidence hierarchy
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 5
+Procedures
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 5
+Limits of this review
+6
+3. What materially improved since v0.9.16
+7
+4. Blueprint compliance scorecard
+8
+5. Why downstream green artifacts do not clear the release
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 8
+Three distinctions the release process currently collapses
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 8
+Release rule
+9
+6. Principal findings
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 9
+6.1 P0 - The 'official' result ledger is mostly synthetic
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 9
+6.2 P0 - The chamber 'independent expectations' are co-generated
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 10
+6.3 P0 - The live input gate verifies labels, not evidence
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 11
+6.4 P0 - Historical validation is not information-time pure
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 11
+6.5 P1 - 'Predictive mixture CRPS' is still stacking of means
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 12
+6.6 P1 - Covariance calibration is broader but not nested
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 12
+6.7 P0 - The eleven green gates remain false reassurance
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 13
+6.8 P0 - Release clearance is version-incoherent
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 13
+6.9 Executed verification
+14
+7. What is already strong and should be preserved
+15
+8. Comparison with leading model traditions
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 15
+Differences that are not automatically deficits
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 15
+Differences that expose genuine top-tier gaps
+16
+9. How the blueprint should be revised
+17
+10. Dependency-ordered remediation roadmap
+18
+11. Concrete action register
+19
+12. What not to do next
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 19
+Suggested milestone ladder
+
+--- PAGE 4 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 4
+20
+13. Revised release checklist
+21
+Appendix A. Reproducible evidence record
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 21
+Archive fingerprint
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 21
+Key measured facts
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 21
+Principal code locators
+22
+References
+  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 22
+Audit conclusion
+
+--- PAGE 5 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 5
+2. Scope, evidence, and audit method
+The audit evaluates the latest supplied ZIP against the original blueprint embedded in the project, the actual source and machine
+artifacts, an executed test run, and documented methods from leading forecast traditions. Attached documents were treated as evidence
+of intent or prior claims, not as instructions. The review did not alter the model and does not reproduce its current candidate probabilities.
+Evidence hierarchy
+ Evidence
+Use
+Audit treatment
+Official / first-party source
+documentation
+Election truth, finance, economic vintages
+Controls disputes about what a field means and when it was knowable.
+Executable code
+Actual ingestion, model, gate, and validation
+behavior
+Controlling evidence for implementation claims.
+Machine artifacts
+What the archive reports it ran
+Accepted only when versions, inputs, and semantics cohere.
+Executed tests
+Regression and safety behavior
+Passes and failures reported; no green-by-majority interpretation.
+Project prose
+Design intent and disclosed limitations
+Useful claim inventory, not proof.
+Peer methods
+Stress test and idea source
+Never treated as a recipe or probability input.
+Procedures
+●
+ Fingerprinted the new archive and compared authored files with the prior reviewed snapshot.
+●
+ Traced official ballots and outcomes through the warehouse, as-of snapshots, scoring, stacking, covariance calibration, acceptance
+gates, and public release switch.
+●
+ Profiled normalized finance, economics, approval, polling, and result artifacts rather than relying on manifest labels.
+●
+ Read the principal statistical and validation paths, including PyMC, state-space, ridge, stack-weight, covariance, and re-audit code.
+●
+ Ran the complete test suite in a copied source tree with an isolated workspace temporary directory.
+●
+ Compared the implementation with The Economist 2020, Morris/538 2024, Silver FLIPR 2026, DDHQ, VoteHub 2026, and
+predictive-distribution literature.[2-7,11-13]
+Limits of this review
+This is a static archive audit, not an accreditation or full independent reconstruction of all federal election returns. Live credentials and
+licensed data were not supplied. Official source checks were targeted because the archive itself discloses that almost all historical vote
+counts are reconstructed. The audit distinguishes an implementation defect from a debatable modeling choice and from a peer
+difference that the blueprint does not require.
+
+--- PAGE 6 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 6
+3. What materially improved since v0.9.16
+The new archive is not a cosmetic rebuild. Relative to the prior source extraction it adds 88 authored files and
+modifies 69, with no authored deletions in the compared selection. The ZIP grew by 311 entries and about 13.5 MB
+compressed. Several prior audit findings were addressed in code, even where their scientific closure remains
+incomplete.
+ Area
+Prior snapshot
+v0.9.19 change
+Auditor reading
+Race universe
+Missing specials/unexpired
+contests
+2014-2024 counts now include named
+specials
+Real structural repair; result values remain mostly reconstructed.
+Canary outcomes
+OH 2018 and AZ 2024 signs wrong
+Exact vote counts added for both
+Closed for two races only; not a full ledger.
+Eligibility
+Finance/economics omitted
+All configured domains enumerated
+Coverage improved; classifier accepts relabeled or absent
+evidence.
+Poll coverage
+Polled-only denominator
+Full official-ballot denominator
+Important repair; top-level PASS still ignores a nested failure.
+Fundamentals
+No ridge fitting
+Closed-form ridge fit added
+Implementation exists; validation trains on future cycles.
+Stack
+Softmax of component scores
+Race-level OOF means optimized
+Progress, but still stacking of means, not deployed predictive
+distributions.
+Covariance
+One-cycle, one-lead search
+Four cycles x two leads; defaults persisted
+Better coverage; selection is not nested and gain is tiny.
+Transparency
+No limitations section
+Detailed limitations added
+Meaningful improvement; claims still overstate source quality.
+Tests
+100 pass, 2 fail, 15 setup errors
+125 pass, 1 fail, no setup errors
+Large QA gain; release suite not completely green.
+The project responded to the previous audit
+That should be credited. The central problem is now less about missing modules and more about
+whether the new labels ('official', 'first_party', 'predictive mixture', 'independent') match the underlying
+objects and procedures.
+
+--- PAGE 7 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 7
+4. Blueprint compliance scorecard
+The original blueprint deliberately treats evidence, model, validation, and operations as a dependency chain.[1] The table below scores
+the actual archive against that standard. 'Partial' means the mechanism exists but the evidence or enforcement is not yet adequate.
+Blueprint requirement
+Status
+Archive evidence
+Audit conclusion
+Stable identity, source, event time,
+availability time, retrieval time,
+immutable versions
+PARTIAL
+Poll schemas/manifests are good; ledger uses generic
+cycle URLs and synthetic vote counts.
+The warehouse shape is ahead of its source semantics.
+Historical economic vintages
+FAIL
+1,610 production rows have available_at equal to
+observation_date; no production revision rows.
+Current FRED history is not ALFRED historical truth.
+Finance amendment chains and
+matched periods
+FAIL
+429 fallback generates 35 shares from BASE_LEANS;
+all totals equal $2m.
+No observed finance signal in the shipped live run.
+No future access through joins, labels,
+preprocessing, or config
+FAIL
+Ridge fallback reads all result cycles except the held-out
+election.
+Earlier folds train on later election outcomes.
+Distinct pollster lean and reliability
+PASS
+House priors and extra-SD/quality paths are separate.
+Blueprint aligned.
+Repeated-poll clustering and
+sublinear information
+PASS
+ENOP, caps, study clustering, max-weight ratios.
+Strong alignment, subject to more empirical testing.
+Separate future movement and
+terminal error
+PASS
+Static PyMC includes contracting future term plus
+non-vanishing terminal shocks.
+Conceptually strong; dynamic path remains challenger.
+PSD correlated, heavy-tailed
+national/region/similarity/local
+uncertainty
+PARTIAL
+Factor-like Student-t layers and PSD similarity matrix
+exist.
+Architecture strong; scales selected in-sample on flawed
+outcomes.
+Institutional and multi-candidate rules
+inside simulation
+FAIL
+Multiway/turnout are auxiliary; D-D, R-R, and
+independent races are forced into D-R margins.
+Not a coherent truth/simulation target for those contests.
+Complete-cycle outer holdouts with
+nested tuning
+FAIL
+Four cycle labels and frozen predictions exist; inner fold
+purity does not.
+'Nested LOO' overstates the implementation.
+Fixed historical lead-time replay
+PARTIAL
+Lead grids exist for 2018-2024.
+Poll dates are useful; other inputs are not faithfully vintaged.
+Continuous, binary, interval, and joint
+scores
+PARTIAL
+CRPS/Brier/seat/control metrics exist; current reliability
+artifact is stale.
+Metric surface is good; evidence bundle is incoherent.
+Metric uncertainty and cycle-balanced
+aggregation
+FAIL
+Fold summaries exist; no uncertainty intervals for score
+differences/weights.
+Tiny differences are treated as decisive.
+Simple baselines may displace
+complexity
+PASS
+PyMC earned zero production stack mass; simple
+learners retained.
+Correct validation-first instinct, although weights are invalid.
+OOF predictive-distribution stacking
+FAIL
+Optimizer uses means with fixed sd=6; production uses
+discrete component draws.
+Training objective and deployed mixture differ.
+Reproducible manifests, archives,
+correction path
+PASS
+Hashes, shadows, signing hooks, rebuild checks.
+One of the archive's strongest layers.
+Version-coherent independent review
+before public release
+FAIL
+v0.9.18 review ran with live off; v0.9.19 shipped live;
+review calls itself second-party.
+Publication authorization is not independently established.
+Public model card, validation, and
+change log
+PARTIAL
+All are present.
+Model card overstates FRED/ALFRED, FEC finance, and
+predictive stacking.
+
+--- PAGE 8 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 8
+5. Why downstream green artifacts do not clear the release
+Forecast validation is hierarchical. A proper score is only meaningful if the target outcome is correctly defined. A
+deterministic rebuild can reproduce a scientifically invalid data pipeline perfectly. The latest archive improves many
+downstream controls but still breaks the chain at the evidence root.
+Certified
+ truth
+Bitemporal
+ evidence
+As-of
+snapshot
+Frozen
+prediction
+Proper
+scoring
+Release
+ gate
+Downstream reproducibility cannot repair an invalid evidence root.
+Three distinctions the release process currently collapses
+ Claim
+What the gate tests
+What a top-tier gate must test
+Official results
+Row count, internal reconciliation, two canaries
+Exact candidate/party/vote data from hashed certified files; independent
+event and seat rosters.
+First-party / curated evidence
+Manifest label, URL presence, fixture marker strings
+Observed values, source-specific schema, object hash, release timing,
+coverage, transformations, and semantic plausibility.
+Predictive stacking
+OOF means exist and weights reproduce
+The exact deployed predictive mixture is optimized on fold-pure predictive
+draws under a proper score.
+Independent review
+An in-repo script named independent_reaudit
+succeeds
+A separate reviewer, code path, truth source, and release-candidate hash
+sign the same model version that ships.
+Release rule
+Necessary, not additive
+Evidence validity, fold purity, numerical quality, and release coherence should be conjunctive.
+Ninety-nine downstream passes cannot compensate for one invalid truth or leakage gate.
+
+--- PAGE 9 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 9
+6. Principal findings
+6.1 P0 - The 'official' result ledger is mostly synthetic
+The new ledger fixes missing contest IDs and two wrong canaries, but its own generator states that all other races use vote counts
+scaled to reproduce hard-coded margins. Across 210 contests, only Ohio 2018 and Arizona 2024 use non-round source totals. The
+remaining 208 are not vote-count-backed results.
+Cycle
+Contests
+Rows with 1,000,000 D+R votes
+Rows with zero other votes
+Rows missing a major-party nominee
+2014
+36
+36
+36
+36
+2016
+34
+34
+34
+34
+2018
+35
+34
+34
+32
+2020
+35
+35
+35
+33
+2022
+35
+35
+35
+35
+2024
+35
+34
+35
+32
+Total
+210
+208
+209
+202
+The source URLs do not repair the values
+Every row in a cycle shares one generic URL. The 2024 URL is a federal-candidate list, not a certified Senate results file. A source link
+attached to a generated value does not make the value first-party or official. The FEC describes its biennial Federal Elections
+publications as compilations of official certified results; the correct ingestion target is the underlying table or a state canvass, preserved
+by hash.[10]
+Multi-candidate truth is collapsed incorrectly
+●
+ California 2018 was a same-party general election, yet the ledger records a synthetic Democratic-versus-Republican split.
+●
+ Alaska 2022 used ranked-choice voting and a same-party final pairing, yet the ledger records a synthetic D-R margin.
+●
+ Nebraska's 2024 regular race had an independent challenger and no Democratic nominee, yet the ledger records a D-R margin.
+●
+ The same problem affects independent-caucusing incumbents and runoff stages: a caucus-control estimand can be valid, but it must
+be explicitly mapped from candidate-level outcomes rather than relabeling votes.
+6.2 P0 - The chamber 'independent expectations' are co-generated
+The ledger and the purportedly independent expectations are written by the same build_official_ledger.py function from the
+same hard-coded margins, held-seat constants, post-election seat totals, and source map. The code comment says the expectations are
+separate; the execution path shows they are not independent. This repairs the earlier circular equation at runtime but preserves
+common-source circularity at build time.
+
+--- PAGE 10 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 10
+6.3 P0 - The live input gate verifies labels, not evidence
+The all-domain registry is a real structural improvement. Its decision rule is still too permissive: 'curated' is publication-eligible by default,
+an HTTP URL can upgrade a manifest to 'first_party', and absent optional stores can be marked eligible. This lets generated research
+placeholders pass as live evidence.
+Domain
+Shipped evidence
+Gate label
+Audit verdict
+Finance
+35 'curated_fec_browse_estimate' rows after HTTP 429; each share is
+exactly the BASE_LEANS formula; every D+R receipt total is $2m.
+curated / eligible
+FAIL - deterministic duplicate of partisan lean, not
+observed FEC finance.
+Economics
+Current FRED public CSV; 1,610 production rows; all have revision=0
+and available_at=observation_date.
+first_party / eligible
+FAIL - revised history masquerades as real-time
+vintage data.
+Approval
+21 hand-entered rounded values in source code, including 2026; one
+generic 538 URL.
+first_party / eligible
+FAIL - URL-presence classification overrides the
+manifest's curated status.
+Demography
+Approximate state constants embedded in Python; no normalized store
+required.
+curated / eligible / n=0
+FAIL for a configured covariance input - no source or
+vintage lineage.
+Ratings
+Wikipedia multi-rater snapshot with revision metadata.
+curated / eligible
+PARTIAL - traceable, but historical correction/vintage
+replay is not established.
+Markets
+Forecast reports 34 race markets and a control market; eligibility reports
+n=0 because it ignores n_races.
+curated / eligible
+PARTIAL - live source exists, but the gate's coverage
+accounting is wrong.
+Polls
+320 VoteHub rows in the current snapshot; historical FTE archive.
+aggregator / eligible
+STRONGEST domain; still requires immutable dumps
+and pollster-rating vintages.
+Why the economic timestamp is leakage
+FRED's default real-time period describes what is known today; ALFRED exists to retrieve what was known on a historical date.[8] The
+code sets realtime_start = observation_date and available_at = observation_date when reading a public CSV.
+Economic observations are normally released after their reference period and later revised. This transformation therefore grants
+historical backtests data too early and at revised values.
+Why the finance fallback is worse than missing
+OpenFEC provides candidate and committee filings, coverage periods, amendment chains, and nightly-updated data.[9] A missing or
+rate-limited feed should disable the finance component or preserve the last sealed valid snapshot. Generating finance shares from
+partisan lean creates circular confirmation: the model appears to use a separate feature while actually reusing its prior.
+
+--- PAGE 11 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 11
+6.4 P0 - Historical validation is not information-time pure
+The replay freezes predictions before reading the target year's result table, which is good. However, the ridge challenger then creates a
+historical training matrix from every result cycle except the snapshot's election ID. For a 2018 holdout, that admits 2020, 2022, and 2024
+outcomes. This is leave-one-cycle-out in name, but not a historical as-of forecast.
+Required replacement
+Use rolling-origin replay as the primary historical claim: for each target cycle, fit only on elections,
+source versions, pollster ratings, economic releases, and configuration choices available before that
+target date. Symmetric leave-one-cycle-out can remain a secondary data-efficiency sensitivity analysis,
+clearly labeled as non-prospective.
+Other fold-purity defects
+●
+ The ridge call in the nested driver does not pass an explicitly fold-built training matrix; it relies on a global warehouse fallback.
+●
+ The 'fundamentals-only' generic ballot is inferred from state Senate polls minus prior lean, so it is not independent of the race-poll
+archive.
+●
+ The static/dynamic comparison still covers only 2022 and uses 80 draws per fit. Keeping static production is sensible given those
+results, but the comparison is not a multi-cycle selection gate.
+6.5 P1 - 'Predictive mixture CRPS' is still stacking of means
+The stacker now stores race-level out-of-fold means, a meaningful advance. Its objective forms pred = M w and evaluates a Normal
+distribution centered on that weighted mean with a fixed six-point standard deviation. It does not combine component predictive
+distributions. Production, by contrast, selects one component's full joint draw for each simulation. Training and deployment therefore
+optimize different distributions.
+Implemented objective
+Current approximation
+w* = arg min_w mean CRPS[ Normal(Mw, 6), y ], with w on the simplex.
+Blueprint target: w* = arg min_w mean S[ sum_m w_m F_m, y ], using fold-pure predictive draws F_m
+and the same mixture mechanism deployed in production.
+The current production weights are approximately 0.409 last-election swing, 0.392 ridge fundamentals, and 0.199 state-space; PyMC
+receives zero mass. That is not inherently a defect - a blueprint-first system should let simple models win. It becomes unusable evidence
+because the ridge is future-contaminated, the outcome ledger is reconstructed, and the weight optimizer ignores component variance
+and covariance. Yao et al. explicitly distinguish stacking predictive distributions from stacking means.[12]
+
+--- PAGE 12 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 12
+6.6 P1 - Covariance calibration is broader but not nested
+The new calibration covers 2018, 2020, 2022, and 2024 at 60 and 30 days, and it persists the selected terminal scales. That is a clear
+advance. The function evaluates all candidate scale configurations on the same eight cycle-lead folds used to select the winner; there is
+no outer holdout. It uses the fast approximation and then transfers the choice to PyMC and dynamic production paths.
+Quantity
+Baseline
+Selected
+Audit interpretation
+Length scale
+1.75
+1.25
+Only selected parameter change.
+Mean race CRPS
+5.4015
+5.4022
+Slightly worse.
+Seat CRPS
+1.5269
+1.5212
+Improves by about 0.0057.
+Control Brier
+0.2548
+0.2555
+Slightly worse.
+Combined chamber objective
+1.7817
+1.7767
+Improvement about 0.0050 (0.28%).
+90% coverage
+0.8786
+0.8786
+No change.
+At 400 draws per configuration in the packaged artifact, that difference should not be treated as decisive without repeated seeds or an
+uncertainty interval. More importantly, the calibration targets inherit the reconstructed result ledger.
+6.7 P0 - The eleven green gates remain false reassurance
+ Gate
+Packaged
+Auditor
+Reason
+G1 Race universe
+PASS
+PARTIAL
+Counts/special IDs fixed; source and candidate truth not official.
+G2 Chamber truth
+PASS
+FAIL
+Expectations and ledger are co-generated; 208 synthetic count rows.
+G3 Poll coverage
+PASS
+FAIL
+2020 lead-30 block is false, but top-level ok stays true and G3 reads only top-level ok.
+G4 Vintage
+integrity
+PASS
+FAIL
+Finance/economics/approval/demography semantics invalid despite eligible labels.
+G5 Model identity
+PASS
+PASS
+No fast-to-PyMC remapping; method labels preserved.
+G6 Proper scores
+PASS
+NOT
+EVALUABLE
+Reads a stale v0.9 validation report and invalid outcome target.
+G7 Reliability
+PASS
+NOT
+EVALUABLE
+Uses 33-race 2022 calibration from v0.9; absent bins can also return partial-ok.
+G8 Ablation
+PASS
+PARTIAL
+Recommendations exist; conclusions inherit flawed folds and truth.
+G9 Numerical
+quality
+PASS
+PASS
+8,000 posterior samples; R-hat/ESS/MCSE checks are useful.
+G10 Reproducibility
+PASS
+PASS*
+Strong hash/shadow mechanics; reproduces the same invalid inputs.
+G11 Transparency
+PASS
+PARTIAL
+Limitations exist, but key source claims are overstated.
+
+--- PAGE 13 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 13
+6.8 P0 - Release clearance is version-incoherent
+The packaged 'independent re-audit' was generated for v0.9.18 while PUBLIC_LIVE_ENABLED=False. It explicitly says it is a
+second-party remediation clearance by the implementing agent, not the original external auditor. The archive then switches to v0.9.19,
+enables live publication, generates a live forecast, and runs acceptance gates later. There is no independent artifact signing the v0.9.19
+code, evidence hashes, forecast hash, and live state as one release candidate.
+Artifact
+Model version
+Generated
+State / concern
+validation_report_latest.json
+v0.9
+2026-09-13 16:56Z
+Stale; 33-race 2022 calibration and old fast-stack weights.
+independent_reaudit_latest.json
+v0.9.18
+2026-09-15 02:52Z
+Ran with live disabled; self-described second-party clearance.
+forecast_latest.json
+v0.9.19
+2026-09-15 02:54Z
+Live; uses new stack weights and invalid live inputs.
+acceptance_gates_latest.json
+v0.9.19
+2026-09-15 03:05Z
+11/11 PASS while reading the stale validation report.
+The re-audit's R-05 check is also hard-coded ok=True; it tests whether the old live lock blocked, not whether the final enabled release is
+safe. An audit script must fail when its own preconditions do not describe the candidate that will ship.
+6.9 Executed verification
+ Run
+Result
+Interpretation
+Full pytest in copied source; isolated workspace temp
+125 passed; 1 failed; 5 warnings;
+7m11s
+Major improvement. No temp setup errors. Suite still not fully
+green.
+Remaining failure
+test_acceptance_gates_from_stub
+s
+Test expects legacy G11 behavior; implementation now correctly
+requires a visible limitations source. Stale test, not a safety
+failure.
+Direct packaged gate evaluation
+11 PASS; 0 fail; 0 partial
+Confirms the false-green behavior described above.
+The numerical production run itself is well sampled: the current artifact reports 2,000 draws x 4 chains, 8,000 posterior samples, R-hat
+max 1.0, ESS bulk minimum 2,100, control-probability MCSE about 0.0041, and expected-seat MCSE about 0.028. These checks
+establish Monte Carlo stability of the fitted pipeline, not empirical correctness of its assumptions or inputs.
+
+--- PAGE 14 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 14
+7. What is already strong and should be preserved
+A hold decision should not obscure the quality of several implementation choices. Replacing these pieces wholesale
+to imitate a peer would be counterproductive.
+ Capability
+Why it matters
+Recommendation
+Poll-level measurement model
+Raw margins are linked to latent race states with pollster, mode,
+population, and excess-error terms.
+Keep. Strengthen priors and historical pollster-rating
+vintages.
+ENOP and study controls
+Prolific firms and related releases add sublinear information.
+Keep. Validate by leave-pollster-out and cluster stress
+tests.
+Uncertainty decomposition
+Future movement contracts with time; terminal national/race/similarity
+error remains.
+Keep. Estimate scales under honest rolling replay.
+Heavy-tailed joint simulation
+National, regional, local, and similarity shocks generate coherent maps
+and non-thin tails.
+Keep. Add same-state/multi-office layers only when
+scope expands.
+Static production / dynamic
+challenger separation
+The project does not force a more fashionable dynamic model to win.
+Keep static until multi-cycle evidence favors dynamic.
+Full-draw chamber aggregation
+Seat/control outcomes come from joint draws, not independent
+Bernoulli races.
+Keep. Score joint distributions with energy/variogram
+and seat log scores.
+Numerical diagnostics
+Sampling scale, ESS, R-hat, MCSE, deterministic seeds, and
+fingerprints are surfaced.
+Keep. Make diagnostic requirements version-bound to
+releases.
+Operational archive
+Signed/hashable releases, shadows, corrections, and manifests
+support accountability.
+Keep. Require external release-candidate signoff.
+A crucial blueprint success
+PyMC receiving zero ensemble mass is not embarrassing. A top-tier system must allow a simple
+baseline to beat a complex model. The scientific response is to inspect and improve the evidence and
+validation, not to force hierarchical weight into the stack.
+
+--- PAGE 15 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 15
+8. Comparison with leading model traditions
+Peer systems are used here as external stress tests. Their design choices are not presumed correct, and their published probabilities
+should not be averaged into this model. Differences matter only when they expose a blueprint requirement or a testable hypothesis.
+Benchmark
+Documented standard
+Electionmodel26 alignment
+Material gap
+The Economist 2020
+Open dynamic multilevel Bayesian state/national model;
+mode/population corrections; informative priors;
+empirical correlations.[2,3]
+Hierarchical poll effects, fundamentals
+prior, shared regional/similarity errors,
+PyMC implementation.
+Production latent is static; source
+truth/vintages are weaker; dynamic path not
+multi-cycle validated.
+Morris / 538 2024
+Polling averages with correlated cross-state movement;
+fundamentals and time-varying uncertainty; separate drift
+and Election-Day bias.[4]
+Future-versus-terminal split and
+correlated borrowing follow the same
+core logic.
+Historical-time validation and current-data
+integrity do not meet the architecture's implied
+evidence standard.
+Silver FLIPR 2026
+Polls, fundamentals, expert ratings; Senate training back
+to 1990; macro/micro factors; national, state, local,
+demographic error; 40,000 simulations; multiway, RCV,
+runoff logic.[5]
+Closest conceptual match on error
+decomposition and Senate-wide
+simulation.
+Far shorter valid history; no first-class
+D-D/R-R/independent/RCV outcome model;
+finance and demographics are placeholders.
+DDHQ
+Spline polling averages; historically learned
+poll/fundamental weights; regularized/tree ensemble;
+national/regional/race correlated simulation.[6]
+Regularized challengers and multi-level
+simulation exist.
+Current weights are not earned by clean
+historical data; ensemble and covariance
+tuning are not nested.
+VoteHub 2026
+Year-held-out base learners with inner grouped tuning;
+race-level OOF meta-design; Legacy and Complete
+layers; continuous similarity covariance; explicit market
+endogeneity caution.[7]
+Official-ballot coverage, challenger pool,
+OOF storage, similarity covariance,
+optional overlays.
+Ridge sees future cycles; meta-objective uses
+means; no weight uncertainty; current live
+inputs fail semantic provenance.
+Differences that are not automatically deficits
+●
+ Static instead of dynamic production: acceptable while a valid multi-cycle test does not show improvement.
+●
+ No tree-based learner: acceptable unless nested tests show stable gains over regularized linear and hierarchical models.
+●
+ Lower simulation count than FLIPR's 40,000: not material if Monte Carlo error is below displayed precision; 8,000 posterior draws are
+currently stable for reported summaries.
+●
+ Different expert-rating and market treatment: acceptable, and possibly preferable, if the Legacy/no-overlay version remains
+independently publishable and ablations show limited incremental value.
+●
+ Senate-only scope: coherent. House/geography complexity should not be imported before the Senate evidence system is trustworthy.
+Differences that expose genuine top-tier gaps
+●
+ Longer and cleaner historical training breadth, with explicit era/nonstationarity treatment.
+●
+ First-class multi-candidate, independent, top-two, runoff, and ranked-choice election mechanics.
+●
+ Fold-pure model and hyperparameter training, not only frozen target-year predictions.
+●
+ Observed, source-vintaged fundamentals rather than rounded or lean-derived substitutes.
+●
+ Prospective publication history and independent release review, not only retrospective artifacts.
+
+--- PAGE 16 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 16
+9. How the blueprint should be revised
+The original blueprint remains directionally strong. This implementation reveals several places where its standards
+should become more explicit and harder to satisfy through labels alone.
+ Revision
+New requirement
+Why this archive demonstrates the need
+B1 - Semantic evidence
+contracts
+A publication tier is source-specific and schema-validated. 'Curated' is non-publication
+unless a named review approves exact rows. URLs and tier strings never upgrade
+generated values.
+Lean-derived finance and hand-entered approval
+passed because labels/URLs were trusted.
+B2 - Certified truth bundle
+Every contest stores all candidates, parties, vote counts, stage, term, certification date,
+raw-object hash, and explicit caucus mapping. No margin-to-vote reconstruction in
+validation truth.
+208 of 210 contests use synthetic round counts;
+multiway races are mislabeled D-R.
+B3 - Independent
+reconciliation
+Event universe, result ledger, pre-election seat roster, and post-election seat total
+must come from separately built sources or separately reviewed artifacts.
+Ledger and 'independent expectations' are
+co-generated by one function.
+B4 - Rolling-origin primary
+validation
+Primary historical claims train only on information available before each forecast date.
+Symmetric LOCO is a secondary sensitivity analysis.
+The 2018 ridge fold trains on 2020-2024 results.
+B5 - Deployed-distribution
+equivalence
+The stacking objective must score exactly the predictive mixture used in production,
+using OOF draws and weight uncertainty/shrinkage.
+Training scores Normal(weighted mean, 6); production
+selects component joint draws.
+B6 - Version-coherent
+clearance
+One signed release-candidate manifest binds code commit, model version, input
+hashes, validation hashes, live switch, forecast hash, and named independent
+approver.
+v0.9.18/off clearance was used to enable v0.9.19/live.
+B7 - Gate mutation tests
+Each gate must include adversarial tests that alter values while preserving shape,
+names, and file presence; the gate must fail for semantic corruption.
+G3/G4/R-05 pass on presence or permissive labels.
+B8 - Prospective evidence
+Top-tier status requires a pre-registered shadow season with frozen forecasts,
+correction logs, and post-election scoring; retrospective backtests alone cannot confer
+the label.
+The archive is operationally ready for this but has not
+accumulated prospective proof.
+B9 - Metric uncertainty
+Report bootstrap/posterior uncertainty for cycle-balanced score differences, coverage,
+covariance parameters, and ensemble weights.
+A 0.28% in-sample covariance objective gain is treated
+as decisive.
+Blueprint principle to preserve
+No component earns its place by resemblance to a famous forecaster. It earns its place by improving a
+source-vintaged, cycle-held-out predictive distribution without harming calibration, coherence, or
+transparency.
+
+--- PAGE 17 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 17
+10. Dependency-ordered remediation roadmap
+The sequence matters. Do not retune weights or covariance on targets that will be replaced, and do not reopen live publication when
+only one P0 item closes.
+Stage
+Action
+Deliverable
+Exit criterion
+0 - Contain
+Set live publication off; label current v0.9.19 artifact
+research/shadow; preserve it unchanged.
+Containment release and public note
+No invalidated probability artifact can be served as
+live.
+1 - Truth
+Digitize FEC/state certified results for every 2014-2024
+Senate contest; all candidates/parties/stages; independent
+seat roster.
+Hashed raw files + normalized truth v3
+Exact counts/margins/winners reconcile from two
+independently built objects.
+2 - Inputs
+Replace lean-derived finance, current-history economics,
+rounded approval, and inline demography with sealed
+source-vintaged stores or disable those components.
+Domain-specific manifests and data
+contracts
+Every consumed row has source hash,
+event/availability/retrieval times, transform version,
+and coverage.
+3 - As-of engine
+Make all feature reads pass through build_as_of; freeze
+pollster ratings, candidate status, ratings, markets, and
+configs.
+Historical snapshot registry
+Future-row mutation tests fail closed across every
+domain.
+4 - Validation
+Implement rolling-origin cycle replay; explicit train matrices;
+fold-local preprocessing/tuning; cycle-balanced metrics
+with uncertainty.
+OOF draw matrix + validation report
+v0.9.20
+No target or later-cycle information enters a
+historical fold.
+5 - Models
+Refit parsimonious fundamentals, PyMC, state-space, and
+baselines on valid evidence; keep unavailable features
+disabled.
+Fold-specific coefficients and diagnostics
+Each feature is fixed by declaration or earns stable
+held-out value.
+6 - Stack
+Optimize the production discrete predictive mixture on OOF
+joint draws; regularize weights; compare best-single/equal
+weights.
+Reproducible predictive-stack artifact
+OOF mixture gain is positive with uncertainty and
+robust to cycle deletion.
+7 - Uncertainty
+Tune terminal/similarity/dynamic parameters inside training
+folds; score race, seat, control, energy/variogram, and tail
+events.
+Nested uncertainty calibration report
+Predeclared joint and marginal thresholds pass;
+transfer to PyMC is tested.
+8 - Release
+Run isolated CI; external red-team; bind all
+versions/hashes/switch state; begin prospective shadow
+season.
+Signed release-candidate bundle
+Independent approver signs the exact live
+candidate; full suite green.
+
+--- PAGE 18 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 18
+11. Concrete action register
+ ID
+Priority
+Action and acceptance test
+A-01
+P0
+Disable PUBLIC_LIVE_ENABLED and supersede the v0.9.19 live artifact with an immutable research-only notice. Test: publish-live must fail.
+A-02
+P0
+Delete margin-scaled vote counts from validation truth. Test: every 2014-2024 contest matches a hashed FEC/state table by candidate and vote
+count.
+A-03
+P0
+Build pre-election Senate seat rosters separately from result ingestion. Test: changing any winner breaks reconciliation without changing held
+seats.
+A-04
+P0
+Change 'curated' to non-publication by default and validate source-specific schemas. Test: a generic URL or renamed placeholder cannot upgrade
+eligibility.
+A-05
+P0
+On OpenFEC failure, use the last sealed valid file or disable finance. Test: BASE_LEANS cannot reproduce any finance field.
+A-06
+P0
+Use ALFRED vintage dates/realtime periods. Test: an as-of snapshot sees only releases and revisions known on that date.[8]
+A-07
+P0
+Fix G3 aggregation. Test: if any required cycle-lead block fails, top-level coverage and G3 fail.
+A-08
+P0
+Regenerate validation and clearance artifacts under the final model version. Test: mismatched version/time/hash blocks release.
+A-09
+P1
+Build explicit training data inside each rolling fold. Test: 2018 cannot access any row, rating, outcome, or config first available after its as-of date.
+A-10
+P1
+Make fundamentals independent of state race polls, or label the component hybrid. Test: removing race polls does not change a true
+fundamentals-only prediction.
+A-11
+P1
+Store OOF predictive draws and optimize the production mixture. Test: recomputed weights and score match from sealed draw arrays; compare
+cycle-deletion sensitivity.
+A-12
+P1
+Nest covariance tuning and repeat seeds. Test: selected scales improve held-out joint scores beyond Monte Carlo and cycle uncertainty.
+A-13
+P1
+Represent candidate-level multiway and institutional rules. Test: CA top-two, AK RCV, NE independent, LA/GA runoff, and caucus mapping score
+correctly.
+A-14
+P2
+Fix the stale G11 unit test and run order-randomized isolated CI. Test: 100% green across unit/data/integration/PyMC tiers.
+A-15
+P2
+Begin prospective shadow publication with predeclared change rules. Test: every issue is timestamped, immutable, and scored after certification.
+
+--- PAGE 19 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 19
+12. What not to do next
+●
+ Do not add another machine-learning learner, more simulations, or additional overlays before fixing truth and vintages.
+●
+ Do not force positive PyMC weight or tune toward a preferred public probability. Zero weight is a diagnostic, not a reputational
+problem.
+●
+ Do not convert missing live finance into a modeled estimate and then call it observed finance. Disable the feature or propagate
+missingness uncertainty.
+●
+ Do not use a broad FEC or 538 URL as provenance for hand-entered numbers. Provenance must identify the exact object and row
+transformation.
+●
+ Do not call symmetric leave-one-cycle-out 'historical as-of' when later cycles train earlier folds.
+●
+ Do not treat all-PASS JSON as independent clearance when the same code and constants produce both the evidence and the
+expectations.
+●
+ Do not copy FLIPR, DDHQ, VoteHub, or Economist parameters. Recreate their useful hypotheses inside this model's own honest
+validation harness.
+Suggested milestone ladder
+ Label
+Minimum evidence
+Research prototype
+Current architecture may run; outputs explicitly non-publication; synthetic/curated placeholders allowed and visible.
+Research-grade backtest
+Exact truth; source-vintaged inputs; rolling-origin replay; full test suite; score uncertainty; no live claim.
+Release candidate
+Distribution stack/covariance nested; multiway rules; version-coherent artifacts; independent red-team signoff.
+Public beta
+Prospective signed forecasts; clear limitations; corrections; stable operations; conservative probability rounding.
+Top-tier claim
+Multiple prospective cycles or equivalent external evidence; demonstrated calibration and joint uncertainty; independent
+governance.
+Current placement
+Between 'research prototype' and 'research-grade backtest.' The code is more mature than that label
+sounds; the evidence chain is less mature than the live UI implies.
+
+--- PAGE 20 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 20
+13. Revised release checklist
+A future audit should answer each item yes with machine evidence. 'Exists' is not enough.
+Gate
+Required evidence
+Current
+Truth
+All contests, candidates, parties, stages, exact votes, certification dates, hashes, caucus translation; separate seat
+roster.
+NO
+Polls
+Immutable poll versions; candidate-set mapping; full-ballot coverage; correction history; pollster-rating vintages.
+PARTIAL
+Economics
+ALFRED vintage/release reconstruction; transformation learned/frozen inside folds.
+NO
+Finance
+Candidate/committee/file IDs; matched periods; amendments; as-of processing dates; missingness policy.
+NO
+Approval/demography
+Exact source rows, retrieval/release timing, vintages, transformations, coverage.
+NO
+Model
+Priors and feature definitions frozen per fold; prior/posterior predictive checks; stable numerical diagnostics.
+PARTIAL
+Validation
+Rolling-origin cycles and leads; fold-local tuning; no later data; cycle-balanced score uncertainty.
+NO
+Ensemble
+OOF joint predictive draws; deployed mixture objective; regularized weight uncertainty and sensitivity.
+NO
+Uncertainty
+Nested multivariate calibration; marginal and joint reliability; rare/coherent scenario stress tests.
+PARTIAL
+Institutional rules
+Multiway/top-two/RCV/runoff/independent/caucus logic in truth and simulation.
+NO
+Operations
+Full isolated CI; immutable signed release; corrections; monitoring; rollback.
+MOSTLY
+Independent release
+Named external/independent reviewer signs exact code/data/forecast hashes and live state.
+NO
+
+--- PAGE 21 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 21
+Appendix A. Reproducible evidence record
+Archive fingerprint
+ Field
+Value
+Path
+C:/Users/zydlo/OneDrive/Desktop/electionmodel26 (2).zip
+SHA-256
+A7DC6253329FC1B6EDFFE1B9CBEC7F4314C26A8D14F97419C6512EF4B85EC6FC
+Compressed bytes
+527,829,607
+ZIP entries
+48,125
+Uncompressed bytes
+1,372,012,953
+Claimed model
+senate-hierarchical-v0.9.19
+Key measured facts
+ Check
+Observed
+Historical ledger
+210 contests; 208 have exactly 1,000,000 D+R votes; 209 have zero other votes; 202 lack a D or R nominee name.
+Finance
+35 rows; every value matches the BASE_LEANS fallback formula exactly; every D+R receipt total equals $2,000,000.
+Economics
+1,610 non-fixture rows; all revision=0; all available_at=observation_date; realtime_end=9999-12-31.
+Approval
+21 rounded rows hard-coded in approval.py; generic source URL; classifier reports first_party.
+Poll coverage
+Top-level ok=true; 2020 lead_ok_all=false because lead-30 coverage 0.657 < 0.70; G3 still passes.
+Validation report
+v0.9, generated 13 Sep; primary holdout 2022; n=33; old fast stack; consumed by v0.9.19 G6/G7.
+Independent re-audit
+v0.9.18; live_enabled_at_start=false; self-described second-party implementing-agent clearance.
+Current forecast
+v0.9.19; live; 34 market races; 8,000 posterior samples; weights exclude PyMC.
+Test suite
+125 passed, 1 failed, 5 warnings in 431.19 seconds using isolated workspace temporary root.
+Principal code locators
+ Issue
+Path and relevant lines
+Scaled vote counts / co-generated expectations
+midterms/evidence/build_official_ledger.py:36-42, 72-75, 97-154, 200-210, 275-330, 335-357
+Lean-derived finance fallback
+midterms/evidence/fec.py:110-140
+FRED public-history timestamps
+midterms/evidence/economics.py:169-196, 199-229
+Hard-coded approval
+midterms/evidence/approval.py:15-64
+Eligibility URL upgrade / permissive optional
+domains
+midterms/evidence/eligibility.py:96-155, 171-269
+Future-cycle ridge training
+midterms/model/challengers.py:94-124; nested driver call at nested_component_loo.py:311-321
+Mean-only stack objective
+midterms/model/ensemble.py:27-90; deployed draw mixture at 142-176
+In-sample covariance selection
+midterms/validation/covariance_calibration.py:55-138, 141-220
+G3 top-level check / stale G6-G7
+midterms/validation/acceptance_gates.py:148-169, 303-397
+Self-audit R-05 and residual risks
+scripts/independent_reaudit.py:171-190, 240-275
+
+--- PAGE 22 ---
+ELECTIONMODEL26  |  BLUEPRINT-FIRST AUDIT
+Evidence cut: 14 September 2026
+Methodological review - no candidate probabilities reproduced
+Page 22
+References
+[1] Designing a High-Integrity U.S. Election Forecasting System. Project blueprint embedded in the audited archive, extracted text checked 14 Sep 2026.
+[2] The Economist. State and national presidential election forecasting model. Public R/Stan repository, 2020. github.com/TheEconomist/us-potus-model
+[3] Heidemanns, M.; Gelman, A.; Morris, G. E. An Updated Dynamic Bayesian Forecasting Model for the 2020 Election. Harvard Data Science Review, 2020. paper
+[4] Morris, G. E. How 538's 2024 presidential election forecast works. ABC News / 538, 23 Aug 2024. methodology
+[5] Silver, N. How FLIPR forecasts the midterm elections. Silver Bulletin, 11 Aug 2026. methodology
+[6] Decision Desk HQ. 2024 Forecast Methodology. methodology
+[7] VoteHub. 2026 Midterm Forecast Methodology. May 2026. PDF
+[8] Federal Reserve Bank of St. Louis. FRED API Real-Time Periods; FRED versus ALFRED. Accessed 14 Sep 2026. documentation
+[9] Federal Election Commission. OpenFEC API Documentation. Accessed 14 Sep 2026. API documentation
+[10] Federal Election Commission. Election and voting information; Federal Elections compilations. Accessed 14 Sep 2026. official results index
+[11] Gneiting, T.; Raftery, A. E. Probabilistic Forecasts, Calibration and Sharpness. Journal of the Royal Statistical Society B 69(2), 2007, 243-268. DOI
+[12] Yao, Y.; Vehtari, A.; Simpson, D.; Gelman, A. Using Stacking to Average Bayesian Predictive Distributions. Bayesian Analysis 13(3), 2018. DOI
+[13] Shirani-Mehr, H.; Rothschild, D.; Goel, S.; Gelman, A. Disentangling Bias and Variance in Election Polls. JASA 113(522), 2018, 607-614. DOI
+Audit conclusion
+Electionmodel26 has reached the point where additional sophistication is not the limiting factor. Its best path toward
+a top-tier model is to make the evidence and validation system as rigorous as the probabilistic architecture: exact
+truth, real historical vintages, fold-pure training, deployed-distribution scoring, adversarial gates, and independent
+version-coherent publication review.
