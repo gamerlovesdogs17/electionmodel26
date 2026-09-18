@@ -10,7 +10,7 @@ from typing import Any
 import pandas as pd
 
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
-from midterms.evidence.schema import RESULT_COLUMNS
+from midterms.evidence.schema import RESULT_COLUMNS, align_result_frame
 
 PARSER_VERSION = "results-archive-v1"
 
@@ -150,6 +150,10 @@ def _result_row(
         "other_votes": 0.0,
         "two_party_margin": float(margin),
         "winner_party": "D" if margin > 0 else "R",
+        "winner_caucus": "D" if margin > 0 else "R",
+        "modeled_side": "D" if margin > 0 else "R",
+        "stage": "general",
+        "certification_status": "certified",
         "source_url": source_url,
         "raw_hash": None,
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
@@ -164,11 +168,7 @@ def build_certified_results_frame() -> pd.DataFrame:
 
         if LEDGER_PATH.exists():
             rows = results_rows_from_ledger()
-            df = pd.DataFrame(rows)
-            for col in RESULT_COLUMNS:
-                if col not in df.columns:
-                    df[col] = None
-            return df[RESULT_COLUMNS]
+            return align_result_frame(pd.DataFrame(rows))
     except Exception:
         pass
 
@@ -218,7 +218,7 @@ def build_certified_results_frame() -> pd.DataFrame:
         )
     if not rows:
         return pd.DataFrame(columns=RESULT_COLUMNS)
-    return pd.DataFrame(rows)[RESULT_COLUMNS]
+    return align_result_frame(pd.DataFrame(rows))
 
 
 def _scaled_votes(margin_pp: float, scale: int = 1_000_000) -> tuple[int, int]:

@@ -27,7 +27,7 @@ from midterms.config import (
     RAW_DIR,
     REGIONS,
 )
-from midterms.evidence.schema import POLL_COLUMNS, RACE_COLUMNS, RESULT_COLUMNS, align_poll_frame
+from midterms.evidence.schema import POLL_COLUMNS, RACE_COLUMNS, RESULT_COLUMNS, align_poll_frame, align_result_frame
 
 PARSER_VERSION = "fixtures-v1"
 
@@ -258,6 +258,10 @@ def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
                 "other_votes": int(rng.integers(1000, 20000)),
                 "two_party_margin": round(margin, 3),
                 "winner_party": "D" if margin > 0 else "R",
+                "winner_caucus": "D" if margin > 0 else "R",
+                "modeled_side": "D" if margin > 0 else "R",
+                "stage": "general",
+                "certification_status": "certified",
                 "source_url": "synthetic://fixtures/certified-results",
                 "raw_hash": "",
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
@@ -338,7 +342,7 @@ def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
             )
 
     polls = align_poll_frame(pd.DataFrame(poll_rows))
-    results = pd.DataFrame(result_rows)[RESULT_COLUMNS]
+    results = align_result_frame(pd.DataFrame(result_rows))
     results["raw_hash"] = results.apply(
         lambda r: _sha256_bytes(f"{r.result_id}|{r.two_party_margin}".encode()), axis=1
     )

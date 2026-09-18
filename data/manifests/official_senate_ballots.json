@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-16T00:44:32.641369+00:00",
+  "generated_at": "2026-09-18T01:53:02.695868+00:00",
   "parser_version": "official-ledger-v2",
   "ledger_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\official_senate_ledger.json",
-  "ledger_sha256": "42498068986d5b85e6ffe110ccfa4ae38640bc2646bfe1cbaeeeab0adc3ee61a",
+  "ledger_sha256": "ea20266bf82d59eed5227823181e935cab675fbb5cbfb25bd5af5feb7ea3525f",
   "expectations_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\independent_chamber_expectations.json",
-  "expectations_sha256": "4ccad61506f67d1d9fab63b2b8033fb60ceba7b9aca1a26ff1f691227b48fdaf",
+  "expectations_sha256": "6105192ceb27be9c8450be84929b056f72317996bf89f01a0b9af3976d2618ac",
   "n_races": 600,
   "n_results": 211,
   "cycles": [
@@ -20,5 +20,17 @@
     "results_certified": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\results_certified.parquet",
     "raw_results": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\senate_certified_results.json"
   },
-  "note": "Official contests + vote-count-derived margins from external ledger; held seats from independent expectations (not sync_held)."
+  "note": "Official contests + vote-count-derived margins from external ledger; held seats from independent expectations (not sync_held).",
+  "years": [
+    2014,
+    2016,
+    2018,
+    2020,
+    2022,
+    2024,
+    2026
+  ],
+  "n_rows": 700,
+  "includes_2026": true,
+  "builder": "build_certified_ledger_v3.rebuild_canonical_truth"
 }

@@ -1,15 +1,54 @@
 {
-  "parser_version": "chamber-expectations-v3-roster",
-  "generated_at": "2026-09-16T00:44:32.568325+00:00",
+  "parser_version": "chamber-expectations-v4-truth_v1",
+  "schema_version": "truth_v1",
+  "generated_at": "2026-09-18T01:53:02.572713+00:00",
   "source": "C:/Users/zydlo/OneDrive/Desktop/electionmodel26/data/raw/external/pre_election_seat_rosters.json",
-  "source_sha256": "78375eedeb08d8f307e102deb30a472b9fa41057fba239ca8f2889f2380a4213",
-  "note": "Independent of result vote ingestion; built from pre_election_seat_rosters.json only.",
+  "source_sha256": "176cf76e390d3b7e7d12478a165bdfb9f8a54ecc31b83af0ad4b9ee9c71ca10f",
+  "note": "Held seats from pre_election_seat_rosters.json. post_dem_seats/canaries are independently curated chamber facts.",
   "cycles": {
     "2014": {
       "held_dem": 34,
       "held_rep": 30,
       "held_ind": 2,
       "n_contested_expected": 36,
+      "expected_race_ids": [
+        "senate-2014-AK",
+        "senate-2014-AL",
+        "senate-2014-AR",
+        "senate-2014-CO",
+        "senate-2014-DE",
+        "senate-2014-GA",
+        "senate-2014-HI-special",
+        "senate-2014-IA",
+        "senate-2014-ID",
+        "senate-2014-IL",
+        "senate-2014-KS",
+        "senate-2014-KY",
+        "senate-2014-LA",
+        "senate-2014-MA",
+        "senate-2014-ME",
+        "senate-2014-MI",
+        "senate-2014-MN",
+        "senate-2014-MS",
+        "senate-2014-MT",
+        "senate-2014-NC",
+        "senate-2014-NE",
+        "senate-2014-NH",
+        "senate-2014-NJ",
+        "senate-2014-NM",
+        "senate-2014-OK",
+        "senate-2014-OK-special",
+        "senate-2014-OR",
+        "senate-2014-RI",
+        "senate-2014-SC",
+        "senate-2014-SC-special",
+        "senate-2014-SD",
+        "senate-2014-TN",
+        "senate-2014-TX",
+        "senate-2014-VA",
+        "senate-2014-WV",
+        "senate-2014-WY"
+      ],
       "contested_race_ids": [
         "senate-2014-AK",
         "senate-2014-AL",
@@ -48,13 +87,65 @@
         "senate-2014-WV",
         "senate-2014-WY"
       ],
-      "post_election_dem_seats": null
+      "expected_special_ids": [
+        "senate-2014-HI-special",
+        "senate-2014-OK-special",
+        "senate-2014-SC-special"
+      ],
+      "post_dem_seats": 46,
+      "post_election_dem_seats": 46,
+      "post_dem_control": false,
+      "vp_tiebreak_party": "D",
+      "canaries": [
+        {
+          "race_id": "senate-2014-LA",
+          "winner_party": "R",
+          "dem_votes": 561210,
+          "rep_votes": 712379
+        }
+      ]
     },
     "2016": {
       "held_dem": 36,
       "held_rep": 30,
       "held_ind": 2,
       "n_contested_expected": 34,
+      "expected_race_ids": [
+        "senate-2016-AK",
+        "senate-2016-AL",
+        "senate-2016-AR",
+        "senate-2016-AZ",
+        "senate-2016-CA",
+        "senate-2016-CO",
+        "senate-2016-CT",
+        "senate-2016-FL",
+        "senate-2016-GA",
+        "senate-2016-HI",
+        "senate-2016-IA",
+        "senate-2016-ID",
+        "senate-2016-IL",
+        "senate-2016-IN",
+        "senate-2016-KS",
+        "senate-2016-KY",
+        "senate-2016-LA",
+        "senate-2016-MD",
+        "senate-2016-MO",
+        "senate-2016-NC",
+        "senate-2016-ND",
+        "senate-2016-NH",
+        "senate-2016-NV",
+        "senate-2016-NY",
+        "senate-2016-OH",
+        "senate-2016-OK",
+        "senate-2016-OR",
+        "senate-2016-PA",
+        "senate-2016-SC",
+        "senate-2016-SD",
+        "senate-2016-UT",
+        "senate-2016-VT",
+        "senate-2016-WA",
+        "senate-2016-WI"
+      ],
       "contested_race_ids": [
         "senate-2016-AK",
         "senate-2016-AL",
@@ -91,13 +182,55 @@
         "senate-2016-WA",
         "senate-2016-WI"
       ],
-      "post_election_dem_seats": null
+      "expected_special_ids": [],
+      "post_dem_seats": 48,
+      "post_election_dem_seats": 48,
+      "post_dem_control": false,
+      "vp_tiebreak_party": "D",
+      "canaries": []
     },
     "2018": {
-      "held_dem": 25,
-      "held_rep": 40,
-      "held_ind": 2,
+      "held_dem": 23,
+      "held_rep": 42,
+      "held_ind": 0,
       "n_contested_expected": 35,
+      "expected_race_ids": [
+        "senate-2018-AZ",
+        "senate-2018-CA",
+        "senate-2018-CT",
+        "senate-2018-DE",
+        "senate-2018-FL",
+        "senate-2018-HI",
+        "senate-2018-IN",
+        "senate-2018-MA",
+        "senate-2018-MD",
+        "senate-2018-ME",
+        "senate-2018-MI",
+        "senate-2018-MN",
+        "senate-2018-MN-special",
+        "senate-2018-MO",
+        "senate-2018-MS",
+        "senate-2018-MS-special",
+        "senate-2018-MT",
+        "senate-2018-ND",
+        "senate-2018-NE",
+        "senate-2018-NJ",
+        "senate-2018-NM",
+        "senate-2018-NV",
+        "senate-2018-NY",
+        "senate-2018-OH",
+        "senate-2018-PA",
+        "senate-2018-RI",
+        "senate-2018-TN",
+        "senate-2018-TX",
+        "senate-2018-UT",
+        "senate-2018-VA",
+        "senate-2018-VT",
+        "senate-2018-WA",
+        "senate-2018-WI",
+        "senate-2018-WV",
+        "senate-2018-WY"
+      ],
       "contested_race_ids": [
         "senate-2018-AZ",
         "senate-2018-CA",
@@ -135,13 +268,66 @@
         "senate-2018-WV",
         "senate-2018-WY"
       ],
-      "post_election_dem_seats": null
+      "expected_special_ids": [
+        "senate-2018-MN-special",
+        "senate-2018-MS-special"
+      ],
+      "post_dem_seats": 47,
+      "post_election_dem_seats": 47,
+      "post_dem_control": false,
+      "vp_tiebreak_party": "R",
+      "canaries": [
+        {
+          "race_id": "senate-2018-OH",
+          "winner_party": "D",
+          "dem_votes": 2358508,
+          "rep_votes": 2057559,
+          "min_margin_pp": 6.5
+        }
+      ]
     },
     "2020": {
       "held_dem": 35,
       "held_rep": 30,
       "held_ind": 2,
       "n_contested_expected": 35,
+      "expected_race_ids": [
+        "senate-2020-AK",
+        "senate-2020-AL",
+        "senate-2020-AR",
+        "senate-2020-AZ-special",
+        "senate-2020-CO",
+        "senate-2020-DE",
+        "senate-2020-GA",
+        "senate-2020-GA-special",
+        "senate-2020-IA",
+        "senate-2020-ID",
+        "senate-2020-IL",
+        "senate-2020-KS",
+        "senate-2020-KY",
+        "senate-2020-LA",
+        "senate-2020-MA",
+        "senate-2020-ME",
+        "senate-2020-MI",
+        "senate-2020-MN",
+        "senate-2020-MS",
+        "senate-2020-MT",
+        "senate-2020-NC",
+        "senate-2020-NE",
+        "senate-2020-NH",
+        "senate-2020-NJ",
+        "senate-2020-NM",
+        "senate-2020-OK",
+        "senate-2020-OR",
+        "senate-2020-RI",
+        "senate-2020-SC",
+        "senate-2020-SD",
+        "senate-2020-TN",
+        "senate-2020-TX",
+        "senate-2020-VA",
+        "senate-2020-WV",
+        "senate-2020-WY"
+      ],
       "contested_race_ids": [
         "senate-2020-AK",
         "senate-2020-AL",
@@ -179,20 +365,35 @@
         "senate-2020-WV",
         "senate-2020-WY"
       ],
-      "post_election_dem_seats": null
+      "expected_special_ids": [
+        "senate-2020-AZ-special",
+        "senate-2020-GA-special"
+      ],
+      "post_dem_seats": 50,
+      "post_election_dem_seats": 50,
+      "post_dem_control": true,
+      "vp_tiebreak_party": "D",
+      "canaries": [
+        {
+          "race_id": "senate-2020-GA-special",
+          "winner_party": "D",
+          "dem_votes": 2289113,
+          "rep_votes": 2195841
+        }
+      ]
     },
     "2022": {
       "held_dem": 35,
       "held_rep": 29,
       "held_ind": 2,
       "n_contested_expected": 36,
-      "contested_race_ids": [
+      "expected_race_ids": [
         "senate-2022-AK",
         "senate-2022-AL",
         "senate-2022-AR",
         "senate-2022-AZ",
         "senate-2022-CA",
-        "senate-2022-CA-special",
+        "senate-2022-CA-unexpired",
         "senate-2022-CO",
         "senate-2022-CT",
         "senate-2022-FL",
@@ -224,13 +425,117 @@
         "senate-2022-WA",
         "senate-2022-WI"
       ],
-      "post_election_dem_seats": null
+      "contested_race_ids": [
+        "senate-2022-AK",
+        "senate-2022-AL",
+        "senate-2022-AR",
+        "senate-2022-AZ",
+        "senate-2022-CA",
+        "senate-2022-CA-unexpired",
+        "senate-2022-CO",
+        "senate-2022-CT",
+        "senate-2022-FL",
+        "senate-2022-GA",
+        "senate-2022-HI",
+        "senate-2022-IA",
+        "senate-2022-ID",
+        "senate-2022-IL",
+        "senate-2022-IN",
+        "senate-2022-KS",
+        "senate-2022-KY",
+        "senate-2022-LA",
+        "senate-2022-MD",
+        "senate-2022-MO",
+        "senate-2022-NC",
+        "senate-2022-ND",
+        "senate-2022-NH",
+        "senate-2022-NV",
+        "senate-2022-NY",
+        "senate-2022-OH",
+        "senate-2022-OK",
+        "senate-2022-OK-special",
+        "senate-2022-OR",
+        "senate-2022-PA",
+        "senate-2022-SC",
+        "senate-2022-SD",
+        "senate-2022-UT",
+        "senate-2022-VT",
+        "senate-2022-WA",
+        "senate-2022-WI"
+      ],
+      "expected_special_ids": [
+        "senate-2022-CA-unexpired",
+        "senate-2022-OK-special"
+      ],
+      "post_dem_seats": 51,
+      "post_election_dem_seats": 51,
+      "post_dem_control": true,
+      "vp_tiebreak_party": "D",
+      "canaries": [
+        {
+          "race_id": "senate-2022-CA",
+          "winner_party": "D",
+          "dem_votes": 6621621,
+          "rep_votes": 4222029
+        },
+        {
+          "race_id": "senate-2022-CA-unexpired",
+          "winner_party": "D",
+          "dem_votes": 6559308,
+          "rep_votes": 4212450
+        },
+        {
+          "race_id": "senate-2022-OK",
+          "other_votes": 41402
+        },
+        {
+          "race_id": "senate-2022-OK-special",
+          "other_votes": 34449
+        }
+      ]
     },
     "2024": {
-      "held_dem": 30,
-      "held_rep": 35,
-      "held_ind": 1,
+      "held_dem": 27,
+      "held_rep": 38,
+      "held_ind": 0,
       "n_contested_expected": 35,
+      "expected_race_ids": [
+        "senate-2024-AZ",
+        "senate-2024-CA",
+        "senate-2024-CA-unexpired",
+        "senate-2024-CT",
+        "senate-2024-DE",
+        "senate-2024-FL",
+        "senate-2024-HI",
+        "senate-2024-IN",
+        "senate-2024-MA",
+        "senate-2024-MD",
+        "senate-2024-ME",
+        "senate-2024-MI",
+        "senate-2024-MN",
+        "senate-2024-MO",
+        "senate-2024-MS",
+        "senate-2024-MT",
+        "senate-2024-ND",
+        "senate-2024-NE",
+        "senate-2024-NE-unexpired",
+        "senate-2024-NJ",
+        "senate-2024-NM",
+        "senate-2024-NV",
+        "senate-2024-NY",
+        "senate-2024-OH",
+        "senate-2024-PA",
+        "senate-2024-RI",
+        "senate-2024-TN",
+        "senate-2024-TX",
+        "senate-2024-UT",
+        "senate-2024-VA",
+        "senate-2024-VT",
+        "senate-2024-WA",
+        "senate-2024-WI",
+        "senate-2024-WV",
+        "senate-2024-WY"
+      ],
       "contested_race_ids": [
         "senate-2024-AZ",
         "senate-2024-CA",
@@ -268,7 +573,23 @@
         "senate-2024-WV",
         "senate-2024-WY"
       ],
-      "post_election_dem_seats": null
+      "expected_special_ids": [
+        "senate-2024-CA-unexpired",
+        "senate-2024-NE-unexpired"
+      ],
+      "post_dem_seats": 47,
+      "post_election_dem_seats": 47,
+      "post_dem_control": false,
+      "vp_tiebreak_party": "D",
+      "canaries": [
+        {
+          "race_id": "senate-2024-AZ",
+          "winner_party": "D",
+          "dem_votes": 1676335,
+          "rep_votes": 1595761,
+          "min_margin_pp": 2.0
+        }
+      ]
     }
   }
 }

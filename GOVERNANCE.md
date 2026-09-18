@@ -3,10 +3,9 @@
 Blueprint §§11–12 roles and change control (Senate research production).
 
 ## Public live probabilities
-**HOLD (blueprint audit 14 Sep 2026 / v0.9.20):** `PUBLIC_LIVE_ENABLED=False`.
-The prior v0.9.19 live clearance is superseded. `publish-live` fail-closes until truth
-ledger, vintages, fold purity, and version-coherent gates meet the revised checklist
-in `data/artifacts/_v0919_blueprint_audit_2026-09-14.txt`.
+**HOLD (17 Sep 2026 data-drop audit / v0.9.21):** `PUBLIC_LIVE_ENABLED=False`.
+Truth_v1 ledger/expectations are unified; Wikipedia vote scrape remains quarantined.
+`publish-live` fail-closes until vintages and fold-pure validation clear a fresh review.
 
 Current surface: `research_only`. Do not label research runs as live.
 

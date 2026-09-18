@@ -309,19 +309,69 @@ def map_fte_to_official_race_id(
         return None, None
     seat = _seat_class_token(seat_name)
     up = (meta or {}).get("seat_class_up")
-    specials = [c for c in by_state if c.get("kind") == "special"]
-    regulars = [c for c in by_state if c.get("kind") == "regular"]
+    specials = [
+        c
+        for c in by_state
+        if c.get("kind") in {"special", "unexpired"} or c.get("term_type") == "unexpired"
+    ]
+    regulars = [c for c in by_state if c.get("kind") == "regular" and c.get("term_type") != "unexpired"]
+    # Prefer the class that is up this cycle for regulars; only route to special/unexpired
+    # when FTE seat_name points at a different class (GA 2020 Class III, NE 2024 Class II).
     if seat and up and seat != up and specials:
-        return specials[0]["race_id"], "special"
-    if seat and specials and regulars:
         for sp in specials:
             if str(sp.get("seat_class")) == seat:
                 return sp["race_id"], "special"
+        return specials[0]["race_id"], "special"
     if regulars:
         return regulars[0]["race_id"], "regular"
     if specials:
         return specials[0]["race_id"], "special"
     return None, None
+
+
+def companion_unexpired_race_ids(
+    cycle: int,
+    state: str,
+    primary_race_id: str,
+    *,
+    dem_name: str | None = None,
+    rep_name: str | None = None,
+) -> list[str]:
+    """Same-state unexpired ballots that share the polled matchup (not distinct races)."""
+    from midterms.evidence.official_ballot import contested_contests
+    from midterms.evidence.official_ledger import nominees_from_ledger
+
+    try:
+        noms = nominees_from_ledger(cycle)
+    except Exception:  # noqa: BLE001
+        noms = {}
+    out: list[str] = []
+    for c in contested_contests(cycle):
+        if c.get("state") != state:
+            continue
+        rid = str(c.get("race_id") or "")
+        if rid == primary_race_id:
+            continue
+        if not (
+            c.get("term_type") == "unexpired"
+            or c.get("kind") == "unexpired"
+            or rid.endswith("-unexpired")
+        ):
+            continue
+        nom = noms.get(rid) or {}
+        # Only alias when the unexpired ballot is the same D/R pairing (CA dual-ballot).
+        if dem_name and nom.get("dem_candidate_name"):
+            if str(nom["dem_candidate_name"]).lower() not in str(dem_name).lower() and str(
+                dem_name
+            ).lower() not in str(nom["dem_candidate_name"]).lower():
+                continue
+        if rep_name and nom.get("rep_candidate_name"):
+            if str(nom["rep_candidate_name"]).lower() not in str(rep_name).lower() and str(
+                rep_name
+            ).lower() not in str(nom["rep_candidate_name"]).lower():
+                continue
+        out.append(rid)
+    return out
 
 
 def normalize_fte_senate_polls(
@@ -330,7 +380,7 @@ def normalize_fte_senate_polls(
     path: Path | None = None,
     cycles: list[int] | None = None,
     include_hypothetical: bool = False,
-    stages: tuple[str, ...] = ("general",),
+    stages: tuple[str, ...] = ("general", "runoff"),
 ) -> pd.DataFrame:
     """
     Collapse candidate-level FTE rows into two-party margin poll records.
@@ -445,52 +495,62 @@ def normalize_fte_senate_polls(
             hypothetical = str(hyp_raw).lower() in {"1", "true", "yes", "t"}
         poll_id = f"fte-{meta.get('poll_id')}-{meta.get('question_id')}"
         payload = f"{poll_id}|{margin}|{sample_size}|{matchup_id}".encode()
-        rows.append(
-            empty_poll_row(
-                poll_id=poll_id,
-                study_id=f"fte-study-{meta.get('poll_id')}",
-                release_version=1,
-                pollster_id=pollster,
-                sponsor_id=str(meta.get("sponsors") or "none") or "none",
-                source_url=str(meta.get("url") or "https://projects.fivethirtyeight.com/polls/"),
-                raw_hash=_sha256(payload),
-                field_start=field_start,
-                field_end=field_end,
-                published_at=published,
-                retrieved_at=now,
-                valid_from=published,
-                available_at=published,
-                event_time=field_end,
-                election_id=election_id,
-                office="US_SENATE",
-                state=st,
-                race_id=race_id,
-                population=pop,
-                sample_size=sample_size,
-                mode=str(meta.get("methodology") or "") or None,
-                dem_share=round(dem_tw, 3),
-                rep_share=round(rep_tw, 3),
-                undecided=0.0,
-                other_share=0.0,
-                two_party_margin=round(margin, 3),
-                partisan=False,
-                exclusion_status="include",
-                parser_version=PARSER_VERSION,
-                normalized_at=now,
-                geography_version_id="state-usps-v1",
-                candidate_set_version=f"fte:{matchup_id}",
-                question_id=str(meta.get("question_id")),
-                dem_candidate_id=dem_id or None,
-                dem_candidate_name=dem_name or None,
-                rep_candidate_id=rep_id or None,
-                rep_candidate_name=rep_name or None,
-                matchup_id=matchup_id,
-                hypothetical=hypothetical,
-                contest_kind=contest_kind,
-                seat_name=str(meta.get("seat_name") or "") or None,
-                election_stage=str(meta.get("stage") or "general").lower(),
-            )
+        base = empty_poll_row(
+            poll_id=poll_id,
+            study_id=f"fte-study-{meta.get('poll_id')}",
+            release_version=1,
+            pollster_id=pollster,
+            sponsor_id=str(meta.get("sponsors") or "none") or "none",
+            source_url=str(meta.get("url") or "https://projects.fivethirtyeight.com/polls/"),
+            raw_hash=_sha256(payload),
+            field_start=field_start,
+            field_end=field_end,
+            published_at=published,
+            retrieved_at=now,
+            valid_from=published,
+            available_at=published,
+            event_time=field_end,
+            election_id=election_id,
+            office="US_SENATE",
+            state=st,
+            race_id=race_id,
+            population=pop,
+            sample_size=sample_size,
+            mode=str(meta.get("methodology") or "") or None,
+            dem_share=round(dem_tw, 3),
+            rep_share=round(rep_tw, 3),
+            undecided=0.0,
+            other_share=0.0,
+            two_party_margin=round(margin, 3),
+            partisan=False,
+            exclusion_status="include",
+            parser_version=PARSER_VERSION,
+            normalized_at=now,
+            geography_version_id="state-usps-v1",
+            candidate_set_version=f"fte:{matchup_id}",
+            question_id=str(meta.get("question_id")),
+            dem_candidate_id=dem_id or None,
+            dem_candidate_name=dem_name or None,
+            rep_candidate_id=rep_id or None,
+            rep_candidate_name=rep_name or None,
+            matchup_id=matchup_id,
+            hypothetical=hypothetical,
+            contest_kind=contest_kind,
+            seat_name=str(meta.get("seat_name") or "") or None,
+            election_stage=str(meta.get("stage") or "general").lower(),
         )
+        rows.append(base)
+        # Dual-ballot same-day unexpired seats (CA/NE 2024, CA 2022): FTE rarely
+        # distinguishes; clone the regular-row poll onto the companion race_id.
+        if contest_kind == "regular":
+            for companion in companion_unexpired_race_ids(
+                cycle, st, race_id, dem_name=dem_name, rep_name=rep_name
+            ):
+                clone = dict(base)
+                clone["poll_id"] = f"{poll_id}-{companion.split('-')[-1]}"
+                clone["race_id"] = companion
+                clone["contest_kind"] = "unexpired"
+                rows.append(clone)
 
     return align_poll_frame(pd.DataFrame(rows)) if rows else align_poll_frame(pd.DataFrame())
 

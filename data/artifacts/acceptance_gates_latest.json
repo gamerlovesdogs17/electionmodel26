@@ -1,7 +1,7 @@
 {
   "audit_item": "Milestone-0",
-  "model_version": "senate-hierarchical-v0.9.19",
-  "generated_at": "2026-09-15T03:05:41.648249+00:00",
+  "model_version": "senate-hierarchical-v0.9.21",
+  "generated_at": "2026-09-18T01:45:57.196914+00:00",
   "archive_scope": "2014-2024",
   "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
   "gates": {
@@ -80,10 +80,20 @@
       "ok": true,
       "status": "pass",
       "detail": {
-        "publishable": true,
-        "run_class": "publication",
-        "reasons": [],
-        "domain_blockers": [],
+        "publishable": false,
+        "run_class": "non_publication",
+        "reasons": [
+          "finance domain blocked (curated): finance tier=curated not publication-eligible",
+          "economics domain blocked (synthetic): economics series includes *_FIXTURE",
+          "approval domain blocked (curated): approval tier=curated not publication-eligible",
+          "ratings domain blocked (curated): ratings tier=curated not publication-eligible",
+          "markets domain blocked (curated): markets tier=curated not publication-eligible",
+          "polls include blocked tiers (260/260): {'synthetic': 260}",
+          "race universe tier=curated not publication-eligible"
+        ],
+        "domain_blockers": [
+          "economics"
+        ],
         "domains_checked": [
           "approval",
           "demographics",
@@ -93,7 +103,8 @@
           "polls",
           "races",
           "ratings",
-          "results"
+          "results",
+          "wiki_vote_scrape"
         ]
       },
       "evidence": [
@@ -108,14 +119,14 @@
       "id": "G5",
       "name": "Model identity",
       "ok": true,
-      "status": "pass",
+      "status": "partial",
       "detail": {
-        "nested_spine": "pymc",
-        "nested_method": "pymc",
+        "nested_spine": "fast_hierarchical_t",
+        "nested_method": "fast",
         "no_weight_remapping": true,
-        "stack_source_spine": "pymc",
+        "stack_source_spine": "fast_hierarchical_t",
         "reproduction_ok": true,
-        "matrix_sha256": "bc5d77056716502ece5278953bf9b4fe650576a47e9c4611a98ccec81368bfed",
+        "matrix_sha256": "0ba1cb46bd3ee5b1d48122c8fd9a8d177f4bc5b80615aff9b13c4c33d2988572",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
@@ -125,7 +136,7 @@
       ],
       "failure_behavior": "Invalidate run.",
       "notes": [
-        "OOF stack / nested LOO spine is pymc (aligned with production)."
+        "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
       ]
     },
     "G6": {
@@ -136,7 +147,7 @@
       "detail": {
         "g8_metric": "crps",
         "mean_crps": null,
-        "n_folds": 4,
+        "n_folds": 1,
         "freeze_before_truth": true,
         "validation_calibration": {
           "n": 33,
@@ -196,14 +207,12 @@
       "status": "pass",
       "detail": {
         "keep": [
-          "state_space",
-          "ridge_fundamentals",
-          "last_election_swing",
-          "similarity_terminal",
-          "terminal_race"
+          "state_space"
         ],
         "disable": [
           "poll_only_state_space",
+          "ridge_fundamentals",
+          "last_election_swing",
           "equal_weight_polls",
           "shrinkage_polls"
         ],
@@ -237,15 +246,15 @@
       "id": "G10",
       "name": "Reproducibility",
       "ok": true,
-      "status": "pass",
+      "status": "partial",
       "detail": {
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
-          "ok": true,
+          "ok": false,
           "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
           "error": null,
           "forecast_hash_expected": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393",
-          "forecast_hash_actual": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393"
+          "forecast_hash_actual": "e9a23d560aede5b053fcfb1fdecd2e5257e4f0a44823de1ce10dbe6e0e558622"
         },
         "independent_rebuild": {
           "ok": true,
@@ -320,12 +329,13 @@
       "status": "pass",
       "detail": {
         "model_card": true,
-        "model_version": "senate-hierarchical-v0.9.19",
+        "model_version": "senate-hierarchical-v0.9.21",
         "model_card_has_limitations_section": true,
-        "run_class": "publication",
-        "publishable": true,
-        "publication_surface": "live",
+        "run_class": "non_publication",
+        "publishable": false,
+        "publication_surface": "research_only",
         "has_limitations": true,
+        "forecast_model_version": "senate-hierarchical-v0.9.21",
         "validation_limitations_n": 4,
         "poll_coverage_present": true
       },
@@ -414,10 +424,20 @@
       "ok": true,
       "status": "pass",
       "detail": {
-        "publishable": true,
-        "run_class": "publication",
-        "reasons": [],
-        "domain_blockers": [],
+        "publishable": false,
+        "run_class": "non_publication",
+        "reasons": [
+          "finance domain blocked (curated): finance tier=curated not publication-eligible",
+          "economics domain blocked (synthetic): economics series includes *_FIXTURE",
+          "approval domain blocked (curated): approval tier=curated not publication-eligible",
+          "ratings domain blocked (curated): ratings tier=curated not publication-eligible",
+          "markets domain blocked (curated): markets tier=curated not publication-eligible",
+          "polls include blocked tiers (260/260): {'synthetic': 260}",
+          "race universe tier=curated not publication-eligible"
+        ],
+        "domain_blockers": [
+          "economics"
+        ],
         "domains_checked": [
           "approval",
           "demographics",
@@ -427,7 +447,8 @@
           "polls",
           "races",
           "ratings",
-          "results"
+          "results",
+          "wiki_vote_scrape"
         ]
       },
       "evidence": [
@@ -442,14 +463,14 @@
       "id": "G5",
       "name": "Model identity",
       "ok": true,
-      "status": "pass",
+      "status": "partial",
       "detail": {
-        "nested_spine": "pymc",
-        "nested_method": "pymc",
+        "nested_spine": "fast_hierarchical_t",
+        "nested_method": "fast",
         "no_weight_remapping": true,
-        "stack_source_spine": "pymc",
+        "stack_source_spine": "fast_hierarchical_t",
         "reproduction_ok": true,
-        "matrix_sha256": "bc5d77056716502ece5278953bf9b4fe650576a47e9c4611a98ccec81368bfed",
+        "matrix_sha256": "0ba1cb46bd3ee5b1d48122c8fd9a8d177f4bc5b80615aff9b13c4c33d2988572",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
@@ -459,7 +480,7 @@
       ],
       "failure_behavior": "Invalidate run.",
       "notes": [
-        "OOF stack / nested LOO spine is pymc (aligned with production)."
+        "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
       ]
     },
     {
@@ -470,7 +491,7 @@
       "detail": {
         "g8_metric": "crps",
         "mean_crps": null,
-        "n_folds": 4,
+        "n_folds": 1,
         "freeze_before_truth": true,
         "validation_calibration": {
           "n": 33,
@@ -530,14 +551,12 @@
       "status": "pass",
       "detail": {
         "keep": [
-          "state_space",
-          "ridge_fundamentals",
-          "last_election_swing",
-          "similarity_terminal",
-          "terminal_race"
+          "state_space"
         ],
         "disable": [
           "poll_only_state_space",
+          "ridge_fundamentals",
+          "last_election_swing",
           "equal_weight_polls",
           "shrinkage_polls"
         ],
@@ -571,15 +590,15 @@
       "id": "G10",
       "name": "Reproducibility",
       "ok": true,
-      "status": "pass",
+      "status": "partial",
       "detail": {
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
-          "ok": true,
+          "ok": false,
           "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
           "error": null,
           "forecast_hash_expected": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393",
-          "forecast_hash_actual": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393"
+          "forecast_hash_actual": "e9a23d560aede5b053fcfb1fdecd2e5257e4f0a44823de1ce10dbe6e0e558622"
         },
         "independent_rebuild": {
           "ok": true,
@@ -654,12 +673,13 @@
       "status": "pass",
       "detail": {
         "model_card": true,
-        "model_version": "senate-hierarchical-v0.9.19",
+        "model_version": "senate-hierarchical-v0.9.21",
         "model_card_has_limitations_section": true,
-        "run_class": "publication",
-        "publishable": true,
-        "publication_surface": "live",
+        "run_class": "non_publication",
+        "publishable": false,
+        "publication_surface": "research_only",
         "has_limitations": true,
+        "forecast_model_version": "senate-hierarchical-v0.9.21",
         "validation_limitations_n": 4,
         "poll_coverage_present": true
       },
@@ -673,11 +693,14 @@
     }
   ],
   "ok": true,
-  "n_pass": 11,
-  "n_partial": 0,
+  "n_pass": 9,
+  "n_partial": 2,
   "n_fail": 0,
   "failures": [],
-  "partials": [],
+  "partials": [
+    "G5",
+    "G10"
+  ],
   "milestone": {
     "name": "first_publishable",
     "public_live_probabilities": true,

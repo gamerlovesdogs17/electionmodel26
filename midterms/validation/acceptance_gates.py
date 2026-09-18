@@ -85,14 +85,27 @@ def evaluate_acceptance_gates(
     model_card = ROOT / "MODEL_CARD.md"
 
     # --- G1 Race universe / G2 Chamber truth ---
-    if chamber is None:
+    # Always recompute from current warehouse/ledger (v0.9.21 — refuse stale artifacts).
+    try:
+        from midterms.validation.chamber_reconcile import reconcile_all_cycles
+
+        chamber = reconcile_all_cycles()
+        if write:
+            ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+            (art_dir / "chamber_reconcile_latest.json").write_text(
+                json.dumps(chamber, indent=2, default=str), encoding="utf-8"
+            )
+    except Exception as exc:  # noqa: BLE001
+        chamber = {"ok": False, "error": f"recompute_failed: {exc}", "by_cycle": {}}
+
+    if not chamber or chamber.get("error"):
         gates.append(
             _gate(
                 "G1",
                 name="Race universe",
                 ok=False,
                 status="fail",
-                detail="missing chamber_reconcile_latest.json",
+                detail=chamber.get("error") if chamber else "missing chamber reconcile",
                 evidence=[],
             )
         )
@@ -102,7 +115,7 @@ def evaluate_acceptance_gates(
                 name="Chamber truth",
                 ok=False,
                 status="fail",
-                detail="missing chamber_reconcile_latest.json",
+                detail=chamber.get("error") if chamber else "missing chamber reconcile",
                 evidence=[],
             )
         )
@@ -560,6 +573,20 @@ def evaluate_acceptance_gates(
         g11_detail["publishable"] = forecast.get("publishable")
         g11_detail["publication_surface"] = forecast.get("publication_surface")
         g11_detail["has_limitations"] = bool(forecast.get("limitations"))
+        g11_detail["forecast_model_version"] = forecast.get("model_version")
+        from midterms.config import PUBLIC_LIVE_ENABLED
+
+        fv = str(forecast.get("model_version") or "")
+        if fv and fv != MODEL_VERSION:
+            g11_ok = False
+            g11_notes.append(
+                f"stale forecast model_version={fv} != {MODEL_VERSION}"
+            )
+        if forecast.get("publication_surface") == "live" and not PUBLIC_LIVE_ENABLED:
+            g11_ok = False
+            g11_notes.append(
+                "forecast publication_surface=live while PUBLIC_LIVE_ENABLED=False"
+            )
         if not forecast.get("limitations"):
             g11_ok = False
             g11_notes.append("forecast artifact missing limitations block")

@@ -412,12 +412,17 @@ def _region(st: str) -> str:
 
 
 def write_official_ballot_store(years: tuple[int, ...] | None = None) -> dict[str, Any]:
-    """Persist official races from the external ledger (fresh audit R-01)."""
-    from midterms.evidence.build_official_ledger import build_and_write
+    """Persist official races from the external ledger (truth_v1 / v0.9.21)."""
+    from midterms.evidence.build_certified_ledger_v3 import rebuild_canonical_truth
     from midterms.evidence.fixtures import generate_2026_races
     from midterms.evidence.official_ledger import write_ledger_normalized
 
-    build_and_write()
+    # One builder only — never legacy build_official_ledger.build_and_write.
+    try:
+        rebuild_canonical_truth()
+    except FileNotFoundError:
+        # Allow offline use of an already-written ledger.
+        write_ledger_normalized()
     man = write_ledger_normalized()
     # Append 2026 curated races into races_official
     path = NORMALIZED_DIR / "races_official.parquet"
@@ -432,6 +437,7 @@ def write_official_ballot_store(years: tuple[int, ...] | None = None) -> dict[st
     man["years"] = sorted({int(str(e).split("-")[-1]) for e in races["election_id"].unique()})
     man["n_rows"] = int(len(races))
     man["includes_2026"] = True
+    man["builder"] = "build_certified_ledger_v3.rebuild_canonical_truth"
     (MANIFESTS_DIR / "official_senate_ballots.json").write_text(json.dumps(man, indent=2))
     return man
 

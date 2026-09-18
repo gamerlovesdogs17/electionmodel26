@@ -3,10 +3,10 @@
   "generated_at": "2026-09-15T02:54:03.877618+00:00",
   "forecast_as_of": "2026-09-13",
   "election_id": "senate-2026",
-  "model_version": "senate-hierarchical-v0.9.19",
+  "model_version": "senate-hierarchical-v0.9.21",
   "method": "ensemble_stack+overlays",
-  "run_class": "publication",
-  "publishable": true,
+  "run_class": "non_publication",
+  "publishable": false,
   "evidence_eligibility": {
     "publishable": true,
     "run_class": "publication",
@@ -3286,8 +3286,9 @@
       }
     }
   },
-  "publication_surface": "live",
+  "publication_surface": "research_only",
   "limitations": [
+    "v0.9.21 truth integration: live locked; prior v0.9.19 live stamp superseded (no forecast retune).",
     "PUBLIC_LIVE_ENABLED=True after independent re-audit; publish still fail-closes on red gates / ineligible evidence / numerical quality.",
     "Finance uses curated FEC-browse estimates when OpenFEC rate-limits; not full candidate-level digitization for every race.",
     "Historical ledger uses scaled two-party counts for non-digitized FEC races; OH2018/AZ2024 are exact canvass totals.",
@@ -3300,11 +3301,13 @@
     "surface": "live",
     "publication_id": "public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
     "published_at": "2026-09-15T03:05:41.380245+00:00",
-    "model_version": "senate-hierarchical-v0.9.19",
+    "model_version": "senate-hierarchical-v0.9.21",
     "code_commit": "3d4a3429c887f57c46d1d78a3c70cb5c191ddcf8",
     "acceptance_gates_ok": true,
     "disclaimer": "Probabilistic Senate forecast for research and public information. Not betting advice. Chamber control uses \u226551 Dem seats; 50\u201350 is Republican via the Vice President. Independents without a Dem nominee still count toward Democratic caucus seats when applicable.",
     "limitations_url_hint": "MODEL_CARD.md / acceptance_gates_latest.md",
-    "archive_scope": "2018-2024 official for validation; live target is senate-2026"
+    "archive_scope": "2018-2024 official for validation; live target is senate-2026",
+    "superseded": true,
+    "publication_surface": "research_only"
   }
 }

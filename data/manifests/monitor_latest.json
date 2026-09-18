@@ -1,8 +1,8 @@
 {
-  "ok": true,
-  "checked_at": "2026-09-13T20:16:01.176662+00:00",
-  "model_version": "senate-hierarchical-v0.9.5",
-  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+  "ok": false,
+  "checked_at": "2026-09-18T01:54:00.160907+00:00",
+  "model_version": "senate-hierarchical-v0.9.21",
+  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
   "checks": [
     {
       "name": "has_races",
@@ -12,20 +12,20 @@
     {
       "name": "model_version_present",
       "ok": true,
-      "detail": "senate-hierarchical-v0.9.5"
+      "detail": "senate-hierarchical-v0.9.21"
     },
     {
       "name": "control_probs_sum_to_one",
       "ok": true,
       "detail": {
-        "p_dem": 0.77625,
-        "p_rep": 0.22375
+        "p_dem": 0.836375,
+        "p_rep": 0.163625
       }
     },
     {
       "name": "expected_seats_in_range",
       "ok": true,
-      "detail": 52.2975
+      "detail": 52.57125
     },
     {
       "name": "min_polls",
@@ -69,9 +69,18 @@
       "detail": []
     },
     {
+      "name": "numerical_quality_g9",
+      "ok": true,
+      "detail": {
+        "alerts": [],
+        "mcse_control": 0.004135998358543558,
+        "n_draws": 8000.0
+      }
+    },
+    {
       "name": "peer_release_gate",
       "ok": true,
-      "detail": 0.29625
+      "detail": 0.356375
     },
     {
       "name": "chamber_reconcile",
@@ -79,6 +88,8 @@
       "detail": {
         "failures": [],
         "gate_years": [
+          2014,
+          2016,
           2018,
           2020,
           2022,
@@ -97,26 +108,34 @@
       "name": "publishable_claim_consistent",
       "ok": true,
       "detail": {
-        "claimed": true,
-        "eligible": true
+        "claimed": false,
+        "eligible": false
+      }
+    },
+    {
+      "name": "acceptance_gates_for_publication",
+      "ok": true,
+      "detail": {
+        "claimed_publication": false,
+        "acceptance_ok": true
       }
     },
     {
       "name": "polls_file_present",
       "ok": true,
       "detail": {
-        "age_hours": 0.03
+        "age_hours": 0.06
       }
     },
     {
       "name": "run_manifest_present",
       "ok": true,
-      "detail": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\run_senate-2026_2026-09-13_ensemble_stack+overlays_20260901.json"
+      "detail": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\run_senate-2026_2026-09-13_ensemble_stack+overlays_20260919.json"
     },
     {
       "name": "manifest_model_version",
-      "ok": true,
-      "detail": "senate-hierarchical-v0.9.5"
+      "ok": false,
+      "detail": "senate-hierarchical-v0.9.19"
     }
   ],
   "soft_checks": [
@@ -139,53 +158,69 @@
       "name": "peer_brier_crps_gate",
       "ok": true,
       "detail": {
-        "max_abs_control_gap": 0.29625,
+        "max_abs_control_gap": 0.356375,
         "race_scores": {
           "ddhq": {
             "n": 10,
-            "brier_vs_peer_favorite": 0.26158828125,
-            "mae": 0.147875,
-            "crps_proxy": 0.147875,
+            "brier_vs_peer_favorite": 0.22321035156250005,
+            "mae": 0.12411249999999999,
+            "crps_proxy": 0.12411249999999999,
             "ok": false
           },
           "kalshi": {
-            "n": 8,
-            "brier_vs_peer_favorite": 0.094440625,
-            "mae": 0.061566088843934,
-            "crps_proxy": 0.061566088843934,
+            "n": 10,
+            "brier_vs_peer_favorite": 0.15701035156249998,
+            "mae": 0.11267341824598616,
+            "crps_proxy": 0.11267341824598616,
             "ok": true
           }
         },
         "reasons": [
-          "control gap vs primary peer large (gap=0.291 > 0.25); gaps={'ddhq': 0.29625, 'kalshi': 0.29125} \u2014 informational under blueprint \u00a72 (peers not averaged)"
+          "control gap vs primary peer large (gap=0.317 > 0.25); gaps={'ddhq': 0.356375, 'kalshi': 0.31657301980198016} \u2014 informational under blueprint \u00a72 (peers not averaged)"
         ]
       }
     },
     {
       "name": "evidence_eligibility",
+      "ok": false,
+      "detail": {
+        "run_class": "non_publication",
+        "reasons": [
+          "finance domain blocked (curated): finance tier=curated not publication-eligible",
+          "approval domain blocked (curated): approval tier=curated not publication-eligible",
+          "ratings domain blocked (curated): ratings tier=curated not publication-eligible",
+          "markets domain blocked (curated): markets tier=curated not publication-eligible",
+          "polls include blocked tiers (260/260): {'synthetic': 260}",
+          "race universe tier=curated not publication-eligible"
+        ],
+        "artifact_publishable": false
+      }
+    },
+    {
+      "name": "acceptance_gates",
       "ok": true,
       "detail": {
-        "run_class": "publication",
-        "reasons": [],
-        "artifact_publishable": true
+        "n_pass": 9,
+        "n_partial": 2,
+        "n_fail": 0,
+        "failures": [],
+        "partials": [
+          "G5",
+          "G10"
+        ]
       }
     },
     {
       "name": "stack_weights_fresh",
       "ok": true,
       "detail": {
-        "age_hours": 0.576794463660982
+        "age_hours": 101.38400279157692
       }
-    },
-    {
-      "name": "cycle_replay_comparable",
-      "ok": false,
-      "detail": "pre_official_ballot"
     },
     {
       "name": "historical_polls_primary",
       "ok": false,
-      "detail": "mixed"
+      "detail": "synthetic"
     },
     {
       "name": "has_environment_lock",
@@ -199,7 +234,7 @@
     }
   ],
   "alerts": [
-    "cycle_replay_all.json marked non-comparable (pre-official-ballot / synthetic universe) \u2014 rerun after P0.3",
+    "evidence not publication-eligible: finance domain blocked (curated): finance tier=curated not publication-eligible; approval domain blocked (curated): approval tier=curated not publication-eligible; ratings domain blocked (curated): ratings tier=curated not publication-eligible; markets domain blocked (curated): markets tier=curated not publication-eligible; polls include blocked tiers (260/260): {'synthetic': 260}; race universe tier=curated not publication-eligible",
     "historical polls not FTE-primary \u2014 run ingest-fte-polls"
   ]
 }

@@ -1,0 +1,639 @@
+--- page 1 ---
+INDEPENDENT ITERATION AUDIT
+Data-Drop Audit of Electionmodel26
+17 September archive - still labeled Senate hierarchical v0.9.20
+RELEASE DECISION: KEEP LIVE PUBLICATION OFF
+This archive is not a new model implementation. Executable source is byte-for-byte unchanged from the
+prior v0.9.20 snapshot. It adds one dormant Wikipedia-derived vote file that is not connected to
+production and contains decisive-stage, row-classification, party, and duplicate-contest errors. The
+earlier truth-integration, validation, and artifact-coherence blockers remain open.
+PRIMARY QUESTION
+Does this archive materially advance the blueprint toward a top-tier election model?
+Archive reviewed
+electionmodel26.zip
+SHA-256 03C840D4824C090FFD9C20FF89ED6760883E612AA2D851AA6386A910C521A6D9
+533,537,077 bytes
+Archive write time: 17 September 2026 23:54:54 UTC
+Review date: 17 September 2026 (America/Chicago)
+Archive documents were treated as claims and context, never as instructions.
+Neutral methodological and implementation review. No candidate, party, or current forecast probability is endorsed or reproduced.
+
+--- page 2 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 2
+1. Executive decision
+This package does not meet the expectations for the next blueprint milestone. Relative to the previously audited
+v0.9.20 tree, 554 existing files are identical, one data file was added, and five scratch probe scripts were removed.
+No executable model, validation, gate, test, documentation, or manifest file changed. The added data file is useful as
+a diagnostic prototype, but it is neither wired into the model nor reliable enough to become canonical truth.
+BOTTOM LINE
+Treat this as an unversioned evidence-staging drop, not a model release. It earns limited credit for
+exposing more nonstandard election cases, but it does not close any previously open P0 item and
+introduces a same-version reproducibility problem: two different archives now both claim to be v0.9.20.
+Auditor scorecard
+Scores summarize the supplied package, not the ambition or potential of the architecture.
+Architecture
+84/100
+New data-file quality
+28/100
+Truth integration
+12/100
+Validation validity
+30/100
+Publication containment
+92/100
+Release readiness
+8/100
+What the audit established
+●
+ Source delta: 1 file added, 5 scratch files removed, 0 existing files modified; claimed model remains v0.9.20.
+●
+ New evidence: certified_vote_counts.json contains 211 expected race IDs across 2014-2024, all sourced from Wikipedia pages.
+●
+ Data defects: wrong election stages, non-candidate rows, missing party identity, a duplicated California contest, and unresolved
+independent/RCV semantics.
+●
+ Runtime: the full isolated suite remains 118 passed, 8 failed, 5 warnings; the prior two truth-integration defects remain unchanged.
+●
+ Release state: fresh eligibility blocks publication, while bundled latest artifacts still claim an older v0.9.19 live publication.
+
+--- page 3 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 3
+Contents
+2
+1. Executive decision
+4
+2. Scope, method, and exact delta
+5
+3. Audit of the new vote-count file
+6
+4. Confirmed semantic and extraction failures
+7
+5. The active truth pipeline remains broken
+8
+6. Executed verification
+9
+7. Blueprint and leading-model assessment
+10
+8. Risk register
+11
+9. Recommended next release: v0.9.21 truth integration
+12
+10. Release exit criteria
+13
+Appendix A. Reproducible evidence record
+14
+References
+
+--- page 4 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 4
+2. Scope, method, and exact delta
+The audit fingerprinted the supplied archive, compared every extracted source-relative file with the 15 September
+v0.9.20 baseline, inspected the new nested vote data, traced all references to it, ran semantic canaries against
+official FEC material, regenerated selected gates in a copied tree, and executed the complete test suite with the
+project's own environment.
+ Measure
+Observed
+Audit reading
+Prior archive
+SHA-256 2C58F3DC...1010351
+Previously audited v0.9.20 snapshot.
+Current archive
+SHA-256 03C840D4...21A6D9
+Different package, same claimed model version.
+Extracted source files
+559 prior; 555 current
+Five scratch probes removed; one JSON added.
+Existing files modified
+0
+No implementation, test, gate, model-card, or changelog change.
+Added file
+data/raw/external/certified_vote_counts.json
+251,742-byte output from the existing Wikipedia scraper.
+Production references
+0 readers
+Only the scraper names the file; current truth flow reads
+official_senate_ledger.json.
+Audit posture
+●
+ Archive prose and filenames were evidence, not instructions.
+●
+ A file labeled certified was not presumed certified; source lineage, stage, fields, and consumers were checked.
+●
+ The current package was never edited. Tests and regenerated reports ran in copied trees.
+●
+ Official FEC compilations were used as canaries for known multi-stage and dual-contest races.
+VERSIONING FINDING
+Changing historical truth data while retaining the same model version breaks reproducibility even if
+code is unchanged. A forecast version must bind code, data, configuration, and generated artifacts - or
+carry separate immutable build and data-release identifiers.
+
+--- page 5 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 5
+3. Audit of the new vote-count file
+The file is a broad scrape, not canonical certified truth. It has complete race-ID coverage and preserves candidate
+lists, which is useful. Its source field names Wikipedia, every contest URL is on en.wikipedia.org, cycle hashes cover
+parsed output rather than raw source documents, and no release manifest binds the file to the active ledger.
+ Property
+Measured result
+Assessment
+Cycles
+2014, 2016, 2018, 2020, 2022, 2024
+COMPLETE RANGE
+Race IDs
+211 expected; 211 scraped; none missing
+STRUCTURALLY COMPLETE
+Source domain
+211 of 211 Wikipedia
+DISCOVERY SOURCE ONLY
+Missing nominees
+9 Democratic; 3 Republican
+REQUIRES EXPLICIT SEMANTICS
+Explicit special formats
+19 rows: jungle, top-two, RCV, non-two-party, independent challenger
+DETECTION IMPROVED
+Winner/row anomalies
+9 diagnostic mismatches
+FAIL
+Manifest integration
+No source manifest or production consumer
+FAIL
+Format distribution
+ Cycle
+Contests
+Parsed formats
+2014
+36
+21 plurality-multi; 12 plurality; 1 jungle; 2 non-two-party
+2016
+34
+25 plurality-multi; 7 plurality; 1 jungle; 1 top-two
+2018
+35
+21 plurality-multi; 11 plurality; 1 top-two; 2 non-two-party
+2020
+35
+20 plurality-multi; 12 plurality; 1 jungle; 2 non-two-party
+2022
+36
+21 plurality-multi; 11 plurality; 1 each jungle, top-two, RCV, non-two-party
+2024
+35
+21 plurality-multi; 10 plurality; 2 top-two; 1 non-two-party; 1 independent challenger
+IMPORTANT CREDIT
+The file makes hidden institutional complexity visible. That is progress. The failure is using page-table
+size as the main selector without a decisive-stage contract or row-role classifier, then leaving the result
+outside the canonical pipeline.
+
+--- page 6 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 6
+4. Confirmed semantic and extraction failures
+Four official-result canaries are sufficient to reject the file as canonical input in its present form.
+ Race
+New file
+Official-result check
+Failure class
+2014 Louisiana
+Uses 4 Nov jungle totals; naive D/R aggregation
+favors Landrieu.
+FEC final 6 Dec runoff: Cassidy 712,379; Landrieu
+561,210.
+Wrong decisive stage
+2020 Georgia special
+Uses 3 Nov multi-candidate totals; aggregated
+Republicans exceed Democrats.
+FEC 5 Jan runoff: Warnock 2,289,113; Loeffler
+2,195,841.
+Wrong decisive stage
+2022 Oklahoma full and
+special
+Treats registered electors and turnout as
+candidates; other votes exceed 3.48 million in each
+race.
+FEC general totals: other candidates 41,402 full term;
+34,449 unexpired.
+Row-role contamination
+2022 California unexpired
+Duplicates full-term totals: 6,621,621 D and
+4,222,029 R.
+FEC unexpired: 6,559,308 D and 4,212,450 R.
+Dual-contest disambiguation
+Additional defects
+●
+ The 2018 Mississippi special contest records all four candidates with party Unknown, producing zero Democratic and Republican
+totals.
+●
+ Independent winners Angus King and Bernie Sanders remain outside a binary D/R winner rule; chamber control requires caucus
+identity, not invented ballot-party reassignment.
+●
+ The 2022 Alaska RCV row stores first-choice party aggregates and a final-round attachment, but the current scoring contract still
+expects one comparable two-party margin.
+●
+ The content hash proves only that the parsed JSON did not change. It does not preserve or authenticate the raw HTML, state
+canvass, certification date, or retrieval response.
+DATA VERDICT
+Quarantine certified_vote_counts.json as a parser-development fixture. Do not merge it into
+official_senate_ledger.json until decisive-stage selection, row typing, party/caucus identity,
+primary-source lineage, and canary checks are implemented.
+
+--- page 7 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 7
+5. The active truth pipeline remains broken
+Because no code changed, the principal v0.9.20 integration findings remain exactly open. The new file bypasses the
+v3 FTE ledger, while the official ballot store still invokes the obsolete synthetic builder before normalizing the active
+ledger.
+ Boundary
+Current behavior
+Observed consequence
+New file to canonical ledger
+No reader or conversion step
+Added evidence has zero effect on model truth.
+Official ballot rebuild
+Calls legacy build_official_ledger.build_and_write
+KeyError on 2022 CA-special; three tests fail.
+Expectations schema
+Producer emits contested_race_ids and
+post_election_dem_seats
+Consumer expects expected_race_ids and post_dem_seats;
+two tests throw KeyError.
+Outcome target
+results_rows_from_ledger derives winner from D versus R
+votes
+Independent, same-party, and multi-stage races can be
+scored incorrectly.
+Chamber target
+Reconciliation counts nonnegative D/R margin as a
+Democratic win
+Ballot party and caucus control remain conflated.
+Why adding another truth file does not help yet
+●
+ The project now has multiple historical result representations with incompatible semantics and no authoritative selection rule.
+●
+ The added file is less authoritative than the existing hashed FTE aggregator snapshot and does not repair its source labeling or
+party-modeling issues.
+●
+ Until one canonical schema is consumed by every downstream stage, each additional producer increases ambiguity and stale-artifact
+risk.
+P0 CLOSURE CONDITION
+One versioned truth contract must carry race ID, stage, term, candidate ID, ballot party, modeled side,
+caucus party, winner, vote totals, certification status, source object hash, and availability time. Every
+warehouse, score, chamber, poll-identity, and gate consumer must read that contract.
+
+--- page 8 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 8
+6. Executed verification
+All runtime checks were executed in copied trees. The supplied archive was not modified.
+ Check
+Result
+Interpretation
+Full test suite
+118 passed, 8 failed, 5 warnings in 538.88 seconds
+Same result class as prior v0.9.20; not release-clean.
+Genuine integration failures
+5 failures across 2 root causes
+CA-special legacy-builder crash; expectations-schema KeyError.
+Stale assertions
+3 failures
+Binary CA margin, 35-race 2022 count, old G11 behavior.
+Fresh eligibility
+ok=false; publishable=false; non_publication
+Finance, approval, ratings, markets, and race-universe evidence
+blocked.
+Fresh poll coverage
+overall false; 2020 and 2024 fail
+2020 fails lead-30; 2024 fails lead-30 and lead-7.
+Fresh acceptance report
+10 pass, 1 fail; only G3 fails
+Misleading because several passing gates consume stale artifacts
+or containment semantics.
+Bundled forecast
+v0.9.19; publication; publishable=true
+Contradicts v0.9.20 code and fresh eligibility.
+Acceptance-gate integrity
+ Gate
+Fresh status
+Why the status is not sufficient
+G1/G2
+PASS
+Reads prior chamber_reconcile_latest.json even though the current truth consumer throws on the current schema.
+G3
+FAIL
+Correctly exposes inadequate 2020 and 2024 historical poll coverage.
+G4
+PASS
+Treats safe non-publication containment as vintage-integrity success while five domains are blocked.
+G10
+PASS
+Rebuild verification binds an older forecast path, not the new data file or a coherent v0.9.20 candidate.
+G11
+PASS
+Consumes the stale v0.9.19 live forecast and reports public live probabilities despite the v0.9.20 master switch being off.
+GATE VERDICT
+A 10-of-11 summary is not evidence that the release is nearly ready. Gate inputs are not
+version-coherent, and the report mixes containment, evidence validity, reproducibility, and release
+authorization into pass states that can contradict one another.
+
+--- page 9 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 9
+7. Blueprint and leading-model assessment
+The blueprint is still the solution. It says to establish trustworthy, time-indexed evidence and honest out-of-sample
+evaluation before optimizing a sophisticated forecast. This archive demonstrates why that order matters: a
+superficially complete 211-race file fails basic stage and row semantics before any Bayesian layer is involved.
+ Top-tier expectation
+Current archive
+Judgment
+Immutable release identity
+Two different archive hashes share v0.9.20
+FAIL
+Canonical, source-vintaged truth
+Multiple ledgers; new Wikipedia scrape has no manifest or consumer
+FAIL
+Explicit election institutions
+Formats are labeled but decisive stage, candidate roles, and caucus are not enforced
+PARTIAL
+Fold-pure backtesting
+Core validation source unchanged; later-cycle access remains possible
+FAIL
+Deployment-equivalent ensemble scoring
+Mean-only stack objective and whole-component draw mixture unchanged
+FAIL
+Nested uncertainty calibration
+Covariance selection still uses the same fold grid it scores
+FAIL
+Fail-closed release controls
+Master switch works; version-incoherent gates still pass
+PARTIAL
+What should not be copied from peer models
+Do not chase peer probability outputs, visual similarity, or added predictors. The strongest lesson from The Economist,
+FiveThirtyEight/Morris, Silver-style empirical discipline, and other serious forecasters is not a single formula. It is a reproducible chain
+from inputs through uncertainty to scoring. Herd convergence cannot repair a wrong election stage or a future-contaminated fold.
+BLUEPRINT ANSWER
+Keep the blueprint and strengthen its closure rule. An item closes only when the implementation diff,
+adversarial test, clean regeneration, downstream behavior, and immutable release manifest all agree.
+
+--- page 10 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 10
+8. Risk register
+ ID
+Severity
+Risk
+Consequence
+Required control
+R-01
+Critical
+Wrong decisive stage
+Historical winner and target can be wrong
+Stage-aware final-event selection with FEC/state
+canaries
+R-02
+Critical
+Binary D/R outcome contract
+Independent, same-party, and RCV races mis-score
+Candidate winner plus modeled-side and caucus
+mappings
+R-03
+Critical
+Truth producer/consumer
+mismatch
+Rebuild and chamber validation crash
+Single schema package and contract tests
+R-04
+Critical
+Same version, different data
+Forecast cannot be reproduced from version label
+Immutable build ID and data release hash
+R-05
+High
+Meta rows parsed as candidates
+Vote totals and margins are corrupted
+Row-role classifier and sum/invariant checks
+R-06
+High
+Stale gate inputs
+Invalid evidence can appear cleared
+Version/hash/freshness binding on every gate
+R-07
+High
+Future-cycle training access
+Backtest performance is optimistic
+Strict rolling-origin data matrices
+R-08
+High
+Objective/deployment mismatch
+Stack weights do not optimize served distribution
+OOF joint draws and exact mixture scoring
+R-09
+Medium
+Wikipedia-only lineage
+Certified label overstates authority
+Primary-source hierarchy; raw snapshot and retrieval
+hash
+Overall maturity
+CONTAINED RESEARCH PROTOTYPE - NO MATURITY ADVANCE IN THIS DROP
+The architecture remains promising and public containment remains good. This archive does not
+advance the scientific or operational maturity rating because its only new evidence is dormant,
+semantically unsafe, unmanifested, and released under an already-used version identifier.
+
+--- page 11 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 11
+9. Recommended next release: v0.9.21 truth integration
+Make the next release intentionally narrow. Do not retune the forecast or add another data domain until these truth
+contracts are green.
+ Step
+Implementation
+Acceptance evidence
+1. Quarantine
+Mark the Wikipedia JSON parser-development-only; do not expose it through
+official_ledger.
+Eligibility and manifests reject it as canonical truth.
+2. Canonical schema
+Define race, event/stage, candidate, party, caucus, outcome, source, and
+availability fields.
+Schema version plus producer-consumer contract tests.
+3. Source hierarchy
+Use state canvasses/FEC compilations as canonical; retain Wikipedia/FTE for
+discovery and cross-checking.
+Raw-source hashes, retrieval timestamps, and source-specific
+labels.
+4. Decisive event
+Select runoff/final RCV round/dual term explicitly, never by largest HTML table.
+LA 2014, GA 2020 special, AK 2022, CA 2022 canaries.
+5. Row roles
+Classify candidate, write-in, total, turnout, registered voter, note, and party-total
+rows.
+No non-candidate row can enter candidate or other-vote sums.
+6. One builder
+Retire the legacy writer and route every historical result through one canonical
+producer.
+Empty-directory rebuild creates all six cycles without fallback.
+7. Consumer migration
+Update warehouse, chamber, poll identity, scoring, and gate readers together.
+211 contests reconcile; 100-seat accounting; no schema
+KeyError.
+8. Immutable release
+Bump version and bind code/data/config/artifact hashes in one candidate manifest.
+Any stale or foreign-version input fails clearance.
+Canary values that must pass
+●
+ 2014 Louisiana final: Bill Cassidy 712,379; Mary Landrieu 561,210.
+●
+ 2020 Georgia special final: Raphael Warnock 2,289,113; Kelly Loeffler 2,195,841.
+●
+ 2022 Oklahoma full term: other-candidate votes 41,402; no turnout or registered-voter row in candidates.
+●
+ 2022 Oklahoma unexpired: other-candidate votes 34,449; no turnout or registered-voter row in candidates.
+●
+ 2022 California full and unexpired contests remain distinct: 6,621,621/4,222,029 versus 6,559,308/4,212,450.
+●
+ Angus King and Bernie Sanders win as candidates and count toward chamber caucus without being relabeled as Democratic ballot
+nominees.
+
+--- page 12 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 12
+10. Release exit criteria
+ Area
+Must be true before v0.9.21 is accepted
+Identity
+New model/build identifier; manifest binds archive hash, commit, data hashes, config, generation time, and live-switch state.
+Truth
+All 211 contests have authoritative decisive-stage outcomes; exceptions are explicit and reviewed.
+Institutions
+Independent, same-party, jungle/runoff, dual-term, RCV, write-in, and uncontested cases have typed tests.
+Pipeline
+One clean-room command builds raw-normalized results, races, chamber reconciliation, poll coverage, and gates.
+Tests
+Full isolated suite passes; obsolete expectations are replaced only after target semantics are documented.
+Gates
+G1/G2 recompute from current truth; G4 distinguishes containment from validity; G11 refuses stale live artifacts.
+Publication
+Fresh eligibility remains non-publication until every required domain is source-vintaged; public master switch remains off.
+Audit
+Independent review reruns canaries, semantic mutations, artifact freshness checks, and the complete suite from the release
+archive.
+Work explicitly deferred until truth closure
+●
+ Rolling-origin feature matrices and fold-local preprocessing.
+●
+ OOF joint-draw storage and deployment-equivalent stack optimization.
+●
+ Nested covariance calibration with untouched outer cycles.
+●
+ Finance, economics, approval, demographic, ratings, and market vintage replacement.
+●
+ Any new learner, overlay, or public probability release.
+NEXT REVIEW TARGET
+A smaller v0.9.21 archive with one canonical truth path, fully green tests, and an immutable manifest
+would be a major advance. Another broad all-in remediation package would make closure harder to
+prove.
+
+--- page 13 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 13
+Appendix A. Reproducible evidence record
+Archive and delta
+ Field
+Value
+Archive
+C:/Users/zydlo/OneDrive/Desktop/electionmodel26.zip
+Current SHA-256
+03C840D4824C090FFD9C20FF89ED6760883E612AA2D851AA6386A910C521A6D9
+Prior SHA-256
+2C58F3DC81E477710D2F5A3501F87CB252B62B19493E01CF5B26C389A1010351
+Compressed bytes
+533,537,077
+Claimed model
+senate-hierarchical-v0.9.20
+Source delta
+1 added; 5 deleted scratch probes; 0 modified
+Added file
+data/raw/external/certified_vote_counts.json; 251,742 bytes
+Principal code and data locators
+ Finding
+Path
+Added dormant dataset
+data/raw/external/certified_vote_counts.json
+Wikipedia scraper and table-selection logic
+midterms/evidence/ingest_certified_votes.py
+Active canonical ledger reader
+midterms/evidence/official_ledger.py
+Legacy active writer
+midterms/evidence/official_ballot.py:414-420
+Legacy CA-special crash
+midterms/evidence/build_official_ledger.py:244-260
+Expectations consumer mismatch
+midterms/validation/chamber_reconcile.py:49, 122-176
+Gate semantic/version weaknesses
+midterms/validation/acceptance_gates.py:172-232, 543-585
+Unchanged validation and ensemble
+midterms/model/challengers.py; model/ensemble.py; validation/stack_weights.py;
+validation/covariance_calibration.py
+Executed results
+ Procedure
+Observed
+Full isolated suite
+118 passed, 8 failed, 5 warnings in 538.88 seconds
+Fresh eligibility
+false / non_publication; five input-domain blockers
+Fresh poll coverage
+false; 2020 and 2024 fail
+Fresh acceptance summary
+false; 10 pass, 1 fail, but stale/incoherent passes remain
+New-file checks
+211 IDs; 9 diagnostic winner/row mismatches; 2 pseudo-candidate-contaminated races; 1 exact duplicate contest
+vector
+
+--- page 14 ---
+ELECTIONMODEL26  |  V0.9.20 DATA-DROP AUDIT
+Evidence cut: 17 September 2026
+Blueprint closure review - no candidate probabilities reproduced
+Page 14
+References
+[1] Designing a High-Integrity U.S. Election Forecasting System. Original project blueprint used as the normative architecture and validation standard.
+[2] Iteration Delta Audit: Electionmodel26 v0.9.20. Independent audit dated 15 September 2026; baseline for this source-to-source comparison.
+[3] Federal Election Commission. Official Election Results for United States Senate, 2014. Louisiana lines distinguish the 4 November general from the 6 December runoff.
+official PDF
+[4] Federal Election Commission. Federal Elections 2020. Georgia unexpired-term table reports the 5 January 2021 runoff. official PDF
+[5] Federal Election Commission. Federal Elections 2022. California full/unexpired and Oklahoma full/unexpired tables. official PDF
+[6] Oklahoma State Election Board. 2022 November General Election - Official Results. official results page
+[7] FiveThirtyEight. election-results repository and data dictionary. Useful aggregator source; not a substitute for source-specific certification semantics. repository
+[8] The Economist. State and national presidential election forecasting model. Public R/Stan repository, 2020. repository
+[9] Yao, Y.; Vehtari, A.; Simpson, D.; Gelman, A. Using Stacking to Average Bayesian Predictive Distributions. Bayesian Analysis 13(3), 2018. DOI
+Audit conclusion
+The 17 September package is a silent evidence-staging repack of v0.9.20, not the next model iteration. Preserve its
+useful parser experiments, quarantine its output, and return to the blueprint's dependency order. The next
+meaningful advance is a narrow, immutable, fully integrated truth release. Only after that should the project resume
+model comparison, ensemble optimization, and covariance calibration.

@@ -38,13 +38,11 @@ def test_2016_certified_margins_cover_class_iii():
 
     by = {c["state"]: c for c in load_ledger()["cycles"]["2016"]["contests"]}
     assert "AK" in by and "KS" in by
-    ca_m = 100.0 * (by["CA"]["dem_votes"] - by["CA"]["rep_votes"]) / (
-        by["CA"]["dem_votes"] + by["CA"]["rep_votes"]
-    )
-    az_m = 100.0 * (by["AZ"]["dem_votes"] - by["AZ"]["rep_votes"]) / (
-        by["AZ"]["dem_votes"] + by["AZ"]["rep_votes"]
-    )
-    assert ca_m < 50
+    # CA 2016 is same-party general (Harris vs Sanchez); use ledger two_party_margin,
+    # not dem/(dem+rep) which is 100% when rep_votes==0.
+    assert by["CA"]["multiway"]["same_party_general"] is True
+    assert float(by["CA"]["two_party_margin"]) < 50
+    az_m = float(by["AZ"]["two_party_margin"])
     assert az_m > -40
 
 

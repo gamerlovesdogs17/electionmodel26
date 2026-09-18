@@ -1,0 +1,102 @@
+{
+  "audit_item": "P1.3",
+  "years": [
+    2022
+  ],
+  "lead_days": [
+    60
+  ],
+  "n_draws": 200,
+  "coverage_tolerance": 0.03,
+  "n_configs": 3,
+  "baseline": {
+    "scales": {
+      "terminal_nat_sd": 1.8,
+      "terminal_race_sd": 1.8,
+      "sim_scale": 1.4,
+      "length_scale": 1.25,
+      "nu": 5.0
+    },
+    "n_folds": 1,
+    "mean_race_crps": 6.673516462942,
+    "mean_seat_crps": 1.048925,
+    "mean_control_brier": 0.09610000000000003,
+    "mean_coverage_90": 0.8333333333333334,
+    "chamber_objective": 1.1450250000000002
+  },
+  "candidates": [
+    {
+      "scales": {
+        "terminal_nat_sd": 1.8,
+        "terminal_race_sd": 1.8,
+        "sim_scale": 1.4,
+        "length_scale": 1.25,
+        "nu": 5.0
+      },
+      "n_folds": 1,
+      "mean_race_crps": 6.673516462942,
+      "mean_seat_crps": 1.048925,
+      "mean_control_brier": 0.09610000000000003,
+      "mean_coverage_90": 0.8333333333333334,
+      "chamber_objective": 1.1450250000000002
+    },
+    {
+      "scales": {
+        "terminal_nat_sd": 1.4,
+        "terminal_race_sd": 1.8,
+        "sim_scale": 1.4,
+        "length_scale": 1.25,
+        "nu": 5.0
+      },
+      "n_folds": 1,
+      "mean_race_crps": 6.663587008208695,
+      "mean_seat_crps": 1.003575,
+      "mean_control_brier": 0.09000000000000002,
+      "mean_coverage_90": 0.8333333333333334,
+      "chamber_objective": 1.0935750000000002
+    },
+    {
+      "scales": {
+        "terminal_nat_sd": 2.2,
+        "terminal_race_sd": 1.8,
+        "sim_scale": 1.4,
+        "length_scale": 1.25,
+        "nu": 5.0
+      },
+      "n_folds": 1,
+      "mean_race_crps": 6.684759999855389,
+      "mean_seat_crps": 1.1128749999999998,
+      "mean_control_brier": 0.10562499999999997,
+      "mean_coverage_90": 0.8333333333333334,
+      "chamber_objective": 1.2184999999999997
+    }
+  ],
+  "eligible_count": 1,
+  "winner": {
+    "scales": {
+      "terminal_nat_sd": 1.4,
+      "terminal_race_sd": 1.8,
+      "sim_scale": 1.4,
+      "length_scale": 1.25,
+      "nu": 5.0
+    },
+    "n_folds": 1,
+    "mean_race_crps": 6.663587008208695,
+    "mean_seat_crps": 1.003575,
+    "mean_control_brier": 0.09000000000000002,
+    "mean_coverage_90": 0.8333333333333334,
+    "chamber_objective": 1.0935750000000002
+  },
+  "gate_passed": true,
+  "defaults_applied": false,
+  "active_scales_after": {
+    "terminal_nat_sd": 1.8,
+    "terminal_race_sd": 1.8,
+    "sim_scale": 1.4,
+    "length_scale": 1.25,
+    "nu": 5.0
+  },
+  "exit_condition": "Multivariate/chamber scores improve without reliability loss (coverage_90 drop \u2264 tolerance).",
+  "note": "Fast-spine nested grid; winning scales used as production terminal defaults for pymc / pymc_dynamic / fast.",
+  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-3\\test_covariance_calibration_sm0\\covariance_calibration_smoke.json"
+}

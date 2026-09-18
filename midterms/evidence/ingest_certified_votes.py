@@ -1,7 +1,10 @@
-"""Ingest certified U.S. Senate popular-vote totals from Wikipedia.
+"""Wikipedia Senate vote-table scraper — PARSER DEVELOPMENT ONLY (v0.9.21).
 
-Replaces margin-scaled 1e6 synthetic ledger rows (audit A-02) with exact
-integers scraped from state election-result tables.
+Output ``data/raw/external/certified_vote_counts.json`` is quarantined and must
+not feed ``official_senate_ledger.json`` or production warehouse/gates.
+
+See ``data/artifacts/WIKI_VOTE_COUNTS_QUARANTINE.md`` and
+``midterms.evidence.truth_contract``.
 
 Run: python -m midterms.evidence.ingest_certified_votes
 """
@@ -26,8 +29,9 @@ from midterms.evidence.official_ballot import CLASS_I, CLASS_II, CLASS_III
 from midterms.evidence.wiki_ratings import STATE_NAME_TO_ABBR
 
 PARSER_VERSION = "certified-votes-v1"
-USER_AGENT = "midterms-senate-model/0.9.20 (research; certified Senate vote ingest)"
+USER_AGENT = "midterms-senate-model/0.9.21 (research; quarantined Wikipedia vote scrape)"
 OUT_PATH = RAW_DIR / "external" / "certified_vote_counts.json"
+QUARANTINED = True  # never promote to official_senate_ledger
 
 STATE_ABBR_TO_NAME = {v: k for k, v in STATE_NAME_TO_ABBR.items()}
 # Wikipedia article titles use "Washington" / "Georgia", not postal codes.

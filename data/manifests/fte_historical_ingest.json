@@ -1,21 +1,21 @@
 {
   "ok": true,
-  "fetched_at": "2026-09-13T19:59:54.922375+00:00",
-  "n_fte_polls": 3081,
+  "fetched_at": "2026-09-18T01:46:07.650798+00:00",
+  "n_fte_polls": 3319,
   "elections": [
     "senate-2018",
     "senate-2020",
     "senate-2022",
     "senate-2024"
   ],
-  "n_warehouse_polls": 4139,
+  "n_warehouse_polls": 4417,
   "paths": {
     "fte_parquet": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls_fte_historical.parquet",
     "warehouse": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls.parquet"
   },
   "freeze": {
-    "generated_at": "2026-09-13T20:00:10.942298+00:00",
-    "n": 3879,
+    "generated_at": "2026-09-18T01:46:51.122425+00:00",
+    "n": 4157,
     "elections": [
       "senate-2014",
       "senate-2016",
@@ -24,21 +24,18 @@
       "senate-2022",
       "senate-2024"
     ],
-    "sha256": "0a5f763d0d14821300aaa6284aab753582e53d18dfc8a647a5d62f7ffa2ab7be",
+    "sha256": "2ef60a14d8d96cce892af17cf7c880755e7d65f2e67d349fbd8346d5d9ea8a4d",
     "parser_version": "historical-polls-v1",
     "primary_source": "mixed",
-    "n_synthetic": 798,
+    "n_synthetic": 838,
     "paths": {
       "raw": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\senate_historical_polls.json",
       "normalized": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\polls_historical.parquet"
     }
   },
   "poll_coverage": {
-    "ok": false,
-    "failures": [
-      "2018",
-      "2022"
-    ],
+    "ok": true,
+    "failures": [],
     "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\poll_coverage_latest.json"
   },
   "license": "CC BY 4.0",
@@ -49,47 +46,47 @@
   "cycle_manifests": {
     "senate-2018": {
       "election_id": "senate-2018",
-      "n_polls": 789,
-      "n_races": 30,
-      "n_with_candidate_identity": 789,
+      "n_polls": 797,
+      "n_races": 32,
+      "n_with_candidate_identity": 797,
       "n_synthetic_marked": 0,
       "primary_source": "fte",
       "field_end_min": "2016-11-17",
-      "field_end_max": "2018-11-05",
-      "sha256_poll_ids": "300f79161ae67591d939c39fa2cdb77415183aaa726f1caad8388003877bd65b"
+      "field_end_max": "2018-11-25",
+      "sha256_poll_ids": "4c801f6e9a109d7a666247ab2041e70828bc0c698cc278ec704462ba06d9a7cb"
     },
     "senate-2020": {
       "election_id": "senate-2020",
-      "n_polls": 685,
-      "n_races": 30,
-      "n_with_candidate_identity": 685,
+      "n_polls": 874,
+      "n_races": 33,
+      "n_with_candidate_identity": 874,
       "n_synthetic_marked": 0,
       "primary_source": "fte",
-      "field_end_min": "2019-03-10",
-      "field_end_max": "2020-11-02",
-      "sha256_poll_ids": "12cd211ca0f147adb22866e410017c9f0b2d79c2aac60a94bf6da9bb0f57aee3"
+      "field_end_min": "2019-02-13",
+      "field_end_max": "2021-01-04",
+      "sha256_poll_ids": "b97771cfd41bfe3e50eba550375e3de9768534f9b4deeb0d4f3afd952a785ad6"
     },
     "senate-2022": {
       "election_id": "senate-2022",
-      "n_polls": 671,
-      "n_races": 30,
-      "n_with_candidate_identity": 671,
+      "n_polls": 691,
+      "n_races": 31,
+      "n_with_candidate_identity": 691,
       "n_synthetic_marked": 0,
       "primary_source": "fte",
       "field_end_min": "2021-02-22",
-      "field_end_max": "2022-11-07",
-      "sha256_poll_ids": "5287ff188a217be590da4e81c50535e90d558b18177501f61411779e34a4ba28"
+      "field_end_max": "2022-12-05",
+      "sha256_poll_ids": "c43e84090a73f0819c28ebddffe5b54ffab254516caf522d24917a346c595daf"
     },
     "senate-2024": {
       "election_id": "senate-2024",
-      "n_polls": 936,
-      "n_races": 31,
-      "n_with_candidate_identity": 936,
+      "n_polls": 957,
+      "n_races": 32,
+      "n_with_candidate_identity": 957,
       "n_synthetic_marked": 0,
       "primary_source": "fte",
       "field_end_min": "2022-12-20",
       "field_end_max": "2024-11-04",
-      "sha256_poll_ids": "305b59baf7ce004e5057647a3be95362a58c6f06e2543d0fe42da1bdd46f7610"
+      "sha256_poll_ids": "5a567141dddc4087c8ed941e745a7af3e10e60e631e4466654b94c4515013f38"
     }
   }
 }

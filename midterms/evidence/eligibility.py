@@ -188,6 +188,20 @@ def _audit_configured_domains() -> dict[str, Any]:
     else:
         domains["finance"] = _classify_manifest_domain(name="finance", manifest=fund)
 
+    # Quarantine: Wikipedia scrape must never appear as canonical results truth.
+    from midterms.config import RAW_DIR
+    from midterms.evidence.truth_contract import WIKI_QUARANTINE_LABEL
+
+    wiki_path = RAW_DIR / "external" / "certified_vote_counts.json"
+    domains["wiki_vote_scrape"] = {
+        "tier": "synthetic",
+        "eligible": False,
+        "n": 1 if wiki_path.exists() else 0,
+        "quarantine": WIKI_QUARANTINE_LABEL,
+        "path": str(wiki_path.as_posix()) if wiki_path.exists() else None,
+        "note": "parser_development_only — not canonical truth (v0.9.21)",
+    }
+
     econ = _load("economics_vintages.json")
     if econ and (econ.get("production_series") or []):
         domains["economics"] = {
@@ -340,6 +354,8 @@ def audit_evidence(
     extra = _audit_configured_domains()
     domains.update(extra)
     for name, block in extra.items():
+        if block.get("quarantine"):
+            continue  # informational quarantine records are not live inputs
         if election_id == "senate-2026" and not block.get("eligible", True):
             reasons.append(
                 f"{name} domain blocked ({block.get('tier')}): "

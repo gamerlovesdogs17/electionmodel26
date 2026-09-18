@@ -4,6 +4,19 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-17 — senate-hierarchical-v0.9.21
+
+Truth integration (17 Sep data-drop audit §9), live stays off:
+
+- Quarantine Wikipedia `certified_vote_counts.json` as parser-development only.
+- Single canonical **truth_v1** schema/builder (`rebuild_canonical_truth`); legacy
+  `build_official_ledger.build_and_write` redirects; expectations keys unified
+  (`expected_race_ids` / `post_dem_seats`).
+- Decisive-stage selection, meta row-role classifier, Independent caucus mapping
+  (King/Sanders); FEC canaries LA 2014 / GA 2020-special / OK+CA 2022.
+- Warehouse / chamber / gates consume winner_caucus; 211 contests reconcile 2014–2024.
+- Deferred: forecast retune, stack/covariance, finance/econ/approval vintage replacement.
+
 ## 2026-09-15 — senate-hierarchical-v0.9.20
 
 Blueprint-first audit (v0.9.19 review) all-in remediation:

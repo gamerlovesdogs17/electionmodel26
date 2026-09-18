@@ -19,7 +19,8 @@ def test_2022_is_class_iii_not_class_ii():
     assert "PA" in states and "OH" in states and "AZ" in states
     assert "DE" not in states  # Class I/II, not III
     assert any(c["race_id"] == "senate-2022-OK-special" for c in contests)
-    assert len(contests) == 35
+    assert any(c["race_id"] == "senate-2022-CA-unexpired" for c in contests)
+    assert len(contests) == 36
 
 
 def test_reconcile_2022_after_official_store():
@@ -36,7 +37,7 @@ def test_reconcile_2022_after_official_store():
     assert rep["ok"] is True, rep.get("reasons")
     assert rep["realized_dem_seats"] == 51
     assert rep["dem_control"] is True
-    assert rep["n_contested_expected"] == 35
+    assert rep["n_contested_expected"] == 36
 
 
 def test_reconcile_core_cycles():

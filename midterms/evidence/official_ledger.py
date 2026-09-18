@@ -40,7 +40,12 @@ def load_expectations(*, path: Path | None = None) -> dict[str, Any]:
     path = path or EXPECTATIONS_PATH
     if not path.exists():
         raise FileNotFoundError(f"missing independent expectations {path}")
-    return json.loads(path.read_text(encoding="utf-8"))
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    from midterms.evidence.truth_contract import normalize_expectation_cycle
+
+    cycles = raw.get("cycles") or {}
+    raw["cycles"] = {y: normalize_expectation_cycle(block) for y, block in cycles.items()}
+    return raw
 
 
 def ledger_cycles(ledger: dict[str, Any] | None = None) -> list[int]:
@@ -69,12 +74,18 @@ def results_rows_from_ledger(*, ledger: dict[str, Any] | None = None) -> list[di
             dem = float(c.get("dem_votes") or 0)
             rep = float(c.get("rep_votes") or 0)
             other = float(c.get("other_votes") or 0)
-            if dem <= 0 and rep <= 0:
+            multi = c.get("multiway") or {}
+            same_party = bool(multi.get("same_party_general"))
+            if dem <= 0 and rep <= 0 and not same_party:
                 raise ValueError(f"{c.get('race_id')}: ledger requires nonzero vote counts")
             tot = dem + rep
-            margin = 100.0 * (dem - rep) / tot if tot > 0 else 0.0
+            margin = float(c.get("two_party_margin")) if c.get("two_party_margin") is not None else (
+                100.0 * (dem - rep) / tot if tot > 0 else 0.0
+            )
             rid = str(c["race_id"])
             st = str(c.get("state") or rid.split("-")[2])
+            winner_party = str(c.get("winner_party") or ("D" if margin > 0 else ("R" if margin < 0 else "T")))
+            winner_caucus = str(c.get("winner_caucus") or winner_party)
             rows.append(
                 {
                     "result_id": f"{rid}-certified",
@@ -83,15 +94,19 @@ def results_rows_from_ledger(*, ledger: dict[str, Any] | None = None) -> list[di
                     "state": st,
                     "race_id": rid,
                     "event_time": str(c.get("election_day") or f"{year}-11-01"),
-                    "available_at": available_at,
-                    "certified_at": available_at,
+                    "available_at": str(c.get("available_at") or available_at),
+                    "certified_at": str(c.get("available_at") or available_at),
                     "dem_votes": dem,
                     "rep_votes": rep,
                     "other_votes": other,
                     "two_party_margin": float(margin),
-                    "winner_party": "D" if margin > 0 else ("R" if margin < 0 else "T"),
+                    "winner_party": winner_party,
+                    "winner_caucus": winner_caucus,
+                    "modeled_side": c.get("modeled_side") or winner_caucus,
+                    "stage": c.get("stage"),
+                    "certification_status": c.get("certification_status") or "certified",
                     "source_url": str(c.get("source_url") or block.get("source_url") or ""),
-                    "raw_hash": None,
+                    "raw_hash": c.get("source_object_hash"),
                     "retrieved_at": datetime.now(timezone.utc).isoformat(),
                     "release_version": 1,
                 }
@@ -122,7 +137,7 @@ def write_ledger_normalized(*, ledger: dict[str, Any] | None = None) -> dict[str
         build_held_rows_from_expectations,
         election_day,
     )
-    from midterms.evidence.schema import RACE_COLUMNS, RESULT_COLUMNS
+    from midterms.evidence.schema import RACE_COLUMNS, RESULT_COLUMNS, align_result_frame
 
     data = ledger or load_ledger()
     expectations = load_expectations()
@@ -172,11 +187,7 @@ def write_ledger_normalized(*, ledger: dict[str, Any] | None = None) -> dict[str
             races[col] = None
     races = races[RACE_COLUMNS]
 
-    results = pd.DataFrame(results_rows_from_ledger(ledger=data))
-    for col in RESULT_COLUMNS:
-        if col not in results.columns:
-            results[col] = None
-    results = results[RESULT_COLUMNS]
+    results = align_result_frame(pd.DataFrame(results_rows_from_ledger(ledger=data)))
 
     races_path = NORMALIZED_DIR / "races_official.parquet"
     results_path = NORMALIZED_DIR / "results_certified.parquet"

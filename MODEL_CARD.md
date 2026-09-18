@@ -1,4 +1,4 @@
-# Model card — Senate hierarchical v0.9.20
+# Model card — Senate hierarchical v0.9.21
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
@@ -59,8 +59,10 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 - **Limits:** VoteHub has no historical archive; no Cook redistribution; House/EC out of scope; peer panel is compare-only (never averaged)
 
 ## Limitations
-- **Public live probabilities are locked** (`PUBLIC_LIVE_ENABLED=False`) after the 14 Sep 2026 blueprint-first audit of v0.9.19. The prior live stamp is superseded; surface is `research_only` until exact truth, vintages, and fold-pure validation clear a fresh review.
-- Historical margins for non-digitized FEC races must not use 1e6-scaled synthetic counts for publication claims; OH 2018 and AZ 2024 remain exact canvass canaries while the certified vote ingest expands.
+- **Public live probabilities are locked** (`PUBLIC_LIVE_ENABLED=False`) after the 17 Sep 2026 data-drop audit. Surface is `research_only` until truth_v1 consumers, vintages, and fold-pure validation clear a fresh review.
+- Wikipedia `certified_vote_counts.json` is **quarantined** (parser-development only); it is not a canonical truth source. See `data/artifacts/WIKI_VOTE_COUNTS_QUARANTINE.md`.
+- Canonical outcomes use **truth_v1** (`official_senate_ledger.json` + independent expectations): decisive-stage FEC canvass overrides, row-role filtering, and Independent caucus mapping (King/Sanders) without inventing a Democratic ballot party.
+- Historical margins for non-digitized FEC races must not use 1e6-scaled synthetic counts for publication claims; OH 2018, AZ 2024, LA 2014 runoff, and GA 2020 special runoff remain exact canvass canaries.
 - Production economics use FRED public CSV (`A229RX0` + YoY); fixture RDPI series remain as leakage canaries only.
 - Live 2026 finance uses curated FEC-browse estimates when OpenFEC rate-limits (eligible curated tier, not `fixture_hash`); full candidate-level digitization is incomplete.
 - Nested LOO / stack OOF now use a **pymc** spine (aligned with production); predictive mixture currently puts mass on last_election_swing / ridge / state_space (pymc OOF CRPS did not earn mixture weight).

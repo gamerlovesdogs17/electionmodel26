@@ -1,25 +1,32 @@
 {
-  "ok": true,
-  "publishable": true,
-  "run_class": "publication",
+  "ok": false,
+  "publishable": false,
+  "run_class": "non_publication",
   "election_id": "senate-2026",
-  "as_of": "2026-09-13",
-  "reasons": [],
+  "as_of": null,
+  "reasons": [
+    "finance domain blocked (curated): finance tier=curated not publication-eligible",
+    "approval domain blocked (curated): approval tier=curated not publication-eligible",
+    "ratings domain blocked (curated): ratings tier=curated not publication-eligible",
+    "markets domain blocked (curated): markets tier=curated not publication-eligible",
+    "polls include blocked tiers (260/260): {'synthetic': 260}",
+    "race universe tier=curated not publication-eligible"
+  ],
   "domains": {
     "races": {
       "tier": "curated",
       "n": 100,
-      "eligible": true
+      "eligible": false
     },
     "polls": {
-      "n": 320,
+      "n": 260,
       "tier_counts": {
-        "aggregator": 320
+        "synthetic": 260
       },
-      "blocked_n": 0,
-      "eligible_n": 320,
+      "blocked_n": 260,
+      "eligible_n": 0,
       "stale": false,
-      "latest_age_hours": 72.0
+      "latest_age_hours": 121.89992465722221
     },
     "results": {
       "n": 0,
@@ -28,12 +35,17 @@
     },
     "finance": {
       "tier": "curated",
-      "eligible": true,
+      "eligible": false,
       "n": 35,
-      "source_url": "https://www.fec.gov/data/browse-data/?tab=candidates",
-      "source_mix": {
-        "curated_fec_browse_estimate": 35
-      }
+      "blocked_reason": "finance tier=curated not publication-eligible"
+    },
+    "wiki_vote_scrape": {
+      "tier": "synthetic",
+      "eligible": false,
+      "n": 1,
+      "quarantine": "parser_development_only",
+      "path": "C:/Users/zydlo/OneDrive/Desktop/electionmodel26/data/raw/external/certified_vote_counts.json",
+      "note": "parser_development_only \u2014 not canonical truth (v0.9.21)"
     },
     "economics": {
       "tier": "first_party",
@@ -47,10 +59,10 @@
       "note": "production YoY present; fixture series retained only as leakage canaries"
     },
     "approval": {
-      "tier": "first_party",
-      "eligible": true,
+      "tier": "curated",
+      "eligible": false,
       "n": 21,
-      "blocked_reason": null
+      "blocked_reason": "approval tier=curated not publication-eligible"
     },
     "demographics": {
       "tier": "curated",
@@ -60,15 +72,15 @@
     },
     "ratings": {
       "tier": "curated",
-      "eligible": true,
+      "eligible": false,
       "n": 35,
-      "blocked_reason": null
+      "blocked_reason": "ratings tier=curated not publication-eligible"
     },
     "markets": {
       "tier": "curated",
-      "eligible": true,
-      "n": 0,
-      "blocked_reason": null
+      "eligible": false,
+      "n": 34,
+      "blocked_reason": "markets tier=curated not publication-eligible"
     }
   },
   "chamber_reconcile_ok": null,
@@ -84,15 +96,15 @@
   ],
   "publication_eligible_tiers": [
     "aggregator",
-    "curated",
     "first_party",
     "official"
   ],
   "publication_blocked_tiers": [
+    "curated",
     "imputed",
     "synthetic",
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-09-15T01:37:17.125515+00:00"
+  "checked_at": "2026-09-18T01:53:59.728766+00:00"
 }

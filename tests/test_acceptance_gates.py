@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
+from midterms.config import MODEL_VERSION
 from midterms.validation.acceptance_gates import evaluate_acceptance_gates
 from midterms.validation.metrics import (
     calibration_slope_intercept,
@@ -93,8 +94,11 @@ def test_acceptance_gates_from_stubs(tmp_path: Path):
         json.dumps(
             {
                 "method": "pymc",
+                "model_version": MODEL_VERSION,
                 "run_class": "non_publication",
                 "publishable": False,
+                "publication_surface": "research_only",
+                "limitations": ["test stub"],
                 "numerical_quality": {"ok": True, "chamber_mcse": {"mcse_p_dem_control": 0.005}},
             }
         ),

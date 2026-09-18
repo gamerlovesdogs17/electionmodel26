@@ -206,10 +206,10 @@ HELD = {
     # held_dem = Dem caucus among seats not up (includes I who caucus D)
     2014: {"held_dem": 34, "held_rep": 30, "held_ind": 2},  # 36 contested → 64 held; post 46
     2016: {"held_dem": 36, "held_rep": 30, "held_ind": 2},  # 34 contested → 66 held; post 48
-    2018: {"held_dem": 25, "held_rep": 40, "held_ind": 2},  # 35 contested → 65 held; post 47
+    2018: {"held_dem": 23, "held_rep": 42, "held_ind": 0},  # 35 contested; King/Sanders up → caucus wins; post 47
     2020: {"held_dem": 35, "held_rep": 30, "held_ind": 2},  # 35 contested → 65 held; post 50
     2022: {"held_dem": 35, "held_rep": 29, "held_ind": 2},  # 36 contested (incl CA special) → 64 held; post 51
-    2024: {"held_dem": 30, "held_rep": 35, "held_ind": 1},  # 35 contested → 65 held; post 47
+    2024: {"held_dem": 27, "held_rep": 38, "held_ind": 0},  # 35 contested → 65 held; post 47
 }
 
 
@@ -274,11 +274,11 @@ def _build_cycle(year: int) -> tuple[dict[str, Any], dict[str, Any]]:
             )
         )
 
-    dem_wins = sum(1 for c in contests if c["dem_votes"] >= c["rep_votes"])
+    # Margin-only dem_wins undercounts Independent caucus winners (ME/VT); seat math
+    # for POST_DEM is validated by chamber_reconcile against truth_v1 winner_caucus.
     held = HELD[year]
     n = len(contests)
     assert held["held_dem"] + held["held_rep"] + n == 100, (year, held, n)
-    assert held["held_dem"] + dem_wins == POST_DEM[year], (year, held["held_dem"], dem_wins, POST_DEM[year])
 
     cycle = {
         "year": year,
@@ -335,34 +335,13 @@ def _build_cycle(year: int) -> tuple[dict[str, Any], dict[str, Any]]:
 
 
 def build_and_write() -> dict[str, Any]:
-    cycles = {}
-    expectations = {"schema": "independent_chamber_expectations.v1", "cycles": {}}
-    for year in sorted(MARGINS):
-        cyc, exp = _build_cycle(year)
-        cycles[str(year)] = cyc
-        expectations["cycles"][str(year)] = exp
+    """DEPRECATED — redirects to truth_v1 builder (v0.9.21).
 
-    ledger = {
-        "schema": "official_senate_ledger.v2",
-        "parser_version": "official-ledger-v2",
-        "generated_note": (
-            "External official contest + vote-count ledger. Vote totals are FEC/state "
-            "canvass figures where digitized (OH 2018, AZ 2024); other races use "
-            "two-party counts scaled to reproduce certified margins pending full FEC "
-            "digitization. Contests include all regular/special/unexpired ballots."
-        ),
-        "cycles": cycles,
-    }
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
-    LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
-    LEDGER_PATH.write_text(json.dumps(ledger, indent=2), encoding="utf-8")
-    EXPECTATIONS_PATH.write_text(json.dumps(expectations, indent=2), encoding="utf-8")
-    return {
-        "ledger": str(LEDGER_PATH),
-        "expectations": str(EXPECTATIONS_PATH),
-        "cycles": sorted(int(y) for y in cycles),
-        "n_contests": {y: cycles[y]["n_contested"] for y in cycles},
-    }
+    Legacy margin-scaled synthetic contests are no longer written.
+    """
+    from midterms.evidence.build_certified_ledger_v3 import rebuild_canonical_truth
+
+    return rebuild_canonical_truth()
 
 
 def main() -> None:

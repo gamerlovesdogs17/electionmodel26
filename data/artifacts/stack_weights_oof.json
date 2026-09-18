@@ -8,104 +8,52 @@
   ],
   "excluded_g8_disable": [
     "equal_weight_polls",
+    "last_election_swing",
     "poll_only_state_space",
+    "ridge_fundamentals",
     "shrinkage_polls"
   ],
   "excluded_extra": [],
   "filtered_crps_by_fold": {
-    "2018": {
-      "pymc": 4.748341001955088,
-      "state_space": 4.06782440552273,
-      "ridge_fundamentals": 5.945925144394869,
-      "last_election_swing": 4.036314134416643
-    },
-    "2020": {
-      "pymc": 4.502645070482453,
-      "state_space": 3.3820008137490074,
-      "ridge_fundamentals": 3.164426179026026,
-      "last_election_swing": 3.9431075575341694
-    },
     "2022": {
-      "pymc": 4.03482987016115,
-      "state_space": 3.8803862036628196,
-      "ridge_fundamentals": 4.011554465803391,
-      "last_election_swing": 3.824786681478069
-    },
-    "2024": {
-      "pymc": 5.398247266465781,
-      "state_space": 4.627919033278031,
-      "ridge_fundamentals": 3.295774956058028,
-      "last_election_swing": 4.140645160608465
+      "fast_hierarchical_t": 6.9811064768903,
+      "state_space": 6.655609989354037
     }
   },
   "mean_crps_eligible": {
-    "ridge_fundamentals": 4.104420186320579,
-    "pymc": 4.671015802266118,
-    "state_space": 3.989532614053147,
-    "last_election_swing": 3.9862133835093365
+    "fast_hierarchical_t": 6.9811064768903,
+    "state_space": 6.655609989354037
   },
   "stack_weights": {
-    "state_space": 0.1990319497544716,
-    "ridge_fundamentals": 0.3916981344404338,
-    "last_election_swing": 0.4092699158050946
+    "state_space": 1.0
   },
   "stack_weights_production": {
-    "state_space": 0.1990319497544716,
-    "ridge_fundamentals": 0.3916981344404338,
-    "last_election_swing": 0.4092699158050946
+    "state_space": 1.0
   },
   "stack_weights_loo": {
-    "2018": {
-      "pymc": 0.09428215021782449,
-      "state_space": 0.2340104404870075,
-      "ridge_fundamentals": 0.43958565866973065,
-      "last_election_swing": 0.2321217506254373
-    },
-    "2020": {
-      "pymc": 0.1391538456041817,
-      "state_space": 0.2840191535072751,
-      "ridge_fundamentals": 0.2102079475593175,
-      "last_election_swing": 0.3666190533292257
-    },
     "2022": {
-      "pymc": 0.10077463439223784,
-      "state_space": 0.31600900797009057,
-      "ridge_fundamentals": 0.2730959372338607,
-      "last_election_swing": 0.31012042040381094
-    },
-    "2024": {
-      "pymc": 0.15643708153894406,
-      "state_space": 0.3730869336383715,
-      "ridge_fundamentals": 0.16825872950385895,
-      "last_election_swing": 0.3022172553188255
+      "pymc": 1.0
     }
   },
-  "matrix_sha256": "bc5d77056716502ece5278953bf9b4fe650576a47e9c4611a98ccec81368bfed",
+  "matrix_sha256": "0ba1cb46bd3ee5b1d48122c8fd9a8d177f4bc5b80615aff9b13c4c33d2988572",
   "no_weight_remapping": true,
   "predictive_stack_fn": "midterms.model.ensemble.predictive_stack_weights",
   "note": "Weights from race-level predictive mixture when oof_means present; else OOF CRPS softmax. Component identity preserved.",
   "source_nested_loo": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
-  "source_spine_label": "pymc",
-  "source_hierarchical_method": "pymc",
+  "source_spine_label": "fast_hierarchical_t",
+  "source_hierarchical_method": "fast",
   "source_years": [
-    2018,
-    2020,
-    2022,
-    2024
+    2022
   ],
   "reproduction": {
     "ok": true,
     "max_abs_weight_delta": 0.0,
     "fingerprint_ok": true,
     "recomputed": {
-      "state_space": 0.1990319497544716,
-      "ridge_fundamentals": 0.3916981344404338,
-      "last_election_swing": 0.4092699158050946
+      "state_space": 1.0
     },
     "stored": {
-      "state_space": 0.1990319497544716,
-      "ridge_fundamentals": 0.3916981344404338,
-      "last_election_swing": 0.4092699158050946
+      "state_space": 1.0
     }
   },
   "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"

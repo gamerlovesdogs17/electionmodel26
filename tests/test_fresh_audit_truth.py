@@ -53,10 +53,9 @@ def test_canaries_oh_2018_az_2024():
     assert float(az["two_party_margin"]) > 2.0
 
 
-def test_changing_winner_breaks_reconcile(tmp_path):
+def test_changing_winner_breaks_reconcile():
     """Acceptance R-02: held seats are not re-solved when a winner flips."""
     from midterms.evidence.warehouse import Warehouse
-    import pandas as pd
 
     wh = Warehouse(ensure_fixtures=False)
     results = wh.results.copy()
@@ -66,6 +65,8 @@ def test_changing_winner_breaks_reconcile(tmp_path):
     results.loc[mask, "rep_votes"] = 2_000_000
     results.loc[mask, "two_party_margin"] = -33.3
     results.loc[mask, "winner_party"] = "R"
+    if "winner_caucus" in results.columns:
+        results.loc[mask, "winner_caucus"] = "R"
     bad = reconcile_cycle(2018, races=wh.races, results=results)
     assert bad["ok"] is False
     assert any("canary" in r or "post-election" in r for r in bad.get("reasons") or [])

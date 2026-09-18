@@ -76,6 +76,10 @@ RESULT_COLUMNS = [
     "other_votes",
     "two_party_margin",
     "winner_party",
+    "winner_caucus",
+    "modeled_side",
+    "stage",
+    "certification_status",
     "source_url",
     "raw_hash",
     "retrieved_at",
@@ -185,3 +189,27 @@ def align_poll_frame(df: "Any") -> "Any":
         if c not in out.columns:
             out[c] = None
     return out[POLL_COLUMNS]
+
+
+def align_result_frame(df: "Any") -> "Any":
+    """Ensure DataFrame has all RESULT_COLUMNS (truth_v1 extras defaulted)."""
+    import pandas as pd
+
+    if not isinstance(df, pd.DataFrame):
+        df = pd.DataFrame(df)
+    out = df.copy()
+    for c in RESULT_COLUMNS:
+        if c not in out.columns:
+            out[c] = None
+    if "winner_caucus" in out.columns:
+        miss = out["winner_caucus"].isna() | (out["winner_caucus"].astype(str) == "")
+        if "winner_party" in out.columns:
+            out.loc[miss, "winner_caucus"] = out.loc[miss, "winner_party"]
+    if "modeled_side" in out.columns:
+        miss = out["modeled_side"].isna() | (out["modeled_side"].astype(str) == "")
+        if "winner_caucus" in out.columns:
+            out.loc[miss, "modeled_side"] = out.loc[miss, "winner_caucus"]
+    if "certification_status" in out.columns:
+        miss = out["certification_status"].isna() | (out["certification_status"].astype(str) == "")
+        out.loc[miss, "certification_status"] = "certified"
+    return out[RESULT_COLUMNS]

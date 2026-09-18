@@ -46,7 +46,9 @@ def reconcile_cycle(
     if rr.empty:
         return {"ok": False, "year": year, "error": "no races for election_id"}
 
-    expected_ids = set(exp.get("expected_race_ids") or [])
+    expected_ids = set(exp.get("expected_race_ids") or exp.get("contested_race_ids") or [])
+    if not expected_ids:
+        return {"ok": False, "year": year, "error": "expectations missing expected_race_ids"}
     contested = rr[~rr["not_up"]] if "not_up" in rr.columns else rr
     held = rr[rr["not_up"]] if "not_up" in rr.columns else rr.iloc[0:0]
     got_ids = set(contested["race_id"].astype(str))
@@ -78,8 +80,9 @@ def reconcile_cycle(
         rep_v = float(row.get("rep_votes") or 0)
         if dem_v <= 0 and rep_v <= 0:
             zero_vote.append(rid)
+        caucus = str(row.get("winner_caucus") or row.get("winner_party") or "")
         margin = float(row["two_party_margin"])
-        if margin >= 0:
+        if caucus == "D" or (not caucus and margin >= 0):
             dem_wins += 1
 
     realized_dem = held_dem + dem_wins
@@ -148,6 +151,10 @@ def reconcile_cycle(
             canary_failures.append(f"{rid}: dem_votes {int(dem_v)} != {can['dem_votes']}")
         if can.get("rep_votes") is not None and int(rep_v) != int(can["rep_votes"]):
             canary_failures.append(f"{rid}: rep_votes {int(rep_v)} != {can['rep_votes']}")
+        if can.get("other_votes") is not None:
+            oth = float(row.get("other_votes") or 0)
+            if int(oth) != int(can["other_votes"]):
+                canary_failures.append(f"{rid}: other_votes {int(oth)} != {can['other_votes']}")
         if can.get("min_margin_pp") is not None and margin < float(can["min_margin_pp"]):
             canary_failures.append(f"{rid}: margin {margin:.2f} < {can['min_margin_pp']}")
     if canary_failures:
