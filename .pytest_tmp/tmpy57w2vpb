@@ -1,0 +1,6 @@
+def numba_composite(nominal_scalar_variable):
+    # GT(i0, 0)
+    scalar_variable_41 = greater_2(nominal_scalar_variable, scalar_constant_31)
+    # log(i0)
+    scalar_variable_42 = log_2(nominal_scalar_variable)
+    return scalar_variable_42, scalar_variable_41

@@ -1,6 +1,6 @@
 # Acceptance gates — senate-hierarchical-v0.9.21
 
-Generated: 2026-09-19T20:01:52.361312+00:00
+Generated: 2026-09-19T20:07:58.803305+00:00
 Overall: **PASS** (11 pass / 0 partial / 0 fail)
 
 Milestone archive scope is 2014–2024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018–2024 until FTE identity polls are sealed for 2014/2016.

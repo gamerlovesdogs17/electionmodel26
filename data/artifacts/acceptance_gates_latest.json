@@ -1,7 +1,7 @@
 {
   "audit_item": "Milestone-0",
   "model_version": "senate-hierarchical-v0.9.21",
-  "generated_at": "2026-09-19T20:01:52.361312+00:00",
+  "generated_at": "2026-09-19T20:07:58.803305+00:00",
   "archive_scope": "2014-2024",
   "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
   "gates": {
@@ -332,7 +332,7 @@
       "status": "pass",
       "detail": {
         "alerts": [],
-        "mcse_control": 0.004135998358543558
+        "mcse_control": 0.007896957483740178
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json"
@@ -351,8 +351,8 @@
           "ok": true,
           "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
           "error": null,
-          "forecast_hash_expected": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f",
-          "forecast_hash_actual": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f"
+          "forecast_hash_expected": "7f5be5804e6bf583ab8d058542b21707215ebea0bc56dcbf92b50f585e6fc7c0",
+          "forecast_hash_actual": "7f5be5804e6bf583ab8d058542b21707215ebea0bc56dcbf92b50f585e6fc7c0"
         },
         "independent_rebuild": {
           "ok": true,
@@ -783,7 +783,7 @@
       "status": "pass",
       "detail": {
         "alerts": [],
-        "mcse_control": 0.004135998358543558
+        "mcse_control": 0.007896957483740178
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json"
@@ -802,8 +802,8 @@
           "ok": true,
           "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
           "error": null,
-          "forecast_hash_expected": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f",
-          "forecast_hash_actual": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f"
+          "forecast_hash_expected": "7f5be5804e6bf583ab8d058542b21707215ebea0bc56dcbf92b50f585e6fc7c0",
+          "forecast_hash_actual": "7f5be5804e6bf583ab8d058542b21707215ebea0bc56dcbf92b50f585e6fc7c0"
         },
         "independent_rebuild": {
           "ok": true,
@@ -918,7 +918,7 @@
     "name": "first_publishable",
     "public_live_probabilities": false,
     "current_publication_surface": "research_only",
-    "prior_public_publication_id": "public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
+    "prior_public_publication_id": null,
     "public_publication_id": null,
     "requirements": [
       "frozen shadow with identified spine",
