@@ -85,14 +85,23 @@ class Warehouse:
         )
 
     def _attach_poll_priors(self, polls: pd.DataFrame, as_of_d: date) -> tuple[pd.DataFrame, dict[str, Any]]:
-        """Join VoteHub / FTE pollster ratings onto poll rows for the as-of date."""
+        """Join VoteHub / FTE pollster ratings onto poll rows for the as-of date.
+
+        Never rebuilds an unfiltered (current) ratings lookup when the historical
+        filter yields zero rows — unrated pollsters get prior_default.
+        """
         if polls.empty:
-            return polls, {}
-        lookup = build_rating_lookup(as_of=as_of_d)
+            return polls, {"as_of": as_of_d.isoformat(), "n_rated": 0, "n_prior_default": 0}
+        from midterms.evidence.ratings import build_rating_lookup_with_meta
+
+        lookup, lookup_meta = build_rating_lookup_with_meta(as_of=as_of_d)
         quality, house, extra, grade, source = [], [], [], [], []
         used: dict[str, Any] = {}
+        n_default = 0
         for _, row in polls.iterrows():
             r = rating_for(str(row["pollster_id"]), lookup)
+            if r.source == "prior_default":
+                n_default += 1
             quality.append(r.quality_weight)
             house.append(r.house_effect_dem_pp)
             extra.append(r.extra_sd_prior)
@@ -104,6 +113,7 @@ class Warehouse:
                 "house_effect_dem_pp": r.house_effect_dem_pp,
                 "extra_sd_prior": r.extra_sd_prior,
                 "source": r.source,
+                "available_at": r.available_at,
             }
         out = polls.copy()
         out["quality_weight"] = quality
@@ -111,7 +121,13 @@ class Warehouse:
         out["extra_sd_prior"] = extra
         out["pollster_grade"] = grade
         out["rating_source"] = source
-        return out, used
+        meta = {
+            **lookup_meta,
+            "n_rated": int(len(lookup)),
+            "n_prior_default": int(n_default),
+            "pollsters": used,
+        }
+        return out, meta
 
     def build_as_of(self, as_of: str | date, election_id: str) -> EvidenceSnapshot:
         """Return polls/races available at `as_of` for `election_id`. Rejects future rows."""
@@ -163,9 +179,9 @@ class Warehouse:
 
         # Leakage canary: if any remaining poll has available_at > as_of, fail closed
         if len(polls):
-            bad = polls["available_at"].map(_parse_day) > as_of_d
-            if bad.any():
-                raise RuntimeError(f"Leakage canary failed: {int(bad.sum())} future polls")
+            from midterms.evidence.point_in_time import assert_no_future_rows
+
+            assert_no_future_rows(polls, as_of_d, column="available_at", label="polls")
 
         polls, rating_meta = self._attach_poll_priors(polls.reset_index(drop=True), as_of_d)
 

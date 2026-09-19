@@ -49,13 +49,17 @@ def test_ed25519_sign_verify(tmp_path, monkeypatch):
     monkeypatch.setattr(signing_mod, "PRIVATE_KEY_DEFAULT_PATH", tmp_path / "signing_private_key.pem")
     monkeypatch.setattr(signing_mod, "PUBLIC_KEY_PATH", tmp_path / "signing_public_key.pem")
     keys = generate_keypair(write_private=True)
-    priv = Path(keys["private_key_path"]).read_text()
+    priv_path = Path(keys["private_key_path"])
+    priv = priv_path.read_text()
     monkeypatch.setenv("MIDTERMS_SIGNING_PRIVATE_KEY", priv)
     monkeypatch.delenv("MIDTERMS_SIGNING_KEY", raising=False)
     payload = {"run_id": "test", "v": 1}
     sig = sign_payload(payload)
     assert sig["alg"] == "Ed25519"
     assert verify_signature(payload, sig["signature"], alg="Ed25519")
+    # Do not leave private key material on disk after the test.
+    if priv_path.exists():
+        priv_path.unlink()
 
 
 def test_require_signing_fails_without_key(monkeypatch):

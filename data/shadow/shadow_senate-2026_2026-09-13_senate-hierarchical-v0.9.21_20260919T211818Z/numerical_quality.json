@@ -1,0 +1,97 @@
+{
+  "audit_item": "P2.3",
+  "ok": true,
+  "publishable_gate": false,
+  "thresholds": {
+    "mcse_control_max": 0.01,
+    "mcse_seats_max": 0.15,
+    "rhat_max": 1.05,
+    "ess_bulk_min_frac": 0.1,
+    "min_posterior_samples": 1600,
+    "min_sim_draws": 2500
+  },
+  "chamber_mcse": {
+    "n_draws": 4000.0,
+    "mcse_p_dem_control": 0.006952625403399784,
+    "mcse_expected_dem_seats": 0.0622659125874068,
+    "p_dem_control": 0.738,
+    "expected_dem_seats": 52.54125
+  },
+  "race_mcse": {
+    "n_draws": 4000,
+    "n_races": 35,
+    "max_mcse_p_dem": 0.007855953156683153,
+    "mean_mcse_p_dem": 0.0041678365753112165,
+    "p95_mcse_p_dem": 0.00780808441765547
+  },
+  "convergence": {
+    "available": true,
+    "var_name": "mu_final",
+    "n_samples": 4000,
+    "r_hat_max": 1.0,
+    "r_hat_mean": 1.0,
+    "ess_bulk_min": 970.0,
+    "ess_bulk_median": 1900.0,
+    "ess_tail_min": 930.0,
+    "ess_bulk_min_frac": 0.2425
+  },
+  "deterministic_replay": {
+    "ok": true,
+    "seed": 20260919,
+    "n_probe": 64,
+    "draws_fingerprint": "490f2f794ea2f080",
+    "note": "RNG probe identical under fixed seed; draws content fingerprinted"
+  },
+  "checks": [
+    {
+      "name": "mcse_control",
+      "ok": true,
+      "detail": 0.006952625403399784
+    },
+    {
+      "name": "mcse_seats",
+      "ok": true,
+      "detail": 0.0622659125874068
+    },
+    {
+      "name": "min_sim_draws",
+      "ok": true,
+      "detail": 4000
+    },
+    {
+      "name": "race_win_mcse",
+      "ok": true,
+      "detail": 0.007855953156683153
+    },
+    {
+      "name": "min_posterior_samples",
+      "ok": true,
+      "detail": 4000
+    },
+    {
+      "name": "r_hat",
+      "ok": true,
+      "detail": 1.0
+    },
+    {
+      "name": "ess_bulk",
+      "ok": true,
+      "detail": {
+        "ess_bulk_min": 970.0,
+        "frac": 0.2425
+      }
+    },
+    {
+      "name": "deterministic_replay",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "seed": 20260919,
+        "n_probe": 64,
+        "draws_fingerprint": "490f2f794ea2f080",
+        "note": "RNG probe identical under fixed seed; draws content fingerprinted"
+      }
+    }
+  ],
+  "alerts": []
+}

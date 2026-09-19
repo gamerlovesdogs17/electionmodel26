@@ -1,0 +1,57 @@
+{
+  "audit_item": "P3",
+  "shadow_id": "shadow_senate-2026_2026-09-13_senate-hierarchical-v0.9.21_20260919T211818Z",
+  "mode": "prospective_live",
+  "election_id": "senate-2026",
+  "as_of": "2026-09-13",
+  "model_version": "senate-hierarchical-v0.9.21",
+  "code_commit": "f00b9bf34509b29abb764aabf18251d5bc1890b8",
+  "frozen_at": "2026-09-19T21:18:18.965615+00:00",
+  "evaluation": null,
+  "environment": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.5",
+      "scipy": "1.18.1",
+      "pymc": "6.3.2",
+      "pyarrow": "25.0.1"
+    },
+    "locked_at": "2026-09-19T21:18:19.001617+00:00"
+  },
+  "domain_hashes": {
+    "economics_vintages.parquet": "d6d30dd3e820da919648f9c3b56d4b5a915fdebbe96b66602ee36a7f4cd68b41",
+    "expert_ratings.parquet": "019155ecba2960274f51c70640bc266b08939d9d88ece21bc9c81423968ab0fb",
+    "fundraising_shares.parquet": "503f3be052b8d7dd83b4cc5673be3aae929a4f919106c6e5d971a7e175ce11f6",
+    "markets.parquet": "7a6a87fab62560f2835196500b78cdbcd0baa110607c117785021c9199f12e02",
+    "markets_control.json": "438de6e9b1e1aa84ff52042e9182ce4566f5ddb7f3c551472c93ff65a49b9c20",
+    "peer_snapshots.json": "8f76fda71b8654f8c5832245b9ee9dc5c3512bb09f8ad6d69a2f147b3d98e438",
+    "polls.parquet": "8e186305f5add364cc97360f34b28d78f3db0b334f9ee00f02e20e06b3c0acb4",
+    "polls_fte_historical.parquet": "c3458f7630a4b6942b28dfa824f8a9e320984992f4a348df54391bd13f0a82b6",
+    "polls_historical.parquet": "c6093d35903af0b88ccf73199f7173f67c2a017817dbd1791120c714343b0942",
+    "polls_live_votehub.parquet": "71f2f5960165b5d6c4559523f9b4041b658ab91482f8d003089a78f42916e8c2",
+    "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
+    "pollster_ratings.parquet": "32a297dd345d25537781428481e1599238c8587528303354239cd353ca23b150",
+    "pres_approval.parquet": "4525b30d6022c51643d38e4f33987f2fbd1f837276ebaee736db1d7b55fdde47",
+    "races.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
+    "races_official.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
+    "results.parquet": "825d8325b945a1f7514e2bfa6834142618e4ef51916280387700209d7717a9cb",
+    "results_certified.parquet": "5c6941809c6ecb8ae5374202d3a8af819d64e494f8b613a249b8b879cc67a5dc"
+  },
+  "file_hashes": {
+    "forecast.json": "171561f95f9f9b0db97a5af6f5eb161194f810ed979ff7c513030053a62520e7",
+    "validation/stack_weights_oof.json": "3abeca4c33cef683a44ba73f977e0f50988e624e1bd0346d1cbcd1399de97560",
+    "validation/nested_component_loo.json": "4738914b8ca5b54ab7b6cf7718559b95c53022e8f7554f94e27d4707cf3f3390",
+    "numerical_quality.json": "ac1d2ef5848c36a824fbd47aebfe50e8cebb4436e5a24d5cd4b74bee99075e09",
+    "AUDIT_NOTICE.md": "e03fe88ae2cc46ec328b3ed1c765ab5d960c47eff94ba0a93249ceb8a8074545"
+  },
+  "paths": {
+    "shadow_dir": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2026_2026-09-13_senate-hierarchical-v0.9.21_20260919T211818Z",
+    "forecast": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2026_2026-09-13_senate-hierarchical-v0.9.21_20260919T211818Z\\forecast.json"
+  },
+  "publishable": false,
+  "run_class": "non_publication",
+  "exit_condition": "At least one cycle of frozen, timestamped evaluation is retained.",
+  "write_once": true
+}

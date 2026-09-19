@@ -212,27 +212,48 @@ def run_forecast(
         try:
             # Never call write_economic_store() bare — that clobbers FRED with fixtures.
             econ_meta = try_refresh_alfred(as_of=str(as_of)[:10])
+            if econ_meta.get("timeout"):
+                layer_warnings.append(
+                    {
+                        "layer": "economics",
+                        "error": f"economics read timed out: {econ_meta.get('error')}",
+                        "publication_eligible": False,
+                    }
+                )
             if econ_meta.get("used_fixtures") and not econ_meta.get("live_rows"):
                 layer_warnings.append(
                     {
                         "layer": "economics",
                         "error": econ_meta.get("error")
                         or "FRED refresh unavailable; fixture canaries only",
+                        "publication_eligible": False,
+                        "note": econ_meta.get("note"),
                     }
                 )
         except Exception as exc:  # noqa: BLE001
-            layer_warnings.append({"layer": "economics", "error": str(exc)})
+            layer_warnings.append(
+                {"layer": "economics", "error": str(exc), "publication_eligible": False}
+            )
         try:
             write_approval_store()
         except Exception as exc:  # noqa: BLE001
             layer_warnings.append({"layer": "approval", "error": str(exc)})
-        ratings_meta = ensure_expert_ratings_store(
-            election_id=election_id, available_at=str(as_of)[:10]
-        )
-        if ratings_meta.get("wiki_error"):
-            layer_warnings.append(
-                {"layer": "expert_ratings", "error": str(ratings_meta["wiki_error"])}
+        # Never backdate living Wikipedia/curated ratings onto historical as-of stamps.
+        if str(election_id).endswith("-2026"):
+            ratings_meta = ensure_expert_ratings_store(
+                election_id=election_id, available_at=str(as_of)[:10]
             )
+            if ratings_meta.get("wiki_error"):
+                layer_warnings.append(
+                    {"layer": "expert_ratings", "error": str(ratings_meta["wiki_error"])}
+                )
+        else:
+            ratings_meta = {
+                "skipped": True,
+                "reason": "historical election — refuse living ratings refresh with backdated available_at",
+                "election_id": election_id,
+                "as_of": str(as_of)[:10],
+            }
         try:
             write_finance_store(election_id=election_id)
         except Exception as exc:  # noqa: BLE001
@@ -251,10 +272,10 @@ def run_forecast(
         ratings_meta = {}
         markets_meta = {}
 
-    wh = Warehouse()
+    wh = Warehouse(ensure_fixtures=False)
     snap = wh.build_as_of(as_of, election_id)
     # Overlay FEC fundraising shares onto race rows used by fundamentals
-    snap.races = attach_fundraising_to_races(snap.races)
+    snap.races = attach_fundraising_to_races(snap.races, as_of=as_of)
     snap.races = attach_demo_features(apply_vacancy_defaults(snap.races))
     year = None
     try:

@@ -52,7 +52,7 @@ def fetch_alfred_observations(
     }
     url = "https://api.stlouisfed.org/fred/series/observations?" + urlencode(params)
     req = Request(url, headers={"User-Agent": "midterms-senate-model/0.2 (research)"})
-    with urlopen(req, timeout=30) as resp:
+    with urlopen(req, timeout=15) as resp:
         payload = json.loads(resp.read().decode("utf-8"))
     rows = []
     for obs in payload.get("observations") or []:
@@ -152,7 +152,8 @@ def fetch_fred_public_csv(series_id: str = DEFAULT_SERIES) -> pd.DataFrame:
     """Download public FRED graph CSV (no API key). Observation dates only — no ALFRED vintages."""
     url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
     req = Request(url, headers={"User-Agent": "midterms-senate-model/0.9 (research)"})
-    with urlopen(req, timeout=45) as resp:
+    # Keep timeout tight so forecast refresh fails closed quickly rather than hanging.
+    with urlopen(req, timeout=15) as resp:
         text = resp.read().decode("utf-8")
     from io import StringIO
 
@@ -277,15 +278,26 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
     return {"raw": str(raw_path), "normalized": str(norm_path), "manifest": str(man_path)}
 
 
-def yoy_growth_as_of(as_of: str | date, *, election_year: int | None = None) -> float | None:
+def yoy_growth_as_of(
+    as_of: str | date,
+    *,
+    election_year: int | None = None,
+    allow_fixture_canary: bool = False,
+) -> float | None:
     """
     Return vintage YoY real-income growth (%) known by as_of.
 
-    Prefers non-fixture production series; fixtures are leakage-canary only.
+    Prefers non-fixture production series. Fixture series are leakage-canary
+    only — never silently substituted into production/as-of reads unless
+    ``allow_fixture_canary=True`` (tests / explicit canaries).
     """
     path = NORMALIZED_DIR / "economics_vintages.parquet"
     if not path.exists():
-        write_economic_store()
+        # Do not materialize fixtures into the production store on a miss.
+        if allow_fixture_canary:
+            write_economic_store(build_fixture_vintages())
+        else:
+            return None
     df = pd.read_parquet(path)
     as_of_d = date.fromisoformat(as_of) if isinstance(as_of, str) else as_of
     if "available_at" in df.columns:
@@ -298,9 +310,14 @@ def yoy_growth_as_of(as_of: str | date, *, election_year: int | None = None) -> 
         usable = df.copy()
     if usable.empty:
         return None
-    # Prefer production YoY series over fixtures
+    # Prefer production YoY series over fixtures — never silent fixture downgrade.
     prod = usable[~usable["series_id"].astype(str).str.contains("FIXTURE")]
-    pool = prod if len(prod) else usable
+    if len(prod):
+        pool = prod
+    elif allow_fixture_canary:
+        pool = usable
+    else:
+        return None
     if election_year is not None and "election_year" in pool.columns:
         year_hit = pool[pool["election_year"] == election_year]
         if len(year_hit):
@@ -314,15 +331,30 @@ def yoy_growth_as_of(as_of: str | date, *, election_year: int | None = None) -> 
 
 
 def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
-    """Best-effort live ALFRED/FRED pull; fixtures kept only as leakage canaries."""
+    """Best-effort live ALFRED/FRED pull; fixtures kept only as leakage canaries.
+
+    Timeouts / network failures must not silently present fixture YoY as
+    production-quality evidence — ``used_fixtures`` / ``timeout`` flags are set.
+    """
     fixtures = build_fixture_vintages()
     # Prefer API vintage slice when keyed; else public CSV levels → YoY.
-    live = fetch_alfred_observations(realtime_end=as_of)
+    live = pd.DataFrame()
     public = pd.DataFrame()
+    fetch_error: str | None = None
+    timed_out = False
+    try:
+        live = fetch_alfred_observations(realtime_end=as_of)
+    except Exception as exc:  # noqa: BLE001
+        fetch_error = str(exc)
+        timed_out = "timed out" in fetch_error.lower() or "timeout" in fetch_error.lower()
     if live.empty:
         try:
             public = fetch_fred_public_csv()
         except Exception as exc:  # noqa: BLE001
+            fetch_error = str(exc) if not fetch_error else f"{fetch_error}; {exc}"
+            timed_out = timed_out or (
+                "timed out" in str(exc).lower() or "timeout" in str(exc).lower()
+            )
             # Keep any existing production store; only fall back to fixtures if empty.
             existing_path = NORMALIZED_DIR / "economics_vintages.parquet"
             if existing_path.exists():
@@ -334,15 +366,26 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
                             "live_rows": 0,
                             "used_fixtures": False,
                             "preserved_existing": True,
-                            "error": str(exc),
+                            "timeout": timed_out,
+                            "error": fetch_error,
+                            "publication_eligible": True,
+                            "note": "preserved existing non-fixture store after read failure",
                             **paths,
                         }
                 except Exception:  # noqa: BLE001
                     pass
             paths = write_economic_store(fixtures)
-            return {"live_rows": 0, "used_fixtures": True, "error": str(exc), **paths}
+            return {
+                "live_rows": 0,
+                "used_fixtures": True,
+                "timeout": timed_out,
+                "error": fetch_error,
+                "publication_eligible": False,
+                "note": "fixture fallback after economics read failure — not publication-eligible",
+                **paths,
+            }
 
-    frames = [fixtures]
+    frames: list[pd.DataFrame] = []
     yoy = None
     if not live.empty:
         frames.append(live)
@@ -360,8 +403,38 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
             yoy = float(yoy_df.iloc[-1]["value"])
         source = "fred_public_csv"
     else:
+        # Empty live + empty public without raising (e.g. no API key).
+        existing_path = NORMALIZED_DIR / "economics_vintages.parquet"
+        if existing_path.exists():
+            try:
+                existing = pd.read_parquet(existing_path)
+                if len(existing) and existing["series_id"].astype(str).str.contains("FIXTURE").eq(False).any():
+                    paths = write_economic_store(existing)
+                    return {
+                        "live_rows": 0,
+                        "used_fixtures": False,
+                        "preserved_existing": True,
+                        "timeout": timed_out,
+                        "error": fetch_error or "alfred/fred returned empty",
+                        "publication_eligible": True,
+                        "note": "preserved existing non-fixture store after empty economics read",
+                        **paths,
+                    }
+            except Exception:  # noqa: BLE001
+                pass
         paths = write_economic_store(fixtures)
-        return {"live_rows": 0, "used_fixtures": True, **paths}
+        return {
+            "live_rows": 0,
+            "used_fixtures": True,
+            "timeout": timed_out,
+            "error": fetch_error or "alfred/fred returned empty",
+            "publication_eligible": False,
+            "note": "fixture fallback after empty economics read — not publication-eligible",
+            **paths,
+        }
+
+    # Retain fixture canaries alongside production series (eligibility prefers production_series).
+    frames.append(fixtures)
 
     if yoy is not None and live.empty is False:
         as_of_d = as_of or date.today()

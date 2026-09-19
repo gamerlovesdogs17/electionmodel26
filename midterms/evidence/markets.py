@@ -253,6 +253,8 @@ def write_markets_store(
         "errors": errors[:10],
         "control_error": control_err,
         "parser_version": PARSER_VERSION,
+        "source_url": "https://api.elections.kalshi.com/",
+        "tier": "aggregator" if len(races) or control.get("p_dem") is not None else "curated",
         "paths": {
             "raw": str(raw_path),
             "races": str(share_path),

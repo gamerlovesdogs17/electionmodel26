@@ -1,10 +1,10 @@
 {
   "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_21",
-  "generated_at": "2026-09-19T19:44:52.542589+00:00",
+  "generated_at": "2026-09-19T21:01:45.654299+00:00",
   "forecast_as_of": "2026-09-13",
   "election_id": "senate-2026",
   "model_version": "senate-hierarchical-v0.9.21",
-  "code_commit": "113e6da2bcf8fa2efa163652c5f38415acd2bf71",
+  "code_commit": "f00b9bf34509b29abb764aabf18251d5bc1890b8",
   "configuration": {
     "method": "fast",
     "fit_method": "fast",
@@ -15,8 +15,8 @@
     "generic_ballot": -1.0,
     "ensemble": true,
     "stack_weights": {
-      "state_space": 0.9094696609576951,
-      "ridge_fundamentals": 0.09053033904230486
+      "state_space": 0.9094696569982004,
+      "ridge_fundamentals": 0.09053034300179955
     },
     "with_ratings": true,
     "with_markets": true,
@@ -26,28 +26,28 @@
     "control_calibrate": false,
     "allow_fast_fallback": false
   },
-  "configuration_hash": "c2ce94b01a1d9375d22d24b5cbf6eb0ceb49f50951f01151ee192a3a2d4e3b8a",
+  "configuration_hash": "0817b9ca6819681dbb2f10805ddae56398d1cfcc704da10eabacb92585b72324",
   "snapshot_ids": {
-    "evidence": "58e61186d6c7fa91"
+    "evidence": "643eb7eb47f2026b"
   },
   "domain_hashes": {
-    "economics_vintages.parquet": "ce363283cc63da5ed70b086aa80e1de3f71eb807a4e7d812b95c2c763de301ee",
-    "expert_ratings.parquet": "381dcb6fa2c9ce935fc0e86aa9411167ecc54a66401b9bac3465a220585ae197",
+    "economics_vintages.parquet": "7fab620cf84033beab17c8a365100a7064274634df9d431aa9762f8eec87b848",
+    "expert_ratings.parquet": "b778d2b285ae2ef4efe0b2e1b303bab67ecd81aed03ffc4b3f55d0194ac91800",
     "fundraising_shares.parquet": "503f3be052b8d7dd83b4cc5673be3aae929a4f919106c6e5d971a7e175ce11f6",
-    "markets.parquet": "3453fa167e333f288806e00e686b8f80200d4f750531e4dd3c7cd5f9ee7c615b",
-    "markets_control.json": "7e0eeb56611f0564c7693f9f7d91f83d55993718883c078844469fea035a612e",
-    "peer_snapshots.json": "7ac3f2db1b12473becd72c9f86d5843668d4336af3facab8b668f54236f678a6",
-    "polls.parquet": "94156b5573404a7de4c211428d15774b95c7907733d6285eb65abab9f8886dc6",
-    "polls_fte_historical.parquet": "26a22cd62b7d541d38f4512cb473fa77693b429a77633d9dada365b611cfb8b2",
-    "polls_historical.parquet": "94cd4f5778a32f99421af7f446c6d194b8bf60724ed485dd8c0adf3e012ed208",
-    "polls_live_votehub.parquet": "d8e5d122beee05e3af0c079314fdb7d6ee3d8353c49368078669cdbebe56adc3",
+    "markets.parquet": "5802775a602e2e14991338be4871579e22ab4b89508bf9a7fd1461c4eeb9177c",
+    "markets_control.json": "0a4d102aa56c3cade25d5153842ef50ff101c25e8554f82dc02174862d60488e",
+    "peer_snapshots.json": "1d46829ae302fb32d31f37ca6213bdba6c69c227e71ea86f4efa59e0c376751e",
+    "polls.parquet": "8e186305f5add364cc97360f34b28d78f3db0b334f9ee00f02e20e06b3c0acb4",
+    "polls_fte_historical.parquet": "c3458f7630a4b6942b28dfa824f8a9e320984992f4a348df54391bd13f0a82b6",
+    "polls_historical.parquet": "60fa6bce4d188c555814869dce005e2cbf26582babe0b57d83a12c781b55b572",
+    "polls_live_votehub.parquet": "71f2f5960165b5d6c4559523f9b4041b658ab91482f8d003089a78f42916e8c2",
     "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
     "pollster_ratings.parquet": "32a297dd345d25537781428481e1599238c8587528303354239cd353ca23b150",
-    "pres_approval.parquet": "cc140454fc4e6839aed977457d8412ee62906351a0609d14866501c7175686f5",
+    "pres_approval.parquet": "941eb6a93da6a88a2653456a273c174febaaf34aa6d99f0c1caa432c84b61db9",
     "races.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
     "races_official.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
-    "results.parquet": "e5897310230db775a5295a4af82c05e8cc356bcf6e96270e8d9bdc02db29884d",
-    "results_certified.parquet": "f11747ff9fba90f45de5e3366ad7bbda05a82f6e6b88d46363c8152b5873a665"
+    "results.parquet": "825d8325b945a1f7514e2bfa6834142618e4ef51916280387700209d7717a9cb",
+    "results_certified.parquet": "ece3a0e3ab301f5aed61eb367a91784537924012f1342164e7cb78da8ff9b595"
   },
   "environment_lock": {
     "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
@@ -59,26 +59,26 @@
       "pymc": "6.3.2",
       "pyarrow": "25.0.1"
     },
-    "locked_at": "2026-09-19T19:44:52.649051+00:00"
+    "locked_at": "2026-09-19T21:01:45.738298+00:00"
   },
   "seed": 21,
   "draws": 2500,
   "tune": null,
   "chains": null,
   "output_hashes": {
-    "forecast_json": "be741576c16c6daee37d7f90adfbb1f52858cc4284a8702c0970bc5336975aea",
-    "draws": "610806c6d7546fa03a748337f48f03cb0acf424649ae4930adbc9c5f9203e107"
+    "forecast_json": "263a09d26095517377f40989b58241a180031184535d8826c42c110095688d76",
+    "draws": "8a8bef464adfe522631efe9363fb7ee2a3d6d6321effaf1f8b1e043dc12fa5eb"
   },
   "paths": {
-    "forecast": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-15\\test_forecast_with_real_overla0\\forecast_senate-2026_2026-09-13_ensemble_stack+overlays_21.json",
-    "forecast_latest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-15\\test_forecast_with_real_overla0\\forecast_latest.json",
-    "draws": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-15\\test_forecast_with_real_overla0\\draws_senate-2026_2026-09-13_ensemble_stack+overlays_21.npz"
+    "forecast": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.tmp_pytest\\pytest-of-zydlo\\pytest-0\\test_forecast_with_real_overla0\\forecast_senate-2026_2026-09-13_ensemble_stack+overlays_21.json",
+    "forecast_latest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.tmp_pytest\\pytest-of-zydlo\\pytest-0\\test_forecast_with_real_overla0\\forecast_latest.json",
+    "draws": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.tmp_pytest\\pytest-of-zydlo\\pytest-0\\test_forecast_with_real_overla0\\draws_senate-2026_2026-09-13_ensemble_stack+overlays_21.npz"
   },
   "rebuild_mode": false,
   "signature": {
     "alg": "HMAC-SHA256",
-    "sha256": "414aa50c2fb042f26b70c84101c1e470712ecbab294680a614fb863e87e1269c",
-    "signature": "b72519e3cee21b9ac2ae81f3f3ff913bd6bd6fcbcbc3eab8a1205f0f7d7ad05c",
+    "sha256": "32dc7ca330df22b39a650a50bce9fa57e79f62c08a5322c53dad310a3c43e00d",
+    "signature": "e74778b3534d64607e6c5197af2a781c517efb81b5afe105e7b675978afaf29f",
     "key_id": "dev-default",
     "warning": "HMAC legacy \u2014 not a public trust root; configure Ed25519 for production"
   }

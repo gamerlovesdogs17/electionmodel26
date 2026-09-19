@@ -1,6 +1,6 @@
 {
-  "ok": false,
-  "checked_at": "2026-09-19T19:49:15.470381+00:00",
+  "ok": true,
+  "checked_at": "2026-09-19T21:03:01.492945+00:00",
   "model_version": "senate-hierarchical-v0.9.21",
   "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
   "checks": [
@@ -18,24 +18,24 @@
       "name": "control_probs_sum_to_one",
       "ok": true,
       "detail": {
-        "p_dem": 0.836375,
-        "p_rep": 0.163625
+        "p_dem": 0.5235,
+        "p_rep": 0.4765
       }
     },
     {
       "name": "expected_seats_in_range",
       "ok": true,
-      "detail": 52.57125
+      "detail": 50.52325
     },
     {
       "name": "min_polls",
       "ok": true,
-      "detail": 320
+      "detail": 260
     },
     {
       "name": "min_enop",
       "ok": true,
-      "detail": 144.68380050572844
+      "detail": 199.83773609977055
     },
     {
       "name": "has_oh_fl_specials",
@@ -73,14 +73,14 @@
       "ok": true,
       "detail": {
         "alerts": [],
-        "mcse_control": 0.004135998358543558,
-        "n_draws": 8000.0
+        "mcse_control": 0.007896957483740178,
+        "n_draws": 4000.0
       }
     },
     {
       "name": "peer_release_gate",
       "ok": true,
-      "detail": 0.356375
+      "detail": 0.0615
     },
     {
       "name": "chamber_reconcile",
@@ -124,7 +124,7 @@
       "name": "polls_file_present",
       "ok": true,
       "detail": {
-        "age_hours": 0.1
+        "age_hours": 0.03
       }
     },
     {
@@ -134,8 +134,8 @@
     },
     {
       "name": "manifest_model_version",
-      "ok": false,
-      "detail": "senate-hierarchical-v0.9.19"
+      "ok": true,
+      "detail": "senate-hierarchical-v0.9.21"
     }
   ],
   "soft_checks": [
@@ -158,27 +158,40 @@
       "name": "peer_brier_crps_gate",
       "ok": true,
       "detail": {
-        "max_abs_control_gap": 0.356375,
+        "max_abs_control_gap": 0.0615,
         "race_scores": {
           "ddhq": {
             "n": 10,
-            "brier_vs_peer_favorite": 0.22321035156250005,
-            "mae": 0.12411249999999999,
-            "crps_proxy": 0.12411249999999999,
-            "ok": false
+            "brier_vs_peer_favorite": 0.1360808875,
+            "mae": 0.12915000000000001,
+            "crps_proxy": 0.12915000000000001,
+            "ok": true
           },
           "kalshi": {
-            "n": 10,
-            "brier_vs_peer_favorite": 0.15701035156249998,
-            "mae": 0.11267341824598616,
-            "crps_proxy": 0.11267341824598616,
-            "ok": true
+            "n": 7,
+            "brier_vs_peer_favorite": 0.23846032142857143,
+            "mae": 0.1510304439338785,
+            "crps_proxy": 0.1510304439338785,
+            "ok": false
           }
         },
-        "reasons": [
-          "control gap vs primary peer large (gap=0.317 > 0.25); gaps={'ddhq': 0.356375, 'kalshi': 0.31657301980198016} \u2014 informational under blueprint \u00a72 (peers not averaged)"
-        ]
+        "reasons": []
       }
+    },
+    {
+      "name": "layer_warnings",
+      "ok": false,
+      "detail": [
+        {
+          "layer": "evidence_eligibility",
+          "error": "non_publication: finance domain blocked (curated): finance tier=curated not publication-eligible; economics domain blocked (synthetic): economics series includes *_FIXTURE; approval domain blocked (curated): approval tier=curated not publication-eligible; ratings domain blocked (curated): ratings tier=curated not publication-eligible; markets domain blocked (curated): markets tier=curated not publication-eligible; polls include blocked tiers (260/260): {'synthetic': 260}; race universe tier=curated not publication-eligible",
+          "run_class": "non_publication"
+        },
+        {
+          "layer": "economics",
+          "error": "The read operation timed out"
+        }
+      ]
     },
     {
       "name": "evidence_eligibility",
@@ -189,9 +202,7 @@
           "finance domain blocked (curated): finance tier=curated not publication-eligible",
           "economics domain blocked (synthetic): economics series includes *_FIXTURE",
           "approval domain blocked (curated): approval tier=curated not publication-eligible",
-          "ratings domain blocked (curated): ratings tier=curated not publication-eligible",
-          "markets domain blocked (curated): markets tier=curated not publication-eligible",
-          "polls include blocked tiers (260/260): {'synthetic': 260}",
+          "demographics domain blocked (curated): demography features curated/embedded; not publication-eligible",
           "race universe tier=curated not publication-eligible"
         ],
         "artifact_publishable": false
@@ -201,23 +212,20 @@
       "name": "acceptance_gates",
       "ok": true,
       "detail": {
-        "n_pass": 8,
-        "n_partial": 2,
+        "n_pass": 10,
+        "n_partial": 0,
         "n_fail": 1,
         "failures": [
           "G10"
         ],
-        "partials": [
-          "G5",
-          "G7"
-        ]
+        "partials": []
       }
     },
     {
       "name": "stack_weights_fresh",
       "ok": true,
       "detail": {
-        "age_hours": 143.30492224216462
+        "age_hours": 144.53437267740568
       }
     },
     {
@@ -237,7 +245,8 @@
     }
   ],
   "alerts": [
-    "evidence not publication-eligible: finance domain blocked (curated): finance tier=curated not publication-eligible; economics domain blocked (synthetic): economics series includes *_FIXTURE; approval domain blocked (curated): approval tier=curated not publication-eligible; ratings domain blocked (curated): ratings tier=curated not publication-eligible; markets domain blocked (curated): markets tier=curated not publication-eligible; polls include blocked tiers (260/260): {'synthetic': 260}; race universe tier=curated not publication-eligible",
+    "layer_warnings=2",
+    "evidence not publication-eligible: finance domain blocked (curated): finance tier=curated not publication-eligible; economics domain blocked (synthetic): economics series includes *_FIXTURE; approval domain blocked (curated): approval tier=curated not publication-eligible; demographics domain blocked (curated): demography features curated/embedded; not publication-eligible; race universe tier=curated not publication-eligible",
     "historical polls not FTE-primary \u2014 run ingest-fte-polls"
   ]
 }

@@ -186,6 +186,7 @@ def write_expert_ratings_store(
         "n": int(len(df)),
         "source": source,
         "parser_version": PARSER_VERSION,
+        "tier": "aggregator" if str(source).startswith("licensed") else "curated",
         "note": note,
     }
     man_path = MANIFESTS_DIR / "expert_ratings.json"

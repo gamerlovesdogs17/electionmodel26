@@ -629,7 +629,6 @@ def build_fixtures(root: Path | None = None) -> dict[str, str]:
             if fte_path.exists():
                 fte = pd.read_parquet(fte_path)
                 if len(fte):
-                    live = df[df["election_id"].astype(str) == "senate-2026"]
                     hist_elections = set(fte["election_id"].astype(str))
                     keep = df[
                         (df["election_id"].astype(str) == "senate-2026")
@@ -640,6 +639,25 @@ def build_fixtures(root: Path | None = None) -> dict[str, str]:
 
                     df = align_poll_frame(df)
                     polls_df = df
+            # Never replace live VoteHub / aggregator 2026 polls with synthetic fixtures.
+            existing_polls = norm / "polls.parquet"
+            if existing_polls.exists():
+                try:
+                    existing = pd.read_parquet(existing_polls)
+                    live_2026 = existing[
+                        (existing["election_id"].astype(str) == "senate-2026")
+                        & (~existing["source_url"].astype(str).str.contains("synthetic", case=False, na=False))
+                        & (~existing["parser_version"].astype(str).str.startswith("fixtures"))
+                    ]
+                    if len(live_2026):
+                        other = df[df["election_id"].astype(str) != "senate-2026"]
+                        df = pd.concat([other, live_2026], ignore_index=True)
+                        from midterms.evidence.schema import align_poll_frame
+
+                        df = align_poll_frame(df)
+                        polls_df = df
+                except Exception:  # noqa: BLE001
+                    pass
         csv_bytes = df.to_csv(index=False).encode()
         raw_path.write_bytes(csv_bytes)
         df.to_parquet(norm_path, index=False)

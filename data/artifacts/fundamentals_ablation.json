@@ -19,31 +19,31 @@
   "n_cycles": 1,
   "by_cycle": {
     "2022": {
-      "full_crps": 4.8443183823324745,
+      "full_crps": 5.123037018090175,
       "drop_one": {
         "fundraising_logit": {
-          "crps": 4.8443183823324745,
+          "crps": 5.123037018090175,
           "delta_vs_full": 0.0
         },
         "pres_approval": {
-          "crps": 4.8443183823324745,
+          "crps": 5.123037018090175,
           "delta_vs_full": 0.0
         },
         "midterm_outparty": {
-          "crps": 4.901790865014292,
-          "delta_vs_full": 0.057472482681817816
+          "crps": 5.19621196378014,
+          "delta_vs_full": 0.0731749456899653
         },
         "real_income_yoy": {
-          "crps": 4.870704011469474,
-          "delta_vs_full": 0.02638562913699971
+          "crps": 5.123037018090175,
+          "delta_vs_full": 0.0
         },
         "incumbency": {
-          "crps": 4.8443183823324745,
+          "crps": 5.123037018090175,
           "delta_vs_full": 0.0
         },
         "generic_ballot": {
-          "crps": 4.820491736143744,
-          "delta_vs_full": -0.02382664618873065
+          "crps": 5.088698574054224,
+          "delta_vs_full": -0.0343384440359511
         }
       }
     }
@@ -65,9 +65,9 @@
       "recommend": "keep"
     },
     "real_income_yoy": {
-      "keep_votes": 1,
+      "keep_votes": 0,
       "n_cycles": 1,
-      "recommend": "keep"
+      "recommend": "drop_or_shrink"
     },
     "incumbency": {
       "keep_votes": 0,

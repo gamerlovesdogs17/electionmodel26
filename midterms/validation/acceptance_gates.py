@@ -566,15 +566,56 @@ def evaluate_acceptance_gates(
         g10_detail["verify_rebuild_error"] = str(exc)
     ind_path = art_dir / "independent_rebuild_latest.json"
     ind = _load_json(ind_path)
+    forecast_run_id = str((forecast or {}).get("run_id") or "")
+    forecast_generated = str((forecast or {}).get("generated_at") or "")
     if ind is not None:
-        independent_ok = bool(ind.get("ok"))
+        ind_run = str(ind.get("run_id") or "")
+        ind_generated = str(ind.get("generated_at") or "")
+        identity_match = bool(forecast_run_id) and ind_run == forecast_run_id
+        # Rebuild must not predate the forecast it claims to verify.
+        freshness_ok = True
+        freshness_detail: dict[str, Any] = {}
+        if forecast_generated and ind_generated:
+            try:
+                from datetime import datetime as _dt
+                from datetime import timedelta as _td
+
+                fg = _dt.fromisoformat(forecast_generated.replace("Z", "+00:00"))
+                ig = _dt.fromisoformat(ind_generated.replace("Z", "+00:00"))
+                # Allow small clock skew; reject rebuilds clearly before the forecast.
+                freshness_ok = ig >= (fg - _td(minutes=5))
+                freshness_detail = {
+                    "forecast_generated_at": forecast_generated,
+                    "rebuild_generated_at": ind_generated,
+                    "rebuild_after_forecast": freshness_ok,
+                }
+            except ValueError:
+                freshness_ok = False
+                freshness_detail = {"error": "unparseable generated_at timestamps"}
+        independent_ok = bool(ind.get("ok")) and identity_match and freshness_ok
         g10_detail["independent_rebuild"] = {
             "ok": independent_ok,
             "path": str(ind_path),
             "comparison": ind.get("comparison"),
             "domain_ok": ind.get("domain_ok"),
             "error": ind.get("error"),
+            "run_id_match": identity_match,
+            "forecast_run_id": forecast_run_id,
+            "rebuild_run_id": ind_run,
+            "freshness": freshness_detail,
+            "claim": (
+                "Independent rebuild verifies the sealed forecast run_id with a "
+                "re-execution no older than the forecast artifact."
+            ),
         }
+        if not identity_match:
+            g10_detail["independent_rebuild"]["block"] = (
+                "rebuild run_id does not match current forecast — stale or wrong release"
+            )
+        if not freshness_ok:
+            g10_detail["independent_rebuild"]["block"] = (
+                "rebuild generated_at precedes forecast — cannot prove current release"
+            )
     else:
         g10_detail["independent_rebuild"] = {
             "ok": False,
@@ -582,16 +623,59 @@ def evaluate_acceptance_gates(
         }
     try:
         from midterms.ops.shadow_publish import list_shadow_publications, verify_shadow
+        from midterms.config import PUBLIC_LIVE_ENABLED as _LIVE
 
         rows = list_shadow_publications()
+        forecast_mv = str((forecast or {}).get("model_version") or MODEL_VERSION)
+        forecast_run = str((forecast or {}).get("run_id") or "")
+        # Prefer seals for the current forecast/model; do not let ancient
+        # rotated-key shadows alone veto a fresh seal.
+        relevant = [
+            r
+            for r in rows
+            if (forecast_run and forecast_run in str(r.get("shadow_id") or ""))
+            or str(r.get("model_version") or "") == forecast_mv
+            or str(r.get("mode") or "") in {"prospective_live", "milestone"}
+        ]
+        check_rows = (relevant or rows)[-5:]
         shadow_checks = []
-        for row in rows[-5:]:
+        for row in check_rows:
             ver = verify_shadow(path=Path(row["path"]))
             shadow_checks.append(
-                {"shadow_id": row.get("shadow_id"), "ok": ver.get("ok"), "path": row.get("path")}
+                {
+                    "shadow_id": row.get("shadow_id"),
+                    "ok": ver.get("ok"),
+                    "hashes_ok": ver.get("hashes_ok"),
+                    "signatures_ok": ver.get("signatures_ok"),
+                    "signature_status": ver.get("signature_status"),
+                    "path": row.get("path"),
+                    "model_version": row.get("model_version"),
+                }
             )
         g10_detail["shadow_verify"] = shadow_checks
-        shadow_all_ok = bool(shadow_checks) and all(c.get("ok") for c in shadow_checks)
+        g10_detail["shadow_rows_checked"] = len(shadow_checks)
+
+        def _shadow_acceptable(c: dict[str, Any]) -> bool:
+            if not c.get("hashes_ok"):
+                return False
+            status = str(c.get("signature_status") or "missing")
+            # Integrity failure only when hashes break or seal is corrupt.
+            if status == "failed":
+                return False
+            # Live publication requires cryptographic verification.
+            if _LIVE and status != "verified":
+                return False
+            # Research / live-locked: hashes + non-failed sig status
+            # (missing / unverifiable disclosed, not greenwashed as verified).
+            return status in {"verified", "missing", "unverifiable"}
+
+        shadow_all_ok = bool(shadow_checks) and all(_shadow_acceptable(c) for c in shadow_checks)
+        g10_detail["shadow_signature_note"] = (
+            "signature_status=verified → Ed25519 ok against historical key_id; "
+            "missing → hashes-only; unverifiable → hash ok but key does not verify "
+            "(e.g. rotated trust root); failed → integrity/corrupt seal. "
+            "PUBLIC_LIVE requires verified; research accepts missing/unverifiable with hashes."
+        )
     except Exception as exc:  # noqa: BLE001
         g10_detail["shadow_verify_error"] = str(exc)
     g10_detail["note"] = (

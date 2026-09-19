@@ -9,8 +9,8 @@
     "as_of": "2026-09-13",
     "method": "pymc",
     "draws": 2000,
-    "tune": 2000,
-    "chains": 4,
+    "tune": 1000,
+    "chains": 2,
     "seed": 20260919,
     "generic_ballot": 5.852513615064197,
     "ensemble": true,
@@ -30,36 +30,35 @@
       {
         "name": "p_dem_majority",
         "ok": true,
-        "delta": 0.0003750000000000142,
+        "delta": 0.0,
         "tol": 0.01
       },
       {
         "name": "expected_dem_seats",
         "ok": true,
-        "delta": 0.006875000000000853,
+        "delta": 0.0,
         "tol": 0.15
       },
       {
         "name": "max_race_p_dem",
         "ok": true,
-        "delta": 0.00824999999999998,
+        "delta": 0.0,
         "tol": 0.02
       }
     ],
-    "mean_abs_race_p_dem": 0.002453571428571436,
+    "mean_abs_race_p_dem": 0.0,
     "n_races_compared": 35
   },
   "lite_hash_seal": {
     "ok": true,
     "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
-    "forecast_hash_expected": "02873ac48e4e8021b9d73fbb8583acc08fb8edda68562a23a403b05ca241c88c",
-    "forecast_hash_actual": "02873ac48e4e8021b9d73fbb8583acc08fb8edda68562a23a403b05ca241c88c",
+    "forecast_hash_expected": "171561f95f9f9b0db97a5af6f5eb161194f810ed979ff7c513030053a62520e7",
+    "forecast_hash_actual": "171561f95f9f9b0db97a5af6f5eb161194f810ed979ff7c513030053a62520e7",
     "draws_ok": true,
     "manifest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\run_senate-2026_2026-09-13_ensemble_stack+overlays_20260919.json",
     "newline_normalized": true
   },
-  "rebuild_out_dir": "C:\\Users\\zydlo\\AppData\\Local\\Temp\\midterms_rebuild_wz1m1u_u",
-  "generated_at": "2026-09-15T03:05:41.322244+00:00",
-  "note": "G10 hard: re-executes run_forecast under rebuild_mode; compares probabilities within MCSE tolerances (not byte-identical JSON).",
-  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\independent_rebuild_latest.json"
+  "rebuild_out_dir": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.tmp_pytest\\midterms_rebuild_xo7o9cia",
+  "generated_at": "2026-09-19T21:18:06.335534+00:00",
+  "note": "G10 hard: re-executes run_forecast under rebuild_mode; compares probabilities within MCSE tolerances (not byte-identical JSON)."
 }

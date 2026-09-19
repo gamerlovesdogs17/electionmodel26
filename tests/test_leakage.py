@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date
 
 import pandas as pd
 import pytest
 
-from midterms.evidence.fixtures import build_fixtures
 from midterms.evidence.warehouse import Warehouse
 
 
 @pytest.fixture(scope="module")
-def warehouse(tmp_path_factory):
-    build_fixtures()
+def warehouse():
+    # Use the production warehouse as-is. Never call build_fixtures() here —
+    # that clobbers VoteHub/FTE live polls with synthetic 2026 rows.
     return Warehouse(ensure_fixtures=False)
 
 

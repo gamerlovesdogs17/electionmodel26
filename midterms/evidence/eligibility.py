@@ -243,15 +243,21 @@ def _audit_configured_domains() -> dict[str, Any]:
     # Demographics: require parquet + any manifest note
     demo_path = NORMALIZED_DIR / "demography.parquet"
     if not demo_path.exists():
-        # similarity may use inline research snapshot
+        # similarity may use inline research snapshot — curated, not publication-eligible
         domains["demographics"] = {
             "tier": "curated",
-            "eligible": True,
+            "eligible": False,
             "n": 0,
-            "note": "demography features embedded in model; no separate blocked fixture marker",
+            "blocked_reason": "demography features curated/embedded; not publication-eligible",
+            "note": "demography features embedded in model; research-only without sealed first-party store",
         }
     else:
-        domains["demographics"] = {"tier": "curated", "eligible": True, "n": 1}
+        domains["demographics"] = {
+            "tier": "curated",
+            "eligible": False,
+            "n": 1,
+            "blocked_reason": "demography.parquet present but tier=curated",
+        }
 
     ratings = _load("peer_snapshots.json") or _load("wiki_ratings.json")
     # expert ratings often under different names
@@ -262,8 +268,9 @@ def _audit_configured_domains() -> dict[str, Any]:
     if ratings is None and (NORMALIZED_DIR / "expert_ratings.parquet").exists():
         domains["ratings"] = {
             "tier": "curated",
-            "eligible": True,
+            "eligible": False,
             "n": int(len(pd.read_parquet(NORMALIZED_DIR / "expert_ratings.parquet"))),
+            "blocked_reason": "expert_ratings.parquet tier=curated not publication-eligible",
             "note": "expert_ratings.parquet present",
         }
     else:

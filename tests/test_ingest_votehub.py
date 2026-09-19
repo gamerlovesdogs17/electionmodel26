@@ -57,11 +57,9 @@ def test_normalize_votehub_senate_polls():
     assert df["available_at"].notna().all()
 
 
-def test_merge_live_polls_and_forecast_smoke(tmp_path):
-    # Ensure fixtures exist, then merge live VoteHub polls for 2026
-    from midterms.evidence.fixtures import build_fixtures
-
-    build_fixtures()
+def test_merge_live_polls_and_forecast_smoke():
+    # Prefer live VoteHub polls; do not rebuild synthetic fixtures first
+    # (build_fixtures would wipe production/live 2026 rows).
     summary = merge_live_polls_into_warehouse(election_id="senate-2026")
     assert summary["n_live"] > 50
     wh = Warehouse(ensure_fixtures=False)

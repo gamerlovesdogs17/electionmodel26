@@ -1,4 +1,14 @@
-"""Pollster quality / house-effect ratings (VoteHub Scorecards + FTE backup)."""
+"""Pollster quality / house-effect ratings (VoteHub Scorecards + FTE backup).
+
+Point-in-time contract (audit):
+- ``build_rating_lookup(as_of=…)`` may only include rows with ``available_at``
+  on or before that date.
+- Living artifacts stamped only with file mtime are **excluded** from historical
+  as-of lookups when that mtime is after the cutoff (no silent use of 2026 grades
+  in a 2018 backtest).
+- ``rating_for(…, lookup=)`` must never rebuild an unfiltered lookup when the
+  caller passed an empty filtered dict (``{}`` is falsy — use ``is None``).
+"""
 
 from __future__ import annotations
 
@@ -6,6 +16,7 @@ import json
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -24,6 +35,12 @@ GRADE_QUALITY = {
 DEFAULT_QUALITY = 0.55
 DEFAULT_HOUSE = 0.0
 DEFAULT_EXTRA_SD = 2.2
+
+# Living FTE/VoteHub dumps without per-row vintage dates are only safe for
+# as-of runs on/after this documented retrieval stamp (file mtime is not a
+# historical publication date). Historical backtests before this date use
+# prior_default unless a vintaged ratings snapshot is present.
+RATINGS_SNAPSHOT_FLOOR = date(2024, 1, 1)
 
 
 @dataclass
@@ -57,6 +74,27 @@ def _fte_ratings_path() -> Path:
     return RAW_DIR / "external" / "fte_pollster_ratings_combined.csv"
 
 
+def _vintaged_ratings_path() -> Path:
+    """Optional historical snapshot: list of {pollster, …, available_at} rows."""
+    return RAW_DIR / "external" / "pollster_ratings_vintages.json"
+
+
+def _neutral_rating(pollster: str) -> PollsterRating:
+    canon = canonicalize_pollster(pollster)
+    return PollsterRating(
+        pollster=canon,
+        grade=None,
+        quality_weight=DEFAULT_QUALITY,
+        house_effect_dem_pp=DEFAULT_HOUSE,
+        percent_error=None,
+        relative_error=None,
+        herding_error_pct=None,
+        within_moe_pct=None,
+        source="prior_default",
+        available_at="",
+    )
+
+
 def load_votehub_scorecards(path: Path | None = None) -> pd.DataFrame:
     path = path or _votehub_scorecards_path()
     if not path.exists():
@@ -71,9 +109,12 @@ def load_votehub_scorecards(path: Path | None = None) -> pd.DataFrame:
     df["pollster_key"] = df["pollster"].map(lambda x: normalize_candidate_key(canonicalize_pollster(x)))
     df["quality_weight"] = df["grade"].map(lambda g: GRADE_QUALITY.get(str(g), DEFAULT_QUALITY))
     df["source"] = "votehub_pollster_scorecards"
-    # Scorecards page is a living artifact — stamp retrieval day as available_at
+    # Living page: retrieval mtime is NOT a historical publication date.
     mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).date().isoformat()
-    df["available_at"] = mtime
+    if "available_at" not in df.columns or df["available_at"].isna().all():
+        df["available_at"] = mtime
+    df["provenance"] = "living_scorecard_mtime"
+    df["retrieval_mtime"] = mtime
     return df
 
 
@@ -84,6 +125,7 @@ def load_fte_ratings(path: Path | None = None) -> pd.DataFrame:
     df = pd.read_csv(path)
     if df.empty:
         return df
+    mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).date().isoformat()
     out = pd.DataFrame(
         {
             "pollster": df["pollster"],
@@ -99,7 +141,10 @@ def load_fte_ratings(path: Path | None = None) -> pd.DataFrame:
             "herding_error_pct": None,
             "within_moe_pct": None,
             "source": "fivethirtyeight_pollster_ratings",
-            "available_at": datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).date().isoformat(),
+            # Living dump without row vintages: stamp retrieval mtime + provenance flag.
+            "available_at": mtime,
+            "provenance": "living_csv_mtime",
+            "retrieval_mtime": mtime,
         }
     )
     # Prefer VoteHub for house effects; FTE bias_ppm scale differs — zero house prior from FTE
@@ -107,29 +152,75 @@ def load_fte_ratings(path: Path | None = None) -> pd.DataFrame:
     return out
 
 
+def load_vintaged_ratings(path: Path | None = None) -> pd.DataFrame:
+    """Load optional curated historical pollster-rating vintages (explicit available_at)."""
+    path = path or _vintaged_ratings_path()
+    if not path.exists():
+        return pd.DataFrame()
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    rows = payload.get("rows") if isinstance(payload, dict) else payload
+    df = pd.DataFrame(rows or [])
+    if df.empty:
+        return df
+    if "pollster_key" not in df.columns:
+        df["pollster_key"] = df["pollster"].map(
+            lambda x: normalize_candidate_key(canonicalize_pollster(str(x)))
+        )
+    df["source"] = df.get("source", pd.Series(["vintaged_pollster_ratings"] * len(df)))
+    df["provenance"] = "vintaged_snapshot"
+    return df
+
+
 def build_rating_lookup(
     as_of: str | date | None = None,
 ) -> dict[str, PollsterRating]:
-    """Merge VoteHub scorecards (primary) with FTE ratings (fill-in)."""
+    """Merge VoteHub scorecards (primary) with FTE ratings (fill-in).
+
+    When ``as_of`` is set, only rows with ``available_at <= as_of`` are kept.
+    Living dumps whose only stamp is a post-cutoff file mtime are excluded
+    (no silent future leak). Optional vintaged snapshots fill historical gaps.
+    """
     vh = load_votehub_scorecards()
     fte = load_fte_ratings()
+    vintaged = load_vintaged_ratings()
     as_of_d = None
     if as_of is not None:
-        as_of_d = as_of if isinstance(as_of, date) else date.fromisoformat(str(as_of))
+        as_of_d = as_of if isinstance(as_of, date) else date.fromisoformat(str(as_of)[:10])
 
     lookup: dict[str, PollsterRating] = {}
+    skipped_future = 0
+    skipped_living = 0
+    ingested = 0
 
     def _ingest(df: pd.DataFrame, *, overwrite: bool) -> None:
+        nonlocal skipped_future, skipped_living, ingested
         if df.empty:
             return
         for _, row in df.iterrows():
             avail = str(row.get("available_at") or "")
-            if as_of_d and avail:
+            provenance = str(row.get("provenance") or "")
+            if as_of_d is not None:
+                if not avail:
+                    # Unknown availability → exclude from historical lookups.
+                    skipped_living += 1
+                    continue
                 try:
-                    if date.fromisoformat(avail[:10]) > as_of_d:
-                        continue
+                    avail_d = date.fromisoformat(avail[:10])
                 except ValueError:
-                    pass
+                    skipped_living += 1
+                    continue
+                if avail_d > as_of_d:
+                    skipped_future += 1
+                    continue
+                # Living mtime stamps after the historical cutoff floor are not
+                # credible publication dates for pre-floor backtests.
+                if (
+                    provenance.startswith("living_")
+                    and as_of_d < RATINGS_SNAPSHOT_FLOOR
+                    and avail_d >= RATINGS_SNAPSHOT_FLOOR
+                ):
+                    skipped_living += 1
+                    continue
             key = str(row["pollster_key"])
             if key in lookup and not overwrite:
                 continue
@@ -151,15 +242,42 @@ def build_rating_lookup(
                 source=str(row.get("source") or "unknown"),
                 available_at=avail,
             )
+            ingested += 1
 
-    # FTE first as fill-in, VoteHub overwrites
+    # Vintaged historical first, then FTE fill-in, VoteHub overwrites for live windows.
+    _ingest(vintaged, overwrite=True)
     _ingest(fte, overwrite=False)
     _ingest(vh, overwrite=True)
+    # Attach debug counters for callers (warehouse) without breaking dict[str, PollsterRating]
+    lookup_meta: dict[str, Any] = {
+        "as_of": as_of_d.isoformat() if as_of_d else None,
+        "n_ratings": len(lookup),
+        "n_ingested_rows": ingested,
+        "n_skipped_future": skipped_future,
+        "n_skipped_living_unvintaged": skipped_living,
+    }
+    # Store meta on a private attribute via wrapper — callers that need it use
+    # build_rating_lookup_with_meta.
+    build_rating_lookup._last_meta = lookup_meta  # type: ignore[attr-defined]
     return lookup
 
 
+def build_rating_lookup_with_meta(
+    as_of: str | date | None = None,
+) -> tuple[dict[str, PollsterRating], dict[str, Any]]:
+    lookup = build_rating_lookup(as_of=as_of)
+    meta = getattr(build_rating_lookup, "_last_meta", {}) or {}
+    return lookup, dict(meta)
+
+
 def rating_for(pollster: str, lookup: dict[str, PollsterRating] | None = None) -> PollsterRating:
-    lookup = lookup or build_rating_lookup()
+    """Resolve a pollster rating.
+
+    Critical: an *empty* filtered lookup must yield ``prior_default``, never a
+    silent rebuild of current (unfiltered) ratings.
+    """
+    if lookup is None:
+        lookup = build_rating_lookup()
     canon = canonicalize_pollster(pollster)
     key = normalize_candidate_key(canon)
     if key in lookup:
@@ -168,18 +286,7 @@ def rating_for(pollster: str, lookup: dict[str, PollsterRating] | None = None) -
     raw_key = normalize_candidate_key(pollster)
     if raw_key in lookup:
         return lookup[raw_key]
-    return PollsterRating(
-        pollster=canon,
-        grade=None,
-        quality_weight=DEFAULT_QUALITY,
-        house_effect_dem_pp=DEFAULT_HOUSE,
-        percent_error=None,
-        relative_error=None,
-        herding_error_pct=None,
-        within_moe_pct=None,
-        source="prior_default",
-        available_at="",
-    )
+    return _neutral_rating(pollster)
 
 
 def write_normalized_ratings() -> Path:
@@ -217,6 +324,10 @@ def write_normalized_ratings() -> Path:
                 "fte_n": int((df["source"] == "fivethirtyeight_pollster_ratings").sum()),
                 "path": str(out),
                 "generated_at": datetime.now(timezone.utc).isoformat(),
+                "note": (
+                    "Living VoteHub/FTE dumps stamped with retrieval mtime; "
+                    "historical as-of lookups exclude post-cutoff living stamps."
+                ),
             },
             indent=2,
         )

@@ -63,23 +63,35 @@ def test_forced_fifty_fifty_is_rep_control():
     }
 
 
-def test_economics_fixture_yoy():
-    write_economic_store()
-    yoy = yoy_growth_as_of("2026-09-01", election_year=2026)
+def test_economics_fixture_yoy(tmp_path, monkeypatch):
+    from midterms.evidence import economics as econ
+
+    monkeypatch.setattr(econ, "NORMALIZED_DIR", tmp_path)
+    monkeypatch.setattr(econ, "MANIFESTS_DIR", tmp_path)
+    monkeypatch.setattr(econ, "RAW_DIR", tmp_path)
+    econ.write_economic_store(econ.build_fixture_vintages())
+    yoy = econ.yoy_growth_as_of("2026-09-01", election_year=2026, allow_fixture_canary=True)
     assert yoy is not None
     assert -10 < float(yoy) < 10
+    # Production path must not silently consume fixture-only YoY.
+    assert econ.yoy_growth_as_of("2026-09-01", election_year=2026, allow_fixture_canary=False) is None
 
 
-def test_alfred_multi_vintage_no_revision_leak():
+def test_alfred_multi_vintage_no_revision_leak(tmp_path, monkeypatch):
     """Post-election revisions must not appear in pre-election as-of queries."""
-    from midterms.evidence.economics import build_fixture_vintages, write_economic_store, yoy_growth_as_of
+    from midterms.evidence import economics as econ
 
-    write_economic_store(build_fixture_vintages())
-    pre = yoy_growth_as_of("2022-09-01", election_year=2022)
-    post = yoy_growth_as_of("2023-01-15", election_year=2022)
+    monkeypatch.setattr(econ, "NORMALIZED_DIR", tmp_path)
+    monkeypatch.setattr(econ, "MANIFESTS_DIR", tmp_path)
+    monkeypatch.setattr(econ, "RAW_DIR", tmp_path)
+    econ.write_economic_store(econ.build_fixture_vintages())
+    pre = econ.yoy_growth_as_of("2022-09-01", election_year=2022, allow_fixture_canary=True)
+    post = econ.yoy_growth_as_of("2023-01-15", election_year=2022, allow_fixture_canary=True)
     assert pre is not None and post is not None
     # Fixture revises after ED; as-of before ED must not equal the revised value
     assert float(pre) != float(post)
+    # Without canary flag, fixture-only store yields None (fail-closed).
+    assert econ.yoy_growth_as_of("2022-09-01", election_year=2022, allow_fixture_canary=False) is None
 
 
 def test_fec_fixture_shares():

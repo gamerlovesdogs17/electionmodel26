@@ -474,7 +474,12 @@ def publish_live_shadow(
 
 
 def verify_shadow(shadow_id: str | None = None, *, path: Path | None = None) -> dict[str, Any]:
-    """Recompute file hashes and confirm write-once seal integrity."""
+    """Recompute file hashes and verify Ed25519 sidecars when present.
+
+    Hash match alone is reported as ``hashes_ok``; cryptographic verification is
+    a separate ``signatures_ok`` field so G10 cannot claim 'signature verified'
+    from hashes only.
+    """
     if path is None:
         if shadow_id is None:
             rows = list_shadow_publications()
@@ -500,14 +505,87 @@ def verify_shadow(shadow_id: str | None = None, *, path: Path | None = None) -> 
         checked.append(rel)
         if got != digest:
             mismatches.append({"file": rel, "expected": digest, "got": got})
+    hashes_ok = len(mismatches) == 0
+
+    # Signature verification against historical key_id when sidecars exist.
+    from midterms.ops.signing import resolve_historical_public_key, verify_signature
+
+    sig_results = []
+    sig_ok = True
+    sig_checked = 0
+    for rel in list(expected.keys()) + ["SHADOW_MANIFEST.json"]:
+        fp = path / rel
+        sig_path = Path(str(fp) + ".sig.json")
+        if not sig_path.exists():
+            # Also try path.with_suffix style used by write_signature_sidecar
+            alt = fp.with_suffix(fp.suffix + ".sig.json")
+            if alt.exists():
+                sig_path = alt
+            else:
+                continue
+        if not fp.exists():
+            continue
+        try:
+            sig_doc = json.loads(sig_path.read_text(encoding="utf-8"))
+            payload_text = fp.read_text(encoding="utf-8")
+            key_path = resolve_historical_public_key(sig_doc.get("key_id"))
+            verified = verify_signature(
+                payload_text,
+                str(sig_doc.get("signature") or ""),
+                alg=str(sig_doc.get("alg") or ""),
+                public_key_path=key_path,
+            )
+            sig_checked += 1
+            sig_results.append(
+                {
+                    "file": rel,
+                    "ok": verified,
+                    "alg": sig_doc.get("alg"),
+                    "key_id": sig_doc.get("key_id"),
+                    "key_path": str(key_path) if key_path else None,
+                }
+            )
+            if not verified:
+                sig_ok = False
+        except Exception as exc:  # noqa: BLE001
+            sig_checked += 1
+            sig_ok = False
+            sig_results.append({"file": rel, "ok": False, "error": str(exc)})
+
+    # If no sidecars: hashes-only — do not claim signature verification.
+    if sig_checked == 0:
+        signatures_ok = False
+        signature_status = "missing"
+    elif sig_ok:
+        signatures_ok = True
+        signature_status = "verified"
+    elif hashes_ok:
+        # File integrity holds but Ed25519 does not verify against the resolved
+        # public key — typical after in-place key rotation without retaining the
+        # historical public key. Not an integrity failure; not a crypto pass.
+        signatures_ok = False
+        signature_status = "unverifiable"
+    else:
+        signatures_ok = False
+        signature_status = "failed"
+
     return {
-        "ok": len(mismatches) == 0,
+        "ok": hashes_ok and (signatures_ok if sig_checked and signature_status == "verified" else hashes_ok),
+        "hashes_ok": hashes_ok,
+        "signatures_ok": signatures_ok if sig_checked else None,
+        "signature_status": signature_status,
+        "signature_checks": sig_results,
         "shadow_id": shadow_id or manifest.get("shadow_id"),
         "path": str(path),
         "checked": checked,
         "mismatches": mismatches,
         "has_evaluation": (path / "evaluation.json").exists(),
         "mode": manifest.get("mode"),
+        "claim": (
+            "Hashes recomputed; Ed25519 sidecars verified against historical key_id "
+            "when present. missing=no sidecar; unverifiable=hash ok but key does not "
+            "verify (e.g. rotated trust root); failed=integrity or corrupt seal."
+        ),
     }
 
 

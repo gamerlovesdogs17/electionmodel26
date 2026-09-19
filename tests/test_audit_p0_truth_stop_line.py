@@ -25,7 +25,7 @@ def test_no_private_signing_key_in_tree():
     if licensed.exists():
         licensed.unlink()
     offenders: list[str] = []
-    skip = {".venv", "node_modules", ".git", "__pycache__", ".pytest_tmp"}
+    skip = {".venv", "node_modules", ".git", "__pycache__", ".pytest_tmp", ".tmp_pytest"}
     for path in ROOT.rglob("*.pem"):
         if any(part in skip for part in path.parts):
             continue

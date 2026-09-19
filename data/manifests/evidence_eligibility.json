@@ -8,9 +8,7 @@
     "finance domain blocked (curated): finance tier=curated not publication-eligible",
     "economics domain blocked (synthetic): economics series includes *_FIXTURE",
     "approval domain blocked (curated): approval tier=curated not publication-eligible",
-    "ratings domain blocked (curated): ratings tier=curated not publication-eligible",
-    "markets domain blocked (curated): markets tier=curated not publication-eligible",
-    "polls include blocked tiers (260/260): {'synthetic': 260}",
+    "demographics domain blocked (curated): demography features curated/embedded; not publication-eligible",
     "race universe tier=curated not publication-eligible"
   ],
   "domains": {
@@ -20,14 +18,14 @@
       "eligible": false
     },
     "polls": {
-      "n": 260,
+      "n": 320,
       "tier_counts": {
-        "synthetic": 260
+        "aggregator": 320
       },
-      "blocked_n": 260,
-      "eligible_n": 0,
+      "blocked_n": 0,
+      "eligible_n": 320,
       "stale": false,
-      "latest_age_hours": 163.82085566166666
+      "latest_age_hours": 237.05031915138886
     },
     "results": {
       "n": 0,
@@ -62,21 +60,22 @@
     },
     "demographics": {
       "tier": "curated",
-      "eligible": true,
+      "eligible": false,
       "n": 0,
-      "note": "demography features embedded in model; no separate blocked fixture marker"
+      "blocked_reason": "demography features curated/embedded; not publication-eligible",
+      "note": "demography features embedded in model; research-only without sealed first-party store"
     },
     "ratings": {
-      "tier": "curated",
-      "eligible": false,
+      "tier": "aggregator",
+      "eligible": true,
       "n": 1,
-      "blocked_reason": "ratings tier=curated not publication-eligible"
+      "blocked_reason": null
     },
     "markets": {
-      "tier": "curated",
-      "eligible": false,
-      "n": 21,
-      "blocked_reason": "markets tier=curated not publication-eligible"
+      "tier": "aggregator",
+      "eligible": true,
+      "n": 25,
+      "blocked_reason": null
     }
   },
   "chamber_reconcile_ok": null,
@@ -102,5 +101,5 @@
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-09-19T19:49:15.080382+00:00"
+  "checked_at": "2026-09-19T21:03:01.148945+00:00"
 }

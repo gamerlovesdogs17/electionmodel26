@@ -1,25 +1,17 @@
 {
-  "generated_at": "2026-09-19T20:06:49.764778+00:00",
+  "generated_at": "2026-09-19T21:16:59.899676+00:00",
   "election_id": "senate-2026",
   "available_at": "2026-09-13",
-  "n_races": 22,
-  "control_p_dem": 0.585,
-  "control_p_rep": 0.415,
+  "n_races": 24,
+  "control_p_dem": 0.5891089108910891,
+  "control_p_rep": 0.41089108910891087,
   "errors": [
     {
       "state": "MS",
       "error": "HTTP Error 429: Too Many Requests"
     },
     {
-      "state": "NE",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "NH",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "NM",
+      "state": "MT",
       "error": "HTTP Error 429: Too Many Requests"
     },
     {
@@ -27,7 +19,7 @@
       "error": "HTTP Error 429: Too Many Requests"
     },
     {
-      "state": "OK",
+      "state": "OH",
       "error": "HTTP Error 429: Too Many Requests"
     },
     {
@@ -39,16 +31,26 @@
       "error": "HTTP Error 429: Too Many Requests"
     },
     {
-      "state": "TN",
+      "state": "SD",
       "error": "HTTP Error 429: Too Many Requests"
     },
     {
       "state": "TX",
       "error": "HTTP Error 429: Too Many Requests"
+    },
+    {
+      "state": "VA",
+      "error": "HTTP Error 429: Too Many Requests"
+    },
+    {
+      "state": "WY",
+      "error": "HTTP Error 429: Too Many Requests"
     }
   ],
   "control_error": null,
   "parser_version": "kalshi-v1",
+  "source_url": "https://api.elections.kalshi.com/",
+  "tier": "aggregator",
   "paths": {
     "raw": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\kalshi_senate.json",
     "races": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\markets.parquet",

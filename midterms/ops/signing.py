@@ -129,16 +129,35 @@ def sign_payload(payload: dict[str, Any] | str) -> dict[str, str]:
     }
 
 
-def verify_signature(payload: dict[str, Any] | str, signature: str, *, alg: str | None = None) -> bool:
+def verify_signature(
+    payload: dict[str, Any] | str,
+    signature: str,
+    *,
+    alg: str | None = None,
+    public_key_pem: bytes | None = None,
+    public_key_path: Path | str | None = None,
+) -> bool:
+    """Verify Ed25519 (or legacy HMAC) signature.
+
+    Historical seals must pass the public key that was valid when signed
+    (``public_key_pem`` / ``public_key_path`` / sidecar ``key_id``), not only
+    today's default trust root.
+    """
     text = _payload_bytes(payload)
     alg = (alg or "").upper()
-    if alg.startswith("ED25519") or (not alg and _load_public_pem()):
+    pub = public_key_pem
+    if pub is None and public_key_path:
+        p = Path(public_key_path)
+        if p.exists():
+            pub = p.read_bytes()
+    if pub is None:
         pub = _load_public_pem()
+    if alg.startswith("ED25519") or (not alg and pub):
         if not pub:
             return False
+        from cryptography.exceptions import InvalidSignature
         from cryptography.hazmat.primitives import serialization
         from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-        from cryptography.exceptions import InvalidSignature
 
         key = serialization.load_pem_public_key(pub)
         if not isinstance(key, Ed25519PublicKey):
@@ -153,6 +172,23 @@ def verify_signature(payload: dict[str, Any] | str, signature: str, *, alg: str 
     if got.get("alg") == "HMAC-SHA256":
         return hmac.compare_digest(got["signature"], signature)
     return False
+
+
+def resolve_historical_public_key(key_id: str | None) -> Path | None:
+    """Locate a committed public key by key_id (basename under manifests/keys)."""
+    if not key_id:
+        return PUBLIC_KEY_PATH if PUBLIC_KEY_PATH.exists() else None
+    # key_id may be a basename or relative path
+    candidates = [
+        MANIFESTS_DIR / key_id,
+        MANIFESTS_DIR / "keys" / key_id,
+        MANIFESTS_DIR / Path(key_id).name,
+        PUBLIC_KEY_PATH,
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return None
 
 
 def write_signature_sidecar(path: Path, payload_text: str) -> Path:
