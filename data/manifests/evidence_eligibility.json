@@ -6,6 +6,7 @@
   "as_of": null,
   "reasons": [
     "finance domain blocked (curated): finance tier=curated not publication-eligible",
+    "economics domain blocked (synthetic): economics series includes *_FIXTURE",
     "approval domain blocked (curated): approval tier=curated not publication-eligible",
     "ratings domain blocked (curated): ratings tier=curated not publication-eligible",
     "markets domain blocked (curated): markets tier=curated not publication-eligible",
@@ -26,7 +27,7 @@
       "blocked_n": 260,
       "eligible_n": 0,
       "stale": false,
-      "latest_age_hours": 121.89992465722221
+      "latest_age_hours": 163.4770862197222
     },
     "results": {
       "n": 0,
@@ -48,15 +49,10 @@
       "note": "parser_development_only \u2014 not canonical truth (v0.9.21)"
     },
     "economics": {
-      "tier": "first_party",
-      "eligible": true,
-      "n": 1680,
-      "production_series": [
-        "A229RX0",
-        "A229RX0_YOY"
-      ],
-      "source_url": "https://fred.stlouisfed.org/series/A229RX0",
-      "note": "production YoY present; fixture series retained only as leakage canaries"
+      "tier": "synthetic",
+      "eligible": false,
+      "n": 70,
+      "blocked_reason": "economics series includes *_FIXTURE"
     },
     "approval": {
       "tier": "curated",
@@ -79,7 +75,7 @@
     "markets": {
       "tier": "curated",
       "eligible": false,
-      "n": 34,
+      "n": 22,
       "blocked_reason": "markets tier=curated not publication-eligible"
     }
   },
@@ -106,5 +102,5 @@
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-09-18T01:53:59.728766+00:00"
+  "checked_at": "2026-09-19T19:28:37.510391+00:00"
 }

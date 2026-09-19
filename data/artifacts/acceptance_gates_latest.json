@@ -1,7 +1,7 @@
 {
   "audit_item": "Milestone-0",
   "model_version": "senate-hierarchical-v0.9.21",
-  "generated_at": "2026-09-18T01:45:57.196914+00:00",
+  "generated_at": "2026-09-19T19:31:18.586642+00:00",
   "archive_scope": "2014-2024",
   "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
   "gates": {
@@ -126,7 +126,7 @@
         "no_weight_remapping": true,
         "stack_source_spine": "fast_hierarchical_t",
         "reproduction_ok": true,
-        "matrix_sha256": "0ba1cb46bd3ee5b1d48122c8fd9a8d177f4bc5b80615aff9b13c4c33d2988572",
+        "matrix_sha256": "c2586e074223c17f143fa00d494dd94ab5f0c2f91c423e39487d5d9db358a09c",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
@@ -146,16 +146,102 @@
       "status": "pass",
       "detail": {
         "g8_metric": "crps",
-        "mean_crps": null,
-        "n_folds": 1,
+        "mean_crps": 4.327731293304342,
+        "mean_crps_by_component": {
+          "hier_no_similarity": 4.34027596303231,
+          "poll_only_state_space": 9.201080046285327,
+          "hier_no_terminal_race": 4.336243341700774,
+          "fast_hierarchical_t": 4.327731293304342,
+          "last_election_swing": 4.9211098267056705,
+          "state_space": 3.5331400039943577,
+          "ridge_fundamentals": 5.042712737757732,
+          "shrinkage_polls": 4.767375284808708,
+          "equal_weight_polls": 5.07513239520805
+        },
+        "n_folds": 4,
+        "n_outer_years": 4,
+        "n_oof_races": 132,
+        "lead_days": [
+          60,
+          30
+        ],
         "freeze_before_truth": true,
+        "spine_label": "fast_hierarchical_t",
         "validation_calibration": {
-          "n": 33,
-          "brier": 0.03719729638687999,
+          "n": 34,
+          "brier": 0.05691536629815605,
           "has_margin_scores": true,
-          "log_score": null,
-          "calibration_slope_intercept": null,
-          "pit": null
+          "log_score": -0.20031564684438355,
+          "calibration_slope_intercept": {
+            "n": 34,
+            "slope": 1.1380596563736143,
+            "intercept": -0.08561575943327543,
+            "ok": true,
+            "ideal": {
+              "slope": 1.0,
+              "intercept": 0.0
+            }
+          },
+          "pit": {
+            "n": 34,
+            "mean": 0.4373964992298807,
+            "var": 0.057210662255936004,
+            "expected_mean": 0.5,
+            "expected_var": 0.08333333333333333,
+            "histogram": [
+              {
+                "bin_lo": 0.0,
+                "bin_hi": 0.1,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.1,
+                "bin_hi": 0.2,
+                "n": 4.0
+              },
+              {
+                "bin_lo": 0.2,
+                "bin_hi": 0.30000000000000004,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.30000000000000004,
+                "bin_hi": 0.4,
+                "n": 7.0
+              },
+              {
+                "bin_lo": 0.4,
+                "bin_hi": 0.5,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.5,
+                "bin_hi": 0.6000000000000001,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.6000000000000001,
+                "bin_hi": 0.7000000000000001,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.7000000000000001,
+                "bin_hi": 0.8,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.8,
+                "bin_hi": 0.9,
+                "n": 1.0
+              },
+              {
+                "bin_lo": 0.9,
+                "bin_hi": 1.0,
+                "n": 2.0
+              }
+            ],
+            "ok": true
+          }
         },
         "shadow_evaluations": [
           {
@@ -181,16 +267,22 @@
       "id": "G7",
       "name": "Reliability",
       "ok": true,
-      "status": "pass",
+      "status": "partial",
       "detail": {
         "n_bins": 8,
         "reliability_gate": {
           "sample_sizes_disclosed": true,
           "overconfident_bins": [],
           "n_overconfident": 0,
-          "calibration_claim_allowed": true
+          "total_n": 34.0,
+          "n_adequate_bins": 2,
+          "thin_sample": true,
+          "calibration_claim_allowed": false
         },
-        "sample_sizes_disclosed": true
+        "sample_sizes_disclosed": true,
+        "calibration_n": 34,
+        "alert": "reliability disclosed but calibration claim blocked (thin sample and/or <2 outer cycles)",
+        "calibration_claim_allowed": false
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
@@ -207,11 +299,13 @@
       "status": "pass",
       "detail": {
         "keep": [
-          "state_space"
+          "state_space",
+          "ridge_fundamentals",
+          "similarity_terminal",
+          "terminal_race"
         ],
         "disable": [
           "poll_only_state_space",
-          "ridge_fundamentals",
           "last_election_swing",
           "equal_weight_polls",
           "shrinkage_polls"
@@ -245,8 +339,8 @@
     "G10": {
       "id": "G10",
       "name": "Reproducibility",
-      "ok": true,
-      "status": "partial",
+      "ok": false,
+      "status": "fail",
       "detail": {
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
@@ -254,7 +348,7 @@
           "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
           "error": null,
           "forecast_hash_expected": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393",
-          "forecast_hash_actual": "e9a23d560aede5b053fcfb1fdecd2e5257e4f0a44823de1ce10dbe6e0e558622"
+          "forecast_hash_actual": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f"
         },
         "independent_rebuild": {
           "ok": true,
@@ -314,7 +408,17 @@
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z"
           }
         ],
-        "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals."
+        "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
+        "promotion_block": "reproducibility seals incomplete or hash mismatch",
+        "release_identity": {
+          "ok": true,
+          "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\release_identity_v0921.json",
+          "mismatches": {},
+          "PUBLIC_LIVE_ENABLED": false,
+          "model_version": "senate-hierarchical-v0.9.21",
+          "live_locked": true,
+          "promotion_blocked": false
+        }
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\shadow_publications.jsonl"
@@ -336,7 +440,7 @@
         "publication_surface": "research_only",
         "has_limitations": true,
         "forecast_model_version": "senate-hierarchical-v0.9.21",
-        "validation_limitations_n": 4,
+        "validation_limitations_n": 9,
         "poll_coverage_present": true
       },
       "evidence": [
@@ -470,7 +574,7 @@
         "no_weight_remapping": true,
         "stack_source_spine": "fast_hierarchical_t",
         "reproduction_ok": true,
-        "matrix_sha256": "0ba1cb46bd3ee5b1d48122c8fd9a8d177f4bc5b80615aff9b13c4c33d2988572",
+        "matrix_sha256": "c2586e074223c17f143fa00d494dd94ab5f0c2f91c423e39487d5d9db358a09c",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
@@ -490,16 +594,102 @@
       "status": "pass",
       "detail": {
         "g8_metric": "crps",
-        "mean_crps": null,
-        "n_folds": 1,
+        "mean_crps": 4.327731293304342,
+        "mean_crps_by_component": {
+          "hier_no_similarity": 4.34027596303231,
+          "poll_only_state_space": 9.201080046285327,
+          "hier_no_terminal_race": 4.336243341700774,
+          "fast_hierarchical_t": 4.327731293304342,
+          "last_election_swing": 4.9211098267056705,
+          "state_space": 3.5331400039943577,
+          "ridge_fundamentals": 5.042712737757732,
+          "shrinkage_polls": 4.767375284808708,
+          "equal_weight_polls": 5.07513239520805
+        },
+        "n_folds": 4,
+        "n_outer_years": 4,
+        "n_oof_races": 132,
+        "lead_days": [
+          60,
+          30
+        ],
         "freeze_before_truth": true,
+        "spine_label": "fast_hierarchical_t",
         "validation_calibration": {
-          "n": 33,
-          "brier": 0.03719729638687999,
+          "n": 34,
+          "brier": 0.05691536629815605,
           "has_margin_scores": true,
-          "log_score": null,
-          "calibration_slope_intercept": null,
-          "pit": null
+          "log_score": -0.20031564684438355,
+          "calibration_slope_intercept": {
+            "n": 34,
+            "slope": 1.1380596563736143,
+            "intercept": -0.08561575943327543,
+            "ok": true,
+            "ideal": {
+              "slope": 1.0,
+              "intercept": 0.0
+            }
+          },
+          "pit": {
+            "n": 34,
+            "mean": 0.4373964992298807,
+            "var": 0.057210662255936004,
+            "expected_mean": 0.5,
+            "expected_var": 0.08333333333333333,
+            "histogram": [
+              {
+                "bin_lo": 0.0,
+                "bin_hi": 0.1,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.1,
+                "bin_hi": 0.2,
+                "n": 4.0
+              },
+              {
+                "bin_lo": 0.2,
+                "bin_hi": 0.30000000000000004,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.30000000000000004,
+                "bin_hi": 0.4,
+                "n": 7.0
+              },
+              {
+                "bin_lo": 0.4,
+                "bin_hi": 0.5,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.5,
+                "bin_hi": 0.6000000000000001,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.6000000000000001,
+                "bin_hi": 0.7000000000000001,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.7000000000000001,
+                "bin_hi": 0.8,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.8,
+                "bin_hi": 0.9,
+                "n": 1.0
+              },
+              {
+                "bin_lo": 0.9,
+                "bin_hi": 1.0,
+                "n": 2.0
+              }
+            ],
+            "ok": true
+          }
         },
         "shadow_evaluations": [
           {
@@ -525,16 +715,22 @@
       "id": "G7",
       "name": "Reliability",
       "ok": true,
-      "status": "pass",
+      "status": "partial",
       "detail": {
         "n_bins": 8,
         "reliability_gate": {
           "sample_sizes_disclosed": true,
           "overconfident_bins": [],
           "n_overconfident": 0,
-          "calibration_claim_allowed": true
+          "total_n": 34.0,
+          "n_adequate_bins": 2,
+          "thin_sample": true,
+          "calibration_claim_allowed": false
         },
-        "sample_sizes_disclosed": true
+        "sample_sizes_disclosed": true,
+        "calibration_n": 34,
+        "alert": "reliability disclosed but calibration claim blocked (thin sample and/or <2 outer cycles)",
+        "calibration_claim_allowed": false
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
@@ -551,11 +747,13 @@
       "status": "pass",
       "detail": {
         "keep": [
-          "state_space"
+          "state_space",
+          "ridge_fundamentals",
+          "similarity_terminal",
+          "terminal_race"
         ],
         "disable": [
           "poll_only_state_space",
-          "ridge_fundamentals",
           "last_election_swing",
           "equal_weight_polls",
           "shrinkage_polls"
@@ -589,8 +787,8 @@
     {
       "id": "G10",
       "name": "Reproducibility",
-      "ok": true,
-      "status": "partial",
+      "ok": false,
+      "status": "fail",
       "detail": {
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
@@ -598,7 +796,7 @@
           "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
           "error": null,
           "forecast_hash_expected": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393",
-          "forecast_hash_actual": "e9a23d560aede5b053fcfb1fdecd2e5257e4f0a44823de1ce10dbe6e0e558622"
+          "forecast_hash_actual": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f"
         },
         "independent_rebuild": {
           "ok": true,
@@ -658,7 +856,17 @@
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z"
           }
         ],
-        "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals."
+        "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
+        "promotion_block": "reproducibility seals incomplete or hash mismatch",
+        "release_identity": {
+          "ok": true,
+          "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\release_identity_v0921.json",
+          "mismatches": {},
+          "PUBLIC_LIVE_ENABLED": false,
+          "model_version": "senate-hierarchical-v0.9.21",
+          "live_locked": true,
+          "promotion_blocked": false
+        }
       },
       "evidence": [
         "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\shadow_publications.jsonl"
@@ -680,7 +888,7 @@
         "publication_surface": "research_only",
         "has_limitations": true,
         "forecast_model_version": "senate-hierarchical-v0.9.21",
-        "validation_limitations_n": 4,
+        "validation_limitations_n": 9,
         "poll_coverage_present": true
       },
       "evidence": [
@@ -693,18 +901,24 @@
     }
   ],
   "ok": true,
-  "n_pass": 9,
+  "promotion_ok": false,
+  "n_pass": 8,
   "n_partial": 2,
-  "n_fail": 0,
-  "failures": [],
+  "n_fail": 1,
+  "failures": [
+    "G10"
+  ],
+  "research_failures": [],
   "partials": [
     "G5",
-    "G10"
+    "G7"
   ],
   "milestone": {
     "name": "first_publishable",
-    "public_live_probabilities": true,
-    "public_publication_id": "public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
+    "public_live_probabilities": false,
+    "current_publication_surface": "research_only",
+    "prior_public_publication_id": "public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
+    "public_publication_id": null,
     "requirements": [
       "frozen shadow with identified spine",
       "nested holdouts",

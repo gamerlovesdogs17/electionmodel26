@@ -475,11 +475,9 @@ def run_nested_component_loo(
 
         # Truth contact — after all freezes for this cycle
         results = wh.results[wh.results["election_id"] == election_id]
-        truth_by_id = {
-            str(r.race_id): float(r.two_party_margin)
-            for r in results.itertuples()
-            if getattr(r, "two_party_margin", None) == getattr(r, "two_party_margin", None)
-        }
+        from midterms.evidence.score_targets import truth_margin_map
+
+        truth_by_id = truth_margin_map(results)
         fold_scores_acc: dict[str, list[float]] = {}
         lead_blocks: dict[str, Any] = {}
         oof_means_fold: dict[str, dict[str, float]] = {}
@@ -516,6 +514,7 @@ def run_nested_component_loo(
         k: float(np.mean([fold[k] for fold in crps_by_fold.values() if k in fold]))
         for k in {n for fold in crps_by_fold.values() for n in fold}
     }
+    spine_mean = mean_crps.get(spine)
     # Honest OOF weights — no spine remapping
     oof_weights = weights_from_oof_scores(crps_by_fold)
     g8 = _g8_recommendations(crps_by_fold, spine=spine)
@@ -544,12 +543,15 @@ def run_nested_component_loo(
         "crps_by_fold": crps_by_fold,
         "oof_means": oof_means_flat,
         "oof_truths": truths_flat,
+        "mean_crps": spine_mean,
         "mean_crps_by_component": mean_crps,
         "oof_mixture_weights_honest": oof_weights,
         "g8_recommendations": g8,
         "failures": failures,
         "by_fold": by_fold,
         "n_frozen_predictions": len(frozen_archive),
+        "n_outer_years": len(crps_by_fold),
+        "n_oof_races": len(truths_flat),
         "exit_condition": "Predictions are frozen before the held-out truth is read.",
         "note": (
             "Outer leave-one-cycle-out for every stackable component + structural "

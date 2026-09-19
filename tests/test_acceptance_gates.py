@@ -68,7 +68,14 @@ def test_acceptance_gates_from_stubs(tmp_path: Path):
                 "no_weight_remapping": True,
                 "spine_label": "fast_hierarchical_t",
                 "hierarchical_method": "fast",
-                "crps_by_fold": {"2022": {"fast_hierarchical_t": 4.0}},
+                "years": [2020, 2022],
+                "lead_days": [60, 30],
+                "mean_crps": 4.0,
+                "mean_crps_by_component": {"fast_hierarchical_t": 4.0},
+                "crps_by_fold": {
+                    "2020": {"fast_hierarchical_t": 4.1},
+                    "2022": {"fast_hierarchical_t": 4.0},
+                },
                 "g8_recommendations": {
                     "state_space": {"recommend": "keep"},
                     "poll_only_state_space": {"recommend": "disable"},

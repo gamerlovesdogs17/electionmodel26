@@ -127,20 +127,46 @@ def freeze_historical_polls_from_warehouse(polls: pd.DataFrame | None = None) ->
 
 
 def merge_historical_polls(polls: pd.DataFrame) -> pd.DataFrame:
-    """Prefer sealed historical archive rows for matching poll_ids when present."""
-    path = NORMALIZED_DIR / "polls_historical.parquet"
-    if not path.exists():
-        return polls
-    hist = pd.read_parquet(path)
-    if hist.empty or polls is None or polls.empty:
-        return polls if polls is not None else hist
-    # For historical elections, prefer archive; keep live 2026 polls as-is
-    live = polls[polls["election_id"].astype(str) == "senate-2026"]
-    other = polls[polls["election_id"].astype(str) != "senate-2026"]
-    # Archive supersedes synthetic for same election_id
-    arch_elections = set(hist["election_id"].astype(str))
-    keep_other = other[~other["election_id"].astype(str).isin(arch_elections)]
-    return pd.concat([live, keep_other, hist], ignore_index=True)
+    """Prefer sealed FTE (then historical archive) for non-2026 elections."""
+    from midterms.evidence.schema import align_poll_frame
+
+    live = (
+        polls[polls["election_id"].astype(str) == "senate-2026"]
+        if polls is not None and len(polls)
+        else pd.DataFrame()
+    )
+    other = (
+        polls[polls["election_id"].astype(str) != "senate-2026"]
+        if polls is not None and len(polls)
+        else pd.DataFrame()
+    )
+
+    preferred: pd.DataFrame | None = None
+    fte_path = NORMALIZED_DIR / "polls_fte_historical.parquet"
+    hist_path = NORMALIZED_DIR / "polls_historical.parquet"
+    for path in (fte_path, hist_path):
+        if not path.exists():
+            continue
+        cand = pd.read_parquet(path)
+        if cand.empty:
+            continue
+        # Never let a fully-synthetic archive beat a non-synthetic FTE snapshot.
+        src = cand["source_url"].astype(str) if "source_url" in cand.columns else pd.Series([])
+        n_synth = int(src.str.contains("synthetic", case=False, na=False).sum()) if len(src) else 0
+        if path == hist_path and preferred is not None and n_synth == len(cand):
+            continue
+        if preferred is None or (path == fte_path and n_synth == 0):
+            preferred = cand
+            if path == fte_path and n_synth == 0:
+                break
+
+    if preferred is None or preferred.empty:
+        return polls if polls is not None else preferred
+
+    arch_elections = set(preferred["election_id"].astype(str))
+    keep_other = other[~other["election_id"].astype(str).isin(arch_elections)] if len(other) else other
+    merged = pd.concat([live, keep_other, preferred], ignore_index=True)
+    return align_poll_frame(merged)
 
 
 def inject_correction_versions(polls: pd.DataFrame, rng_seed: int = 42) -> pd.DataFrame:

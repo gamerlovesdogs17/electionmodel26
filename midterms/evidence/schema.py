@@ -75,8 +75,13 @@ RESULT_COLUMNS = [
     "rep_votes",
     "other_votes",
     "two_party_margin",
+    "margin_definition",
+    "margin_value",
+    "score_eligible",
+    "score_exclusion_reason",
     "winner_party",
     "winner_caucus",
+    "ballot_winner_party",
     "modeled_side",
     "stage",
     "certification_status",
@@ -209,6 +214,15 @@ def align_result_frame(df: "Any") -> "Any":
         miss = out["modeled_side"].isna() | (out["modeled_side"].astype(str) == "")
         if "winner_caucus" in out.columns:
             out.loc[miss, "modeled_side"] = out.loc[miss, "winner_caucus"]
+    if "score_eligible" in out.columns:
+        miss = out["score_eligible"].isna()
+        if "two_party_margin" in out.columns:
+            out.loc[miss, "score_eligible"] = out.loc[miss, "two_party_margin"].notna()
+        else:
+            out.loc[miss, "score_eligible"] = False
+    if "margin_definition" in out.columns:
+        miss = out["margin_definition"].isna() | (out["margin_definition"].astype(str) == "")
+        out.loc[miss, "margin_definition"] = "dem_minus_rep"
     if "certification_status" in out.columns:
         miss = out["certification_status"].isna() | (out["certification_status"].astype(str) == "")
         out.loc[miss, "certification_status"] = "certified"

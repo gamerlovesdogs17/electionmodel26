@@ -62,6 +62,11 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 - **Public live probabilities are locked** (`PUBLIC_LIVE_ENABLED=False`) after the 17 Sep 2026 data-drop audit. Surface is `research_only` until truth_v1 consumers, vintages, and fold-pure validation clear a fresh review.
 - Wikipedia `certified_vote_counts.json` is **quarantined** (parser-development only); it is not a canonical truth source. See `data/artifacts/WIKI_VOTE_COUNTS_QUARANTINE.md`.
 - Canonical outcomes use **truth_v1** (`official_senate_ledger.json` + independent expectations): decisive-stage FEC canvass overrides, row-role filtering, and Independent caucus mapping (King/Sanders) without inventing a Democratic ballot party.
+- Margin scoring uses `score_eligible` / `margin_definition`: Independent winners, same-party finals, and petition Independents are excluded from D−R fit/score targets (still counted in chamber via `winner_caucus`).
+- Runoff contests use decisive-stage `election_day` with `available_at` no earlier than the day after (19 Sep 2026 audit P0). `certified_at` is null unless a certification record is archived; do not treat FTE-mediated rows as fully certified.
+- Canvass overrides are labeled `*_transcribed` with distinct override hashes; bare `fec_canvass` tiers without primary-object evidence fail the truth validator.
+- G6/G7 do not allow calibration claims on thin/single-cycle nested evidence; nested LOO must cover multiple outer cycles before “calibrated” language.
+- Private signing keys must never appear in handoff ZIPs (`data/licensed/` is gitignored; release scanner rejects PEM private-key headers).
 - Historical margins for non-digitized FEC races must not use 1e6-scaled synthetic counts for publication claims; OH 2018, AZ 2024, LA 2014 runoff, and GA 2020 special runoff remain exact canvass canaries.
 - Production economics use FRED public CSV (`A229RX0` + YoY); fixture RDPI series remain as leakage canaries only.
 - Live 2026 finance uses curated FEC-browse estimates when OpenFEC rate-limits (eligible curated tier, not `fixture_hash`); full candidate-level digitization is incomplete.

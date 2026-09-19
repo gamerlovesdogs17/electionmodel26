@@ -20,6 +20,7 @@ CONTEST_REQUIRED = frozenset(
         "kind",
         "term_type",
         "stage",
+        "election_day",
         "dem_votes",
         "rep_votes",
         "other_votes",
@@ -80,9 +81,92 @@ def validate_expectation_cycle(cycle: dict[str, Any]) -> list[str]:
     return [f"missing expectation field: {k}" for k in missing]
 
 
+def _parse_iso_date(value: object) -> "date | None":
+    from datetime import date, datetime
+
+    if value is None or value == "":
+        return None
+    text = str(value)[:10]
+    try:
+        return datetime.strptime(text, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
 def validate_contest(contest: dict[str, Any]) -> list[str]:
-    missing = sorted(k for k in CONTEST_REQUIRED if k not in contest)
-    return [f"missing contest field: {k}" for k in missing]
+    """Presence + semantic checks (v0.9.21 audit P0/P2)."""
+    errs = [f"missing contest field: {k}" for k in sorted(CONTEST_REQUIRED - set(contest))]
+    dem = contest.get("dem_votes")
+    rep = contest.get("rep_votes")
+    other = contest.get("other_votes")
+    for label, val in (("dem_votes", dem), ("rep_votes", rep), ("other_votes", other)):
+        try:
+            if float(val) < 0:
+                errs.append(f"{label} must be non-negative")
+        except (TypeError, ValueError):
+            errs.append(f"{label} must be numeric")
+    wp = str(contest.get("winner_party") or "")
+    wc = str(contest.get("winner_caucus") or "")
+    if wp and wp not in {"D", "R", "I", "T"}:
+        errs.append(f"winner_party unexpected: {wp}")
+    if wc and wc not in {"D", "R", "I"}:
+        errs.append(f"winner_caucus unexpected: {wc}")
+    event = _parse_iso_date(contest.get("election_day"))
+    available = _parse_iso_date(contest.get("available_at"))
+    certified = _parse_iso_date(contest.get("certified_at"))
+    if event is None:
+        errs.append("election_day missing or invalid")
+    if available is None:
+        errs.append("available_at missing or invalid")
+    if event and available and available < event:
+        errs.append(
+            f"available_at {available} precedes election_day {event} (pre-event leakage)"
+        )
+    if certified is not None and available is not None and certified < available:
+        errs.append(f"certified_at {certified} precedes available_at {available}")
+    status = str(contest.get("certification_status") or "")
+    if status == "certified" and certified is None:
+        errs.append("certification_status=certified requires certified_at evidence")
+    tier = str(contest.get("truth_tier") or "")
+    if tier.startswith("fec_canvass") or tier.startswith("state_canvass"):
+        if not contest.get("source_url"):
+            errs.append(f"truth_tier={tier} requires source_url")
+        # Reject bare fec_canvass/state_canvass claims that still point at the FTE CSV hash
+        # without an override transcription marker (audit P1 provenance).
+        if tier in {"fec_canvass", "state_canvass"}:
+            errs.append(
+                f"truth_tier={tier} overstates provenance; use *_transcribed "
+                "with discovery_source_hash or archive a primary object hash"
+            )
+        disc = contest.get("discovery_source_hash")
+        src_hash = contest.get("source_object_hash")
+        if disc and src_hash and disc == src_hash and "transcribed" in tier:
+            errs.append(
+                "override source_object_hash must differ from discovery FTE hash"
+            )
+        if "transcribed" in tier and not contest.get("override_note") and not disc:
+            errs.append(f"truth_tier={tier} requires override_note or discovery_source_hash")
+    # Margin semantics
+    if "score_eligible" in contest:
+        if contest.get("score_eligible") is True:
+            if contest.get("two_party_margin") is None and contest.get("margin_value") is None:
+                errs.append("score_eligible=True requires margin_value or two_party_margin")
+            if contest.get("margin_definition") not in {None, "dem_minus_rep"}:
+                # Eligible D−R models only score dem_minus_rep
+                if contest.get("margin_definition") != "dem_minus_rep":
+                    errs.append("score_eligible=True requires margin_definition=dem_minus_rep")
+        if contest.get("score_eligible") is False and contest.get("two_party_margin") == -100.0:
+            errs.append("ineligible independent contest must not carry -100 two_party_margin")
+    return errs
+
+
+def validate_ledger_contests(ledger: dict[str, Any]) -> list[str]:
+    errs: list[str] = []
+    for year, block in (ledger.get("cycles") or {}).items():
+        for contest in block.get("contests") or []:
+            for msg in validate_contest(contest):
+                errs.append(f"{year}/{contest.get('race_id')}: {msg}")
+    return errs
 
 
 def _norm_person_name(name: str | None) -> str:

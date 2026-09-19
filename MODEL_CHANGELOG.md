@@ -4,6 +4,32 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-19 — senate-hierarchical-v0.9.21 (P1 margins / provenance / validation honesty)
+
+Follow-on to the same-day P0 stop-line:
+
+- Separate `margin_definition` / `margin_value` / `score_eligible`; Independent winners
+  (King/Sanders), same-party finals (AK 2022), and petition Independents (Osborn) are
+  excluded from D−R margin fitting/scoring while remaining in seat simulation via caucus.
+- Canvass overrides use distinct `source_object_hash` + `discovery_source_hash` and
+  `*_transcribed` tiers; bare `fec_canvass` claims fail validation.
+- Independent seat roster is fail-closed if absent or missing held/expected IDs.
+- G6/G7 fail closed on null CRPS / thin single-cycle reliability; calibration claims
+  require multi-cycle nested evidence and adequate bin samples.
+- Consumers (`score_forecasts`, nested LOO, cycle replay chamber, fundamentals ridge)
+  honor `score_eligible`.
+
+## 2026-09-19 — senate-hierarchical-v0.9.21 (P0 stop-line / bitemporal truth)
+
+Independent Cursor audit remediations (live stays off):
+
+- Correct runoff `election_day` / `available_at` for LA 2014/2016, MS 2018 special,
+  GA 2020 regular+special, GA 2022; `certified_at` null without archived certification.
+- Official results path fail-closed (no silent synthetic “certified” fallback).
+- Release-identity reseal after rebuild; G10 fails on hash mismatch; milestone live
+  flag ignores superseded `public_release` blocks.
+- Archive scanner test rejects bundled private signing keys.
+
 ## 2026-09-17 — senate-hierarchical-v0.9.21
 
 Truth integration (17 Sep data-drop audit §9), live stays off:

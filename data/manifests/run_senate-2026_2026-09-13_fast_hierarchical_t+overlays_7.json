@@ -1,10 +1,10 @@
 {
   "run_id": "senate-2026_2026-09-13_fast_hierarchical_t+overlays_7",
-  "generated_at": "2026-09-18T01:53:52.193228+00:00",
+  "generated_at": "2026-09-19T19:28:30.451252+00:00",
   "forecast_as_of": "2026-09-13",
   "election_id": "senate-2026",
   "model_version": "senate-hierarchical-v0.9.21",
-  "code_commit": "339cc608d27e57c3dd1f03c02d5b0e22673c0344",
+  "code_commit": "2edba89540f963a8ea649a5bb1e8fdaf488e86d2",
   "configuration": {
     "method": "fast",
     "fit_method": "fast",
@@ -28,23 +28,23 @@
     "evidence": "58e61186d6c7fa91"
   },
   "domain_hashes": {
-    "economics_vintages.parquet": "a5a0c8d014452c5443c7513b65468e08dd29520422431eace82a28ee40893b58",
-    "expert_ratings.parquet": "17f61b7571528c40539ff9423cc57d7a897aeb06bfda85e3af35b387d061261c",
+    "economics_vintages.parquet": "08f5992f5cbaa507e3dbb5e536133643a6937a8da81542282490bbde7f5846f4",
+    "expert_ratings.parquet": "f6d1be6106e960ed08f3967a438d43b1b21af0e6bba0421b5851cd8658ac2fd9",
     "fundraising_shares.parquet": "503f3be052b8d7dd83b4cc5673be3aae929a4f919106c6e5d971a7e175ce11f6",
-    "markets.parquet": "2607baff1b41fc503f885215b0919100bad0ea22b978754745cf89a76e9f49c0",
-    "markets_control.json": "1ec1ac39590ec179efc13590dd354b0508bad0834c4dc5994d831f4f891faedf",
-    "peer_snapshots.json": "afa0bf12e1c6f3de3cded06a0a8a7b36e6707faf7d7e6c72a3eb6818707ae2ab",
-    "polls.parquet": "80bbc53dc2ec50574b1b9d4a3838da85bd4ab5dbf8eb380e2418ad0d00efb57d",
-    "polls_fte_historical.parquet": "996038bb3f153dd29ad887e87af96e7f1b0a1b47e96f245eb41ceccaa609acff",
-    "polls_historical.parquet": "aeae3bcdebd00f44693c4492e4877608419c5d7a741af8995ed85f6c859c7700",
-    "polls_live_votehub.parquet": "3bcd56cddc64594a3254c946828c33471c241994d786b9a314d292b527533306",
+    "markets.parquet": "b8c7a14f7a1db8a6396cf1610d6143826b7a0a97ecf83b219be6e419e96d1999",
+    "markets_control.json": "dc56b0b381bd8ee15b7eceda23de33b3e1f9e5dbea144a62c5e42241e13e352d",
+    "peer_snapshots.json": "f9ea57f9366d416761ab245157143ac112132a23c99445d71fb517db9cc20a54",
+    "polls.parquet": "34e119bcf3553c7b1513d02ae7417d55b9cfdaf66afc1da8b617454c581fb878",
+    "polls_fte_historical.parquet": "117282c3db63efd465dfb5ad612516be1e17e3c1b118eb6f7b408c0422670829",
+    "polls_historical.parquet": "e7be11491dbc90395f1a45b96e5e6cd9bf6138670fb4d10aadf2980c685d6d5c",
+    "polls_live_votehub.parquet": "f54a8b342a128c694f9e307be297ed7f9c417f453371afb6c06604dc8f463fb2",
     "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
     "pollster_ratings.parquet": "32a297dd345d25537781428481e1599238c8587528303354239cd353ca23b150",
-    "pres_approval.parquet": "e24f3e271897c872597801f24d30c70912aa0bb5ef4c9bf430c4953e97dc3ce4",
+    "pres_approval.parquet": "e9bec5fd45738f3d4503a572bd3abcd2a4ee615c06a6c024a4810fdd58f2c410",
     "races.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
     "races_official.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
-    "results.parquet": "be7a060d0baa1291de3d5f9077c415592fdfa600933288b8ffa1d788170d34b9",
-    "results_certified.parquet": "9118cebf182fcbc2da47673dc83bc966d7424fb64b4c358f9dde0df22d53771f"
+    "results.parquet": "780c59bcb1ef37f2baae8c5326a938a19ad5e4d8dc19a04d142db5fc51d802b3",
+    "results_certified.parquet": "3785c335e31e1c0022b9b387c0287d0e72171802f5541c4dad06f177a6d06ecb"
   },
   "environment_lock": {
     "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
@@ -56,27 +56,27 @@
       "pymc": "6.3.2",
       "pyarrow": "25.0.1"
     },
-    "locked_at": "2026-09-18T01:53:52.294504+00:00"
+    "locked_at": "2026-09-19T19:28:30.544252+00:00"
   },
   "seed": 7,
   "draws": 2500,
   "tune": null,
   "chains": null,
   "output_hashes": {
-    "forecast_json": "de417dc9ff07cc8ca1f0b61a8b9ea1851b51399de23ffec5b7fd283deeb02a03",
-    "draws": "0aabd2bd3bfa9b24270168201677470c3e6ef7aa877a8396aca7e1a222214ee8"
+    "forecast_json": "3e46e2493fcc398b69ddfd505e4fd4f6ba89d00fcefee6fbe13f144791b3a3a9",
+    "draws": "c2cb30f34acc04fe3314763b61525bef6ff022f97723401edad4ae0f74473616"
   },
   "paths": {
-    "forecast": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-3\\test_forecast_rating_matches_p0\\forecast_senate-2026_2026-09-13_fast_hierarchical_t+overlays_7.json",
-    "forecast_latest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-3\\test_forecast_rating_matches_p0\\forecast_latest.json",
-    "draws": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-3\\test_forecast_rating_matches_p0\\draws_senate-2026_2026-09-13_fast_hierarchical_t+overlays_7.npz"
+    "forecast": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-13\\test_forecast_rating_matches_p0\\forecast_senate-2026_2026-09-13_fast_hierarchical_t+overlays_7.json",
+    "forecast_latest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-13\\test_forecast_rating_matches_p0\\forecast_latest.json",
+    "draws": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-13\\test_forecast_rating_matches_p0\\draws_senate-2026_2026-09-13_fast_hierarchical_t+overlays_7.npz"
   },
   "rebuild_mode": false,
   "signature": {
-    "alg": "Ed25519",
-    "sha256": "b47202b0a6301f5403aa82faa094b29c9708ad69956a2e647c5e8706157bd04e",
-    "signature": "ALtmlxqs1NvugPuXwdFi7Y8oGAxzzpFNyQ75Qe8NF08lkS0k0Myo+lKSVvGf75Lm44AhbgXnZgecY98cBYvuDA==",
-    "key_id": "signing_public_key.pem",
-    "public_key_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\signing_public_key.pem"
+    "alg": "HMAC-SHA256",
+    "sha256": "56ddf87aa49fc3a93a2ea4df7780d6a7c5b623bb5e0183f4369d62f232f7d0ee",
+    "signature": "3aabb0c8a3a1170926d630b725a6fe825f421a66b283d1cf63226ecc54cd6165",
+    "key_id": "dev-default",
+    "warning": "HMAC legacy \u2014 not a public trust root; configure Ed25519 for production"
   }
 }

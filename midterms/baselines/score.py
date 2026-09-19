@@ -29,13 +29,24 @@ def score_forecasts(
 ) -> dict[str, float]:
     if results is None or results.empty:
         return {"n": 0}
+    from midterms.evidence.score_targets import filter_score_eligible_results
+
+    eligible = filter_score_eligible_results(results)
+    if eligible is None or eligible.empty:
+        return {"n": 0}
+    ycol = "margin_value" if "margin_value" in eligible.columns else "two_party_margin"
     merged = []
     by_race = {f.race_id: f for f in forecasts}
-    for _, row in results.iterrows():
+    for _, row in eligible.iterrows():
         f = by_race.get(row["race_id"])
         if not f:
             continue
-        y = float(row["two_party_margin"])
+        raw_y = row.get(ycol)
+        if raw_y is None or (isinstance(raw_y, float) and pd.isna(raw_y)):
+            raw_y = row.get("two_party_margin")
+        if raw_y is None or (isinstance(raw_y, float) and pd.isna(raw_y)):
+            continue
+        y = float(raw_y)
         outcome = int(y > 0)
         merged.append(
             {

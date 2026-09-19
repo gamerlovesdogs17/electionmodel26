@@ -189,7 +189,14 @@ def build_design(
     keys = list(PRIOR_COEF.keys())
     if races.empty or results.empty:
         return np.zeros((0, len(keys))), np.zeros(0), keys
-    res = results.set_index("race_id")["two_party_margin"].astype(float)
+    res_all = results.set_index("race_id")
+    from midterms.evidence.score_targets import filter_score_eligible_results
+
+    elig = filter_score_eligible_results(results)
+    ycol = "margin_value" if "margin_value" in elig.columns else "two_party_margin"
+    res = elig.set_index("race_id")[ycol].astype(float) if len(elig) else res_all.get(
+        "two_party_margin", pd.Series(dtype=float)
+    )
     gb = (
         float(generic_ballot)
         if generic_ballot is not None

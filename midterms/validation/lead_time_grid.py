@@ -42,9 +42,11 @@ def replay_lead_time_grid(
         else:
             fit = fit_fast_approximation(snap, n_draws=draws, seed=year * 100 + lead)
         scores = score_forecasts(_forecasts_from_fit(fit), results)
-        # Extended metrics on overlapping races
-        if len(results) and fit.race_ids:
-            res_map = results.set_index("race_id")["two_party_margin"].to_dict()
+        from midterms.evidence.score_targets import truth_margin_map
+
+        res_map = truth_margin_map(results)
+        # Extended metrics on overlapping score-eligible races
+        if res_map and fit.race_ids:
             ys, mus, sds = [], [], []
             for i, rid in enumerate(fit.race_ids):
                 if rid in res_map:
@@ -64,7 +66,6 @@ def replay_lead_time_grid(
         # Energy score on realized margins vector
         y_vec = []
         idx = []
-        res_map = results.set_index("race_id")["two_party_margin"].to_dict() if len(results) else {}
         for i, rid in enumerate(fit.race_ids):
             if rid in res_map:
                 y_vec.append(float(res_map[rid]))

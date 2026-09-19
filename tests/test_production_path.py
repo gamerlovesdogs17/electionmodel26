@@ -44,10 +44,10 @@ def test_licensed_ingest_present(tmp_path, monkeypatch):
 
 
 def test_ed25519_sign_verify(tmp_path, monkeypatch):
-    # Generate into temp paths via monkeypatch of module paths would be heavy;
-    # use generate_keypair then sign with env private key.
     from midterms.ops import signing as signing_mod
 
+    monkeypatch.setattr(signing_mod, "PRIVATE_KEY_DEFAULT_PATH", tmp_path / "signing_private_key.pem")
+    monkeypatch.setattr(signing_mod, "PUBLIC_KEY_PATH", tmp_path / "signing_public_key.pem")
     keys = generate_keypair(write_private=True)
     priv = Path(keys["private_key_path"]).read_text()
     monkeypatch.setenv("MIDTERMS_SIGNING_PRIVATE_KEY", priv)

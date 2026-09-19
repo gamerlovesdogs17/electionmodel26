@@ -99,14 +99,16 @@ def _score_config(
             if sc.get("n"):
                 race_crps.append(float(sc["crps"]))
             # Coverage / reliability on contested margins
-            by_res = results.set_index("race_id")
+            from midterms.evidence.score_targets import truth_margin_map
+
+            truth_map = truth_margin_map(results)
             means, sds, ys = [], [], []
             for i, rid in enumerate(fit.race_ids):
-                if rid not in by_res.index:
+                if rid not in truth_map:
                     continue
                 means.append(float(fit.mean_margin[i]))
                 sds.append(float(max(fit.sd_margin[i], 0.5)))
-                ys.append(float(by_res.loc[rid, "two_party_margin"]))
+                ys.append(float(truth_map[rid]))
             if means:
                 ext = score_margins_extended(
                     np.asarray(means), np.asarray(sds), np.asarray(ys)

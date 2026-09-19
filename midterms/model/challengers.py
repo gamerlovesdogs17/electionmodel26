@@ -106,16 +106,31 @@ def fit_ridge_fundamentals(
 
             wh = Warehouse(ensure_fixtures=False)
             hist = wh.races.merge(
-                wh.results[["race_id", "two_party_margin"]],
+                wh.results[
+                    [
+                        c
+                        for c in (
+                            "race_id",
+                            "two_party_margin",
+                            "score_eligible",
+                            "margin_value",
+                        )
+                        if c in wh.results.columns
+                    ]
+                ],
                 on="race_id",
                 how="inner",
             )
             hist = hist[hist["election_id"].astype(str) != str(snapshot.election_id)]
             hist = hist[hist.apply(is_active_ballot_row, axis=1)]
+            from midterms.evidence.score_targets import filter_score_eligible_results
+
+            hist = filter_score_eligible_results(hist)
+            ycol = "margin_value" if "margin_value" in hist.columns else "two_party_margin"
             if len(hist) >= 40:
                 fitted = fit_ridge_coefficients(
                     hist,
-                    hist["two_party_margin"].to_numpy(dtype=float),
+                    hist[ycol].astype(float).to_numpy(dtype=float),
                     generic_ballot=generic_ballot,
                     alpha=alpha,
                 )

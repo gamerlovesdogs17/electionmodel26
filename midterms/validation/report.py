@@ -60,15 +60,21 @@ def build_validation_report(
         races = wh.races[wh.races["election_id"] == election_id]
         ed = date.fromisoformat(str(races["election_day"].iloc[0]))
         snap = wh.build_as_of(ed - timedelta(days=60), election_id)
-        results = wh.results[wh.results["election_id"] == election_id].set_index("race_id")
+        results = wh.results[wh.results["election_id"] == election_id]
+        from midterms.evidence.score_targets import truth_margin_map
+
+        truth_map = truth_margin_map(results)
         fit = fit_fast_approximation(snap, n_draws=max(300, draws), seed=PRIMARY_HOLDOUT)
         probs = []
         outcomes = []
         interval_scores = []
+        means_scored = []
+        sds_scored = []
+        ys_scored = []
         for i, rid in enumerate(fit.race_ids):
-            if rid not in results.index:
+            if rid not in truth_map:
                 continue
-            y = float(results.loc[rid, "two_party_margin"])
+            y = float(truth_map[rid])
             mu = float(fit.mean_margin[i])
             sd = float(max(fit.sd_margin[i], 0.5))
             from scipy.stats import norm
@@ -77,6 +83,9 @@ def build_validation_report(
             probs.append(p)
             outcomes.append(1.0 if y >= 0 else 0.0)
             interval_scores.append(interval_score_gaussian(y, mu, sd))
+            means_scored.append(mu)
+            sds_scored.append(sd)
+            ys_scored.append(y)
         if probs:
             calibration = {
                 "n": len(probs),
@@ -86,16 +95,9 @@ def build_validation_report(
             }
             try:
                 calibration["margin_scores"] = score_margins_extended(
-                    fit.mean_margin,
-                    fit.sd_margin,
-                    np.array(
-                        [
-                            float(results.loc[rid, "two_party_margin"])
-                            if rid in results.index
-                            else np.nan
-                            for rid in fit.race_ids
-                        ]
-                    ),
+                    np.array(means_scored),
+                    np.array(sds_scored),
+                    np.array(ys_scored),
                 )
             except Exception as exc:  # noqa: BLE001
                 calibration["margin_scores_error"] = str(exc)
@@ -210,9 +212,9 @@ def build_validation_report(
         report["acceptance_gates"] = {"ok": False, "error": str(exc)}
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     path = ARTIFACTS_DIR / "validation_report_latest.json"
-    path.write_text(json.dumps(report, indent=2, default=str))
+    path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     md_path = ARTIFACTS_DIR / "validation_report_latest.md"
-    md_path.write_text(_to_markdown(report))
+    md_path.write_text(_to_markdown(report), encoding="utf-8")
     report["path"] = str(path)
     report["md_path"] = str(md_path)
     return report

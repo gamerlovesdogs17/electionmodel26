@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, ROOT
+from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, PUBLIC_LIVE_ENABLED, ROOT
 
 
 GATE_FAILURE = {
@@ -318,12 +318,29 @@ def evaluate_acceptance_gates(
     g6_ok = False
     g6_status = "fail"
     scores_present = False
+    mean_crps = None
+    n_folds = 0
+    n_outer_years = 0
     if nested and nested.get("crps_by_fold"):
         scores_present = True
+        mean_crps = nested.get("mean_crps") or nested.get("crps_mean")
+        if mean_crps is None:
+            by_comp = nested.get("mean_crps_by_component") or {}
+            spine = nested.get("spine_label") or "fast_hierarchical_t"
+            mean_crps = by_comp.get(spine) or (
+                next(iter(by_comp.values()), None) if by_comp else None
+            )
+        n_folds = len(nested.get("crps_by_fold") or {})
+        n_outer_years = len(nested.get("years") or []) or n_folds
         g6_detail["g8_metric"] = nested.get("g8_metric")
-        g6_detail["mean_crps"] = nested.get("mean_crps") or nested.get("crps_mean")
-        g6_detail["n_folds"] = len(nested.get("crps_by_fold") or {})
+        g6_detail["mean_crps"] = mean_crps
+        g6_detail["mean_crps_by_component"] = nested.get("mean_crps_by_component")
+        g6_detail["n_folds"] = n_folds
+        g6_detail["n_outer_years"] = n_outer_years
+        g6_detail["n_oof_races"] = nested.get("n_oof_races")
+        g6_detail["lead_days"] = nested.get("lead_days")
         g6_detail["freeze_before_truth"] = nested.get("freeze_before_truth")
+        g6_detail["spine_label"] = nested.get("spine_label")
     cal = (val_report or {}).get("calibration") or {}
     if cal.get("brier") is not None or cal.get("margin_scores"):
         scores_present = True
@@ -348,12 +365,26 @@ def evaluate_acceptance_gates(
     if shadow_evals:
         scores_present = True
         g6_detail["shadow_evaluations"] = shadow_evals[-3:]
-    if scores_present and (nested or {}).get("freeze_before_truth"):
+    # Fail closed on missing/null CRPS or single-fold nested evidence (audit P1).
+    multi_cycle = n_outer_years >= 2 and n_folds >= 2
+    crps_ok = mean_crps is not None and isinstance(mean_crps, (int, float)) and (
+        mean_crps == mean_crps
+    )
+    if scores_present and (nested or {}).get("freeze_before_truth") and multi_cycle and crps_ok:
         g6_ok = True
         g6_status = "pass"
-    elif scores_present:
+    elif scores_present and crps_ok:
         g6_ok = True
         g6_status = "partial"
+        g6_detail["alert"] = (
+            "proper scores present but nested matrix thinner than multi-cycle requirement"
+        )
+    elif scores_present:
+        g6_ok = False
+        g6_status = "fail"
+        g6_detail["alert"] = "scores present but mean_crps null/missing — blocking"
+    else:
+        g6_detail["alert"] = "no proper scores found"
     gates.append(
         _gate(
             "G6",
@@ -383,20 +414,29 @@ def evaluate_acceptance_gates(
         g7_detail["n_bins"] = len(rel)
         g7_detail["reliability_gate"] = rel_gate
         g7_detail["sample_sizes_disclosed"] = all("n" in b for b in rel)
-        if rel_gate and rel_gate.get("calibration_claim_allowed"):
+        g7_detail["calibration_n"] = cal.get("n")
+        if rel_gate and rel_gate.get("calibration_claim_allowed") and multi_cycle:
             g7_ok = True
             g7_status = "pass"
-        elif rel_gate and rel_gate.get("sample_sizes_disclosed") and rel_gate.get("n_overconfident"):
+        elif rel_gate and rel_gate.get("n_overconfident"):
             g7_ok = False
             g7_status = "fail"
-            g7_detail["alert"] = "material overconfidence — recalibrate or widen; no calibration claim"
+            g7_detail["alert"] = (
+                "material overconfidence — recalibrate or widen; no calibration claim"
+            )
         else:
-            g7_ok = bool(g7_detail.get("sample_sizes_disclosed"))
-            g7_status = "partial" if g7_ok else "fail"
+            # Thin / single-cycle reliability: report honestly, do not claim pass.
+            g7_ok = True
+            g7_status = "partial"
+            g7_detail["alert"] = (
+                "reliability disclosed but calibration claim blocked "
+                "(thin sample and/or <2 outer cycles)"
+            )
+            g7_detail["calibration_claim_allowed"] = False
     else:
         g7_detail["alert"] = "no reliability bins in validation_report_latest"
-        g7_status = "partial"
-        g7_ok = True  # do not hard-fail milestone if calibration block absent but G6 scores exist
+        g7_status = "fail"
+        g7_ok = False
         g7_detail["note"] = "Reliability claim withheld until bins with sample sizes are regenerated."
     gates.append(
         _gate(
@@ -536,12 +576,30 @@ def evaluate_acceptance_gates(
     if rebuild_ok and independent_ok and shadow_all_ok:
         g10_ok = True
         g10_status = "pass"
-    elif (rebuild_ok or independent_ok) and shadow_all_ok:
-        g10_ok = True
+    elif rebuild_ok and (independent_ok or shadow_all_ok):
+        g10_ok = False
         g10_status = "partial"
-    elif rebuild_ok or independent_ok or shadow_all_ok:
-        g10_ok = True
-        g10_status = "partial"
+        g10_detail["promotion_block"] = (
+            "incomplete reproducibility evidence — research partial only"
+        )
+    else:
+        g10_ok = False
+        g10_status = "fail"
+        g10_detail["promotion_block"] = "reproducibility seals incomplete or hash mismatch"
+    # Release-identity hash seal (truth artifacts) — fail closed for promotion.
+    try:
+        from midterms.ops.release_identity import verify_release_identity
+
+        identity = verify_release_identity()
+        g10_detail["release_identity"] = identity
+        if not identity.get("ok"):
+            g10_ok = False
+            g10_status = "fail"
+            g10_detail["promotion_block"] = "release_identity hash mismatch"
+    except Exception as exc:  # noqa: BLE001
+        g10_detail["release_identity_error"] = str(exc)
+        g10_ok = False
+        g10_status = "fail"
     gates.append(
         _gate(
             "G10",
@@ -615,6 +673,13 @@ def evaluate_acceptance_gates(
 
     hard = [g for g in gates if g["status"] == "fail"]
     partial = [g for g in gates if g["status"] == "partial"]
+    # While live is locked, G10 seal failures are promotion-blocking only
+    # (research diagnostic may continue with ok=true and promotion_ok=false).
+    research_hard = [
+        g
+        for g in hard
+        if g["id"] != "G10" or PUBLIC_LIVE_ENABLED
+    ]
     report = {
         "audit_item": "Milestone-0",
         "model_version": MODEL_VERSION,
@@ -623,20 +688,35 @@ def evaluate_acceptance_gates(
         "archive_note": MILESTONE_ARCHIVE_NOTE,
         "gates": {g["id"]: g for g in gates},
         "gate_list": gates,
-        "ok": len(hard) == 0,
+        "ok": len(research_hard) == 0,
+        "promotion_ok": len(hard) == 0
+        and len(partial) == 0
+        and (not PUBLIC_LIVE_ENABLED)
+        and all(bool(g.get("ok")) for g in gates),
         "n_pass": sum(1 for g in gates if g["status"] == "pass"),
         "n_partial": len(partial),
         "n_fail": len(hard),
         "failures": [g["id"] for g in hard],
+        "research_failures": [g["id"] for g in research_hard],
         "partials": [g["id"] for g in partial],
         "milestone": {
             "name": "first_publishable",
-            "public_live_probabilities": bool(
-                (forecast or {}).get("public_release", {}).get("enabled")
-                or (forecast or {}).get("publication_surface") == "live"
+            "public_live_probabilities": (
+                bool(PUBLIC_LIVE_ENABLED)
+                and str((forecast or {}).get("publication_surface") or "") == "live"
+                and not bool(((forecast or {}).get("public_release") or {}).get("superseded"))
+            ),
+            "current_publication_surface": (forecast or {}).get("publication_surface")
+            or "research_only",
+            "prior_public_publication_id": (
+                ((forecast or {}).get("public_release") or {}).get("publication_id")
+                if ((forecast or {}).get("public_release") or {}).get("superseded")
+                else None
             ),
             "public_publication_id": (
-                ((forecast or {}).get("public_release") or {}).get("publication_id")
+                None
+                if ((forecast or {}).get("public_release") or {}).get("superseded")
+                else ((forecast or {}).get("public_release") or {}).get("publication_id")
             ),
             "requirements": [
                 "frozen shadow with identified spine",

@@ -1,0 +1,56 @@
+{
+  "audit_item": "P3",
+  "shadow_id": "shadow_test_live",
+  "mode": "prospective_live",
+  "election_id": "senate-2026",
+  "as_of": "2026-09-13",
+  "model_version": "senate-hierarchical-v0.9.21",
+  "code_commit": "2edba89540f963a8ea649a5bb1e8fdaf488e86d2",
+  "frozen_at": "2026-09-19T19:27:19.876321+00:00",
+  "evaluation": null,
+  "environment": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.5",
+      "scipy": "1.18.1",
+      "pymc": "6.3.2",
+      "pyarrow": "25.0.1"
+    },
+    "locked_at": "2026-09-19T19:27:19.885322+00:00"
+  },
+  "domain_hashes": {
+    "economics_vintages.parquet": "285bb97d769cc4064b68ecbfb475edb4ff22a9c6b176b24e242885854d761944",
+    "expert_ratings.parquet": "60cab934d811552ff462d39279b8211c53fc9cb128531c7d0f0a449f3614543b",
+    "fundraising_shares.parquet": "503f3be052b8d7dd83b4cc5673be3aae929a4f919106c6e5d971a7e175ce11f6",
+    "markets.parquet": "f61c2f81931bb1c820a8b31cd18a1092fcb7ea010601b625e860f8c22a2b4ce3",
+    "markets_control.json": "5ff857d64798461968002d69c9eaf9500603c6a918b57ec656c24d760a5f6689",
+    "peer_snapshots.json": "fa136b6e49b849c88f87ef614336a3b1de146911bbb8f849f51d4489b39a7f47",
+    "polls.parquet": "34e119bcf3553c7b1513d02ae7417d55b9cfdaf66afc1da8b617454c581fb878",
+    "polls_fte_historical.parquet": "117282c3db63efd465dfb5ad612516be1e17e3c1b118eb6f7b408c0422670829",
+    "polls_historical.parquet": "e7be11491dbc90395f1a45b96e5e6cd9bf6138670fb4d10aadf2980c685d6d5c",
+    "polls_live_votehub.parquet": "f54a8b342a128c694f9e307be297ed7f9c417f453371afb6c06604dc8f463fb2",
+    "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
+    "pollster_ratings.parquet": "32a297dd345d25537781428481e1599238c8587528303354239cd353ca23b150",
+    "pres_approval.parquet": "5cb41eb48c448bfa80e05d4dc6098ae109f8ee7f646841a3558353f8c4b5a741",
+    "races.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
+    "races_official.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
+    "results.parquet": "780c59bcb1ef37f2baae8c5326a938a19ad5e4d8dc19a04d142db5fc51d802b3",
+    "results_certified.parquet": "3785c335e31e1c0022b9b387c0287d0e72171802f5541c4dad06f177a6d06ecb"
+  },
+  "file_hashes": {
+    "forecast.json": "0a4c0a2985b542079b6399238c97698e7a77886ff504daf9c67f443e3615d89a",
+    "validation/stack_weights_oof.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "numerical_quality.json": "f3adcd971592edb4dffdac442434f4181a8127e75935c0f2b862f95f5574f13e",
+    "AUDIT_NOTICE.md": "3b72e6174a32568cb569fbcd76968ad229924b1b19762cea261eaf256bf9c655"
+  },
+  "paths": {
+    "shadow_dir": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-13\\test_verify_live_shadow_seal0\\shadow\\shadow_test_live",
+    "forecast": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.pytest_tmp\\pytest-of-zydlo\\pytest-13\\test_verify_live_shadow_seal0\\shadow\\shadow_test_live\\forecast.json"
+  },
+  "publishable": false,
+  "run_class": "research",
+  "exit_condition": "At least one cycle of frozen, timestamped evaluation is retained.",
+  "write_once": true
+}

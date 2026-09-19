@@ -79,12 +79,32 @@ def results_rows_from_ledger(*, ledger: dict[str, Any] | None = None) -> list[di
             if dem <= 0 and rep <= 0 and not same_party:
                 raise ValueError(f"{c.get('race_id')}: ledger requires nonzero vote counts")
             tot = dem + rep
-            margin = float(c.get("two_party_margin")) if c.get("two_party_margin") is not None else (
-                100.0 * (dem - rep) / tot if tot > 0 else 0.0
-            )
+            if c.get("two_party_margin") is not None:
+                margin = float(c["two_party_margin"])
+            elif c.get("score_eligible") is False:
+                # Do not invent a D−R margin for excluded contests (Independents, etc.).
+                margin = None
+            elif c.get("margin_value") is not None and c.get("margin_definition") == "dem_minus_rep":
+                margin = float(c["margin_value"])
+            elif tot > 0:
+                margin = 100.0 * (dem - rep) / tot
+            else:
+                margin = None
+            score_eligible = c.get("score_eligible")
+            if score_eligible is None:
+                score_eligible = margin is not None and not bool(
+                    (c.get("multiway") or {}).get("same_party_general")
+                ) and str(c.get("winner_party") or "") != "I"
             rid = str(c["race_id"])
             st = str(c.get("state") or rid.split("-")[2])
-            winner_party = str(c.get("winner_party") or ("D" if margin > 0 else ("R" if margin < 0 else "T")))
+            winner_party = str(
+                c.get("winner_party")
+                or (
+                    "D"
+                    if (margin or 0) > 0
+                    else ("R" if (margin or 0) < 0 else "T")
+                )
+            )
             winner_caucus = str(c.get("winner_caucus") or winner_party)
             rows.append(
                 {
@@ -95,16 +115,23 @@ def results_rows_from_ledger(*, ledger: dict[str, Any] | None = None) -> list[di
                     "race_id": rid,
                     "event_time": str(c.get("election_day") or f"{year}-11-01"),
                     "available_at": str(c.get("available_at") or available_at),
-                    "certified_at": str(c.get("available_at") or available_at),
+                    # Do not invent certification timestamps from available_at.
+                    "certified_at": c.get("certified_at"),
                     "dem_votes": dem,
                     "rep_votes": rep,
                     "other_votes": other,
-                    "two_party_margin": float(margin),
+                    "two_party_margin": margin,
+                    "margin_definition": c.get("margin_definition"),
+                    "margin_value": c.get("margin_value"),
+                    "score_eligible": bool(score_eligible) if score_eligible is not None else None,
+                    "score_exclusion_reason": c.get("score_exclusion_reason"),
                     "winner_party": winner_party,
                     "winner_caucus": winner_caucus,
+                    "ballot_winner_party": c.get("ballot_winner_party") or winner_party,
                     "modeled_side": c.get("modeled_side") or winner_caucus,
                     "stage": c.get("stage"),
-                    "certification_status": c.get("certification_status") or "certified",
+                    "certification_status": c.get("certification_status")
+                    or "fte_mediated_unproven",
                     "source_url": str(c.get("source_url") or block.get("source_url") or ""),
                     "raw_hash": c.get("source_object_hash"),
                     "retrieved_at": datetime.now(timezone.utc).isoformat(),
@@ -191,8 +218,10 @@ def write_ledger_normalized(*, ledger: dict[str, Any] | None = None) -> dict[str
 
     races_path = NORMALIZED_DIR / "races_official.parquet"
     results_path = NORMALIZED_DIR / "results_certified.parquet"
-    races.to_parquet(races_path, index=False)
-    results.to_parquet(results_path, index=False)
+    from midterms.evidence.results_archive import _atomic_to_parquet
+
+    _atomic_to_parquet(races, races_path)
+    _atomic_to_parquet(results, results_path)
 
     raw_results = RAW_DIR / "external" / "senate_certified_results.json"
     raw_results.write_text(

@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "year": 2022,
+  "lead_days": 60,
+  "method": "fast_hierarchical_t",
+  "baseline": {
+    "n": 34,
+    "crps": 4.756203642191842,
+    "log_score": -3.5784692783882277,
+    "brier": 0.04935770700155865,
+    "mae": 6.596631684461597
+  },
+  "drops": [
+    {
+      "pollster_id": "Center Street PAC",
+      "n_polls": 25,
+      "crps": 4.7769786177406175,
+      "brier": 0.04999612406119907,
+      "delta_crps": 0.020774975548775387,
+      "delta_brier": 0.0006384170596404198
+    },
+    {
+      "pollster_id": "Trafalgar Group",
+      "n_polls": 14,
+      "crps": 4.44026689923413,
+      "brier": 0.055471099068026095,
+      "delta_crps": -0.315936742957712,
+      "delta_brier": 0.006113392066467445
+    },
+    {
+      "pollster_id": "Emerson",
+      "n_polls": 11,
+      "crps": 4.7561554211834345,
+      "brier": 0.05304274156586731,
+      "delta_crps": -4.822100840762289e-05,
+      "delta_brier": 0.003685034564308659
+    }
+  ],
+  "mean_abs_delta_crps": 0.11225331317163167,
+  "note": "Leave-pollster-out: large positive delta_crps means that pollster was important; stable scores imply robustness to single-house dominance."
+}

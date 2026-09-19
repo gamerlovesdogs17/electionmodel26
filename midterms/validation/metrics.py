@@ -129,19 +129,27 @@ def reliability_overconfidence(
     *,
     min_bin_n: float = 5.0,
     gap_threshold: float = 0.15,
+    min_total_n: float = 80.0,
+    min_adequate_bins: int = 4,
 ) -> dict[str, Any]:
     """
     Flag material overconfidence: mean_p ≫ mean_y in disclosed bins.
 
     G7: calibration claim fails if overconfident bins lack sample-size disclosure
-    or gap exceeds threshold on bins with adequate n.
+    or gap exceeds threshold on bins with adequate n. Thin samples (audit P1)
+    never allow a calibration claim even when no overconfident bin is flagged.
     """
     issues: list[dict[str, Any]] = []
     disclosed = True
+    total_n = 0.0
+    adequate_bins = 0
     for b in bins or []:
         n = float(b.get("n") or 0)
+        total_n += n
         if "n" not in b:
             disclosed = False
+        if n >= min_bin_n:
+            adequate_bins += 1
         mean_p = float(b.get("mean_p") or 0)
         mean_y = float(b.get("mean_y") or 0)
         gap = mean_p - mean_y
@@ -156,11 +164,17 @@ def reliability_overconfidence(
                     "gap": gap,
                 }
             )
+    thin = total_n < min_total_n or adequate_bins < min_adequate_bins
     return {
         "sample_sizes_disclosed": disclosed,
         "overconfident_bins": issues,
         "n_overconfident": len(issues),
-        "calibration_claim_allowed": disclosed and len(issues) == 0,
+        "total_n": total_n,
+        "n_adequate_bins": adequate_bins,
+        "thin_sample": thin,
+        "calibration_claim_allowed": (
+            disclosed and len(issues) == 0 and not thin and bool(bins)
+        ),
     }
 
 

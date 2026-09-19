@@ -153,7 +153,7 @@ def _result_row(
         "winner_caucus": "D" if margin > 0 else "R",
         "modeled_side": "D" if margin > 0 else "R",
         "stage": "general",
-        "certification_status": "certified",
+        "certification_status": "exploratory_scaled",
         "source_url": source_url,
         "raw_hash": None,
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
@@ -161,16 +161,24 @@ def _result_row(
     }
 
 
-def build_certified_results_frame() -> pd.DataFrame:
-    """Prefer vote-count ledger; fall back to curated margins only if ledger missing."""
-    try:
-        from midterms.evidence.official_ledger import LEDGER_PATH, results_rows_from_ledger
+def build_certified_results_frame(*, allow_exploratory_fallback: bool = False) -> pd.DataFrame:
+    """Load canonical ledger results.
 
-        if LEDGER_PATH.exists():
-            rows = results_rows_from_ledger()
-            return align_result_frame(pd.DataFrame(rows))
-    except Exception:
-        pass
+    Official / research backtest paths must not silently substitute scaled
+    placeholder votes. Exploratory fixtures require an explicit flag and are
+    labeled non-certified.
+    """
+    from midterms.evidence.official_ledger import LEDGER_PATH, results_rows_from_ledger
+
+    if LEDGER_PATH.exists():
+        rows = results_rows_from_ledger()
+        return align_result_frame(pd.DataFrame(rows))
+
+    if not allow_exploratory_fallback:
+        raise FileNotFoundError(
+            f"missing official ledger {LEDGER_PATH}; "
+            "pass allow_exploratory_fallback=True only for fixture/exploratory modes"
+        )
 
     rows: list[dict[str, Any]] = []
     curated_keys: set[tuple[str, str]] = set()
@@ -184,20 +192,21 @@ def build_certified_results_frame() -> pd.DataFrame:
                 race_id = f"{election_id}-{st}"
                 state_abbr = st
             curated_keys.add((election_id, race_id))
-            # Nonzero placeholder counts so gates reject zero-vote artifacts
             dem, rep = _scaled_votes(float(margin))
-            rows.append(
-                _result_row(
-                    election_id=election_id,
-                    state=state_abbr,
-                    margin=margin,
-                    dem_votes=dem,
-                    rep_votes=rep,
-                    available_at=f"{year}-11-22",
-                    source_url="curated_certified_public_returns",
-                    race_id=race_id,
-                )
+            row = _result_row(
+                election_id=election_id,
+                state=state_abbr,
+                margin=margin,
+                dem_votes=dem,
+                rep_votes=rep,
+                available_at=f"{year}-11-22",
+                source_url="exploratory://scaled_margins",
+                race_id=race_id,
             )
+            row["certification_status"] = "exploratory_scaled"
+            row["truth_tier"] = "synthetic"
+            row["certified_at"] = None
+            rows.append(row)
     medsl = medsl_2016_state_margins()
     for _, r in medsl.iterrows():
         election_id = "senate-2016"
@@ -205,17 +214,18 @@ def build_certified_results_frame() -> pd.DataFrame:
         race_id = f"{election_id}-{st}"
         if (election_id, race_id) in curated_keys:
             continue
-        rows.append(
-            _result_row(
-                election_id=election_id,
-                state=st,
-                margin=float(r["two_party_margin"]),
-                dem_votes=float(r["dem_votes"]),
-                rep_votes=float(r["rep_votes"]),
-                available_at="2016-11-22",
-                source_url="MEDSL election-context-2018 (demsen16/repsen16 county aggregate)",
-            )
+        row = _result_row(
+            election_id=election_id,
+            state=st,
+            margin=float(r["two_party_margin"]),
+            dem_votes=float(r["dem_votes"]),
+            rep_votes=float(r["rep_votes"]),
+            available_at="2016-11-22",
+            source_url="MEDSL election-context-2018 (demsen16/repsen16 county aggregate)",
         )
+        row["certification_status"] = "medsl_aggregate"
+        row["certified_at"] = None
+        rows.append(row)
     if not rows:
         return pd.DataFrame(columns=RESULT_COLUMNS)
     return align_result_frame(pd.DataFrame(rows))
@@ -225,6 +235,14 @@ def _scaled_votes(margin_pp: float, scale: int = 1_000_000) -> tuple[int, int]:
     dem_share = (100.0 + float(margin_pp)) / 200.0
     dem = int(round(scale * dem_share))
     return dem, int(scale - dem)
+
+
+def _atomic_to_parquet(df: pd.DataFrame, path: Path) -> None:
+    """Write parquet via temp file + replace to avoid 0-byte readers mid-write."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    df.to_parquet(tmp, index=False)
+    tmp.replace(path)
 
 
 def write_results_archive() -> dict[str, Any]:
@@ -247,7 +265,7 @@ def write_results_archive() -> dict[str, Any]:
         )
     )
     out = NORMALIZED_DIR / "results_certified.parquet"
-    df.to_parquet(out, index=False)
+    _atomic_to_parquet(df, out)
     man = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "n": int(len(df)),
@@ -263,9 +281,13 @@ def write_results_archive() -> dict[str, Any]:
 def merge_certified_into_results(results: pd.DataFrame) -> pd.DataFrame:
     """Prefer certified archive rows over synthetic fixture results for matching race_ids."""
     path = NORMALIZED_DIR / "results_certified.parquet"
-    if not path.exists():
+    if not path.exists() or path.stat().st_size == 0:
         write_results_archive()
-    cert = pd.read_parquet(path)
+    try:
+        cert = pd.read_parquet(path)
+    except Exception:  # noqa: BLE001
+        write_results_archive()
+        cert = pd.read_parquet(path)
     if cert.empty:
         return results
     if results is None or results.empty:

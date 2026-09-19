@@ -48,8 +48,12 @@ def _load_public_pem() -> bytes | None:
     return None
 
 
-def generate_keypair(*, write_private: bool = True) -> dict[str, str]:
-    """Generate Ed25519 keypair; write public key to manifests; private to licensed/."""
+def generate_keypair(*, write_private: bool = False) -> dict[str, str]:
+    """Generate Ed25519 keypair; write public key to manifests.
+
+    Private key is returned in the response / written only when ``write_private``
+    is explicitly True (local ops). Never ship private PEM in handoff archives.
+    """
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -73,7 +77,10 @@ def generate_keypair(*, write_private: bool = True) -> dict[str, str]:
     return {
         "public_key_path": str(PUBLIC_KEY_PATH),
         "private_key_path": priv_path,
-        "note": "Commit public key only. Keep private key in env or data/licensed/ (gitignored).",
+        "note": (
+            "Commit public key only. Prefer MIDTERMS_SIGNING_PRIVATE_KEY env; "
+            "never include data/licensed/*.pem in handoff ZIPs. Rotate if exposed."
+        ),
     }
 
 

@@ -7,6 +7,7 @@ from datetime import timedelta
 from typing import Any
 
 import numpy as np
+import pandas as pd
 
 from midterms.config import ARTIFACTS_DIR, PRIMARY_HOLDOUT
 from midterms.evidence.warehouse import Warehouse
@@ -37,7 +38,9 @@ def compare_static_vs_dynamic(
     results = wh.results[wh.results["election_id"] == election_id]
     if results.empty:
         return {"ok": False, "error": f"no results for {election_id}"}
-    truth = results.drop_duplicates("race_id").set_index("race_id")["two_party_margin"].astype(float)
+    from midterms.evidence.score_targets import truth_margin_map
+
+    truth = pd.Series(truth_margin_map(results), dtype=float)
 
     by_lead: dict[str, Any] = {}
     for lead in lead_days:

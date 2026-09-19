@@ -623,6 +623,23 @@ def build_fixtures(root: Path | None = None) -> dict[str, str]:
     ]:
         raw_path = raw / f"{name}.csv"
         norm_path = norm / f"{name}.parquet"
+        # Never clobber non-synthetic FTE historical polls with fixture synthetics.
+        if name == "polls":
+            fte_path = norm / "polls_fte_historical.parquet"
+            if fte_path.exists():
+                fte = pd.read_parquet(fte_path)
+                if len(fte):
+                    live = df[df["election_id"].astype(str) == "senate-2026"]
+                    hist_elections = set(fte["election_id"].astype(str))
+                    keep = df[
+                        (df["election_id"].astype(str) == "senate-2026")
+                        | (~df["election_id"].astype(str).isin(hist_elections))
+                    ]
+                    df = pd.concat([keep, fte], ignore_index=True)
+                    from midterms.evidence.schema import align_poll_frame
+
+                    df = align_poll_frame(df)
+                    polls_df = df
         csv_bytes = df.to_csv(index=False).encode()
         raw_path.write_bytes(csv_bytes)
         df.to_parquet(norm_path, index=False)

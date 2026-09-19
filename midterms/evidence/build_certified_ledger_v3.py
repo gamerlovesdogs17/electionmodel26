@@ -35,14 +35,21 @@ ROSTER_PATH = RAW_DIR / "external" / "pre_election_seat_rosters.json"
 CANDIDATE_LEDGER_PATH = RAW_DIR / "external" / "official_senate_candidates.json"
 
 # Exact canvass overrides (FEC Federal Elections / state SOS).
+# Temporal fields for runoffs: event date = decisive stage; available_at = day-after
+# as conservative first-public bound when exact release timestamp is undocumented;
+# certified_at stays null unless a certification record is archived.
 CANVASS_OVERRIDES: dict[str, dict[str, Any]] = {
     "senate-2014-LA": {
         "dem_votes": 561_210,
         "rep_votes": 712_379,
         "other_votes": 0,
         "stage": "runoff",
+        "election_day": "2014-12-06",
+        "available_at": "2014-12-07",
+        "certified_at": None,
+        "certification_status": "public_canvass_unproven",
         "source_url": "https://www.fec.gov/resources/cms-content/documents/federalelections2014.pdf",
-        "truth_tier": "fec_canvass",
+        "truth_tier": "fec_canvass_transcribed",
         "dem_nominee": "Mary L. Landrieu",
         "rep_nominee": "Bill Cassidy",
         "winner_party": "R",
@@ -53,15 +60,21 @@ CANVASS_OVERRIDES: dict[str, dict[str, Any]] = {
         "other_votes": 1_017,
         "stage": "general",
         "source_url": "https://www.fec.gov/resources/cms-content/documents/federalelections2018.pdf",
-        "truth_tier": "fec_canvass",
+        "truth_tier": "fec_canvass_transcribed",
+        "certification_status": "public_canvass_unproven",
+        "certified_at": None,
     },
     "senate-2020-GA-special": {
         "dem_votes": 2_289_113,
         "rep_votes": 2_195_841,
         "other_votes": 0,
         "stage": "runoff",
+        "election_day": "2021-01-05",
+        "available_at": "2021-01-06",
+        "certified_at": None,
+        "certification_status": "public_canvass_unproven",
         "source_url": "https://www.fec.gov/resources/cms-content/documents/federalelections2020.pdf",
-        "truth_tier": "fec_canvass",
+        "truth_tier": "fec_canvass_transcribed",
         "dem_nominee": "Raphael Warnock",
         "rep_nominee": "Kelly Loeffler",
         "winner_party": "D",
@@ -69,13 +82,17 @@ CANVASS_OVERRIDES: dict[str, dict[str, Any]] = {
     "senate-2022-OK": {
         "other_votes": 41_402,
         "stage": "general",
-        "truth_tier": "fec_canvass",
+        "truth_tier": "fec_canvass_transcribed",
+        "certification_status": "public_canvass_unproven",
+        "certified_at": None,
         "source_url": "https://www.fec.gov/resources/cms-content/documents/federalelections2022.pdf",
     },
     "senate-2022-OK-special": {
         "other_votes": 34_449,
         "stage": "general",
-        "truth_tier": "fec_canvass",
+        "truth_tier": "fec_canvass_transcribed",
+        "certification_status": "public_canvass_unproven",
+        "certified_at": None,
         "source_url": "https://www.fec.gov/resources/cms-content/documents/federalelections2022.pdf",
     },
     "senate-2022-CA": {
@@ -83,7 +100,9 @@ CANVASS_OVERRIDES: dict[str, dict[str, Any]] = {
         "rep_votes": 4_222_029,
         "other_votes": 0,
         "stage": "general",
-        "truth_tier": "fec_canvass",
+        "truth_tier": "fec_canvass_transcribed",
+        "certification_status": "public_canvass_unproven",
+        "certified_at": None,
         "source_url": "https://www.fec.gov/resources/cms-content/documents/federalelections2022.pdf",
     },
     "senate-2022-CA-unexpired": {
@@ -91,7 +110,9 @@ CANVASS_OVERRIDES: dict[str, dict[str, Any]] = {
         "rep_votes": 4_212_450,
         "other_votes": 0,
         "stage": "general",
-        "truth_tier": "fec_canvass",
+        "truth_tier": "fec_canvass_transcribed",
+        "certification_status": "public_canvass_unproven",
+        "certified_at": None,
         "source_url": "https://www.fec.gov/resources/cms-content/documents/federalelections2022.pdf",
         "dem_nominee": "Alex Padilla",
         "rep_nominee": "Mark P. Meuser",
@@ -103,7 +124,50 @@ CANVASS_OVERRIDES: dict[str, dict[str, Any]] = {
         "other_votes": 75_868,
         "stage": "general",
         "source_url": "https://azsos.gov/elections/election-information/2024-election-info",
-        "truth_tier": "state_canvass",
+        "truth_tier": "state_canvass_transcribed",
+        "certification_status": "public_canvass_unproven",
+        "certified_at": None,
+    },
+}
+
+# Decisive-stage calendars (FEC / state). available_at = day after event when
+# exact first-public timestamp is not archived (fail-closed vs pre-event leakage).
+RUNOFF_STAGE_CALENDAR: dict[str, dict[str, Any]] = {
+    "senate-2014-LA": {
+        "election_day": "2014-12-06",
+        "available_at": "2014-12-07",
+        "certified_at": None,
+        "stage": "runoff",
+    },
+    "senate-2016-LA": {
+        "election_day": "2016-12-10",
+        "available_at": "2016-12-11",
+        "certified_at": None,
+        "stage": "runoff",
+    },
+    "senate-2018-MS-special": {
+        "election_day": "2018-11-27",
+        "available_at": "2018-11-28",
+        "certified_at": None,
+        "stage": "runoff",
+    },
+    "senate-2020-GA": {
+        "election_day": "2021-01-05",
+        "available_at": "2021-01-06",
+        "certified_at": None,
+        "stage": "runoff",
+    },
+    "senate-2020-GA-special": {
+        "election_day": "2021-01-05",
+        "available_at": "2021-01-06",
+        "certified_at": None,
+        "stage": "runoff",
+    },
+    "senate-2022-GA": {
+        "election_day": "2022-12-06",
+        "available_at": "2022-12-07",
+        "certified_at": None,
+        "stage": "runoff",
     },
 }
 
@@ -313,9 +377,7 @@ def build_from_fte(years: tuple[int, ...] = (2014, 2016, 2018, 2020, 2022, 2024)
             else False,
         }
 
-        available_at = (
-            f"{year}-11-22" if not (year == 2020 and "runoff" in stage_label) else "2021-01-06"
-        )
+        available_at = f"{year}-11-22"
         contest = {
             "race_id": race_id,
             "state": state,
@@ -325,6 +387,7 @@ def build_from_fte(years: tuple[int, ...] = (2014, 2016, 2018, 2020, 2022, 2024)
             "stage": stage_label,
             "election_day": _election_day(year),
             "available_at": available_at,
+            "certified_at": None,
             "dem_votes": dem_v,
             "rep_votes": rep_v,
             "other_votes": oth_v,
@@ -335,7 +398,7 @@ def build_from_fte(years: tuple[int, ...] = (2014, 2016, 2018, 2020, 2022, 2024)
             "winner_name": winner_name,
             "dem_nominee": dem_name,
             "rep_nominee": rep_name,
-            "certification_status": "certified",
+            "certification_status": "fte_mediated_unproven",
             "source_object_hash": source_hash,
             "source_url": sources[0] if sources else "",
             "source_urls": sorted(set(sources))[:5],
@@ -344,12 +407,18 @@ def build_from_fte(years: tuple[int, ...] = (2014, 2016, 2018, 2020, 2022, 2024)
             "scaled_synthetic": False,
             "schema_version": SCHEMA_VERSION,
         }
+        # Apply decisive-stage calendar before vote overrides so event dates win.
+        if race_id in RUNOFF_STAGE_CALENDAR:
+            for k, v in RUNOFF_STAGE_CALENDAR[race_id].items():
+                contest[k] = v
+            contest["certification_status"] = "public_canvass_unproven"
         if race_id in CANVASS_OVERRIDES:
             ov = CANVASS_OVERRIDES[race_id]
             for k, v in ov.items():
                 contest[k] = v
             tot = int(contest["dem_votes"]) + int(contest["rep_votes"])
-            if tot > 0:
+            if tot > 0 and not contest.get("multiway", {}).get("same_party_general"):
+                # Provisional D−R; annotate_margin_semantics may clear/replace.
                 contest["two_party_margin"] = round(
                     100.0 * (contest["dem_votes"] - contest["rep_votes"]) / tot, 4
                 )
@@ -365,6 +434,24 @@ def build_from_fte(years: tuple[int, ...] = (2014, 2016, 2018, 2020, 2022, 2024)
             )
             contest["modeled_side"] = contest["winner_caucus"]
             contest["truth_tier"] = ov.get("truth_tier", contest["truth_tier"])
+            ov_hash_payload = {
+                k: v
+                for k, v in ov.items()
+                if k
+                not in {
+                    "source_object_hash",
+                    "discovery_source_hash",
+                    "override_note",
+                }
+            }
+            contest["discovery_source_hash"] = source_hash
+            contest["source_object_hash"] = hashlib.sha256(
+                json.dumps(ov_hash_payload, sort_keys=True, default=str).encode()
+            ).hexdigest()
+            contest["override_note"] = "manual_canvass_transcription"
+        from midterms.evidence.score_targets import annotate_margin_semantics
+
+        contest = annotate_margin_semantics(contest)
         contests_by_year[str(year)].append(contest)
 
     for y, rows in contests_by_year.items():
@@ -421,48 +508,38 @@ def build_from_fte(years: tuple[int, ...] = (2014, 2016, 2018, 2020, 2022, 2024)
 
 
 def write_expectations_from_roster() -> dict[str, Any]:
-    """Held seats from roster; post seats / canaries independently curated."""
-    from midterms.evidence.build_official_ledger import HELD
+    """Held seats from roster; post seats / canaries independently curated.
 
+    The roster must already exist as a separately curated artifact — never
+    regenerated from the result ledger under test (audit P2).
+    """
     if not ROSTER_PATH.exists():
-        ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
-        roster = {
-            "parser_version": "seat-roster-v1",
-            "note": (
-                "Pre-election held seats and contested race_id lists. "
-                "Must not be regenerated from vote margins."
-            ),
-            "cycles": {},
-        }
-        for y, block in ledger.get("cycles", {}).items():
-            yi = int(y)
-            h = HELD[yi]
-            ids = [c["race_id"] for c in block["contests"]]
-            # Prefer unexpired naming in roster
-            ids = [
-                ("senate-2022-CA-unexpired" if rid == "senate-2022-CA-special" else rid)
-                for rid in ids
-            ]
-            roster["cycles"][y] = {
-                "held_dem": int(h["held_dem"]),
-                "held_rep": int(h["held_rep"]),
-                "held_ind": int(h["held_ind"]),
-                "expected_race_ids": ids,
-                "contested_race_ids": ids,
-                "n_contested_expected": len(ids),
-            }
-        ROSTER_PATH.write_text(json.dumps(roster, indent=2), encoding="utf-8")
-    else:
-        roster = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))
-        # Migrate CA-special → CA-unexpired in place
-        for y, block in roster.get("cycles", {}).items():
-            for key in ("expected_race_ids", "contested_race_ids"):
-                if key in block:
-                    block[key] = [
-                        "senate-2022-CA-unexpired" if rid == "senate-2022-CA-special" else rid
-                        for rid in block[key]
-                    ]
-        ROSTER_PATH.write_text(json.dumps(roster, indent=2), encoding="utf-8")
+        raise FileNotFoundError(
+            f"missing independent seat roster {ROSTER_PATH}; "
+            "curate held seats / expected_race_ids offline — do not derive from ledger"
+        )
+    roster = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))
+    # Migrate CA-special → CA-unexpired naming only (no inventing contests).
+    for y, block in roster.get("cycles", {}).items():
+        for key in ("expected_race_ids", "contested_race_ids"):
+            if key in block:
+                block[key] = [
+                    "senate-2022-CA-unexpired" if rid == "senate-2022-CA-special" else rid
+                    for rid in block[key]
+                ]
+        if "held_dem" not in block or "held_rep" not in block:
+            raise ValueError(
+                f"roster cycle {y} missing held_dem/held_rep — curate offline; "
+                "refusing to invent held seats from ledger constants"
+            )
+        if not (
+            block.get("expected_race_ids") or block.get("contested_race_ids")
+        ):
+            raise ValueError(
+                f"roster cycle {y} missing expected_race_ids — do not derive from ledger"
+            )
+    # Persist naming migration only; never rewrite held counts from results.
+    ROSTER_PATH.write_text(json.dumps(roster, indent=2), encoding="utf-8")
 
     expectations = {
         "parser_version": "chamber-expectations-v4-truth_v1",
@@ -584,11 +661,21 @@ def rebuild_canonical_truth() -> dict[str, Any]:
     """Single entrypoint: FTE ledger + roster expectations + normalized parquet."""
     CERT_DIR.mkdir(parents=True, exist_ok=True)
     out = build_from_fte()
+    from midterms.evidence.truth_contract import validate_ledger_contests
+    from midterms.evidence.official_ledger import load_ledger
+
+    # Validate the just-written ledger before expectations/normalized materialize.
+    led = load_ledger()
+    verrs = validate_ledger_contests(led)
+    if verrs:
+        raise ValueError("truth_v1 semantic validation failed:\n" + "\n".join(verrs[:20]))
     exp = write_expectations_from_roster()
     from midterms.evidence.official_ledger import write_ledger_normalized
+    from midterms.ops.release_identity import write_release_identity
 
     norm = write_ledger_normalized()
-    return {**out, **exp, "normalized": norm}
+    identity = write_release_identity()
+    return {**out, **exp, "normalized": norm, "release_identity": identity}
 
 
 def main() -> None:

@@ -118,8 +118,13 @@ def _realized_chamber(races, results, *, vp_tiebreak_party: str = "R") -> tuple[
         if by_res is None or rid not in by_res.index:
             continue
         n += 1
-        if float(by_res.loc[rid, "two_party_margin"]) >= 0:
+        caucus = str(by_res.loc[rid].get("winner_caucus") or "")
+        if caucus == "D":
             wins += 1
+        elif not caucus:
+            m = by_res.loc[rid].get("two_party_margin")
+            if m is not None and float(m) >= 0:
+                wins += 1
     dem_seats = held_dem + wins
     if n == 0:
         dem_seats = float(held_dem)

@@ -144,13 +144,15 @@ def test_score_after_freeze():
     assert scored["fast_hierarchical_t"]["n"] >= 1
 
 
-def test_nested_loo_smoke():
+def test_nested_loo_smoke(tmp_path):
+    out = tmp_path / "nested_component_loo.json"
     report = run_nested_component_loo(
         years=(2022,),
         lead_days=(60,),
         hierarchical_method="fast",
         n_draws=100,
         seed=9,
+        out_path=out,
     )
     assert report["audit_item"] == "P2.1"
     assert report["freeze_before_truth"] is True
@@ -158,3 +160,4 @@ def test_nested_loo_smoke():
     assert "2022" in report["crps_by_fold"]
     assert "g8_recommendations" in report
     assert report.get("path")
+    assert out.exists()

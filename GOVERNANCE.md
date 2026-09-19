@@ -5,7 +5,8 @@ Blueprint §§11–12 roles and change control (Senate research production).
 ## Public live probabilities
 **HOLD (17 Sep 2026 data-drop audit / v0.9.21):** `PUBLIC_LIVE_ENABLED=False`.
 Truth_v1 ledger/expectations are unified; Wikipedia vote scrape remains quarantined.
-`publish-live` fail-closes until vintages and fold-pure validation clear a fresh review.
+`publish-live` fail-closes until multi-cycle nested validation and fold-pure evidence
+clear a fresh review. Thin/single-cycle calibration claims are blocked by G6/G7.
 
 Current surface: `research_only`. Do not label research runs as live.
 

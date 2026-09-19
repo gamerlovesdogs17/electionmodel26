@@ -1,14 +1,14 @@
 {
   "release_id": "truth_v1_v0.9.21",
   "model_version": "senate-hierarchical-v0.9.21",
-  "generated_at": "2026-09-18T01:16:21.450251+00:00",
-  "code_commit": "339cc608d27e57c3dd1f03c02d5b0e22673c0344",
+  "generated_at": "2026-09-19T19:27:06.609650+00:00",
+  "code_commit": "2edba89540f963a8ea649a5bb1e8fdaf488e86d2",
   "PUBLIC_LIVE_ENABLED": false,
   "publication_surface": "research_only",
   "schema_version": "truth_v1",
   "data_hashes": {
-    "official_senate_ledger.json": "4ae4a74f91b02bcaa940a9c9d6c57786bc5799aa2f8ce8d475d598715e8bf1ee",
-    "independent_chamber_expectations.json": "912ef1384fc4ab016ea53f01073bab73ffec4c7279542ba535bb2f78e64cfd55",
+    "official_senate_ledger.json": "50082bd9656467f43704a8456235a5405c6530349b90632e4aceddbdff1140a5",
+    "independent_chamber_expectations.json": "c9cd11e3b30567d491fea0f8e701b525b65a12acdb02129b724ccad91564e59f",
     "fte_senate.csv": "26a7d8cf3baaa1caf5706b9e23586b449fcc78b11bd1f03c72d02ea3f3faac05"
   },
   "config": {
@@ -16,7 +16,8 @@
     "PUBLIC_LIVE_ENABLED": false
   },
   "notes": [
-    "Immutable truth-integration identity for v0.9.21; forecast not retuned.",
-    "Wikipedia certified_vote_counts.json quarantined (parser_development_only)."
+    "Immutable truth-integration identity; resealed after clean rebuild.",
+    "Wikipedia certified_vote_counts.json quarantined (parser_development_only).",
+    "Runoff event dates + available_at day-after bound (audit 19 Sep 2026 P0)."
   ]
 }

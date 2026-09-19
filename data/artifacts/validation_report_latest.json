@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-13T16:56:45.705695+00:00",
-  "model_version": "senate-hierarchical-v0.9",
+  "generated_at": "2026-09-19T19:05:07.968335+00:00",
+  "model_version": "senate-hierarchical-v0.9.21",
   "primary_holdout": 2022,
   "quick": true,
   "lead_time_grid": {
@@ -10,315 +10,684 @@
       {
         "lead_days": 90,
         "as_of": "2022-08-10",
-        "n_polls": 16,
+        "n_polls": 152,
         "scores": {
-          "n": 33,
-          "crps": 2.65664489166191,
-          "log_score": -3.0346712439624834,
-          "brier": 0.03549564303168325,
-          "mae": 3.5404940920274712
+          "n": 34,
+          "crps": 4.097190704861594,
+          "log_score": -3.4320310508167933,
+          "brier": 0.03751617952661601,
+          "mae": 5.769379462356477
         },
         "extended": {
-          "n": 33,
-          "crps": 2.6566448916619096,
-          "interval_score_90": 20.845195458182204,
-          "brier": 0.03549564303168325,
-          "mae": 3.5404940920274717,
-          "coverage_90": 0.9696969696969697,
+          "n": 34,
+          "crps": 4.097190704861594,
+          "interval_score_90": 33.041965953292355,
+          "brier": 0.03751617952661601,
+          "log_score": -0.13839106059445822,
+          "mae": 5.769379462356477,
+          "coverage_90": 0.9705882352941176,
           "reliability": [
             {
               "bin_lo": 0.0,
               "bin_hi": 0.1,
-              "n": 18.0,
-              "mean_p": 0.006338786304276751,
+              "n": 13.0,
+              "mean_p": 0.01282831348991695,
               "mean_y": 0.0
             },
             {
-              "bin_lo": 0.30000000000000004,
-              "bin_hi": 0.4,
-              "n": 3.0,
-              "mean_p": 0.35145016132045503,
-              "mean_y": 0.3333333333333333
+              "bin_lo": 0.1,
+              "bin_hi": 0.2,
+              "n": 2.0,
+              "mean_p": 0.1703781342998925,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.4,
+              "bin_hi": 0.5,
+              "n": 1.0,
+              "mean_p": 0.4046526319319812,
+              "mean_y": 0.0
             },
             {
               "bin_lo": 0.5,
               "bin_hi": 0.6000000000000001,
               "n": 1.0,
-              "mean_p": 0.5650491124133055,
+              "mean_p": 0.5139628288863552,
               "mean_y": 0.0
             },
             {
               "bin_lo": 0.6000000000000001,
               "bin_hi": 0.7000000000000001,
-              "n": 1.0,
-              "mean_p": 0.6955442833588125,
-              "mean_y": 1.0
+              "n": 2.0,
+              "mean_p": 0.6635984783313754,
+              "mean_y": 0.5
             },
             {
               "bin_lo": 0.7000000000000001,
               "bin_hi": 0.8,
-              "n": 2.0,
-              "mean_p": 0.7404584341957476,
+              "n": 3.0,
+              "mean_p": 0.7485867945128742,
               "mean_y": 1.0
             },
             {
               "bin_lo": 0.8,
               "bin_hi": 0.9,
               "n": 1.0,
-              "mean_p": 0.8851389938611455,
+              "mean_p": 0.8882623510032741,
               "mean_y": 1.0
             },
             {
               "bin_lo": 0.9,
               "bin_hi": 1.0,
-              "n": 7.0,
-              "mean_p": 0.9710274850890236,
+              "n": 11.0,
+              "mean_p": 0.9609575972748686,
               "mean_y": 1.0
             }
-          ]
+          ],
+          "calibration_slope_intercept": {
+            "n": 34,
+            "slope": 1.0949838241668868,
+            "intercept": -0.05944490256338411,
+            "ok": true,
+            "ideal": {
+              "slope": 1.0,
+              "intercept": 0.0
+            }
+          },
+          "pit": {
+            "n": 34,
+            "mean": 0.447820551438864,
+            "var": 0.059988629356781537,
+            "expected_mean": 0.5,
+            "expected_var": 0.08333333333333333,
+            "histogram": [
+              {
+                "bin_lo": 0.0,
+                "bin_hi": 0.1,
+                "n": 0.0
+              },
+              {
+                "bin_lo": 0.1,
+                "bin_hi": 0.2,
+                "n": 6.0
+              },
+              {
+                "bin_lo": 0.2,
+                "bin_hi": 0.30000000000000004,
+                "n": 6.0
+              },
+              {
+                "bin_lo": 0.30000000000000004,
+                "bin_hi": 0.4,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.4,
+                "bin_hi": 0.5,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.5,
+                "bin_hi": 0.6000000000000001,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.6000000000000001,
+                "bin_hi": 0.7000000000000001,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.7000000000000001,
+                "bin_hi": 0.8,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.8,
+                "bin_hi": 0.9,
+                "n": 0.0
+              },
+              {
+                "bin_lo": 0.9,
+                "bin_hi": 1.0,
+                "n": 3.0
+              }
+            ],
+            "ok": true
+          },
+          "reliability_gate": {
+            "sample_sizes_disclosed": true,
+            "overconfident_bins": [],
+            "n_overconfident": 0,
+            "total_n": 34.0,
+            "n_adequate_bins": 2,
+            "thin_sample": true,
+            "calibration_claim_allowed": false
+          }
         },
         "chamber": {
-          "seat_crps": 0.5150666666666666,
-          "seat_mae": 1.7266666666666666,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 42.62,
+          "seat_crps": 1.0211555555555556,
+          "seat_mae": 3.2666666666666666,
+          "control_brier": 0.09000000000000002,
+          "p_dem_control": 0.7,
+          "expected_dem_seats": 51.54666666666667,
           "n_draws": 150
         },
-        "energy_score": 18.250797041922755
+        "energy_score": 30.933008076548823
       },
       {
         "lead_days": 60,
         "as_of": "2022-09-09",
-        "n_polls": 16,
+        "n_polls": 207,
         "scores": {
-          "n": 33,
-          "crps": 2.85306886221847,
-          "log_score": -3.0730769827073177,
-          "brier": 0.036804873523734696,
-          "mae": 3.9162128192628374
+          "n": 34,
+          "crps": 4.792333200083149,
+          "log_score": -3.5963797371577915,
+          "brier": 0.05289518013402882,
+          "mae": 6.649335151414399
         },
         "extended": {
-          "n": 33,
-          "crps": 2.8530688622184694,
-          "interval_score_90": 21.026307762062686,
-          "brier": 0.0368048735237347,
-          "mae": 3.9162128192628374,
-          "coverage_90": 0.9393939393939394,
+          "n": 34,
+          "crps": 4.792333200083149,
+          "interval_score_90": 42.11171999465585,
+          "brier": 0.05289518013402882,
+          "log_score": -0.1803165357615721,
+          "mae": 6.649335151414399,
+          "coverage_90": 0.9117647058823529,
           "reliability": [
             {
               "bin_lo": 0.0,
               "bin_hi": 0.1,
-              "n": 18.0,
-              "mean_p": 0.0043321911602255585,
+              "n": 12.0,
+              "mean_p": 0.009161912730122951,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.1,
+              "bin_hi": 0.2,
+              "n": 1.0,
+              "mean_p": 0.13606624619918334,
               "mean_y": 0.0
             },
             {
               "bin_lo": 0.2,
               "bin_hi": 0.30000000000000004,
               "n": 2.0,
-              "mean_p": 0.2936893420894626,
+              "mean_p": 0.2623762616704531,
               "mean_y": 0.0
             },
             {
-              "bin_lo": 0.30000000000000004,
-              "bin_hi": 0.4,
+              "bin_lo": 0.4,
+              "bin_hi": 0.5,
               "n": 1.0,
-              "mean_p": 0.3679733407681323,
-              "mean_y": 1.0
+              "mean_p": 0.4726770660016486,
+              "mean_y": 0.0
             },
             {
               "bin_lo": 0.5,
               "bin_hi": 0.6000000000000001,
               "n": 1.0,
-              "mean_p": 0.5758300582359087,
-              "mean_y": 0.0
+              "mean_p": 0.5440864179420657,
+              "mean_y": 1.0
             },
             {
               "bin_lo": 0.6000000000000001,
               "bin_hi": 0.7000000000000001,
               "n": 1.0,
-              "mean_p": 0.6373175782479523,
-              "mean_y": 1.0
+              "mean_p": 0.622589777330843,
+              "mean_y": 0.0
             },
             {
               "bin_lo": 0.7000000000000001,
               "bin_hi": 0.8,
-              "n": 2.0,
-              "mean_p": 0.7307247309749684,
-              "mean_y": 1.0
+              "n": 4.0,
+              "mean_p": 0.7325219543779136,
+              "mean_y": 0.75
             },
             {
               "bin_lo": 0.8,
               "bin_hi": 0.9,
-              "n": 1.0,
-              "mean_p": 0.86560339715489,
+              "n": 5.0,
+              "mean_p": 0.8617527505790241,
               "mean_y": 1.0
             },
             {
               "bin_lo": 0.9,
               "bin_hi": 1.0,
               "n": 7.0,
-              "mean_p": 0.9643235970650552,
+              "mean_p": 0.9808922571617409,
               "mean_y": 1.0
             }
-          ]
+          ],
+          "calibration_slope_intercept": {
+            "n": 34,
+            "slope": 1.0912659524773782,
+            "intercept": -0.059484968822928454,
+            "ok": true,
+            "ideal": {
+              "slope": 1.0,
+              "intercept": 0.0
+            }
+          },
+          "pit": {
+            "n": 34,
+            "mean": 0.4534656811852235,
+            "var": 0.07228726993937007,
+            "expected_mean": 0.5,
+            "expected_var": 0.08333333333333333,
+            "histogram": [
+              {
+                "bin_lo": 0.0,
+                "bin_hi": 0.1,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.1,
+                "bin_hi": 0.2,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.2,
+                "bin_hi": 0.30000000000000004,
+                "n": 6.0
+              },
+              {
+                "bin_lo": 0.30000000000000004,
+                "bin_hi": 0.4,
+                "n": 4.0
+              },
+              {
+                "bin_lo": 0.4,
+                "bin_hi": 0.5,
+                "n": 4.0
+              },
+              {
+                "bin_lo": 0.5,
+                "bin_hi": 0.6000000000000001,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.6000000000000001,
+                "bin_hi": 0.7000000000000001,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.7000000000000001,
+                "bin_hi": 0.8,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.8,
+                "bin_hi": 0.9,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.9,
+                "bin_hi": 1.0,
+                "n": 3.0
+              }
+            ],
+            "ok": true
+          },
+          "reliability_gate": {
+            "sample_sizes_disclosed": true,
+            "overconfident_bins": [],
+            "n_overconfident": 0,
+            "total_n": 34.0,
+            "n_adequate_bins": 3,
+            "thin_sample": true,
+            "calibration_claim_allowed": false
+          }
         },
         "chamber": {
-          "seat_crps": 0.5005333333333333,
-          "seat_mae": 1.7333333333333334,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 42.4,
+          "seat_crps": 1.2752444444444442,
+          "seat_mae": 3.8066666666666666,
+          "control_brier": 0.0981777777777778,
+          "p_dem_control": 0.6866666666666666,
+          "expected_dem_seats": 51.62,
           "n_draws": 150
         },
-        "energy_score": 19.46105999152029
+        "energy_score": 39.10410467837278
       },
       {
         "lead_days": 30,
         "as_of": "2022-10-09",
-        "n_polls": 16,
+        "n_polls": 340,
         "scores": {
-          "n": 33,
-          "crps": 2.674328774947265,
-          "log_score": -3.033745364778619,
-          "brier": 0.03475417188539389,
-          "mae": 3.5886913363539805
+          "n": 34,
+          "crps": 4.8909490975067555,
+          "log_score": -3.6142033155295614,
+          "brier": 0.03792064052684994,
+          "mae": 6.600264991446364
         },
         "extended": {
-          "n": 33,
-          "crps": 2.6743287749472646,
-          "interval_score_90": 20.892855730340887,
-          "brier": 0.03475417188539389,
-          "mae": 3.5886913363539805,
-          "coverage_90": 0.9696969696969697,
+          "n": 34,
+          "crps": 4.8909490975067555,
+          "interval_score_90": 43.30952743813988,
+          "brier": 0.03792064052684994,
+          "log_score": -0.13254626800983121,
+          "mae": 6.600264991446364,
+          "coverage_90": 0.8235294117647058,
           "reliability": [
             {
               "bin_lo": 0.0,
               "bin_hi": 0.1,
-              "n": 18.0,
-              "mean_p": 0.004128737694639906,
-              "mean_y": 0.0
-            },
-            {
-              "bin_lo": 0.30000000000000004,
-              "bin_hi": 0.4,
-              "n": 3.0,
-              "mean_p": 0.3367578788098142,
-              "mean_y": 0.3333333333333333
-            },
-            {
-              "bin_lo": 0.5,
-              "bin_hi": 0.6000000000000001,
-              "n": 1.0,
-              "mean_p": 0.5021968309573062,
-              "mean_y": 0.0
-            },
-            {
-              "bin_lo": 0.6000000000000001,
-              "bin_hi": 0.7000000000000001,
-              "n": 1.0,
-              "mean_p": 0.6701912844431328,
-              "mean_y": 1.0
-            },
-            {
-              "bin_lo": 0.7000000000000001,
-              "bin_hi": 0.8,
-              "n": 2.0,
-              "mean_p": 0.73312391861755,
-              "mean_y": 1.0
-            },
-            {
-              "bin_lo": 0.9,
-              "bin_hi": 1.0,
-              "n": 8.0,
-              "mean_p": 0.9602923629710953,
-              "mean_y": 1.0
-            }
-          ]
-        },
-        "chamber": {
-          "seat_crps": 0.5568444444444443,
-          "seat_mae": 1.8333333333333333,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 42.406666666666666,
-          "n_draws": 150
-        },
-        "energy_score": 18.479676302544043
-      },
-      {
-        "lead_days": 7,
-        "as_of": "2022-11-01",
-        "n_polls": 16,
-        "scores": {
-          "n": 33,
-          "crps": 2.7259251184749482,
-          "log_score": -3.048348034593627,
-          "brier": 0.040822738217355894,
-          "mae": 3.820161309502531
-        },
-        "extended": {
-          "n": 33,
-          "crps": 2.725925118474948,
-          "interval_score_90": 21.25364167373555,
-          "brier": 0.040822738217355894,
-          "mae": 3.820161309502531,
-          "coverage_90": 0.9696969696969697,
-          "reliability": [
-            {
-              "bin_lo": 0.0,
-              "bin_hi": 0.1,
-              "n": 18.0,
-              "mean_p": 0.00507670179005072,
+              "n": 13.0,
+              "mean_p": 0.014391591404033186,
               "mean_y": 0.0
             },
             {
               "bin_lo": 0.2,
               "bin_hi": 0.30000000000000004,
               "n": 1.0,
-              "mean_p": 0.28503700616927863,
+              "mean_p": 0.2563173000521133,
               "mean_y": 0.0
             },
             {
               "bin_lo": 0.30000000000000004,
               "bin_hi": 0.4,
+              "n": 1.0,
+              "mean_p": 0.34552632048537985,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.4,
+              "bin_hi": 0.5,
               "n": 2.0,
-              "mean_p": 0.3534714370997053,
+              "mean_p": 0.4296783151529936,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.5,
+              "bin_hi": 0.6000000000000001,
+              "n": 2.0,
+              "mean_p": 0.5459910357891312,
               "mean_y": 0.5
             },
             {
               "bin_lo": 0.6000000000000001,
               "bin_hi": 0.7000000000000001,
-              "n": 3.0,
-              "mean_p": 0.620663413533553,
-              "mean_y": 0.6666666666666666
+              "n": 1.0,
+              "mean_p": 0.6619851991175447,
+              "mean_y": 1.0
             },
             {
-              "bin_lo": 0.7000000000000001,
-              "bin_hi": 0.8,
-              "n": 1.0,
-              "mean_p": 0.7253871487808432,
+              "bin_lo": 0.8,
+              "bin_hi": 0.9,
+              "n": 3.0,
+              "mean_p": 0.8851183627412796,
               "mean_y": 1.0
             },
             {
               "bin_lo": 0.9,
               "bin_hi": 1.0,
-              "n": 8.0,
-              "mean_p": 0.9618562801152821,
+              "n": 11.0,
+              "mean_p": 0.9837386716263772,
               "mean_y": 1.0
             }
-          ]
+          ],
+          "calibration_slope_intercept": {
+            "n": 34,
+            "slope": 1.0786612042088564,
+            "intercept": -0.06489531166075448,
+            "ok": true,
+            "ideal": {
+              "slope": 1.0,
+              "intercept": 0.0
+            }
+          },
+          "pit": {
+            "n": 34,
+            "mean": 0.36879766437688793,
+            "var": 0.06713179830101135,
+            "expected_mean": 0.5,
+            "expected_var": 0.08333333333333333,
+            "histogram": [
+              {
+                "bin_lo": 0.0,
+                "bin_hi": 0.1,
+                "n": 4.0
+              },
+              {
+                "bin_lo": 0.1,
+                "bin_hi": 0.2,
+                "n": 7.0
+              },
+              {
+                "bin_lo": 0.2,
+                "bin_hi": 0.30000000000000004,
+                "n": 6.0
+              },
+              {
+                "bin_lo": 0.30000000000000004,
+                "bin_hi": 0.4,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.4,
+                "bin_hi": 0.5,
+                "n": 4.0
+              },
+              {
+                "bin_lo": 0.5,
+                "bin_hi": 0.6000000000000001,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.6000000000000001,
+                "bin_hi": 0.7000000000000001,
+                "n": 0.0
+              },
+              {
+                "bin_lo": 0.7000000000000001,
+                "bin_hi": 0.8,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.8,
+                "bin_hi": 0.9,
+                "n": 1.0
+              },
+              {
+                "bin_lo": 0.9,
+                "bin_hi": 1.0,
+                "n": 2.0
+              }
+            ],
+            "ok": true
+          },
+          "reliability_gate": {
+            "sample_sizes_disclosed": true,
+            "overconfident_bins": [],
+            "n_overconfident": 0,
+            "total_n": 34.0,
+            "n_adequate_bins": 2,
+            "thin_sample": true,
+            "calibration_claim_allowed": false
+          }
         },
         "chamber": {
-          "seat_crps": 0.6107555555555555,
-          "seat_mae": 1.92,
-          "control_brier": 0.0,
-          "p_dem_control": 0.0,
-          "expected_dem_seats": 42.373333333333335,
+          "seat_crps": 0.9517333333333333,
+          "seat_mae": 3.013333333333333,
+          "control_brier": 0.13444444444444448,
+          "p_dem_control": 0.6333333333333333,
+          "expected_dem_seats": 52.0,
           "n_draws": 150
         },
-        "energy_score": 18.80466033296897
+        "energy_score": 38.07532751027098
+      },
+      {
+        "lead_days": 7,
+        "as_of": "2022-11-01",
+        "n_polls": 547,
+        "scores": {
+          "n": 34,
+          "crps": 4.079735094997157,
+          "log_score": -3.3832746886804888,
+          "brier": 0.035181568796329485,
+          "mae": 5.675695895564408
+        },
+        "extended": {
+          "n": 34,
+          "crps": 4.079735094997157,
+          "interval_score_90": 32.21049436653431,
+          "brier": 0.035181568796329485,
+          "log_score": -0.13164021737118659,
+          "mae": 5.675695895564408,
+          "coverage_90": 0.8529411764705882,
+          "reliability": [
+            {
+              "bin_lo": 0.0,
+              "bin_hi": 0.1,
+              "n": 12.0,
+              "mean_p": 0.003895615996500611,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.1,
+              "bin_hi": 0.2,
+              "n": 1.0,
+              "mean_p": 0.11228891392674745,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.2,
+              "bin_hi": 0.30000000000000004,
+              "n": 2.0,
+              "mean_p": 0.25104740049393043,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.30000000000000004,
+              "bin_hi": 0.4,
+              "n": 2.0,
+              "mean_p": 0.34745901784611866,
+              "mean_y": 0.0
+            },
+            {
+              "bin_lo": 0.4,
+              "bin_hi": 0.5,
+              "n": 2.0,
+              "mean_p": 0.45473728559532617,
+              "mean_y": 0.5
+            },
+            {
+              "bin_lo": 0.5,
+              "bin_hi": 0.6000000000000001,
+              "n": 1.0,
+              "mean_p": 0.592786206210503,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.7000000000000001,
+              "bin_hi": 0.8,
+              "n": 3.0,
+              "mean_p": 0.7641031455910591,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.8,
+              "bin_hi": 0.9,
+              "n": 1.0,
+              "mean_p": 0.8936682289270039,
+              "mean_y": 1.0
+            },
+            {
+              "bin_lo": 0.9,
+              "bin_hi": 1.0,
+              "n": 10.0,
+              "mean_p": 0.9882557963959722,
+              "mean_y": 1.0
+            }
+          ],
+          "calibration_slope_intercept": {
+            "n": 34,
+            "slope": 1.1052952965888347,
+            "intercept": -0.04717257280877466,
+            "ok": true,
+            "ideal": {
+              "slope": 1.0,
+              "intercept": 0.0
+            }
+          },
+          "pit": {
+            "n": 34,
+            "mean": 0.4001107706071723,
+            "var": 0.07424586916916806,
+            "expected_mean": 0.5,
+            "expected_var": 0.08333333333333333,
+            "histogram": [
+              {
+                "bin_lo": 0.0,
+                "bin_hi": 0.1,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.1,
+                "bin_hi": 0.2,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.2,
+                "bin_hi": 0.30000000000000004,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.30000000000000004,
+                "bin_hi": 0.4,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.4,
+                "bin_hi": 0.5,
+                "n": 5.0
+              },
+              {
+                "bin_lo": 0.5,
+                "bin_hi": 0.6000000000000001,
+                "n": 3.0
+              },
+              {
+                "bin_lo": 0.6000000000000001,
+                "bin_hi": 0.7000000000000001,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.7000000000000001,
+                "bin_hi": 0.8,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.8,
+                "bin_hi": 0.9,
+                "n": 2.0
+              },
+              {
+                "bin_lo": 0.9,
+                "bin_hi": 1.0,
+                "n": 2.0
+              }
+            ],
+            "ok": true
+          },
+          "reliability_gate": {
+            "sample_sizes_disclosed": true,
+            "overconfident_bins": [],
+            "n_overconfident": 0,
+            "total_n": 34.0,
+            "n_adequate_bins": 2,
+            "thin_sample": true,
+            "calibration_claim_allowed": false
+          }
+        },
+        "chamber": {
+          "seat_crps": 1.0703555555555555,
+          "seat_mae": 3.34,
+          "control_brier": 0.1995111111111111,
+          "p_dem_control": 0.5533333333333333,
+          "expected_dem_seats": 50.92666666666667,
+          "n_draws": 150
+        },
+        "energy_score": 31.35390430962676
       }
     ],
     "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\lead_time_grid_2022.json"
@@ -329,38 +698,38 @@
     "lead_days": 60,
     "ablations": {
       "baseline": {
-        "n": 33,
-        "crps": 2.7803403124114885,
-        "log_score": -3.1200471138397576,
-        "brier": 0.03818748917143761,
-        "mae": 3.7139836325582976
+        "n": 34,
+        "crps": 5.076159690438279,
+        "log_score": -3.6968524681422648,
+        "brier": 0.0628322415875672,
+        "mae": 6.6016918485696365
       },
       "no_heavy_tails": {
-        "n": 33,
-        "crps": 2.712986064108397,
-        "log_score": -3.1063816641160105,
-        "brier": 0.03931663970140218,
-        "mae": 3.5806206325660406
+        "n": 34,
+        "crps": 5.099050536394635,
+        "log_score": -3.7035481459915043,
+        "brier": 0.06475680609977397,
+        "mae": 6.660805603163948
       },
       "independent_errors": {
-        "n": 33,
-        "crps": 2.7208439134971365,
-        "log_score": -3.1001250820055244,
-        "brier": 0.04169113703313758,
-        "mae": 3.5328901493768
+        "n": 34,
+        "crps": 5.099372863208339,
+        "log_score": -3.6804367228862245,
+        "brier": 0.06737479668849715,
+        "mae": 6.8339040883153945
       },
       "no_national_factor": {
-        "n": 33,
-        "crps": 15.700764733354118,
-        "log_score": -10.255452715302773,
-        "brier": 0.06535156115864277,
-        "mae": 18.51685633937532
+        "n": 34,
+        "crps": 13.431304853026774,
+        "log_score": -10.734289422163165,
+        "brier": 0.08524353441588023,
+        "mae": 15.765994910981089
       }
     },
     "deltas_crps_vs_baseline": {
-      "no_heavy_tails": -0.06735424830309134,
-      "independent_errors": -0.05949639891435199,
-      "no_national_factor": 12.92042442094263
+      "no_heavy_tails": 0.022890845956355932,
+      "independent_errors": 0.02321317277006063,
+      "no_national_factor": 8.355145162588496
     },
     "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\component_ablation_2022.json"
   },
@@ -377,308 +746,2407 @@
       {
         "student_t_df": 4.0,
         "era_weight": 0.85,
-        "train_mean_crps": 4.841748769252236,
+        "train_mean_crps": 5.522838903987313,
         "train_scores": [
-          1.948391879839898,
-          12.632902863576447,
-          3.2182588826107437,
-          2.793869063368147,
-          3.6153211568659462
+          7.078551300124833,
+          9.642649424468951,
+          3.4293467108362834,
+          3.900299325575768,
+          3.5633477589307256
         ]
       },
       {
         "student_t_df": 4.0,
         "era_weight": 1.0,
-        "train_mean_crps": 4.843252423243532,
+        "train_mean_crps": 5.507394191729415,
         "train_scores": [
-          2.0025720339642636,
-          12.531556720846288,
-          3.234518348027564,
-          2.8363346278126493,
-          3.611280385566896
+          7.026823011607393,
+          9.573139048763466,
+          3.4401580164371284,
+          3.918378628110559,
+          3.578472253728532
         ]
       },
       {
         "student_t_df": 4.0,
         "era_weight": 1.15,
-        "train_mean_crps": 4.852215942308135,
+        "train_mean_crps": 5.493337376264001,
         "train_scores": [
-          2.0683515339734764,
-          12.433709955804263,
-          3.2598383197345773,
-          2.8855541892751337,
-          3.6136257127532234
+          6.974318061933619,
+          9.500032176398655,
+          3.4553333901951495,
+          3.9404486651656194,
+          3.596554587626961
         ]
       },
       {
         "student_t_df": 5.0,
         "era_weight": 0.85,
-        "train_mean_crps": 4.859787440718799,
+        "train_mean_crps": 5.5022270824813955,
         "train_scores": [
-          1.8873712839427752,
-          12.77591316123569,
-          3.2116259834048675,
-          2.7614960437077523,
-          3.6625307313029087
+          7.1564327433957295,
+          9.754541093293813,
+          3.3530680283539462,
+          3.8108899654665453,
+          3.436203581896949
         ]
       },
       {
         "student_t_df": 5.0,
         "era_weight": 1.0,
-        "train_mean_crps": 4.85666765645907,
+        "train_mean_crps": 5.484108351666596,
         "train_scores": [
-          1.9278923430399155,
-          12.682742606257792,
-          3.214388912555338,
-          2.796016243209853,
-          3.6622981772324494
+          7.103810053052182,
+          9.686724325748397,
+          3.364439140704526,
+          3.824403474415531,
+          3.44116476441234
         ]
       },
       {
         "student_t_df": 5.0,
         "era_weight": 1.15,
-        "train_mean_crps": 4.860260616060956,
+        "train_mean_crps": 5.467114706439984,
         "train_scores": [
-          1.980102041529491,
-          12.59060846116795,
-          3.2261777303142285,
-          2.8364135731153053,
-          3.6680012741778056
+          7.050457444702393,
+          9.615537201326902,
+          3.3796269051064787,
+          3.841075683777284,
+          3.448876297286864
         ]
       },
       {
         "student_t_df": 8.0,
         "era_weight": 0.85,
-        "train_mean_crps": 4.835278598173822,
+        "train_mean_crps": 5.4882005288127464,
         "train_scores": [
-          1.8973786937670698,
-          12.869543731902729,
-          3.2068408739642553,
-          2.615692363250115,
-          3.5869373279849417
+          7.086362933172278,
+          9.813516903463366,
+          3.4094713833360686,
+          3.834453064550954,
+          3.2971983595410657
         ]
       },
       {
         "student_t_df": 8.0,
         "era_weight": 1.0,
-        "train_mean_crps": 4.825815052448979,
+        "train_mean_crps": 5.468264058970135,
         "train_scores": [
-          1.9324844601565048,
-          12.771213208209293,
-          3.2091662923867426,
-          2.6410762589678134,
-          3.575135042524538
+          7.048783423264823,
+          9.747244314234063,
+          3.4139632018368866,
+          3.8376038269581643,
+          3.2937255285567395
         ]
       },
       {
         "student_t_df": 8.0,
         "era_weight": 1.15,
-        "train_mean_crps": 4.821660332592852,
+        "train_mean_crps": 5.448589106991188,
         "train_scores": [
-          1.9767710683245052,
-          12.673559785817686,
-          3.2178806329572334,
-          2.67129720840552,
-          3.568792967459319
+          7.00964613972554,
+          9.677060192845753,
+          3.4212382918079633,
+          3.84265509300067,
+          3.292345817576014
         ]
       }
     ],
     "selected": {
       "student_t_df": 8.0,
       "era_weight": 1.15,
-      "train_mean_crps": 4.821660332592852,
+      "train_mean_crps": 5.448589106991188,
       "train_scores": [
-        1.9767710683245052,
-        12.673559785817686,
-        3.2178806329572334,
-        2.67129720840552,
-        3.568792967459319
+        7.00964613972554,
+        9.677060192845753,
+        3.4212382918079633,
+        3.84265509300067,
+        3.292345817576014
       ]
     },
-    "holdout_crps": 2.8063094626689224,
+    "holdout_crps": 4.24119052617373,
     "note": "Hyperparameters selected without seeing holdout cycle",
     "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_df_era_2022.json"
   },
+  "nested_component_loo": {
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+    "audit_item": "P2.1",
+    "spine_label": "fast_hierarchical_t",
+    "freeze_before_truth": true,
+    "no_weight_remapping": true,
+    "mean_crps_by_component": {
+      "shrinkage_polls": 4.767375284808708,
+      "fast_hierarchical_t": 4.327731293304342,
+      "state_space": 3.5331400039943577,
+      "poll_only_state_space": 9.201080046285327,
+      "last_election_swing": 4.9211098267056705,
+      "hier_no_similarity": 4.34027596303231,
+      "ridge_fundamentals": 5.042712737757732,
+      "equal_weight_polls": 5.07513239520805,
+      "hier_no_terminal_race": 4.336243341700774
+    },
+    "g8_recommendations": {
+      "state_space": {
+        "keep_votes": 4,
+        "n_folds": 4,
+        "recommend": "keep",
+        "deltas_spine_minus_component": {
+          "2018": 1.0477137284878832,
+          "2020": 1.1217346066152274,
+          "2022": 0.520350859646812,
+          "2024": 0.48856596249001605
+        }
+      },
+      "poll_only_state_space": {
+        "keep_votes": 0,
+        "n_folds": 4,
+        "recommend": "disable",
+        "deltas_spine_minus_component": {
+          "2018": -2.292619016488386,
+          "2020": -6.552522416685354,
+          "2022": -7.374961492176996,
+          "2024": -3.2732920865732003
+        }
+      },
+      "ridge_fundamentals": {
+        "keep_votes": 3,
+        "n_folds": 4,
+        "recommend": "keep",
+        "deltas_spine_minus_component": {
+          "2018": -3.988507884238601,
+          "2020": 0.8486873361919951,
+          "2022": 0.2579920868097636,
+          "2024": 0.021902683423284497
+        }
+      },
+      "last_election_swing": {
+        "keep_votes": 0,
+        "n_folds": 4,
+        "recommend": "disable",
+        "deltas_spine_minus_component": {
+          "2018": -1.3090472572019287,
+          "2020": -0.11593330466227947,
+          "2022": -0.0353381865304323,
+          "2024": -0.9131953852106744
+        }
+      },
+      "equal_weight_polls": {
+        "keep_votes": 0,
+        "n_folds": 4,
+        "recommend": "disable",
+        "deltas_spine_minus_component": {
+          "2018": -1.9462206362752923,
+          "2020": -0.18340114396660034,
+          "2022": -0.7635671545756955,
+          "2024": -0.09641547279724483
+        }
+      },
+      "shrinkage_polls": {
+        "keep_votes": 0,
+        "n_folds": 4,
+        "recommend": "disable",
+        "deltas_spine_minus_component": {
+          "2018": -0.3839878369427687,
+          "2020": -0.5924344061715487,
+          "2022": -0.5572512568254666,
+          "2024": -0.22490246607767928
+        }
+      },
+      "similarity_terminal": {
+        "ablation_component": "hier_no_similarity",
+        "keep_votes": 3,
+        "n_folds": 4,
+        "recommend": "keep",
+        "deltas_spine_minus_ablation": {
+          "2018": -0.03324204725313873,
+          "2020": -0.04111254546672782,
+          "2022": -0.03062673333949295,
+          "2024": 0.054802647147487615
+        }
+      },
+      "terminal_race": {
+        "ablation_component": "hier_no_terminal_race",
+        "keep_votes": 3,
+        "n_folds": 4,
+        "recommend": "keep",
+        "deltas_spine_minus_ablation": {
+          "2018": -0.02826345408962938,
+          "2020": -0.02558162093218108,
+          "2022": -0.0311738001894577,
+          "2024": 0.05097068162553997
+        }
+      }
+    },
+    "n_failures": 0
+  },
   "cycle_replay": {
     "stack_weights": {
-      "last_election_swing": 0.08601003796343126,
-      "equal_weight_polls": 0.18628210919561128,
-      "shrinkage_polls": 0.17454717853584162,
-      "fast_hierarchical_t": 0.20388838308391619,
-      "state_space": 0.15357234404904524,
-      "poll_only_state_space": 6.703090946798564e-08,
-      "ridge_fundamentals": 0.195699880141245
+      "last_election_swing": 0.12136786533502746,
+      "equal_weight_polls": 0.045963802543537456,
+      "shrinkage_polls": 0.060518073088351436,
+      "pymc": 0.18110971209259216,
+      "fast_hierarchical_t": 0.1299579869306571,
+      "state_space": 0.28161811027516764,
+      "poll_only_state_space": 7.889566501991266e-06,
+      "ridge_fundamentals": 0.17945656016816477
     },
     "chamber": {
-      "seat_crps": 0.5522999999999999,
-      "seat_mae": 1.81,
-      "control_brier": 0.0,
-      "p_dem_control": 0.0,
-      "expected_dem_seats": 42.975,
+      "control_brier": 0.07387222222222223,
+      "seat_mae": 1.9566666666666666,
       "n_leads": 2
     },
     "poll_gate": {
       "election_id": "senate-2022",
       "year": 2022,
-      "n_polls": 16,
+      "n_polls": 691,
       "synthetic": false,
       "source": "cycle_manifest",
-      "allow_synthetic": true,
-      "in_cycles": true
+      "allow_synthetic": false,
+      "in_cycles": true,
+      "coverage": {
+        "ok": true,
+        "year": 2022,
+        "election_id": "senate-2022",
+        "n_official_contests": 36,
+        "n_polled_contests": 30,
+        "n_polled_universe": 30,
+        "never_polled_contests": [
+          "senate-2022-HI",
+          "senate-2022-ID",
+          "senate-2022-KY",
+          "senate-2022-LA",
+          "senate-2022-ND",
+          "senate-2022-UT"
+        ],
+        "n_never_polled": 6,
+        "n_poll_rows": 691,
+        "n_polls_with_candidate_identity": 691,
+        "n_inferred_nominee_races": 36,
+        "denominator": "official_ballot",
+        "nominee_source": "official_ledger",
+        "by_lead": {
+          "90": {
+            "as_of": "2022-08-10",
+            "lead_days": 90,
+            "n_polls": 152,
+            "n_contests_with_polls": 19,
+            "n_contests_expected": 36,
+            "coverage_share": 0.5277777777777778,
+            "min_share_required": 0.4,
+            "missing_contests": [
+              "senate-2022-AL",
+              "senate-2022-AR",
+              "senate-2022-CA",
+              "senate-2022-CA-unexpired",
+              "senate-2022-HI",
+              "senate-2022-ID",
+              "senate-2022-IN",
+              "senate-2022-KS",
+              "senate-2022-LA",
+              "senate-2022-MD",
+              "senate-2022-ND",
+              "senate-2022-OK",
+              "senate-2022-OK-special",
+              "senate-2022-OR",
+              "senate-2022-SC",
+              "senate-2022-UT",
+              "senate-2022-VT"
+            ],
+            "n_missing_contests": 17,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2022-05-16",
+            "max_field_end": "2022-08-08",
+            "n_recent_21d": 34,
+            "recency_ok": true,
+            "ok": true
+          },
+          "60": {
+            "as_of": "2022-09-09",
+            "lead_days": 60,
+            "n_polls": 207,
+            "n_contests_with_polls": 22,
+            "n_contests_expected": 36,
+            "coverage_share": 0.6111111111111112,
+            "min_share_required": 0.55,
+            "missing_contests": [
+              "senate-2022-AL",
+              "senate-2022-AR",
+              "senate-2022-CA",
+              "senate-2022-CA-unexpired",
+              "senate-2022-HI",
+              "senate-2022-ID",
+              "senate-2022-LA",
+              "senate-2022-MD",
+              "senate-2022-ND",
+              "senate-2022-OK",
+              "senate-2022-OK-special",
+              "senate-2022-OR",
+              "senate-2022-SC",
+              "senate-2022-UT"
+            ],
+            "n_missing_contests": 14,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2022-07-04",
+            "max_field_end": "2022-09-07",
+            "n_recent_21d": 33,
+            "recency_ok": true,
+            "ok": true
+          },
+          "30": {
+            "as_of": "2022-10-09",
+            "lead_days": 30,
+            "n_polls": 340,
+            "n_contests_with_polls": 28,
+            "n_contests_expected": 36,
+            "coverage_share": 0.7777777777777778,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2022-AL",
+              "senate-2022-CA",
+              "senate-2022-CA-unexpired",
+              "senate-2022-HI",
+              "senate-2022-ID",
+              "senate-2022-LA",
+              "senate-2022-ND",
+              "senate-2022-UT"
+            ],
+            "n_missing_contests": 8,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2022-08-17",
+            "max_field_end": "2022-10-07",
+            "n_recent_21d": 77,
+            "recency_ok": true,
+            "ok": true
+          },
+          "7": {
+            "as_of": "2022-11-01",
+            "lead_days": 7,
+            "n_polls": 547,
+            "n_contests_with_polls": 31,
+            "n_contests_expected": 36,
+            "coverage_share": 0.8611111111111112,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2022-HI",
+              "senate-2022-ID",
+              "senate-2022-LA",
+              "senate-2022-ND",
+              "senate-2022-UT"
+            ],
+            "n_missing_contests": 5,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2022-09-19",
+            "max_field_end": "2022-10-31",
+            "n_recent_21d": 173,
+            "recency_ok": true,
+            "ok": true
+          }
+        },
+        "lead_ok_all": true,
+        "failures": [],
+        "note": "Coverage denominator is the full official ballot; never-polled contests appear at 0% rather than disappearing (fresh audit R-06). Top-level ok requires every lead block ok (A-07).",
+        "meta_source": "Wikipedia: 2022 United States Senate elections"
+      }
     },
     "aggregate_keys": [
       "last_election_swing",
       "equal_weight_polls",
       "shrinkage_polls",
+      "pymc",
       "fast_hierarchical_t",
       "state_space",
       "poll_only_state_space",
       "ridge_fundamentals"
     ],
-    "error": null
+    "error": null,
+    "comparable": true,
+    "validation_status": "official_ballot_fte_polls"
   },
   "calibration": {
-    "n": 33,
+    "n": 34,
     "reliability": [
       {
         "bin_lo": 0.0,
         "bin_hi": 0.1,
-        "n": 18.0,
-        "mean_p": 0.008709277158211137,
+        "n": 12.0,
+        "mean_p": 0.025569613073740324,
         "mean_y": 0.0
       },
       {
         "bin_lo": 0.2,
         "bin_hi": 0.30000000000000004,
-        "n": 1.0,
-        "mean_p": 0.29381774264778693,
+        "n": 2.0,
+        "mean_p": 0.24507660495032502,
         "mean_y": 0.0
       },
       {
         "bin_lo": 0.30000000000000004,
         "bin_hi": 0.4,
         "n": 1.0,
-        "mean_p": 0.34445247352650543,
+        "mean_p": 0.3758555044883789,
         "mean_y": 0.0
-      },
-      {
-        "bin_lo": 0.4,
-        "bin_hi": 0.5,
-        "n": 1.0,
-        "mean_p": 0.4076980724477728,
-        "mean_y": 1.0
       },
       {
         "bin_lo": 0.5,
         "bin_hi": 0.6000000000000001,
-        "n": 1.0,
-        "mean_p": 0.5666478781115543,
-        "mean_y": 0.0
+        "n": 3.0,
+        "mean_p": 0.5654833374970534,
+        "mean_y": 0.3333333333333333
       },
       {
         "bin_lo": 0.6000000000000001,
         "bin_hi": 0.7000000000000001,
+        "n": 2.0,
+        "mean_p": 0.6838264381014957,
+        "mean_y": 0.5
+      },
+      {
+        "bin_lo": 0.7000000000000001,
+        "bin_hi": 0.8,
         "n": 3.0,
-        "mean_p": 0.6777308313832938,
+        "mean_p": 0.7532395265323496,
         "mean_y": 1.0
       },
       {
         "bin_lo": 0.8,
         "bin_hi": 0.9,
-        "n": 1.0,
-        "mean_p": 0.8876220826831243,
+        "n": 4.0,
+        "mean_p": 0.8321565624642394,
         "mean_y": 1.0
       },
       {
         "bin_lo": 0.9,
         "bin_hi": 1.0,
         "n": 7.0,
-        "mean_p": 0.9603499949685324,
+        "mean_p": 0.970218737756795,
         "mean_y": 1.0
       }
     ],
-    "mean_interval_score_90": 23.25002385480888,
-    "brier": 0.03719729638687999,
+    "mean_interval_score_90": 43.28371220551403,
+    "brier": 0.05691536629815605,
     "margin_scores": {
-      "n": 33,
-      "crps": 2.6847249206839807,
-      "interval_score_90": 23.25002385480888,
-      "brier": 0.03719729638687999,
-      "mae": 3.5237888637442367,
-      "coverage_90": 1.0,
+      "n": 34,
+      "crps": 4.968707993699802,
+      "interval_score_90": 43.28371220551403,
+      "brier": 0.05691536629815605,
+      "log_score": -0.20031564684438355,
+      "mae": 6.822077836767783,
+      "coverage_90": 0.9411764705882353,
       "reliability": [
         {
           "bin_lo": 0.0,
           "bin_hi": 0.1,
-          "n": 18.0,
-          "mean_p": 0.008709277158211137,
+          "n": 12.0,
+          "mean_p": 0.025569613073740324,
           "mean_y": 0.0
         },
         {
           "bin_lo": 0.2,
           "bin_hi": 0.30000000000000004,
-          "n": 1.0,
-          "mean_p": 0.29381774264778693,
+          "n": 2.0,
+          "mean_p": 0.24507660495032502,
           "mean_y": 0.0
         },
         {
           "bin_lo": 0.30000000000000004,
           "bin_hi": 0.4,
           "n": 1.0,
-          "mean_p": 0.34445247352650543,
+          "mean_p": 0.3758555044883789,
           "mean_y": 0.0
-        },
-        {
-          "bin_lo": 0.4,
-          "bin_hi": 0.5,
-          "n": 1.0,
-          "mean_p": 0.4076980724477728,
-          "mean_y": 1.0
         },
         {
           "bin_lo": 0.5,
           "bin_hi": 0.6000000000000001,
-          "n": 1.0,
-          "mean_p": 0.5666478781115543,
-          "mean_y": 0.0
+          "n": 3.0,
+          "mean_p": 0.5654833374970534,
+          "mean_y": 0.3333333333333333
         },
         {
           "bin_lo": 0.6000000000000001,
           "bin_hi": 0.7000000000000001,
+          "n": 2.0,
+          "mean_p": 0.6838264381014957,
+          "mean_y": 0.5
+        },
+        {
+          "bin_lo": 0.7000000000000001,
+          "bin_hi": 0.8,
           "n": 3.0,
-          "mean_p": 0.6777308313832938,
+          "mean_p": 0.7532395265323496,
           "mean_y": 1.0
         },
         {
           "bin_lo": 0.8,
           "bin_hi": 0.9,
-          "n": 1.0,
-          "mean_p": 0.8876220826831243,
+          "n": 4.0,
+          "mean_p": 0.8321565624642394,
           "mean_y": 1.0
         },
         {
           "bin_lo": 0.9,
           "bin_hi": 1.0,
           "n": 7.0,
-          "mean_p": 0.9603499949685324,
+          "mean_p": 0.970218737756795,
           "mean_y": 1.0
         }
-      ]
+      ],
+      "calibration_slope_intercept": {
+        "n": 34,
+        "slope": 1.1380596563736143,
+        "intercept": -0.08561575943327543,
+        "ok": true,
+        "ideal": {
+          "slope": 1.0,
+          "intercept": 0.0
+        }
+      },
+      "pit": {
+        "n": 34,
+        "mean": 0.4373964992298807,
+        "var": 0.057210662255936004,
+        "expected_mean": 0.5,
+        "expected_var": 0.08333333333333333,
+        "histogram": [
+          {
+            "bin_lo": 0.0,
+            "bin_hi": 0.1,
+            "n": 2.0
+          },
+          {
+            "bin_lo": 0.1,
+            "bin_hi": 0.2,
+            "n": 4.0
+          },
+          {
+            "bin_lo": 0.2,
+            "bin_hi": 0.30000000000000004,
+            "n": 5.0
+          },
+          {
+            "bin_lo": 0.30000000000000004,
+            "bin_hi": 0.4,
+            "n": 7.0
+          },
+          {
+            "bin_lo": 0.4,
+            "bin_hi": 0.5,
+            "n": 5.0
+          },
+          {
+            "bin_lo": 0.5,
+            "bin_hi": 0.6000000000000001,
+            "n": 3.0
+          },
+          {
+            "bin_lo": 0.6000000000000001,
+            "bin_hi": 0.7000000000000001,
+            "n": 2.0
+          },
+          {
+            "bin_lo": 0.7000000000000001,
+            "bin_hi": 0.8,
+            "n": 3.0
+          },
+          {
+            "bin_lo": 0.8,
+            "bin_hi": 0.9,
+            "n": 1.0
+          },
+          {
+            "bin_lo": 0.9,
+            "bin_hi": 1.0,
+            "n": 2.0
+          }
+        ],
+        "ok": true
+      },
+      "reliability_gate": {
+        "sample_sizes_disclosed": true,
+        "overconfident_bins": [],
+        "n_overconfident": 0,
+        "total_n": 34.0,
+        "n_adequate_bins": 2,
+        "thin_sample": true,
+        "calibration_claim_allowed": false
+      }
     }
   },
   "stack_weights_artifact": {
-    "last_election_swing": 0.1264075367822936,
-    "equal_weight_polls": 0.15608110823084928,
-    "shrinkage_polls": 0.17591829122496674,
-    "fast_hierarchical_t": 0.18104159247789697,
-    "state_space": 0.1940869161670225,
-    "poll_only_state_space": 3.2863477009926e-05,
-    "ridge_fundamentals": 0.16643169163996094
+    "last_election_swing": 0.19466485083338164,
+    "equal_weight_polls": 0.032613878705476926,
+    "shrinkage_polls": 0.01333823271636273,
+    "pymc": 0.10682012920103916,
+    "state_space": 0.2103163494311376,
+    "poll_only_state_space": 7.018999103367987e-05,
+    "ridge_fundamentals": 0.44217636912156827
+  },
+  "stack_weights_meta": {
+    "comparable": true,
+    "validation_status": "official_ballot_fte_polls",
+    "archive_note": "Race universe uses official ballots; historical polls are FTE with candidate identity (P0.3). Still not a peer-published claim until nested OOS scores are regenerated."
+  },
+  "chamber_reconcile": {
+    "ok": true,
+    "gate_years": [
+      2014,
+      2016,
+      2018,
+      2020,
+      2022,
+      2024
+    ],
+    "cycles": [
+      "2014",
+      "2016",
+      "2018",
+      "2020",
+      "2022",
+      "2024"
+    ],
+    "by_cycle": {
+      "2014": {
+        "ok": true,
+        "year": 2014,
+        "election_id": "senate-2014",
+        "n_contested_expected": 36,
+        "n_contested_got": 36,
+        "missing_race_ids": [],
+        "extra_race_ids": [],
+        "held_dem": 34,
+        "held_rep": 30,
+        "held_ind": 2,
+        "dem_wins_certified": 12,
+        "realized_dem_seats": 46,
+        "expected_dem_seats": 46,
+        "dem_control": false,
+        "expected_dem_control": false,
+        "vp_tiebreak_party": "D",
+        "canary_failures": [],
+        "reasons": [],
+        "expectations_source": "independent_chamber_expectations.json",
+        "independence_note": "Expected IDs/held/post from independent expectations; observed from warehouse. Held seats are not solved from winners."
+      },
+      "2016": {
+        "ok": true,
+        "year": 2016,
+        "election_id": "senate-2016",
+        "n_contested_expected": 34,
+        "n_contested_got": 34,
+        "missing_race_ids": [],
+        "extra_race_ids": [],
+        "held_dem": 36,
+        "held_rep": 30,
+        "held_ind": 2,
+        "dem_wins_certified": 12,
+        "realized_dem_seats": 48,
+        "expected_dem_seats": 48,
+        "dem_control": false,
+        "expected_dem_control": false,
+        "vp_tiebreak_party": "D",
+        "canary_failures": [],
+        "reasons": [],
+        "expectations_source": "independent_chamber_expectations.json",
+        "independence_note": "Expected IDs/held/post from independent expectations; observed from warehouse. Held seats are not solved from winners."
+      },
+      "2018": {
+        "ok": true,
+        "year": 2018,
+        "election_id": "senate-2018",
+        "n_contested_expected": 35,
+        "n_contested_got": 35,
+        "missing_race_ids": [],
+        "extra_race_ids": [],
+        "held_dem": 23,
+        "held_rep": 42,
+        "held_ind": 0,
+        "dem_wins_certified": 24,
+        "realized_dem_seats": 47,
+        "expected_dem_seats": 47,
+        "dem_control": false,
+        "expected_dem_control": false,
+        "vp_tiebreak_party": "R",
+        "canary_failures": [],
+        "reasons": [],
+        "expectations_source": "independent_chamber_expectations.json",
+        "independence_note": "Expected IDs/held/post from independent expectations; observed from warehouse. Held seats are not solved from winners."
+      },
+      "2020": {
+        "ok": true,
+        "year": 2020,
+        "election_id": "senate-2020",
+        "n_contested_expected": 35,
+        "n_contested_got": 35,
+        "missing_race_ids": [],
+        "extra_race_ids": [],
+        "held_dem": 35,
+        "held_rep": 30,
+        "held_ind": 2,
+        "dem_wins_certified": 15,
+        "realized_dem_seats": 50,
+        "expected_dem_seats": 50,
+        "dem_control": true,
+        "expected_dem_control": true,
+        "vp_tiebreak_party": "D",
+        "canary_failures": [],
+        "reasons": [],
+        "expectations_source": "independent_chamber_expectations.json",
+        "independence_note": "Expected IDs/held/post from independent expectations; observed from warehouse. Held seats are not solved from winners."
+      },
+      "2022": {
+        "ok": true,
+        "year": 2022,
+        "election_id": "senate-2022",
+        "n_contested_expected": 36,
+        "n_contested_got": 36,
+        "missing_race_ids": [],
+        "extra_race_ids": [],
+        "held_dem": 35,
+        "held_rep": 29,
+        "held_ind": 2,
+        "dem_wins_certified": 16,
+        "realized_dem_seats": 51,
+        "expected_dem_seats": 51,
+        "dem_control": true,
+        "expected_dem_control": true,
+        "vp_tiebreak_party": "D",
+        "canary_failures": [],
+        "reasons": [],
+        "expectations_source": "independent_chamber_expectations.json",
+        "independence_note": "Expected IDs/held/post from independent expectations; observed from warehouse. Held seats are not solved from winners."
+      },
+      "2024": {
+        "ok": true,
+        "year": 2024,
+        "election_id": "senate-2024",
+        "n_contested_expected": 35,
+        "n_contested_got": 35,
+        "missing_race_ids": [],
+        "extra_race_ids": [],
+        "held_dem": 27,
+        "held_rep": 38,
+        "held_ind": 0,
+        "dem_wins_certified": 20,
+        "realized_dem_seats": 47,
+        "expected_dem_seats": 47,
+        "dem_control": false,
+        "expected_dem_control": false,
+        "vp_tiebreak_party": "D",
+        "canary_failures": [],
+        "reasons": [],
+        "expectations_source": "independent_chamber_expectations.json",
+        "independence_note": "Expected IDs/held/post from independent expectations; observed from warehouse. Held seats are not solved from winners."
+      }
+    },
+    "failures": [],
+    "note": "Gate years 2014\u20132024 against independent expectations + vote-count ledger (fresh audit R-01/R-02/R-03).",
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+  },
+  "poll_coverage": {
+    "ok": true,
+    "years": [
+      "2018",
+      "2020",
+      "2022",
+      "2024"
+    ],
+    "by_cycle": {
+      "2018": {
+        "ok": true,
+        "year": 2018,
+        "election_id": "senate-2018",
+        "n_official_contests": 35,
+        "n_polled_contests": 32,
+        "n_polled_universe": 32,
+        "never_polled_contests": [
+          "senate-2018-CA",
+          "senate-2018-HI",
+          "senate-2018-VT"
+        ],
+        "n_never_polled": 3,
+        "n_poll_rows": 797,
+        "n_polls_with_candidate_identity": 797,
+        "n_inferred_nominee_races": 35,
+        "denominator": "official_ballot",
+        "nominee_source": "official_ledger",
+        "by_lead": {
+          "90": {
+            "as_of": "2018-08-08",
+            "lead_days": 90,
+            "n_polls": 92,
+            "n_contests_with_polls": 15,
+            "n_contests_expected": 35,
+            "coverage_share": 0.42857142857142855,
+            "min_share_required": 0.4,
+            "missing_contests": [
+              "senate-2018-AZ",
+              "senate-2018-CA",
+              "senate-2018-CT",
+              "senate-2018-DE",
+              "senate-2018-FL",
+              "senate-2018-HI",
+              "senate-2018-MA",
+              "senate-2018-MD",
+              "senate-2018-MI",
+              "senate-2018-MN",
+              "senate-2018-MN-special",
+              "senate-2018-MO",
+              "senate-2018-MS",
+              "senate-2018-MS-special",
+              "senate-2018-NM",
+              "senate-2018-RI",
+              "senate-2018-VT",
+              "senate-2018-WA",
+              "senate-2018-WI",
+              "senate-2018-WY"
+            ],
+            "n_missing_contests": 20,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2018-05-16",
+            "max_field_end": "2018-08-06",
+            "n_recent_21d": 7,
+            "recency_ok": true,
+            "ok": true
+          },
+          "60": {
+            "as_of": "2018-09-07",
+            "lead_days": 60,
+            "n_polls": 289,
+            "n_contests_with_polls": 29,
+            "n_contests_expected": 35,
+            "coverage_share": 0.8285714285714286,
+            "min_share_required": 0.55,
+            "missing_contests": [
+              "senate-2018-CA",
+              "senate-2018-HI",
+              "senate-2018-MD",
+              "senate-2018-RI",
+              "senate-2018-VT",
+              "senate-2018-WY"
+            ],
+            "n_missing_contests": 6,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2018-07-02",
+            "max_field_end": "2018-09-04",
+            "n_recent_21d": 35,
+            "recency_ok": true,
+            "ok": true
+          },
+          "30": {
+            "as_of": "2018-10-07",
+            "lead_days": 30,
+            "n_polls": 435,
+            "n_contests_with_polls": 31,
+            "n_contests_expected": 35,
+            "coverage_share": 0.8857142857142857,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2018-CA",
+              "senate-2018-HI",
+              "senate-2018-VT",
+              "senate-2018-WY"
+            ],
+            "n_missing_contests": 4,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2018-07-07",
+            "max_field_end": "2018-10-05",
+            "n_recent_21d": 86,
+            "recency_ok": true,
+            "ok": true
+          },
+          "7": {
+            "as_of": "2018-10-30",
+            "lead_days": 7,
+            "n_polls": 605,
+            "n_contests_with_polls": 31,
+            "n_contests_expected": 35,
+            "coverage_share": 0.8857142857142857,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2018-CA",
+              "senate-2018-HI",
+              "senate-2018-VT",
+              "senate-2018-WY"
+            ],
+            "n_missing_contests": 4,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2018-09-07",
+            "max_field_end": "2018-10-29",
+            "n_recent_21d": 121,
+            "recency_ok": true,
+            "ok": true
+          }
+        },
+        "lead_ok_all": true,
+        "failures": [],
+        "note": "Coverage denominator is the full official ballot; never-polled contests appear at 0% rather than disappearing (fresh audit R-06). Top-level ok requires every lead block ok (A-07).",
+        "meta_source": "Wikipedia: 2018 United States Senate elections"
+      },
+      "2020": {
+        "ok": true,
+        "year": 2020,
+        "election_id": "senate-2020",
+        "n_official_contests": 35,
+        "n_polled_contests": 33,
+        "n_polled_universe": 33,
+        "never_polled_contests": [
+          "senate-2020-AR",
+          "senate-2020-RI"
+        ],
+        "n_never_polled": 2,
+        "n_poll_rows": 874,
+        "n_polls_with_candidate_identity": 874,
+        "n_inferred_nominee_races": 35,
+        "denominator": "official_ballot",
+        "nominee_source": "official_ledger",
+        "by_lead": {
+          "90": {
+            "as_of": "2020-08-05",
+            "lead_days": 90,
+            "n_polls": 226,
+            "n_contests_with_polls": 21,
+            "n_contests_expected": 35,
+            "coverage_share": 0.6,
+            "min_share_required": 0.4,
+            "missing_contests": [
+              "senate-2020-AR",
+              "senate-2020-DE",
+              "senate-2020-ID",
+              "senate-2020-IL",
+              "senate-2020-LA",
+              "senate-2020-MA",
+              "senate-2020-NE",
+              "senate-2020-OR",
+              "senate-2020-RI",
+              "senate-2020-SD",
+              "senate-2020-TN",
+              "senate-2020-VA",
+              "senate-2020-WV",
+              "senate-2020-WY"
+            ],
+            "n_missing_contests": 14,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2020-06-04",
+            "max_field_end": "2020-08-03",
+            "n_recent_21d": 55,
+            "recency_ok": true,
+            "ok": true
+          },
+          "60": {
+            "as_of": "2020-09-04",
+            "lead_days": 60,
+            "n_polls": 290,
+            "n_contests_with_polls": 22,
+            "n_contests_expected": 35,
+            "coverage_share": 0.6285714285714286,
+            "min_share_required": 0.55,
+            "missing_contests": [
+              "senate-2020-AR",
+              "senate-2020-DE",
+              "senate-2020-ID",
+              "senate-2020-IL",
+              "senate-2020-LA",
+              "senate-2020-MA",
+              "senate-2020-NE",
+              "senate-2020-OR",
+              "senate-2020-RI",
+              "senate-2020-SD",
+              "senate-2020-TN",
+              "senate-2020-WV",
+              "senate-2020-WY"
+            ],
+            "n_missing_contests": 13,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2020-06-27",
+            "max_field_end": "2020-09-04",
+            "n_recent_21d": 28,
+            "recency_ok": true,
+            "ok": true
+          },
+          "30": {
+            "as_of": "2020-10-04",
+            "lead_days": 30,
+            "n_polls": 446,
+            "n_contests_with_polls": 25,
+            "n_contests_expected": 35,
+            "coverage_share": 0.7142857142857143,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2020-AR",
+              "senate-2020-DE",
+              "senate-2020-IL",
+              "senate-2020-LA",
+              "senate-2020-NE",
+              "senate-2020-RI",
+              "senate-2020-SD",
+              "senate-2020-TN",
+              "senate-2020-WV",
+              "senate-2020-WY"
+            ],
+            "n_missing_contests": 10,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2020-07-31",
+            "max_field_end": "2020-10-01",
+            "n_recent_21d": 117,
+            "recency_ok": true,
+            "ok": true
+          },
+          "7": {
+            "as_of": "2020-10-27",
+            "lead_days": 7,
+            "n_polls": 660,
+            "n_contests_with_polls": 30,
+            "n_contests_expected": 35,
+            "coverage_share": 0.8571428571428571,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2020-AR",
+              "senate-2020-IL",
+              "senate-2020-RI",
+              "senate-2020-SD",
+              "senate-2020-WY"
+            ],
+            "n_missing_contests": 5,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2020-09-11",
+            "max_field_end": "2020-10-27",
+            "n_recent_21d": 169,
+            "recency_ok": true,
+            "ok": true
+          }
+        },
+        "lead_ok_all": true,
+        "failures": [],
+        "note": "Coverage denominator is the full official ballot; never-polled contests appear at 0% rather than disappearing (fresh audit R-06). Top-level ok requires every lead block ok (A-07).",
+        "meta_source": "Wikipedia: 2020 United States Senate elections"
+      },
+      "2022": {
+        "ok": true,
+        "year": 2022,
+        "election_id": "senate-2022",
+        "n_official_contests": 36,
+        "n_polled_contests": 30,
+        "n_polled_universe": 30,
+        "never_polled_contests": [
+          "senate-2022-HI",
+          "senate-2022-ID",
+          "senate-2022-KY",
+          "senate-2022-LA",
+          "senate-2022-ND",
+          "senate-2022-UT"
+        ],
+        "n_never_polled": 6,
+        "n_poll_rows": 691,
+        "n_polls_with_candidate_identity": 691,
+        "n_inferred_nominee_races": 36,
+        "denominator": "official_ballot",
+        "nominee_source": "official_ledger",
+        "by_lead": {
+          "90": {
+            "as_of": "2022-08-10",
+            "lead_days": 90,
+            "n_polls": 152,
+            "n_contests_with_polls": 19,
+            "n_contests_expected": 36,
+            "coverage_share": 0.5277777777777778,
+            "min_share_required": 0.4,
+            "missing_contests": [
+              "senate-2022-AL",
+              "senate-2022-AR",
+              "senate-2022-CA",
+              "senate-2022-CA-unexpired",
+              "senate-2022-HI",
+              "senate-2022-ID",
+              "senate-2022-IN",
+              "senate-2022-KS",
+              "senate-2022-LA",
+              "senate-2022-MD",
+              "senate-2022-ND",
+              "senate-2022-OK",
+              "senate-2022-OK-special",
+              "senate-2022-OR",
+              "senate-2022-SC",
+              "senate-2022-UT",
+              "senate-2022-VT"
+            ],
+            "n_missing_contests": 17,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2022-05-16",
+            "max_field_end": "2022-08-08",
+            "n_recent_21d": 34,
+            "recency_ok": true,
+            "ok": true
+          },
+          "60": {
+            "as_of": "2022-09-09",
+            "lead_days": 60,
+            "n_polls": 207,
+            "n_contests_with_polls": 22,
+            "n_contests_expected": 36,
+            "coverage_share": 0.6111111111111112,
+            "min_share_required": 0.55,
+            "missing_contests": [
+              "senate-2022-AL",
+              "senate-2022-AR",
+              "senate-2022-CA",
+              "senate-2022-CA-unexpired",
+              "senate-2022-HI",
+              "senate-2022-ID",
+              "senate-2022-LA",
+              "senate-2022-MD",
+              "senate-2022-ND",
+              "senate-2022-OK",
+              "senate-2022-OK-special",
+              "senate-2022-OR",
+              "senate-2022-SC",
+              "senate-2022-UT"
+            ],
+            "n_missing_contests": 14,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2022-07-04",
+            "max_field_end": "2022-09-07",
+            "n_recent_21d": 33,
+            "recency_ok": true,
+            "ok": true
+          },
+          "30": {
+            "as_of": "2022-10-09",
+            "lead_days": 30,
+            "n_polls": 340,
+            "n_contests_with_polls": 28,
+            "n_contests_expected": 36,
+            "coverage_share": 0.7777777777777778,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2022-AL",
+              "senate-2022-CA",
+              "senate-2022-CA-unexpired",
+              "senate-2022-HI",
+              "senate-2022-ID",
+              "senate-2022-LA",
+              "senate-2022-ND",
+              "senate-2022-UT"
+            ],
+            "n_missing_contests": 8,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2022-08-17",
+            "max_field_end": "2022-10-07",
+            "n_recent_21d": 77,
+            "recency_ok": true,
+            "ok": true
+          },
+          "7": {
+            "as_of": "2022-11-01",
+            "lead_days": 7,
+            "n_polls": 547,
+            "n_contests_with_polls": 31,
+            "n_contests_expected": 36,
+            "coverage_share": 0.8611111111111112,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2022-HI",
+              "senate-2022-ID",
+              "senate-2022-LA",
+              "senate-2022-ND",
+              "senate-2022-UT"
+            ],
+            "n_missing_contests": 5,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2022-09-19",
+            "max_field_end": "2022-10-31",
+            "n_recent_21d": 173,
+            "recency_ok": true,
+            "ok": true
+          }
+        },
+        "lead_ok_all": true,
+        "failures": [],
+        "note": "Coverage denominator is the full official ballot; never-polled contests appear at 0% rather than disappearing (fresh audit R-06). Top-level ok requires every lead block ok (A-07).",
+        "meta_source": "Wikipedia: 2022 United States Senate elections"
+      },
+      "2024": {
+        "ok": true,
+        "year": 2024,
+        "election_id": "senate-2024",
+        "n_official_contests": 35,
+        "n_polled_contests": 32,
+        "n_polled_universe": 32,
+        "never_polled_contests": [
+          "senate-2024-HI",
+          "senate-2024-NE",
+          "senate-2024-VT"
+        ],
+        "n_never_polled": 3,
+        "n_poll_rows": 957,
+        "n_polls_with_candidate_identity": 957,
+        "n_inferred_nominee_races": 35,
+        "denominator": "official_ballot",
+        "nominee_source": "official_ledger",
+        "by_lead": {
+          "90": {
+            "as_of": "2024-08-07",
+            "lead_days": 90,
+            "n_polls": 267,
+            "n_contests_with_polls": 25,
+            "n_contests_expected": 35,
+            "coverage_share": 0.7142857142857143,
+            "min_share_required": 0.4,
+            "missing_contests": [
+              "senate-2024-CT",
+              "senate-2024-DE",
+              "senate-2024-HI",
+              "senate-2024-MS",
+              "senate-2024-NE",
+              "senate-2024-NE-unexpired",
+              "senate-2024-RI",
+              "senate-2024-UT",
+              "senate-2024-VT",
+              "senate-2024-WY"
+            ],
+            "n_missing_contests": 10,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2024-05-09",
+            "max_field_end": "2024-08-05",
+            "n_recent_21d": 34,
+            "recency_ok": true,
+            "ok": true
+          },
+          "60": {
+            "as_of": "2024-09-06",
+            "lead_days": 60,
+            "n_polls": 376,
+            "n_contests_with_polls": 27,
+            "n_contests_expected": 35,
+            "coverage_share": 0.7714285714285715,
+            "min_share_required": 0.55,
+            "missing_contests": [
+              "senate-2024-CT",
+              "senate-2024-DE",
+              "senate-2024-HI",
+              "senate-2024-MS",
+              "senate-2024-NE",
+              "senate-2024-RI",
+              "senate-2024-VT",
+              "senate-2024-WY"
+            ],
+            "n_missing_contests": 8,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2024-06-19",
+            "max_field_end": "2024-09-05",
+            "n_recent_21d": 60,
+            "recency_ok": true,
+            "ok": true
+          },
+          "30": {
+            "as_of": "2024-10-06",
+            "lead_days": 30,
+            "n_polls": 567,
+            "n_contests_with_polls": 30,
+            "n_contests_expected": 35,
+            "coverage_share": 0.8571428571428571,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2024-HI",
+              "senate-2024-MS",
+              "senate-2024-NE",
+              "senate-2024-VT",
+              "senate-2024-WY"
+            ],
+            "n_missing_contests": 5,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2024-08-09",
+            "max_field_end": "2024-10-05",
+            "n_recent_21d": 141,
+            "recency_ok": true,
+            "ok": true
+          },
+          "7": {
+            "as_of": "2024-10-29",
+            "lead_days": 7,
+            "n_polls": 771,
+            "n_contests_with_polls": 31,
+            "n_contests_expected": 35,
+            "coverage_share": 0.8857142857142857,
+            "min_share_required": 0.7,
+            "missing_contests": [
+              "senate-2024-HI",
+              "senate-2024-NE",
+              "senate-2024-VT",
+              "senate-2024-WY"
+            ],
+            "n_missing_contests": 4,
+            "nominee_mismatch_races": [],
+            "n_nominee_mismatches": 0,
+            "median_field_end": "2024-09-05",
+            "max_field_end": "2024-10-29",
+            "n_recent_21d": 149,
+            "recency_ok": true,
+            "ok": true
+          }
+        },
+        "lead_ok_all": true,
+        "failures": [],
+        "note": "Coverage denominator is the full official ballot; never-polled contests appear at 0% rather than disappearing (fresh audit R-06). Top-level ok requires every lead block ok (A-07).",
+        "meta_source": "Wikipedia: 2024 United States Senate elections"
+      }
+    },
+    "failures": [],
+    "generated_note": "audit P0.3 historical poll coverage gate",
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\poll_coverage_latest.json"
+  },
+  "peer_gate": {
+    "ok": true,
+    "control_ok": false,
+    "control_soft": true,
+    "control_gaps": {
+      "ddhq": 0.356375,
+      "kalshi": 0.31657301980198016
+    },
+    "primary_control_gap": 0.31657301980198016,
+    "max_abs_control_gap": 0.356375,
+    "race_scores": {
+      "ddhq": {
+        "n": 10,
+        "brier_vs_peer_favorite": 0.22321035156250005,
+        "mae": 0.12411249999999999,
+        "crps_proxy": 0.12411249999999999,
+        "ok": false
+      },
+      "kalshi": {
+        "n": 10,
+        "brier_vs_peer_favorite": 0.15701035156249998,
+        "mae": 0.11267341824598616,
+        "crps_proxy": 0.11267341824598616,
+        "ok": true
+      }
+    },
+    "race_ok": true,
+    "mean_peer_disagreement": 0.15949111626578813,
+    "null_margin_races": [],
+    "method": "ensemble_stack+overlays",
+    "core_method": "pymc",
+    "generic_ballot": 5.852513615064197,
+    "reasons": [
+      "control gap vs primary peer large (gap=0.317 > 0.25); gaps={'ddhq': 0.356375, 'kalshi': 0.31657301980198016} \u2014 informational under blueprint \u00a72 (peers not averaged)"
+    ],
+    "thresholds": {
+      "max_abs_control_gap": 0.25,
+      "race_brier": 0.22,
+      "race_mae": 0.22,
+      "control_gap_hard_fail": false
+    },
+    "note": "Peers are a release gate for integrity/race calibration only \u2014 never averaged into the ensemble (blueprint \u00a72). Chamber control gap vs markets is soft/informational.",
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\peer_gate_latest.json"
+  },
+  "acceptance_gates": {
+    "audit_item": "Milestone-0",
+    "model_version": "senate-hierarchical-v0.9.21",
+    "generated_at": "2026-09-19T19:06:06.257263+00:00",
+    "archive_scope": "2014-2024",
+    "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
+    "gates": {
+      "G1": {
+        "id": "G1",
+        "name": "Race universe",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "gate_years": [
+            2014,
+            2016,
+            2018,
+            2020,
+            2022,
+            2024
+          ],
+          "problem_cycles": [],
+          "failures": []
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+        ],
+        "failure_behavior": "Stop replay.",
+        "notes": [
+          "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016."
+        ]
+      },
+      "G2": {
+        "id": "G2",
+        "name": "Chamber truth",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "gate_years": [
+            2014,
+            2016,
+            2018,
+            2020,
+            2022,
+            2024
+          ],
+          "failures": []
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+        ],
+        "failure_behavior": "Stop scoring.",
+        "notes": [
+          "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016."
+        ]
+      },
+      "G3": {
+        "id": "G3",
+        "name": "Poll coverage",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "failures": [],
+          "years": [
+            "2018",
+            "2020",
+            "2022",
+            "2024"
+          ]
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\poll_coverage_latest.json"
+        ],
+        "failure_behavior": "Mark thin races; prohibit complete-cycle claim.",
+        "notes": []
+      },
+      "G4": {
+        "id": "G4",
+        "name": "Vintage integrity",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "publishable": false,
+          "run_class": "non_publication",
+          "reasons": [
+            "finance domain blocked (curated): finance tier=curated not publication-eligible",
+            "economics domain blocked (synthetic): economics series includes *_FIXTURE",
+            "approval domain blocked (curated): approval tier=curated not publication-eligible",
+            "ratings domain blocked (curated): ratings tier=curated not publication-eligible",
+            "markets domain blocked (curated): markets tier=curated not publication-eligible",
+            "polls include blocked tiers (260/260): {'synthetic': 260}",
+            "race universe tier=curated not publication-eligible"
+          ],
+          "domain_blockers": [
+            "economics"
+          ],
+          "domains_checked": [
+            "approval",
+            "demographics",
+            "economics",
+            "finance",
+            "markets",
+            "polls",
+            "races",
+            "ratings",
+            "results",
+            "wiki_vote_scrape"
+          ]
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\evidence_eligibility_latest.json"
+        ],
+        "failure_behavior": "Leakage failure.",
+        "notes": [
+          "All configured domains (finance/economics/approval/\u2026) must be enumerated; fixture_hash / *_FIXTURE blocks publication."
+        ]
+      },
+      "G5": {
+        "id": "G5",
+        "name": "Model identity",
+        "ok": true,
+        "status": "partial",
+        "detail": {
+          "nested_spine": "fast_hierarchical_t",
+          "nested_method": "fast",
+          "no_weight_remapping": true,
+          "stack_source_spine": "fast_hierarchical_t",
+          "reproduction_ok": true,
+          "matrix_sha256": "d633e34163c3589f4692a8ad38ffabb2e2ddd860e4eb48511017e1cd053d413b",
+          "forecast_method": "ensemble_stack+overlays",
+          "forecast_core": "pymc"
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"
+        ],
+        "failure_behavior": "Invalidate run.",
+        "notes": [
+          "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
+        ]
+      },
+      "G6": {
+        "id": "G6",
+        "name": "Proper scores",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "g8_metric": "crps",
+          "mean_crps": 4.327731293304342,
+          "mean_crps_by_component": {
+            "shrinkage_polls": 4.767375284808708,
+            "fast_hierarchical_t": 4.327731293304342,
+            "state_space": 3.5331400039943577,
+            "poll_only_state_space": 9.201080046285327,
+            "last_election_swing": 4.9211098267056705,
+            "hier_no_similarity": 4.34027596303231,
+            "ridge_fundamentals": 5.042712737757732,
+            "equal_weight_polls": 5.07513239520805,
+            "hier_no_terminal_race": 4.336243341700774
+          },
+          "n_folds": 4,
+          "n_outer_years": 4,
+          "n_oof_races": 132,
+          "lead_days": [
+            60,
+            30
+          ],
+          "freeze_before_truth": true,
+          "spine_label": "fast_hierarchical_t",
+          "validation_calibration": {
+            "n": 34,
+            "brier": 0.05691536629815605,
+            "has_margin_scores": true,
+            "log_score": -0.20031564684438355,
+            "calibration_slope_intercept": {
+              "n": 34,
+              "slope": 1.1380596563736143,
+              "intercept": -0.08561575943327543,
+              "ok": true,
+              "ideal": {
+                "slope": 1.0,
+                "intercept": 0.0
+              }
+            },
+            "pit": {
+              "n": 34,
+              "mean": 0.4373964992298807,
+              "var": 0.057210662255936004,
+              "expected_mean": 0.5,
+              "expected_var": 0.08333333333333333,
+              "histogram": [
+                {
+                  "bin_lo": 0.0,
+                  "bin_hi": 0.1,
+                  "n": 2.0
+                },
+                {
+                  "bin_lo": 0.1,
+                  "bin_hi": 0.2,
+                  "n": 4.0
+                },
+                {
+                  "bin_lo": 0.2,
+                  "bin_hi": 0.30000000000000004,
+                  "n": 5.0
+                },
+                {
+                  "bin_lo": 0.30000000000000004,
+                  "bin_hi": 0.4,
+                  "n": 7.0
+                },
+                {
+                  "bin_lo": 0.4,
+                  "bin_hi": 0.5,
+                  "n": 5.0
+                },
+                {
+                  "bin_lo": 0.5,
+                  "bin_hi": 0.6000000000000001,
+                  "n": 3.0
+                },
+                {
+                  "bin_lo": 0.6000000000000001,
+                  "bin_hi": 0.7000000000000001,
+                  "n": 2.0
+                },
+                {
+                  "bin_lo": 0.7000000000000001,
+                  "bin_hi": 0.8,
+                  "n": 3.0
+                },
+                {
+                  "bin_lo": 0.8,
+                  "bin_hi": 0.9,
+                  "n": 1.0
+                },
+                {
+                  "bin_lo": 0.9,
+                  "bin_hi": 1.0,
+                  "n": 2.0
+                }
+              ],
+              "ok": true
+            }
+          },
+          "shadow_evaluations": [
+            {
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z\\evaluation.json",
+              "spine_crps": 3.588344785515356
+            },
+            {
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z\\evaluation.json",
+              "spine_crps": 4.854064061143937
+            }
+          ]
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+        ],
+        "failure_behavior": "No calibration claim.",
+        "notes": [
+          "Race CRPS/Brier/log + chamber scores required before calibration claims."
+        ]
+      },
+      "G7": {
+        "id": "G7",
+        "name": "Reliability",
+        "ok": true,
+        "status": "partial",
+        "detail": {
+          "n_bins": 8,
+          "reliability_gate": {
+            "sample_sizes_disclosed": true,
+            "overconfident_bins": [],
+            "n_overconfident": 0,
+            "total_n": 34.0,
+            "n_adequate_bins": 2,
+            "thin_sample": true,
+            "calibration_claim_allowed": false
+          },
+          "sample_sizes_disclosed": true,
+          "calibration_n": 34,
+          "alert": "reliability disclosed but calibration claim blocked (thin sample and/or <2 outer cycles)",
+          "calibration_claim_allowed": false
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+        ],
+        "failure_behavior": "Recalibrate or widen.",
+        "notes": [
+          "Calibration plots must disclose sample sizes; overconfidence blocks claims."
+        ]
+      },
+      "G8": {
+        "id": "G8",
+        "name": "Ablation",
+        "ok": false,
+        "status": "fail",
+        "detail": {
+          "keep": [
+            "state_space",
+            "ridge_fundamentals",
+            "similarity_terminal",
+            "terminal_race"
+          ],
+          "disable": [
+            "poll_only_state_space",
+            "last_election_swing",
+            "equal_weight_polls",
+            "shrinkage_polls"
+          ],
+          "n_components": 8,
+          "disabled_still_weighted": [
+            "last_election_swing"
+          ]
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
+        ],
+        "failure_behavior": "Disable component.",
+        "notes": [
+          "G8-disable recommendations must be absent from production stack weights."
+        ]
+      },
+      "G9": {
+        "id": "G9",
+        "name": "Numerical quality",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "alerts": [],
+          "mcse_control": 0.004135998358543558
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json"
+        ],
+        "failure_behavior": "Do not publish.",
+        "notes": []
+      },
+      "G10": {
+        "id": "G10",
+        "name": "Reproducibility",
+        "ok": false,
+        "status": "fail",
+        "detail": {
+          "mode": "hash_seal_and_independent",
+          "verify_rebuild": {
+            "ok": false,
+            "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
+            "error": null,
+            "forecast_hash_expected": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393",
+            "forecast_hash_actual": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f"
+          },
+          "independent_rebuild": {
+            "ok": true,
+            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\independent_rebuild_latest.json",
+            "comparison": {
+              "ok": true,
+              "checks": [
+                {
+                  "name": "p_dem_majority",
+                  "ok": true,
+                  "delta": 0.0003750000000000142,
+                  "tol": 0.01
+                },
+                {
+                  "name": "expected_dem_seats",
+                  "ok": true,
+                  "delta": 0.006875000000000853,
+                  "tol": 0.15
+                },
+                {
+                  "name": "max_race_p_dem",
+                  "ok": true,
+                  "delta": 0.00824999999999998,
+                  "tol": 0.02
+                }
+              ],
+              "mean_abs_race_p_dem": 0.002453571428571436,
+              "n_races_compared": 35
+            },
+            "domain_ok": true,
+            "error": null
+          },
+          "shadow_verify": [
+            {
+              "shadow_id": "live_public_senate-2026__senate-hierarchical-v0.9.15_20260913T223026Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026__senate-hierarchical-v0.9.15_20260913T223026Z"
+            },
+            {
+              "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z"
+            },
+            {
+              "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025440Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025440Z"
+            },
+            {
+              "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025447Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025447Z"
+            },
+            {
+              "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z"
+            }
+          ],
+          "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
+          "promotion_block": "reproducibility seals incomplete or hash mismatch",
+          "release_identity": {
+            "ok": true,
+            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\release_identity_v0921.json",
+            "mismatches": {},
+            "PUBLIC_LIVE_ENABLED": false,
+            "model_version": "senate-hierarchical-v0.9.21",
+            "live_locked": true,
+            "promotion_blocked": false
+          }
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\shadow_publications.jsonl"
+        ],
+        "failure_behavior": "Reject release.",
+        "notes": []
+      },
+      "G11": {
+        "id": "G11",
+        "name": "Transparency",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "model_card": true,
+          "model_version": "senate-hierarchical-v0.9.21",
+          "model_card_has_limitations_section": true,
+          "run_class": "non_publication",
+          "publishable": false,
+          "publication_surface": "research_only",
+          "has_limitations": true,
+          "forecast_model_version": "senate-hierarchical-v0.9.21",
+          "validation_limitations_n": 9,
+          "poll_coverage_present": true
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\MODEL_CARD.md"
+        ],
+        "failure_behavior": "Withhold public artifact.",
+        "notes": [
+          "Model card limitations, run_class, and missingness required."
+        ]
+      }
+    },
+    "gate_list": [
+      {
+        "id": "G1",
+        "name": "Race universe",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "gate_years": [
+            2014,
+            2016,
+            2018,
+            2020,
+            2022,
+            2024
+          ],
+          "problem_cycles": [],
+          "failures": []
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+        ],
+        "failure_behavior": "Stop replay.",
+        "notes": [
+          "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016."
+        ]
+      },
+      {
+        "id": "G2",
+        "name": "Chamber truth",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "gate_years": [
+            2014,
+            2016,
+            2018,
+            2020,
+            2022,
+            2024
+          ],
+          "failures": []
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+        ],
+        "failure_behavior": "Stop scoring.",
+        "notes": [
+          "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016."
+        ]
+      },
+      {
+        "id": "G3",
+        "name": "Poll coverage",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "failures": [],
+          "years": [
+            "2018",
+            "2020",
+            "2022",
+            "2024"
+          ]
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\poll_coverage_latest.json"
+        ],
+        "failure_behavior": "Mark thin races; prohibit complete-cycle claim.",
+        "notes": []
+      },
+      {
+        "id": "G4",
+        "name": "Vintage integrity",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "publishable": false,
+          "run_class": "non_publication",
+          "reasons": [
+            "finance domain blocked (curated): finance tier=curated not publication-eligible",
+            "economics domain blocked (synthetic): economics series includes *_FIXTURE",
+            "approval domain blocked (curated): approval tier=curated not publication-eligible",
+            "ratings domain blocked (curated): ratings tier=curated not publication-eligible",
+            "markets domain blocked (curated): markets tier=curated not publication-eligible",
+            "polls include blocked tiers (260/260): {'synthetic': 260}",
+            "race universe tier=curated not publication-eligible"
+          ],
+          "domain_blockers": [
+            "economics"
+          ],
+          "domains_checked": [
+            "approval",
+            "demographics",
+            "economics",
+            "finance",
+            "markets",
+            "polls",
+            "races",
+            "ratings",
+            "results",
+            "wiki_vote_scrape"
+          ]
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\evidence_eligibility_latest.json"
+        ],
+        "failure_behavior": "Leakage failure.",
+        "notes": [
+          "All configured domains (finance/economics/approval/\u2026) must be enumerated; fixture_hash / *_FIXTURE blocks publication."
+        ]
+      },
+      {
+        "id": "G5",
+        "name": "Model identity",
+        "ok": true,
+        "status": "partial",
+        "detail": {
+          "nested_spine": "fast_hierarchical_t",
+          "nested_method": "fast",
+          "no_weight_remapping": true,
+          "stack_source_spine": "fast_hierarchical_t",
+          "reproduction_ok": true,
+          "matrix_sha256": "d633e34163c3589f4692a8ad38ffabb2e2ddd860e4eb48511017e1cd053d413b",
+          "forecast_method": "ensemble_stack+overlays",
+          "forecast_core": "pymc"
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"
+        ],
+        "failure_behavior": "Invalidate run.",
+        "notes": [
+          "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
+        ]
+      },
+      {
+        "id": "G6",
+        "name": "Proper scores",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "g8_metric": "crps",
+          "mean_crps": 4.327731293304342,
+          "mean_crps_by_component": {
+            "shrinkage_polls": 4.767375284808708,
+            "fast_hierarchical_t": 4.327731293304342,
+            "state_space": 3.5331400039943577,
+            "poll_only_state_space": 9.201080046285327,
+            "last_election_swing": 4.9211098267056705,
+            "hier_no_similarity": 4.34027596303231,
+            "ridge_fundamentals": 5.042712737757732,
+            "equal_weight_polls": 5.07513239520805,
+            "hier_no_terminal_race": 4.336243341700774
+          },
+          "n_folds": 4,
+          "n_outer_years": 4,
+          "n_oof_races": 132,
+          "lead_days": [
+            60,
+            30
+          ],
+          "freeze_before_truth": true,
+          "spine_label": "fast_hierarchical_t",
+          "validation_calibration": {
+            "n": 34,
+            "brier": 0.05691536629815605,
+            "has_margin_scores": true,
+            "log_score": -0.20031564684438355,
+            "calibration_slope_intercept": {
+              "n": 34,
+              "slope": 1.1380596563736143,
+              "intercept": -0.08561575943327543,
+              "ok": true,
+              "ideal": {
+                "slope": 1.0,
+                "intercept": 0.0
+              }
+            },
+            "pit": {
+              "n": 34,
+              "mean": 0.4373964992298807,
+              "var": 0.057210662255936004,
+              "expected_mean": 0.5,
+              "expected_var": 0.08333333333333333,
+              "histogram": [
+                {
+                  "bin_lo": 0.0,
+                  "bin_hi": 0.1,
+                  "n": 2.0
+                },
+                {
+                  "bin_lo": 0.1,
+                  "bin_hi": 0.2,
+                  "n": 4.0
+                },
+                {
+                  "bin_lo": 0.2,
+                  "bin_hi": 0.30000000000000004,
+                  "n": 5.0
+                },
+                {
+                  "bin_lo": 0.30000000000000004,
+                  "bin_hi": 0.4,
+                  "n": 7.0
+                },
+                {
+                  "bin_lo": 0.4,
+                  "bin_hi": 0.5,
+                  "n": 5.0
+                },
+                {
+                  "bin_lo": 0.5,
+                  "bin_hi": 0.6000000000000001,
+                  "n": 3.0
+                },
+                {
+                  "bin_lo": 0.6000000000000001,
+                  "bin_hi": 0.7000000000000001,
+                  "n": 2.0
+                },
+                {
+                  "bin_lo": 0.7000000000000001,
+                  "bin_hi": 0.8,
+                  "n": 3.0
+                },
+                {
+                  "bin_lo": 0.8,
+                  "bin_hi": 0.9,
+                  "n": 1.0
+                },
+                {
+                  "bin_lo": 0.9,
+                  "bin_hi": 1.0,
+                  "n": 2.0
+                }
+              ],
+              "ok": true
+            }
+          },
+          "shadow_evaluations": [
+            {
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z\\evaluation.json",
+              "spine_crps": 3.588344785515356
+            },
+            {
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z\\evaluation.json",
+              "spine_crps": 4.854064061143937
+            }
+          ]
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+        ],
+        "failure_behavior": "No calibration claim.",
+        "notes": [
+          "Race CRPS/Brier/log + chamber scores required before calibration claims."
+        ]
+      },
+      {
+        "id": "G7",
+        "name": "Reliability",
+        "ok": true,
+        "status": "partial",
+        "detail": {
+          "n_bins": 8,
+          "reliability_gate": {
+            "sample_sizes_disclosed": true,
+            "overconfident_bins": [],
+            "n_overconfident": 0,
+            "total_n": 34.0,
+            "n_adequate_bins": 2,
+            "thin_sample": true,
+            "calibration_claim_allowed": false
+          },
+          "sample_sizes_disclosed": true,
+          "calibration_n": 34,
+          "alert": "reliability disclosed but calibration claim blocked (thin sample and/or <2 outer cycles)",
+          "calibration_claim_allowed": false
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+        ],
+        "failure_behavior": "Recalibrate or widen.",
+        "notes": [
+          "Calibration plots must disclose sample sizes; overconfidence blocks claims."
+        ]
+      },
+      {
+        "id": "G8",
+        "name": "Ablation",
+        "ok": false,
+        "status": "fail",
+        "detail": {
+          "keep": [
+            "state_space",
+            "ridge_fundamentals",
+            "similarity_terminal",
+            "terminal_race"
+          ],
+          "disable": [
+            "poll_only_state_space",
+            "last_election_swing",
+            "equal_weight_polls",
+            "shrinkage_polls"
+          ],
+          "n_components": 8,
+          "disabled_still_weighted": [
+            "last_election_swing"
+          ]
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
+        ],
+        "failure_behavior": "Disable component.",
+        "notes": [
+          "G8-disable recommendations must be absent from production stack weights."
+        ]
+      },
+      {
+        "id": "G9",
+        "name": "Numerical quality",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "alerts": [],
+          "mcse_control": 0.004135998358543558
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json"
+        ],
+        "failure_behavior": "Do not publish.",
+        "notes": []
+      },
+      {
+        "id": "G10",
+        "name": "Reproducibility",
+        "ok": false,
+        "status": "fail",
+        "detail": {
+          "mode": "hash_seal_and_independent",
+          "verify_rebuild": {
+            "ok": false,
+            "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
+            "error": null,
+            "forecast_hash_expected": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393",
+            "forecast_hash_actual": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f"
+          },
+          "independent_rebuild": {
+            "ok": true,
+            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\independent_rebuild_latest.json",
+            "comparison": {
+              "ok": true,
+              "checks": [
+                {
+                  "name": "p_dem_majority",
+                  "ok": true,
+                  "delta": 0.0003750000000000142,
+                  "tol": 0.01
+                },
+                {
+                  "name": "expected_dem_seats",
+                  "ok": true,
+                  "delta": 0.006875000000000853,
+                  "tol": 0.15
+                },
+                {
+                  "name": "max_race_p_dem",
+                  "ok": true,
+                  "delta": 0.00824999999999998,
+                  "tol": 0.02
+                }
+              ],
+              "mean_abs_race_p_dem": 0.002453571428571436,
+              "n_races_compared": 35
+            },
+            "domain_ok": true,
+            "error": null
+          },
+          "shadow_verify": [
+            {
+              "shadow_id": "live_public_senate-2026__senate-hierarchical-v0.9.15_20260913T223026Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026__senate-hierarchical-v0.9.15_20260913T223026Z"
+            },
+            {
+              "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z"
+            },
+            {
+              "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025440Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025440Z"
+            },
+            {
+              "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025447Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025447Z"
+            },
+            {
+              "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
+              "ok": true,
+              "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z"
+            }
+          ],
+          "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
+          "promotion_block": "reproducibility seals incomplete or hash mismatch",
+          "release_identity": {
+            "ok": true,
+            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\release_identity_v0921.json",
+            "mismatches": {},
+            "PUBLIC_LIVE_ENABLED": false,
+            "model_version": "senate-hierarchical-v0.9.21",
+            "live_locked": true,
+            "promotion_blocked": false
+          }
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\shadow_publications.jsonl"
+        ],
+        "failure_behavior": "Reject release.",
+        "notes": []
+      },
+      {
+        "id": "G11",
+        "name": "Transparency",
+        "ok": true,
+        "status": "pass",
+        "detail": {
+          "model_card": true,
+          "model_version": "senate-hierarchical-v0.9.21",
+          "model_card_has_limitations_section": true,
+          "run_class": "non_publication",
+          "publishable": false,
+          "publication_surface": "research_only",
+          "has_limitations": true,
+          "forecast_model_version": "senate-hierarchical-v0.9.21",
+          "validation_limitations_n": 9,
+          "poll_coverage_present": true
+        },
+        "evidence": [
+          "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\MODEL_CARD.md"
+        ],
+        "failure_behavior": "Withhold public artifact.",
+        "notes": [
+          "Model card limitations, run_class, and missingness required."
+        ]
+      }
+    ],
+    "ok": false,
+    "promotion_ok": false,
+    "n_pass": 7,
+    "n_partial": 2,
+    "n_fail": 2,
+    "failures": [
+      "G8",
+      "G10"
+    ],
+    "research_failures": [
+      "G8"
+    ],
+    "partials": [
+      "G5",
+      "G7"
+    ],
+    "milestone": {
+      "name": "first_publishable",
+      "public_live_probabilities": false,
+      "current_publication_surface": "research_only",
+      "prior_public_publication_id": "public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
+      "public_publication_id": null,
+      "requirements": [
+        "frozen shadow with identified spine",
+        "nested holdouts",
+        "official 2014-2024 chamber archive",
+        "no fixture inputs for publication claims",
+        "G1-G11 acceptance report"
+      ]
+    },
+    "exit_condition": "Unified G1\u2013G11 acceptance artifact retained; milestone shadow uses production spine.",
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\acceptance_gates_latest.json",
+    "md_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\acceptance_gates_latest.md"
   },
   "limitations": [
-    "VoteHub documents no /polls/archive \u2014 historical polls prefer FTE CC BY Datasette.",
+    "VoteHub documents no /polls/archive \u2014 historical polls prefer FTE CC BY (Wayback/sealed polls-page).",
     "Licensed Cook/IE feeds are not redistributed; Wikipedia multi-rater is production ratings.",
     "House / Electoral College intentionally out of scope.",
-    "fast hierarchical-t is a non-production approximation; production prefers pymc / ensemble_stack."
-  ]
+    "fast hierarchical-t is a non-production approximation; production prefers pymc / ensemble_stack.",
+    "Peer Brier/CRPS is a release gate only \u2014 peers are never averaged into the ensemble.",
+    "Pre-P0.3 cycle_replay artifacts may be non-comparable (wrong historical race universe / synthetic polls).",
+    "Chamber reconcile + poll coverage gates (2018\u20132024) are required before treating holdout scores as validated.",
+    "P2.1 nested-component-loo: freeze-before-truth; no fast\u2192pymc weight remapping.",
+    "Milestone-0 archive scope is 2018\u20132024; 2014/2016 provisional. Public live probabilities wait on gate green + pymc shadow."
+  ],
+  "leave_pollster_out": {
+    "ok": true,
+    "year": 2022,
+    "lead_days": 60,
+    "method": "fast_hierarchical_t",
+    "baseline": {
+      "n": 34,
+      "crps": 4.756203642191842,
+      "log_score": -3.5784692783882277,
+      "brier": 0.04935770700155865,
+      "mae": 6.596631684461597
+    },
+    "drops": [
+      {
+        "pollster_id": "Center Street PAC",
+        "n_polls": 25,
+        "crps": 4.7769786177406175,
+        "brier": 0.04999612406119907,
+        "delta_crps": 0.020774975548775387,
+        "delta_brier": 0.0006384170596404198
+      },
+      {
+        "pollster_id": "Trafalgar Group",
+        "n_polls": 14,
+        "crps": 4.44026689923413,
+        "brier": 0.055471099068026095,
+        "delta_crps": -0.315936742957712,
+        "delta_brier": 0.006113392066467445
+      },
+      {
+        "pollster_id": "Emerson",
+        "n_polls": 11,
+        "crps": 4.7561554211834345,
+        "brier": 0.05304274156586731,
+        "delta_crps": -4.822100840762289e-05,
+        "delta_brier": 0.003685034564308659
+      }
+    ],
+    "mean_abs_delta_crps": 0.11225331317163167,
+    "note": "Leave-pollster-out: large positive delta_crps means that pollster was important; stable scores imply robustness to single-house dominance.",
+    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\leave_pollster_out_latest.json"
+  }
 }

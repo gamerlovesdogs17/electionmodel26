@@ -3288,6 +3288,7 @@
   },
   "publication_surface": "research_only",
   "limitations": [
+    "v0.9.21 P0: runoff bitemporal dates; synthetic result fallback removed; live locked.",
     "v0.9.21 truth integration: live locked; prior v0.9.19 live stamp superseded (no forecast retune).",
     "PUBLIC_LIVE_ENABLED=True after independent re-audit; publish still fail-closes on red gates / ineligible evidence / numerical quality.",
     "Finance uses curated FEC-browse estimates when OpenFEC rate-limits; not full candidate-level digitization for every race.",
@@ -3297,7 +3298,7 @@
   ],
   "research_only_notice": null,
   "public_release": {
-    "enabled": true,
+    "enabled": false,
     "surface": "live",
     "publication_id": "public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
     "published_at": "2026-09-15T03:05:41.380245+00:00",
@@ -3308,6 +3309,7 @@
     "limitations_url_hint": "MODEL_CARD.md / acceptance_gates_latest.md",
     "archive_scope": "2018-2024 official for validation; live target is senate-2026",
     "superseded": true,
-    "publication_surface": "research_only"
+    "publication_surface": "research_only",
+    "note": "Superseded historical v0.9.19 live stamp; current surface research_only."
   }
 }
