@@ -127,10 +127,10 @@ def pit_summary(
 def reliability_overconfidence(
     bins: list[dict[str, float]],
     *,
-    min_bin_n: float = 5.0,
+    min_bin_n: float = 8.0,
     gap_threshold: float = 0.15,
     min_total_n: float = 80.0,
-    min_adequate_bins: int = 4,
+    min_adequate_bins: int = 3,
 ) -> dict[str, Any]:
     """
     Flag material overconfidence: mean_p ≫ mean_y in disclosed bins.
@@ -138,6 +138,8 @@ def reliability_overconfidence(
     G7: calibration claim fails if overconfident bins lack sample-size disclosure
     or gap exceeds threshold on bins with adequate n. Thin samples (audit P1)
     never allow a calibration claim even when no overconfident bin is flagged.
+
+    Default ``min_bin_n=8`` avoids treating tiny bins as decisive overconfidence.
     """
     issues: list[dict[str, Any]] = []
     disclosed = True

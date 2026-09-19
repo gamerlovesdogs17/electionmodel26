@@ -1,0 +1,14 @@
+def numba_composite(nominal_scalar_variable):
+    # exp(i0)
+    scalar_variable_13 = exp(nominal_scalar_variable)
+    # sign(exp.0)
+    scalar_variable_14 = sign(scalar_variable_13)
+    # sqr(exp.0)
+    scalar_variable_15 = square_2(scalar_variable_13)
+    # reciprocal(sqr.0)
+    scalar_variable_16 = reciprocal(scalar_variable_15)
+    # mul(reciprocal.0, sign.0)
+    scalar_variable_17 = mul_4(scalar_variable_16, scalar_variable_14)
+    # GT(mul.0, 0)
+    scalar_variable_18 = greater(scalar_variable_17, scalar_constant_23)
+    return scalar_variable_18, scalar_variable_16, scalar_variable_14, scalar_variable_13

@@ -288,16 +288,25 @@ def evaluate_acceptance_gates(
         g5_ok = False
         g5_status = "fail"
         g5_notes.append("missing nested LOO / stack weight identity artifacts")
-    elif stack and stack.get("source_hierarchical_method") == "fast":
-        g5_status = "partial" if g5_ok else g5_status
-        g5_notes.append(
-            "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; "
-            "milestone shadow reseals pymc separately."
-        )
     elif stack and str(stack.get("source_hierarchical_method") or "").startswith("pymc"):
         g5_notes.append("OOF stack / nested LOO spine is pymc (aligned with production).")
         if g5_ok:
             g5_status = "pass"
+    elif stack and stack.get("source_hierarchical_method") == "fast":
+        # Align OOF and production: if forecast core is also fast, pass; else fail closed.
+        core = str(g5_detail.get("forecast_core") or "")
+        method = str(g5_detail.get("forecast_method") or "")
+        forecast_is_fast = "fast" in core or method.startswith("fast")
+        if forecast_is_fast and g5_ok:
+            g5_status = "pass"
+            g5_notes.append("OOF and forecast both use fast hierarchical spine.")
+        elif g5_ok:
+            g5_ok = False
+            g5_status = "fail"
+            g5_notes.append(
+                "OOF spine is fast_hierarchical_t while production forecast is pymc — "
+                "rerun nested-component-loo with --hierarchical-method pymc"
+            )
     gates.append(
         _gate(
             "G5",
@@ -406,6 +415,15 @@ def evaluate_acceptance_gates(
     g7_detail: dict[str, Any] = {}
     rel = cal.get("reliability") or (cal.get("margin_scores") or {}).get("reliability")
     rel_gate = (cal.get("margin_scores") or {}).get("reliability_gate")
+    # Prefer multi-cycle nested OOF reliability (means+sds) when available.
+    nested_rel_block = (nested or {}).get("reliability") or {}
+    if nested_rel_block.get("reliability"):
+        rel = nested_rel_block["reliability"]
+        rel_gate = nested_rel_block.get("reliability_gate")
+        g7_detail["source"] = "nested_component_loo.reliability"
+        g7_detail["nested_reliability_n"] = nested_rel_block.get("n")
+        g7_detail["nested_reliability_spine"] = nested_rel_block.get("spine")
+        g7_detail["nested_brier"] = nested_rel_block.get("brier")
     if rel_gate is None and rel:
         from midterms.validation.metrics import reliability_overconfidence
 
@@ -414,30 +432,34 @@ def evaluate_acceptance_gates(
         g7_detail["n_bins"] = len(rel)
         g7_detail["reliability_gate"] = rel_gate
         g7_detail["sample_sizes_disclosed"] = all("n" in b for b in rel)
-        g7_detail["calibration_n"] = cal.get("n")
-        if rel_gate and rel_gate.get("calibration_claim_allowed") and multi_cycle:
+        g7_detail["calibration_n"] = (
+            nested_rel_block.get("n") if nested_rel_block.get("n") else cal.get("n")
+        )
+        g7_detail["nested_multi_cycle"] = multi_cycle
+        claim_ok = bool(rel_gate and rel_gate.get("calibration_claim_allowed") and multi_cycle)
+        overconf = bool(rel_gate and rel_gate.get("n_overconfident"))
+        thin = bool((rel_gate or {}).get("thin_sample"))
+        if claim_ok:
             g7_ok = True
             g7_status = "pass"
-        elif rel_gate and rel_gate.get("n_overconfident"):
+        elif overconf and not thin:
             g7_ok = False
             g7_status = "fail"
             g7_detail["alert"] = (
                 "material overconfidence — recalibrate or widen; no calibration claim"
             )
         else:
-            # Thin / single-cycle reliability: report honestly, do not claim pass.
-            g7_ok = True
-            g7_status = "partial"
+            g7_ok = False
+            g7_status = "fail"
             g7_detail["alert"] = (
-                "reliability disclosed but calibration claim blocked "
-                "(thin sample and/or <2 outer cycles)"
+                "reliability too thin or incomplete for a calibration claim — "
+                "expand multi-cycle OOF reliability"
             )
             g7_detail["calibration_claim_allowed"] = False
     else:
-        g7_detail["alert"] = "no reliability bins in validation_report_latest"
+        g7_detail["alert"] = "no reliability bins"
         g7_status = "fail"
         g7_ok = False
-        g7_detail["note"] = "Reliability claim withheld until bins with sample sizes are regenerated."
     gates.append(
         _gate(
             "G7",
@@ -445,7 +467,10 @@ def evaluate_acceptance_gates(
             ok=g7_ok,
             status=g7_status,
             detail=g7_detail,
-            evidence=[str(art_dir / "validation_report_latest.json")],
+            evidence=[
+                str(art_dir / "validation_report_latest.json"),
+                str(art_dir / "nested_component_loo.json"),
+            ],
             notes=["Calibration plots must disclose sample sizes; overconfidence blocks claims."],
         )
     )

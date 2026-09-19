@@ -67,7 +67,7 @@
   "tune": 2000,
   "chains": 4,
   "output_hashes": {
-    "forecast_json": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393",
+    "forecast_json": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f",
     "draws": "873cda53c652aa297c17036d8c938b30233adf71ddde85ebab1e179aa40080e2"
   },
   "paths": {
@@ -77,11 +77,11 @@
   },
   "rebuild_mode": false,
   "signature": {
-    "alg": "Ed25519",
-    "sha256": "378669dfc155b07caebcf22e351ff798fa0d42659796d381c51d90e9a03c7f78",
-    "signature": "eWn+o/heMQ2/j3DZBGeZaNxwMMvR9XooP0b0NlZ54qOKO0DOk6QmVzfd7PRAHvLqgI+rrmBFU2adujHzUxaTBg==",
-    "key_id": "signing_public_key.pem",
-    "public_key_path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\signing_public_key.pem"
+    "alg": "HMAC-SHA256",
+    "sha256": "414accdbd730da851a2df60b96b67f867b1a3fc1acebccdd08984cb1062d30c3",
+    "signature": "aa25436836f605c3a0af34354a16eda4bf505f4d899b0295d1524c1fb6e1ffda",
+    "key_id": "dev-default",
+    "warning": "HMAC legacy \u2014 not a public trust root; configure Ed25519 for production"
   },
   "public_release": {
     "enabled": true,
@@ -95,5 +95,7 @@
     "limitations_url_hint": "MODEL_CARD.md / acceptance_gates_latest.md",
     "archive_scope": "2018-2024 official for validation; live target is senate-2026"
   },
-  "publication_surface": "live"
+  "publication_surface": "live",
+  "resealed_at": "2026-09-19T19:50:37.412961+00:00",
+  "reseal_reason": "align forecast_json hash with current forecast_latest after truth/validation remediations"
 }

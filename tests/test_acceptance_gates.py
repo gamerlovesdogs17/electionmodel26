@@ -66,15 +66,32 @@ def test_acceptance_gates_from_stubs(tmp_path: Path):
             {
                 "freeze_before_truth": True,
                 "no_weight_remapping": True,
-                "spine_label": "fast_hierarchical_t",
-                "hierarchical_method": "fast",
+                "spine_label": "pymc",
+                "hierarchical_method": "pymc",
                 "years": [2020, 2022],
                 "lead_days": [60, 30],
                 "mean_crps": 4.0,
-                "mean_crps_by_component": {"fast_hierarchical_t": 4.0},
+                "mean_crps_by_component": {"pymc": 4.0},
                 "crps_by_fold": {
-                    "2020": {"fast_hierarchical_t": 4.1},
-                    "2022": {"fast_hierarchical_t": 4.0},
+                    "2020": {"pymc": 4.1},
+                    "2022": {"pymc": 4.0},
+                },
+                "reliability": {
+                    "spine": "pymc",
+                    "n": 100,
+                    "reliability": [
+                        {"bin_lo": 0.0, "bin_hi": 0.5, "n": 50, "mean_p": 0.4, "mean_y": 0.42},
+                        {"bin_lo": 0.5, "bin_hi": 1.0, "n": 50, "mean_p": 0.6, "mean_y": 0.58},
+                    ],
+                    "reliability_gate": {
+                        "sample_sizes_disclosed": True,
+                        "n_overconfident": 0,
+                        "thin_sample": False,
+                        "calibration_claim_allowed": True,
+                        "total_n": 100,
+                        "n_adequate_bins": 2,
+                    },
+                    "ok": True,
                 },
                 "g8_recommendations": {
                     "state_space": {"recommend": "keep"},
@@ -88,9 +105,9 @@ def test_acceptance_gates_from_stubs(tmp_path: Path):
         json.dumps(
             {
                 "no_weight_remapping": True,
-                "source_spine_label": "fast_hierarchical_t",
-                "source_hierarchical_method": "fast",
-                "stack_weights": {"fast_hierarchical_t": 0.3, "state_space": 0.7},
+                "source_spine_label": "pymc",
+                "source_hierarchical_method": "pymc",
+                "stack_weights": {"pymc": 0.3, "state_space": 0.7},
                 "reproduction": {"ok": True},
                 "matrix_sha256": "abc",
             }

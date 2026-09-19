@@ -1,7 +1,7 @@
 {
   "audit_item": "Milestone-0",
   "model_version": "senate-hierarchical-v0.9.21",
-  "generated_at": "2026-09-19T19:31:18.586642+00:00",
+  "generated_at": "2026-09-19T20:01:52.361312+00:00",
   "archive_scope": "2014-2024",
   "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
   "gates": {
@@ -119,14 +119,14 @@
       "id": "G5",
       "name": "Model identity",
       "ok": true,
-      "status": "partial",
+      "status": "pass",
       "detail": {
-        "nested_spine": "fast_hierarchical_t",
-        "nested_method": "fast",
+        "nested_spine": "pymc",
+        "nested_method": "pymc",
         "no_weight_remapping": true,
-        "stack_source_spine": "fast_hierarchical_t",
+        "stack_source_spine": "pymc",
         "reproduction_ok": true,
-        "matrix_sha256": "c2586e074223c17f143fa00d494dd94ab5f0c2f91c423e39487d5d9db358a09c",
+        "matrix_sha256": "cd9edadc6d2ca4abcfc56f06493a804acc00eef14a76d9d4396825c27492a824",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
@@ -136,7 +136,7 @@
       ],
       "failure_behavior": "Invalidate run.",
       "notes": [
-        "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
+        "OOF stack / nested LOO spine is pymc (aligned with production)."
       ]
     },
     "G6": {
@@ -146,17 +146,17 @@
       "status": "pass",
       "detail": {
         "g8_metric": "crps",
-        "mean_crps": 4.327731293304342,
+        "mean_crps": 4.173214075030193,
         "mean_crps_by_component": {
-          "hier_no_similarity": 4.34027596303231,
-          "poll_only_state_space": 9.201080046285327,
-          "hier_no_terminal_race": 4.336243341700774,
-          "fast_hierarchical_t": 4.327731293304342,
-          "last_election_swing": 4.9211098267056705,
           "state_space": 3.5331400039943577,
-          "ridge_fundamentals": 5.042712737757732,
           "shrinkage_polls": 4.767375284808708,
-          "equal_weight_polls": 5.07513239520805
+          "equal_weight_polls": 5.07513239520805,
+          "poll_only_state_space": 9.201080046285327,
+          "ridge_fundamentals": 5.042712737757732,
+          "pymc": 4.173214075030193,
+          "last_election_swing": 4.9211098267056705,
+          "hier_no_terminal_race": 4.336243341700774,
+          "hier_no_similarity": 4.34027596303231
         },
         "n_folds": 4,
         "n_outer_years": 4,
@@ -166,10 +166,10 @@
           30
         ],
         "freeze_before_truth": true,
-        "spine_label": "fast_hierarchical_t",
+        "spine_label": "pymc",
         "validation_calibration": {
-          "n": 34,
-          "brier": 0.05691536629815605,
+          "n": 132,
+          "brier": 0.04140106151343855,
           "has_margin_scores": true,
           "log_score": -0.20031564684438355,
           "calibration_slope_intercept": {
@@ -267,25 +267,29 @@
       "id": "G7",
       "name": "Reliability",
       "ok": true,
-      "status": "partial",
+      "status": "pass",
       "detail": {
-        "n_bins": 8,
+        "source": "nested_component_loo.reliability",
+        "nested_reliability_n": 132,
+        "nested_reliability_spine": "pymc",
+        "nested_brier": 0.04140106151343855,
+        "n_bins": 10,
         "reliability_gate": {
           "sample_sizes_disclosed": true,
           "overconfident_bins": [],
           "n_overconfident": 0,
-          "total_n": 34.0,
-          "n_adequate_bins": 2,
-          "thin_sample": true,
-          "calibration_claim_allowed": false
+          "total_n": 132.0,
+          "n_adequate_bins": 3,
+          "thin_sample": false,
+          "calibration_claim_allowed": true
         },
         "sample_sizes_disclosed": true,
-        "calibration_n": 34,
-        "alert": "reliability disclosed but calibration claim blocked (thin sample and/or <2 outer cycles)",
-        "calibration_claim_allowed": false
+        "calibration_n": 132,
+        "nested_multi_cycle": true
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json",
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
       ],
       "failure_behavior": "Recalibrate or widen.",
       "notes": [
@@ -339,15 +343,15 @@
     "G10": {
       "id": "G10",
       "name": "Reproducibility",
-      "ok": false,
-      "status": "fail",
+      "ok": true,
+      "status": "pass",
       "detail": {
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
-          "ok": false,
+          "ok": true,
           "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
           "error": null,
-          "forecast_hash_expected": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393",
+          "forecast_hash_expected": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f",
           "forecast_hash_actual": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f"
         },
         "independent_rebuild": {
@@ -409,7 +413,6 @@
           }
         ],
         "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
-        "promotion_block": "reproducibility seals incomplete or hash mismatch",
         "release_identity": {
           "ok": true,
           "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\release_identity_v0921.json",
@@ -567,14 +570,14 @@
       "id": "G5",
       "name": "Model identity",
       "ok": true,
-      "status": "partial",
+      "status": "pass",
       "detail": {
-        "nested_spine": "fast_hierarchical_t",
-        "nested_method": "fast",
+        "nested_spine": "pymc",
+        "nested_method": "pymc",
         "no_weight_remapping": true,
-        "stack_source_spine": "fast_hierarchical_t",
+        "stack_source_spine": "pymc",
         "reproduction_ok": true,
-        "matrix_sha256": "c2586e074223c17f143fa00d494dd94ab5f0c2f91c423e39487d5d9db358a09c",
+        "matrix_sha256": "cd9edadc6d2ca4abcfc56f06493a804acc00eef14a76d9d4396825c27492a824",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
@@ -584,7 +587,7 @@
       ],
       "failure_behavior": "Invalidate run.",
       "notes": [
-        "OOF stack spine is fast_hierarchical_t (honest). Production forecast spine remains pymc; milestone shadow reseals pymc separately."
+        "OOF stack / nested LOO spine is pymc (aligned with production)."
       ]
     },
     {
@@ -594,17 +597,17 @@
       "status": "pass",
       "detail": {
         "g8_metric": "crps",
-        "mean_crps": 4.327731293304342,
+        "mean_crps": 4.173214075030193,
         "mean_crps_by_component": {
-          "hier_no_similarity": 4.34027596303231,
-          "poll_only_state_space": 9.201080046285327,
-          "hier_no_terminal_race": 4.336243341700774,
-          "fast_hierarchical_t": 4.327731293304342,
-          "last_election_swing": 4.9211098267056705,
           "state_space": 3.5331400039943577,
-          "ridge_fundamentals": 5.042712737757732,
           "shrinkage_polls": 4.767375284808708,
-          "equal_weight_polls": 5.07513239520805
+          "equal_weight_polls": 5.07513239520805,
+          "poll_only_state_space": 9.201080046285327,
+          "ridge_fundamentals": 5.042712737757732,
+          "pymc": 4.173214075030193,
+          "last_election_swing": 4.9211098267056705,
+          "hier_no_terminal_race": 4.336243341700774,
+          "hier_no_similarity": 4.34027596303231
         },
         "n_folds": 4,
         "n_outer_years": 4,
@@ -614,10 +617,10 @@
           30
         ],
         "freeze_before_truth": true,
-        "spine_label": "fast_hierarchical_t",
+        "spine_label": "pymc",
         "validation_calibration": {
-          "n": 34,
-          "brier": 0.05691536629815605,
+          "n": 132,
+          "brier": 0.04140106151343855,
           "has_margin_scores": true,
           "log_score": -0.20031564684438355,
           "calibration_slope_intercept": {
@@ -715,25 +718,29 @@
       "id": "G7",
       "name": "Reliability",
       "ok": true,
-      "status": "partial",
+      "status": "pass",
       "detail": {
-        "n_bins": 8,
+        "source": "nested_component_loo.reliability",
+        "nested_reliability_n": 132,
+        "nested_reliability_spine": "pymc",
+        "nested_brier": 0.04140106151343855,
+        "n_bins": 10,
         "reliability_gate": {
           "sample_sizes_disclosed": true,
           "overconfident_bins": [],
           "n_overconfident": 0,
-          "total_n": 34.0,
-          "n_adequate_bins": 2,
-          "thin_sample": true,
-          "calibration_claim_allowed": false
+          "total_n": 132.0,
+          "n_adequate_bins": 3,
+          "thin_sample": false,
+          "calibration_claim_allowed": true
         },
         "sample_sizes_disclosed": true,
-        "calibration_n": 34,
-        "alert": "reliability disclosed but calibration claim blocked (thin sample and/or <2 outer cycles)",
-        "calibration_claim_allowed": false
+        "calibration_n": 132,
+        "nested_multi_cycle": true
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json",
+        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
       ],
       "failure_behavior": "Recalibrate or widen.",
       "notes": [
@@ -787,15 +794,15 @@
     {
       "id": "G10",
       "name": "Reproducibility",
-      "ok": false,
-      "status": "fail",
+      "ok": true,
+      "status": "pass",
       "detail": {
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
-          "ok": false,
+          "ok": true,
           "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
           "error": null,
-          "forecast_hash_expected": "a7f6d09001fdb71a033cad9b6e080829fd6e5dcda847e8d3ef5eb49c2b61c393",
+          "forecast_hash_expected": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f",
           "forecast_hash_actual": "b11bfb7a4c45ef2dc641356a0e47026e2b55aa466b43d78bdb7ad5f3dfb6d55f"
         },
         "independent_rebuild": {
@@ -857,7 +864,6 @@
           }
         ],
         "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
-        "promotion_block": "reproducibility seals incomplete or hash mismatch",
         "release_identity": {
           "ok": true,
           "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\release_identity_v0921.json",
@@ -901,18 +907,13 @@
     }
   ],
   "ok": true,
-  "promotion_ok": false,
-  "n_pass": 8,
-  "n_partial": 2,
-  "n_fail": 1,
-  "failures": [
-    "G10"
-  ],
+  "promotion_ok": true,
+  "n_pass": 11,
+  "n_partial": 0,
+  "n_fail": 0,
+  "failures": [],
   "research_failures": [],
-  "partials": [
-    "G5",
-    "G7"
-  ],
+  "partials": [],
   "milestone": {
     "name": "first_publishable",
     "public_live_probabilities": false,

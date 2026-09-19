@@ -1,6 +1,6 @@
 {
   "ok": false,
-  "checked_at": "2026-09-19T19:28:37.912733+00:00",
+  "checked_at": "2026-09-19T19:49:15.470381+00:00",
   "model_version": "senate-hierarchical-v0.9.21",
   "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
   "checks": [
@@ -124,7 +124,7 @@
       "name": "polls_file_present",
       "ok": true,
       "detail": {
-        "age_hours": 0.09
+        "age_hours": 0.1
       }
     },
     {
@@ -201,15 +201,14 @@
       "name": "acceptance_gates",
       "ok": true,
       "detail": {
-        "n_pass": 7,
-        "n_partial": 3,
+        "n_pass": 8,
+        "n_partial": 2,
         "n_fail": 1,
         "failures": [
           "G10"
         ],
         "partials": [
           "G5",
-          "G6",
           "G7"
         ]
       }
@@ -218,7 +217,7 @@
       "name": "stack_weights_fresh",
       "ok": true,
       "detail": {
-        "age_hours": 142.96115595075818
+        "age_hours": 143.30492224216462
       }
     },
     {

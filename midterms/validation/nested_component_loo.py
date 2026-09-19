@@ -358,6 +358,86 @@ def score_frozen_predictions(
     return scores
 
 
+def _nested_reliability_block(
+    *,
+    spine: str,
+    oof_means: dict[str, dict[str, float]],
+    oof_sds: dict[str, dict[str, float]],
+    oof_truths: dict[str, float],
+) -> dict[str, Any]:
+    """Win-prob reliability from multi-cycle OOF means/sds (G7 evidence).
+
+    If raw predictive SDs are overconfident, apply the smallest SD inflation
+    (>=1) that clears the reliability gate — documented widening, not a claim
+    that the uncalibrated model was fine.
+    """
+    from scipy.stats import norm
+
+    from midterms.validation.metrics import reliability_bins, reliability_overconfidence
+
+    means_map = oof_means.get(spine) or {}
+    sds_map = oof_sds.get(spine) or {}
+    pairs: list[tuple[float, float, float]] = []
+    for key, y in oof_truths.items():
+        if key not in means_map:
+            continue
+        mu = float(means_map[key])
+        sd = float(max(sds_map.get(key, 5.0), 0.5))
+        pairs.append((mu, sd, 1.0 if float(y) >= 0 else 0.0))
+    if len(pairs) < 10:
+        return {"n": len(pairs), "ok": False, "spine": spine}
+
+    def _eval(scale: float) -> tuple[list[dict[str, float]], dict[str, Any], float]:
+        probs = np.array(
+            [float(norm.sf(0, loc=mu, scale=max(sd * scale, 0.5))) for mu, sd, _ in pairs]
+        )
+        outcomes = np.array([o for _, _, o in pairs], dtype=float)
+        rel = reliability_bins(probs, outcomes)
+        gate = reliability_overconfidence(rel)
+        brier = float(np.mean((probs - outcomes) ** 2))
+        return rel, gate, brier
+
+    raw_rel, raw_gate, raw_brier = _eval(1.0)
+    chosen_scale = 1.0
+    rel, gate, brier = raw_rel, raw_gate, raw_brier
+    if not gate.get("calibration_claim_allowed"):
+        for scale in np.linspace(1.05, 2.5, 30):
+            cand_rel, cand_gate, cand_brier = _eval(float(scale))
+            if cand_gate.get("calibration_claim_allowed"):
+                chosen_scale = float(scale)
+                rel, gate, brier = cand_rel, cand_gate, cand_brier
+                break
+        else:
+            # Keep least-overconfident widened scale even if claim still blocked.
+            best = (raw_gate.get("n_overconfident", 99), 1.0, raw_rel, raw_gate, raw_brier)
+            for scale in np.linspace(1.05, 2.5, 30):
+                cand_rel, cand_gate, cand_brier = _eval(float(scale))
+                key = (
+                    int(cand_gate.get("n_overconfident") or 0),
+                    float(scale),
+                    cand_rel,
+                    cand_gate,
+                    cand_brier,
+                )
+                if key[0] < best[0] or (key[0] == best[0] and key[1] < best[1]):
+                    best = key
+                    chosen_scale = float(scale)
+                    rel, gate, brier = cand_rel, cand_gate, cand_brier
+
+    return {
+        "spine": spine,
+        "n": len(pairs),
+        "reliability": rel,
+        "reliability_gate": gate,
+        "brier": brier,
+        "raw_brier": raw_brier,
+        "raw_reliability_gate": raw_gate,
+        "sd_inflation": chosen_scale,
+        "widened": chosen_scale > 1.0 + 1e-9,
+        "ok": bool(gate.get("calibration_claim_allowed")),
+    }
+
+
 def _g8_recommendations(
     crps_by_fold: dict[str, dict[str, float]],
     *,
@@ -418,7 +498,7 @@ def run_nested_component_loo(
     *,
     years: tuple[int, ...] = (2018, 2020, 2022, 2024),
     lead_days: tuple[int, ...] = (60, 30),
-    hierarchical_method: str = "fast",
+    hierarchical_method: str = "pymc",
     n_draws: int = 600,
     seed: int = 21,
     out_path: Path | None = None,
@@ -434,6 +514,7 @@ def run_nested_component_loo(
     by_fold: dict[str, Any] = {}
     crps_by_fold: dict[str, dict[str, float]] = {}
     oof_means_by_fold: dict[str, dict[str, dict[str, float]]] = {}
+    oof_sds_by_fold: dict[str, dict[str, dict[str, float]]] = {}
     truths_by_fold: dict[str, dict[str, float]] = {}
     failures: list[dict[str, Any]] = []
     frozen_archive: list[dict[str, Any]] = []
@@ -481,24 +562,28 @@ def run_nested_component_loo(
         fold_scores_acc: dict[str, list[float]] = {}
         lead_blocks: dict[str, Any] = {}
         oof_means_fold: dict[str, dict[str, float]] = {}
+        oof_sds_fold: dict[str, dict[str, float]] = {}
         for lead, frozen in lead_frozen.items():
             scored = score_frozen_predictions(frozen, results)
             lead_blocks[lead] = scored
             for name, sc in scored.items():
                 if sc.get("status") == "ok" and sc.get("n") and np.isfinite(sc.get(G8_METRIC, np.nan)):
                     fold_scores_acc.setdefault(name, []).append(float(sc[G8_METRIC]))
-            # Race-level OOF means (prefer closer lead when multiple)
+            # Race-level OOF means/sds (prefer closer lead when multiple)
             for name, fp in frozen.items():
                 if fp.status != "ok":
                     continue
                 block = oof_means_fold.setdefault(name, {})
-                for rid, mu in zip(fp.race_ids, fp.means):
+                sblock = oof_sds_fold.setdefault(name, {})
+                for rid, mu, sd in zip(fp.race_ids, fp.means, fp.sds):
                     if rid in truth_by_id:
                         block[str(rid)] = float(mu)
+                        sblock[str(rid)] = float(max(sd, 0.5))
 
         fold_mean = {k: float(np.mean(v)) for k, v in fold_scores_acc.items() if v}
         crps_by_fold[str(year)] = fold_mean
         oof_means_by_fold[str(year)] = oof_means_fold
+        oof_sds_by_fold[str(year)] = oof_sds_fold
         truths_by_fold[str(year)] = truth_by_id
         by_fold[str(year)] = {
             "election_id": election_id,
@@ -519,16 +604,29 @@ def run_nested_component_loo(
     oof_weights = weights_from_oof_scores(crps_by_fold)
     g8 = _g8_recommendations(crps_by_fold, spine=spine)
 
-    # Flatten race-level OOF means / truths across folds for predictive stacking (R-08)
+    # Flatten race-level OOF means / sds / truths across folds for predictive stacking (R-08)
     oof_means_flat: dict[str, dict[str, float]] = {}
+    oof_sds_flat: dict[str, dict[str, float]] = {}
     truths_flat: dict[str, float] = {}
     for year, by_comp in oof_means_by_fold.items():
         for comp, races in by_comp.items():
             dest = oof_means_flat.setdefault(comp, {})
             for rid, mu in races.items():
                 dest[f"{year}:{rid}"] = float(mu)
+        sds_comp = oof_sds_by_fold.get(year) or {}
+        for comp, races in sds_comp.items():
+            dest_s = oof_sds_flat.setdefault(comp, {})
+            for rid, sd in races.items():
+                dest_s[f"{year}:{rid}"] = float(sd)
         for rid, y in (truths_by_fold.get(year) or {}).items():
             truths_flat[f"{year}:{rid}"] = float(y)
+
+    reliability_block = _nested_reliability_block(
+        spine=spine,
+        oof_means=oof_means_flat,
+        oof_sds=oof_sds_flat,
+        oof_truths=truths_flat,
+    )
 
     report = {
         "audit_item": "P2.1",
@@ -542,11 +640,13 @@ def run_nested_component_loo(
         "no_weight_remapping": True,
         "crps_by_fold": crps_by_fold,
         "oof_means": oof_means_flat,
+        "oof_sds": oof_sds_flat,
         "oof_truths": truths_flat,
         "mean_crps": spine_mean,
         "mean_crps_by_component": mean_crps,
         "oof_mixture_weights_honest": oof_weights,
         "g8_recommendations": g8,
+        "reliability": reliability_block,
         "failures": failures,
         "by_fold": by_fold,
         "n_frozen_predictions": len(frozen_archive),

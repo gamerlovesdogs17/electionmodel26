@@ -748,9 +748,9 @@ def main(argv: list[str] | None = None) -> None:
     p_nloo.add_argument("--draws", type=int, default=600)
     p_nloo.add_argument(
         "--hierarchical-method",
-        default="fast",
+        default="pymc",
         choices=("fast", "pymc"),
-        help="Hierarchical spine for LOO (fast default; pymc for publishable claims)",
+        help="Hierarchical spine for LOO (pymc default — align with production)",
     )
     p_nloo.add_argument("--years", default="2018,2020,2022,2024")
     p_nloo.add_argument("--leads", default="60,30")

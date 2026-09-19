@@ -1,0 +1,6 @@
+def numba_composite(nominal_scalar_variable):
+    # sqr(i0)
+    scalar_variable = square_6(nominal_scalar_variable)
+    # mul(sqr.0, i0)
+    scalar_variable_32 = mul_7(scalar_variable, nominal_scalar_variable)
+    return scalar_variable_32
