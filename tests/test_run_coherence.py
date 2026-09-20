@@ -56,3 +56,25 @@ def test_coherence_detects_eligibility_publishable_mismatch(tmp_path: Path):
     assert rep["ok"] is False
     assert any("publishable" in m for m in rep["mismatches"])
     assert any("run_id" in m for m in rep["mismatches"])
+
+
+def test_evidence_eligible_development_run_is_not_mislabeled(tmp_path: Path):
+    from midterms.config import MODEL_VERSION
+
+    forecast = {
+        "run_id": "dev-a", "model_version": MODEL_VERSION,
+        "publishable": False, "run_class": "non_publication",
+        "publication_surface": "research_only",
+        "evidence_fingerprint": {"sha256": "abc"},
+        "evidence_eligibility": {"publishable": True, "run_class": "publication"},
+        "snapshot": {"snapshot_id": "snap-a"},
+    }
+    eligibility = {
+        "publishable": True, "run_class": "publication",
+        "forecast_run_id": "dev-a", "evidence_fingerprint": {"sha256": "abc"},
+    }
+    (tmp_path / "forecast_latest.json").write_text(json.dumps(forecast), encoding="utf-8")
+    (tmp_path / "evidence_eligibility_latest.json").write_text(json.dumps(eligibility), encoding="utf-8")
+    report = check_run_coherence(artifacts_dir=tmp_path)
+    assert report["ok"] is True
+    assert any("inference is non-publication" in note for note in report["notes"])

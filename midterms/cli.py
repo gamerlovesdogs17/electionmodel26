@@ -143,11 +143,9 @@ def main(argv: list[str] | None = None) -> None:
 
     p_run.add_argument("--as-of", default=_DEMO_AS_OF)
     p_run.add_argument("--method", choices=["fast", "pymc", "pymc_dynamic", "state_space"], default="pymc")
-    from midterms.config import DEMO_CHAINS, DEMO_DRAWS, DEMO_TUNE
-
-    p_run.add_argument("--draws", type=int, default=DEMO_DRAWS)
-    p_run.add_argument("--tune", type=int, default=DEMO_TUNE)
-    p_run.add_argument("--chains", type=int, default=DEMO_CHAINS)
+    p_run.add_argument("--draws", type=int, default=None)
+    p_run.add_argument("--tune", type=int, default=None)
+    p_run.add_argument("--chains", type=int, default=None)
     p_run.add_argument("--seed", type=int, default=20260901)
     p_run.add_argument(
         "--generic-ballot",
@@ -817,6 +815,9 @@ def main(argv: list[str] | None = None) -> None:
         report = evaluate_numerical_quality(
             p_dem_control=float(chamber.get("p_dem_majority") or 0.5),
             n_posterior_samples=diag.get("n_posterior_samples") or diag.get("draws"),
+            draws=diag.get("draws"),
+            tune=diag.get("tune"),
+            chains=diag.get("chains"),
             convergence=diag.get("convergence"),
             seed=art.get("seed"),
             publishable=bool(a.publishable),

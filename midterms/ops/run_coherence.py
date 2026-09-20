@@ -119,16 +119,18 @@ def check_run_coherence(
         else:
             elig_pub = bool(eligibility.get("publishable"))
             fc_pub = bool(forecast.get("publishable"))
-            if elig_pub != fc_pub:
+            if fc_pub and not elig_pub:
                 mismatches.append(
-                    f"eligibility.publishable={elig_pub} != forecast.publishable={fc_pub}"
+                    "forecast is publishable while evidence eligibility is false"
                 )
             elig_class = str(eligibility.get("run_class") or "")
             fc_class = str(forecast.get("run_class") or "")
-            if elig_class and fc_class and elig_class != fc_class:
+            if fc_class == "publication" and elig_class != "publication":
                 mismatches.append(
-                    f"eligibility.run_class={elig_class} != forecast.run_class={fc_class}"
+                    "forecast has publication run_class while evidence does not"
                 )
+            if elig_pub and not fc_pub:
+                notes.append("evidence is eligible but forecast inference is non-publication")
             elig_run = str(eligibility.get("forecast_run_id") or "")
             if elig_run and run_id and elig_run != run_id:
                 mismatches.append(

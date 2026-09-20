@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlencode
@@ -13,7 +14,7 @@ import pandas as pd
 
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 
-PARSER_VERSION = "kalshi-v1"
+PARSER_VERSION = "kalshi-v2-candidate-aware"
 KALSHI = "https://api.elections.kalshi.com/trade-api/v2"
 
 # Class II 2026 contested set + specials (mirrors fixtures)
@@ -57,6 +58,95 @@ def _f(x: Any) -> float | None:
         return float(x)
     except (TypeError, ValueError):
         return None
+
+
+def _name_tokens(value: str) -> list[str]:
+    plain = unicodedata.normalize("NFKD", str(value)).encode("ascii", "ignore").decode("ascii")
+    return re.findall(r"[a-z]+", plain.lower())
+
+
+def _matches_name(ticker: str, title: str, candidate_name: str) -> bool:
+    """Use a title or a candidate-specific ticker code, never a party suffix alone."""
+    tokens = _name_tokens(candidate_name)
+    if not tokens:
+        return False
+    surname = tokens[-1]
+    title_tokens = _name_tokens(title)
+    if surname in title_tokens and (len(tokens) == 1 or tokens[0] in title_tokens):
+        return True
+    suffix = str(ticker).rsplit("-", 1)[-1].upper()
+    if len(surname) >= 4:
+        stem = surname[:3].upper()
+        return len(suffix) >= 4 and suffix.endswith(stem) and suffix[0] == tokens[0][0].upper()
+    return False
+
+
+def map_race_event(
+    *, race_id: str, event_ticker: str, markets: list[dict[str, Any]], ticket: dict[str, Any]
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Map a priced event to the candidate represented by the model's non-R side.
+
+    Candidate identity and party are explicit. Chamber caucus accounting is a
+    separate model assumption and is not inferred from market tickers.
+    """
+    target_name = str(ticket.get("dem_name") or "").strip()
+    target_party = str(ticket.get("dem_party") or "").upper()
+    rep_name = str(ticket.get("rep_name") or "").strip()
+    if not target_name or not rep_name or target_party not in {"D", "I"}:
+        return None, "missing modeled candidate identity"
+    contracts: list[dict[str, Any]] = []
+    for m in markets:
+        ticker = str(m.get("ticker") or "")
+        title = str(m.get("title") or "")
+        if not ticker.startswith(event_ticker + "-"):
+            continue
+        p = _mid(_f(m.get("yes_bid_dollars")), _f(m.get("yes_ask_dollars")), _f(m.get("last_price_dollars")))
+        if p is None or not 0 <= p <= 1:
+            return None, f"missing or invalid price for {ticker}"
+        suffix = ticker[len(event_ticker) + 1 :].upper()
+        target_by_name = _matches_name(ticker, title, target_name)
+        rep_by_name = _matches_name(ticker, title, rep_name)
+        target_by_party = target_party == "D" and suffix == "D"
+        rep_by_party = suffix == "R"
+        if target_by_name and rep_by_name:
+            return None, f"ambiguous candidate contract {ticker}"
+        modeled_side = bool(target_by_name or target_by_party)
+        republican_side = bool(rep_by_name or rep_by_party)
+        # An Independent's party marker alone is not a candidate identity.
+        if target_party == "I" and not target_by_name:
+            modeled_side = False
+        contracts.append({
+            "ticker": ticker, "title": title, "p_yes": float(p),
+            "candidate_name": target_name if modeled_side else (rep_name if republican_side else None),
+            "candidate_party": target_party if modeled_side else ("R" if republican_side else None),
+            "modeled_side": modeled_side,
+            "republican_side": republican_side,
+        })
+    targets = [c for c in contracts if c["modeled_side"]]
+    reps = [c for c in contracts if c["republican_side"]]
+    if len(targets) != 1 or len(reps) != 1 or targets[0] is reps[0]:
+        return None, "modeled candidate or Republican contract is absent or ambiguous"
+    if len(contracts) < 2:
+        return None, "incomplete candidate event"
+    total = sum(c["p_yes"] for c in contracts)
+    if total <= 0:
+        return None, "candidate event has zero priced mass"
+    for c in contracts:
+        c["p_normalized"] = c["p_yes"] / total
+    return {
+        "race_id": race_id,
+        "event_ticker": event_ticker,
+        "p_dem": targets[0]["p_normalized"],  # legacy overlay field: modeled non-R side
+        "modeled_side_probability": targets[0]["p_normalized"],
+        "modeled_candidate_name": target_name,
+        "modeled_candidate_party": target_party,
+        "modeled_candidate_ticker": targets[0]["ticker"],
+        "republican_candidate_name": rep_name,
+        "republican_candidate_ticker": reps[0]["ticker"],
+        "candidate_contracts": contracts,
+        "normalization_contracts": len(contracts),
+        "market_mapping": "candidate_identity",
+    }, None
 
 
 def fetch_control_market(cycle: int = 2026) -> dict[str, Any]:
@@ -110,7 +200,9 @@ def fetch_race_markets(
     *,
     available_at: str | None = None,
 ) -> tuple[pd.DataFrame, list[dict[str, str]]]:
-    """Race-level SENATE{ST}-{yy}-D markets → p_dem + liquidity."""
+    """Candidate-aware race events → modeled-side market overlay evidence."""
+    from midterms.evidence.tickets import TICKETS_2026
+
     states = states or SENATE_2026_STATES
     stamp = available_at or datetime.now(timezone.utc).date().isoformat()
     rows = []
@@ -125,7 +217,7 @@ def fetch_race_markets(
         last_err: Exception | None = None
         for event in candidates:
             try:
-                data = _get("/markets", {"limit": 10, "status": "open", "event_ticker": event})
+                data = _get("/markets", {"limit": 100, "status": "open", "event_ticker": event})
                 if data.get("markets"):
                     break
             except Exception as exc:  # noqa: BLE001
@@ -136,41 +228,28 @@ def fetch_race_markets(
             continue
         if not (data.get("markets") or []):
             continue
-        p_dem = None
-        p_rep = None
-        vol = 0.0
-        tickers = []
-        for m in data.get("markets") or []:
-            ticker = str(m.get("ticker") or "")
-            tickers.append(ticker)
-            p = _mid(
-                _f(m.get("yes_bid_dollars")),
-                _f(m.get("yes_ask_dollars")),
-                _f(m.get("last_price_dollars")),
-            )
-            vol = max(vol, _f(m.get("volume_fp")) or 0.0)
-            if ticker.endswith("-D"):
-                p_dem = p
-            elif ticker.endswith("-R"):
-                p_rep = p
-        if p_dem is None and p_rep is not None:
-            p_dem = 1.0 - p_rep
-        if p_dem is None:
+        ticket = TICKETS_2026.get(st) if cycle_suffix == "26" else None
+        if ticket is None:
+            errors.append({"state": st, "error": "no candidate identity registry for this cycle"})
             continue
-        if p_rep is not None:
-            s = p_dem + p_rep
-            if s > 0:
-                p_dem = p_dem / s
+        mapped, reason = map_race_event(
+            race_id=f"senate-20{cycle_suffix}-{st}",
+            event_ticker=event,
+            markets=data.get("markets") or [],
+            ticket=ticket,
+        )
+        if mapped is None:
+            errors.append({"state": st, "error": str(reason), "event_ticker": event})
+            continue
+        vol = max((_f(m.get("volume_fp")) or 0.0 for m in data.get("markets") or []), default=0.0)
         liq = min(1.0, vol / 250_000.0)  # race markets thinner than control
         rows.append(
             {
+                **mapped,
                 "state": st,
-                "race_id": f"senate-20{cycle_suffix}-{st}",
-                "event_ticker": event,
-                "p_dem": float(p_dem),
                 "liquidity": float(liq),
                 "volume": float(vol),
-                "tickers": ",".join(tickers),
+                "tickers": ",".join(c["ticker"] for c in mapped["candidate_contracts"]),
                 "source": "kalshi",
                 "available_at": stamp,
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
@@ -271,6 +350,11 @@ def load_race_markets(as_of: str | None = None) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
     df = pd.read_parquet(path)
+    # A prior parser can carry a wrong candidate mapping. Never reuse it after
+    # a refresh failure or when loading an older workspace artifact.
+    if "parser_version" not in df.columns:
+        return df.head(0)
+    df = df[df["parser_version"] == PARSER_VERSION]
     if as_of and "available_at" in df.columns and len(df):
         df = df[pd.to_datetime(df["available_at"]).dt.date <= pd.Timestamp(as_of).date()]
     return df

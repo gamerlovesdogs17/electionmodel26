@@ -40,7 +40,10 @@ def test_evaluate_numerical_quality_passes_with_enough_draws():
     report = evaluate_numerical_quality(
         seat_draws=seats,
         draws_margin=draws,
-        n_posterior_samples=2000,
+        n_posterior_samples=8000,
+        draws=2000,
+        tune=2000,
+        chains=4,
         convergence={
             "available": True,
             "r_hat_max": 1.01,
@@ -53,6 +56,22 @@ def test_evaluate_numerical_quality_passes_with_enough_draws():
     assert report["audit_item"] == "P2.3"
     assert report["ok"] is True
     assert report["deterministic_replay"]["ok"] is True
+
+
+def test_publication_floor_rejects_demo_sampling_even_with_good_convergence():
+    report = evaluate_numerical_quality(
+        n_posterior_samples=1600,
+        draws=800,
+        tune=800,
+        chains=2,
+        convergence={"available": True, "r_hat_max": 1.01, "ess_bulk_min_frac": 0.2},
+        publishable=True,
+    )
+    assert report["ok"] is False
+    assert report["thresholds"]["min_posterior_samples"] == 8000
+    assert {c["name"] for c in report["checks"] if not c["ok"]} >= {
+        "min_posterior_samples", "production_draws", "production_tune", "production_chains"
+    }
 
 
 def test_evaluate_fails_when_too_few_draws_publishable():

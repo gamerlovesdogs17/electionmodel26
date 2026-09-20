@@ -6,13 +6,16 @@ from typing import Any
 
 import numpy as np
 
+from midterms.config import PRODUCTION_CHAINS, PRODUCTION_DRAWS, PRODUCTION_TUNE
+
 
 # Publishable-run thresholds (predeclared).
 MCSE_CONTROL_MAX = 0.01  # 1pp on P(Dem control); needs ~2500 draws at p=0.5
 MCSE_SEATS_MAX = 0.15  # seats
 RHAT_MAX = 1.05
 ESS_BULK_MIN_FRAC = 0.10  # ess_bulk >= frac * n_samples for worst race
-MIN_POSTERIOR_SAMPLES = 1600  # draws * chains (publishable floor)
+MIN_POSTERIOR_SAMPLES = 1600  # routine development diagnostic
+PRODUCTION_POSTERIOR_SAMPLES = PRODUCTION_DRAWS * PRODUCTION_CHAINS
 MIN_SIM_DRAWS = 2500  # chamber / stacked predictive draws (CI floor)
 # Routine internal forecasts should meet this; production target is higher still.
 ROUTINE_SIM_DRAWS = 10_000
@@ -149,6 +152,9 @@ def evaluate_numerical_quality(
     draws_margin: np.ndarray | None = None,
     p_dem_control: float | None = None,
     n_posterior_samples: int | None = None,
+    draws: int | None = None,
+    tune: int | None = None,
+    chains: int | None = None,
     convergence: dict[str, Any] | None = None,
     seed: int | None = None,
     publishable: bool = False,
@@ -214,13 +220,28 @@ def evaluate_numerical_quality(
             f"max race P(win) MCSE={race.get('max_mcse_p_dem')}",
         )
 
+    posterior_floor = PRODUCTION_POSTERIOR_SAMPLES if publishable else MIN_POSTERIOR_SAMPLES
     if n_posterior_samples is not None:
         add(
             "min_posterior_samples",
-            int(n_posterior_samples) >= MIN_POSTERIOR_SAMPLES,
+            int(n_posterior_samples) >= posterior_floor,
             int(n_posterior_samples),
-            f"posterior samples {n_posterior_samples} < {MIN_POSTERIOR_SAMPLES}",
+            f"posterior samples {n_posterior_samples} < {posterior_floor}",
         )
+    elif publishable:
+        add("min_posterior_samples", False, None, "posterior sample count unavailable")
+    if publishable:
+        for name, value, floor in (
+            ("draws", draws, PRODUCTION_DRAWS),
+            ("tune", tune, PRODUCTION_TUNE),
+            ("chains", chains, PRODUCTION_CHAINS),
+        ):
+            add(
+                f"production_{name}",
+                value is not None and int(value) >= floor,
+                value,
+                f"publication {name} {value} < production floor {floor}",
+            )
 
     conv = convergence or {}
     if conv.get("available"):
@@ -262,7 +283,10 @@ def evaluate_numerical_quality(
             "mcse_seats_max": MCSE_SEATS_MAX,
             "rhat_max": RHAT_MAX,
             "ess_bulk_min_frac": ESS_BULK_MIN_FRAC,
-            "min_posterior_samples": MIN_POSTERIOR_SAMPLES,
+            "min_posterior_samples": posterior_floor,
+            "production_draws": PRODUCTION_DRAWS,
+            "production_tune": PRODUCTION_TUNE,
+            "production_chains": PRODUCTION_CHAINS,
             "min_sim_draws": MIN_SIM_DRAWS,
         },
         "chamber_mcse": chamber,

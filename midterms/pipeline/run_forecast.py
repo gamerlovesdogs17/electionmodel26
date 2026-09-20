@@ -34,6 +34,7 @@ from midterms.model.pymc_model import (
     fit_pymc_dynamic,
 )
 from midterms.simulate.chamber import independent_bernoulli_foil, simulate_chamber
+from midterms.pipeline.inference_settings import resolve_inference_settings
 
 
 def _git_commit() -> str:
@@ -142,9 +143,9 @@ def run_forecast(
     election_id: str = DEMO_ELECTION_ID,
     as_of: str = DEMO_AS_OF,
     method: str = "pymc",
-    draws: int = 400,
-    tune: int = 400,
-    chains: int = 2,
+    draws: int | None = None,
+    tune: int | None = None,
+    chains: int | None = None,
     seed: int = DEMO_SEED,
     generic_ballot: float = -1.0,
     ensemble: bool = True,
@@ -162,6 +163,14 @@ def run_forecast(
     rebuild_mode: bool = False,
     n_joint_sims: int | None = None,
 ) -> dict[str, Any]:
+    draws, tune, chains = resolve_inference_settings(
+        draws=draws,
+        tune=tune,
+        chains=chains,
+        require_publishable=require_publishable,
+        method=method,
+        allow_fast_fallback=allow_fast_fallback,
+    )
     from midterms.evidence.economics import try_refresh_alfred, yoy_growth_as_of
     from midterms.evidence.approval import approval_as_of, write_approval_store
     from midterms.evidence.demography import attach_demo_features
@@ -627,6 +636,9 @@ def run_forecast(
         p_dem_control=float(sim.p_dem_majority),
         n_posterior_samples=(fit.diagnostics or {}).get("n_posterior_samples")
         or (fit.diagnostics or {}).get("draws"),
+        draws=(fit.diagnostics or {}).get("draws"),
+        tune=(fit.diagnostics or {}).get("tune"),
+        chains=(fit.diagnostics or {}).get("chains"),
         convergence=(fit.diagnostics or {}).get("convergence"),
         seed=seed,
         publishable=bool(require_publishable),
@@ -636,6 +648,9 @@ def run_forecast(
             "require_publishable=True but numerical quality gate failed: "
             + "; ".join(numerical.get("alerts") or ["unknown"])
         )
+    # Evidence eligibility alone does not make a demo inference run publishable.
+    run_publishable = bool(require_publishable and eligibility.get("publishable") and numerical.get("ok"))
+    run_class = "publication" if run_publishable else "non_publication"
 
     foil = independent_bernoulli_foil(
         race_summaries, sim.held_dem, n_draws=len(sim.seat_draws), seed=seed
@@ -672,8 +687,8 @@ def run_forecast(
         "election_id": election_id,
         "model_version": MODEL_VERSION,
         "method": fit.method,
-        "run_class": eligibility.get("run_class") or "non_publication",
-        "publishable": bool(eligibility.get("publishable")),
+        "run_class": run_class,
+        "publishable": run_publishable,
         "evidence_eligibility": {
             "publishable": bool(eligibility.get("publishable")),
             "run_class": eligibility.get("run_class"),
@@ -727,8 +742,9 @@ def run_forecast(
             "layer_warnings": layer_warnings,
             "core_method": spine_method,
             "allow_fast_fallback": bool(allow_fast_fallback),
-            "run_class": eligibility.get("run_class"),
-            "publishable": bool(eligibility.get("publishable")),
+            "run_class": run_class,
+            "publishable": run_publishable,
+            "publication_inference_requested": bool(require_publishable),
             "n_joint_sims": int(getattr(sim, "n_joint_sims", len(sim.seat_draws))),
             "n_posterior_margin_draws": int(
                 getattr(sim, "n_posterior_margin_draws", fit.draws_margin.shape[0])
