@@ -212,21 +212,24 @@ def run_forecast(
         try:
             # Never call write_economic_store() bare — that clobbers FRED with fixtures.
             econ_meta = try_refresh_alfred(as_of=str(as_of)[:10])
-            if econ_meta.get("timeout"):
+            if econ_meta.get("used_fixtures") and not econ_meta.get("live_rows"):
+                err = econ_meta.get("error") or "FRED refresh unavailable; fixture canaries only"
+                if econ_meta.get("timeout"):
+                    err = f"economics read timed out: {err}"
                 layer_warnings.append(
                     {
                         "layer": "economics",
-                        "error": f"economics read timed out: {econ_meta.get('error')}",
+                        "error": err,
                         "publication_eligible": False,
+                        "note": econ_meta.get("note"),
                     }
                 )
-            if econ_meta.get("used_fixtures") and not econ_meta.get("live_rows"):
+            elif econ_meta.get("timeout") and econ_meta.get("source") == "worldbank_gdppc_yoy":
                 layer_warnings.append(
                     {
                         "layer": "economics",
-                        "error": econ_meta.get("error")
-                        or "FRED refresh unavailable; fixture canaries only",
-                        "publication_eligible": False,
+                        "error": "FRED timed out; using World Bank GDPPC YoY substitute",
+                        "publication_eligible": True,
                         "note": econ_meta.get("note"),
                     }
                 )

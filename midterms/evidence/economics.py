@@ -18,6 +18,8 @@ from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 # ALFRED series commonly used in election fundamentals work.
 DEFAULT_SERIES = "A229RX0"  # Real Disposable Personal Income: Per Capita
 PARSER_VERSION = "alfred-v2"
+WB_GDPPC_SERIES = "WB_NY_GDP_PCAP_KD_ZG"
+WB_SOURCE_URL = "https://api.worldbank.org/v2/country/US/indicator/NY.GDP.PCAP.KD.ZG"
 
 
 def _fred_api_key() -> str | None:
@@ -73,6 +75,53 @@ def fetch_alfred_observations(
             }
         )
     return pd.DataFrame(rows)
+
+
+def fetch_worldbank_us_gdppc_yoy() -> pd.DataFrame:
+    """Fetch US real GDP per capita annual growth (%) from the World Bank API.
+
+    Used only when FRED/ALFRED RDPI is unavailable. This is a real first-party
+    public series (not a fixture), but it is **not** RDPI — callers should prefer
+    A229RX0 when a FRED_API_KEY / FRED CSV path works.
+    """
+    url = (
+        "https://api.worldbank.org/v2/country/US/indicator/NY.GDP.PCAP.KD.ZG"
+        "?format=json&per_page=80&date=1990:2030"
+    )
+    req = Request(url, headers={"User-Agent": "midterms-senate-model/0.9 (research)"})
+    with urlopen(req, timeout=20) as resp:
+        payload = json.loads(resp.read().decode("utf-8"))
+    rows_in = payload[1] if isinstance(payload, list) and len(payload) > 1 else []
+    retrieved = datetime.now(timezone.utc).isoformat()
+    out = []
+    for item in rows_in or []:
+        if item.get("value") is None:
+            continue
+        year = str(item.get("date") or "")[:4]
+        if not year.isdigit():
+            continue
+        # Stamp mid-year availability for annual series (known by year-end + lag).
+        avail = f"{year}-12-31"
+        out.append(
+            {
+                "series_id": WB_GDPPC_SERIES,
+                "observation_date": avail,
+                "realtime_start": avail,
+                "realtime_end": "9999-12-31",
+                "available_at": avail,
+                "value": float(item["value"]),
+                "revision": 0,
+                "vintage_id": f"{WB_GDPPC_SERIES}|{year}|r0",
+                "transformation": "yoy_pct",
+                "election_year": int(year),
+                "lead_days": None,
+                "retrieved_at": retrieved,
+                "parser_version": PARSER_VERSION,
+                "status": "worldbank_api",
+                "source_url": WB_SOURCE_URL,
+            }
+        )
+    return pd.DataFrame(out)
 
 
 def build_fixture_vintages() -> pd.DataFrame:
@@ -259,18 +308,22 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
     n_rev = int((df["revision"] > 0).sum()) if "revision" in df.columns else 0
     series = sorted(df["series_id"].astype(str).unique().tolist())
     production_series = [s for s in series if "FIXTURE" not in s]
+    source_url = "https://fred.stlouisfed.org/series/A229RX0"
+    if any("WB_" in s for s in production_series) and not any("A229RX0" in s for s in production_series):
+        source_url = WB_SOURCE_URL
     man = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "n_rows": int(len(df)),
         "n_revisions": n_rev,
         "series": series,
         "production_series": production_series,
-        "source_url": "https://fred.stlouisfed.org/series/A229RX0",
+        "source_url": source_url,
         "tier": "first_party" if production_series else "synthetic",
         "parser_version": PARSER_VERSION,
         "note": (
-            "Production YoY from FRED/ALFRED public levels when available; "
-            "RDPI_YOY_FIXTURE retained only for historical leakage canaries."
+            "Production YoY from FRED/ALFRED when available; World Bank US GDPPC "
+            "YoY as substitute when FRED is blocked; RDPI_YOY_FIXTURE retained only "
+            "for historical leakage canaries."
         ),
     }
     man_path = MANIFESTS_DIR / "economics_vintages.json"
@@ -311,9 +364,11 @@ def yoy_growth_as_of(
     if usable.empty:
         return None
     # Prefer production YoY series over fixtures — never silent fixture downgrade.
+    # Prefer FRED RDPI when present; else World Bank / other non-fixture series.
     prod = usable[~usable["series_id"].astype(str).str.contains("FIXTURE")]
     if len(prod):
-        pool = prod
+        rdpi = prod[prod["series_id"].astype(str).str.contains("A229RX0")]
+        pool = rdpi if len(rdpi) else prod
     elif allow_fixture_canary:
         pool = usable
     else:
@@ -331,15 +386,15 @@ def yoy_growth_as_of(
 
 
 def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
-    """Best-effort live ALFRED/FRED pull; fixtures kept only as leakage canaries.
+    """Best-effort live ALFRED/FRED pull; World Bank YoY if FRED blocked; fixtures last.
 
     Timeouts / network failures must not silently present fixture YoY as
     production-quality evidence — ``used_fixtures`` / ``timeout`` flags are set.
     """
     fixtures = build_fixture_vintages()
-    # Prefer API vintage slice when keyed; else public CSV levels → YoY.
     live = pd.DataFrame()
     public = pd.DataFrame()
+    wb = pd.DataFrame()
     fetch_error: str | None = None
     timed_out = False
     try:
@@ -355,55 +410,8 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
             timed_out = timed_out or (
                 "timed out" in str(exc).lower() or "timeout" in str(exc).lower()
             )
-            # Keep any existing production store; only fall back to fixtures if empty.
-            existing_path = NORMALIZED_DIR / "economics_vintages.parquet"
-            if existing_path.exists():
-                try:
-                    existing = pd.read_parquet(existing_path)
-                    if len(existing) and existing["series_id"].astype(str).str.contains("FIXTURE").eq(False).any():
-                        paths = write_economic_store(existing)
-                        return {
-                            "live_rows": 0,
-                            "used_fixtures": False,
-                            "preserved_existing": True,
-                            "timeout": timed_out,
-                            "error": fetch_error,
-                            "publication_eligible": True,
-                            "note": "preserved existing non-fixture store after read failure",
-                            **paths,
-                        }
-                except Exception:  # noqa: BLE001
-                    pass
-            paths = write_economic_store(fixtures)
-            return {
-                "live_rows": 0,
-                "used_fixtures": True,
-                "timeout": timed_out,
-                "error": fetch_error,
-                "publication_eligible": False,
-                "note": "fixture fallback after economics read failure — not publication-eligible",
-                **paths,
-            }
 
-    frames: list[pd.DataFrame] = []
-    yoy = None
-    if not live.empty:
-        frames.append(live)
-        live_s = live.sort_values("observation_date")
-        if len(live_s) >= 13:
-            latest = float(live_s.iloc[-1]["value"])
-            year_ago = float(live_s.iloc[-13]["value"])
-            yoy = 100.0 * (latest / year_ago - 1.0) if year_ago else None
-        source = "alfred_api"
-    elif not public.empty:
-        frames.append(public)
-        yoy_df = _yoy_rows_from_levels(public)
-        if len(yoy_df):
-            frames.append(yoy_df)
-            yoy = float(yoy_df.iloc[-1]["value"])
-        source = "fred_public_csv"
-    else:
-        # Empty live + empty public without raising (e.g. no API key).
+    def _preserve_or_fixture(*, err: str) -> dict[str, Any]:
         existing_path = NORMALIZED_DIR / "economics_vintages.parquet"
         if existing_path.exists():
             try:
@@ -415,23 +423,76 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
                         "used_fixtures": False,
                         "preserved_existing": True,
                         "timeout": timed_out,
-                        "error": fetch_error or "alfred/fred returned empty",
+                        "error": err,
                         "publication_eligible": True,
-                        "note": "preserved existing non-fixture store after empty economics read",
+                        "note": "preserved existing non-fixture store after read failure",
                         **paths,
                     }
             except Exception:  # noqa: BLE001
                 pass
-        paths = write_economic_store(fixtures)
+        # Prefer World Bank (real public series) over synthetic fixtures.
+        try:
+            wb_local = fetch_worldbank_us_gdppc_yoy()
+        except Exception as wb_exc:  # noqa: BLE001
+            paths = write_economic_store(fixtures)
+            return {
+                "live_rows": 0,
+                "used_fixtures": True,
+                "timeout": timed_out,
+                "error": f"{err}; worldbank: {wb_exc}",
+                "publication_eligible": False,
+                "note": "fixture fallback after economics read failure — not publication-eligible",
+                **paths,
+            }
+        if wb_local.empty:
+            paths = write_economic_store(fixtures)
+            return {
+                "live_rows": 0,
+                "used_fixtures": True,
+                "timeout": timed_out,
+                "error": err,
+                "publication_eligible": False,
+                "note": "fixture fallback after empty economics read — not publication-eligible",
+                **paths,
+            }
+        merged = pd.concat([fixtures, wb_local], ignore_index=True)
+        paths = write_economic_store(merged)
+        yoy_val = float(wb_local.sort_values("observation_date").iloc[-1]["value"])
         return {
-            "live_rows": 0,
-            "used_fixtures": True,
+            "live_rows": int(len(wb_local)),
+            "yoy": yoy_val,
+            "used_fixtures": False,
             "timeout": timed_out,
-            "error": fetch_error or "alfred/fred returned empty",
-            "publication_eligible": False,
-            "note": "fixture fallback after empty economics read — not publication-eligible",
+            "error": err,
+            "publication_eligible": True,
+            "source": "worldbank_gdppc_yoy",
+            "note": (
+                "FRED/ALFRED RDPI unavailable; using World Bank US real GDP per capita "
+                "annual growth as production YoY substitute (not RDPI)."
+            ),
             **paths,
         }
+
+    if live.empty and public.empty:
+        return _preserve_or_fixture(err=fetch_error or "alfred/fred returned empty")
+
+    frames: list[pd.DataFrame] = []
+    yoy = None
+    if not live.empty:
+        frames.append(live)
+        live_s = live.sort_values("observation_date")
+        if len(live_s) >= 13:
+            latest = float(live_s.iloc[-1]["value"])
+            year_ago = float(live_s.iloc[-13]["value"])
+            yoy = 100.0 * (latest / year_ago - 1.0) if year_ago else None
+        source = "alfred_api"
+    else:
+        frames.append(public)
+        yoy_df = _yoy_rows_from_levels(public)
+        if len(yoy_df):
+            frames.append(yoy_df)
+            yoy = float(yoy_df.iloc[-1]["value"])
+        source = "fred_public_csv"
 
     # Retain fixture canaries alongside production series (eligibility prefers production_series).
     frames.append(fixtures)
