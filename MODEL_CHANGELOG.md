@@ -4,6 +4,34 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-20 — senate-hierarchical-v0.9.21 (coherence + dynamic core + joint sims)
+
+Phase 1 — run/artifact coherence (live stays off):
+
+- `midterms/ops/run_coherence.py` fingerprints evidence manifests and fails closed when
+  `forecast_latest` / `evidence_eligibility_latest` / rebuild disagree on run_id,
+  publishable flag, or fingerprint.
+- Forecast writes identity-tied eligibility (`forecast_run_id`, `snapshot_id`,
+  `evidence_fingerprint`) and embeds the same on the artifact.
+- Acceptance G4 requires eligibility↔forecast identity match; gates write
+  `run_coherence_latest.json`.
+- `PUBLIC_LIVE_ENABLED` remains `False`; surface stays `research_only`.
+
+Phase 2 — unified dynamic hierarchical PyMC challenger:
+
+- `fit_pymc_dynamic` recalibrated: weekly RW future innovations match Morris
+  future-movement budget; ED terminal reduced to residual polling error + light
+  similarity (no double-count of path + full static terminal).
+- Nested LOO freezes `pymc_dynamic` as its own stack candidate.
+- OOS grid script: `scripts/run_dynamic_oos_grid.py` → `dynamic_core_oos_grid.json`.
+- Static `pymc` retained as reference; production mixture still OOF-learned only.
+
+Joint simulation precision:
+
+- Separate `n_posterior_samples` from `n_joint_sims` (correlated resample expansion).
+- Defaults: demo/routine 10k; `--require-publishable` / production target 50k.
+- MCSE reports control, expected seats, and key seat-count probabilities.
+
 ## 2026-09-19 — senate-hierarchical-v0.9.21 (P1 margins / provenance / validation honesty)
 
 Follow-on to the same-day P0 stop-line:

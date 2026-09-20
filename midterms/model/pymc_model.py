@@ -310,6 +310,7 @@ def fit_pymc(
             progressbar=False,
             return_inferencedata=True,
             compute_convergence_checks=False,
+            cores=1,
         )
 
     from midterms.validation.numerical_quality import idata_convergence
@@ -441,11 +442,16 @@ def fit_pymc_dynamic(
     terminal_scales: dict | None = None,
 ) -> FitResult:
     """
-    Date-indexed hierarchical opinion path (audit P1.1 / Finding 3).
+    Unified dynamic hierarchical core (blueprint §7.1–7.2 / Finding 3).
 
-    Weekly national random walk + partially pooled race random walks. Process
-    innovation scale ∝ sqrt(calendar days). Polls observe theta[r, t_poll];
-    Election-Day outcome is theta[r, T] plus layered terminal (nat+race+similarity).
+    Weekly national + race random walks with calendar-scaled innovations.
+    Process noise from ``as_of``→ED is calibrated to the Morris future-movement
+    budget so RW future variance is **not** stacked again on full static
+    terminal scales. Election-Day terminal = residual polling error only
+    (reduced nat/race + light similarity). Polls observe ``theta[r, t_poll]``.
+
+    Distinct from ``fit_pymc`` (static Election-Day latent). Competing OOS
+    challenger — stack weight only if earned.
     """
     import pymc as pm
 
@@ -454,7 +460,40 @@ def fit_pymc_dynamic(
     t_weeks = int(prep["n_weeks"])
     day_gaps = np.asarray(prep["day_gaps"], dtype=float)
     step_scale = np.sqrt(day_gaps / 7.0)
-    scales = active_scales(**scales_kwargs(terminal_scales))
+    as_of_week = int(prep["as_of_week"])
+    ed_week = int(prep["ed_week"])
+    n_future = max(ed_week - as_of_week, 1)
+
+    # Morris future-movement budget (same family as static / state_space).
+    future_sd = float(4.5 * np.sqrt(max(prep["days_to_ed"], 1) / 120.0))
+    nat_future_sd = float(0.55 * future_sd)
+    race_future_sd = float(np.sqrt(max(future_sd**2 - nat_future_sd**2, 0.25)))
+    # Per-week process scales so Var(cumsum over future weeks) ≈ Morris budget.
+    # E[sum_i (s_i * sigma)^2] ≈ sigma^2 * sum(s_i^2); set sigma accordingly.
+    future_step2 = float(np.sum(step_scale[as_of_week + 1 : ed_week + 1] ** 2)) or float(n_future)
+    hist_step2 = float(np.sum(step_scale[: as_of_week + 1] ** 2)) or 1.0
+    sigma_nat_future = float(nat_future_sd / np.sqrt(future_step2))
+    sigma_race_future = float(race_future_sd / np.sqrt(future_step2))
+    # Historical RW (weeks ≤ as_of): smaller — polls pin the path.
+    sigma_nat_hist = float(min(1.2, sigma_nat_future * 0.85))
+    sigma_race_hist = float(min(0.7, sigma_race_future * 0.85))
+
+    base_scales = active_scales(**scales_kwargs(terminal_scales))
+    # Residual ED polling error only (path already carries future movement).
+    # Match state_space practice: light national + similarity; race residual in RW.
+    dyn_scales = {
+        **base_scales,
+        "terminal_nat_sd": float(base_scales["terminal_nat_sd"] * 0.35),
+        "terminal_race_sd": float(base_scales["terminal_race_sd"] * 0.25),
+        "sim_scale": float(base_scales["sim_scale"] * 0.85),
+    }
+
+    # Per-week innovation multipliers (hist vs future)
+    nat_step_sd = np.full(t_weeks, sigma_nat_hist, dtype=float)
+    race_step_sd = np.full(t_weeks, sigma_race_hist, dtype=float)
+    if as_of_week + 1 < t_weeks:
+        nat_step_sd[as_of_week + 1 :] = sigma_nat_future
+        race_step_sd[as_of_week + 1 :] = sigma_race_future
 
     coords = {
         "race": prep["race_ids"],
@@ -472,20 +511,16 @@ def fit_pymc_dynamic(
         sigma_local0 = pm.HalfNormal("sigma_local0", 3.0)
         local0 = pm.StudentT("local0", nu=5, mu=0.0, sigma=sigma_local0, dims="race")
 
-        # National weekly RW (process sd per sqrt-week)
-        sigma_nat_step = pm.HalfNormal("sigma_nat_step", 1.8)
+        # National / race weekly RW with calendar + Morris-calibrated step sds
         nat_innov = pm.Normal("nat_innov", 0.0, 1.0, dims="week")
-        nat_steps = sigma_nat_step * nat_innov * step_scale
+        nat_steps = nat_innov * (nat_step_sd * step_scale)
         nat = pm.Deterministic("nat", pm.math.cumsum(nat_steps), dims="week")
 
-        # Race weekly RW deviations (smaller than national)
-        sigma_race_step = pm.HalfNormal("sigma_race_step", 1.0)
         race_innov = pm.Normal("race_innov", 0.0, 1.0, dims=("race", "week"))
-        race_steps = sigma_race_step * race_innov * step_scale[None, :]
+        race_steps = race_innov * (race_step_sd[None, :] * step_scale[None, :])
         race_rw = pm.Deterministic("race_rw", pm.math.cumsum(race_steps, axis=1), dims=("race", "week"))
 
         level = prep["prior_mu"] + region_eff[prep["region_idx"]] + local0  # (race,)
-        # theta[r,t] = level[r] + nat[t] + race_rw[r,t]
         theta = pm.Deterministic(
             "theta",
             level[:, None] + nat[None, :] + race_rw,
@@ -525,24 +560,28 @@ def fit_pymc_dynamic(
                 observed=prep["poll_y"],
             )
 
-        # Distinct terminal ED layer (nat+race in-model; similarity post-draw)
+        # Residual ED terminal only (future movement already in RW after as_of)
         terminal_nat = pm.StudentT(
-            "terminal_nat", nu=4, mu=0.0, sigma=scales["terminal_nat_sd"]
+            "terminal_nat", nu=4, mu=0.0, sigma=dyn_scales["terminal_nat_sd"]
         )
         terminal_race = pm.StudentT(
             "terminal_race",
             nu=5,
             mu=0.0,
-            sigma=scales["terminal_race_sd"],
+            sigma=dyn_scales["terminal_race_sd"],
             dims="race",
         )
         mu_final = pm.Deterministic(
             "mu_final",
-            theta[:, prep["ed_week"]] + terminal_nat + terminal_race,
+            theta[:, ed_week] + terminal_nat + terminal_race,
             dims="race",
         )
-        # Snapshot current as-of latent for diagnostics
-        pm.Deterministic("theta_as_of", theta[:, prep["as_of_week"]], dims="race")
+        pm.Deterministic("theta_as_of", theta[:, as_of_week], dims="race")
+        pm.Deterministic(
+            "future_move",
+            theta[:, ed_week] - theta[:, as_of_week],
+            dims="race",
+        )
 
         idata = pm.sample(
             draws=draws,
@@ -553,6 +592,7 @@ def fit_pymc_dynamic(
             progressbar=False,
             return_inferencedata=True,
             compute_convergence_checks=False,
+            cores=1,
         )
 
     from midterms.validation.numerical_quality import idata_convergence
@@ -563,7 +603,7 @@ def fit_pymc_dynamic(
     mu = posterior["mu_final"].stack(sample=("chain", "draw")).values.T
     contested = prep["races"].set_index("race_id").loc[prep["race_ids"]].reset_index()
     rng = np.random.default_rng(seed + 19)
-    mu = add_similarity_terminal(mu, contested, rng, **scales)
+    mu = add_similarity_terminal(mu, contested, rng, **dyn_scales)
     mean = mu.mean(axis=0)
     sd = mu.std(axis=0)
     house_mean = {}
@@ -571,12 +611,22 @@ def fit_pymc_dynamic(
         h = posterior["house"].stack(sample=("chain", "draw")).mean(dim="sample").values
         house_mean = {p: float(h[i]) for i, p in enumerate(prep["pollster_ids"])}
 
-    budget = error_budget_block(scales)
+    budget = error_budget_block(dyn_scales)
     budget.update(
         {
-            "sigma_nat_step_prior": 1.8,
-            "sigma_race_step_prior": 1.0,
+            "future_movement_sd_target": float(future_sd),
+            "nat_future_sd_target": float(nat_future_sd),
+            "race_future_sd_target": float(race_future_sd),
+            "sigma_nat_future_step": float(sigma_nat_future),
+            "sigma_race_future_step": float(sigma_race_future),
+            "sigma_nat_hist_step": float(sigma_nat_hist),
+            "sigma_race_hist_step": float(sigma_race_hist),
+            "future_step2": float(future_step2),
+            "hist_step2": float(hist_step2),
             "n_weeks": t_weeks,
+            "n_future_weeks": int(n_future),
+            "terminal_budget": "residual_ed_only_after_calibrated_rw",
+            "double_count_guard": "morris_calibrated_rw_then_reduced_terminal",
         }
     )
 
@@ -594,16 +644,16 @@ def fit_pymc_dynamic(
             "days_to_ed": prep["days_to_ed"],
             "n_weeks": t_weeks,
             "origin": str(prep["origin"]),
-            "as_of_week": int(prep["as_of_week"]),
-            "ed_week": int(prep["ed_week"]),
+            "as_of_week": as_of_week,
+            "ed_week": ed_week,
             "draws": draws,
             "tune": tune,
             "chains": chains,
             "seed": seed,
             "n_posterior_samples": int(draws * chains),
-            "latent_path": "weekly_random_walk",
+            "latent_path": "weekly_random_walk_morris_calibrated",
             "measurement_effects": "hierarchical_mode_pop",
-            "terminal_layers": "national+race+similarity",
+            "terminal_layers": "reduced_nat+race+similarity_after_rw",
             "convergence": conv,
             "enop_global": prep["enop_global"],
             "enop_by_race_mean": float(np.mean(list(prep["enop_by_race"].values())))

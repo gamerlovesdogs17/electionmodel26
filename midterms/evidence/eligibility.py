@@ -489,8 +489,19 @@ def write_eligibility_report(
     election_id: str = "senate-2026",
     *,
     as_of: str | None = None,
+    run_id: str | None = None,
+    snapshot_id: str | None = None,
+    forecast_generated_at: str | None = None,
 ) -> dict[str, Any]:
     report = audit_evidence(election_id=election_id, as_of=as_of)
+    from midterms.ops.run_coherence import stamp_eligibility_identity
+
+    report = stamp_eligibility_identity(
+        report,
+        run_id=run_id,
+        snapshot_id=snapshot_id,
+        forecast_generated_at=forecast_generated_at,
+    )
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
     path = ARTIFACTS_DIR / "evidence_eligibility_latest.json"

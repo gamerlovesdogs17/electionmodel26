@@ -96,5 +96,36 @@
       "ridge_fundamentals": 0.09053034300179955
     }
   },
-  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"
+  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json",
+  "pymc_dynamic_oos": {
+    "source": "dynamic_core_oos_grid.json",
+    "protocol": "freeze_before_truth",
+    "years": [
+      2018,
+      2020,
+      2022,
+      2024
+    ],
+    "leads": [
+      90,
+      60,
+      30,
+      14,
+      7
+    ],
+    "mean_crps": {
+      "pymc": 4.167839223016675,
+      "pymc_dynamic": 4.467062402455864,
+      "state_space": 3.680690972321821,
+      "ridge_fundamentals": 5.042699511740173
+    },
+    "stack_weights_from_mean_crps": {
+      "pymc": 0.2565998384417638,
+      "pymc_dynamic": 0.17218226281959284,
+      "state_space": 0.4912969953765856,
+      "ridge_fundamentals": 0.07992090336205766
+    },
+    "earned_production_weight": false,
+    "note": "Morris-calibrated pymc_dynamic did not beat static pymc or state_space on mean CRPS across 2018-2024 x {90,60,30,14,7}d; retained as challenger only. Production mixture unchanged (state_space + ridge_fundamentals)."
+  }
 }

@@ -193,6 +193,12 @@ def main(argv: list[str] | None = None) -> None:
         action="store_true",
         help="Hard-fail if evidence tiers are synthetic/stale/untraceable (audit P0.4)",
     )
+    p_run.add_argument(
+        "--n-joint-sims",
+        type=int,
+        default=None,
+        help="Correlated chamber simulation count (default: 10k demo / 50k with --require-publishable)",
+    )
 
     def _forecast(a: argparse.Namespace) -> None:
         gb_meta = None
@@ -226,6 +232,7 @@ def main(argv: list[str] | None = None) -> None:
             control_calibrate=bool(a.control_calibrate),
             allow_fast_fallback=bool(a.allow_fast_fallback) or a.method == "fast",
             require_publishable=bool(a.require_publishable),
+            n_joint_sims=a.n_joint_sims,
         )
         print(
             json.dumps(

@@ -6,10 +6,18 @@
 - **Auxiliary:** multiway shares + turnout foils (do not drive seat math)
 - **Independents:** Ind display (purple) when no Dem nominee; still Dem caucus seats
 
+## Architecture (five layers — do not conflate)
+1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
+2. **Stack candidates** — frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, plus optional baselines / structural ablations. None is “the model” until stacking assigns mass.
+3. **Learned OOS production mixture** — nonnegative weights from predictive CRPS mixture / OOF scores (`stack_weights_oof.json`). If a component’s mean OOF CRPS does not earn mass, its production weight is zero even if it is the reference spine.
+4. **Overlays** — expert ratings + Kalshi race/control soft pulls (ablatable; never forced to market).
+5. **Final correlated chamber simulator** — joint margin draws → seats → control. Simulation count is separate from posterior sample count (`n_joint_sims` vs `n_posterior_samples`). Independent Bernoulli foil is diagnostic only.
+
 ## Update cadence
 `forecast` / `refresh`. Releases: `data/manifests/releases.jsonl` + signed `data/releases/{run_id}/`.
 Shadow publications (audit P3): `data/manifests/shadow_publications.jsonl` + write-once `data/shadow/{shadow_id}/`.
 Acceptance gates (Milestone-0): `acceptance-gates` → `data/artifacts/acceptance_gates_latest.json` (G1–G11).
+Run coherence: `run_coherence_latest.json` ties forecast ↔ eligibility ↔ rebuild fingerprints.
 Public live: `publish-live` → stamps `public_release` on forecast + `publication_latest.json` (requires green gates).
 Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-out`, `verify-rebuild`, `replay-cycle`, `shadow-verify`.
 
@@ -19,68 +27,56 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 | Polls (live 2026) | VoteHub CC BY | Required for `run_class=publication`; fixtures are non-publication |
 | Polls (historical) | FiveThirtyEight / ABC News (CC BY; Wayback/sealed) | Candidate identity + official race_id map; `--allow-synthetic` CI only |
 | Pollster quality | VoteHub + FTE fill-in | House ≠ reliability |
-| Economics | ALFRED/FRED or multi-vintage fixtures | Observation vs available_at; revisions do not leak |
-| Approval | Curated public-aggregate vintages | As-of store |
-| Finance | OpenFEC (receipts/cash/disbursements) | Matched-window share; amendment/coverage chain |
+| Economics | FRED public CSV / World Bank GDPPC YoY fallback | Observation vs available_at; fixtures are leakage canaries |
+| Approval | VoteHub Trump approval aggregates | As-of store; aggregator tier |
+| Finance | OpenFEC API or FEC `weball` bulk | Matched-window share; bulk is first_party when API 429s |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
 | Markets | Kalshi | Soft overlays; `SENATE{ST}S` for FL/OH specials; chamber calibration **off** by default |
-| Demography | State research snapshot | Similarity / covariance |
+| Demography | MEDSL ACS county means (state aggregate) | Similarity / covariance; aggregator tier |
 | Results | Certified archive + MEDSL 2016 + fixtures | Prefer certified |
-| Race universe | Official class/special ballots | Chamber reconcile gate **2014–2024** (poll coverage production 2018–2024) |
+| Race universe | Wikipedia Class II / 2026 schedule + constitutional roster | Chamber reconcile gate **2014–2024** |
 
 ## Evidence eligibility (P0.4)
 - Tiers: `official` › `first_party` › `aggregator` › `curated` › `imputed` › `synthetic` › `untraceable`
 - Publishable runs reject synthetic/imputed/untraceable; `evidence-eligibility` / `--require-publishable`
+- Forecast writes `evidence_eligibility_latest.json` with matching `forecast_run_id` + `evidence_fingerprint`
 - Development may continue with `run_class=non_publication` (UI banner mandatory)
 
 ## Core model
-- **Production spine (default):** PyMC hierarchical Student-t (`method=pymc`) — static Election-Day latent (`latent_path=static_election_day`)
-- **Dynamic spine (P1.1):** weekly national+race RW (`method=pymc_dynamic`); compare with `compare-static-dynamic`
-- **OOS replay:** `replay-cycle` defaults to scoring **pymc** folds (`--hierarchical-method pymc_dynamic` available)
+- **Reference spine (default):** static PyMC (`method=pymc`)
+- **Dynamic challenger:** `method=pymc_dynamic` — weekly national+race RW; future process noise calibrated to Morris `4.5√(days/120)` budget; terminal = residual ED error only (avoids double-counting path + full static terminal)
+- **OOS replay:** `replay-cycle` / nested LOO freeze both spines as candidates
 - **Non-production:** `fast` hierarchical-t approximation (CI / `--allow-fast-fallback` only)
-- Generic ballot: VoteHub **21-day trailing weighted average** (Winsorized headline D−R), not a single poll
-- **Morris §7.2 split in core PyMC:** contracting future movement (national+race) + fixed terminal ED error
-- Forward state-space challenger: national path + calibrated future/terminal scales; mode/pop/house offsets aligned
-- Fundamentals prior (approval, income, fundraising, midterm, lean, GB)
-- ENOP / caps / study clustering / max-weight-ratio; mode/pop as **offsets only**
-- National / region / local + demographic similarity shocks; named **error_budget** in diagnostics
-- Ratings / race markets / soft control pull overlays with ablation (no forced market matching)
-- Fold-pure stack weights (`stack_provenance`); hierarchical mass labeled `pymc`
-- Leave-pollster-out diagnostics; peer integrity gate (control gap soft)
-- LA/GA runoff templates; vacancy_reason on specials; scenario sensitivity block
+- Generic ballot: VoteHub **21-day trailing weighted average** (Winsorized headline D−R)
+- **Morris §7.2:** current opinion ≠ future movement ≠ Election-Day terminal polling error
+- Forward state-space challenger remains the historically strongest OOF member in recent stacks
+- Fundamentals prior; ENOP / caps / study clustering; hierarchical mode/pop; named **error_budget**
+- Ratings / markets overlays with ablation
+- Fold-pure stack weights (`stack_provenance`); never manually assign positive weight
+- Joint sims: CI ≥2.5k; routine ≥10k; production target **50k** correlated draws (`--n-joint-sims`)
 
 ## Validation / ops
-- Complete-cycle replay with challenger pool; LOO stack weights; production PyMC OOS
-- Lead-time grid; nested Student-t df / era search; component ablations
-- Published `validation_report_latest.{json,md}` + `leave_pollster_out_latest.json`
+- Complete-cycle replay; nested LOO; lead-time grid; component ablations
+- Dynamic OOS grid artifact: `dynamic_core_oos_grid.json` (freeze-before-truth)
 - Monitor alerts; Ed25519 signing; environment lock; `verify-rebuild`; correction registry
 - **Pre-P0 cycle_replay artifacts are non-comparable** — not validated backtests (`VALIDATION_ARCHIVE_NOTICE.md`)
-- **Limits:** VoteHub has no historical archive; no Cook redistribution; House/EC out of scope; peer panel is compare-only (never averaged)
 
 ## Limitations
-- **Public live probabilities are locked** (`PUBLIC_LIVE_ENABLED=False`) after the 17 Sep 2026 data-drop audit. Surface is `research_only` until truth_v1 consumers, vintages, and fold-pure validation clear a fresh review.
-- Wikipedia `certified_vote_counts.json` is **quarantined** (parser-development only); it is not a canonical truth source. See `data/artifacts/WIKI_VOTE_COUNTS_QUARANTINE.md`.
-- Canonical outcomes use **truth_v1** (`official_senate_ledger.json` + independent expectations): decisive-stage FEC canvass overrides, row-role filtering, and Independent caucus mapping (King/Sanders) without inventing a Democratic ballot party.
-- Margin scoring uses `score_eligible` / `margin_definition`: Independent winners, same-party finals, and petition Independents are excluded from D−R fit/score targets (still counted in chamber via `winner_caucus`).
-- Runoff contests use decisive-stage `election_day` with `available_at` no earlier than the day after (19 Sep 2026 audit P0). `certified_at` is null unless a certification record is archived; do not treat FTE-mediated rows as fully certified.
-- Canvass overrides are labeled `*_transcribed` with distinct override hashes; bare `fec_canvass` tiers without primary-object evidence fail the truth validator.
-- G6/G7 do not allow calibration claims on thin/single-cycle nested evidence; nested LOO must cover multiple outer cycles before “calibrated” language.
-- Private signing keys must never appear in handoff ZIPs (`data/licensed/` is gitignored; release scanner rejects PEM private-key headers).
-- Historical margins for non-digitized FEC races must not use 1e6-scaled synthetic counts for publication claims; OH 2018, AZ 2024, LA 2014 runoff, and GA 2020 special runoff remain exact canvass canaries.
-- Production economics use FRED public CSV (`A229RX0` + YoY); fixture RDPI series remain as leakage canaries only.
-- Live 2026 finance uses curated FEC-browse estimates when OpenFEC rate-limits (eligible curated tier, not `fixture_hash`); full candidate-level digitization is incomplete.
-- Nested LOO / stack OOF now use a **pymc** spine (aligned with production); predictive mixture currently puts mass on last_election_swing / ridge / state_space (pymc OOF CRPS did not earn mixture weight).
-- Production hierarchical fit remains a static Election-Day latent; weekly dynamic is a challenger (2022 compare: static better CRPS).
-- Poll coverage for 2014/2016 is not production-gated (no FTE identity archive yet).
+- **Public live probabilities are locked** (`PUBLIC_LIVE_ENABLED=False`). Surface is `research_only` until a fresh independent clearance.
+- Do **not** call PyMC the effective production predictor when its learned stack weight is ~0; the mixture (often `state_space` + `ridge_fundamentals`) is the production predictor, with PyMC as reference spine / candidate.
+- Wikipedia `certified_vote_counts.json` is **quarantined** (parser-development only).
+- Canonical outcomes use **truth_v1** (`official_senate_ledger.json` + independent expectations).
+- Margin scoring uses `score_eligible` / `margin_definition`.
+- Runoff contests use decisive-stage `election_day` with `available_at` day-after bound.
+- G6/G7 require multi-cycle nested evidence before “calibrated” language.
+- Private signing keys must never appear in handoff ZIPs.
+- Production economics use FRED / WB; fixture series are canaries only.
+- Finance prefers OpenFEC; FEC weball bulk is the rate-limit alternative (same filings).
+- `pymc_dynamic` must earn OOF mass before displacing static pymc as reference or mixture member.
+- Poll coverage for 2014/2016 is not production-gated.
 - Peer snapshots are compare-only and never averaged into the ensemble.
 - House, governors, and Electoral College are out of scope.
 
 ## Known limitations
 See **Limitations** above (retained heading for acceptance G11).
-
-
-## Production paths
-See `DEPLOY.md`: API bearer auth (`MIDTERMS_API_KEY`), Docker/Fly deploy, Ed25519 signing
-(`generate-signing-keys`, `MIDTERMS_REQUIRE_SIGNING=1`), Wikipedia ratings (`fetch-ratings`),
-FTE historical ingest (`ingest-fte-polls`), VoteHub dump sealing (`seal-votehub-dumps`).

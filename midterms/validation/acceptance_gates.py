@@ -213,6 +213,35 @@ def evaluate_acceptance_gates(
             and domains[d].get("eligible") is False
             and domains[d].get("tier") in {"synthetic", "imputed", "untraceable"}
         ]
+        coherence_notes: list[str] = []
+        coherence_ok = True
+        if forecast:
+            fc_pub = bool(forecast.get("publishable"))
+            if fc_pub != bool(eligibility.get("publishable")):
+                coherence_ok = False
+                coherence_notes.append(
+                    f"eligibility.publishable={eligibility.get('publishable')} "
+                    f"!= forecast.publishable={fc_pub}"
+                )
+            elig_run = str(eligibility.get("forecast_run_id") or "")
+            fc_run = str(forecast.get("run_id") or "")
+            if elig_run and fc_run and elig_run != fc_run:
+                coherence_ok = False
+                coherence_notes.append(
+                    f"eligibility.forecast_run_id={elig_run} != forecast.run_id={fc_run}"
+                )
+            elig_fp = str((eligibility.get("evidence_fingerprint") or {}).get("sha256") or "")
+            fc_fp = str((forecast.get("evidence_fingerprint") or {}).get("sha256") or "")
+            if elig_fp and fc_fp and elig_fp != fc_fp:
+                coherence_ok = False
+                coherence_notes.append("evidence_fingerprint mismatch forecast vs eligibility")
+            if not elig_fp:
+                coherence_notes.append(
+                    "eligibility lacks evidence_fingerprint — regenerate with current forecast"
+                )
+                # Fingerprint is required once a publishable forecast exists
+                if fc_pub:
+                    coherence_ok = False
         # Fresh audit R-04/R-05: fixture finance/economics must force non_publication
         if domain_blockers and run_class == "publication":
             g4_ok = False
@@ -226,6 +255,9 @@ def evaluate_acceptance_gates(
             if not eligibility.get("ok") and run_class == "non_publication":
                 status = "pass"
                 g4_ok = True
+        if not coherence_ok:
+            g4_ok = False
+            status = "fail"
         gates.append(
             _gate(
                 "G4",
@@ -238,11 +270,18 @@ def evaluate_acceptance_gates(
                     "reasons": reasons[:12],
                     "domain_blockers": domain_blockers,
                     "domains_checked": sorted(domains.keys()),
+                    "coherence_ok": coherence_ok,
+                    "coherence_notes": coherence_notes,
+                    "forecast_run_id": eligibility.get("forecast_run_id"),
+                    "evidence_fingerprint": (eligibility.get("evidence_fingerprint") or {}).get(
+                        "sha256"
+                    ),
                 },
                 evidence=[str(art_dir / "evidence_eligibility_latest.json")],
                 notes=[
                     "All configured domains (finance/economics/approval/…) must be enumerated; "
-                    "fixture_hash / *_FIXTURE blocks publication."
+                    "fixture_hash / *_FIXTURE blocks publication.",
+                    "Eligibility artifact must match forecast_latest run_id / fingerprint.",
                 ],
             )
         )
@@ -839,6 +878,20 @@ def evaluate_acceptance_gates(
             "Unified G1–G11 acceptance artifact retained; milestone shadow uses production spine."
         ),
     }
+
+    try:
+        from midterms.ops.run_coherence import write_coherence_report
+
+        coherence = write_coherence_report(artifacts_dir=art_dir)
+    except Exception as exc:  # noqa: BLE001
+        coherence = {"ok": False, "error": str(exc)}
+    report["run_coherence"] = coherence
+    if coherence.get("ok") is False:
+        # Coherence failure blocks promotion; research ok already computed above.
+        report["promotion_ok"] = False
+        report.setdefault("failures", [])
+        if "COHERENCE" not in report["failures"]:
+            report["failures"] = list(report["failures"]) + ["COHERENCE"]
 
     if write:
         art_dir.mkdir(parents=True, exist_ok=True)

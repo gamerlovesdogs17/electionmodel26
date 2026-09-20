@@ -17,9 +17,11 @@ from midterms.config import (
     ARTIFACTS_DIR,
     DEMO_AS_OF,
     DEMO_ELECTION_ID,
+    DEMO_JOINT_SIMS,
     DEMO_SEED,
     MODEL_VERSION,
     PRIMARY_HOLDOUT,
+    PRODUCTION_JOINT_SIMS,
     PUBLIC_LIVE_ENABLED,
     PUBLICATION_SURFACE_DEFAULT,
 )
@@ -158,11 +160,12 @@ def run_forecast(
     require_publishable: bool = False,
     allow_non_publication: bool = True,
     rebuild_mode: bool = False,
+    n_joint_sims: int | None = None,
 ) -> dict[str, Any]:
     from midterms.evidence.economics import try_refresh_alfred, yoy_growth_as_of
     from midterms.evidence.approval import approval_as_of, write_approval_store
     from midterms.evidence.demography import attach_demo_features
-    from midterms.evidence.eligibility import assert_publishable
+    from midterms.evidence.eligibility import assert_publishable, write_eligibility_report
     from midterms.evidence.expert_ratings import (
         ensure_expert_ratings_store,
         ratings_for_races,
@@ -184,6 +187,7 @@ def run_forecast(
     from midterms.model.turnout import turnout_layer, undecided_allocation
     from midterms.simulate.institutional import apply_vacancy_defaults, maybe_materialize_runoff_rows
     from midterms.ops.reproducibility import environment_lock, snapshot_domain_hashes
+    from midterms.ops.run_coherence import evidence_manifest_fingerprint, stamp_eligibility_identity
     from midterms.ops.signing import sign_payload
 
     # Evidence eligibility (audit P0.4) — before fitting so ineligible runs are labeled
@@ -197,6 +201,12 @@ def run_forecast(
             "require_publishable=True but evidence is ineligible: "
             + "; ".join(eligibility.get("reasons") or [])
         )
+
+    joint_sims = int(
+        n_joint_sims
+        if n_joint_sims is not None
+        else (PRODUCTION_JOINT_SIMS if require_publishable else DEMO_JOINT_SIMS)
+    )
 
     # Ensure economic + finance + ratings + markets stores exist
     layer_warnings: list[dict[str, str]] = []
@@ -277,6 +287,17 @@ def run_forecast(
             write_peer_snapshots()
         except Exception as exc:  # noqa: BLE001
             layer_warnings.append({"layer": "peers", "error": str(exc)})
+        # Re-audit after store refresh so run_class matches the snapshot we fit on.
+        eligibility = assert_publishable(
+            election_id,
+            as_of=str(as_of)[:10],
+            allow_non_publication=allow_non_publication and not require_publishable,
+        )
+        if require_publishable and not eligibility.get("publishable"):
+            raise ValueError(
+                "require_publishable=True but evidence still ineligible after refresh: "
+                + "; ".join(eligibility.get("reasons") or [])
+            )
     else:
         ratings_meta = {}
         markets_meta = {}
@@ -544,7 +565,13 @@ def run_forecast(
             method=fit.method + "+overlays",
         )
 
-    sim, race_summaries = simulate_chamber(fit, snap.races, vp_tiebreak_party="R")
+    sim, race_summaries = simulate_chamber(
+        fit,
+        snap.races,
+        vp_tiebreak_party="R",
+        n_sims=joint_sims,
+        sim_seed=seed + 101,
+    )
     contested_active = snap.races[snap.races["race_id"].isin(fit.race_ids)].copy()
     # Align contested to fit order
     contested_active = contested_active.set_index("race_id").loc[fit.race_ids].reset_index()
@@ -568,7 +595,13 @@ def run_forecast(
             s["market_liquidity"] = float(market_by_id.loc[s["race_id"], "liquidity"])
 
     # Ablation: unadjusted core chamber
-    core_sim, _ = simulate_chamber(core_fit, snap.races, vp_tiebreak_party="R")
+    core_sim, _ = simulate_chamber(
+        core_fit,
+        snap.races,
+        vp_tiebreak_party="R",
+        n_sims=joint_sims,
+        sim_seed=seed + 103,
+    )
     ablation = {
         "unadjusted": {
             "p_dem_majority": core_sim.p_dem_majority,
@@ -624,6 +657,14 @@ def run_forecast(
     # control already loaded above for overlay; refresh for artifact snapshot
     control = load_control_market()
 
+    evidence_fp = evidence_manifest_fingerprint()
+    eligibility = stamp_eligibility_identity(
+        eligibility,
+        run_id=run_id,
+        snapshot_id=str(snap.snapshot_id),
+        forecast_generated_at=datetime.now(timezone.utc).isoformat(),
+    )
+
     artifact = {
         "run_id": run_id,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -638,7 +679,12 @@ def run_forecast(
             "run_class": eligibility.get("run_class"),
             "reasons": eligibility.get("reasons"),
             "domains": eligibility.get("domains"),
+            "forecast_run_id": run_id,
+            "snapshot_id": str(snap.snapshot_id),
+            "evidence_fingerprint": evidence_fp,
         },
+        "evidence_fingerprint": evidence_fp,
+        "snapshot_ids": {"evidence": str(snap.snapshot_id)},
         "generic_ballot": float(generic_ballot),
         "generic_ballot_meta": generic_ballot_meta
         or {"margin": float(generic_ballot), "method": "caller_supplied"},
@@ -661,6 +707,10 @@ def run_forecast(
             "vp_tiebreak_party": sim.vp_tiebreak_party,
             "expected_dem_seats": sim.expected_dem_seats,
             "expected_rep_seats": expected_rep,
+            "n_joint_sims": int(getattr(sim, "n_joint_sims", len(sim.seat_draws))),
+            "n_posterior_margin_draws": int(
+                getattr(sim, "n_posterior_margin_draws", fit.draws_margin.shape[0])
+            ),
             "seat_histogram": seat_hist,
             "independent_bernoulli_foil_expected": float(np.mean(foil)),
             "note": (
@@ -679,6 +729,10 @@ def run_forecast(
             "allow_fast_fallback": bool(allow_fast_fallback),
             "run_class": eligibility.get("run_class"),
             "publishable": bool(eligibility.get("publishable")),
+            "n_joint_sims": int(getattr(sim, "n_joint_sims", len(sim.seat_draws))),
+            "n_posterior_margin_draws": int(
+                getattr(sim, "n_posterior_margin_draws", fit.draws_margin.shape[0])
+            ),
             "numerical_quality": numerical,
         },
         "numerical_quality": numerical,
@@ -743,13 +797,14 @@ def run_forecast(
                 "OH2018/AZ2024 are exact canvass totals."
             ),
             (
-                "Ensemble predictive mixture OOF-scored with pymc spine; "
-                "current weights favor last_election_swing / ridge / state_space "
-                "(pymc did not earn mixture mass on mean CRPS)."
+                "Ensemble predictive mixture OOF-scored; learned weights favor "
+                "state_space / ridge when static pymc CRPS does not earn mass. "
+                "pymc_dynamic competes as a separate stack candidate after OOF freeze."
             ),
             (
-                "Production spine is static Election-Day latent; dynamic challenger "
-                "selection is comparative only until multi-cycle gate clears."
+                "Reference generative spine may be static pymc or pymc_dynamic; "
+                "effective production mixture is whatever OOF stacking assigns. "
+                "Chamber totals always come from correlated joint sims, not independent Bernoullis."
             ),
         ],
         "research_only_notice": (
@@ -768,6 +823,15 @@ def run_forecast(
     payload = text.encode("utf-8")
     artifact_path.write_bytes(payload)
     demo_path.write_bytes(payload)
+
+    # Keep eligibility artifact identity-tied to this exact forecast run.
+    write_eligibility_report(
+        election_id,
+        as_of=str(as_of)[:10],
+        run_id=run_id,
+        snapshot_id=str(snap.snapshot_id),
+        forecast_generated_at=str(artifact.get("generated_at")),
+    )
 
     draws_path = out_dir / f"draws_{run_id}.npz"
     np.savez_compressed(

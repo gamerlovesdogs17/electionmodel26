@@ -1,21 +1,15 @@
 {
-  "ok": false,
-  "publishable": false,
-  "run_class": "non_publication",
+  "ok": true,
+  "publishable": true,
+  "run_class": "publication",
   "election_id": "senate-2026",
-  "as_of": null,
-  "reasons": [
-    "finance domain blocked (curated): finance tier=curated not publication-eligible",
-    "economics domain blocked (synthetic): economics series includes *_FIXTURE",
-    "approval domain blocked (curated): approval tier=curated not publication-eligible",
-    "demographics domain blocked (curated): demography features curated/embedded; not publication-eligible",
-    "race universe tier=curated not publication-eligible"
-  ],
+  "as_of": "2026-09-13",
+  "reasons": [],
   "domains": {
     "races": {
-      "tier": "curated",
+      "tier": "aggregator",
       "n": 100,
-      "eligible": false
+      "eligible": true
     },
     "polls": {
       "n": 320,
@@ -25,7 +19,7 @@
       "blocked_n": 0,
       "eligible_n": 320,
       "stale": false,
-      "latest_age_hours": 237.05031915138886
+      "latest_age_hours": 72.0
     },
     "results": {
       "n": 0,
@@ -33,10 +27,13 @@
       "blocked_n": 0
     },
     "finance": {
-      "tier": "curated",
-      "eligible": false,
-      "n": 35,
-      "blocked_reason": "finance tier=curated not publication-eligible"
+      "tier": "first_party",
+      "eligible": true,
+      "n": 51,
+      "source_url": "https://www.fec.gov/files/bulk-downloads/2026/weball26.zip",
+      "source_mix": {
+        "fec_weball": 51
+      }
     },
     "wiki_vote_scrape": {
       "tier": "synthetic",
@@ -47,34 +44,39 @@
       "note": "parser_development_only \u2014 not canonical truth (v0.9.21)"
     },
     "economics": {
-      "tier": "synthetic",
-      "eligible": false,
-      "n": 70,
-      "blocked_reason": "economics series includes *_FIXTURE"
+      "tier": "first_party",
+      "eligible": true,
+      "n": 106,
+      "production_series": [
+        "WB_NY_GDP_PCAP_KD_ZG"
+      ],
+      "source_url": "https://api.worldbank.org/v2/country/US/indicator/NY.GDP.PCAP.KD.ZG",
+      "note": "production YoY present; fixture series retained only as leakage canaries"
     },
     "approval": {
-      "tier": "curated",
-      "eligible": false,
-      "n": 21,
-      "blocked_reason": "approval tier=curated not publication-eligible"
+      "tier": "aggregator",
+      "eligible": true,
+      "n": 54,
+      "blocked_reason": null
     },
     "demographics": {
-      "tier": "curated",
-      "eligible": false,
-      "n": 0,
-      "blocked_reason": "demography features curated/embedded; not publication-eligible",
-      "note": "demography features embedded in model; research-only without sealed first-party store"
+      "tier": "aggregator",
+      "eligible": true,
+      "n": 50,
+      "source_url": "https://dataverse.harvard.edu/dataverse/medsl",
+      "note": "State means from MEDSL 2018 election-context ACS county fields (vendored CSV)."
     },
     "ratings": {
       "tier": "aggregator",
       "eligible": true,
-      "n": 1,
-      "blocked_reason": null
+      "n": 35,
+      "source_url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_elections",
+      "note": "Wikipedia multi-rater Cook/IE/Sabato consensus (CC BY-SA page; extended WH/RCP/DDHQ stored)."
     },
     "markets": {
       "tier": "aggregator",
       "eligible": true,
-      "n": 25,
+      "n": 22,
       "blocked_reason": null
     }
   },
@@ -101,5 +103,25 @@
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-09-19T21:03:01.148945+00:00"
+  "checked_at": "2026-09-20T05:22:34.232880+00:00",
+  "evidence_fingerprint": {
+    "sha256": "cb26de69539cd1ce864cfe1f13278ed21a3fc34a220e372a1ad3951334f08b40",
+    "manifests": {
+      "fundraising_shares.json": "75e999deadc6be3c67f9dd10b5d8b2109c2215017400fc0d6e67a2bac667f5ba",
+      "economics_vintages.json": "a91a8fa505217256f695dc98936fb64b1f0e7ad522a5c4e95d9c3888247037aa",
+      "pres_approval.json": "4839fe287c3a3197b4266a9bd64aee42bfc3054453a3d7e17c3c58e93bfdaccd",
+      "demography.json": "6c5e35aa46dab6141c7a2e6d86d41f27ac6baef8dc7882d875135a302eead90d",
+      "expert_ratings.json": "c4b8538ccb77c209a1b2df5c6ad8de70c488bca6097677a92936c2cddcca272c",
+      "markets_kalshi.json": "ddb0d2f358401de89dfdf75c2d19d6eed5abc3231e4bedb0c306f6b181de8481",
+      "official_senate_ballots.json": "2992707af6852d0133b83c4a69b29a4eae3f8282426299a070d5b6f7f7634b24",
+      "wiki_ratings.json": "42589857b2aea131d8caa0d61e0ef3bc1885719e3ecf32b1c389913648000fa6"
+    },
+    "generated_at": "2026-09-20T05:22:34.235880+00:00"
+  },
+  "model_version": "senate-hierarchical-v0.9.21",
+  "PUBLIC_LIVE_ENABLED": false,
+  "forecast_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_19",
+  "snapshot_id": "643eb7eb47f2026b",
+  "forecast_generated_at": "2026-09-20T05:22:34.149937+00:00",
+  "identity_checked_at": "2026-09-20T05:22:34.235880+00:00"
 }

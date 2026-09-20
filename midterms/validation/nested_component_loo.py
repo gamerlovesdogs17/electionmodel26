@@ -27,7 +27,7 @@ from midterms.model.challengers import (
     fit_ridge_fundamentals,
 )
 from midterms.model.ensemble import weights_from_oof_scores
-from midterms.model.pymc_model import FitResult, fit_fast_approximation, fit_pymc
+from midterms.model.pymc_model import FitResult, fit_fast_approximation, fit_pymc, fit_pymc_dynamic
 from midterms.model.state_space import fit_state_space
 from midterms.model.terminal import active_scales
 
@@ -39,6 +39,7 @@ OPTIONAL_COMPONENTS = (
     "state_space",
     "poll_only_state_space",
     "ridge_fundamentals",
+    "pymc_dynamic",
     "last_election_swing",
     "equal_weight_polls",
     "shrinkage_polls",
@@ -184,6 +185,16 @@ def _fit_hierarchical(snap, *, method: str, n_draws: int, seed: int, gb: float, 
             generic_ballot=gb,
             terminal_scales=terminal_scales,
         )
+    if method in {"pymc_dynamic", "pymc-dynamic"}:
+        return fit_pymc_dynamic(
+            snap,
+            draws=max(n_draws // 4, 50),
+            tune=max(n_draws // 4, 50),
+            chains=2,
+            seed=seed,
+            generic_ballot=gb,
+            terminal_scales=terminal_scales,
+        )
     return fit_fast_approximation(
         snap,
         n_draws=n_draws,
@@ -211,7 +222,11 @@ def freeze_component_predictions(
     as_of = snap.as_of
     gb = _generic_ballot(snap)
     frozen: dict[str, FrozenPrediction] = {}
-    hier_name = "pymc" if hierarchical_method.startswith("pymc") else "fast_hierarchical_t"
+    hier_name = (
+        "pymc_dynamic"
+        if hierarchical_method.startswith("pymc_dynamic")
+        else ("pymc" if hierarchical_method.startswith("pymc") else "fast_hierarchical_t")
+    )
 
     def _safe(name: str, fn: Callable[[], FrozenPrediction]) -> None:
         try:
@@ -320,6 +335,28 @@ def freeze_component_predictions(
             seed=seed + 17,
         ),
     )
+    # Unified dynamic hierarchical PyMC — always freeze as its own candidate
+    # (even when the spine is static pymc), so stacking can assign mass honestly.
+    if hier_name != "pymc_dynamic":
+        _safe(
+            "pymc_dynamic",
+            lambda: _freeze_from_fit(
+                fit_pymc_dynamic(
+                    snap,
+                    draws=max(n_draws // 4, 50),
+                    tune=max(n_draws // 4, 50),
+                    chains=2,
+                    seed=seed + 19,
+                    generic_ballot=gb,
+                ),
+                component="pymc_dynamic",
+                election_id=election_id,
+                holdout_year=holdout_year,
+                lead_days=lead_days,
+                as_of=as_of,
+                seed=seed + 19,
+            ),
+        )
 
     for bname, bfn in BASELINES.items():
         _safe(
@@ -510,7 +547,11 @@ def run_nested_component_loo(
     recommendations. Does **not** remap fast→pymc.
     """
     wh = Warehouse()
-    spine = "pymc" if hierarchical_method.startswith("pymc") else "fast_hierarchical_t"
+    spine = (
+        "pymc_dynamic"
+        if hierarchical_method.startswith("pymc_dynamic")
+        else ("pymc" if hierarchical_method.startswith("pymc") else "fast_hierarchical_t")
+    )
     by_fold: dict[str, Any] = {}
     crps_by_fold: dict[str, dict[str, float]] = {}
     oof_means_by_fold: dict[str, dict[str, dict[str, float]]] = {}

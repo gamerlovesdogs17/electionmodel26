@@ -49,6 +49,14 @@ PRODUCTION_DRAWS = 2000
 PRODUCTION_TUNE = 2000
 PRODUCTION_CHAINS = 4
 
+# Joint chamber simulations (correlated margin draws → seats). Separate from
+# PyMC retained posterior samples. CI/dev can use the floor; production target
+# is 50k unless memory/runtime forces a documented reduction.
+CI_JOINT_SIMS = 2_500
+ROUTINE_JOINT_SIMS = 10_000
+PRODUCTION_JOINT_SIMS = 50_000
+DEMO_JOINT_SIMS = 10_000
+
 REGIONS = {
     "AL": "South",
     "AK": "West",

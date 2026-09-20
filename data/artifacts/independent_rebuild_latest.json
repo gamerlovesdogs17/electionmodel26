@@ -1,17 +1,17 @@
 {
   "ok": true,
   "mode": "independent",
-  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
-  "manifest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\releases\\senate-2026_2026-09-13_ensemble_stack+overlays_20260919\\run_manifest.json",
-  "release_dir": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\releases\\senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
+  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+  "manifest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\releases\\senate-2026_2026-09-13_ensemble_stack+overlays_20260901\\run_manifest.json",
+  "release_dir": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\releases\\senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
   "configuration": {
     "election_id": "senate-2026",
     "as_of": "2026-09-13",
     "method": "pymc",
-    "draws": 2000,
-    "tune": 1000,
+    "draws": 800,
+    "tune": 800,
     "chains": 2,
-    "seed": 20260919,
+    "seed": 20260901,
     "generic_ballot": 5.852513615064197,
     "ensemble": true,
     "with_ratings": true,
@@ -30,35 +30,35 @@
       {
         "name": "p_dem_majority",
         "ok": true,
-        "delta": 0.0,
+        "delta": 0.0035200000000000786,
         "tol": 0.01
       },
       {
         "name": "expected_dem_seats",
         "ok": true,
-        "delta": 0.0,
+        "delta": 0.02656000000000347,
         "tol": 0.15
       },
       {
         "name": "max_race_p_dem",
         "ok": true,
-        "delta": 0.0,
+        "delta": 0.006620000000000015,
         "tol": 0.02
       }
     ],
-    "mean_abs_race_p_dem": 0.0,
+    "mean_abs_race_p_dem": 0.001666285714285722,
     "n_races_compared": 35
   },
   "lite_hash_seal": {
     "ok": true,
-    "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260919",
-    "forecast_hash_expected": "171561f95f9f9b0db97a5af6f5eb161194f810ed979ff7c513030053a62520e7",
-    "forecast_hash_actual": "171561f95f9f9b0db97a5af6f5eb161194f810ed979ff7c513030053a62520e7",
+    "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+    "forecast_hash_expected": "527c2426c6bb7a0962bfe998554f2180b983ac7b1b9c14fbde1cc475d2690521",
+    "forecast_hash_actual": "527c2426c6bb7a0962bfe998554f2180b983ac7b1b9c14fbde1cc475d2690521",
     "draws_ok": true,
-    "manifest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\run_senate-2026_2026-09-13_ensemble_stack+overlays_20260919.json",
+    "manifest": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\run_senate-2026_2026-09-13_ensemble_stack+overlays_20260901.json",
     "newline_normalized": true
   },
-  "rebuild_out_dir": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.tmp_pytest\\midterms_rebuild_xo7o9cia",
-  "generated_at": "2026-09-19T21:18:06.335534+00:00",
+  "rebuild_out_dir": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\.tmp_pytest\\midterms_rebuild_p4x9wi1i",
+  "generated_at": "2026-09-20T05:16:22.422255+00:00",
   "note": "G10 hard: re-executes run_forecast under rebuild_mode; compares probabilities within MCSE tolerances (not byte-identical JSON)."
 }

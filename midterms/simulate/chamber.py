@@ -48,6 +48,32 @@ class ChamberSimulation:
     seat_histogram: dict[str, int]
     vp_tiebreak_party: str = "R"
     held_ind: int = 0
+    n_joint_sims: int = 0
+    n_posterior_margin_draws: int = 0
+
+
+def expand_joint_draws(
+    margins: np.ndarray,
+    *,
+    n_sims: int,
+    seed: int = 0,
+) -> np.ndarray:
+    """
+    Expand posterior predictive margin draws to ``n_sims`` joint election sims.
+
+    Resamples existing correlated draws with replacement (preserves dependence).
+    Does **not** invent independent Bernoulli race outcomes.
+    """
+    margins = np.asarray(margins, dtype=float)
+    if margins.ndim != 2 or margins.shape[0] == 0:
+        raise ValueError("margins must be (n_draws, n_races) with n_draws > 0")
+    n_post, n_races = margins.shape
+    target = int(n_sims)
+    if target <= n_post:
+        return margins[:target].copy()
+    rng = np.random.default_rng(int(seed))
+    idx = rng.integers(0, n_post, size=target)
+    return margins[idx]
 
 
 def simulate_chamber(
@@ -56,6 +82,8 @@ def simulate_chamber(
     *,
     majority_threshold: int = 51,
     vp_tiebreak_party: str = "R",
+    n_sims: int | None = None,
+    sim_seed: int | None = None,
 ) -> tuple[ChamberSimulation, list[dict]]:
     """
     Translate joint margin draws into seat outcomes and chamber control.
@@ -65,6 +93,9 @@ def simulate_chamber(
 
     With a Republican VP, Dem control requires >=51 seats; dem_seats <= 50 is
     Republican control (including 50–50).
+
+    ``n_sims`` optionally expands posterior draws to a larger joint-simulation
+    count via resampling (correlated structure preserved).
     """
     contested = races[races.apply(is_active_ballot_row, axis=1)] if len(races) else races
     held = races[races["not_up"]] if len(races) else races
@@ -72,7 +103,11 @@ def simulate_chamber(
     held_dem = int((held["held_by"] == "D").sum()) + held_ind if len(held) else 0
     held_rep = int((held["held_by"] == "R").sum()) if len(held) else 0
 
-    margins = fit.draws_margin
+    margins = np.asarray(fit.draws_margin, dtype=float)
+    n_post = int(margins.shape[0]) if margins.ndim == 2 else 0
+    if n_sims is not None and int(n_sims) > n_post > 0:
+        seed = int(sim_seed if sim_seed is not None else 0)
+        margins = expand_joint_draws(margins, n_sims=int(n_sims), seed=seed)
     n_draws, n_races = margins.shape
     wins = (margins >= 0).astype(int)
 
@@ -124,6 +159,8 @@ def simulate_chamber(
         seat_histogram=hist,
         vp_tiebreak_party=vp_tiebreak_party,
         held_ind=held_ind,
+        n_joint_sims=int(n_draws),
+        n_posterior_margin_draws=int(n_post),
     )
 
     contested_ix = contested.set_index("race_id")

@@ -13,7 +13,10 @@ MCSE_SEATS_MAX = 0.15  # seats
 RHAT_MAX = 1.05
 ESS_BULK_MIN_FRAC = 0.10  # ess_bulk >= frac * n_samples for worst race
 MIN_POSTERIOR_SAMPLES = 1600  # draws * chains (publishable floor)
-MIN_SIM_DRAWS = 2500  # chamber / stacked predictive draws
+MIN_SIM_DRAWS = 2500  # chamber / stacked predictive draws (CI floor)
+# Routine internal forecasts should meet this; production target is higher still.
+ROUTINE_SIM_DRAWS = 10_000
+PRODUCTION_SIM_DRAWS = 50_000
 
 
 def mcse_bernoulli(p: float, n: int) -> float:
@@ -166,6 +169,17 @@ def evaluate_numerical_quality(
     chamber = {}
     if seat_draws is not None:
         chamber = chamber_mcse(seat_draws, p_dem_control=p_dem_control)
+        # Seat-count probability MCSEs for key thresholds
+        seats = np.asarray(seat_draws, dtype=float).ravel()
+        n_s = max(len(seats), 1)
+        seat_prob_mcse = {}
+        for k in (50, 51, 52, 48, 49):
+            p_k = float((seats == k).mean())
+            seat_prob_mcse[f"p_dem_seats_eq_{k}"] = {
+                "p": p_k,
+                "mcse": mcse_bernoulli(p_k, n_s),
+            }
+        chamber["seat_count_mcse"] = seat_prob_mcse
         add(
             "mcse_control",
             chamber["mcse_p_dem_control"] <= MCSE_CONTROL_MAX,
@@ -183,6 +197,11 @@ def evaluate_numerical_quality(
             chamber["n_draws"] >= MIN_SIM_DRAWS,
             int(chamber["n_draws"]),
             f"sim draws {int(chamber['n_draws'])} < {MIN_SIM_DRAWS}",
+        )
+        add(
+            "n_joint_sims_reported",
+            True,
+            int(chamber["n_draws"]),
         )
 
     race = {}
