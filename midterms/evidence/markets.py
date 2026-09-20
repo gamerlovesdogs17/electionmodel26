@@ -92,7 +92,7 @@ def map_race_event(
     target_name = str(ticket.get("dem_name") or "").strip()
     target_party = str(ticket.get("dem_party") or "").upper()
     rep_name = str(ticket.get("rep_name") or "").strip()
-    if not target_name or not rep_name or target_party not in {"D", "I"}:
+    if not target_name or not rep_name or not target_party:
         return None, "missing modeled candidate identity"
     contracts: list[dict[str, Any]] = []
     for m in markets:
@@ -106,22 +106,39 @@ def map_race_event(
         suffix = ticker[len(event_ticker) + 1 :].upper()
         target_by_name = _matches_name(ticker, title, target_name)
         rep_by_name = _matches_name(ticker, title, rep_name)
-        target_by_party = target_party == "D" and suffix == "D"
-        rep_by_party = suffix == "R"
         if target_by_name and rep_by_name:
             return None, f"ambiguous candidate contract {ticker}"
-        modeled_side = bool(target_by_name or target_by_party)
-        republican_side = bool(rep_by_name or rep_by_party)
-        # An Independent's party marker alone is not a candidate identity.
-        if target_party == "I" and not target_by_name:
-            modeled_side = False
         contracts.append({
             "ticker": ticker, "title": title, "p_yes": float(p),
-            "candidate_name": target_name if modeled_side else (rep_name if republican_side else None),
-            "candidate_party": target_party if modeled_side else ("R" if republican_side else None),
-            "modeled_side": modeled_side,
-            "republican_side": republican_side,
+            "candidate_name": None, "candidate_party": None,
+            "modeled_side": False, "republican_side": False,
+            "target_name_match": target_by_name,
+            "opponent_name_match": rep_by_name,
+            "party_marker": suffix if suffix in {"D", "R"} else None,
         })
+    if len({c["ticker"] for c in contracts}) != len(contracts):
+        return None, "duplicate contract identifier"
+    named_targets = [c for c in contracts if c["target_name_match"]]
+    named_reps = [c for c in contracts if c["opponent_name_match"]]
+    # A named match wins over a generic party marker. A marker may be used for
+    # an ordinary major-party contract only when no name match exists.
+    for c in contracts:
+        suffix = c["party_marker"]
+        c["modeled_side"] = bool(
+            c["target_name_match"] or (
+                not named_targets and target_party == "D" and suffix == "D"
+                and not c["opponent_name_match"]
+            )
+        )
+        c["republican_side"] = bool(
+            c["opponent_name_match"] or (
+                not named_reps and suffix == "R" and not c["target_name_match"]
+            )
+        )
+        if c["modeled_side"]:
+            c["candidate_name"], c["candidate_party"] = target_name, target_party
+        elif c["republican_side"]:
+            c["candidate_name"], c["candidate_party"] = rep_name, "R"
     targets = [c for c in contracts if c["modeled_side"]]
     reps = [c for c in contracts if c["republican_side"]]
     if len(targets) != 1 or len(reps) != 1 or targets[0] is reps[0]:
@@ -145,8 +162,54 @@ def map_race_event(
         "republican_candidate_ticker": reps[0]["ticker"],
         "candidate_contracts": contracts,
         "normalization_contracts": len(contracts),
-        "market_mapping": "candidate_identity",
+        "market_mapping": "named_candidate" if named_targets else "party_contract_with_identity_registry",
     }, None
+
+
+def audit_race_event(
+    *, race_id: str, event_ticker: str, markets: list[dict[str, Any]], ticket: dict[str, Any]
+) -> dict[str, Any]:
+    """Record both successful and disabled mappings without silently substituting contracts."""
+    mapped, reason = map_race_event(
+        race_id=race_id, event_ticker=event_ticker, markets=markets, ticket=ticket,
+    )
+    raw_contracts = []
+    for market in markets:
+        ticker = str(market.get("ticker") or "")
+        if ticker.startswith(event_ticker + "-"):
+            raw_contracts.append({
+                "contract_id": ticker,
+                "title": str(market.get("title") or ""),
+                "raw_price": _mid(
+                    _f(market.get("yes_bid_dollars")),
+                    _f(market.get("yes_ask_dollars")),
+                    _f(market.get("last_price_dollars")),
+                ),
+            })
+    prices = [row["raw_price"] for row in raw_contracts]
+    total = sum(prices) if prices and all(
+        price is not None and 0 <= price <= 1 for price in prices
+    ) else 0.0
+    normalized = (
+        {row["contract_id"]: row["raw_price"] / total for row in raw_contracts}
+        if total > 0 and len({row["contract_id"] for row in raw_contracts}) == len(raw_contracts)
+        else None
+    )
+    return {
+        "race_id": race_id,
+        "event_id": event_ticker,
+        "modeled_entity_id": str(ticket.get("modeled_candidate_id") or ticket.get("dem_name") or ""),
+        "opposing_entity_id": str(ticket.get("republican_candidate_id") or ticket.get("rep_name") or ""),
+        "matched_modeled_contract_id": mapped["modeled_candidate_ticker"] if mapped else None,
+        "matched_opposing_contract_id": mapped["republican_candidate_ticker"] if mapped else None,
+        "raw_contract_prices": raw_contracts,
+        "normalized_event_probabilities": normalized,
+        "mapping_method": mapped["market_mapping"] if mapped else None,
+        "ambiguous_or_unsafe": mapped is None,
+        "overlay_enabled": mapped is not None,
+        "parser_version": PARSER_VERSION,
+        "disable_reason": reason,
+    }
 
 
 def fetch_control_market(cycle: int = 2026) -> dict[str, Any]:
@@ -238,8 +301,15 @@ def fetch_race_markets(
             markets=data.get("markets") or [],
             ticket=ticket,
         )
+        mapping_audit = audit_race_event(
+            race_id=f"senate-20{cycle_suffix}-{st}",
+            event_ticker=event,
+            markets=data.get("markets") or [],
+            ticket=ticket,
+        )
         if mapped is None:
-            errors.append({"state": st, "error": str(reason), "event_ticker": event})
+            errors.append({"state": st, "error": str(reason), "event_ticker": event,
+                           "mapping_audit": mapping_audit})
             continue
         vol = max((_f(m.get("volume_fp")) or 0.0 for m in data.get("markets") or []), default=0.0)
         liq = min(1.0, vol / 250_000.0)  # race markets thinner than control
@@ -254,6 +324,7 @@ def fetch_race_markets(
                 "available_at": stamp,
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
                 "parser_version": PARSER_VERSION,
+                "mapping_audit": json.dumps(mapping_audit, sort_keys=True),
             }
         )
     return pd.DataFrame(rows), errors

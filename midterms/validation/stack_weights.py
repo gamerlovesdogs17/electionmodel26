@@ -1,8 +1,8 @@
-"""Genuine OOF predictive stacking weights (audit P2.2 / Finding 6).
+"""Distributional OOF stacking with independently reproduced frozen draws.
 
-Weights reproduce from the nested-component LOO CRPS matrix. No silent
-remapping of ``fast_hierarchical_t`` onto ``pymc``. G8-disabled and structural
-ablation variants are excluded from the production simplex.
+The fold CRPS matrix is diagnostic and supplies eligibility filters. It is not
+the production optimization objective. G8-disabled and structural ablations
+are excluded from the predictive-distribution simplex.
 """
 
 from __future__ import annotations
@@ -15,9 +15,8 @@ from typing import Any
 import numpy as np
 
 from midterms.config import ARTIFACTS_DIR
+from midterms.model.empirical_mixture import fit_predictive_mixture
 from midterms.model.ensemble import (
-    predictive_stack_weights,
-    softmax_neg_scores,
     weights_from_oof_scores,
 )
 
@@ -36,6 +35,11 @@ NESTED_LOO_PATH = ARTIFACTS_DIR / "nested_component_loo.json"
 
 def _matrix_fingerprint(crps_by_fold: dict[str, dict[str, float]]) -> str:
     blob = json.dumps(crps_by_fold, sort_keys=True, default=str).encode()
+    return hashlib.sha256(blob).hexdigest()
+
+
+def _draws_fingerprint(draws: dict[str, Any]) -> str:
+    blob = json.dumps(draws, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     return hashlib.sha256(blob).hexdigest()
 
 
@@ -74,36 +78,39 @@ def fit_stack_weights_from_oof(
     g8_recommendations: dict[str, Any] | None = None,
     temperature: float = 0.75,
     extra_exclude: set[str] | None = None,
-    oof_means: dict[str, dict[str, float]] | None = None,
+    oof_draws: dict[str, dict[str, list[float]]] | None = None,
     oof_truths: dict[str, float] | None = None,
+    seed: int = 21,
+    max_draws: int = 128,
 ) -> dict[str, Any]:
-    """
-    Fit nonnegative simplex weights from OOF predictions.
-
-    Prefers race-level predictive mixture (R-08) when ``oof_means`` / ``oof_truths``
-    are supplied; otherwise falls back to softmax of mean CRPS.
-    """
+    """Fit production weights from complete frozen predictive distributions only."""
     disabled = disabled_from_g8(g8_recommendations)
     ban = set(EXCLUDE_FROM_STACK) | disabled | set(extra_exclude or ())
     filtered = filter_crps_matrix(crps_by_fold, exclude=ban)
     if not filtered:
         raise ValueError("empty OOF CRPS matrix after G8 / structural filters")
 
-    stacking_mode = "softmax_mean_crps"
-    if oof_means and oof_truths:
-        means_kept = {k: v for k, v in oof_means.items() if k not in ban and v}
-        if len(means_kept) >= 2:
-            production = predictive_stack_weights(means_kept, oof_truths)
-            stacking_mode = "predictive_mixture_crps"
+    if not oof_draws or not oof_truths:
+        raise ValueError("production stacking requires frozen OOF draws and truths")
+    eligible = {model for fold in filtered.values() for model in fold}
+    required_cases = set(oof_truths)
+    if not required_cases:
+        raise ValueError("OOF truth set is empty")
+    excluded_missing: dict[str, list[str]] = {}
+    complete_draws: dict[str, dict[str, list[float]]] = {}
+    for model in sorted(eligible):
+        cases = oof_draws.get(model) or {}
+        missing = sorted(required_cases - set(cases))
+        if missing:
+            excluded_missing[model] = missing
         else:
-            production = weights_from_oof_scores(filtered, temperature=temperature)
-    else:
-        production = weights_from_oof_scores(filtered, temperature=temperature)
-
-    # Drop near-zeros for a clean simplex
-    production = {k: float(v) for k, v in production.items() if float(v) >= 1e-6}
-    total = sum(production.values())
-    production = {k: v / total for k, v in production.items()}
+            complete_draws[model] = cases
+    if not complete_draws:
+        raise ValueError("no candidate model has complete frozen OOF draws")
+    mixture = fit_predictive_mixture(
+        complete_draws, oof_truths, seed=seed, max_draws=max_draws,
+    )
+    production = mixture["weights"]
 
     loo: dict[str, dict[str, float]] = {}
     for fold in filtered:
@@ -120,54 +127,66 @@ def fit_stack_weights_from_oof(
     return {
         "audit_item": "P2.2",
         "temperature": temperature,
-        "stacking_mode": stacking_mode,
+        "stacking_mode": "empirical_predictive_mixture_crps_v1",
         "excluded_structural": sorted(EXCLUDE_FROM_STACK),
         "excluded_g8_disable": sorted(disabled),
         "excluded_extra": sorted(extra_exclude or ()),
+        "excluded_missing_predictions": excluded_missing,
         "filtered_crps_by_fold": filtered,
-        "mean_crps_eligible": mean_crps,
+        "diagnostic_mean_crps_by_candidate": mean_crps,
         "stack_weights": production,
         "stack_weights_production": production,
-        "stack_weights_loo": loo,
+        "diagnostic_score_softmax_loo": loo,
         "matrix_sha256": _matrix_fingerprint(filtered),
+        "prediction_sha256": mixture["prediction_sha256"],
+        "mixture_diagnostics": mixture,
+        "optimizer_seed": seed,
+        "optimizer_max_draws": max_draws,
         "no_weight_remapping": True,
-        "predictive_stack_fn": "midterms.model.ensemble.predictive_stack_weights",
-        "note": (
-            "Weights from race-level predictive mixture when oof_means present; "
-            "else OOF CRPS softmax. Component identity preserved."
-        ),
+        "predictive_stack_fn": "midterms.model.empirical_mixture.fit_predictive_mixture",
+        "note": "Production weights use frozen empirical draws; score softmax is diagnostic only.",
     }
 
 
 def reproduce_weights(payload: dict[str, Any]) -> dict[str, float]:
-    """Recompute production weights from the artifact's filtered matrix / OOF means."""
-    temperature = float(payload.get("temperature") or 0.75)
-    if payload.get("stacking_mode") == "predictive_mixture_crps":
-        # Fall back to stored filtered CRPS softmax for exact reproduction when
-        # oof_means are not re-embedded in the stack artifact.
-        nested_path = Path(str(payload.get("source_nested_loo") or NESTED_LOO_PATH))
-        if nested_path.exists():
-            nested = json.loads(nested_path.read_text(encoding="utf-8"))
-            means = nested.get("oof_means") or {}
-            truths = nested.get("oof_truths") or {}
-            ban = set(EXCLUDE_FROM_STACK) | set(payload.get("excluded_g8_disable") or [])
-            means = {k: v for k, v in means.items() if k not in ban}
-            if means and truths:
-                w = predictive_stack_weights(means, truths)
-                w = {k: float(v) for k, v in w.items() if float(v) >= 1e-6}
-                total = sum(w.values())
-                return {k: v / total for k, v in w.items()} if total > 0 else {}
-    filtered = payload.get("filtered_crps_by_fold") or {}
-    w = weights_from_oof_scores(filtered, temperature=temperature)
-    w = {k: float(v) for k, v in w.items() if float(v) >= 1e-6}
-    total = sum(w.values())
-    return {k: v / total for k, v in w.items()} if total > 0 else {}
+    """Refit from the exact frozen predictions referenced by the stack artifact."""
+    if payload.get("stacking_mode") != "empirical_predictive_mixture_crps_v1":
+        raise ValueError("stale stack artifact: empirical predictive draws required")
+    nested_path = Path(str(payload.get("source_nested_loo") or ""))
+    if not nested_path.is_file():
+        raise FileNotFoundError(f"frozen prediction artifact missing: {nested_path}")
+    nested = json.loads(nested_path.read_text(encoding="utf-8"))
+    if nested.get("frozen_draws_sha256") != _draws_fingerprint(nested.get("oof_draws") or {}):
+        raise ValueError("frozen draw archive fingerprint changed")
+    excluded = set(payload.get("excluded_g8_disable") or []) | set(EXCLUDE_FROM_STACK)
+    excluded |= set(payload.get("excluded_extra") or [])
+    excluded |= set(payload.get("excluded_missing_predictions") or {})
+    allowed = {name for fold in (payload.get("filtered_crps_by_fold") or {}).values() for name in fold}
+    draws = {
+        name: cases for name, cases in (nested.get("oof_draws") or {}).items()
+        if name in allowed and name not in excluded
+    }
+    fitted = fit_predictive_mixture(
+        draws, nested.get("oof_truths") or {},
+        seed=int(payload.get("optimizer_seed", 21)),
+        max_draws=int(payload.get("optimizer_max_draws", 128)),
+    )
+    if fitted["prediction_sha256"] != payload.get("prediction_sha256"):
+        raise ValueError("frozen prediction fingerprint changed")
+    return fitted["weights"]
 
 
 def verify_reproducible(payload: dict[str, Any], *, atol: float = 1e-9) -> dict[str, Any]:
-    """Exit check: stored weights match recomputation from the OOF matrix."""
+    """Exit check: stored weights match refitting the frozen distributions."""
     stored = payload.get("stack_weights_production") or payload.get("stack_weights") or {}
-    recomputed = reproduce_weights(payload)
+    try:
+        recomputed = reproduce_weights(payload)
+        prediction_ok = True
+        prediction_error = None
+    except (ValueError, FileNotFoundError) as exc:
+        recomputed = {}
+        prediction_ok = False
+        prediction_error = str(exc)
     keys = sorted(set(stored) | set(recomputed))
     max_abs = 0.0
     for k in keys:
@@ -176,9 +195,11 @@ def verify_reproducible(payload: dict[str, Any], *, atol: float = 1e-9) -> dict[
         payload.get("filtered_crps_by_fold") or {}
     )
     return {
-        "ok": max_abs <= atol and fp_ok,
+        "ok": max_abs <= atol and fp_ok and prediction_ok,
         "max_abs_weight_delta": max_abs,
         "fingerprint_ok": fp_ok,
+        "prediction_fingerprint_ok": prediction_ok,
+        "prediction_error": prediction_error,
         "recomputed": recomputed,
         "stored": {k: float(v) for k, v in stored.items()},
     }
@@ -197,13 +218,15 @@ def fit_stack_weights_from_nested_loo(
             f"missing {nested_path}; run nested-component-loo (P2.1) first"
         )
     nested = json.loads(nested_path.read_text())
+    if nested.get("frozen_draws_sha256") != _draws_fingerprint(nested.get("oof_draws") or {}):
+        raise ValueError("nested OOF frozen draw fingerprint missing or stale")
     crps = nested.get("crps_by_fold") or {}
     g8 = nested.get("g8_recommendations") or {}
     fitted = fit_stack_weights_from_oof(
         crps,
         g8_recommendations=g8,
         temperature=temperature,
-        oof_means=nested.get("oof_means"),
+        oof_draws=nested.get("oof_draws"),
         oof_truths=nested.get("oof_truths"),
     )
     fitted["source_nested_loo"] = str(nested_path)
@@ -232,6 +255,8 @@ def load_oof_stack_weights(
     if not path.exists():
         return {}, {"source": "missing", "path": str(path)}
     payload = json.loads(path.read_text())
+    if payload.get("stacking_mode") != "empirical_predictive_mixture_crps_v1":
+        raise ValueError("stale stack artifact: rebuild from frozen predictive draws")
     provenance: dict[str, Any] = {
         "source": "stack_weights_oof.json",
         "path": str(path),

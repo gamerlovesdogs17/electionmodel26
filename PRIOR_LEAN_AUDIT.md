@@ -2,6 +2,19 @@
 
 Status: provenance identified; source methodology has not been replaced.
 
+## Generic replacement framework (code only)
+
+`midterms/evidence/prior_sources.py` defines a versioned source record with
+observation date, `available_at`, attribution URL, source SHA-256, local value,
+national reference, and source kind. A pure function computes predeclared
+weighted local-minus-national components, rejects observations unavailable at
+the requested snapshot, and records each component and a snapshot hash. Fixture
+fallback is explicit and marked ineligible for production.
+
+No real source series has been ingested and the race builder does not yet use
+this framework. Existing prior values and current artifacts are unchanged;
+they must not be relabeled as measured or point-in-time derived.
+
 ## Current 2026 construction
 
 `generate_2026_races` in `midterms/evidence/fixtures.py` supplies the current

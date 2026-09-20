@@ -11,6 +11,7 @@ Failures are recorded explicitly; unscored components receive no weight credit.
 from __future__ import annotations
 
 import json
+import hashlib
 from dataclasses import asdict, dataclass
 from datetime import date, timedelta
 from pathlib import Path
@@ -27,7 +28,9 @@ from midterms.model.challengers import (
     fit_ridge_fundamentals,
 )
 from midterms.model.ensemble import weights_from_oof_scores
-from midterms.model.pymc_model import FitResult, fit_fast_approximation, fit_pymc, fit_pymc_dynamic
+from midterms.model.pymc_model import (
+    FitResult, draws_from_baseline_forecasts, fit_fast_approximation, fit_pymc, fit_pymc_dynamic,
+)
 from midterms.model.state_space import fit_state_space
 from midterms.model.terminal import active_scales
 
@@ -68,6 +71,15 @@ class FrozenPrediction:
     seed: int
     status: str  # ok | failed
     error: str | None = None
+    draws_by_race: dict[str, list[float]] | None = None
+    fit_settings: dict[str, Any] | None = None
+    prediction_sha256: str | None = None
+
+
+def _draws_fingerprint(draws: dict[str, Any]) -> str:
+    return hashlib.sha256(
+        json.dumps(draws, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
 
 
 def _forecasts_from_frozen(fp: FrozenPrediction) -> list[RaceForecast]:
@@ -98,6 +110,14 @@ def _freeze_from_fit(
     as_of: date,
     seed: int,
 ) -> FrozenPrediction:
+    matrix = np.asarray(fit.draws_margin, dtype=float)
+    if matrix.ndim != 2 or matrix.shape[1] != len(fit.race_ids) or not np.isfinite(matrix).all():
+        raise ValueError(f"invalid frozen predictive draws for {component}")
+    by_race = {
+        str(rid): [float(x) for x in matrix[:, i]]
+        for i, rid in enumerate(fit.race_ids)
+    }
+    diagnostics = fit.diagnostics or {}
     return FrozenPrediction(
         component=component,
         election_id=election_id,
@@ -111,6 +131,9 @@ def _freeze_from_fit(
         n_draws=int(fit.draws_margin.shape[0]) if getattr(fit, "draws_margin", None) is not None else 0,
         seed=seed,
         status="ok",
+        draws_by_race=by_race,
+        fit_settings={k: diagnostics.get(k) for k in ("draws", "tune", "chains", "seed", "convergence")},
+        prediction_sha256=_draws_fingerprint(by_race),
     )
 
 
@@ -123,7 +146,10 @@ def _freeze_from_forecasts(
     lead_days: int,
     as_of: date,
     seed: int,
+    n_draws: int = 600,
 ) -> FrozenPrediction:
+    matrix = draws_from_baseline_forecasts(forecasts, n_draws=n_draws, seed=seed)
+    by_race = {str(f.race_id): [float(x) for x in matrix[:, i]] for i, f in enumerate(forecasts)}
     return FrozenPrediction(
         component=component,
         election_id=election_id,
@@ -134,9 +160,12 @@ def _freeze_from_forecasts(
         means=[float(f.mean_margin) for f in forecasts],
         sds=[float(max(f.sd, 0.5)) for f in forecasts],
         method=component,
-        n_draws=0,
+        n_draws=n_draws,
         seed=seed,
         status="ok",
+        draws_by_race=by_race,
+        fit_settings={"draws": n_draws, "seed": seed, "method": "baseline_predictive_draws"},
+        prediction_sha256=_draws_fingerprint(by_race),
     )
 
 
@@ -337,7 +366,7 @@ def freeze_component_predictions(
     )
     # Unified dynamic hierarchical PyMC — always freeze as its own candidate
     # (even when the spine is static pymc), so stacking can assign mass honestly.
-    if hier_name != "pymc_dynamic":
+    if hier_name == "pymc":
         _safe(
             "pymc_dynamic",
             lambda: _freeze_from_fit(
@@ -357,6 +386,19 @@ def freeze_component_predictions(
                 seed=seed + 19,
             ),
         )
+    elif hier_name == "pymc_dynamic":
+        _safe(
+            "pymc",
+            lambda: _freeze_from_fit(
+                fit_pymc(
+                    snap, draws=max(n_draws // 4, 50), tune=max(n_draws // 4, 50),
+                    chains=2, seed=seed + 23, generic_ballot=gb,
+                ),
+                component="pymc", election_id=election_id,
+                holdout_year=holdout_year, lead_days=lead_days,
+                as_of=as_of, seed=seed + 23,
+            ),
+        )
 
     for bname, bfn in BASELINES.items():
         _safe(
@@ -369,6 +411,7 @@ def freeze_component_predictions(
                 lead_days=lead_days,
                 as_of=as_of,
                 seed=seed,
+                n_draws=n_draws,
             ),
         )
 
@@ -556,6 +599,7 @@ def run_nested_component_loo(
     crps_by_fold: dict[str, dict[str, float]] = {}
     oof_means_by_fold: dict[str, dict[str, dict[str, float]]] = {}
     oof_sds_by_fold: dict[str, dict[str, dict[str, float]]] = {}
+    oof_draws_by_fold: dict[str, dict[str, dict[str, list[float]]]] = {}
     truths_by_fold: dict[str, dict[str, float]] = {}
     failures: list[dict[str, Any]] = []
     frozen_archive: list[dict[str, Any]] = []
@@ -604,28 +648,38 @@ def run_nested_component_loo(
         lead_blocks: dict[str, Any] = {}
         oof_means_fold: dict[str, dict[str, float]] = {}
         oof_sds_fold: dict[str, dict[str, float]] = {}
+        oof_draws_fold: dict[str, dict[str, list[float]]] = {}
         for lead, frozen in lead_frozen.items():
             scored = score_frozen_predictions(frozen, results)
             lead_blocks[lead] = scored
             for name, sc in scored.items():
                 if sc.get("status") == "ok" and sc.get("n") and np.isfinite(sc.get(G8_METRIC, np.nan)):
                     fold_scores_acc.setdefault(name, []).append(float(sc[G8_METRIC]))
-            # Race-level OOF means/sds (prefer closer lead when multiple)
+            # Each predeclared lead is a separate OOF case. Never overwrite an
+            # earlier lead with a later freeze for the same subject.
             for name, fp in frozen.items():
                 if fp.status != "ok":
                     continue
                 block = oof_means_fold.setdefault(name, {})
                 sblock = oof_sds_fold.setdefault(name, {})
+                dblock = oof_draws_fold.setdefault(name, {})
                 for rid, mu, sd in zip(fp.race_ids, fp.means, fp.sds):
                     if rid in truth_by_id:
-                        block[str(rid)] = float(mu)
-                        sblock[str(rid)] = float(max(sd, 0.5))
+                        case_id = f"{lead}:{rid}"
+                        block[case_id] = float(mu)
+                        sblock[case_id] = float(max(sd, 0.5))
+                        if fp.draws_by_race and rid in fp.draws_by_race:
+                            dblock[case_id] = fp.draws_by_race[rid]
 
         fold_mean = {k: float(np.mean(v)) for k, v in fold_scores_acc.items() if v}
         crps_by_fold[str(year)] = fold_mean
         oof_means_by_fold[str(year)] = oof_means_fold
         oof_sds_by_fold[str(year)] = oof_sds_fold
-        truths_by_fold[str(year)] = truth_by_id
+        oof_draws_by_fold[str(year)] = oof_draws_fold
+        truths_by_fold[str(year)] = {
+            f"{lead}:{rid}": float(y)
+            for lead in lead_frozen for rid, y in truth_by_id.items()
+        }
         by_fold[str(year)] = {
             "election_id": election_id,
             "spine": spine,
@@ -633,6 +687,7 @@ def run_nested_component_loo(
             "mean_crps": fold_mean,
             "freeze_before_truth": True,
             "n_oof_races": len(truth_by_id),
+            "n_oof_cases": len(truth_by_id) * len(lead_frozen),
         }
         print(f"[nested-loo] year={year} components={len(fold_mean)}", flush=True)
 
@@ -642,12 +697,13 @@ def run_nested_component_loo(
     }
     spine_mean = mean_crps.get(spine)
     # Honest OOF weights — no spine remapping
-    oof_weights = weights_from_oof_scores(crps_by_fold)
+    diagnostic_score_softmax = weights_from_oof_scores(crps_by_fold)
     g8 = _g8_recommendations(crps_by_fold, spine=spine)
 
     # Flatten race-level OOF means / sds / truths across folds for predictive stacking (R-08)
     oof_means_flat: dict[str, dict[str, float]] = {}
     oof_sds_flat: dict[str, dict[str, float]] = {}
+    oof_draws_flat: dict[str, dict[str, list[float]]] = {}
     truths_flat: dict[str, float] = {}
     for year, by_comp in oof_means_by_fold.items():
         for comp, races in by_comp.items():
@@ -655,10 +711,15 @@ def run_nested_component_loo(
             for rid, mu in races.items():
                 dest[f"{year}:{rid}"] = float(mu)
         sds_comp = oof_sds_by_fold.get(year) or {}
+        draws_comp = oof_draws_by_fold.get(year) or {}
         for comp, races in sds_comp.items():
             dest_s = oof_sds_flat.setdefault(comp, {})
             for rid, sd in races.items():
                 dest_s[f"{year}:{rid}"] = float(sd)
+        for comp, races in draws_comp.items():
+            dest_d = oof_draws_flat.setdefault(comp, {})
+            for rid, values in races.items():
+                dest_d[f"{year}:{rid}"] = values
         for rid, y in (truths_by_fold.get(year) or {}).items():
             truths_flat[f"{year}:{rid}"] = float(y)
 
@@ -682,21 +743,25 @@ def run_nested_component_loo(
         "crps_by_fold": crps_by_fold,
         "oof_means": oof_means_flat,
         "oof_sds": oof_sds_flat,
+        "oof_draws": oof_draws_flat,
+        "frozen_draws_sha256": _draws_fingerprint(oof_draws_flat),
         "oof_truths": truths_flat,
         "mean_crps": spine_mean,
         "mean_crps_by_component": mean_crps,
-        "oof_mixture_weights_honest": oof_weights,
+        "diagnostic_score_softmax_weights": diagnostic_score_softmax,
         "g8_recommendations": g8,
         "reliability": reliability_block,
         "failures": failures,
         "by_fold": by_fold,
         "n_frozen_predictions": len(frozen_archive),
         "n_outer_years": len(crps_by_fold),
-        "n_oof_races": len(truths_flat),
+        "n_oof_races": len({case.split(":", 2)[2] for case in truths_flat}),
+        "n_oof_cases": len(truths_flat),
         "exit_condition": "Predictions are frozen before the held-out truth is read.",
         "note": (
             "Outer leave-one-cycle-out for every stackable component + structural "
-            "terminal ablations. Race-level oof_means feed predictive stacking (R-08)."
+            "terminal ablations. Each declared lead is retained as a separate frozen "
+            "case; empirical draws feed predictive-mixture stacking."
         ),
     }
     out_path = out_path or (ARTIFACTS_DIR / "nested_component_loo.json")
@@ -717,6 +782,10 @@ def run_nested_component_loo(
                         "status": e["status"],
                         "n_races": len(e["race_ids"]),
                         "method": e["method"],
+                        "n_draws": e["n_draws"],
+                        "seed": e["seed"],
+                        "fit_settings": e.get("fit_settings"),
+                        "prediction_sha256": e.get("prediction_sha256"),
                         "error": e.get("error"),
                     }
                     for e in frozen_archive

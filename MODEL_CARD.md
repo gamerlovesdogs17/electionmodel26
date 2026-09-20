@@ -4,12 +4,14 @@
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
 - **Estimands:** two-party margins; joint Dem seats; chamber control (≥51 Dem; ≤50 → R via VP)
 - **Auxiliary:** multiway shares + turnout foils (do not drive seat math)
-- **Independents:** Ind display (purple) when no Dem nominee; still Dem caucus seats
+- **Nonstandard candidates:** candidate, ballot party, modeled side, and caucus
+  affiliation are distinct fields in the new generic identity schema. Existing
+  real-data consumers still require an explicit integration audit.
 
 ## Architecture (five layers — do not conflate)
 1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
-2. **Stack candidates** — frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, plus optional baselines / structural ablations. None is “the model” until stacking assigns mass.
-3. **Learned OOS production mixture** — nonnegative weights from predictive CRPS mixture / OOF scores (`stack_weights_oof.json`). If a component’s mean OOF CRPS does not earn mass, its production weight is zero even if it is the reference spine.
+2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural ablations are diagnostics and are excluded from the production simplex.
+3. **Distributional mixture code** — nonnegative weights from empirical predictive-mixture CRPS over frozen draws. Mean-score softmax is diagnostic only. Current `stack_weights_oof.json` predates this code and is stale; a real-data refit is pending.
 4. **Overlays** — expert ratings + Kalshi race/control soft pulls (ablatable; never forced to market).
 5. **Final correlated chamber simulator** — joint margin draws → seats → control. Simulation count is separate from posterior sample count (`n_joint_sims` vs `n_posterior_samples`). Independent Bernoulli foil is diagnostic only.
 
@@ -46,11 +48,13 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 ## Core model
 - **Reference spine (default):** static PyMC (`method=pymc`)
 - **Dynamic challenger:** `method=pymc_dynamic` — weekly national+race RW; future process noise calibrated to Morris `4.5√(days/120)` budget; terminal = residual ED error only (avoids double-counting path + full static terminal)
-- **OOS replay:** `replay-cycle` / nested LOO freeze both spines as candidates
+- **OOS replay code:** nested LOO can freeze static and dynamic implementations
+  under separate identifiers and retain draws for each declared lead. No new
+  real-data validation was run for this code change.
 - **Non-production:** `fast` hierarchical-t approximation (CI / `--allow-fast-fallback` only)
 - Generic ballot: VoteHub **21-day trailing weighted average** (Winsorized headline D−R)
 - **Morris §7.2:** current opinion ≠ future movement ≠ Election-Day terminal polling error
-- Forward state-space challenger remains the historically strongest OOF member in recent stacks
+- Previously generated OOF artifacts do not validate the current code changes.
 - Fundamentals prior; ENOP / caps / study clustering; hierarchical mode/pop; named **error_budget**
 - Ratings / markets overlays with ablation
 - Fold-pure stack weights (`stack_provenance`); never manually assign positive weight
@@ -58,6 +62,9 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 
 ## Validation / ops
 - Complete-cycle replay; nested LOO; lead-time grid; component ablations
+- Generic grouped model registry, point-in-time prior provenance, decomposition
+  schema, and artifact lineage checks are implemented but not yet fully wired
+  into a regenerated real-data chain. Current artifacts are stale.
 - Dynamic OOS grid artifact: `dynamic_core_oos_grid.json` (freeze-before-truth)
 - Monitor alerts; Ed25519 signing; environment lock; `verify-rebuild`; correction registry
 - **Pre-P0 cycle_replay artifacts are non-comparable** — not validated backtests (`VALIDATION_ARCHIVE_NOTICE.md`)

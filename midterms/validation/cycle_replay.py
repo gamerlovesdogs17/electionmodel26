@@ -485,9 +485,8 @@ def replay_all_cycles(
     """
     Leave-one-cycle-out reports for each historical Senate cycle.
 
-    Production `stack_weights` average CRPS across all OOS cycle reports (each
-    cycle was held out when scored). Per-holdout `stack_weights_loo` excludes
-    that holdout's own CRPS so evaluation of stacking on year Y never peeks at Y.
+    Mean-score softmax weights are exploratory diagnostics only. Distributional
+    production stacking is fitted from frozen draws in ``stack_weights.py``.
     """
     from midterms.model.ensemble import align_weights_to_spine, weights_from_oof_scores
 
@@ -513,7 +512,7 @@ def replay_all_cycles(
 
     # Second pass: LOO weights need the full fold table
     for y, rep in reports.items():
-        rep["stack_weights_loo"] = align_weights_to_spine(
+        rep["diagnostic_score_softmax_weights_loo"] = align_weights_to_spine(
             weights_from_oof_scores(crps_by_fold, exclude_fold=str(y)),
             spine="pymc",
         )
@@ -522,15 +521,14 @@ def replay_all_cycles(
         k: float(np.mean([fold[k] for fold in crps_by_fold.values() if k in fold]))
         for k in {n for fold in crps_by_fold.values() for n in fold}
     }
-    production_weights = align_weights_to_spine(
+    diagnostic_weights = align_weights_to_spine(
         weights_from_oof_scores(crps_by_fold),
         spine="pymc",
     )
     summary = {
         "cycles": list(reports.keys()),
         "mean_crps_by_model": mean_crps,
-        "stack_weights": production_weights,
-        "stack_weights_production": production_weights,
+        "diagnostic_score_softmax_weights": diagnostic_weights,
         "hierarchical_method": hierarchical_method,
         # comparable once official ballots + FTE identity polls pass coverage (P0.1–P0.3)
         "comparable": True,
@@ -540,22 +538,23 @@ def replay_all_cycles(
             "identity (P0.3). Still not a peer-published claim until nested OOS scores are regenerated."
         ),
         "stack_provenance": {
-            "method": "leave_one_cycle_out_mean_crps",
+            "method": "diagnostic_mean_score_softmax",
             "folds": list(crps_by_fold.keys()),
             "temperature": 0.75,
             "hierarchical_method": hierarchical_method,
             "note": (
-                "Production weights average OOS CRPS across historical cycles. "
-                "Each cycle's scores were computed with that cycle held out. "
-                "Hierarchical spine scored as pymc when hierarchical_method=pymc."
+                "These weights are diagnostic, not a predictive-mixture fit. "
+                "Each cycle's scores were computed with that cycle held out."
             ),
         },
-        "note": "Stack weights from OOS mean CRPS across cycles; hierarchical mass labeled pymc.",
+        "note": "Exploratory softmax of mean scores; not production stack weights.",
         "by_cycle": {
             y: {
                 "aggregate": reports[y].get("aggregate"),
                 "stack_weights": reports[y].get("stack_weights"),
-                "stack_weights_loo": reports[y].get("stack_weights_loo"),
+                "diagnostic_score_softmax_weights_loo": reports[y].get(
+                    "diagnostic_score_softmax_weights_loo"
+                ),
                 "chamber": reports[y].get("chamber"),
                 "overlay_ablation": reports[y].get("overlay_ablation"),
                 "poll_gate": reports[y].get("poll_gate"),

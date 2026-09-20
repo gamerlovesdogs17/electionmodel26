@@ -53,32 +53,30 @@ def _hash_obj(obj: Any) -> str:
     return hashlib.sha256(blob).hexdigest()
 
 
-def _load_stack_weights(*, spine: str = "pymc") -> tuple[dict[str, float], dict[str, Any]]:
+def _load_stack_weights(
+    *, spine: str = "pymc", require_predictive_stack: bool = False
+) -> tuple[dict[str, float], dict[str, Any]]:
     """Load OOF CRPS mixture weights (audit P2.2 — no silent remapping)."""
     from midterms.validation.stack_weights import load_oof_stack_weights
 
-    fallback_err: str | None = None
-    try:
+    # An existing but stale stack must never degrade to legacy/default weights.
+    if (ARTIFACTS_DIR / "stack_weights_oof.json").exists():
         weights, provenance = load_oof_stack_weights(require_reproducible=True)
-        if weights:
-            provenance = dict(provenance)
-            provenance["spine"] = spine
-            if spine.startswith("pymc") and "pymc" not in weights and "fast_hierarchical_t" in weights:
-                provenance["hierarchical_unscored"] = {
-                    "executed_spine": spine,
-                    "oof_scored_as": "fast_hierarchical_t",
-                    "note": (
-                        "PyMC was not OOF-scored; its draws are not given fast's weight. "
-                        "Re-run nested-component-loo --hierarchical-method pymc to earn pymc mass."
-                    ),
-                }
-            provenance["weights"] = weights
-            return weights, provenance
-        fallback_err = "empty_oof_weights"
-    except Exception as exc:  # noqa: BLE001
-        fallback_err = str(exc)
+        if not weights:
+            raise ValueError("OOF stack artifact contains no production weights")
+        provenance = dict(provenance)
+        provenance["spine"] = spine
+        provenance["weights"] = weights
+        return weights, provenance
 
-    path = ARTIFACTS_DIR / "cycle_replay_all.json"
+    if require_predictive_stack:
+        raise FileNotFoundError(
+            "publication-quality execution requires a reproducible empirical "
+            "predictive-mixture OOF stack artifact"
+        )
+
+    # A small deterministic default keeps development fixtures usable. It is
+    # explicitly non-publication and never inherits diagnostic score softmax.
     defaults = {
         "pymc": 0.40,
         "state_space": 0.20,
@@ -86,31 +84,13 @@ def _load_stack_weights(*, spine: str = "pymc") -> tuple[dict[str, float], dict[
         "last_election_swing": 0.15,
     }
     provenance = {
-        "source": "defaults",
-        "path": str(path),
+        "source": "development_defaults_non_publication",
+        "path": None,
         "spine": spine,
         "no_weight_remapping": True,
-        "oof_load_error": fallback_err,
+        "predictive_mixture_validated": False,
     }
     weights = dict(defaults)
-    if path.exists():
-        try:
-            payload = json.loads(path.read_text())
-            raw = payload.get("stack_weights_production") or payload.get("stack_weights") or {}
-            if raw:
-                weights = {k: float(v) for k, v in raw.items() if float(v) > 0}
-                provenance = {
-                    "source": "cycle_replay_all.json",
-                    "path": str(path),
-                    "spine": spine,
-                    "no_weight_remapping": True,
-                    "artifact_provenance": payload.get("stack_provenance"),
-                    "note": (
-                        "Legacy cycle_replay weights; prefer stack_weights_oof.json from P2.2."
-                    ),
-                }
-        except (json.JSONDecodeError, TypeError, ValueError):
-            provenance["error"] = "failed_to_parse_cycle_replay_all"
     provenance["weights"] = weights
     return weights, provenance
 
@@ -406,7 +386,10 @@ def run_forecast(
         method in {"fast", "state_space", "pymc", "pymc_dynamic"}
         or str(getattr(fit, "method", "")).startswith("degraded")
     ):
-        weights, stack_provenance = _load_stack_weights(spine=spine_method.split("+")[0])
+        weights, stack_provenance = _load_stack_weights(
+            spine=spine_method.split("+")[0],
+            require_predictive_stack=require_publishable,
+        )
         component_draws: dict[str, np.ndarray] = {fit.method.split("+")[0]: fit.draws_margin}
         core_name = "fast_hierarchical_t"
         if fit.method.startswith("pymc_dynamic"):

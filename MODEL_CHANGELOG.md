@@ -4,6 +4,24 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-20 — generic statistical and provenance infrastructure (validation pending)
+
+- Added empirical predictive-mixture CRPS fitting from frozen draws with
+  deterministic subsampling, fingerprints, and reproduction checks. Mean-score
+  softmax outputs are labeled diagnostics; stale stack artifacts fail closed.
+- Added a generic model registry for distinct identifiers, per-model fit
+  settings and failures, frozen draws, and grouped freeze-before-truth hooks.
+- Added a versioned point-in-time relative-prior source schema and weighted
+  calculation. It is not yet populated with a real source series or connected
+  to production race inputs.
+- Added explicit candidate/party/modeled-side/caucus identity and a generic
+  decomposition schema. Candidate-aware contract mapping now emits an audit
+  record for successful and disabled events.
+- Added artifact-lineage checks and synthetic tests. Current real-data artifacts
+  predate these changes; no forecast, market refresh, or historical replay was
+  executed for this entry. Public live remains disabled and the surface remains
+  `research_only`.
+
 ## 2026-09-20 — senate-hierarchical-v0.9.21 (coherence + dynamic core + joint sims)
 
 Phase 1 — run/artifact coherence (live stays off):

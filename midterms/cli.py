@@ -754,7 +754,7 @@ def main(argv: list[str] | None = None) -> None:
     p_nloo.add_argument(
         "--hierarchical-method",
         default="pymc",
-        choices=("fast", "pymc"),
+        choices=("fast", "pymc", "pymc_dynamic"),
         help="Hierarchical spine for LOO (pymc default — align with production)",
     )
     p_nloo.add_argument("--years", default="2018,2020,2022,2024")
