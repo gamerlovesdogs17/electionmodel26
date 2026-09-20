@@ -1,16 +1,20 @@
 {
-  "generated_at": "2026-09-20T04:17:06.214350+00:00",
+  "generated_at": "2026-09-20T04:45:59.543915+00:00",
   "election_id": "senate-2026",
   "cycle": 2026,
-  "n_shares": 35,
+  "n_shares": 51,
   "source_mix": {
-    "curated_fec_browse_estimate": 35
+    "fec_weball": 51
   },
   "fetch_meta": {
-    "error": "HTTP Error 429: Too Many Requests",
-    "n": 0
+    "n": 634,
+    "source": "fec_weball",
+    "url": "https://www.fec.gov/files/bulk-downloads/2026/weball26.zip",
+    "bytes": 193502,
+    "openfec_error": "HTTP Error 429: Too Many Requests",
+    "openfec_partial_n": 0
   },
   "parser_version": "fec-v1",
-  "source_url": "https://www.fec.gov/data/browse-data/?tab=candidates",
-  "tier": "curated"
+  "source_url": "https://www.fec.gov/files/bulk-downloads/2026/weball26.zip",
+  "tier": "first_party"
 }

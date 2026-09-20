@@ -241,6 +241,12 @@ def run_forecast(
             write_approval_store()
         except Exception as exc:  # noqa: BLE001
             layer_warnings.append({"layer": "approval", "error": str(exc)})
+        try:
+            from midterms.evidence.demography import write_demography_store
+
+            write_demography_store()
+        except Exception as exc:  # noqa: BLE001
+            layer_warnings.append({"layer": "demographics", "error": str(exc)})
         # Never backdate living Wikipedia/curated ratings onto historical as-of stamps.
         if str(election_id).endswith("-2026"):
             ratings_meta = ensure_expert_ratings_store(
@@ -729,8 +735,8 @@ def run_forecast(
                 else "PUBLIC_LIVE_ENABLED=False (fresh audit Stage-0 containment)."
             ),
             (
-                "Finance uses curated FEC-browse estimates when OpenFEC rate-limits; "
-                "not full candidate-level digitization for every race."
+                "Finance prefers OpenFEC totals; on API rate-limits falls back to "
+                "FEC weball bulk downloads (same filings, no API key)."
             ),
             (
                 "Historical ledger uses scaled two-party counts for non-digitized FEC races; "

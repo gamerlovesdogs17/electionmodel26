@@ -1,10 +1,15 @@
 {
-  "generated_at": "2026-09-19T21:16:54.801182+00:00",
-  "n": 21,
-  "parser_version": "approval-v1",
-  "source_url": "https://projects.fivethirtyeight.com/trump-approval-ratings/",
-  "tier": "curated",
-  "note": "Curated public-aggregate net approval vintages for as-of fundamentals.",
+  "generated_at": "2026-09-20T04:45:45.925774+00:00",
+  "n": 54,
+  "n_votehub": 36,
+  "n_historical_curated": 18,
+  "parser_version": "approval-v2",
+  "source_url": "https://api.votehub.com/polls?subject=donald-trump&poll_type=approval",
+  "tier": "aggregator",
+  "license": "CC BY 4.0",
+  "attribution": "Polling data from VoteHub (https://votehub.com)",
+  "fetch_error": null,
+  "note": "Live net approval from VoteHub Trump approval polls (recency-weighted); pre-2025 cycles retain curated vintages for as-of backtests.",
   "paths": {
     "raw": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\pres_approval_vintages.json",
     "normalized": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\pres_approval.parquet"

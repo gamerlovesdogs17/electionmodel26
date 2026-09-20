@@ -437,6 +437,10 @@ def write_official_ballot_store(years: tuple[int, ...] | None = None) -> dict[st
     man["years"] = sorted({int(str(e).split("-")[-1]) for e in races["election_id"].unique()})
     man["n_rows"] = int(len(races))
     man["includes_2026"] = True
+    man["tier_2026"] = "aggregator"
+    man["ballot_source_2026"] = (
+        "wikipedia:2026_United_States_Senate_elections+constitutional_class_II"
+    )
     man["builder"] = "build_certified_ledger_v3.rebuild_canonical_truth"
     (MANIFESTS_DIR / "official_senate_ballots.json").write_text(json.dumps(man, indent=2))
     return man

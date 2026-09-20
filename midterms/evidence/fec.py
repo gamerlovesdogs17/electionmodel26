@@ -1,12 +1,16 @@
-"""OpenFEC campaign-finance ingest → Dem fundraising share by Senate race."""
+"""OpenFEC / FEC bulk campaign-finance ingest → Dem fundraising share by Senate race."""
 
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import os
+import time
+import zipfile
 from datetime import date, datetime, timezone
 from typing import Any
+from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -17,23 +21,169 @@ from midterms.evidence.tickets import TICKETS_2026
 
 PARSER_VERSION = "fec-v1"
 OPENFEC = "https://api.open.fec.gov/v1"
+# FEC all-candidates summary (no API key; same underlying filings as OpenFEC).
+WEBALL_URL = "https://www.fec.gov/files/bulk-downloads/{cycle}/weball{yy}.zip"
+# Pipe fields: see https://www.fec.gov/campaign-finance-data/all-candidates-file-description/
+WEBALL_COLS = [
+    "candidate_id",
+    "name",
+    "incumbent_challenger_status",
+    "party_code",
+    "party",
+    "receipts",
+    "transfers_from_auth",
+    "disbursements",
+    "transfers_to_auth",
+    "cash_on_hand_bop",
+    "cash_on_hand_end_period",
+    "candidate_contrib",
+    "candidate_loans",
+    "other_loans",
+    "candidate_loan_repay",
+    "other_loan_repay",
+    "debts_owed_by",
+    "indiv_contrib",
+    "state",
+    "district",
+    "special_election_status",
+    "primary_election_status",
+    "runoff_election_status",
+    "general_election_status",
+    "general_election_pct",
+    "other_pol_cmte_contrib",
+    "party_contrib",
+    "coverage_end_date",
+    "indiv_refunds",
+    "cmte_refunds",
+]
 
 
 def _fec_api_key() -> str:
     return os.environ.get("FEC_API_KEY") or "DEMO_KEY"
 
 
-def _get(path: str, params: dict[str, Any]) -> dict[str, Any]:
+def _get(path: str, params: dict[str, Any], *, retries: int = 4) -> dict[str, Any]:
     q = dict(params)
     q["api_key"] = _fec_api_key()
     url = f"{OPENFEC}{path}?{urlencode(q, doseq=True)}"
     req = Request(url, headers={"User-Agent": "midterms-senate-model/0.2 (research)"})
-    with urlopen(req, timeout=45) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    last_exc: Exception | None = None
+    for attempt in range(retries):
+        try:
+            with urlopen(req, timeout=45) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except HTTPError as exc:
+            last_exc = exc
+            if int(getattr(exc, "code", 0) or 0) == 429 and attempt + 1 < retries:
+                time.sleep(1.5 * (2**attempt))
+                continue
+            raise
+        except Exception as exc:  # noqa: BLE001
+            last_exc = exc
+            if attempt + 1 < retries:
+                time.sleep(0.75 * (attempt + 1))
+                continue
+            raise
+    raise last_exc or RuntimeError("OpenFEC request failed")
+
+
+def _normalize_party(raw: str) -> str:
+    p = (raw or "").strip().upper()
+    if p.startswith("DEM") or p in {"D", "DEM"}:
+        return "DEM"
+    if p.startswith("REP") or p in {"R", "REP"}:
+        return "REP"
+    return p[:3]
+
+
+def _coverage_iso(raw: str) -> str | None:
+    s = (raw or "").strip()
+    if not s:
+        return None
+    for fmt in ("%m/%d/%Y", "%Y-%m-%d", "%Y%m%d"):
+        try:
+            return datetime.strptime(s, fmt).date().isoformat()
+        except ValueError:
+            continue
+    return s[:10] if len(s) >= 10 else None
+
+
+def fetch_senate_bulk_totals(cycle: int = 2026) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """
+    FEC weball bulk download — first-party alternative when OpenFEC rate-limits.
+
+    Same official filings as the API; no key required.
+    """
+    yy = f"{int(cycle) % 100:02d}"
+    url = WEBALL_URL.format(cycle=int(cycle), yy=yy)
+    req = Request(url, headers={"User-Agent": "midterms-senate-model/0.2 (research)"})
+    try:
+        with urlopen(req, timeout=90) as resp:
+            blob = resp.read()
+    except Exception as exc:  # noqa: BLE001
+        return pd.DataFrame(), {"error": f"bulk:{exc}", "n": 0, "source": "fec_weball"}
+    try:
+        with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+            name = next(n for n in zf.namelist() if n.lower().endswith(".txt"))
+            text = zf.read(name).decode("latin-1")
+    except Exception as exc:  # noqa: BLE001
+        return pd.DataFrame(), {"error": f"bulk_unzip:{exc}", "n": 0, "source": "fec_weball"}
+
+    rows: list[dict[str, Any]] = []
+    retrieved = datetime.now(timezone.utc).isoformat()
+    for line in text.splitlines():
+        if not line or not line.startswith("S"):
+            continue
+        parts = line.split("|")
+        if len(parts) < 20:
+            continue
+        # Pad short rows so zipfile schema drift doesn't crash.
+        while len(parts) < len(WEBALL_COLS):
+            parts.append("")
+        rec = dict(zip(WEBALL_COLS, parts[: len(WEBALL_COLS)]))
+        state = (rec.get("state") or "").strip().upper()
+        if len(state) != 2:
+            cid = rec.get("candidate_id") or ""
+            state = cid[2:4].upper() if len(cid) >= 4 else ""
+        cov = _coverage_iso(str(rec.get("coverage_end_date") or ""))
+        try:
+            receipts = float(rec.get("receipts") or 0.0)
+        except ValueError:
+            receipts = 0.0
+        try:
+            disbursements = float(rec.get("disbursements") or 0.0)
+        except ValueError:
+            disbursements = 0.0
+        try:
+            cash = float(rec.get("cash_on_hand_end_period") or 0.0)
+        except ValueError:
+            cash = 0.0
+        rows.append(
+            {
+                "cycle": cycle,
+                "candidate_id": rec.get("candidate_id"),
+                "name": rec.get("name"),
+                "party": _normalize_party(str(rec.get("party") or "")),
+                "state": state,
+                "receipts": receipts,
+                "disbursements": disbursements,
+                "cash_on_hand_end_period": cash,
+                "coverage_start_date": None,
+                "coverage_end_date": cov,
+                "last_file_date": cov,
+                "amendment_indicator": None,
+                "filing_id": rec.get("candidate_id"),
+                "available_at": cov or datetime.now(timezone.utc).date().isoformat(),
+                "retrieved_at": retrieved,
+                "parser_version": PARSER_VERSION,
+                "source": "fec_weball",
+            }
+        )
+    return pd.DataFrame(rows), {"n": len(rows), "source": "fec_weball", "url": url, "bytes": len(blob)}
 
 
 def fetch_senate_candidate_totals(cycle: int = 2026) -> tuple[pd.DataFrame, dict[str, Any]]:
-    """Best-effort OpenFEC totals for Senate candidates in `cycle`."""
+    """OpenFEC totals first; on failure/empty, FEC weball bulk (no API key)."""
     rows: list[dict[str, Any]] = []
     page = 1
     try:
@@ -74,15 +224,28 @@ def fetch_senate_candidate_totals(cycle: int = 2026) -> tuple[pd.DataFrame, dict
                         or datetime.now(timezone.utc).date().isoformat(),
                         "retrieved_at": datetime.now(timezone.utc).isoformat(),
                         "parser_version": PARSER_VERSION,
+                        "source": "openfec",
                     }
                 )
             pagination = payload.get("pagination") or {}
             if page >= int(pagination.get("pages") or 1):
                 break
             page += 1
+            time.sleep(0.35)  # stay under DEMO_KEY / shared-key rate limits
     except Exception as exc:  # noqa: BLE001
-        return pd.DataFrame(rows), {"error": str(exc), "n": len(rows)}
-    return pd.DataFrame(rows), {"pages": page, "n": len(rows)}
+        # Partial DEMO_KEY pages are worse than the full weball dump.
+        bulk, bmeta = fetch_senate_bulk_totals(cycle)
+        if len(bulk):
+            bmeta = {**bmeta, "openfec_error": str(exc), "openfec_partial_n": len(rows)}
+            return bulk, bmeta
+        if rows:
+            return pd.DataFrame(rows), {"error": str(exc), "n": len(rows), "source": "openfec"}
+        return pd.DataFrame(), {**bmeta, "openfec_error": str(exc)}
+    if rows:
+        return pd.DataFrame(rows), {"pages": page, "n": len(rows), "source": "openfec"}
+    bulk, bmeta = fetch_senate_bulk_totals(cycle)
+    bmeta = {**bmeta, "openfec_error": "empty_results"}
+    return bulk, bmeta
 
 
 def fixture_fundraising_shares(election_id: str = "senate-2026") -> pd.DataFrame:
@@ -109,10 +272,9 @@ def fixture_fundraising_shares(election_id: str = "senate-2026") -> pd.DataFrame
 
 def curated_fundraising_shares(election_id: str = "senate-2026") -> pd.DataFrame:
     """
-    Publication-eligible curated shares when OpenFEC is rate-limited.
+    Non-publication lean-anchored estimates when both OpenFEC and FEC weball fail.
 
-    Shares are lean-anchored research estimates with an explicit curated tier and
-    FEC browse URL — not synthetic fixture_hash placeholders.
+    Explicit curated tier — blocked for PUBLICATION_ELIGIBLE runs.
     """
     from midterms.evidence.official_ballot import BASE_LEANS
 
@@ -190,6 +352,17 @@ def shares_from_totals(
         for cid in g.get("candidate_id", pd.Series(dtype=str)).dropna().astype(str).tolist():
             chains.extend(chain_by_cand.get(cid, []))
         cov_dates = sorted(set(chains))
+        src_vals = (
+            set(g["source"].dropna().astype(str))
+            if "source" in g.columns
+            else set()
+        )
+        if "openfec" in src_vals:
+            src = "openfec"
+        elif "fec_weball" in src_vals:
+            src = "fec_weball"
+        else:
+            src = "openfec"
         rows.append(
             {
                 "election_id": election_id,
@@ -206,12 +379,22 @@ def shares_from_totals(
                 "matched_window_id": f"cycle-{cycle}-coverage-end-asof",
                 "amendment_chain": ">".join(cov_dates) if cov_dates else "latest_totals_row",
                 "n_filings_in_chain": int(len(cov_dates)),
-                "source": "openfec",
+                "source": src,
                 "available_at": str(g["available_at"].max()),
                 "parser_version": PARSER_VERSION,
             }
         )
     return pd.DataFrame(rows)
+
+
+def _finance_tier_and_url(shares: pd.DataFrame, meta: dict[str, Any]) -> tuple[str, str]:
+    sources = set(shares["source"].astype(str)) if len(shares) else set()
+    if "openfec" in sources:
+        return "aggregator", "https://api.open.fec.gov/v1/candidates/totals/"
+    if "fec_weball" in sources:
+        url = str(meta.get("url") or "https://www.fec.gov/files/bulk-downloads/")
+        return "first_party", url
+    return "curated", "https://www.fec.gov/data/browse-data/?tab=candidates"
 
 
 def write_finance_store(election_id: str = "senate-2026", cycle: int = 2026) -> dict[str, Any]:
@@ -227,6 +410,7 @@ def write_finance_store(election_id: str = "senate-2026", cycle: int = 2026) -> 
     else:
         pd.DataFrame().to_csv(raw_path, index=False)
     shares.to_parquet(share_path, index=False)
+    tier, source_url = _finance_tier_and_url(shares, meta if isinstance(meta, dict) else {})
     man = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "election_id": election_id,
@@ -235,12 +419,8 @@ def write_finance_store(election_id: str = "senate-2026", cycle: int = 2026) -> 
         "source_mix": shares["source"].value_counts().to_dict() if len(shares) else {},
         "fetch_meta": meta,
         "parser_version": PARSER_VERSION,
-        "source_url": "https://api.open.fec.gov/v1/candidates/totals/"
-        if (shares["source"] == "openfec").any()
-        else "https://www.fec.gov/data/browse-data/?tab=candidates",
-        "tier": "aggregator"
-        if len(shares) and (shares["source"] == "openfec").any()
-        else "curated",
+        "source_url": source_url,
+        "tier": tier,
     }
     man_path = MANIFESTS_DIR / "fundraising_shares.json"
     man_path.write_text(json.dumps(man, indent=2))

@@ -489,6 +489,9 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
     assert int((~df["not_up"]).sum()) == 35
     assert int(df["not_up"].sum()) == 65
     assert len(df) == 100
+    # Provenance for eligibility: Class II / specials from public Senate schedule +
+    # Wikipedia 2026 elections page (CC BY-SA); held roster is research-augmented.
+    df["ballot_source"] = "wikipedia:2026_United_States_Senate_elections+constitutional_class_II"
     return df
 
 

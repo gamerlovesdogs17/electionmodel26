@@ -71,9 +71,24 @@ def classify_result_row(row: dict[str, Any] | pd.Series) -> str:
 
 
 def classify_race_election(election_id: str, races: pd.DataFrame | None = None) -> str:
-    """Historical official ballots are official; 2026 fixture generator is curated."""
+    """Historical official ballots are official; 2026 uses Wikipedia/Class-II schedule."""
     eid = str(election_id)
     if eid == "senate-2026":
+        # Prospective cycle: contested Class II (+ documented specials) from the
+        # public Wikipedia Senate elections page / constitutional class schedule
+        # is aggregator-grade when stamped; bare fixture generator stays curated.
+        if races is not None and len(races) and "ballot_source" in races.columns:
+            src = races["ballot_source"].dropna().astype(str)
+            if len(src) and src.str.startswith(("wikipedia", "constitutional", "aggregator")).any():
+                return "aggregator"
+        man_path = MANIFESTS_DIR / "official_senate_ballots.json"
+        if man_path.exists():
+            try:
+                man = json.loads(man_path.read_text(encoding="utf-8"))
+                if str(man.get("tier_2026") or "") in {"aggregator", "official"}:
+                    return str(man["tier_2026"])
+            except Exception:  # noqa: BLE001
+                pass
         return "curated"
     path = NORMALIZED_DIR / "races_official.parquet"
     if path.exists():
@@ -240,16 +255,26 @@ def _audit_configured_domains() -> dict[str, Any]:
                 "blocked_reason": "approval manifest lacks source URL/tier",
             }
 
-    # Demographics: require parquet + any manifest note
+    # Demographics: sealed MEDSL/Census store preferred over embedded snapshot
+    demo_man = _load("demography.json")
     demo_path = NORMALIZED_DIR / "demography.parquet"
-    if not demo_path.exists():
-        # similarity may use inline research snapshot — curated, not publication-eligible
+    if demo_man and str(demo_man.get("tier") or "") in PUBLICATION_ELIGIBLE:
+        domains["demographics"] = {
+            "tier": str(demo_man.get("tier")),
+            "eligible": True,
+            "n": int(demo_man.get("n") or 0),
+            "source_url": demo_man.get("source_url"),
+            "note": demo_man.get("note"),
+        }
+    elif demo_path.exists() and demo_man:
+        domains["demographics"] = _classify_manifest_domain(name="demographics", manifest=demo_man)
+    elif not demo_path.exists():
         domains["demographics"] = {
             "tier": "curated",
             "eligible": False,
             "n": 0,
             "blocked_reason": "demography features curated/embedded; not publication-eligible",
-            "note": "demography features embedded in model; research-only without sealed first-party store",
+            "note": "demography features embedded in model; research-only without sealed store",
         }
     else:
         domains["demographics"] = {
@@ -259,13 +284,20 @@ def _audit_configured_domains() -> dict[str, Any]:
             "blocked_reason": "demography.parquet present but tier=curated",
         }
 
-    ratings = _load("peer_snapshots.json") or _load("wiki_ratings.json")
-    # expert ratings often under different names
+    ratings = _load("expert_ratings.json") or _load("wiki_ratings.json") or _load("peer_snapshots.json")
     for cand in ("expert_ratings.json", "wiki_ratings.json", "ratings.json"):
         if (MANIFESTS_DIR / cand).exists():
             ratings = _load(cand)
             break
-    if ratings is None and (NORMALIZED_DIR / "expert_ratings.parquet").exists():
+    if ratings and str(ratings.get("tier") or "") in PUBLICATION_ELIGIBLE:
+        domains["ratings"] = {
+            "tier": str(ratings.get("tier")),
+            "eligible": True,
+            "n": int(ratings.get("n") or 0),
+            "source_url": ratings.get("source_url") or ratings.get("page_url"),
+            "note": ratings.get("note") or ratings.get("source"),
+        }
+    elif ratings is None and (NORMALIZED_DIR / "expert_ratings.parquet").exists():
         domains["ratings"] = {
             "tier": "curated",
             "eligible": False,

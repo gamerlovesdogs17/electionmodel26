@@ -442,10 +442,14 @@ def fetch_wikipedia_expert_ratings(
         "available_at": available_at,
         "n": len(stamped),
         "source": SOURCE_LABEL,
+        "tier": "aggregator",
+        "license": "CC BY-SA",
+        "source_url": fetch_meta.get("url") or WIKI_URL,
         "page_url": fetch_meta.get("url"),
         "revid": fetch_meta.get("revid"),
         "header_asofs": table_meta.get("header_asofs"),
         "raw": str(raw_path),
+        "note": "Multi-rater Cook/IE/Sabato consensus scraped from Wikipedia Predictions table.",
     }
     (MANIFESTS_DIR / "wiki_ratings.json").write_text(json.dumps(man, indent=2))
     return {

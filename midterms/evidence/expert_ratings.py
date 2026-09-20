@@ -186,7 +186,17 @@ def write_expert_ratings_store(
         "n": int(len(df)),
         "source": source,
         "parser_version": PARSER_VERSION,
-        "tier": "aggregator" if str(source).startswith("licensed") else "curated",
+        "tier": (
+            "aggregator"
+            if str(source).startswith("wikipedia") or str(source).startswith("licensed")
+            else "curated"
+        ),
+        "source_url": (
+            "https://en.wikipedia.org/wiki/2026_United_States_Senate_elections"
+            if str(source).startswith("wikipedia")
+            else None
+        ),
+        "license": "CC BY-SA" if str(source).startswith("wikipedia") else None,
         "note": note,
     }
     man_path = MANIFESTS_DIR / "expert_ratings.json"

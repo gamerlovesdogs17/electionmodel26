@@ -1,16 +1,24 @@
-"""State-level demography features for similarity / covariance (Senate)."""
+"""State-level demography features for similarity / covariance (Senate).
+
+Primary path: aggregate Harvard MEDSL county election-context ACS fields
+(already vendored under ``data/raw/external/medsl_election_context_2018.csv``)
+up to state means. Fallback: compact research snapshot table.
+"""
 
 from __future__ import annotations
 
+import json
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
-# Compact ACS-like research features (standardized-ish). Redistributable snapshots —
-# not a live Census API pull. Values are approximate public statistics for pooling.
+from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
+
+# Compact ACS-like research features (fallback only).
 STATE_DEMO: dict[str, dict[str, float]] = {
-    # college_share, nonwhite_share, density_log, median_age_z, urban_share
     "AL": {"college": 0.26, "nonwhite": 0.35, "density": 2.4, "age": 0.2, "urban": 0.59},
     "AK": {"college": 0.30, "nonwhite": 0.40, "density": 0.1, "age": -0.3, "urban": 0.66},
     "AZ": {"college": 0.31, "nonwhite": 0.45, "density": 1.8, "age": 0.1, "urban": 0.90},
@@ -63,9 +71,128 @@ STATE_DEMO: dict[str, dict[str, float]] = {
     "WY": {"college": 0.28, "nonwhite": 0.15, "density": 0.2, "age": 0.0, "urban": 0.65},
 }
 
+STATE_NAME_TO_ABBR = {
+    "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
+    "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
+    "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
+    "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
+    "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS",
+    "Missouri": "MO", "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH",
+    "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY", "North Carolina": "NC",
+    "North Dakota": "ND", "Ohio": "OH", "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA",
+    "Rhode Island": "RI", "South Carolina": "SC", "South Dakota": "SD", "Tennessee": "TN",
+    "Texas": "TX", "Utah": "UT", "Vermont": "VT", "Virginia": "VA", "Washington": "WA",
+    "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY", "District of Columbia": "DC",
+}
+
+MEDSL_PATH = RAW_DIR / "external" / "medsl_election_context_2018.csv"
+
+
+def _medsl_state_demo(path: Path | None = None) -> pd.DataFrame:
+    path = path or MEDSL_PATH
+    if not path.exists():
+        return pd.DataFrame()
+    df = pd.read_csv(path)
+    if "state" not in df.columns:
+        return pd.DataFrame()
+    df = df.copy()
+    df["state_abbr"] = df["state"].map(lambda s: STATE_NAME_TO_ABBR.get(str(s), None))
+    df = df[df["state_abbr"].notna()]
+    # Population-weighted state means when totals exist.
+    wcol = "total_population" if "total_population" in df.columns else None
+    rows = []
+    for st, g in df.groupby("state_abbr"):
+        if wcol:
+            w = g[wcol].fillna(0).astype(float)
+            if float(w.sum()) <= 0:
+                w = pd.Series(np.ones(len(g)))
+        else:
+            w = pd.Series(np.ones(len(g)))
+
+        def _wavg(col: str, default: float) -> float:
+            if col not in g.columns:
+                return default
+            v = pd.to_numeric(g[col], errors="coerce")
+            m = v.notna() & w.notna()
+            if not m.any():
+                return default
+            return float(np.average(v[m], weights=w[m]))
+
+        less_college = _wavg("lesscollege_pct", 70.0)
+        nonwhite = _wavg("nonwhite_pct", 30.0)
+        rural = _wavg("rural_pct", 30.0)
+        age65 = _wavg("age65andolder_pct", 15.0)
+        # Map into the feature scheme used by similarity.
+        rows.append(
+            {
+                "state": st,
+                "college": float(np.clip(1.0 - less_college / 100.0, 0.05, 0.95)),
+                "nonwhite": float(np.clip(nonwhite / 100.0, 0.01, 0.99)),
+                "density": float(np.clip(np.log1p(100.0 - rural), 0.1, 5.0)),
+                "age": float(np.clip((age65 - 16.0) / 10.0, -1.5, 1.5)),
+                "urban": float(np.clip(1.0 - rural / 100.0, 0.05, 0.99)),
+                "source": "medsl_election_context_2018",
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def write_demography_store(*, prefer_medsl: bool = True) -> dict[str, Any]:
+    """Materialize sealed state demography parquet + manifest."""
+    NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
+    MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
+    medsl = _medsl_state_demo() if prefer_medsl else pd.DataFrame()
+    if len(medsl):
+        df = medsl
+        tier = "aggregator"
+        source_url = "https://dataverse.harvard.edu/dataverse/medsl"
+        note = "State means from MEDSL 2018 election-context ACS county fields (vendored CSV)."
+    else:
+        df = pd.DataFrame(
+            [{"state": st, **vals, "source": "embedded_research_snapshot"} for st, vals in STATE_DEMO.items()]
+        )
+        tier = "curated"
+        source_url = None
+        note = "Embedded research snapshot — replace via MEDSL/Census store."
+    out = NORMALIZED_DIR / "demography.parquet"
+    df.to_parquet(out, index=False)
+    man = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "n": int(len(df)),
+        "tier": tier,
+        "eligible": tier in {"official", "first_party", "aggregator"},
+        "source_url": source_url,
+        "path": str(out),
+        "note": note,
+    }
+    (MANIFESTS_DIR / "demography.json").write_text(json.dumps(man, indent=2))
+    return man
+
+
+def _demo_lookup() -> dict[str, dict[str, float]]:
+    path = NORMALIZED_DIR / "demography.parquet"
+    if path.exists():
+        try:
+            df = pd.read_parquet(path)
+            out = {}
+            for _, r in df.iterrows():
+                out[str(r["state"])] = {
+                    "college": float(r["college"]),
+                    "nonwhite": float(r["nonwhite"]),
+                    "density": float(r["density"]),
+                    "age": float(r["age"]),
+                    "urban": float(r["urban"]),
+                }
+            if out:
+                return out
+        except Exception:  # noqa: BLE001
+            pass
+    return STATE_DEMO
+
 
 def demo_feature_vector(state: str) -> np.ndarray:
-    d = STATE_DEMO.get(state, {"college": 0.3, "nonwhite": 0.3, "density": 2.0, "age": 0.0, "urban": 0.7})
+    lookup = _demo_lookup()
+    d = lookup.get(state, {"college": 0.3, "nonwhite": 0.3, "density": 2.0, "age": 0.0, "urban": 0.7})
     return np.array(
         [d["college"], d["nonwhite"], d["density"] / 4.0, d["age"], d["urban"]],
         dtype=float,
