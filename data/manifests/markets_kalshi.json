@@ -67,7 +67,9 @@
     "path": "data/normalized/markets_mapping_audit.json",
     "sha256": "3383c2a8e4b1a6fbf3771be2974d58a9763118278a664254ad21a5cd97c9127a",
     "n_enabled": 33,
-    "n_disabled": 2
+    "n_disabled": 2,
+    "hash_mode": "canonical_json_sha256_v1",
+    "canonical_json_sha256": "ead95054ab00e1c9f8da677134462e580045cf6c978ee9d53b5c68bfd67511c1"
   },
   "normalized_races_sha256": "88333a7e079b2b9daf5c209129d04ce6ee30d6bd2e286c30e7d7e95ec6e4f8e9",
   "normalized_control_sha256": "39bde0c775a19c01e558c38f962beacff219501a9d92106605c64c73814dea21",
@@ -77,5 +79,15 @@
     "raw": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\kalshi_senate.json",
     "races": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\markets.parquet",
     "control": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\markets_control.json"
+  },
+  "json_hash_mode": "canonical_json_sha256_v1",
+  "raw_canonical_json_sha256": "b5c3fe85d4896b97ea3ab6865619b6e099b57ec8fbb663cd8d9df33a440db07e",
+  "normalized_control_canonical_json_sha256": "2d97235de2470844e9fab28ee99d9887afb6a4d39eb1ad1a0216ad1a90240abd",
+  "integrity_migration": {
+    "from": "platform_specific_json_byte_sha256",
+    "to": "canonical_json_sha256_v1",
+    "reason": "git_lf_crlf_normalization",
+    "semantic_equivalence_verified": true,
+    "legacy_byte_hashes_retained": true
   }
 }

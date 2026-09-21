@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 import re
 import time
 import unicodedata
@@ -19,6 +19,7 @@ import pandas as pd
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 
 PARSER_VERSION = "kalshi-v3-candidate-audit"
+JSON_HASH_MODE = "canonical_json_sha256_v1"
 KALSHI = "https://api.elections.kalshi.com/trade-api/v2"
 
 # Class II 2026 contested set + specials (mirrors fixtures)
@@ -33,6 +34,18 @@ SPECIAL_EVENT_SUFFIX: dict[str, str] = {
     "FL": "S",
     "OH": "S",
 }
+
+
+def canonical_json_sha256(path: Path) -> str:
+    """Hash every parsed JSON value independent of transport serialization."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    canonical = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
 
 
 def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -404,6 +417,8 @@ def write_mapping_audit_store(
     except ValueError:
         portable_path = path.name
     return {"path": portable_path, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "hash_mode": JSON_HASH_MODE,
+            "canonical_json_sha256": canonical_json_sha256(path),
             "n_enabled": sum(bool(a.get("overlay_enabled")) for a in audits),
             "n_disabled": sum(not bool(a.get("overlay_enabled")) for a in audits)}
 
@@ -497,10 +512,13 @@ def write_markets_store(
         "errors": errors[:10],
         "control_error": control_err,
         "parser_version": PARSER_VERSION,
+        "json_hash_mode": JSON_HASH_MODE,
         "raw_sha256": hashlib.sha256(raw_path.read_bytes()).hexdigest(),
+        "raw_canonical_json_sha256": canonical_json_sha256(raw_path),
         "mapping_audit": mapping_meta,
         "normalized_races_sha256": hashlib.sha256(share_path.read_bytes()).hexdigest(),
         "normalized_control_sha256": hashlib.sha256(control_path.read_bytes()).hexdigest(),
+        "normalized_control_canonical_json_sha256": canonical_json_sha256(control_path),
         "source_url": "https://api.elections.kalshi.com/",
         "tier": "aggregator" if len(races) or control.get("p_dem") is not None else "curated",
         "paths": {
@@ -515,7 +533,7 @@ def write_markets_store(
 
 
 def verify_market_store_integrity(*, as_of: str | None = None) -> dict[str, Any]:
-    """Validate current parser, bytes, and one mapping decision per event."""
+    """Validate semantic JSON, exact Parquet bytes, and every event mapping."""
     manifest_path = MANIFESTS_DIR / "markets_kalshi.json"
     if not manifest_path.exists():
         return {"ok": False, "reason": "market manifest missing"}
@@ -523,22 +541,35 @@ def verify_market_store_integrity(*, as_of: str | None = None) -> dict[str, Any]
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         if manifest.get("parser_version") != PARSER_VERSION:
             raise ValueError("market parser version is stale")
+        if manifest.get("json_hash_mode") != JSON_HASH_MODE:
+            raise ValueError("market JSON integrity hash mode is missing or stale")
         if manifest.get("retrieval_date") != manifest.get("available_at"):
             raise ValueError("live market availability differs from retrieval date")
         if as_of and str(manifest.get("available_at") or "") > as_of:
             raise ValueError("market store is newer than requested snapshot")
         paths = {
-            "raw_sha256": RAW_DIR / "external" / "kalshi_senate.json",
-            "normalized_races_sha256": NORMALIZED_DIR / "markets.parquet",
-            "normalized_control_sha256": NORMALIZED_DIR / "markets_control.json",
+            "raw": RAW_DIR / "external" / "kalshi_senate.json",
+            "races": NORMALIZED_DIR / "markets.parquet",
+            "control": NORMALIZED_DIR / "markets_control.json",
         }
-        for field, path in paths.items():
-            if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != manifest.get(field):
+        json_fingerprints = {
+            "raw_canonical_json_sha256": paths["raw"],
+            "normalized_control_canonical_json_sha256": paths["control"],
+        }
+        for field, path in json_fingerprints.items():
+            if (not path.is_file()
+                    or canonical_json_sha256(path) != manifest.get(field)):
                 raise ValueError(f"market {field} is missing or changed")
+        if (not paths["races"].is_file()
+                or hashlib.sha256(paths["races"].read_bytes()).hexdigest()
+                != manifest.get("normalized_races_sha256")):
+            raise ValueError("market normalized_races_sha256 is missing or changed")
         audit_path = NORMALIZED_DIR / "markets_mapping_audit.json"
         audit_meta = manifest["mapping_audit"]
         if (not audit_path.is_file()
-                or hashlib.sha256(audit_path.read_bytes()).hexdigest() != audit_meta.get("sha256")):
+                or audit_meta.get("hash_mode") != JSON_HASH_MODE
+                or canonical_json_sha256(audit_path)
+                != audit_meta.get("canonical_json_sha256")):
             raise ValueError("market mapping audit is missing or changed")
         audit = json.loads(audit_path.read_text(encoding="utf-8"))
         events = audit["events"]
@@ -557,7 +588,7 @@ def verify_market_store_integrity(*, as_of: str | None = None) -> dict[str, Any]
         if any(not event.get("overlay_enabled") and not event.get("disable_reason") for event in events):
             raise ValueError("disabled market event lacks a reason")
         enabled = [event for event in events if event.get("overlay_enabled")]
-        frame = pd.read_parquet(paths["normalized_races_sha256"])
+        frame = pd.read_parquet(paths["races"])
         if len(frame) and (
             not frame["available_at"].astype(str).eq(manifest["available_at"]).all()
             or frame["retrieved_at"].astype(str).str[:10].gt(manifest["available_at"]).any()
@@ -570,9 +601,20 @@ def verify_market_store_integrity(*, as_of: str | None = None) -> dict[str, Any]
         if len(frame) and (not frame["parser_version"].eq(PARSER_VERSION).all()
                            or not frame["overlay_enabled"].all()):
             raise ValueError("normalized market rows include stale or disabled mapping")
+        byte_hash_diagnostics = {
+            "raw_sha256": hashlib.sha256(paths["raw"].read_bytes()).hexdigest()
+            == manifest.get("raw_sha256"),
+            "normalized_control_sha256": hashlib.sha256(
+                paths["control"].read_bytes()
+            ).hexdigest() == manifest.get("normalized_control_sha256"),
+            "mapping_audit_sha256": hashlib.sha256(audit_path.read_bytes()).hexdigest()
+            == audit_meta.get("sha256"),
+        }
         return {"ok": True, "parser_version": PARSER_VERSION,
+                "json_hash_mode": JSON_HASH_MODE,
                 "n_enabled": len(enabled), "n_disabled": len(events) - len(enabled),
-                "audit_sha256": audit_meta["sha256"]}
+                "audit_sha256": audit_meta["canonical_json_sha256"],
+                "byte_hash_diagnostics": byte_hash_diagnostics}
     except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         return {"ok": False, "reason": str(exc)}
 
