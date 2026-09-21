@@ -175,11 +175,13 @@ def require_explicit_caucus(races: pd.DataFrame, race_ids: list[str]) -> None:
 
 def require_binary_chamber_compatibility(races: pd.DataFrame) -> None:
     """Reject nonstandard affiliations the current two-caucus engine cannot account for."""
-    missing = sorted({"not_up", "held_by"} - set(races.columns))
-    if missing:
+    if "not_up" not in races.columns:
         raise ValueError(
-            "chamber accounting requires complete race columns: " + ", ".join(missing)
+            "chamber accounting requires complete race columns: not_up"
         )
+    has_held_seats = races["not_up"].fillna(False).astype(bool).any()
+    if has_held_seats and "held_by" not in races.columns:
+        raise ValueError("chamber accounting requires complete race columns: held_by")
     for _, row in races.iterrows():
         race_id = str(row.get("race_id"))
         if bool(row.get("not_up")):
