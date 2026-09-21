@@ -10,12 +10,13 @@ Failures are recorded explicitly; unscored components receive no weight credit.
 
 from __future__ import annotations
 
-import json
 import hashlib
+import json
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 
@@ -29,11 +30,18 @@ from midterms.model.challengers import (
 )
 from midterms.model.ensemble import weights_from_oof_scores
 from midterms.model.pymc_model import (
-    FitResult, draws_from_baseline_forecasts, fit_fast_approximation, fit_pymc, fit_pymc_dynamic,
+    FitResult,
+    draws_from_baseline_forecasts,
+    fit_fast_approximation,
+    fit_pymc,
+    fit_pymc_dynamic,
 )
 from midterms.model.state_space import fit_state_space
 from midterms.model.terminal import active_scales
-
+from midterms.validation.artifact_lineage import (
+    frozen_index_semantic_sha256,
+    json_text_sha256_variants,
+)
 
 # Predeclared metric for G8 keep/drop (lower better).
 G8_METRIC = "crps"
@@ -705,7 +713,12 @@ def repair_failed_oof_inference(
     # First truth/report contact is after replacement was frozen above.
     report = json.loads(out_path.read_text(encoding="utf-8"))
     original_index_sha = report.get("frozen_index_sha256")
-    if original_index_sha and original_index_sha != hashlib.sha256(index_path.read_bytes()).hexdigest():
+    original_index_semantic = report.get("frozen_index_semantic_sha256")
+    if (original_index_semantic is not None
+            and original_index_semantic != frozen_index_semantic_sha256(index_path)):
+        raise ValueError("frozen prediction index changed before inference repair")
+    if (original_index_semantic is None and original_index_sha
+            and original_index_sha not in json_text_sha256_variants(index_path)):
         raise ValueError("frozen prediction index changed before inference repair")
     if (report["prior_snapshot_sha256_by_fold_lead"][str(year)][str(lead_days)]
             != replacement.prior_snapshot_sha256
@@ -756,6 +769,7 @@ def repair_failed_oof_inference(
     index_tmp = index_path.with_suffix(index_path.suffix + ".tmp")
     index_tmp.write_text(json.dumps(index, indent=2, default=str))
     report["frozen_index_sha256"] = hashlib.sha256(index_tmp.read_bytes()).hexdigest()
+    report["frozen_index_semantic_sha256"] = frozen_index_semantic_sha256(index)
     report_tmp.write_text(json.dumps(report, separators=(",", ":"), default=str))
     # A process interruption between replacements is detected by the index
     # fingerprint before stack fitting.
@@ -1007,6 +1021,7 @@ def run_nested_component_loo(
     )
     report["frozen_index_path"] = str(freeze_path)
     report["frozen_index_sha256"] = hashlib.sha256(freeze_path.read_bytes()).hexdigest()
+    report["frozen_index_semantic_sha256"] = frozen_index_semantic_sha256(freeze_path)
     # Frozen draws dominate this artifact. Compact encoding keeps the
     # reproducibility record practical to version and transfer.
     out_path.write_text(json.dumps(report, separators=(",", ":"), default=str))

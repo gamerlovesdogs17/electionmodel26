@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 import re
 import unicodedata
+from dataclasses import asdict, dataclass
 
 import pandas as pd
-
 
 INDEPENDENT_DEM_CAUCUSES_BASIS = "user_declared_independent_dem_caucus_assumption_2026_09_20"
 
@@ -143,6 +142,8 @@ def attach_declared_held_independent_caucus(races: pd.DataFrame) -> pd.DataFrame
     for column in ("held_caucus", "held_caucus_basis"):
         if column not in out.columns:
             out[column] = None
+    if "not_up" not in out.columns or "held_by" not in out.columns:
+        return out
     held_independent = out["not_up"].fillna(False).astype(bool) & out["held_by"].eq("I")
     if held_independent.any():
         existing = out.loc[held_independent, "held_caucus"]
@@ -174,6 +175,11 @@ def require_explicit_caucus(races: pd.DataFrame, race_ids: list[str]) -> None:
 
 def require_binary_chamber_compatibility(races: pd.DataFrame) -> None:
     """Reject nonstandard affiliations the current two-caucus engine cannot account for."""
+    missing = sorted({"not_up", "held_by"} - set(races.columns))
+    if missing:
+        raise ValueError(
+            "chamber accounting requires complete race columns: " + ", ".join(missing)
+        )
     for _, row in races.iterrows():
         race_id = str(row.get("race_id"))
         if bool(row.get("not_up")):

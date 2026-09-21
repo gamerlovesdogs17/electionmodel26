@@ -100,6 +100,16 @@ def test_conflicting_held_independent_caucus_fails_closed() -> None:
         attach_declared_held_independent_caucus(races)
 
 
+def test_partial_metadata_attachment_does_not_invent_held_by() -> None:
+    partial = pd.DataFrame([{"race_id": "synthetic-partial"}])
+    attached = attach_declared_held_independent_caucus(partial)
+    assert "held_by" not in attached.columns
+    assert attached["held_caucus"].isna().all()
+    assert attached["held_caucus_basis"].isna().all()
+    with pytest.raises(ValueError, match="chamber accounting requires complete race columns"):
+        require_binary_chamber_compatibility(attached)
+
+
 def test_legacy_synthetic_fixture_aligns_extended_held_schema() -> None:
     from midterms.evidence.fixtures import _chamber_held
 

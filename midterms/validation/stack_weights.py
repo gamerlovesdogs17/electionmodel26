@@ -16,10 +16,12 @@ import numpy as np
 
 from midterms.config import ARTIFACTS_DIR, ROOT
 from midterms.model.empirical_mixture import fit_predictive_mixture
-from midterms.model.ensemble import (
-    weights_from_oof_scores,
+from midterms.model.ensemble import weights_from_oof_scores
+from midterms.validation.artifact_lineage import (
+    FROZEN_INDEX_SEMANTIC_VERSION,
+    frozen_index_semantic_sha256,
+    json_text_sha256_variants,
 )
-
 
 # Structural ablation labels are diagnostics, not stack members.
 EXCLUDE_FROM_STACK = frozenset(
@@ -176,11 +178,24 @@ def reproduce_weights(payload: dict[str, Any]) -> dict[str, float]:
     nested = json.loads(nested_path.read_text(encoding="utf-8"))
     if payload.get("source_stack_training_protocol") == "formal_60_30_v1":
         frozen_index = nested_path.with_name(f"{nested_path.stem}_frozen.json")
-        if (not frozen_index.is_file() or not payload.get("source_frozen_index_sha256")
-                or hashlib.sha256(frozen_index.read_bytes()).hexdigest()
-                != payload["source_frozen_index_sha256"]
-                or nested.get("frozen_index_sha256") != payload["source_frozen_index_sha256"]):
+        if not frozen_index.is_file():
             raise ValueError("frozen prediction index lineage changed")
+        expected_semantic = payload.get("source_frozen_index_semantic_sha256")
+        if (not expected_semantic
+                or payload.get("source_frozen_index_hash_mode")
+                != FROZEN_INDEX_SEMANTIC_VERSION):
+            raise ValueError("formal stack lacks semantic frozen prediction index lineage")
+        actual_semantic = frozen_index_semantic_sha256(frozen_index)
+        nested_semantic = nested.get("frozen_index_semantic_sha256")
+        if (actual_semantic != expected_semantic
+                or (nested_semantic is not None and nested_semantic != expected_semantic)):
+            raise ValueError("frozen prediction index lineage changed")
+        # Old nested artifacts recorded the platform-specific text digest. Keep
+        # it verifiable during migration, allowing only LF/CRLF conversion.
+        legacy_nested_sha = nested.get("frozen_index_sha256")
+        if (nested_semantic is None and legacy_nested_sha not in
+                json_text_sha256_variants(frozen_index)):
+            raise ValueError("legacy frozen prediction index lineage changed")
     if (nested.get("prior_snapshot_sha256_by_fold_lead")
             != payload.get("source_prior_snapshot_sha256_by_fold_lead")):
         raise ValueError("prior snapshot lineage changed")
@@ -257,9 +272,15 @@ def fit_stack_weights_from_nested_loo(
         if nested.get("oof_crps_method") != "exact_empirical_predictive_draws":
             raise ValueError("formal production stack requires empirical OOF CRPS screening")
         frozen_index = nested_path.with_name(f"{nested_path.stem}_frozen.json")
-        if (not frozen_index.is_file() or not nested.get("frozen_index_sha256")
-                or hashlib.sha256(frozen_index.read_bytes()).hexdigest()
-                != nested["frozen_index_sha256"]):
+        if not frozen_index.is_file():
+            raise ValueError("formal production stack frozen index is missing or stale")
+        actual_index_semantic = frozen_index_semantic_sha256(frozen_index)
+        nested_index_semantic = nested.get("frozen_index_semantic_sha256")
+        if nested_index_semantic is not None:
+            if nested_index_semantic != actual_index_semantic:
+                raise ValueError("formal production stack frozen index is missing or stale")
+        elif (not nested.get("frozen_index_sha256")
+              or nested["frozen_index_sha256"] not in json_text_sha256_variants(frozen_index)):
             raise ValueError("formal production stack frozen index is missing or stale")
         if nested.get("years") != [2018, 2020, 2022, 2024] or nested.get("lead_days") != [60, 30]:
             raise ValueError("formal production stack requires the declared four-cycle 60/30 grid")
@@ -296,6 +317,11 @@ def fit_stack_weights_from_nested_loo(
     fitted["source_prior_snapshot_sha256_by_fold_lead"] = nested.get("prior_snapshot_sha256_by_fold_lead")
     fitted["source_presidential_source_sha256_by_fold_lead"] = nested.get("presidential_source_sha256_by_fold_lead")
     fitted["source_frozen_index_sha256"] = nested.get("frozen_index_sha256")
+    if nested.get("stack_training_protocol") == "formal_60_30_v1":
+        fitted["source_frozen_index_hash_mode"] = FROZEN_INDEX_SEMANTIC_VERSION
+        fitted["source_frozen_index_semantic_sha256"] = frozen_index_semantic_sha256(
+            nested_path.with_name(f"{nested_path.stem}_frozen.json")
+        )
     fitted["source_model_version"] = nested.get("model_version")
     fitted["source_stack_training_protocol"] = nested.get("stack_training_protocol")
     ver = verify_reproducible(fitted)
@@ -333,6 +359,10 @@ def load_oof_stack_weights(
         "source_model_version": payload.get("source_model_version"),
         "source_stack_training_protocol": payload.get("source_stack_training_protocol"),
         "source_nested_sha256": payload.get("source_nested_sha256"),
+        "source_frozen_index_semantic_sha256": payload.get(
+            "source_frozen_index_semantic_sha256"
+        ),
+        "source_frozen_index_hash_mode": payload.get("source_frozen_index_hash_mode"),
         "source_prior_snapshot_sha256_by_fold_lead": payload.get("source_prior_snapshot_sha256_by_fold_lead"),
         "source_presidential_source_sha256_by_fold_lead": payload.get("source_presidential_source_sha256_by_fold_lead"),
         "note": payload.get("note"),

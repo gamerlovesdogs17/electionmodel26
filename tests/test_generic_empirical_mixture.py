@@ -8,6 +8,7 @@ import json
 import pytest
 
 from midterms.model.empirical_mixture import empirical_crps, fit_predictive_mixture
+from midterms.validation.artifact_lineage import frozen_index_semantic_sha256
 from midterms.validation.stack_weights import (
     fit_stack_weights_from_nested_loo,
     load_oof_stack_weights,
@@ -119,8 +120,81 @@ def test_formal_stack_refuses_incomplete_required_candidate(tmp_path):
         fit_stack_weights_from_nested_loo(
             nested_path=nested_path, out_path=tmp_path / "stack.json",
         )
-    frozen_index.write_text('{"entries": ["changed"]}', encoding="utf-8")
-    with pytest.raises(ValueError, match="frozen index"):
-        fit_stack_weights_from_nested_loo(
-            nested_path=nested_path, out_path=tmp_path / "stack.json",
-        )
+
+
+def test_formal_stack_index_lineage_ignores_serialization_but_rejects_prediction_change(
+    tmp_path,
+):
+    nested_path = tmp_path / "synthetic_formal_nested.json"
+    frozen_index = tmp_path / "synthetic_formal_nested_frozen.json"
+    out_path = tmp_path / "synthetic_stack.json"
+    years = [2018, 2020, 2022, 2024]
+    leads = [60, 30]
+    models = ["pymc", "pymc_dynamic", "state_space", "ridge_fundamentals"]
+    truths = {
+        f"{year}:{lead}:synthetic": 0.0
+        for year in years for lead in leads
+    }
+    draws = {
+        model: {
+            case: [float(model_ix - 1), float(model_ix + 1)]
+            for case in truths
+        }
+        for model_ix, model in enumerate(models)
+    }
+    entries = [{
+        "component": model,
+        "holdout_year": year,
+        "lead_days": lead,
+        "as_of": f"{year}-09-01",
+        "status": "ok",
+        "prediction_sha256": hashlib.sha256(
+            f"{model}:{year}:{lead}".encode()
+        ).hexdigest(),
+        "fit_settings": {"synthetic": True},
+    } for year in years for lead in leads for model in models]
+    index_payload = {"n": len(entries), "entries": entries}
+    frozen_index.write_text(json.dumps(index_payload, indent=2), encoding="utf-8")
+    draw_hash = hashlib.sha256(json.dumps(
+        draws, sort_keys=True, separators=(",", ":"), allow_nan=False,
+    ).encode()).hexdigest()
+    lineage = {
+        str(year): {str(lead): f"synthetic-{year}-{lead}" for lead in leads}
+        for year in years
+    }
+    nested_path.write_text(json.dumps({
+        "stack_training_protocol": "formal_60_30_v1",
+        "oof_crps_method": "exact_empirical_predictive_draws",
+        "years": years,
+        "lead_days": leads,
+        "failures": [],
+        "crps_by_fold": {
+            str(year): {model: 1.0 for model in models} for year in years
+        },
+        "oof_draws": draws,
+        "frozen_draws_sha256": draw_hash,
+        "oof_truths": truths,
+        "frozen_index_sha256": hashlib.sha256(frozen_index.read_bytes()).hexdigest(),
+        "frozen_index_semantic_sha256": frozen_index_semantic_sha256(frozen_index),
+        "prior_snapshot_sha256_by_fold_lead": lineage,
+        "presidential_source_sha256_by_fold_lead": lineage,
+    }), encoding="utf-8")
+
+    fitted = fit_stack_weights_from_nested_loo(
+        nested_path=nested_path, out_path=out_path,
+    )
+    assert verify_reproducible(fitted)["ok"] is True
+
+    # Same entries, different entry order, key order, whitespace, and line endings.
+    equivalent = {"entries": list(reversed(entries)), "n": len(entries)}
+    frozen_index.write_bytes(json.dumps(equivalent, separators=(",", ":")).replace(
+        "},{", "},\r\n{",
+    ).encode("utf-8"))
+    assert verify_reproducible(fitted)["ok"] is True
+
+    changed = json.loads(frozen_index.read_text(encoding="utf-8"))
+    changed["entries"][0]["prediction_sha256"] = "0" * 64
+    frozen_index.write_text(json.dumps(changed), encoding="utf-8")
+    verification = verify_reproducible(fitted)
+    assert verification["ok"] is False
+    assert verification["prediction_error"] == "frozen prediction index lineage changed"

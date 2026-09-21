@@ -6,7 +6,79 @@ import hashlib
 import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any
+
+FROZEN_INDEX_SEMANTIC_VERSION = "frozen_prediction_index_semantic_v1"
+_NON_SEMANTIC_INDEX_FIELDS = frozenset({"path", "generated_at", "created_at"})
+
+
+def frozen_index_semantic_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
+    """Return the prediction-bearing content of a frozen-prediction index.
+
+    JSON whitespace, object-key order, entry order, generated timestamps, and
+    filesystem paths do not identify a prediction. Every field on every entry
+    does: this includes model/case identity, fit settings, evidence lineage,
+    status, errors, and the per-prediction digest.
+    """
+    entries = payload.get("entries")
+    if not isinstance(entries, list):
+        raise TypeError("frozen prediction index requires an entries list")
+    declared_n = payload.get("n")
+    if declared_n is not None and int(declared_n) != len(entries):
+        raise ValueError("frozen prediction index count does not match entries")
+    if any(not isinstance(entry, Mapping) for entry in entries):
+        raise ValueError("frozen prediction index entries must be objects")
+
+    # A JSON round trip normalizes Mapping subclasses without losing any JSON
+    # value. Sorting by each entry's canonical representation makes the index a
+    # semantic set while retaining duplicate entries if they exist.
+    normalized_entries = [
+        json.loads(json.dumps(dict(entry), sort_keys=True, separators=(",", ":"),
+                              allow_nan=False, default=str))
+        for entry in entries
+    ]
+    normalized_entries.sort(
+        key=lambda entry: json.dumps(
+            entry, sort_keys=True, separators=(",", ":"), allow_nan=False,
+        )
+    )
+    metadata = {
+        str(key): value
+        for key, value in payload.items()
+        if key not in {"entries", "n"} and key not in _NON_SEMANTIC_INDEX_FIELDS
+    }
+    return {
+        "schema": FROZEN_INDEX_SEMANTIC_VERSION,
+        "entries": normalized_entries,
+        "metadata": metadata,
+    }
+
+
+def frozen_index_semantic_sha256(source: Mapping[str, Any] | Path) -> str:
+    """Hash frozen predictions independent of JSON serialization details."""
+    if isinstance(source, Path):
+        payload = json.loads(source.read_text(encoding="utf-8"))
+    else:
+        payload = source
+    canonical = json.dumps(
+        frozen_index_semantic_payload(payload),
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def json_text_sha256_variants(path: Path) -> set[str]:
+    """Return raw and LF/CRLF-normalized digests for legacy text lineage."""
+    raw = path.read_bytes()
+    lf = raw.replace(b"\r\n", b"\n")
+    crlf = lf.replace(b"\n", b"\r\n")
+    return {
+        hashlib.sha256(value).hexdigest()
+        for value in (raw, lf, crlf)
+    }
 
 
 @dataclass(frozen=True)
