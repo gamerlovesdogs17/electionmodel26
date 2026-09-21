@@ -11,9 +11,9 @@ from typing import Any
 
 import pandas as pd
 
-from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
+from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR, ROOT
 from midterms.evidence.fixtures import build_fixtures
-from midterms.evidence.ratings import build_rating_lookup, rating_for
+from midterms.evidence.ratings import rating_for
 from midterms.evidence.results_archive import merge_certified_into_results
 from midterms.evidence.historical_polls import merge_historical_polls
 from midterms.evidence.schema import is_active_ballot_row, align_poll_frame
@@ -36,6 +36,10 @@ class EvidenceSnapshot:
     results_known: pd.DataFrame
     snapshot_id: str
     pollster_ratings: dict[str, Any] | None = None
+    presidential_source_sha256: str | None = None
+    presidential_source_years: tuple[int, ...] = ()
+    prior_snapshot_sha256: str | None = None
+    prior_snapshot_path: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         n_contested = (
@@ -49,6 +53,10 @@ class EvidenceSnapshot:
             "n_races_contested": n_contested,
             "n_results_known": int(len(self.results_known)),
             "n_rated_pollsters": int(len(self.pollster_ratings or {})),
+            "presidential_source_sha256": self.presidential_source_sha256,
+            "presidential_source_years": list(self.presidential_source_years),
+            "prior_snapshot_sha256": self.prior_snapshot_sha256,
+            "prior_snapshot_path": self.prior_snapshot_path,
         }
 
 
@@ -176,6 +184,44 @@ class Warehouse:
                 axis=1,
             )
             races = races[mask]
+        if len(races):
+            from midterms.evidence.outcome_identity import attach_declared_held_independent_caucus
+
+            # Existing normalized stores may predate the explicit caucus columns.
+            # Attach the declared accounting assumption in the model snapshot.
+            races = attach_declared_held_independent_caucus(races)
+        if election_id == "senate-2026" and len(races):
+            from midterms.evidence.outcome_identity import attach_2026_ticket_identities
+
+            races = attach_2026_ticket_identities(races)
+
+        # Verify source bytes, then attach one point-in-time derived side table
+        # to all races in this snapshot. Truth/result fields are untouched.
+        source_sha = None
+        source_years: tuple[int, ...] = ()
+        prior_snapshot_sha = None
+        prior_snapshot_path = None
+        if self.normalized_dir.resolve() == NORMALIZED_DIR.resolve():
+            from midterms.evidence.presidential_results import (
+                SOURCE_MANIFEST_PATH, select_source_years, verified_source_set_sha256,
+            )
+
+            if SOURCE_MANIFEST_PATH.exists():
+                source_sha = verified_source_set_sha256()
+                source_years = select_source_years(as_of_d)
+                if source_years:
+                    from midterms.evidence.presidential_prior import (
+                        attach_prior_snapshot, materialize_prior_snapshot,
+                    )
+
+                    prior_snapshot, prior_path = materialize_prior_snapshot(as_of_d)
+                    races = attach_prior_snapshot(races, prior_snapshot)
+                    prior_snapshot_sha = str(prior_snapshot["snapshot_sha256"])
+                    prior_snapshot_path = prior_path.resolve().relative_to(ROOT.resolve()).as_posix()
+        if "prior_source" not in races.columns:
+            races["prior_source"] = "legacy_unverified_fixture"
+        else:
+            races["prior_source"] = races["prior_source"].fillna("legacy_unverified_fixture")
 
         # Leakage canary: if any remaining poll has available_at > as_of, fail closed
         if len(polls):
@@ -188,6 +234,7 @@ class Warehouse:
         blob = (
             f"{election_id}|{as_of_d.isoformat()}|{len(polls)}|"
             f"{polls['poll_id'].astype(str).sum() if len(polls) else ''}"
+            f"|{source_sha or ''}|{','.join(map(str, source_years))}|{prior_snapshot_sha or ''}"
         )
         snapshot_id = hashlib.sha256(blob.encode()).hexdigest()[:16]
         return EvidenceSnapshot(
@@ -200,6 +247,10 @@ class Warehouse:
             else results_known,
             snapshot_id=snapshot_id,
             pollster_ratings=rating_meta,
+            presidential_source_sha256=source_sha,
+            presidential_source_years=source_years,
+            prior_snapshot_sha256=prior_snapshot_sha,
+            prior_snapshot_path=prior_snapshot_path,
         )
 
     def inject_future_poll_for_canary(self, election_id: str, as_of: str | date) -> pd.DataFrame:

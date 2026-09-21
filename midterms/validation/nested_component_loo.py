@@ -21,7 +21,7 @@ import numpy as np
 
 from midterms.baselines.models import BASELINES, RaceForecast
 from midterms.baselines.score import score_forecasts
-from midterms.config import ARTIFACTS_DIR
+from midterms.config import ARTIFACTS_DIR, MODEL_VERSION
 from midterms.evidence.warehouse import Warehouse
 from midterms.model.challengers import (
     fit_poll_only_state_space,
@@ -37,6 +37,9 @@ from midterms.model.terminal import active_scales
 
 # Predeclared metric for G8 keep/drop (lower better).
 G8_METRIC = "crps"
+OOF_PYMC_DRAWS_PER_CHAIN = 800
+OOF_PYMC_TUNE_PER_CHAIN = 800
+OOF_PYMC_CHAINS = 2
 # Optional stack members subject to disable recommendation.
 OPTIONAL_COMPONENTS = (
     "state_space",
@@ -74,6 +77,9 @@ class FrozenPrediction:
     draws_by_race: dict[str, list[float]] | None = None
     fit_settings: dict[str, Any] | None = None
     prediction_sha256: str | None = None
+    evidence_snapshot_id: str | None = None
+    prior_snapshot_sha256: str | None = None
+    presidential_source_sha256: str | None = None
 
 
 def _draws_fingerprint(draws: dict[str, Any]) -> str:
@@ -118,6 +124,20 @@ def _freeze_from_fit(
         for i, rid in enumerate(fit.race_ids)
     }
     diagnostics = fit.diagnostics or {}
+    if component in {"pymc", "pymc_dynamic", "state_space", "ridge_fundamentals"}:
+        if str(fit.method) != component:
+            raise ValueError(f"{component} fit returned a different model identity: {fit.method}")
+    if component in {"pymc", "pymc_dynamic"}:
+        convergence = diagnostics.get("convergence") or {}
+        if (not convergence.get("available")
+                or not np.isfinite(float(convergence.get("r_hat_max", float("nan"))))
+                or float(convergence["r_hat_max"]) > 1.05
+                or not np.isfinite(float(convergence.get("ess_bulk_min_frac", float("nan"))))
+                or float(convergence["ess_bulk_min_frac"]) < 0.10):
+            raise ValueError(
+                f"{component} validation inference did not meet R-hat/ESS diagnostics: "
+                f"{convergence}"
+            )
     return FrozenPrediction(
         component=component,
         election_id=election_id,
@@ -207,9 +227,9 @@ def _fit_hierarchical(snap, *, method: str, n_draws: int, seed: int, gb: float, 
     if method == "pymc":
         return fit_pymc(
             snap,
-            draws=max(n_draws // 4, 50),
-            tune=max(n_draws // 4, 50),
-            chains=2,
+            draws=max(n_draws // 2, OOF_PYMC_DRAWS_PER_CHAIN),
+            tune=max(n_draws // 2, OOF_PYMC_TUNE_PER_CHAIN),
+            chains=OOF_PYMC_CHAINS,
             seed=seed,
             generic_ballot=gb,
             terminal_scales=terminal_scales,
@@ -217,9 +237,9 @@ def _fit_hierarchical(snap, *, method: str, n_draws: int, seed: int, gb: float, 
     if method in {"pymc_dynamic", "pymc-dynamic"}:
         return fit_pymc_dynamic(
             snap,
-            draws=max(n_draws // 4, 50),
-            tune=max(n_draws // 4, 50),
-            chains=2,
+            draws=max(n_draws // 2, OOF_PYMC_DRAWS_PER_CHAIN),
+            tune=max(n_draws // 2, OOF_PYMC_TUNE_PER_CHAIN),
+            chains=OOF_PYMC_CHAINS,
             seed=seed,
             generic_ballot=gb,
             terminal_scales=terminal_scales,
@@ -244,7 +264,7 @@ def freeze_component_predictions(
     seed: int = 21,
 ) -> dict[str, FrozenPrediction]:
     """
-    Fit every component and freeze predictive means/sds.
+    Fit every component and freeze predictive distributions.
 
     Intentionally does not accept or read certified results.
     """
@@ -270,6 +290,9 @@ def freeze_component_predictions(
                 seed=seed,
                 error=str(exc),
             )
+        frozen[name].evidence_snapshot_id = getattr(snap, "snapshot_id", None)
+        frozen[name].prior_snapshot_sha256 = getattr(snap, "prior_snapshot_sha256", None)
+        frozen[name].presidential_source_sha256 = getattr(snap, "presidential_source_sha256", None)
 
     _safe(
         hier_name,
@@ -355,7 +378,10 @@ def freeze_component_predictions(
     _safe(
         "ridge_fundamentals",
         lambda: _freeze_from_fit(
-            fit_ridge_fundamentals(snap, n_draws=n_draws, seed=seed + 17, generic_ballot=gb),
+            fit_ridge_fundamentals(
+                snap, n_draws=n_draws, seed=seed + 17, generic_ballot=gb,
+                require_historical_fit=True,
+            ),
             component="ridge_fundamentals",
             election_id=election_id,
             holdout_year=holdout_year,
@@ -372,9 +398,9 @@ def freeze_component_predictions(
             lambda: _freeze_from_fit(
                 fit_pymc_dynamic(
                     snap,
-                    draws=max(n_draws // 4, 50),
-                    tune=max(n_draws // 4, 50),
-                    chains=2,
+                    draws=max(n_draws // 2, OOF_PYMC_DRAWS_PER_CHAIN),
+                    tune=max(n_draws // 2, OOF_PYMC_TUNE_PER_CHAIN),
+                    chains=OOF_PYMC_CHAINS,
                     seed=seed + 19,
                     generic_ballot=gb,
                 ),
@@ -391,8 +417,9 @@ def freeze_component_predictions(
             "pymc",
             lambda: _freeze_from_fit(
                 fit_pymc(
-                    snap, draws=max(n_draws // 4, 50), tune=max(n_draws // 4, 50),
-                    chains=2, seed=seed + 23, generic_ballot=gb,
+                    snap, draws=max(n_draws // 2, OOF_PYMC_DRAWS_PER_CHAIN),
+                    tune=max(n_draws // 2, OOF_PYMC_TUNE_PER_CHAIN),
+                    chains=OOF_PYMC_CHAINS, seed=seed + 23, generic_ballot=gb,
                 ),
                 component="pymc", election_id=election_id,
                 holdout_year=holdout_year, lead_days=lead_days,
@@ -423,6 +450,10 @@ def score_frozen_predictions(
     results,
 ) -> dict[str, Any]:
     """Score only after predictions are frozen — first point of contact with truth."""
+    from midterms.baselines.score import discrete_crps
+    from midterms.evidence.score_targets import truth_margin_map
+
+    truth_by_id = truth_margin_map(results)
     scores: dict[str, Any] = {}
     for name, fp in frozen.items():
         if fp.status != "ok" or not fp.race_ids:
@@ -434,7 +465,22 @@ def score_frozen_predictions(
             }
             continue
         sc = score_forecasts(_forecasts_from_frozen(fp), results)
-        scores[name] = {"status": "ok", **sc}
+        empirical: list[float] = []
+        for rid, draws in (fp.draws_by_race or {}).items():
+            if rid in truth_by_id:
+                empirical.append(discrete_crps(np.asarray(draws, dtype=float), truth_by_id[rid]))
+        if not empirical or len(empirical) != sc.get("n"):
+            scores[name] = {
+                "status": "failed", "error": "frozen predictive draws missing for scored cases",
+                "n": 0, G8_METRIC: float("nan"),
+            }
+            continue
+        scores[name] = {
+            "status": "ok", **sc,
+            "crps_gaussian_diagnostic": sc["crps"],
+            "crps": float(np.mean(empirical)),
+            "crps_method": "exact_empirical_predictive_draws",
+        }
     return scores
 
 
@@ -445,11 +491,11 @@ def _nested_reliability_block(
     oof_sds: dict[str, dict[str, float]],
     oof_truths: dict[str, float],
 ) -> dict[str, Any]:
-    """Win-prob reliability from multi-cycle OOF means/sds (G7 evidence).
+    """Unadjusted reliability diagnostic on frozen outer-fold predictions.
 
-    If raw predictive SDs are overconfident, apply the smallest SD inflation
-    (>=1) that clears the reliability gate — documented widening, not a claim
-    that the uncalibrated model was fine.
+    An uncertainty scale selected with these same held-out outcomes would not
+    be an independently validated calibration result. Keep such fitting in a
+    separate inner training procedure if it is introduced later.
     """
     from scipy.stats import norm
 
@@ -477,32 +523,7 @@ def _nested_reliability_block(
         brier = float(np.mean((probs - outcomes) ** 2))
         return rel, gate, brier
 
-    raw_rel, raw_gate, raw_brier = _eval(1.0)
-    chosen_scale = 1.0
-    rel, gate, brier = raw_rel, raw_gate, raw_brier
-    if not gate.get("calibration_claim_allowed"):
-        for scale in np.linspace(1.05, 2.5, 30):
-            cand_rel, cand_gate, cand_brier = _eval(float(scale))
-            if cand_gate.get("calibration_claim_allowed"):
-                chosen_scale = float(scale)
-                rel, gate, brier = cand_rel, cand_gate, cand_brier
-                break
-        else:
-            # Keep least-overconfident widened scale even if claim still blocked.
-            best = (raw_gate.get("n_overconfident", 99), 1.0, raw_rel, raw_gate, raw_brier)
-            for scale in np.linspace(1.05, 2.5, 30):
-                cand_rel, cand_gate, cand_brier = _eval(float(scale))
-                key = (
-                    int(cand_gate.get("n_overconfident") or 0),
-                    float(scale),
-                    cand_rel,
-                    cand_gate,
-                    cand_brier,
-                )
-                if key[0] < best[0] or (key[0] == best[0] and key[1] < best[1]):
-                    best = key
-                    chosen_scale = float(scale)
-                    rel, gate, brier = cand_rel, cand_gate, cand_brier
+    rel, gate, brier = _eval(1.0)
 
     return {
         "spine": spine,
@@ -510,10 +531,10 @@ def _nested_reliability_block(
         "reliability": rel,
         "reliability_gate": gate,
         "brier": brier,
-        "raw_brier": raw_brier,
-        "raw_reliability_gate": raw_gate,
-        "sd_inflation": chosen_scale,
-        "widened": chosen_scale > 1.0 + 1e-9,
+        "raw_brier": brier,
+        "raw_reliability_gate": gate,
+        "sd_inflation": 1.0,
+        "widened": False,
         "ok": bool(gate.get("calibration_claim_allowed")),
     }
 
@@ -574,12 +595,182 @@ def _g8_recommendations(
     return recs
 
 
+def rescore_frozen_oof_draws(report: dict[str, Any]) -> dict[str, Any]:
+    """Recompute OOF CRPS from sealed predictive draws, without any refit.
+
+    This is also useful when migrating an older freeze archive whose
+    screening scores were computed from a Gaussian moment approximation.
+    """
+    from midterms.baselines.score import discrete_crps
+
+    draws = report.get("oof_draws") or {}
+    truths = report.get("oof_truths") or {}
+    if report.get("frozen_draws_sha256") != _draws_fingerprint(draws):
+        raise ValueError("frozen OOF draws changed before rescoring")
+    crps_by_fold: dict[str, dict[str, float]] = {}
+    for year in report.get("years") or []:
+        year_key = str(year)
+        scores_by_model: dict[str, list[float]] = {}
+        for lead in report.get("lead_days") or []:
+            lead_key = str(lead)
+            prefix = f"{year_key}:{lead_key}:"
+            lead_scores = report["by_fold"][year_key]["leads"][lead_key]
+            for model, block in lead_scores.items():
+                if block.get("status") != "ok":
+                    continue
+                cases = {
+                    case: values for case, values in (draws.get(model) or {}).items()
+                    if case.startswith(prefix) and case in truths
+                }
+                if len(cases) != int(block.get("n", 0)) or not cases:
+                    raise ValueError(f"incomplete frozen draw cases for {model}/{year}/{lead}")
+                score = float(np.mean([
+                    discrete_crps(np.asarray(values, dtype=float), float(truths[case]))
+                    for case, values in sorted(cases.items())
+                ]))
+                if block.get("crps_method") != "exact_empirical_predictive_draws":
+                    block["crps_gaussian_diagnostic"] = block.get("crps")
+                block["crps"] = score
+                block["crps_method"] = "exact_empirical_predictive_draws"
+                scores_by_model.setdefault(model, []).append(score)
+        fold_scores = {model: float(np.mean(scores)) for model, scores in scores_by_model.items()}
+        report["by_fold"][year_key]["mean_crps"] = fold_scores
+        crps_by_fold[year_key] = fold_scores
+    report["crps_by_fold"] = crps_by_fold
+    report["mean_crps_by_component"] = {
+        model: float(np.mean([fold[model] for fold in crps_by_fold.values() if model in fold]))
+        for model in {name for fold in crps_by_fold.values() for name in fold}
+    }
+    spine = report.get("spine_label")
+    report["mean_crps"] = report["mean_crps_by_component"].get(spine)
+    report["diagnostic_score_softmax_weights"] = weights_from_oof_scores(crps_by_fold)
+    report["g8_recommendations"] = _g8_recommendations(crps_by_fold, spine=spine)
+    report["oof_crps_method"] = "exact_empirical_predictive_draws"
+    return report
+
+
+def repair_failed_oof_inference(
+    *,
+    year: int,
+    lead_days: int,
+    component: str,
+    out_path: Path | None = None,
+    draws_per_chain: int = 2000,
+    tune_per_chain: int = 2000,
+    chains: int = 4,
+) -> dict[str, Any]:
+    """Refit a failed PyMC freeze using only convergence-driven extra sampling.
+
+    The compact freeze index, which contains no held-out truth, is the only
+    persisted validation file read before fitting. The scored report is opened
+    only after the replacement prediction has been frozen and checked.
+    """
+    if component not in {"pymc", "pymc_dynamic"}:
+        raise ValueError("diagnostic inference repair supports PyMC candidates only")
+    if draws_per_chain < 2000 or tune_per_chain < 2000 or chains < 4:
+        raise ValueError("inference repair must meet the 2000/2000/4 recovery floor")
+    out_path = out_path or (ARTIFACTS_DIR / "nested_component_loo.json")
+    index_path = out_path.with_name(f"{out_path.stem}_frozen.json")
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    matches = [entry for entry in index["entries"] if (
+        entry["component"] == component and entry["holdout_year"] == year
+        and entry["lead_days"] == lead_days and entry["status"] == "failed"
+    )]
+    if len(matches) != 1:
+        raise ValueError("expected one failed, unscored frozen prediction in index")
+    original = matches[0]
+    election_id = f"senate-{year}"
+    wh = Warehouse()
+    races = wh.races[wh.races["election_id"] == election_id]
+    if races.empty:
+        raise ValueError("historical race group missing")
+    ed = date.fromisoformat(str(races["election_day"].iloc[0])[:10])
+    as_of = ed - timedelta(days=lead_days)
+    if original["as_of"] != as_of.isoformat():
+        raise ValueError("freeze index date differs from reconstructed as-of")
+    snap = wh.build_as_of(as_of, election_id)
+    fit_fn = fit_pymc if component == "pymc" else fit_pymc_dynamic
+    replacement = _freeze_from_fit(
+        fit_fn(
+            snap, draws=draws_per_chain, tune=tune_per_chain, chains=chains,
+            seed=int(original["seed"]), generic_ballot=_generic_ballot(snap),
+        ),
+        component=component, election_id=election_id, holdout_year=year,
+        lead_days=lead_days, as_of=as_of, seed=int(original["seed"]),
+    )
+    replacement.evidence_snapshot_id = snap.snapshot_id
+    replacement.prior_snapshot_sha256 = snap.prior_snapshot_sha256
+    replacement.presidential_source_sha256 = snap.presidential_source_sha256
+
+    # First truth/report contact is after replacement was frozen above.
+    report = json.loads(out_path.read_text(encoding="utf-8"))
+    original_index_sha = report.get("frozen_index_sha256")
+    if original_index_sha and original_index_sha != hashlib.sha256(index_path.read_bytes()).hexdigest():
+        raise ValueError("frozen prediction index changed before inference repair")
+    if (report["prior_snapshot_sha256_by_fold_lead"][str(year)][str(lead_days)]
+            != replacement.prior_snapshot_sha256
+            or report["presidential_source_sha256_by_fold_lead"][str(year)][str(lead_days)]
+            != replacement.presidential_source_sha256):
+        raise ValueError("replacement prediction uses a different prior source snapshot")
+    if not any(f.get("year") == year and f.get("lead") == lead_days
+               and f.get("component") == component for f in report["failures"]):
+        raise ValueError("scored report has no corresponding failed candidate")
+    all_results = wh.results
+    results = all_results[all_results["election_id"] == election_id]
+    scored = score_frozen_predictions({component: replacement}, results)[component]
+    if scored.get("status") != "ok":
+        raise ValueError("replacement prediction could not be scored")
+    prefix = f"{year}:{lead_days}:"
+    truths = report["oof_truths"]
+    for rid, mu, sd in zip(replacement.race_ids, replacement.means, replacement.sds):
+        case = prefix + rid
+        if case not in truths:
+            continue
+        report["oof_means"].setdefault(component, {})[case] = float(mu)
+        report["oof_sds"].setdefault(component, {})[case] = float(sd)
+        report["oof_draws"].setdefault(component, {})[case] = replacement.draws_by_race[rid]
+    report["by_fold"][str(year)]["leads"][str(lead_days)][component] = scored
+    report["failures"] = [f for f in report["failures"] if not (
+        f.get("year") == year and f.get("lead") == lead_days
+        and f.get("component") == component
+    )]
+    report["frozen_draws_sha256"] = _draws_fingerprint(report["oof_draws"])
+    report = rescore_frozen_oof_draws(report)
+    report.setdefault("inference_repairs", []).append({
+        "year": year, "lead_days": lead_days, "component": component,
+        "reason": "initial freeze failed convergence diagnostics; no truth used in refit",
+        "draws_per_chain": draws_per_chain, "tune_per_chain": tune_per_chain,
+        "chains": chains, "seed": int(original["seed"]),
+    })
+    original.update({
+        "status": "ok", "n_races": len(replacement.race_ids),
+        "method": replacement.method, "n_draws": replacement.n_draws,
+        "fit_settings": replacement.fit_settings,
+        "prediction_sha256": replacement.prediction_sha256,
+        "evidence_snapshot_id": replacement.evidence_snapshot_id,
+        "prior_snapshot_sha256": replacement.prior_snapshot_sha256,
+        "presidential_source_sha256": replacement.presidential_source_sha256,
+        "error": None,
+    })
+    report_tmp = out_path.with_suffix(out_path.suffix + ".tmp")
+    index_tmp = index_path.with_suffix(index_path.suffix + ".tmp")
+    index_tmp.write_text(json.dumps(index, indent=2, default=str))
+    report["frozen_index_sha256"] = hashlib.sha256(index_tmp.read_bytes()).hexdigest()
+    report_tmp.write_text(json.dumps(report, separators=(",", ":"), default=str))
+    # A process interruption between replacements is detected by the index
+    # fingerprint before stack fitting.
+    index_tmp.replace(index_path)
+    report_tmp.replace(out_path)
+    return {"year": year, "lead_days": lead_days, "component": component,
+            "remaining_failures": len(report["failures"]), "n_oof_cases": len(truths)}
+
+
 def run_nested_component_loo(
     *,
     years: tuple[int, ...] = (2018, 2020, 2022, 2024),
     lead_days: tuple[int, ...] = (60, 30),
     hierarchical_method: str = "pymc",
-    n_draws: int = 600,
+    n_draws: int = 1600,
     seed: int = 21,
     out_path: Path | None = None,
 ) -> dict[str, Any]:
@@ -603,6 +794,8 @@ def run_nested_component_loo(
     truths_by_fold: dict[str, dict[str, float]] = {}
     failures: list[dict[str, Any]] = []
     frozen_archive: list[dict[str, Any]] = []
+    prior_snapshot_sha256_by_fold_lead: dict[str, dict[str, str | None]] = {}
+    source_set_sha256_by_fold_lead: dict[str, dict[str, str | None]] = {}
 
     for year in years:
         election_id = f"senate-{year}"
@@ -614,9 +807,13 @@ def run_nested_component_loo(
         # Load results only after freeze — but we need them for scoring after.
         # Structure: freeze all leads first, then score.
         lead_frozen: dict[str, dict[str, FrozenPrediction]] = {}
+        prior_snapshot_sha256_by_fold_lead[str(year)] = {}
+        source_set_sha256_by_fold_lead[str(year)] = {}
         for lead in lead_days:
             as_of = ed - timedelta(days=lead)
             snap = wh.build_as_of(as_of, election_id)
+            prior_snapshot_sha256_by_fold_lead[str(year)][str(lead)] = snap.prior_snapshot_sha256
+            source_set_sha256_by_fold_lead[str(year)][str(lead)] = snap.presidential_source_sha256
             frozen = freeze_component_predictions(
                 snap,
                 election_id=election_id,
@@ -640,7 +837,8 @@ def run_nested_component_loo(
                     )
 
         # Truth contact — after all freezes for this cycle
-        results = wh.results[wh.results["election_id"] == election_id]
+        all_results = wh.results
+        results = all_results[all_results["election_id"] == election_id]
         from midterms.evidence.score_targets import truth_margin_map
 
         truth_by_id = truth_margin_map(results)
@@ -733,9 +931,19 @@ def run_nested_component_loo(
     report = {
         "audit_item": "P2.1",
         "g8_metric": G8_METRIC,
+        "oof_crps_method": "exact_empirical_predictive_draws",
         "years": list(years),
         "lead_days": list(lead_days),
         "hierarchical_method": hierarchical_method,
+        "model_version": MODEL_VERSION,
+        "stack_training_protocol": "formal_60_30_v1" if lead_days == (60, 30) else "diagnostic_custom_leads",
+        "pymc_validation_inference": {
+            "draws_per_chain_floor": OOF_PYMC_DRAWS_PER_CHAIN,
+            "tune_per_chain_floor": OOF_PYMC_TUNE_PER_CHAIN,
+            "chains": OOF_PYMC_CHAINS,
+        },
+        "prior_snapshot_sha256_by_fold_lead": prior_snapshot_sha256_by_fold_lead,
+        "presidential_source_sha256_by_fold_lead": source_set_sha256_by_fold_lead,
         "spine_label": spine,
         "n_draws": n_draws,
         "freeze_before_truth": True,
@@ -765,10 +973,10 @@ def run_nested_component_loo(
         ),
     }
     out_path = out_path or (ARTIFACTS_DIR / "nested_component_loo.json")
-    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     report["path"] = str(out_path)
     # Persist a compact freeze index (not full means) alongside report
-    freeze_path = ARTIFACTS_DIR / "nested_component_loo_frozen.json"
+    freeze_path = out_path.with_name(f"{out_path.stem}_frozen.json")
     freeze_path.write_text(
         json.dumps(
             {
@@ -786,6 +994,9 @@ def run_nested_component_loo(
                         "seed": e["seed"],
                         "fit_settings": e.get("fit_settings"),
                         "prediction_sha256": e.get("prediction_sha256"),
+                        "evidence_snapshot_id": e.get("evidence_snapshot_id"),
+                        "prior_snapshot_sha256": e.get("prior_snapshot_sha256"),
+                        "presidential_source_sha256": e.get("presidential_source_sha256"),
                         "error": e.get("error"),
                     }
                     for e in frozen_archive
@@ -795,5 +1006,8 @@ def run_nested_component_loo(
         )
     )
     report["frozen_index_path"] = str(freeze_path)
-    out_path.write_text(json.dumps(report, indent=2, default=str))
+    report["frozen_index_sha256"] = hashlib.sha256(freeze_path.read_bytes()).hexdigest()
+    # Frozen draws dominate this artifact. Compact encoding keeps the
+    # reproducibility record practical to version and transfer.
+    out_path.write_text(json.dumps(report, separators=(",", ":"), default=str))
     return report

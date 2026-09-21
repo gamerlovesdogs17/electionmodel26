@@ -19,13 +19,16 @@ from midterms.config import (
     DEMO_ELECTION_ID,
     DEMO_JOINT_SIMS,
     DEMO_SEED,
+    MANIFESTS_DIR,
     MODEL_VERSION,
     PRIMARY_HOLDOUT,
     PRODUCTION_JOINT_SIMS,
     PUBLIC_LIVE_ENABLED,
     PUBLICATION_SURFACE_DEFAULT,
+    ROOT,
 )
 from midterms.evidence.warehouse import Warehouse, write_run_manifest
+from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
 from midterms.model.pymc_model import (
     FitResult,
     draws_from_baseline_forecasts,
@@ -116,6 +119,19 @@ def _json_safe(obj: Any) -> Any:
     except (TypeError, ValueError):
         pass
     return obj
+
+
+def _available_stack_weights(
+    weights: dict[str, float], component_draws: dict[str, np.ndarray],
+    *, require_publishable: bool,
+) -> dict[str, float]:
+    """Never reassign missing model mass to a differently named component."""
+    missing = sorted(name for name, mass in weights.items()
+                     if mass > 0 and name not in component_draws)
+    if missing and require_publishable:
+        raise ValueError(f"production stack components unavailable: {', '.join(missing)}")
+    return {name: float(mass) for name, mass in weights.items()
+            if mass > 0 and name in component_draws}
 
 
 def run_forecast(
@@ -296,6 +312,14 @@ def run_forecast(
     # Overlay FEC fundraising shares onto race rows used by fundamentals
     snap.races = attach_fundraising_to_races(snap.races, as_of=as_of)
     snap.races = attach_demo_features(apply_vacancy_defaults(snap.races))
+    if election_id == "senate-2026":
+        from midterms.evidence.outcome_identity import require_explicit_caucus
+
+        active_ids = snap.races.loc[~snap.races["not_up"].fillna(False), "race_id"].astype(str).tolist()
+        require_explicit_caucus(snap.races, active_ids)
+    from midterms.evidence.outcome_identity import require_binary_chamber_compatibility
+
+    require_binary_chamber_compatibility(snap.races)
     year = None
     try:
         year = int(str(snap.races["election_day"].iloc[0])[:4])
@@ -390,13 +414,24 @@ def run_forecast(
             spine=spine_method.split("+")[0],
             require_predictive_stack=require_publishable,
         )
+        if require_publishable:
+            if stack_provenance.get("source_model_version") != MODEL_VERSION:
+                raise ValueError("production stack model version differs from current code")
+            if stack_provenance.get("source_stack_training_protocol") != "formal_60_30_v1":
+                raise ValueError("production stack was not trained on the declared 60/30 protocol")
+            prior_folds = stack_provenance.get("source_prior_snapshot_sha256_by_fold_lead") or {}
+            source_folds = stack_provenance.get("source_presidential_source_sha256_by_fold_lead") or {}
+            prior_digests = [digest for leads in prior_folds.values() for digest in leads.values()]
+            source_digests = [digest for leads in source_folds.values() for digest in leads.values()]
+            if not prior_digests or any(not digest for digest in prior_digests):
+                raise ValueError("production stack lacks complete prior snapshot lineage")
+            if not source_digests or any(digest != snap.presidential_source_sha256 for digest in source_digests):
+                raise ValueError("production stack presidential source lineage differs from current snapshot")
         component_draws: dict[str, np.ndarray] = {fit.method.split("+")[0]: fit.draws_margin}
         core_name = "fast_hierarchical_t"
         if fit.method.startswith("pymc_dynamic"):
             core_name = "pymc_dynamic"
             component_draws["pymc_dynamic"] = fit.draws_margin
-            # Also keep static pymc label mass mappable via stack when present
-            component_draws["pymc"] = fit.draws_margin
         elif fit.method.startswith("pymc"):
             core_name = "pymc"
             component_draws["pymc"] = fit.draws_margin
@@ -407,9 +442,25 @@ def run_forecast(
             component_draws["state_space"] = fit.draws_margin
         else:
             component_draws[core_name] = fit.draws_margin
+        # Static and dynamic PyMC are independent fitted candidates. Each
+        # positive OOF weight requires its own predictive distribution.
+        if weights.get("pymc", 0.0) > 0 and "pymc" not in component_draws:
+            separate_static = fit_pymc(
+                snap, draws=draws, tune=tune, chains=chains,
+                seed=seed + 29, generic_ballot=generic_ballot,
+            )
+            component_draws["pymc"] = separate_static.draws_margin
+        if weights.get("pymc_dynamic", 0.0) > 0 and "pymc_dynamic" not in component_draws:
+            separate_dynamic = fit_pymc_dynamic(
+                snap, draws=draws, tune=tune, chains=chains,
+                seed=seed + 31, generic_ballot=generic_ballot,
+            )
+            component_draws["pymc_dynamic"] = separate_dynamic.draws_margin
         try:
             chall = build_challenger_draws(
-                snap, n_draws=fit.draws_margin.shape[0], seed=seed, generic_ballot=generic_ballot
+                snap, n_draws=fit.draws_margin.shape[0], seed=seed,
+                generic_ballot=generic_ballot,
+                require_historical_fit=require_publishable,
             )
             for k, v in chall.items():
                 if v.shape[1] == fit.draws_margin.shape[1]:
@@ -422,17 +473,13 @@ def run_forecast(
                 component_draws[name] = draws_from_baseline_forecasts(
                     bl,
                     n_draws=fit.draws_margin.shape[0],
-                    seed=seed + hash(name) % 10_000,
+                    seed=seed + int.from_bytes(hashlib.sha256(name.encode()).digest()[:4], "big") % 10_000,
                     race_ids=fit.race_ids,
                 )
-        use_w = {k: v for k, v in weights.items() if k in component_draws and v > 0}
-        # Only mix components that earned OOF weight — never invent mass for unscored spine
-        if core_name not in use_w and core_name in weights and core_name in component_draws:
-            use_w[core_name] = float(weights[core_name])
-        # Do not silently give pymc the fast OOF weight (audit Finding 6)
-        if core_name == "pymc":
-            use_w.pop("fast_hierarchical_t", None)
-        if len(use_w) >= 2:
+        use_w = _available_stack_weights(
+            weights, component_draws, require_publishable=require_publishable,
+        )
+        if use_w:
             from midterms.model.ensemble import stack_margin_draws
 
             stacked = stack_margin_draws(
@@ -466,6 +513,7 @@ def run_forecast(
     core_fit = fit
     unadjusted_means = fit.mean_margin.copy()
     adj = unadjusted_means.copy()
+    overlay_shifts: dict[str, np.ndarray] = {}
 
     expert_tbl = ratings_for_races(
         fit.race_ids,
@@ -494,19 +542,25 @@ def run_forecast(
 
     used_ratings = bool(with_ratings and len(expert_tbl))
     used_markets = bool(with_markets and len(market_df))
-    control = load_control_market()
+    control = load_control_market(as_of=str(as_of)[:10])
     control_p = control.get("p_dem")
     used_control = bool(with_markets and control_p is not None and control_weight > 0)
     control_cal_meta: dict[str, Any] = {"enabled": False}
     if used_ratings:
+        before = adj.copy()
         adj = apply_rating_overlay(adj, fit.race_ids, expert_tbl, weight=rating_weight)
+        overlay_shifts["expert_rating_overlay"] = adj - before
     if used_markets:
+        before = adj.copy()
         adj = apply_market_overlay(adj, fit.race_ids, market_df, weight=market_weight)
+        overlay_shifts["race_market_overlay"] = adj - before
     # Light mean-level control pull first (helps fundamentals location)
     if used_control:
+        before = adj.copy()
         adj = apply_control_market_overlay(
             adj, control_p_dem=float(control_p), weight=control_weight
         )
+        overlay_shifts["control_market_national_overlay"] = adj - before
     if used_ratings or used_markets or used_control:
         shifted = shift_draws_to_means(fit.draws_margin, adj)
         # Hard chamber calibration is OFF by default (blueprint §9.4: optional soft overlay).
@@ -653,9 +707,40 @@ def run_forecast(
     ]
     expected_rep = 100.0 - sim.expected_dem_seats
     # control already loaded above for overlay; refresh for artifact snapshot
-    control = load_control_market()
+    control = load_control_market(as_of=str(as_of)[:10])
 
     evidence_fp = evidence_manifest_fingerprint()
+    from midterms.evidence.markets import verify_market_store_integrity
+
+    market_integrity = verify_market_store_integrity(as_of=str(as_of)[:10])
+    market_manifest = (
+        json.loads((MANIFESTS_DIR / "markets_kalshi.json").read_text(encoding="utf-8"))
+        if market_integrity["ok"] else {}
+    )
+    market_store_sha = market_manifest.get("normalized_races_sha256")
+    market_audit_sha = market_integrity.get("audit_sha256")
+    stack_artifact_sha = (stack_provenance or {}).get("artifact_sha256")
+    from midterms.validation.decomposition_hook import build_decomposition_rows
+
+    if snap.prior_snapshot_path:
+        prior_payload = json.loads((ROOT / snap.prior_snapshot_path).read_text(encoding="utf-8"))
+        prior_by_state = {row["state"]: row["provenance"] for row in prior_payload["rows"]}
+    else:
+        prior_by_state = {
+            str(state): {"source_kind": "legacy_unverified_fixture", "production_eligible": False}
+            for state in snap.races["state"].astype(str).unique()
+        }
+    decomposition_rows = build_decomposition_rows(
+        races=snap.races, polls=snap.polls, as_of=snap.as_of,
+        race_ids=fit.race_ids,
+        core_means=core_fit.mean_margin, core_sds=core_fit.sd_margin,
+        final_means=fit.mean_margin, final_sds=fit.sd_margin,
+        prior_provenance_by_state=prior_by_state,
+        generic_ballot=generic_ballot, overlay_shifts=overlay_shifts,
+        error_budget=(core_fit.diagnostics or {}).get("error_budget"),
+        exact_overlay_chain=not bool(used_control and control_calibrate),
+    )
+    decomposition_path = out_dir / "race_decomposition_latest.json"
     eligibility = stamp_eligibility_identity(
         eligibility,
         run_id=run_id,
@@ -682,6 +767,13 @@ def run_forecast(
             "evidence_fingerprint": evidence_fp,
         },
         "evidence_fingerprint": evidence_fp,
+        "presidential_source_sha256": snap.presidential_source_sha256,
+        "presidential_source_years": list(snap.presidential_source_years),
+        "prior_store_sha256": snap.prior_snapshot_sha256,
+        "market_store_sha256": market_store_sha,
+        "market_audit_sha256": market_audit_sha,
+        "stack_artifact_sha256": stack_artifact_sha,
+        "decomposition_artifact": decomposition_path.name,
         "snapshot_ids": {"evidence": str(snap.snapshot_id)},
         "generic_ballot": float(generic_ballot),
         "generic_ballot_meta": generic_ballot_meta
@@ -697,6 +789,12 @@ def run_forecast(
             "held_dem": sim.held_dem,
             "held_rep": sim.held_rep,
             "held_ind": getattr(sim, "held_ind", 0),
+            "independent_caucus_policy": {
+                "ballot_party": "I",
+                "seat_accounting_caucus": "D",
+                "basis": INDEPENDENT_DEM_CAUCUSES_BASIS,
+                "type": "user_declared_model_assumption",
+            },
             "majority_threshold": sim.majority_threshold,
             "p_dem_majority": sim.p_dem_majority,
             "p_rep_majority": sim.p_rep_majority,
@@ -713,7 +811,8 @@ def run_forecast(
             "independent_bernoulli_foil_expected": float(np.mean(foil)),
             "note": (
                 "Chamber totals from joint correlated draws. "
-                "Independents without a Dem nominee still count toward Democratic seats. "
+                "Independent candidates retain their ballot identity and enter "
+                "Democratic-caucus seat totals under the declared model assumption. "
                 "Display ratings are model-derived from P(Dem); expert/Kalshi overlays are ablatable. "
                 "p_tie/p_fifty_fifty is P(exactly 50 Dem seats); with VP=R that outcome is Rep control."
             ),
@@ -822,6 +921,18 @@ def run_forecast(
     payload = text.encode("utf-8")
     artifact_path.write_bytes(payload)
     demo_path.write_bytes(payload)
+    decomposition_path.write_text(json.dumps(_json_safe({
+        "run_id": run_id,
+        "model_version": MODEL_VERSION,
+        "snapshot_id": snap.snapshot_id,
+        "evidence_fingerprint": evidence_fp,
+        "prior_store_sha256": snap.prior_snapshot_sha256,
+        "market_store_sha256": market_store_sha,
+        "market_audit_sha256": market_audit_sha,
+        "stack_artifact_sha256": stack_artifact_sha,
+        "forecast_sha256": hashlib.sha256(payload).hexdigest(),
+        "rows": decomposition_rows,
+    }), indent=2, allow_nan=False), encoding="utf-8")
 
     # Keep eligibility artifact identity-tied to this exact forecast run.
     write_eligibility_report(
@@ -862,6 +973,7 @@ def run_forecast(
         "control_weight": control_weight,
         "control_calibrate": control_calibrate,
         "allow_fast_fallback": allow_fast_fallback,
+        "independent_caucus_basis": INDEPENDENT_DEM_CAUCUSES_BASIS,
     }
     manifest = {
         "run_id": run_id,
@@ -873,6 +985,12 @@ def run_forecast(
         "configuration": configuration,
         "configuration_hash": _hash_obj(configuration),
         "snapshot_ids": {"evidence": snap.snapshot_id},
+        "presidential_source_sha256": snap.presidential_source_sha256,
+        "presidential_source_years": list(snap.presidential_source_years),
+        "prior_store_sha256": snap.prior_snapshot_sha256,
+        "market_store_sha256": market_store_sha,
+        "market_audit_sha256": market_audit_sha,
+        "stack_artifact_sha256": stack_artifact_sha,
         "domain_hashes": snapshot_domain_hashes(),
         "environment_lock": environment_lock(),
         "seed": seed,

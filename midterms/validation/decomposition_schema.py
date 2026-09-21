@@ -12,6 +12,7 @@ TermKind = Literal[
     "overlay_shift",
     "uncertainty_component",
     "nonlinear_joint_effect",
+    "observation_location",
 ]
 TERM_KINDS = frozenset(TermKind.__args__)
 
@@ -42,6 +43,7 @@ class Decomposition:
     final_scale: DiagnosticTerm
     terms: tuple[DiagnosticTerm, ...] = field(default_factory=tuple)
     effective_sample_size: float | None = None
+    observation_count: int | None = None
     exact_overlay_chain: bool = False
 
     def validate(self, *, atol: float = 1e-8) -> None:
@@ -61,6 +63,8 @@ class Decomposition:
             raise ValueError("final scale must be positive")
         if self.effective_sample_size is not None and self.effective_sample_size < 0:
             raise ValueError("effective sample size cannot be negative")
+        if self.observation_count is not None and self.observation_count < 0:
+            raise ValueError("observation count cannot be negative")
         if self.exact_overlay_chain:
             shifts = sum(term.value for term in self.terms if term.kind == "overlay_shift")
             expected = self.stacked_core_location.value + shifts

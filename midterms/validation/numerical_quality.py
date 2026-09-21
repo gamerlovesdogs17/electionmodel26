@@ -95,6 +95,9 @@ def idata_convergence(idata: Any, *, var_name: str = "mu_final") -> dict[str, An
             else ess_bulk
         )
         n_samples = int(idata.posterior.sizes.get("chain", 1) * idata.posterior.sizes.get("draw", 0))
+        if (not np.isfinite(rhat).all() or not np.isfinite(ess_bulk).all()
+                or not np.isfinite(ess_tail).all()):
+            raise ValueError("ArviZ convergence estimates are nonfinite or underpowered")
         out.update(
             {
                 "available": True,
@@ -108,8 +111,90 @@ def idata_convergence(idata: Any, *, var_name: str = "mu_final") -> dict[str, An
             }
         )
     except Exception as exc:  # noqa: BLE001
-        out["error"] = str(exc)
+        try:
+            fallback = _numpy_rank_convergence(idata, var_name=var_name)
+            fallback["arviz_error"] = str(exc)
+            return fallback
+        except Exception as fallback_exc:  # noqa: BLE001
+            out["error"] = f"ArviZ: {exc}; NumPy fallback: {fallback_exc}"
     return out
+
+
+def _numpy_rank_convergence(idata: Any, *, var_name: str) -> dict[str, Any]:
+    """Rank-normalized split R-hat and Geyer bulk ESS without ArviZ DLLs."""
+    from scipy.stats import norm, rankdata
+
+    posterior = idata.posterior
+    if var_name not in posterior:
+        raise ValueError(f"{var_name} missing from posterior")
+    values = np.asarray(posterior[var_name].values, dtype=float)
+    if values.ndim < 2 or values.shape[0] < 2 or values.shape[1] < 4:
+        raise ValueError("convergence requires at least two chains and four draws per chain")
+    n_chains, n_draws = values.shape[:2]
+    if not np.isfinite(values).all():
+        raise ValueError("posterior contains nonfinite samples")
+    values = values.reshape(n_chains, n_draws, -1)
+    half = n_draws // 2
+    split = np.concatenate((values[:, :half, :], values[:, -half:, :]), axis=0)
+    total = split.shape[0] * half
+
+    def _rank_normalize(x: np.ndarray) -> np.ndarray:
+        ranks = rankdata(x.reshape(-1), method="average")
+        z = norm.ppf((ranks - 0.375) / (len(ranks) + 0.25))
+        return np.asarray(z, dtype=float).reshape(x.shape)
+
+    def _split_rhat(x: np.ndarray) -> float:
+        within = float(np.mean(np.var(x, axis=1, ddof=1)))
+        if within <= 0:
+            return float("inf")
+        between = half * float(np.var(np.mean(x, axis=1), ddof=1))
+        var_plus = (half - 1) / half * within + between / half
+        return float(np.sqrt(max(var_plus / within, 0.0)))
+
+    def _bulk_ess(x: np.ndarray) -> float:
+        centered = x - x.mean(axis=1, keepdims=True)
+        within = float(np.mean(np.var(x, axis=1, ddof=1)))
+        between = half * float(np.var(np.mean(x, axis=1), ddof=1))
+        var_plus = (half - 1) / half * within + between / half
+        if var_plus <= 0:
+            return 0.0
+        spectrum = np.fft.rfft(centered, n=2 * half, axis=1)
+        autocov = np.fft.irfft(spectrum * np.conjugate(spectrum), n=2 * half, axis=1)
+        autocov = autocov[:, :half].mean(axis=0) / half
+        rho = 1.0 - (within - autocov) / var_plus
+        rho[0] = 1.0
+        pair_sums = []
+        for lag in range(0, half - 1, 2):
+            pair = float(rho[lag] + rho[lag + 1])
+            if not np.isfinite(pair) or pair <= 0:
+                break
+            pair_sums.append(min(pair, pair_sums[-1]) if pair_sums else pair)
+        tau = max(-1.0 + 2.0 * sum(pair_sums), 1.0)
+        return float(min(total / tau, total))
+
+    rhats: list[float] = []
+    bulk_esses: list[float] = []
+    for variable in range(split.shape[2]):
+        raw = split[:, :, variable]
+        ranked = _rank_normalize(raw)
+        folded = _rank_normalize(np.abs(raw - np.median(raw)))
+        rhats.append(max(_split_rhat(ranked), _split_rhat(folded)))
+        bulk_esses.append(_bulk_ess(ranked))
+    if not np.isfinite(rhats).all() or not np.isfinite(bulk_esses).all():
+        raise ValueError("rank convergence calculation was nonfinite")
+    n_samples = n_chains * n_draws
+    return {
+        "available": True,
+        "backend": "numpy_rank_split_rhat_geyer_bulk_ess_v1",
+        "var_name": var_name,
+        "n_samples": n_samples,
+        "r_hat_max": float(max(rhats)),
+        "r_hat_mean": float(np.mean(rhats)),
+        "ess_bulk_min": float(min(bulk_esses)),
+        "ess_bulk_median": float(np.median(bulk_esses)),
+        "ess_tail_min": None,
+        "ess_bulk_min_frac": float(min(bulk_esses) / n_samples),
+    }
 
 
 def deterministic_replay_check(

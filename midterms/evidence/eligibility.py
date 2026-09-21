@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -61,7 +60,6 @@ def classify_result_row(row: dict[str, Any] | pd.Series) -> str:
         return "official"
     if url.startswith("http"):
         return "curated"
-    rid = str(get("race_id") or "")
     # Prefer certified archive presence via results_certified merge provenance
     if get("release_version") is not None and url and "synthetic" not in url:
         return "curated"
@@ -101,6 +99,25 @@ def classify_race_election(election_id: str, races: pd.DataFrame | None = None) 
 def _tier_counts(series: pd.Series) -> dict[str, int]:
     vc = series.value_counts()
     return {str(k): int(v) for k, v in vc.items()}
+
+
+def audit_structural_prior(races: pd.DataFrame) -> dict[str, Any]:
+    """A raw source manifest alone cannot certify a derived model input."""
+    required = ("prior_source", "prior_provenance_sha256", "prior_production_eligible")
+    missing = [name for name in required if name not in races.columns]
+    if missing:
+        return {"eligible": False, "blocked_n": int(len(races)),
+                "reason": f"structural prior metadata missing: {', '.join(missing)}"}
+    active = races[~races["not_up"].fillna(False)] if "not_up" in races.columns else races
+    valid_sha = active["prior_provenance_sha256"].astype(str).str.fullmatch(r"[0-9a-fA-F]{64}")
+    valid = (
+        active["prior_source"].eq("observed_presidential_relative_v1")
+        & active["prior_production_eligible"].eq(True)  # noqa: E712
+        & valid_sha
+    )
+    blocked = int((~valid).sum())
+    return {"eligible": blocked == 0, "blocked_n": blocked,
+            "reason": None if blocked == 0 else f"{blocked} structural priors lack verified derived provenance"}
 
 
 def classify_polls(polls: pd.DataFrame) -> pd.Series:
@@ -174,7 +191,7 @@ def _classify_manifest_domain(
     return out
 
 
-def _audit_configured_domains() -> dict[str, Any]:
+def _audit_configured_domains(*, as_of: str | None = None) -> dict[str, Any]:
     """All-domain evidence registry (fresh audit R-04)."""
     domains: dict[str, Any] = {}
 
@@ -316,14 +333,20 @@ def _audit_configured_domains() -> dict[str, Any]:
             }
 
     markets = _load("markets_kalshi.json")
-    if markets is None and (NORMALIZED_DIR / "markets.parquet").exists():
+    from midterms.evidence.markets import verify_market_store_integrity
+
+    market_integrity = verify_market_store_integrity(as_of=as_of)
+    if not market_integrity["ok"]:
         domains["markets"] = {
-            "tier": "aggregator",
-            "eligible": True,
-            "n": int(len(pd.read_parquet(NORMALIZED_DIR / "markets.parquet"))),
+            "tier": "untraceable", "eligible": False,
+            "n": int((markets or {}).get("n_races") or 0),
+            "blocked_reason": str(market_integrity["reason"]),
         }
     else:
-        domains["markets"] = _classify_manifest_domain(name="markets", manifest=markets)
+        domains["markets"] = {
+            **_classify_manifest_domain(name="markets", manifest=markets),
+            "mapping_integrity": market_integrity,
+        }
 
     return domains
 
@@ -388,9 +411,28 @@ def audit_evidence(
             else 0,
         },
     }
+    if election_id == "senate-2026":
+        prior_error = None
+        if as_of:
+            try:
+                from midterms.evidence.presidential_prior import (
+                    attach_prior_snapshot, materialize_prior_snapshot,
+                )
+
+                prior_snapshot, _ = materialize_prior_snapshot(pd.Timestamp(as_of).date())
+                races_e = attach_prior_snapshot(races_e, prior_snapshot)
+            except (FileNotFoundError, KeyError, TypeError, ValueError) as exc:
+                prior_error = str(exc)
+        prior_audit = audit_structural_prior(races_e)
+        if prior_error:
+            prior_audit = {"eligible": False, "blocked_n": len(races_e),
+                           "reason": f"structural prior source verification failed: {prior_error}"}
+        domains["structural_prior"] = prior_audit
+        if not prior_audit["eligible"]:
+            reasons.append(str(prior_audit["reason"]))
 
     # Fresh audit R-04: every configured live domain
-    extra = _audit_configured_domains()
+    extra = _audit_configured_domains(as_of=as_of)
     domains.update(extra)
     for name, block in extra.items():
         if block.get("quarantine"):

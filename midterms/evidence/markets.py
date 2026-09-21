@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
+import time
 import unicodedata
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -14,7 +18,7 @@ import pandas as pd
 
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 
-PARSER_VERSION = "kalshi-v2-candidate-aware"
+PARSER_VERSION = "kalshi-v3-candidate-audit"
 KALSHI = "https://api.elections.kalshi.com/trade-api/v2"
 
 # Class II 2026 contested set + specials (mirrors fixtures)
@@ -36,8 +40,20 @@ def _get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
     if params:
         url += "?" + urlencode(params)
     req = Request(url, headers={"User-Agent": "midterms-senate-model/0.3 (research)"})
-    with urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    for attempt in range(3):
+        try:
+            with urlopen(req, timeout=30) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except HTTPError as exc:
+            if exc.code != 429 or attempt == 2:
+                raise
+            retry_after = _f(exc.headers.get("Retry-After"))
+            time.sleep(min(10.0, max(1.0, retry_after or 2 ** (attempt + 1))))
+    raise RuntimeError("market request retries exhausted")
+
+
+def _utc_today() -> str:
+    return datetime.now(timezone.utc).date().isoformat()
 
 
 def _mid(bid: float | None, ask: float | None, last: float | None) -> float | None:
@@ -173,6 +189,13 @@ def audit_race_event(
     mapped, reason = map_race_event(
         race_id=race_id, event_ticker=event_ticker, markets=markets, ticket=ticket,
     )
+    from midterms.evidence.outcome_identity import identity_from_ticket
+
+    try:
+        identity = identity_from_ticket(race_id, ticket)
+        modeled_id, opposing_id = (item.candidate_id for item in identity.contenders)
+    except ValueError:
+        modeled_id, opposing_id = None, None
     raw_contracts = []
     for market in markets:
         ticker = str(market.get("ticker") or "")
@@ -198,8 +221,11 @@ def audit_race_event(
     return {
         "race_id": race_id,
         "event_id": event_ticker,
-        "modeled_entity_id": str(ticket.get("modeled_candidate_id") or ticket.get("dem_name") or ""),
-        "opposing_entity_id": str(ticket.get("republican_candidate_id") or ticket.get("rep_name") or ""),
+        "modeled_entity_id": modeled_id,
+        "opposing_entity_id": opposing_id,
+        "modeled_candidate_name": ticket.get("dem_name"),
+        "opposing_candidate_name": ticket.get("rep_name"),
+        "modeled_ballot_party": ticket.get("dem_party"),
         "matched_modeled_contract_id": mapped["modeled_candidate_ticker"] if mapped else None,
         "matched_opposing_contract_id": mapped["republican_candidate_ticker"] if mapped else None,
         "raw_contract_prices": raw_contracts,
@@ -207,6 +233,7 @@ def audit_race_event(
         "mapping_method": mapped["market_mapping"] if mapped else None,
         "ambiguous_or_unsafe": mapped is None,
         "overlay_enabled": mapped is not None,
+        "fetch_status": "ok",
         "parser_version": PARSER_VERSION,
         "disable_reason": reason,
     }
@@ -262,7 +289,7 @@ def fetch_race_markets(
     cycle_suffix: str = "26",
     *,
     available_at: str | None = None,
-) -> tuple[pd.DataFrame, list[dict[str, str]]]:
+) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
     """Candidate-aware race events → modeled-side market overlay evidence."""
     from midterms.evidence.tickets import TICKETS_2026
 
@@ -271,6 +298,7 @@ def fetch_race_markets(
     rows = []
     errors = []
     for st in states:
+        race_id = f"senate-20{cycle_suffix}-{st}"
         candidates = [f"SENATE{st}-{cycle_suffix}"]
         extra = SPECIAL_EVENT_SUFFIX.get(st)
         if extra:
@@ -287,28 +315,36 @@ def fetch_race_markets(
                 last_err = exc
                 data = None
         if data is None:
-            errors.append({"state": st, "error": str(last_err or "no markets")})
+            errors.append({"state": st, "race_id": race_id,
+                           "error": str(last_err or "no markets"), "event_ticker": event,
+                           "kind": "fetch_failed"})
             continue
         if not (data.get("markets") or []):
+            errors.append({"state": st, "race_id": race_id,
+                           "error": "no priced contracts", "event_ticker": event,
+                           "kind": "no_event_contracts"})
             continue
         ticket = TICKETS_2026.get(st) if cycle_suffix == "26" else None
         if ticket is None:
-            errors.append({"state": st, "error": "no candidate identity registry for this cycle"})
+            errors.append({"state": st, "race_id": race_id,
+                           "error": "no candidate identity registry for this cycle",
+                           "event_ticker": event, "kind": "identity_unavailable"})
             continue
         mapped, reason = map_race_event(
-            race_id=f"senate-20{cycle_suffix}-{st}",
+            race_id=race_id,
             event_ticker=event,
             markets=data.get("markets") or [],
             ticket=ticket,
         )
         mapping_audit = audit_race_event(
-            race_id=f"senate-20{cycle_suffix}-{st}",
+            race_id=race_id,
             event_ticker=event,
             markets=data.get("markets") or [],
             ticket=ticket,
         )
         if mapped is None:
-            errors.append({"state": st, "error": str(reason), "event_ticker": event,
+            errors.append({"state": st, "race_id": race_id,
+                           "error": str(reason), "event_ticker": event,
                            "mapping_audit": mapping_audit})
             continue
         vol = max((_f(m.get("volume_fp")) or 0.0 for m in data.get("markets") or []), default=0.0)
@@ -324,10 +360,52 @@ def fetch_race_markets(
                 "available_at": stamp,
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
                 "parser_version": PARSER_VERSION,
+                "overlay_enabled": True,
+                "disable_reason": None,
+                "modeled_entity_id": mapping_audit["modeled_entity_id"],
+                "opposing_entity_id": mapping_audit["opposing_entity_id"],
+                "matched_modeled_contract_id": mapping_audit["matched_modeled_contract_id"],
+                "matched_opposing_contract_id": mapping_audit["matched_opposing_contract_id"],
                 "mapping_audit": json.dumps(mapping_audit, sort_keys=True),
             }
         )
     return pd.DataFrame(rows), errors
+
+
+def write_mapping_audit_store(
+    races: pd.DataFrame, errors: list[dict[str, Any]], *, path: Path,
+) -> dict[str, Any]:
+    """Persist all event mappings, including disabled and unpriced events."""
+    audits = []
+    for _, row in races.iterrows():
+        audits.append(json.loads(row["mapping_audit"]))
+    for error in errors:
+        audit = error.get("mapping_audit")
+        if audit is None:
+            audit = {
+                "race_id": error.get("race_id"), "event_id": error.get("event_ticker"),
+                "modeled_entity_id": None, "opposing_entity_id": None,
+                "modeled_candidate_name": None, "opposing_candidate_name": None,
+                "modeled_ballot_party": None,
+                "matched_modeled_contract_id": None,
+                "matched_opposing_contract_id": None,
+                "overlay_enabled": False, "ambiguous_or_unsafe": True,
+                "disable_reason": error.get("error"), "parser_version": PARSER_VERSION,
+                "fetch_status": error.get("kind") or "unclassified_error",
+                "raw_contract_prices": [], "normalized_event_probabilities": None,
+                "mapping_method": None,
+            }
+        audits.append(audit)
+    payload = {"parser_version": PARSER_VERSION, "events": audits}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    try:
+        portable_path = path.resolve().relative_to(Path(__file__).resolve().parents[2]).as_posix()
+    except ValueError:
+        portable_path = path.name
+    return {"path": portable_path, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "n_enabled": sum(bool(a.get("overlay_enabled")) for a in audits),
+            "n_disabled": sum(not bool(a.get("overlay_enabled")) for a in audits)}
 
 
 def write_markets_store(
@@ -340,7 +418,12 @@ def write_markets_store(
     m = re.search(r"(\d{4})", election_id)
     year = int(m.group(1)) if m else 2026
     suffix = str(year)[-2:]
-    stamp = available_at or datetime.now(timezone.utc).date().isoformat()
+    stamp = _utc_today()
+    if available_at is not None and available_at != stamp:
+        raise ValueError(
+            "live market retrieval cannot be backdated or future-dated: "
+            f"requested available_at={available_at}, retrieval date={stamp}"
+        )
 
     control = {}
     control_err = None
@@ -370,6 +453,9 @@ def write_markets_store(
         )
     )
     share_path = NORMALIZED_DIR / "markets.parquet"
+    mapping_meta = write_mapping_audit_store(
+        races, errors, path=NORMALIZED_DIR / "markets_mapping_audit.json",
+    )
     if len(races):
         races.to_parquet(share_path, index=False)
     else:
@@ -386,6 +472,13 @@ def write_markets_store(
                 "available_at",
                 "retrieved_at",
                 "parser_version",
+                "overlay_enabled",
+                "disable_reason",
+                "modeled_entity_id",
+                "opposing_entity_id",
+                "matched_modeled_contract_id",
+                "matched_opposing_contract_id",
+                "mapping_audit",
                 "election_id",
             ]
         ).to_parquet(share_path, index=False)
@@ -397,12 +490,17 @@ def write_markets_store(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "election_id": election_id,
         "available_at": stamp,
+        "retrieval_date": stamp,
         "n_races": int(len(races)),
         "control_p_dem": control.get("p_dem"),
         "control_p_rep": control.get("p_rep"),
         "errors": errors[:10],
         "control_error": control_err,
         "parser_version": PARSER_VERSION,
+        "raw_sha256": hashlib.sha256(raw_path.read_bytes()).hexdigest(),
+        "mapping_audit": mapping_meta,
+        "normalized_races_sha256": hashlib.sha256(share_path.read_bytes()).hexdigest(),
+        "normalized_control_sha256": hashlib.sha256(control_path.read_bytes()).hexdigest(),
         "source_url": "https://api.elections.kalshi.com/",
         "tier": "aggregator" if len(races) or control.get("p_dem") is not None else "curated",
         "paths": {
@@ -416,9 +514,72 @@ def write_markets_store(
     return man
 
 
+def verify_market_store_integrity(*, as_of: str | None = None) -> dict[str, Any]:
+    """Validate current parser, bytes, and one mapping decision per event."""
+    manifest_path = MANIFESTS_DIR / "markets_kalshi.json"
+    if not manifest_path.exists():
+        return {"ok": False, "reason": "market manifest missing"}
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if manifest.get("parser_version") != PARSER_VERSION:
+            raise ValueError("market parser version is stale")
+        if manifest.get("retrieval_date") != manifest.get("available_at"):
+            raise ValueError("live market availability differs from retrieval date")
+        if as_of and str(manifest.get("available_at") or "") > as_of:
+            raise ValueError("market store is newer than requested snapshot")
+        paths = {
+            "raw_sha256": RAW_DIR / "external" / "kalshi_senate.json",
+            "normalized_races_sha256": NORMALIZED_DIR / "markets.parquet",
+            "normalized_control_sha256": NORMALIZED_DIR / "markets_control.json",
+        }
+        for field, path in paths.items():
+            if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != manifest.get(field):
+                raise ValueError(f"market {field} is missing or changed")
+        audit_path = NORMALIZED_DIR / "markets_mapping_audit.json"
+        audit_meta = manifest["mapping_audit"]
+        if (not audit_path.is_file()
+                or hashlib.sha256(audit_path.read_bytes()).hexdigest() != audit_meta.get("sha256")):
+            raise ValueError("market mapping audit is missing or changed")
+        audit = json.loads(audit_path.read_text(encoding="utf-8"))
+        events = audit["events"]
+        if audit.get("parser_version") != PARSER_VERSION:
+            raise ValueError("market mapping audit parser is stale")
+        expected = {f"{manifest['election_id']}-{state}" for state in SENATE_2026_STATES}
+        found = [str(event.get("race_id")) for event in events]
+        if set(found) != expected or len(found) != len(expected):
+            raise ValueError("market mapping audit does not cover each event exactly once")
+        if any(event.get("parser_version") != PARSER_VERSION for event in events):
+            raise ValueError("market mapping audit contains a stale event parser")
+        if any(event.get("fetch_status") == "fetch_failed" for event in events):
+            raise ValueError("market event fetch failed; normalized store is incomplete")
+        if any(not event.get("fetch_status") for event in events):
+            raise ValueError("market event lacks fetch status")
+        if any(not event.get("overlay_enabled") and not event.get("disable_reason") for event in events):
+            raise ValueError("disabled market event lacks a reason")
+        enabled = [event for event in events if event.get("overlay_enabled")]
+        frame = pd.read_parquet(paths["normalized_races_sha256"])
+        if len(frame) and (
+            not frame["available_at"].astype(str).eq(manifest["available_at"]).all()
+            or frame["retrieved_at"].astype(str).str[:10].gt(manifest["available_at"]).any()
+        ):
+            raise ValueError("market row was backdated before retrieval")
+        if len(frame) != len(enabled) or set(frame.get("race_id", [])) != {
+            str(event["race_id"]) for event in enabled
+        }:
+            raise ValueError("enabled market rows differ from mapping audit")
+        if len(frame) and (not frame["parser_version"].eq(PARSER_VERSION).all()
+                           or not frame["overlay_enabled"].all()):
+            raise ValueError("normalized market rows include stale or disabled mapping")
+        return {"ok": True, "parser_version": PARSER_VERSION,
+                "n_enabled": len(enabled), "n_disabled": len(events) - len(enabled),
+                "audit_sha256": audit_meta["sha256"]}
+    except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        return {"ok": False, "reason": str(exc)}
+
+
 def load_race_markets(as_of: str | None = None) -> pd.DataFrame:
     path = NORMALIZED_DIR / "markets.parquet"
-    if not path.exists():
+    if not path.exists() or not verify_market_store_integrity(as_of=as_of)["ok"]:
         return pd.DataFrame()
     df = pd.read_parquet(path)
     # A prior parser can carry a wrong candidate mapping. Never reuse it after
@@ -426,13 +587,19 @@ def load_race_markets(as_of: str | None = None) -> pd.DataFrame:
     if "parser_version" not in df.columns:
         return df.head(0)
     df = df[df["parser_version"] == PARSER_VERSION]
+    if "overlay_enabled" not in df.columns or "mapping_audit" not in df.columns:
+        return df.head(0)
+    df = df[df["overlay_enabled"] == True]  # noqa: E712 - pandas BooleanArray filter
     if as_of and "available_at" in df.columns and len(df):
         df = df[pd.to_datetime(df["available_at"]).dt.date <= pd.Timestamp(as_of).date()]
     return df
 
 
-def load_control_market() -> dict[str, Any]:
+def load_control_market(as_of: str | None = None) -> dict[str, Any]:
     path = NORMALIZED_DIR / "markets_control.json"
-    if not path.exists():
+    if not path.exists() or not verify_market_store_integrity(as_of=as_of)["ok"]:
         return {}
-    return json.loads(path.read_text())
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}

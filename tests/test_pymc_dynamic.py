@@ -152,6 +152,6 @@ def test_fit_pymc_dynamic_smoke():
     snap = _toy_snapshot()
     fit = fit_pymc_dynamic(snap, draws=40, tune=40, chains=1, seed=1)
     assert fit.method == "pymc_dynamic"
-    assert fit.diagnostics.get("latent_path") == "weekly_random_walk"
+    assert fit.diagnostics.get("latent_path") == "weekly_random_walk_morris_calibrated"
     assert fit.draws_margin.shape[1] == 2
     assert np.all(np.isfinite(fit.mean_margin))

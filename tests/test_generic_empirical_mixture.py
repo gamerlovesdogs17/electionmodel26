@@ -85,6 +85,11 @@ def test_stack_artifact_reproduces_from_synthetic_frozen_draws(tmp_path):
     assert verify_reproducible(fitted)["ok"] is False
     nested_payload["oof_draws"]["first"]["a"][0] = -1.0
     nested.write_text(json.dumps(nested_payload), encoding="utf-8")
+    nested_payload["unrelated_lineage_marker"] = "tampered"
+    nested.write_text(json.dumps(nested_payload), encoding="utf-8")
+    assert verify_reproducible(fitted)["ok"] is False
+    del nested_payload["unrelated_lineage_marker"]
+    nested.write_text(json.dumps(nested_payload), encoding="utf-8")
     payload = json.loads(out.read_text(encoding="utf-8"))
     payload["matrix_sha256"] = "stale"
     assert verify_reproducible(payload)["ok"] is False
@@ -92,3 +97,30 @@ def test_stack_artifact_reproduces_from_synthetic_frozen_draws(tmp_path):
     out.write_text(json.dumps(old), encoding="utf-8")
     with pytest.raises(ValueError, match="stale stack"):
         load_oof_stack_weights(path=out)
+
+
+def test_formal_stack_refuses_incomplete_required_candidate(tmp_path):
+    nested_path = tmp_path / "synthetic_formal_nested.json"
+    frozen_index = tmp_path / "synthetic_formal_nested_frozen.json"
+    frozen_index.write_text('{"entries": []}', encoding="utf-8")
+    draws = {"pymc": {"2018:60:synthetic": [-1.0, 1.0]}}
+    fingerprint = hashlib.sha256(json.dumps(
+        draws, sort_keys=True, separators=(",", ":"), allow_nan=False,
+    ).encode()).hexdigest()
+    nested_path.write_text(json.dumps({
+        "stack_training_protocol": "formal_60_30_v1",
+        "oof_crps_method": "exact_empirical_predictive_draws",
+        "years": [2018, 2020, 2022, 2024], "lead_days": [60, 30],
+        "oof_draws": draws, "frozen_draws_sha256": fingerprint,
+        "frozen_index_sha256": hashlib.sha256(frozen_index.read_bytes()).hexdigest(),
+        "oof_truths": {"2018:60:synthetic": 0.0},
+    }), encoding="utf-8")
+    with pytest.raises(ValueError, match="candidate pymc_dynamic"):
+        fit_stack_weights_from_nested_loo(
+            nested_path=nested_path, out_path=tmp_path / "stack.json",
+        )
+    frozen_index.write_text('{"entries": ["changed"]}', encoding="utf-8")
+    with pytest.raises(ValueError, match="frozen index"):
+        fit_stack_weights_from_nested_loo(
+            nested_path=nested_path, out_path=tmp_path / "stack.json",
+        )

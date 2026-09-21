@@ -97,6 +97,9 @@ def simulate_chamber(
     ``n_sims`` optionally expands posterior draws to a larger joint-simulation
     count via resampling (correlated structure preserved).
     """
+    from midterms.evidence.outcome_identity import require_binary_chamber_compatibility
+
+    require_binary_chamber_compatibility(races)
     contested = races[races.apply(is_active_ballot_row, axis=1)] if len(races) else races
     held = races[races["not_up"]] if len(races) else races
     held_ind = int((held["held_by"] == "I").sum()) if len(held) else 0
@@ -185,7 +188,10 @@ def simulate_chamber(
         ticket = ticket_for_state(state)
         dem_name = str(ticket["dem_name"])
         rep_name = str(ticket["rep_name"])
-        dem_party = str(ticket.get("dem_party") or "D")
+        row_ballot_party = None if row is None else row.get("modeled_ballot_party")
+        dem_party = str(
+            row_ballot_party if pd.notna(row_ballot_party) else ticket.get("dem_party") or "D"
+        )
         if dem_party not in {"D", "I"}:
             dem_party = "D"
         mean_m = float(fit.mean_margin[i])
@@ -194,8 +200,14 @@ def simulate_chamber(
         rating = rating_from_probability(p_dem)
         favored_caucus = "D" if p_dem >= 0.5 else "R"
         favored_party = dem_party if favored_caucus == "D" else "R"
-        held_caucus = "D" if held_by in {"D", "I"} else ("R" if held_by == "R" else None)
-        is_flip = bool(held_caucus and favored_caucus != held_caucus)
+        held_caucus = (
+            str(row.get("held_caucus")) if held_by == "I" and row is not None
+            and pd.notna(row.get("held_caucus")) else held_by if held_by in {"D", "R"} else None
+        )
+        is_flip = None if held_caucus is None else favored_caucus != held_caucus
+        favored_candidate_id = None if row is None else row.get(
+            "modeled_candidate_id" if favored_caucus == "D" else "opposing_candidate_id"
+        )
         summaries.append(
             {
                 "race_id": rid,
@@ -216,7 +228,16 @@ def simulate_chamber(
                 "dem_candidate": dem_name,
                 "rep_candidate": rep_name,
                 "dem_party": dem_party,
-                "caucus": dem_party if favored_caucus == "D" else "R",
+                "modeled_candidate_id": None if row is None else row.get("modeled_candidate_id"),
+                "opposing_candidate_id": None if row is None else row.get("opposing_candidate_id"),
+                "modeled_ballot_party": dem_party,
+                "opposing_ballot_party": "R",
+                "modeled_caucus": None if row is None else row.get("modeled_caucus"),
+                "opposing_caucus": None if row is None else row.get("opposing_caucus"),
+                "modeled_caucus_basis": None if row is None else row.get("modeled_caucus_basis"),
+                "opposing_caucus_basis": None if row is None else row.get("opposing_caucus_basis"),
+                "favored_candidate_id": favored_candidate_id,
+                "caucus": favored_caucus,
                 "dem_share": round(dem_share, 1),
                 "rep_share": round(rep_share, 1),
                 "rating": rating,

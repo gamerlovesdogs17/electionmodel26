@@ -1,0 +1,59 @@
+{
+  "parser_version": "fec-presidential-vote-counts-v1",
+  "source_kind": "official_certified_vote_counts",
+  "source_blocks": [
+    {
+      "year": 2012,
+      "filename": "fec_2012.xls",
+      "url": "https://www.fec.gov/documents/1684/2012pres.xls",
+      "title": "Federal Elections 2012: President",
+      "election_date": "2012-11-06",
+      "available_at": "2013-08-21",
+      "sha256": "8b3cb324ef9d14b69bd643681f753c3c3d5aa1c4b72eadbf03e010046ecf8067",
+      "provider": "Federal Election Commission",
+      "retrieved_at": "2026-09-20",
+      "raw_path": "data/raw/external/presidential/fec_2012.xls"
+    },
+    {
+      "year": 2016,
+      "filename": "fec_2016.xlsx",
+      "url": "https://www.fec.gov/documents/1890/federalelections2016.xlsx",
+      "title": "Federal Elections 2016",
+      "election_date": "2016-11-08",
+      "available_at": "2018-01-09",
+      "sha256": "b4a1d1383602bc388cfbdf1fbea2476476d32e0b44b44236d3a3910fa9782eb6",
+      "provider": "Federal Election Commission",
+      "retrieved_at": "2026-09-20",
+      "raw_path": "data/raw/external/presidential/fec_2016.xlsx"
+    },
+    {
+      "year": 2020,
+      "filename": "fec_2020.pdf",
+      "url": "https://www.fec.gov/resources/cms-content/documents/2020presgeresults.pdf",
+      "title": "Official 2020 Presidential General Election Results",
+      "election_date": "2020-11-03",
+      "available_at": "2021-02-01",
+      "sha256": "3665d4523618b9c86a6f26fa9b924dbb4ffb757d2b3c59a43c768e980821b0d7",
+      "provider": "Federal Election Commission",
+      "retrieved_at": "2026-09-20",
+      "raw_path": "data/raw/external/presidential/fec_2020.pdf"
+    },
+    {
+      "year": 2024,
+      "filename": "fec_2024.xlsx",
+      "url": "https://www.fec.gov/documents/5645/2024presgeresults.xlsx",
+      "title": "Official 2024 Presidential General Election Results",
+      "election_date": "2024-11-05",
+      "available_at": "2025-01-24",
+      "sha256": "68acdee2924d771b92a05cd950dec850b462c633c05563207ac7e206116e7366",
+      "provider": "Federal Election Commission",
+      "retrieved_at": "2026-09-20",
+      "raw_path": "data/raw/external/presidential/fec_2024.xlsx"
+    }
+  ],
+  "n_rows": 204,
+  "normalized_path": "data/normalized/presidential_vote_counts.parquet",
+  "derived_prior_status": "not_computed",
+  "normalized_sha256": "fdbe33a9bca1f7be4ddc1d6fcee6daa29fe30df0023cbd4134596bb7bad032fe",
+  "source_set_sha256": "fa2602dedb4d49d65ee1b8ea0eeb0c9d232442dec727cedab75286c057d0772b"
+}

@@ -1,54 +1,76 @@
 {
-  "generated_at": "2026-09-20T05:22:31.641939+00:00",
+  "generated_at": "2026-09-20T21:01:54.347073+00:00",
   "election_id": "senate-2026",
-  "available_at": "2026-09-13",
-  "n_races": 22,
+  "available_at": "2026-09-20",
+  "retrieval_date": "2026-09-20",
+  "n_races": 33,
   "control_p_dem": 0.5891089108910891,
   "control_p_rep": 0.41089108910891087,
   "errors": [
     {
-      "state": "MN",
-      "error": "HTTP Error 429: Too Many Requests"
+      "state": "KY",
+      "race_id": "senate-2026-KY",
+      "error": "no priced contracts",
+      "event_ticker": "SENATEKY-26",
+      "kind": "no_event_contracts"
     },
     {
       "state": "MT",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "NE",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "NJ",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "NC",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "OK",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "RI",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "SC",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "TN",
-      "error": "HTTP Error 429: Too Many Requests"
-    },
-    {
-      "state": "VA",
-      "error": "HTTP Error 429: Too Many Requests"
+      "race_id": "senate-2026-MT",
+      "error": "modeled candidate or Republican contract is absent or ambiguous",
+      "event_ticker": "SENATEMT-26",
+      "mapping_audit": {
+        "race_id": "senate-2026-MT",
+        "event_id": "SENATEMT-26",
+        "modeled_entity_id": "senate-2026-MT:seth-bodnar",
+        "opposing_entity_id": "senate-2026-MT:kurt-alme",
+        "modeled_candidate_name": "Seth Bodnar",
+        "opposing_candidate_name": "Kurt Alme",
+        "modeled_ballot_party": "I",
+        "matched_modeled_contract_id": null,
+        "matched_opposing_contract_id": null,
+        "raw_contract_prices": [
+          {
+            "contract_id": "SENATEMT-26-IND",
+            "title": "Will Independents win the Senate race in Montana?",
+            "raw_price": 0.0865
+          },
+          {
+            "contract_id": "SENATEMT-26-R",
+            "title": "Will Republicans win the Senate race in Montana?",
+            "raw_price": 0.914
+          },
+          {
+            "contract_id": "SENATEMT-26-D",
+            "title": "Will Democratics win the Senate race in Montana?",
+            "raw_price": 0.007
+          }
+        ],
+        "normalized_event_probabilities": {
+          "SENATEMT-26-IND": 0.08585607940446649,
+          "SENATEMT-26-R": 0.9071960297766749,
+          "SENATEMT-26-D": 0.006947890818858561
+        },
+        "mapping_method": null,
+        "ambiguous_or_unsafe": true,
+        "overlay_enabled": false,
+        "fetch_status": "ok",
+        "parser_version": "kalshi-v3-candidate-audit",
+        "disable_reason": "modeled candidate or Republican contract is absent or ambiguous"
+      }
     }
   ],
   "control_error": null,
-  "parser_version": "kalshi-v1",
+  "parser_version": "kalshi-v3-candidate-audit",
+  "raw_sha256": "8f89b4f8a604395e6ecc9f1fd436a3af5f4f28a4a9e2f8382ee637a600d0916d",
+  "mapping_audit": {
+    "path": "data/normalized/markets_mapping_audit.json",
+    "sha256": "3383c2a8e4b1a6fbf3771be2974d58a9763118278a664254ad21a5cd97c9127a",
+    "n_enabled": 33,
+    "n_disabled": 2
+  },
+  "normalized_races_sha256": "88333a7e079b2b9daf5c209129d04ce6ee30d6bd2e286c30e7d7e95ec6e4f8e9",
+  "normalized_control_sha256": "39bde0c775a19c01e558c38f962beacff219501a9d92106605c64c73814dea21",
   "source_url": "https://api.elections.kalshi.com/",
   "tier": "aggregator",
   "paths": {

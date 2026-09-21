@@ -4,6 +4,76 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-20 — declared Independent caucus accounting assumption (no model rerun)
+
+- At the user's direction, all modeled Independent challengers in the current
+  ticket registry and held Independent seats now count toward the Democratic
+  caucus in chamber math. Their ballot/held party remains `I`; the accounting
+  basis is explicitly marked as a user-declared model assumption, not as an
+  individual candidate's verified caucus pledge.
+- Independent contests remain excluded from D–R margin scoring. A future
+  forecast will write the policy into its chamber artifact and run
+  configuration; run coherence rejects an older current forecast without it.
+  Missing or conflicting caucus metadata still fails closed.
+- Only focused synthetic/accounting tests were run. No current forecast,
+  market refresh, stack fit, simulation, or acceptance chain was regenerated.
+
+## 2026-09-20 — sourced prior and validation integration (release pending)
+
+- The verified FEC statewide vote-count store now produces sealed 50-state
+  presidential-relative prior snapshots. Warehouse races use the point-in-time
+  derived prior; fixture `BASE_LEANS` remains only in source/fixture tables.
+  The same method applies to historical snapshots without changing truth.
+- The candidate-aware Kalshi store was refreshed with an event-level mapping
+  audit. Named Independent contracts take precedence over party suffixes;
+  ambiguous events stay disabled. Market ingestion rejects backdated live
+  timestamps and loader/eligibility checks bind parser, audit, raw and normalized
+  hashes, full fetch status, and snapshot date.
+- OOF freezes static and dynamic PyMC as distinct candidates, records source
+  and prior lineage, and requires validation R-hat/ESS diagnostics. The formal
+  stack-training protocol remains 60/30 days. A custom OOF output path keeps
+  its freeze index beside the requested artifact, avoiding changes to `latest`
+  artifacts during tests. Reliability is reported unadjusted; uncertainty is
+  no longer widened using the same held-out outcomes being scored.
+- The four-cycle formal OOF was run with 800 tune and retained draws over two
+  chains. Two dynamic fits missed the ESS threshold and were refitted at
+  2000/2000/4 using diagnostics alone; the final archive has no failed fits.
+  Candidate screening scores now use exact empirical CRPS from frozen draws,
+  with Gaussian moment scores labeled diagnostics. The true predictive-mixture
+  stack was fitted and independently reproduced. Dynamic PyMC earned zero
+  production mass under the predeclared screen.
+- Historical ridge training excludes held-out, later, and not-yet-available
+  results. A strict validation fit cannot silently revert to prior coefficients.
+  The forecast code has separate static/dynamic component fits and fails when
+  a positive production stack weight lacks its named predictive component.
+- Candidate identity and caucus metadata are separate throughout the warehouse
+  and chamber preflight. Unknown Independent caucus treatment blocks chamber
+  accounting. The per-race decomposition hook is connected but has not generated
+  a new current forecast artifact.
+- The sourced prior, market store, formal OOF, and stack have been rebuilt.
+  The current forecast, independent rebuild, coherence, and G1–G11 remain
+  blocked by unknown Independent caucus metadata. Public live stays disabled.
+
+## 2026-09-20 — official source and pipeline provenance wiring (validation pending)
+
+- Added hash-pinned raw FEC presidential result files for four historical
+  elections and a normalized statewide vote-count store. Source selection uses
+  dated FEC availability metadata. At this stage it did not yet derive or
+  populate state partisan priors; the integration entry above supersedes that
+  status.
+- Warehouse snapshots carry the verified source-set fingerprint and selected
+  source years. Current ticket identities carry separate ballot-party and
+  caucus fields; missing caucus metadata blocks seat accounting before fitting.
+- Candidate-market audit records are persisted for enabled and disabled events;
+  stale parser versions or tampered normalized/audit files cannot be silently
+  reused. The chamber simulator rejects unsupported nonstandard caucus
+  mappings before seat accounting.
+  No market refresh was run at this earlier stage.
+- Publication eligibility fails closed on fixture or unprovenanced structural
+  priors. Generic artifact lineage includes optional prior and market hashes.
+  Existing forecasts and validation artifacts are unchanged and stale; no
+  forecast, replay, stack fit, or simulation was run.
+
 ## 2026-09-20 — generic statistical and provenance infrastructure (validation pending)
 
 - Added empirical predictive-mixture CRPS fitting from frozen draws with
@@ -12,8 +82,9 @@ should be preserved alongside newer ones under `data/artifacts/` and
 - Added a generic model registry for distinct identifiers, per-model fit
   settings and failures, frozen draws, and grouped freeze-before-truth hooks.
 - Added a versioned point-in-time relative-prior source schema and weighted
-  calculation. It is not yet populated with a real source series or connected
-  to production race inputs.
+  calculation. At this stage it was not populated with a real source series or
+  connected to production race inputs; the later source-ingest entry above
+  records the subsequent count-only work.
 - Added explicit candidate/party/modeled-side/caucus identity and a generic
   decomposition schema. Candidate-aware contract mapping now emits an audit
   record for successful and disabled events.

@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
+
 # General-election tickets (Class II + 2026 specials), Sep 2026 research snapshot.
 # Prefer nominated / ballot-qualified major candidates; not an endorsement.
-# dem_party: "D" or "I" — Ind (no Dem) still maps to Dem caucus seat math.
+# dem_party is a ballot label. Caucus affiliation is separate metadata.
 TICKETS_2026: dict[str, dict[str, Any]] = {
     "AL": {"dem_name": "Everett Wess", "rep_name": "Barry Moore", "dem_party": "D"},
     "AK": {"dem_name": "Mary Peltola", "rep_name": "Dan Sullivan", "dem_party": "D"},
@@ -44,6 +46,21 @@ TICKETS_2026: dict[str, dict[str, Any]] = {
     "WV": {"dem_name": "Rachel Fetty Anderson", "rep_name": "Shelley Moore Capito", "dem_party": "D"},
     "WY": {"dem_name": "James W. Byrd", "rep_name": "Harriet Hageman", "dem_party": "D"},
 }
+
+# Major-party affiliations and the Independent treatment are explicit
+# model-accounting assumptions. The ballot party stays I; the caucus field
+# tells the binary chamber simulator how to count a modeled win.
+for _ticket in TICKETS_2026.values():
+    _ticket["opposing_caucus"] = "R"
+    _ticket["opposing_caucus_basis"] = "declared_major_party_nominee_assumption"
+    if _ticket["dem_party"] == "D":
+        _ticket["modeled_caucus"] = "D"
+        _ticket["modeled_caucus_basis"] = "declared_major_party_nominee_assumption"
+    elif _ticket["dem_party"] == "I":
+        _ticket["modeled_caucus"] = "D"
+        _ticket["modeled_caucus_basis"] = INDEPENDENT_DEM_CAUCUSES_BASIS
+    else:
+        raise ValueError("unsupported modeled ballot party requires an explicit caucus")
 
 
 def ticket_for_state(state: str) -> dict[str, Any]:

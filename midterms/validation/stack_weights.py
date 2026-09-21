@@ -14,7 +14,7 @@ from typing import Any
 
 import numpy as np
 
-from midterms.config import ARTIFACTS_DIR
+from midterms.config import ARTIFACTS_DIR, ROOT
 from midterms.model.empirical_mixture import fit_predictive_mixture
 from midterms.model.ensemble import (
     weights_from_oof_scores,
@@ -31,6 +31,9 @@ EXCLUDE_FROM_STACK = frozenset(
 
 STACK_WEIGHTS_PATH = ARTIFACTS_DIR / "stack_weights_oof.json"
 NESTED_LOO_PATH = ARTIFACTS_DIR / "nested_component_loo.json"
+FORMAL_REQUIRED_CANDIDATES = frozenset({
+    "pymc", "pymc_dynamic", "state_space", "ridge_fundamentals",
+})
 
 
 def _matrix_fingerprint(crps_by_fold: dict[str, dict[str, float]]) -> str:
@@ -41,6 +44,13 @@ def _matrix_fingerprint(crps_by_fold: dict[str, dict[str, float]]) -> str:
 def _draws_fingerprint(draws: dict[str, Any]) -> str:
     blob = json.dumps(draws, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     return hashlib.sha256(blob).hexdigest()
+
+
+def _portable_path(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        return str(path)
 
 
 def disabled_from_g8(g8: dict[str, Any] | None) -> set[str]:
@@ -153,9 +163,30 @@ def reproduce_weights(payload: dict[str, Any]) -> dict[str, float]:
     if payload.get("stacking_mode") != "empirical_predictive_mixture_crps_v1":
         raise ValueError("stale stack artifact: empirical predictive draws required")
     nested_path = Path(str(payload.get("source_nested_loo") or ""))
+    if not nested_path.is_absolute():
+        nested_path = ROOT / nested_path
     if not nested_path.is_file():
         raise FileNotFoundError(f"frozen prediction artifact missing: {nested_path}")
+    nested_sha = payload.get("source_nested_sha256")
+    if nested_sha:
+        if hashlib.sha256(nested_path.read_bytes()).hexdigest() != nested_sha:
+            raise ValueError("nested OOF artifact fingerprint changed")
+    elif payload.get("source_stack_training_protocol") == "formal_60_30_v1":
+        raise ValueError("formal stack lacks nested OOF artifact fingerprint")
     nested = json.loads(nested_path.read_text(encoding="utf-8"))
+    if payload.get("source_stack_training_protocol") == "formal_60_30_v1":
+        frozen_index = nested_path.with_name(f"{nested_path.stem}_frozen.json")
+        if (not frozen_index.is_file() or not payload.get("source_frozen_index_sha256")
+                or hashlib.sha256(frozen_index.read_bytes()).hexdigest()
+                != payload["source_frozen_index_sha256"]
+                or nested.get("frozen_index_sha256") != payload["source_frozen_index_sha256"]):
+            raise ValueError("frozen prediction index lineage changed")
+    if (nested.get("prior_snapshot_sha256_by_fold_lead")
+            != payload.get("source_prior_snapshot_sha256_by_fold_lead")):
+        raise ValueError("prior snapshot lineage changed")
+    if (nested.get("presidential_source_sha256_by_fold_lead")
+            != payload.get("source_presidential_source_sha256_by_fold_lead")):
+        raise ValueError("presidential source lineage changed")
     if nested.get("frozen_draws_sha256") != _draws_fingerprint(nested.get("oof_draws") or {}):
         raise ValueError("frozen draw archive fingerprint changed")
     excluded = set(payload.get("excluded_g8_disable") or []) | set(EXCLUDE_FROM_STACK)
@@ -220,6 +251,34 @@ def fit_stack_weights_from_nested_loo(
     nested = json.loads(nested_path.read_text())
     if nested.get("frozen_draws_sha256") != _draws_fingerprint(nested.get("oof_draws") or {}):
         raise ValueError("nested OOF frozen draw fingerprint missing or stale")
+    if nested.get("stack_training_protocol") == "formal_60_30_v1":
+        if nested.get("failures"):
+            raise ValueError("formal production stack requires zero nested component failures")
+        if nested.get("oof_crps_method") != "exact_empirical_predictive_draws":
+            raise ValueError("formal production stack requires empirical OOF CRPS screening")
+        frozen_index = nested_path.with_name(f"{nested_path.stem}_frozen.json")
+        if (not frozen_index.is_file() or not nested.get("frozen_index_sha256")
+                or hashlib.sha256(frozen_index.read_bytes()).hexdigest()
+                != nested["frozen_index_sha256"]):
+            raise ValueError("formal production stack frozen index is missing or stale")
+        if nested.get("years") != [2018, 2020, 2022, 2024] or nested.get("lead_days") != [60, 30]:
+            raise ValueError("formal production stack requires the declared four-cycle 60/30 grid")
+        truths = set(nested.get("oof_truths") or {})
+        if not truths:
+            raise ValueError("formal production stack has no frozen OOF truth cases")
+        for name in sorted(FORMAL_REQUIRED_CANDIDATES):
+            cases = set((nested.get("oof_draws") or {}).get(name) or {})
+            if cases != truths:
+                raise ValueError(
+                    f"formal production stack candidate {name} has incomplete frozen OOF draws "
+                    f"({len(cases)}/{len(truths)} cases)"
+                )
+        for year in nested["years"]:
+            for lead in nested["lead_days"]:
+                if not (nested.get("prior_snapshot_sha256_by_fold_lead") or {}).get(str(year), {}).get(str(lead)):
+                    raise ValueError("formal production stack lacks a prior snapshot for a fold/lead")
+                if not (nested.get("presidential_source_sha256_by_fold_lead") or {}).get(str(year), {}).get(str(lead)):
+                    raise ValueError("formal production stack lacks presidential source lineage")
     crps = nested.get("crps_by_fold") or {}
     g8 = nested.get("g8_recommendations") or {}
     fitted = fit_stack_weights_from_oof(
@@ -229,10 +288,16 @@ def fit_stack_weights_from_nested_loo(
         oof_draws=nested.get("oof_draws"),
         oof_truths=nested.get("oof_truths"),
     )
-    fitted["source_nested_loo"] = str(nested_path)
+    fitted["source_nested_loo"] = _portable_path(nested_path)
+    fitted["source_nested_sha256"] = hashlib.sha256(nested_path.read_bytes()).hexdigest()
     fitted["source_spine_label"] = nested.get("spine_label")
     fitted["source_hierarchical_method"] = nested.get("hierarchical_method")
     fitted["source_years"] = nested.get("years")
+    fitted["source_prior_snapshot_sha256_by_fold_lead"] = nested.get("prior_snapshot_sha256_by_fold_lead")
+    fitted["source_presidential_source_sha256_by_fold_lead"] = nested.get("presidential_source_sha256_by_fold_lead")
+    fitted["source_frozen_index_sha256"] = nested.get("frozen_index_sha256")
+    fitted["source_model_version"] = nested.get("model_version")
+    fitted["source_stack_training_protocol"] = nested.get("stack_training_protocol")
     ver = verify_reproducible(fitted)
     fitted["reproduction"] = ver
     if not ver["ok"]:
@@ -260,10 +325,16 @@ def load_oof_stack_weights(
     provenance: dict[str, Any] = {
         "source": "stack_weights_oof.json",
         "path": str(path),
+        "artifact_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         "matrix_sha256": payload.get("matrix_sha256"),
         "no_weight_remapping": payload.get("no_weight_remapping", True),
         "excluded_g8_disable": payload.get("excluded_g8_disable"),
         "source_spine_label": payload.get("source_spine_label"),
+        "source_model_version": payload.get("source_model_version"),
+        "source_stack_training_protocol": payload.get("source_stack_training_protocol"),
+        "source_nested_sha256": payload.get("source_nested_sha256"),
+        "source_prior_snapshot_sha256_by_fold_lead": payload.get("source_prior_snapshot_sha256_by_fold_lead"),
+        "source_presidential_source_sha256_by_fold_lead": payload.get("source_presidential_source_sha256_by_fold_lead"),
         "note": payload.get("note"),
     }
     if require_reproducible:

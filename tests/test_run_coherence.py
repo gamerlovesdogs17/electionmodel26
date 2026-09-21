@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -78,3 +79,106 @@ def test_evidence_eligible_development_run_is_not_mislabeled(tmp_path: Path):
     report = check_run_coherence(artifacts_dir=tmp_path)
     assert report["ok"] is True
     assert any("inference is non-publication" in note for note in report["notes"])
+
+
+def test_coherence_detects_stale_presidential_source(tmp_path: Path, monkeypatch):
+    from midterms.config import MODEL_VERSION
+    from midterms.evidence import presidential_results
+
+    monkeypatch.setattr(presidential_results, "verified_source_set_sha256", lambda: "b" * 64)
+    forecast = {
+        "run_id": "synthetic-run", "model_version": MODEL_VERSION,
+        "publishable": False, "run_class": "non_publication",
+        "publication_surface": "research_only",
+        "presidential_source_sha256": "a" * 64,
+        "snapshot": {"snapshot_id": "synthetic-snapshot"},
+    }
+    (tmp_path / "forecast_latest.json").write_text(json.dumps(forecast), encoding="utf-8")
+    report = check_run_coherence(artifacts_dir=tmp_path, require_matching_eligibility=False)
+    assert not report["ok"]
+    assert any("presidential source fingerprint" in item for item in report["mismatches"])
+
+
+def test_coherence_rejects_stale_independent_caucus_policy(tmp_path: Path):
+    from midterms.config import MODEL_VERSION
+
+    forecast = {
+        "run_id": "synthetic-run", "model_version": MODEL_VERSION,
+        "election_id": "senate-2026", "publishable": False,
+        "run_class": "non_publication", "publication_surface": "research_only",
+        "snapshot": {"snapshot_id": "synthetic-snapshot"},
+        "chamber": {"independent_caucus_policy": {
+            "ballot_party": "I", "seat_accounting_caucus": "D", "basis": "old-policy",
+        }},
+    }
+    (tmp_path / "forecast_latest.json").write_text(json.dumps(forecast), encoding="utf-8")
+    report = check_run_coherence(artifacts_dir=tmp_path, require_matching_eligibility=False)
+    assert not report["ok"]
+    assert any("Independent caucus accounting policy" in item for item in report["mismatches"])
+
+
+def test_coherence_binds_decomposition_to_forecast(tmp_path: Path):
+    from midterms.config import MODEL_VERSION
+
+    forecast = {
+        "run_id": "synthetic-run", "model_version": MODEL_VERSION,
+        "publishable": False, "run_class": "non_publication",
+        "publication_surface": "research_only",
+        "snapshot": {"snapshot_id": "synthetic-snapshot"},
+        "decomposition_artifact": "race_decomposition_latest.json",
+    }
+    raw = json.dumps(forecast).encode()
+    (tmp_path / "forecast_latest.json").write_bytes(raw)
+    decomposition = {
+        "run_id": "synthetic-run", "model_version": MODEL_VERSION,
+        "snapshot_id": "synthetic-snapshot", "prior_store_sha256": None,
+        "forecast_sha256": hashlib.sha256(raw).hexdigest(),
+        "evidence_fingerprint": {"sha256": ""}, "rows": [],
+    }
+    path = tmp_path / "race_decomposition_latest.json"
+    path.write_text(json.dumps(decomposition))
+    assert check_run_coherence(artifacts_dir=tmp_path, require_matching_eligibility=False)["ok"]
+    decomposition["run_id"] = "different-run"
+    path.write_text(json.dumps(decomposition))
+    report = check_run_coherence(artifacts_dir=tmp_path, require_matching_eligibility=False)
+    assert not report["ok"]
+    assert any("decomposition.run_id" in item for item in report["mismatches"])
+
+
+def test_coherence_rejects_stale_market_store(tmp_path: Path, monkeypatch):
+    from midterms.config import MODEL_VERSION
+    from midterms.evidence import markets
+
+    monkeypatch.setattr(markets, "verify_market_store_integrity",
+                        lambda **kwargs: {"ok": False, "reason": "synthetic stale audit"})
+    forecast = {
+        "run_id": "synthetic-run", "model_version": MODEL_VERSION,
+        "forecast_as_of": "2026-01-01", "publishable": False,
+        "run_class": "non_publication", "publication_surface": "research_only",
+        "market_store_sha256": "a" * 64, "market_audit_sha256": "b" * 64,
+        "snapshot": {"snapshot_id": "synthetic-snapshot"},
+    }
+    (tmp_path / "forecast_latest.json").write_text(json.dumps(forecast), encoding="utf-8")
+    report = check_run_coherence(artifacts_dir=tmp_path, require_matching_eligibility=False)
+    assert not report["ok"]
+    assert any("market store integrity" in item for item in report["mismatches"])
+
+
+def test_coherence_rejects_stale_stack_artifact(tmp_path: Path, monkeypatch):
+    from midterms.config import MODEL_VERSION
+    from midterms.ops import run_coherence
+
+    monkeypatch.setattr(run_coherence, "ARTIFACTS_DIR", tmp_path)
+    stack_path = tmp_path / "stack_weights_oof.json"
+    stack_path.write_text('{"synthetic":true}', encoding="utf-8")
+    forecast = {
+        "run_id": "synthetic-run", "model_version": MODEL_VERSION,
+        "publishable": False, "run_class": "non_publication",
+        "publication_surface": "research_only",
+        "stack_artifact_sha256": "a" * 64,
+        "snapshot": {"snapshot_id": "synthetic-snapshot"},
+    }
+    (tmp_path / "forecast_latest.json").write_text(json.dumps(forecast), encoding="utf-8")
+    report = check_run_coherence(artifacts_dir=tmp_path, require_matching_eligibility=False)
+    assert not report["ok"]
+    assert any("stack artifact fingerprint" in item for item in report["mismatches"])

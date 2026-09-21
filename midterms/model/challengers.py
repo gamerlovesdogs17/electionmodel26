@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import date, timedelta
+
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
@@ -67,6 +69,33 @@ def fit_ridge_coefficients(
     return out
 
 
+def select_chronological_training_rows(
+    races: pd.DataFrame, results: pd.DataFrame, *, holdout_year: int, as_of: date,
+) -> pd.DataFrame:
+    """Select only earlier, already available outcomes for a held-out cycle."""
+    if "available_at" not in results.columns:
+        raise ValueError("historical ridge results require available_at")
+    race_year = pd.to_numeric(
+        races["election_id"].astype(str).str.extract(r"(\d{4})$")[0], errors="coerce",
+    )
+    result_year = pd.to_numeric(
+        results["election_id"].astype(str).str.extract(r"(\d{4})$")[0], errors="coerce",
+    )
+    available = pd.to_datetime(results["available_at"], errors="coerce").dt.date
+    earlier_races = races.loc[race_year.lt(holdout_year)].copy()
+    known = results.loc[result_year.lt(holdout_year) & available.le(as_of)].copy()
+    known = known.sort_values("available_at").drop_duplicates("race_id", keep="last")
+    columns = [
+        column for column in ("race_id", "two_party_margin", "score_eligible", "margin_value")
+        if column in known.columns
+    ]
+    historical = earlier_races.merge(known[columns], on="race_id", how="inner")
+    historical = historical[historical.apply(is_active_ballot_row, axis=1)]
+    from midterms.evidence.score_targets import filter_score_eligible_results
+
+    return filter_score_eligible_results(historical).reset_index(drop=True)
+
+
 def fit_ridge_fundamentals(
     snapshot: EvidenceSnapshot,
     *,
@@ -77,6 +106,7 @@ def fit_ridge_fundamentals(
     train_margins: np.ndarray | None = None,
     alpha: float = 25.0,
     coefs: dict[str, float] | None = None,
+    require_historical_fit: bool = False,
 ) -> FitResult:
     """
     Fundamentals-only predictive distribution.
@@ -94,48 +124,51 @@ def fit_ridge_fundamentals(
     fitted = coefs
     ridge_fit = False
     if fitted is None and train_races is not None and train_margins is not None:
+        if require_historical_fit and len(train_races) < 40:
+            raise ValueError("insufficient point-in-time historical races for ridge fit")
         fitted = fit_ridge_coefficients(
             train_races, np.asarray(train_margins, dtype=float),
             generic_ballot=generic_ballot, alpha=alpha,
         )
         ridge_fit = True
     elif fitted is None:
-        # Attempt multi-cycle historical design matrix from warehouse results
+        # Chronological training only: an outer holdout cannot see its own or
+        # later certified results. Every training race gets its own as-of prior.
         try:
             from midterms.evidence.warehouse import Warehouse
+            from midterms.evidence.presidential_prior import (
+                attach_prior_snapshot, materialize_prior_snapshot,
+            )
 
             wh = Warehouse(ensure_fixtures=False)
-            hist = wh.races.merge(
-                wh.results[
-                    [
-                        c
-                        for c in (
-                            "race_id",
-                            "two_party_margin",
-                            "score_eligible",
-                            "margin_value",
-                        )
-                        if c in wh.results.columns
-                    ]
-                ],
-                on="race_id",
-                how="inner",
+            holdout_year = int(str(snapshot.election_id).rsplit("-", 1)[-1])
+            hist = select_chronological_training_rows(
+                wh.races, wh.results, holdout_year=holdout_year, as_of=snapshot.as_of,
             )
-            hist = hist[hist["election_id"].astype(str) != str(snapshot.election_id)]
-            hist = hist[hist.apply(is_active_ballot_row, axis=1)]
-            from midterms.evidence.score_targets import filter_score_eligible_results
-
-            hist = filter_score_eligible_results(hist)
+            if len(hist):
+                rebuilt = []
+                for cycle_id, group in hist.groupby("election_id", sort=True):
+                    day = date.fromisoformat(str(group["election_day"].iloc[0])[:10])
+                    prior_snapshot, _ = materialize_prior_snapshot(day - timedelta(days=30))
+                    rebuilt.append(attach_prior_snapshot(group, prior_snapshot))
+                hist = pd.concat(rebuilt, ignore_index=True)
             ycol = "margin_value" if "margin_value" in hist.columns else "two_party_margin"
             if len(hist) >= 40:
                 fitted = fit_ridge_coefficients(
                     hist,
                     hist[ycol].astype(float).to_numpy(dtype=float),
-                    generic_ballot=generic_ballot,
+                    # The holdout's generic ballot is unavailable in a past
+                    # cycle's feature vintage. Fit historical coefficients at
+                    # the neutral context; apply today's context only at fit.
+                    generic_ballot=0.0,
                     alpha=alpha,
                 )
                 ridge_fit = True
+            elif require_historical_fit:
+                raise ValueError("insufficient point-in-time historical races for ridge fit")
         except Exception:  # noqa: BLE001
+            if require_historical_fit:
+                raise
             fitted = None
 
     old = fund_mod.set_coefs(fitted)
@@ -201,12 +234,14 @@ def build_challenger_draws(
     n_draws: int,
     seed: int,
     generic_ballot: float,
+    require_historical_fit: bool = False,
 ) -> dict[str, np.ndarray]:
     """Named draw tensors for stacking."""
     ss = fit_state_space(snapshot, n_draws=n_draws, seed=seed + 1, generic_ballot=generic_ballot)
     poll_only = fit_poll_only_state_space(snapshot, n_draws=n_draws, seed=seed + 2)
     ridge = fit_ridge_fundamentals(
-        snapshot, n_draws=n_draws, seed=seed + 3, generic_ballot=generic_ballot
+        snapshot, n_draws=n_draws, seed=seed + 3, generic_ballot=generic_ballot,
+        require_historical_fit=require_historical_fit,
     )
     return {
         "state_space": ss.draws_margin,

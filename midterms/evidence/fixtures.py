@@ -27,7 +27,7 @@ from midterms.config import (
     RAW_DIR,
     REGIONS,
 )
-from midterms.evidence.schema import POLL_COLUMNS, RACE_COLUMNS, RESULT_COLUMNS, align_poll_frame, align_result_frame
+from midterms.evidence.schema import RACE_COLUMNS, align_poll_frame, align_result_frame
 
 PARSER_VERSION = "fixtures-v1"
 
@@ -201,7 +201,7 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
                 **struct,
             }
         )
-    return pd.DataFrame(rows)[RACE_COLUMNS]
+    return pd.DataFrame(rows).reindex(columns=RACE_COLUMNS)
 
 
 def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -351,6 +351,8 @@ def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
 
 def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
     """Build research map: 33 Class II + 2 specials contested + 65 held (=100)."""
+    from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
+
     rng = rng or np.random.default_rng(2026)
     rows = []
     # Contested Class II — illustrative incumbency / openings for research demos
@@ -482,6 +484,10 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
                 "region": REGIONS[st],
                 "not_up": True,
                 "held_by": party,
+                "held_caucus": "D" if party == "I" else None,
+                "held_caucus_basis": (
+                    INDEPENDENT_DEM_CAUCUSES_BASIS if party == "I" else None
+                ),
                 **struct,
             }
         )

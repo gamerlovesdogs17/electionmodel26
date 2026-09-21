@@ -1,54 +1,84 @@
 # Incomplete validation status — 2026-09-20
 
-This completion pass remains incomplete as a real-data validation effort. The current `forecast_latest.json`,
-`nested_component_loo.json`, `stack_weights_oof.json`, validation reports,
-independent rebuild, and acceptance artifacts predate the code changes in
-this pass. Do not treat them as evidence for the modified pipeline.
+The code and historical stack validation have advanced, but the **current
+research forecast has not been rerun**. On 2026-09-20 the user explicitly
+declared a modeling assumption that Independent candidates and held Independent
+seats count toward the Democratic caucus. Their ballot/held party remains `I`.
+The assumption is recorded in race metadata and future run artifacts; it is
+not a claim about any candidate's real-world caucus declaration. Do not use older `latest`
+forecast, numerical, validation, rebuild, coherence, or acceptance artifacts
+as evidence for this code.
+The read-only run-coherence check is currently red: it detects missing new
+prior/source/stack/decomposition lineage and a market store newer than the old
+forecast snapshot. The changed caucus policy also makes the old current
+forecast stale. This is expected until a new same-run forecast exists.
 
-Completed code and focused verification:
+## Completed code and evidence
 
-- Publication sampling now resolves to the production floor by default and
-  rejects explicit underpowered publication requests before fitting.
-- The numerical gate checks per-chain draws, tuning, chain count, and the
-  retained posterior total for publication runs.
-- Candidate-aware market mapping uses the modeled candidate identity and
-  disables ambiguous events. Multi-contract events normalize across all
-  priced contracts.
-- A development run cannot inherit a publication label solely from evidence
-  eligibility.
-- Focused synthetic regression tests passed.
-- Generic empirical predictive-mixture CRPS now optimizes frozen draw distributions
-  on the simplex. Prediction and matrix fingerprints support deterministic refitting;
-  old mean-only stack artifacts fail closed.
-- A domain-neutral model registry stores separately identified predictions, fit
-  settings, per-model failures, and a freeze-before-truth grouped validation index.
-  The nested export retains each declared lead as a separate frozen draw case.
-- A versioned relative-prior source schema and pure point-in-time weighted
-  calculation are available, with explicit non-production fixture fallback.
-- Candidate, ballot party, modeled side, and caucus affiliation have separate
-  generic identities. Market mappings expose an audit record; ambiguous mappings
-  disable themselves. An internal decomposition schema and artifact-lineage check
-  are available for future integration.
+- Publication sampling defaults to 2000 retained draws and 2000 tune per chain
+  over four chains, rejects explicit underpowered publication requests, and
+  checks the 8000-sample posterior floor. The 50,000 joint-simulation target
+  is configured but has **not** been executed with this code.
+- The Federal Election Commission 2012/2016/2020/2024 presidential files are
+  pinned by SHA-256, parsed into statewide vote counts, and used to derive a
+  point-in-time 50-state structural prior. The latest available election gets
+  weight 2/3 and the previous one 1/3. Each warehouse race row carries a
+  derived-prior and source fingerprint. Fixture/randomized prior values are
+  rejected for publication-quality research runs.
+- Candidate, ballot party, modeled side, and caucus are distinct. The four
+  current Independent challengers and held Independent seats have an explicit
+  Democratic-caucus **model assumption** with a versioned basis. Their `I`
+  ballot/held labels remain unchanged. Independent contests remain excluded
+  from Democratic-minus-Republican margin scoring. Missing or conflicting
+  caucus metadata still fails closed.
+- The current Kalshi store was refreshed with the candidate-aware parser on
+  2026-09-20. Its raw, normalized, and event-audit hashes are verified; 33
+  race overlays are enabled and two are disabled. Ambiguous or unpriced events
+  retain explicit disable reasons. It cannot be backdated to 2026-09-13.
+- The internal decomposition hook and run lineage checks include prior, market,
+  stack, evidence, and run identities. No current race decomposition was
+  generated because the forecast was not rerun.
+- Formal nested OOF was run on the predeclared 2018/2020/2022/2024 × 60/30-day
+  protocol. Static `pymc`, `pymc_dynamic`, `state_space`, and
+  `ridge_fundamentals` remain separate candidates. All 264 eligible frozen
+  cases have predictive draws for these four models. The validation default
+  used 800 tune + 800 retained draws per chain over two chains. Two dynamic
+  folds failed the predeclared ESS threshold and were refitted using 2000 tune
+  + 2000 retained draws over four chains, selected from convergence diagnostics
+  alone. Their replacement predictions were frozen before truth was read.
+  The final archive has zero fit failures.
+- OOF component CRPS was recomputed from the frozen empirical distributions;
+  the earlier Gaussian moment scores remain labeled diagnostics. Production
+  stack weights were fitted by true predictive-mixture CRPS and independently
+  reproduced from the frozen archive. Dynamic PyMC earned no production mass
+  under the predeclared component screen.
 
-None of these generic modules has populated a new current prior, decomposition,
-market store, forecast, or OOF result. The current artifacts remain stale relative
-to this code. The existing production-facing prior construction has not yet been
-replaced by a sourced series.
+## Test status
 
-Still required before any completion claim:
+Focused synthetic/data tests pass, including distributional stack
+reproduction, point-in-time prior provenance, market mapping integrity,
+candidate/caucus separation, decomposition hooks, and freeze-before-truth
+repair. The full suite produced 230 passes, one skip, and 12 failures before
+an outdated dynamic-path assertion was corrected and its focused smoke test
+passed. The other 11 failures at that time required chamber accounting on
+rows with unknown Independent caucus metadata. A later focused synthetic
+policy/accounting suite passed after the explicit assumption was added; the
+full suite and current forecast have **not** been rerun after that change.
 
-1. Run genuine nested OOF for the separately identified model candidates across the
-   formal production lead times, with the broader diagnostic grid kept distinct.
-2. Refit and reproduce stack weights from that OOF artifact.
-3. Acquire and ingest a dated, attributable source series for the measured prior,
-   then connect the new framework to the production race builder and historical snapshots.
-4. Rebuild the market store with the new parser and audit every skipped
-   or ambiguously mapped event.
-5. Connect per-race prior provenance, explicit caucus metadata, and decomposition
-   diagnostics to the real-data pipeline after source validation.
-6. Regenerate the research forecast and all dependent numerical,
-   independent-rebuild, coherence, validation, and G1–G11 artifacts in order.
-7. Run the full relevant test suite and audit repository junk separately.
+## Required before any current-run completion claim
 
-`PUBLIC_LIVE_ENABLED` remains false and the configured publication surface
-remains `research_only`.
+1. Review the declared Independent Democratic-caucus assumption as a model
+   choice. Do not treat it as external candidate evidence or change ballot
+   party labels to Democratic.
+2. When separately requested, run the publication-quality current research
+   forecast with 2000/2000/4 PyMC inference and 50,000 correlated joint
+   simulations, then write the
+   per-race decomposition artifact.
+3. Run numerical quality, validation report, independent rebuild, run
+   coherence, and G1–G11 on the resulting **same-run** artifacts. These are
+   not green for the new code merely because older artifacts exist.
+4. Review the broader 90/60/30/14/7-day grid separately if desired; its old
+   120-draw screening evidence is not the production stack dataset.
+
+`PUBLIC_LIVE_ENABLED` remains false and `publication_surface` remains
+`research_only`. No public live publication was performed.

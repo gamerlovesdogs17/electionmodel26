@@ -8,12 +8,12 @@ definitions; Wikipedia / Ballotpedia certified election summaries (research).
 from __future__ import annotations
 
 import json
-from datetime import date, datetime, timezone
+from datetime import date
 from typing import Any
 
 import pandas as pd
 
-from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
+from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR
 from midterms.evidence.schema import RACE_COLUMNS
 
 PARSER_VERSION = "official-ballot-v1"
@@ -210,6 +210,8 @@ def build_held_rows_from_expectations(
     election_day: str,
 ) -> list[dict[str, Any]]:
     """Materialize not-up seats from independent expectations (not winner-solved)."""
+    from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
+
     n_held_dem = int(exp["held_dem"])
     n_held_ind = int(exp.get("held_ind") or 0)
     n_held_d_party = max(0, n_held_dem - n_held_ind)
@@ -249,6 +251,10 @@ def build_held_rows_from_expectations(
                 "incumbent_party": party,
                 "is_open": False,
                 "held_by": party,
+                "held_caucus": "D" if party == "I" else None,
+                "held_caucus_basis": (
+                    INDEPENDENT_DEM_CAUCUSES_BASIS if party == "I" else None
+                ),
                 "prior_lean": lean,
                 "region": _region(st if st != "XX" else "AL"),
                 "not_up": True,

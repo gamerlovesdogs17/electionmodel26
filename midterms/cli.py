@@ -19,6 +19,28 @@ def main(argv: list[str] | None = None) -> None:
     p_fix = sub.add_parser("build-fixtures", help="Generate synthetic evidence fixtures")
     p_fix.set_defaults(func=lambda a: print(json.dumps(build_fixtures(), indent=2)))
 
+    p_pres = sub.add_parser(
+        "build-presidential-vote-store",
+        help="Verify pinned FEC raw files and rebuild the statewide vote-count source store",
+    )
+    p_pres.add_argument("--fetch-missing", action="store_true",
+                        help="Download a missing pinned FEC file only after its hash verifies")
+
+    def _build_presidential_vote_store(a: argparse.Namespace) -> None:
+        from midterms.evidence.presidential_results import build_vote_count_store
+
+        manifest = build_vote_count_store(fetch_missing=a.fetch_missing)
+        print(json.dumps({
+            "parser_version": manifest["parser_version"],
+            "source_set_sha256": manifest["source_set_sha256"],
+            "normalized_sha256": manifest["normalized_sha256"],
+            "source_years": [row["year"] for row in manifest["source_blocks"]],
+            "n_rows": manifest["n_rows"],
+            "derived_prior_status": manifest["derived_prior_status"],
+        }, indent=2))
+
+    p_pres.set_defaults(func=_build_presidential_vote_store)
+
     p_fetch = sub.add_parser(
         "fetch-external",
         help="Fetch VoteHub polls/ratings (+ MEDSL/FTE archives when reachable)",
@@ -750,7 +772,7 @@ def main(argv: list[str] | None = None) -> None:
         "nested-component-loo",
         help="Freeze-then-score nested LOO for every component (audit P2.1)",
     )
-    p_nloo.add_argument("--draws", type=int, default=600)
+    p_nloo.add_argument("--draws", type=int, default=1600)
     p_nloo.add_argument(
         "--hierarchical-method",
         default="pymc",
@@ -826,7 +848,7 @@ def main(argv: list[str] | None = None) -> None:
         hist = chamber.get("seat_histogram") or []
         n = int(sum(int(h.get("count") or 0) for h in hist)) if hist else 0
         if n > 0:
-            from midterms.validation.numerical_quality import mcse_bernoulli, mcse_mean
+            from midterms.validation.numerical_quality import mcse_bernoulli
 
             p = float(chamber.get("p_dem_majority") or 0.5)
             seats = float(chamber.get("expected_dem_seats") or 50.0)
