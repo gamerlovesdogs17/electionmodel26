@@ -1,14 +1,14 @@
 {
   "schema_version": "stack_reliability_crossfit_v1",
   "procedure": "cycle_cross_fitted_production_stack",
-  "generated_at": "2026-09-22T00:51:27.527115+00:00",
+  "generated_at": "2026-09-22T01:18:42.619254+00:00",
   "complete": true,
   "freeze_before_truth": "Every outer-cycle plan is fit from other cycles only; held-out truth is read only after component eligibility, stack weights, and scale are frozen.",
   "source": {
     "nested_artifact_path": "data/artifacts/nested_component_loo.json",
     "nested_artifact_sha256": "f6a806ef07591866bb54b00ad6de6e726904a312e1acdd02056c389d86e7f9de",
     "stack_artifact_path": "data/artifacts/stack_weights_oof.json",
-    "stack_artifact_sha256": "6cd8d3a2e8de8091af3acc241861098e780d69546bf29f3b509cedd1ae99f842",
+    "stack_artifact_sha256": "d10f94ae3ed58e8c2c89b340474825b6bd6f76087cb853cb566f788fd520b673",
     "frozen_index_path": "data/artifacts/nested_component_loo_frozen.json",
     "frozen_index_semantic_sha256": "23b8d6d2528918cc29bea7dc2e865993db1e43eb653a3e321b14ab12de85dacd",
     "frozen_draws_sha256": "cf0c1ca5851e7dfe80b4d95eca9f0c21af54ff4405557d345a00b2c5f53a3b10",
@@ -395,8 +395,8 @@
         "calibration_claim_allowed": false,
         "calibration_slope_intercept": {
           "n": 64,
-          "slope": 0.9479066364555989,
-          "intercept": 0.0793044040651203,
+          "slope": 0.947906636455599,
+          "intercept": 0.07930440406512029,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -548,8 +548,8 @@
         "calibration_claim_allowed": false,
         "calibration_slope_intercept": {
           "n": 64,
-          "slope": 0.9479066364555989,
-          "intercept": 0.0793044040651203,
+          "slope": 0.947906636455599,
+          "intercept": 0.07930440406512029,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -1977,8 +1977,8 @@
         "excluded_missing_predictions": {}
       },
       "stack_weights": {
-        "pymc": 0.26165810853712157,
-        "state_space": 0.7383418914628784
+        "pymc": 0.26165810853712257,
+        "state_space": 0.7383418914628774
       },
       "stack_fit": {
         "method": "empirical_predictive_mixture_crps_v1",
@@ -1989,16 +1989,16 @@
       },
       "training_case_ids_sha256": "f17862c1623ea24dfb1987dbb3659dada9ef88e65edc04390c4c0e7363c86ec5",
       "training_truth_sha256": "cebbe5384bdff51f9e36eb8e97f5b79588915a9da2501421b8c3d9dd41eda791",
-      "plan_sha256": "45bded519135ae538414c67af1ed6b30feba82430fc9701f6c47e3fb4295ee8a",
+      "plan_sha256": "7009e376ab49cccf348525ac9b60711a36ae42e60e1fea2289476efbaf687556",
       "scale_selection": {
         "objective": "training_empirical_margin_crps",
         "tie_break": "closest_to_1.0_then_lower",
         "selected_scale": 1.0,
-        "selected_training_crps": 3.175545036864476,
+        "selected_training_crps": 3.1755450368644764,
         "candidate_scores": [
           {
             "scale": 1.0,
-            "empirical_crps": 3.175545036864476
+            "empirical_crps": 3.1755450368644764
           },
           {
             "scale": 1.05,
@@ -2006,27 +2006,27 @@
           },
           {
             "scale": 1.1,
-            "empirical_crps": 3.20744338867813
+            "empirical_crps": 3.2074433886781315
           },
           {
             "scale": 1.15,
-            "empirical_crps": 3.22797718266903
+            "empirical_crps": 3.227977182669032
           },
           {
             "scale": 1.2,
-            "empirical_crps": 3.2516350797483837
+            "empirical_crps": 3.251635079748383
           },
           {
             "scale": 1.25,
-            "empirical_crps": 3.277875000100081
+            "empirical_crps": 3.2778750001000825
           },
           {
             "scale": 1.3,
-            "empirical_crps": 3.3067029377489487
+            "empirical_crps": 3.30670293774895
           },
           {
             "scale": 1.35,
-            "empirical_crps": 3.337786557733307
+            "empirical_crps": 3.3377865577333075
           },
           {
             "scale": 1.4,
@@ -2038,27 +2038,27 @@
           },
           {
             "scale": 1.5,
-            "empirical_crps": 3.442728115542758
+            "empirical_crps": 3.44272811554276
           },
           {
             "scale": 1.55,
-            "empirical_crps": 3.481163864859593
+            "empirical_crps": 3.481163864859595
           },
           {
             "scale": 1.6,
-            "empirical_crps": 3.521112395392239
+            "empirical_crps": 3.52111239539224
           },
           {
             "scale": 1.65,
-            "empirical_crps": 3.5626375317268946
+            "empirical_crps": 3.562637531726896
           },
           {
             "scale": 1.7,
-            "empirical_crps": 3.605613231402753
+            "empirical_crps": 3.605613231402754
           },
           {
             "scale": 1.75,
-            "empirical_crps": 3.6497478249894475
+            "empirical_crps": 3.6497478249894484
           },
           {
             "scale": 1.8,
@@ -2066,11 +2066,11 @@
           },
           {
             "scale": 1.85,
-            "empirical_crps": 3.741676470744799
+            "empirical_crps": 3.7416764707448005
           },
           {
             "scale": 1.9,
-            "empirical_crps": 3.789311286357213
+            "empirical_crps": 3.789311286357214
           },
           {
             "scale": 1.95,
@@ -2078,7 +2078,7 @@
           },
           {
             "scale": 2.0,
-            "empirical_crps": 3.887326626810519
+            "empirical_crps": 3.88732662681052
           }
         ],
         "seed": 21,
@@ -2086,58 +2086,58 @@
       },
       "raw": {
         "n": 68,
-        "empirical_crps": 3.3939496000820717,
-        "brier": 0.06999062133260406,
-        "log_score": -0.20945566460827633,
+        "empirical_crps": 3.3939496000820726,
+        "brier": 0.06999062133260403,
+        "log_score": -0.2094556646082763,
         "log_score_orientation": "higher_is_better",
         "reliability": [
           {
             "bin_lo": 0.0,
             "bin_hi": 0.1,
             "n": 30.0,
-            "mean_p": 0.019206877626814577,
+            "mean_p": 0.019206877626814597,
             "mean_y": 0.0
           },
           {
             "bin_lo": 0.1,
             "bin_hi": 0.2,
             "n": 2.0,
-            "mean_p": 0.12644997257815935,
+            "mean_p": 0.1264499725781594,
             "mean_y": 0.0
           },
           {
             "bin_lo": 0.2,
             "bin_hi": 0.30000000000000004,
             "n": 1.0,
-            "mean_p": 0.2949336208148338,
+            "mean_p": 0.29493362081483393,
             "mean_y": 1.0
           },
           {
             "bin_lo": 0.30000000000000004,
             "bin_hi": 0.4,
             "n": 1.0,
-            "mean_p": 0.3015689839931909,
+            "mean_p": 0.30156898399319093,
             "mean_y": 1.0
           },
           {
             "bin_lo": 0.5,
             "bin_hi": 0.6000000000000001,
             "n": 3.0,
-            "mean_p": 0.5219764797947968,
+            "mean_p": 0.5219764797947969,
             "mean_y": 0.3333333333333333
           },
           {
             "bin_lo": 0.6000000000000001,
             "bin_hi": 0.7000000000000001,
             "n": 2.0,
-            "mean_p": 0.6895782192458999,
+            "mean_p": 0.6895782192459,
             "mean_y": 0.5
           },
           {
             "bin_lo": 0.7000000000000001,
             "bin_hi": 0.8,
             "n": 1.0,
-            "mean_p": 0.7824838227150389,
+            "mean_p": 0.782483822715039,
             "mean_y": 1.0
           },
           {
@@ -2167,8 +2167,8 @@
         "calibration_claim_allowed": false,
         "calibration_slope_intercept": {
           "n": 68,
-          "slope": 0.9624325325775215,
-          "intercept": -0.006299751612312696,
+          "slope": 0.9624325325775217,
+          "intercept": -0.006299751612312763,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -2177,8 +2177,8 @@
         },
         "pit": {
           "n": 68,
-          "mean": 0.3904895221862632,
-          "var": 0.05669240778694948,
+          "mean": 0.3904895221862631,
+          "var": 0.05669240778694945,
           "expected_mean": 0.5,
           "expected_var": 0.08333333333333333,
           "histogram": [
@@ -2239,58 +2239,58 @@
       },
       "calibrated": {
         "n": 68,
-        "empirical_crps": 3.3939496000820717,
-        "brier": 0.06999062133260406,
-        "log_score": -0.20945566460827633,
+        "empirical_crps": 3.3939496000820726,
+        "brier": 0.06999062133260403,
+        "log_score": -0.2094556646082763,
         "log_score_orientation": "higher_is_better",
         "reliability": [
           {
             "bin_lo": 0.0,
             "bin_hi": 0.1,
             "n": 30.0,
-            "mean_p": 0.019206877626814577,
+            "mean_p": 0.019206877626814597,
             "mean_y": 0.0
           },
           {
             "bin_lo": 0.1,
             "bin_hi": 0.2,
             "n": 2.0,
-            "mean_p": 0.12644997257815935,
+            "mean_p": 0.1264499725781594,
             "mean_y": 0.0
           },
           {
             "bin_lo": 0.2,
             "bin_hi": 0.30000000000000004,
             "n": 1.0,
-            "mean_p": 0.2949336208148338,
+            "mean_p": 0.29493362081483393,
             "mean_y": 1.0
           },
           {
             "bin_lo": 0.30000000000000004,
             "bin_hi": 0.4,
             "n": 1.0,
-            "mean_p": 0.3015689839931909,
+            "mean_p": 0.30156898399319093,
             "mean_y": 1.0
           },
           {
             "bin_lo": 0.5,
             "bin_hi": 0.6000000000000001,
             "n": 3.0,
-            "mean_p": 0.5219764797947968,
+            "mean_p": 0.5219764797947969,
             "mean_y": 0.3333333333333333
           },
           {
             "bin_lo": 0.6000000000000001,
             "bin_hi": 0.7000000000000001,
             "n": 2.0,
-            "mean_p": 0.6895782192458999,
+            "mean_p": 0.6895782192459,
             "mean_y": 0.5
           },
           {
             "bin_lo": 0.7000000000000001,
             "bin_hi": 0.8,
             "n": 1.0,
-            "mean_p": 0.7824838227150389,
+            "mean_p": 0.782483822715039,
             "mean_y": 1.0
           },
           {
@@ -2320,8 +2320,8 @@
         "calibration_claim_allowed": false,
         "calibration_slope_intercept": {
           "n": 68,
-          "slope": 0.9624325325775215,
-          "intercept": -0.006299751612312696,
+          "slope": 0.9624325325775217,
+          "intercept": -0.006299751612312763,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -2330,8 +2330,8 @@
         },
         "pit": {
           "n": 68,
-          "mean": 0.3904895221862632,
-          "var": 0.05669240778694948,
+          "mean": 0.3904895221862631,
+          "var": 0.05669240778694945,
           "expected_mean": 0.5,
           "expected_var": 0.08333333333333333,
           "histogram": [
@@ -2398,16 +2398,16 @@
           "truth_margin": -13.359,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.050343268605213085,
-            "predictive_mean": -9.417023715244285,
-            "empirical_crps": 2.190988276550977,
-            "pit": 0.23148152949458184
+            "probability": 0.05034326860521314,
+            "predictive_mean": -9.417023715244282,
+            "empirical_crps": 2.1909882765509794,
+            "pit": 0.2314815294945817
           },
           "calibrated": {
-            "probability": 0.050343268605213085,
-            "predictive_mean": -9.417023715244285,
-            "empirical_crps": 2.190988276550977,
-            "pit": 0.23148152949458184
+            "probability": 0.05034326860521314,
+            "predictive_mean": -9.417023715244282,
+            "empirical_crps": 2.1909882765509794,
+            "pit": 0.2314815294945817
           }
         },
         {
@@ -2417,16 +2417,16 @@
           "truth_margin": -20.393,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.000163536317835701,
-            "predictive_mean": -20.16801051377735,
-            "empirical_crps": 1.3865221760975408,
-            "pit": 0.4784342439899691
+            "probability": 0.00016353631783570162,
+            "predictive_mean": -20.168010513777347,
+            "empirical_crps": 1.3865221760975412,
+            "pit": 0.47843424398996887
           },
           "calibrated": {
-            "probability": 0.000163536317835701,
-            "predictive_mean": -20.16801051377735,
-            "empirical_crps": 1.3865221760975408,
-            "pit": 0.4784342439899691
+            "probability": 0.00016353631783570162,
+            "predictive_mean": -20.168010513777347,
+            "empirical_crps": 1.3865221760975412,
+            "pit": 0.47843424398996887
           }
         },
         {
@@ -2436,16 +2436,16 @@
           "truth_margin": 2.3495,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.7824838227150389,
-            "predictive_mean": 4.087911931135828,
-            "empirical_crps": 1.5705229019122,
-            "pit": 0.36872731069497716
+            "probability": 0.782483822715039,
+            "predictive_mean": 4.087911931135832,
+            "empirical_crps": 1.5705229019122022,
+            "pit": 0.36872731069497694
           },
           "calibrated": {
-            "probability": 0.7824838227150389,
-            "predictive_mean": 4.087911931135828,
-            "empirical_crps": 1.5705229019122,
-            "pit": 0.36872731069497716
+            "probability": 0.782483822715039,
+            "predictive_mean": 4.087911931135832,
+            "empirical_crps": 1.5705229019122022,
+            "pit": 0.36872731069497694
           }
         },
         {
@@ -2455,16 +2455,16 @@
           "truth_margin": 9.5432,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9312548606593206,
-            "predictive_mean": 7.832532539510158,
-            "empirical_crps": 1.2635078802949193,
-            "pit": 0.6268264120913749
+            "probability": 0.9312548606593207,
+            "predictive_mean": 7.83253253951016,
+            "empirical_crps": 1.263507880294919,
+            "pit": 0.6268264120913748
           },
           "calibrated": {
-            "probability": 0.9312548606593206,
-            "predictive_mean": 7.832532539510158,
-            "empirical_crps": 1.2635078802949193,
-            "pit": 0.6268264120913749
+            "probability": 0.9312548606593207,
+            "predictive_mean": 7.83253253951016,
+            "empirical_crps": 1.263507880294919,
+            "pit": 0.6268264120913748
           }
         },
         {
@@ -2475,15 +2475,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9643507153879778,
-            "predictive_mean": 15.798403555285063,
-            "empirical_crps": 3.862321576752951,
-            "pit": 0.7818199187558937
+            "predictive_mean": 15.798403555285073,
+            "empirical_crps": 3.8623215767529464,
+            "pit": 0.7818199187558934
           },
           "calibrated": {
             "probability": 0.9643507153879778,
-            "predictive_mean": 15.798403555285063,
-            "empirical_crps": 3.862321576752951,
-            "pit": 0.7818199187558937
+            "predictive_mean": 15.798403555285073,
+            "empirical_crps": 3.8623215767529464,
+            "pit": 0.7818199187558934
           }
         },
         {
@@ -2493,15 +2493,15 @@
           "truth_margin": 1.2251,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.2949336208148338,
-            "predictive_mean": -2.7034895018653984,
-            "empirical_crps": 2.2706337502255347,
+            "probability": 0.29493362081483393,
+            "predictive_mean": -2.7034895018653966,
+            "empirical_crps": 2.270633750225535,
             "pit": 0.7832788149991945
           },
           "calibrated": {
-            "probability": 0.2949336208148338,
-            "predictive_mean": -2.7034895018653984,
-            "empirical_crps": 2.2706337502255347,
+            "probability": 0.29493362081483393,
+            "predictive_mean": -2.7034895018653966,
+            "empirical_crps": 2.270633750225535,
             "pit": 0.7832788149991945
           }
         },
@@ -2512,16 +2512,16 @@
           "truth_margin": 2.0797,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.6848559063194465,
-            "predictive_mean": 2.3655888892947377,
-            "empirical_crps": 1.295055687530898,
-            "pit": 0.48290801511421866
+            "probability": 0.6848559063194466,
+            "predictive_mean": 2.36558888929474,
+            "empirical_crps": 1.2950556875308994,
+            "pit": 0.4829080151142185
           },
           "calibrated": {
-            "probability": 0.6848559063194465,
-            "predictive_mean": 2.3655888892947377,
-            "empirical_crps": 1.295055687530898,
-            "pit": 0.48290801511421866
+            "probability": 0.6848559063194466,
+            "predictive_mean": 2.36558888929474,
+            "empirical_crps": 1.2950556875308994,
+            "pit": 0.4829080151142185
           }
         },
         {
@@ -2531,16 +2531,16 @@
           "truth_margin": -6.7992,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.5432739730244546,
-            "predictive_mean": 0.4900109279671989,
+            "probability": 0.5432739730244547,
+            "predictive_mean": 0.4900109279672001,
             "empirical_crps": 5.397890478659539,
-            "pit": 0.07904306670500803
+            "pit": 0.07904306670500799
           },
           "calibrated": {
-            "probability": 0.5432739730244546,
-            "predictive_mean": 0.4900109279671989,
+            "probability": 0.5432739730244547,
+            "predictive_mean": 0.4900109279672001,
             "empirical_crps": 5.397890478659539,
-            "pit": 0.07904306670500803
+            "pit": 0.07904306670500799
           }
         },
         {
@@ -2552,14 +2552,14 @@
           "raw": {
             "probability": 0.0,
             "predictive_mean": -32.48953087416735,
-            "empirical_crps": 1.945368163503384,
-            "pit": 0.6272975784075998
+            "empirical_crps": 1.9453681635033826,
+            "pit": 0.6272975784075995
           },
           "calibrated": {
             "probability": 0.0,
             "predictive_mean": -32.48953087416735,
-            "empirical_crps": 1.945368163503384,
-            "pit": 0.6272975784075998
+            "empirical_crps": 1.9453681635033826,
+            "pit": 0.6272975784075995
           }
         },
         {
@@ -2570,15 +2570,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.986395726356714,
-            "predictive_mean": 19.258458277495833,
-            "empirical_crps": 2.288507296617211,
-            "pit": 0.396790773484551
+            "predictive_mean": 19.25845827749584,
+            "empirical_crps": 2.2885072966172144,
+            "pit": 0.3967907734845506
           },
           "calibrated": {
             "probability": 0.986395726356714,
-            "predictive_mean": 19.258458277495833,
-            "empirical_crps": 2.288507296617211,
-            "pit": 0.396790773484551
+            "predictive_mean": 19.25845827749584,
+            "empirical_crps": 2.2885072966172144,
+            "pit": 0.3967907734845506
           }
         },
         {
@@ -2588,16 +2588,16 @@
           "truth_margin": -12.0379,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.05365447554349104,
-            "predictive_mean": -9.134525537829811,
-            "empirical_crps": 1.6884429593394041,
-            "pit": 0.29332899821481906
+            "probability": 0.05365447554349112,
+            "predictive_mean": -9.134525537829807,
+            "empirical_crps": 1.6884429593394064,
+            "pit": 0.29332899821481884
           },
           "calibrated": {
-            "probability": 0.05365447554349104,
-            "predictive_mean": -9.134525537829811,
-            "empirical_crps": 1.6884429593394041,
-            "pit": 0.29332899821481906
+            "probability": 0.05365447554349112,
+            "predictive_mean": -9.134525537829807,
+            "empirical_crps": 1.6884429593394064,
+            "pit": 0.29332899821481884
           }
         },
         {
@@ -2608,15 +2608,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.003125,
-            "predictive_mean": -16.58311372120558,
-            "empirical_crps": 2.1633826772188933,
-            "pit": 0.2406006967033972
+            "predictive_mean": -16.583113721205578,
+            "empirical_crps": 2.163382677218895,
+            "pit": 0.24060069670339698
           },
           "calibrated": {
             "probability": 0.003125,
-            "predictive_mean": -16.58311372120558,
-            "empirical_crps": 2.1633826772188933,
-            "pit": 0.2406006967033972
+            "predictive_mean": -16.583113721205578,
+            "empirical_crps": 2.163382677218895,
+            "pit": 0.24060069670339698
           }
         },
         {
@@ -2626,16 +2626,16 @@
           "truth_margin": -26.8382,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.019023642752306356,
-            "predictive_mean": -17.665325541782778,
-            "empirical_crps": 5.560583532084747,
-            "pit": 0.12336786480480298
+            "probability": 0.019023642752306395,
+            "predictive_mean": -17.66532554178277,
+            "empirical_crps": 5.560583532084754,
+            "pit": 0.12336786480480284
           },
           "calibrated": {
-            "probability": 0.019023642752306356,
-            "predictive_mean": -17.665325541782778,
-            "empirical_crps": 5.560583532084747,
-            "pit": 0.12336786480480298
+            "probability": 0.019023642752306395,
+            "predictive_mean": -17.66532554178277,
+            "empirical_crps": 5.560583532084754,
+            "pit": 0.12336786480480284
           }
         },
         {
@@ -2646,15 +2646,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9976343910464929,
-            "predictive_mean": 21.065744306992215,
-            "empirical_crps": 8.819937263191584,
-            "pit": 0.9301570429823545
+            "predictive_mean": 21.065744306992222,
+            "empirical_crps": 8.819937263191576,
+            "pit": 0.9301570429823542
           },
           "calibrated": {
             "probability": 0.9976343910464929,
-            "predictive_mean": 21.065744306992215,
-            "empirical_crps": 8.819937263191584,
-            "pit": 0.9301570429823545
+            "predictive_mean": 21.065744306992222,
+            "empirical_crps": 8.819937263191576,
+            "pit": 0.9301570429823542
           }
         },
         {
@@ -2664,16 +2664,16 @@
           "truth_margin": -9.2071,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.8966175532172354,
-            "predictive_mean": 6.236399166986639,
-            "empirical_crps": 11.932175441813161,
-            "pit": 0.0038843910464928973
+            "probability": 0.8966175532172352,
+            "predictive_mean": 6.23639916698664,
+            "empirical_crps": 11.932175441813165,
+            "pit": 0.0038843910464928955
           },
           "calibrated": {
-            "probability": 0.8966175532172354,
-            "predictive_mean": 6.236399166986639,
-            "empirical_crps": 11.932175441813161,
-            "pit": 0.0038843910464928973
+            "probability": 0.8966175532172352,
+            "predictive_mean": 6.23639916698664,
+            "empirical_crps": 11.932175441813165,
+            "pit": 0.0038843910464928955
           }
         },
         {
@@ -2683,16 +2683,16 @@
           "truth_margin": 1.7173,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.8331913978697467,
-            "predictive_mean": 4.8260268881646216,
-            "empirical_crps": 1.5043137215741345,
-            "pit": 0.27164667980399754
+            "probability": 0.8331913978697469,
+            "predictive_mean": 4.826026888164625,
+            "empirical_crps": 1.5043137215741353,
+            "pit": 0.2716466798039973
           },
           "calibrated": {
-            "probability": 0.8331913978697467,
-            "predictive_mean": 4.8260268881646216,
-            "empirical_crps": 1.5043137215741345,
-            "pit": 0.27164667980399754
+            "probability": 0.8331913978697469,
+            "predictive_mean": 4.826026888164625,
+            "empirical_crps": 1.5043137215741353,
+            "pit": 0.2716466798039973
           }
         },
         {
@@ -2702,16 +2702,16 @@
           "truth_margin": 5.6795,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9394203412408844,
+            "probability": 0.9394203412408846,
             "predictive_mean": 8.116233160940375,
-            "empirical_crps": 1.5374926951269896,
-            "pit": 0.31005018321562444
+            "empirical_crps": 1.53749269512699,
+            "pit": 0.31005018321562433
           },
           "calibrated": {
-            "probability": 0.9394203412408844,
+            "probability": 0.9394203412408846,
             "predictive_mean": 8.116233160940375,
-            "empirical_crps": 1.5374926951269896,
-            "pit": 0.31005018321562444
+            "empirical_crps": 1.53749269512699,
+            "pit": 0.31005018321562433
           }
         },
         {
@@ -2721,16 +2721,16 @@
           "truth_margin": -10.1552,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.033100715387977764,
-            "predictive_mean": -9.794524165358904,
-            "empirical_crps": 1.2440231307965974,
-            "pit": 0.4667810708504905
+            "probability": 0.0331007153879778,
+            "predictive_mean": -9.7945241653589,
+            "empirical_crps": 1.2440231307965983,
+            "pit": 0.4667810708504902
           },
           "calibrated": {
-            "probability": 0.033100715387977764,
-            "predictive_mean": -9.794524165358904,
-            "empirical_crps": 1.2440231307965974,
-            "pit": 0.4667810708504905
+            "probability": 0.0331007153879778,
+            "predictive_mean": -9.7945241653589,
+            "empirical_crps": 1.2440231307965983,
+            "pit": 0.4667810708504902
           }
         },
         {
@@ -2740,16 +2740,16 @@
           "truth_margin": -10.0243,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0756395819779617,
-            "predictive_mean": -7.982782281194826,
-            "empirical_crps": 1.549597902613114,
-            "pit": 0.3533824280981841
+            "probability": 0.0756395819779618,
+            "predictive_mean": -7.9827822811948215,
+            "empirical_crps": 1.5495979026131157,
+            "pit": 0.3533824280981838
           },
           "calibrated": {
-            "probability": 0.0756395819779617,
-            "predictive_mean": -7.982782281194826,
-            "empirical_crps": 1.549597902613114,
-            "pit": 0.3533824280981841
+            "probability": 0.0756395819779618,
+            "predictive_mean": -7.9827822811948215,
+            "empirical_crps": 1.5495979026131157,
+            "pit": 0.3533824280981838
           }
         },
         {
@@ -2760,15 +2760,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.8282108218224484,
-            "predictive_mean": 4.571664652870162,
-            "empirical_crps": 4.198616259133847,
-            "pit": 0.10425355825530822
+            "predictive_mean": 4.5716646528701625,
+            "empirical_crps": 4.198616259133849,
+            "pit": 0.10425355825530817
           },
           "calibrated": {
             "probability": 0.8282108218224484,
-            "predictive_mean": 4.571664652870162,
-            "empirical_crps": 4.198616259133847,
-            "pit": 0.10425355825530822
+            "predictive_mean": 4.5716646528701625,
+            "empirical_crps": 4.198616259133849,
+            "pit": 0.10425355825530817
           }
         },
         {
@@ -2778,16 +2778,16 @@
           "truth_margin": -43.9518,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.006232190038878319,
-            "predictive_mean": -23.773249445345044,
-            "empirical_crps": 14.565922727203157,
-            "pit": 0.011536592054107475
+            "probability": 0.00623219003887833,
+            "predictive_mean": -23.773249445345037,
+            "empirical_crps": 14.565922727203167,
+            "pit": 0.01153659205410746
           },
           "calibrated": {
-            "probability": 0.006232190038878319,
-            "predictive_mean": -23.773249445345044,
-            "empirical_crps": 14.565922727203157,
-            "pit": 0.011536592054107475
+            "probability": 0.00623219003887833,
+            "predictive_mean": -23.773249445345037,
+            "empirical_crps": 14.565922727203167,
+            "pit": 0.01153659205410746
           }
         },
         {
@@ -2798,15 +2798,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9845790168993996,
-            "predictive_mean": 12.509912312642058,
-            "empirical_crps": 2.009033611679545,
-            "pit": 0.747027182323034
+            "predictive_mean": 12.509912312642061,
+            "empirical_crps": 2.009033611679543,
+            "pit": 0.7470271823230338
           },
           "calibrated": {
             "probability": 0.9845790168993996,
-            "predictive_mean": 12.509912312642058,
-            "empirical_crps": 2.009033611679545,
-            "pit": 0.747027182323034
+            "predictive_mean": 12.509912312642061,
+            "empirical_crps": 2.009033611679543,
+            "pit": 0.7470271823230338
           }
         },
         {
@@ -2817,15 +2817,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9995385363178357,
-            "predictive_mean": 23.6683220804765,
-            "empirical_crps": 4.515595183943773,
-            "pit": 0.11908516127815197
+            "predictive_mean": 23.668322080476504,
+            "empirical_crps": 4.515595183943775,
+            "pit": 0.11908516127815186
           },
           "calibrated": {
             "probability": 0.9995385363178357,
-            "predictive_mean": 23.6683220804765,
-            "empirical_crps": 4.515595183943773,
-            "pit": 0.11908516127815197
+            "predictive_mean": 23.668322080476504,
+            "empirical_crps": 4.515595183943775,
+            "pit": 0.11908516127815186
           }
         },
         {
@@ -2836,15 +2836,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.974041452713428,
-            "predictive_mean": 11.493876700305808,
-            "empirical_crps": 3.256559519213961,
-            "pit": 0.1698688369366671
+            "predictive_mean": 11.493876700305812,
+            "empirical_crps": 3.2565595192139636,
+            "pit": 0.16986883693666696
           },
           "calibrated": {
             "probability": 0.974041452713428,
-            "predictive_mean": 11.493876700305808,
-            "empirical_crps": 3.256559519213961,
-            "pit": 0.1698688369366671
+            "predictive_mean": 11.493876700305812,
+            "empirical_crps": 3.2565595192139636,
+            "pit": 0.16986883693666696
           }
         },
         {
@@ -2855,15 +2855,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.0,
-            "predictive_mean": -28.43538226312984,
-            "empirical_crps": 2.2319668916719975,
-            "pit": 0.2955132608893688
+            "predictive_mean": -28.435382263129835,
+            "empirical_crps": 2.2319668916719992,
+            "pit": 0.2955132608893686
           },
           "calibrated": {
             "probability": 0.0,
-            "predictive_mean": -28.43538226312984,
-            "empirical_crps": 2.2319668916719975,
-            "pit": 0.2955132608893688
+            "predictive_mean": -28.435382263129835,
+            "empirical_crps": 2.2319668916719992,
+            "pit": 0.2955132608893686
           }
         },
         {
@@ -2874,15 +2874,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9966062179070142,
-            "predictive_mean": 17.510408935045685,
+            "predictive_mean": 17.51040893504569,
             "empirical_crps": 1.517576115696432,
-            "pit": 0.5571680480204274
+            "pit": 0.5571680480204272
           },
           "calibrated": {
             "probability": 0.9966062179070142,
-            "predictive_mean": 17.510408935045685,
+            "predictive_mean": 17.51040893504569,
             "empirical_crps": 1.517576115696432,
-            "pit": 0.5571680480204274
+            "pit": 0.5571680480204272
           }
         },
         {
@@ -2893,15 +2893,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9921551174032069,
-            "predictive_mean": 22.043892534804826,
-            "empirical_crps": 7.97206286722635,
-            "pit": 0.908953998214819
+            "predictive_mean": 22.043892534804833,
+            "empirical_crps": 7.972062867226342,
+            "pit": 0.9089539982148188
           },
           "calibrated": {
             "probability": 0.9921551174032069,
-            "predictive_mean": 22.043892534804826,
-            "empirical_crps": 7.97206286722635,
-            "pit": 0.908953998214819
+            "predictive_mean": 22.043892534804833,
+            "empirical_crps": 7.972062867226342,
+            "pit": 0.9089539982148188
           }
         },
         {
@@ -2911,16 +2911,16 @@
           "truth_margin": -10.4158,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.15152850341162694,
-            "predictive_mean": -5.227879965313275,
-            "empirical_crps": 3.122346730359924,
-            "pit": 0.15146858019278073
+            "probability": 0.151528503411627,
+            "predictive_mean": -5.2278799653132735,
+            "empirical_crps": 3.122346730359925,
+            "pit": 0.15146858019278064
           },
           "calibrated": {
-            "probability": 0.15152850341162694,
-            "predictive_mean": -5.227879965313275,
-            "empirical_crps": 3.122346730359924,
-            "pit": 0.15146858019278073
+            "probability": 0.151528503411627,
+            "predictive_mean": -5.2278799653132735,
+            "empirical_crps": 3.122346730359925,
+            "pit": 0.15146858019278064
           }
         },
         {
@@ -2930,16 +2930,16 @@
           "truth_margin": -31.4705,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.005174871628056824,
-            "predictive_mean": -25.74601083289798,
-            "empirical_crps": 3.941493551897045,
-            "pit": 0.24579499228415566
+            "probability": 0.0051748716280568385,
+            "predictive_mean": -25.74601083289797,
+            "empirical_crps": 3.94149355189705,
+            "pit": 0.2457949922841554
           },
           "calibrated": {
-            "probability": 0.005174871628056824,
-            "predictive_mean": -25.74601083289798,
-            "empirical_crps": 3.941493551897045,
-            "pit": 0.24579499228415566
+            "probability": 0.0051748716280568385,
+            "predictive_mean": -25.74601083289797,
+            "empirical_crps": 3.94149355189705,
+            "pit": 0.2457949922841554
           }
         },
         {
@@ -2949,16 +2949,16 @@
           "truth_margin": -27.7703,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.004222798992385422,
-            "predictive_mean": -23.74311906196967,
-            "empirical_crps": 2.8869053469021786,
-            "pit": 0.30094233263244974
+            "probability": 0.004222798992385436,
+            "predictive_mean": -23.74311906196966,
+            "empirical_crps": 2.886905346902182,
+            "pit": 0.3009423326324494
           },
           "calibrated": {
-            "probability": 0.004222798992385422,
-            "predictive_mean": -23.74311906196967,
-            "empirical_crps": 2.8869053469021786,
-            "pit": 0.30094233263244974
+            "probability": 0.004222798992385436,
+            "predictive_mean": -23.74311906196966,
+            "empirical_crps": 2.886905346902182,
+            "pit": 0.3009423326324494
           }
         },
         {
@@ -2969,15 +2969,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.03598121790701421,
-            "predictive_mean": -9.371821891555182,
+            "predictive_mean": -9.37182189155518,
             "empirical_crps": 1.1902207518605525,
-            "pit": 0.44698833441763064
+            "pit": 0.44698833441763053
           },
           "calibrated": {
             "probability": 0.03598121790701421,
-            "predictive_mean": -9.371821891555182,
+            "predictive_mean": -9.37182189155518,
             "empirical_crps": 1.1902207518605525,
-            "pit": 0.44698833441763064
+            "pit": 0.44698833441763053
           }
         },
         {
@@ -2988,15 +2988,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9770320616669351,
-            "predictive_mean": 12.710277751538081,
-            "empirical_crps": 1.2005277380645194,
-            "pit": 0.44547925495870533
+            "predictive_mean": 12.710277751538086,
+            "empirical_crps": 1.2005277380645207,
+            "pit": 0.4454792549587051
           },
           "calibrated": {
             "probability": 0.9770320616669351,
-            "predictive_mean": 12.710277751538081,
-            "empirical_crps": 1.2005277380645194,
-            "pit": 0.44547925495870533
+            "predictive_mean": 12.710277751538086,
+            "empirical_crps": 1.2005277380645207,
+            "pit": 0.4454792549587051
           }
         },
         {
@@ -3006,16 +3006,16 @@
           "truth_margin": -44.4921,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.000327072635671402,
-            "predictive_mean": -37.05692997413631,
-            "empirical_crps": 4.463889382708981,
-            "pit": 0.18435069670339718
+            "probability": 0.00032707263567140324,
+            "predictive_mean": -37.0569299741363,
+            "empirical_crps": 4.463889382708987,
+            "pit": 0.184350696703397
           },
           "calibrated": {
-            "probability": 0.000327072635671402,
-            "predictive_mean": -37.05692997413631,
-            "empirical_crps": 4.463889382708981,
-            "pit": 0.18435069670339718
+            "probability": 0.00032707263567140324,
+            "predictive_mean": -37.0569299741363,
+            "empirical_crps": 4.463889382708987,
+            "pit": 0.184350696703397
           }
         },
         {
@@ -3025,16 +3025,16 @@
           "truth_margin": -46.2716,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0008176815891785049,
-            "predictive_mean": -46.53286579439759,
+            "probability": 0.0008176815891785081,
+            "predictive_mean": -46.53286579439758,
             "empirical_crps": 1.8319357017515623,
-            "pit": 0.5211090969334454
+            "pit": 0.521109096933445
           },
           "calibrated": {
-            "probability": 0.0008176815891785049,
-            "predictive_mean": -46.53286579439759,
+            "probability": 0.0008176815891785081,
+            "predictive_mean": -46.53286579439758,
             "empirical_crps": 1.8319357017515623,
-            "pit": 0.5211090969334454
+            "pit": 0.521109096933445
           }
         },
         {
@@ -3044,16 +3044,16 @@
           "truth_margin": -13.359,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.024251944263728224,
-            "predictive_mean": -11.974295888088232,
-            "empirical_crps": 1.518146397061758,
-            "pit": 0.40887789771101174
+            "probability": 0.02425194426372824,
+            "predictive_mean": -11.974295888088228,
+            "empirical_crps": 1.5181463970617592,
+            "pit": 0.4088778977110116
           },
           "calibrated": {
-            "probability": 0.024251944263728224,
-            "predictive_mean": -11.974295888088232,
-            "empirical_crps": 1.518146397061758,
-            "pit": 0.40887789771101174
+            "probability": 0.02425194426372824,
+            "predictive_mean": -11.974295888088228,
+            "empirical_crps": 1.5181463970617592,
+            "pit": 0.4088778977110116
           }
         },
         {
@@ -3064,15 +3064,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.003913536317835701,
-            "predictive_mean": -18.53910796304598,
-            "empirical_crps": 1.7490755795029251,
-            "pit": 0.3691223951919753
+            "predictive_mean": -18.53910796304597,
+            "empirical_crps": 1.749075579502926,
+            "pit": 0.3691223951919751
           },
           "calibrated": {
             "probability": 0.003913536317835701,
-            "predictive_mean": -18.53910796304598,
-            "empirical_crps": 1.7490755795029251,
-            "pit": 0.3691223951919753
+            "predictive_mean": -18.53910796304597,
+            "empirical_crps": 1.749075579502926,
+            "pit": 0.3691223951919751
           }
         },
         {
@@ -3083,15 +3083,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.892979273643286,
-            "predictive_mean": 7.311409256550232,
-            "empirical_crps": 2.998608403627984,
-            "pit": 0.19234132434148488
+            "predictive_mean": 7.311409256550231,
+            "empirical_crps": 2.9986084036279843,
+            "pit": 0.1923413243414849
           },
           "calibrated": {
             "probability": 0.892979273643286,
-            "predictive_mean": 7.311409256550232,
-            "empirical_crps": 2.998608403627984,
-            "pit": 0.19234132434148488
+            "predictive_mean": 7.311409256550231,
+            "empirical_crps": 2.9986084036279843,
+            "pit": 0.1923413243414849
           }
         },
         {
@@ -3102,15 +3102,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9327849780625275,
-            "predictive_mean": 8.98824007804746,
-            "empirical_crps": 1.71608106372612,
-            "pit": 0.5347522558512958
+            "predictive_mean": 8.988240078047461,
+            "empirical_crps": 1.7160810637261195,
+            "pit": 0.5347522558512957
           },
           "calibrated": {
             "probability": 0.9327849780625275,
-            "predictive_mean": 8.98824007804746,
-            "empirical_crps": 1.71608106372612,
-            "pit": 0.5347522558512958
+            "predictive_mean": 8.988240078047461,
+            "empirical_crps": 1.7160810637261195,
+            "pit": 0.5347522558512957
           }
         },
         {
@@ -3121,15 +3121,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9650809611631279,
-            "predictive_mean": 15.902903481191167,
-            "empirical_crps": 3.943884286626237,
-            "pit": 0.7748040530585003
+            "predictive_mean": 15.902903481191174,
+            "empirical_crps": 3.9438842866262327,
+            "pit": 0.7748040530585
           },
           "calibrated": {
             "probability": 0.9650809611631279,
-            "predictive_mean": 15.902903481191167,
-            "empirical_crps": 3.943884286626237,
-            "pit": 0.7748040530585003
+            "predictive_mean": 15.902903481191174,
+            "empirical_crps": 3.9438842866262327,
+            "pit": 0.7748040530585
           }
         },
         {
@@ -3139,15 +3139,15 @@
           "truth_margin": 1.2251,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.3015689839931909,
-            "predictive_mean": -2.918645903973057,
-            "empirical_crps": 2.622831445578934,
+            "probability": 0.30156898399319093,
+            "predictive_mean": -2.9186459039730552,
+            "empirical_crps": 2.6228314455789334,
             "pit": 0.7624433234488943
           },
           "calibrated": {
-            "probability": 0.3015689839931909,
-            "predictive_mean": -2.918645903973057,
-            "empirical_crps": 2.622831445578934,
+            "probability": 0.30156898399319093,
+            "predictive_mean": -2.9186459039730552,
+            "empirical_crps": 2.6228314455789334,
             "pit": 0.7624433234488943
           }
         },
@@ -3158,16 +3158,16 @@
           "truth_margin": 2.0797,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.5157723590328745,
-            "predictive_mean": 0.132157714977152,
-            "empirical_crps": 1.4658865245668578,
-            "pit": 0.6255650767811538
+            "probability": 0.5157723590328748,
+            "predictive_mean": 0.13215771497715456,
+            "empirical_crps": 1.4658865245668586,
+            "pit": 0.6255650767811536
           },
           "calibrated": {
-            "probability": 0.5157723590328745,
-            "predictive_mean": 0.132157714977152,
-            "empirical_crps": 1.4658865245668578,
-            "pit": 0.6255650767811538
+            "probability": 0.5157723590328748,
+            "predictive_mean": 0.13215771497715456,
+            "empirical_crps": 1.4658865245668586,
+            "pit": 0.6255650767811536
           }
         },
         {
@@ -3178,15 +3178,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.5068831073270612,
-            "predictive_mean": 0.13112512904616125,
-            "empirical_crps": 3.8834536282383296,
-            "pit": 0.11650906077434467
+            "predictive_mean": 0.13112512904616314,
+            "empirical_crps": 3.88345362823833,
+            "pit": 0.11650906077434459
           },
           "calibrated": {
             "probability": 0.5068831073270612,
-            "predictive_mean": 0.13112512904616125,
-            "empirical_crps": 3.8834536282383296,
-            "pit": 0.11650906077434467
+            "predictive_mean": 0.13112512904616314,
+            "empirical_crps": 3.88345362823833,
+            "pit": 0.11650906077434459
           }
         },
         {
@@ -3197,15 +3197,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.001875,
-            "predictive_mean": -33.587925442286384,
-            "empirical_crps": 1.98460865670884,
-            "pit": 0.6424983486392588
+            "predictive_mean": -33.58792544228638,
+            "empirical_crps": 1.9846086567088381,
+            "pit": 0.6424983486392584
           },
           "calibrated": {
             "probability": 0.001875,
-            "predictive_mean": -33.587925442286384,
-            "empirical_crps": 1.98460865670884,
-            "pit": 0.6424983486392588
+            "predictive_mean": -33.58792544228638,
+            "empirical_crps": 1.9846086567088381,
+            "pit": 0.6424983486392584
           }
         },
         {
@@ -3215,16 +3215,16 @@
           "truth_margin": 17.1297,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9781476706204422,
-            "predictive_mean": 19.284272389761213,
-            "empirical_crps": 2.163504913720522,
-            "pit": 0.395395047127837
+            "probability": 0.9781476706204423,
+            "predictive_mean": 19.284272389761224,
+            "empirical_crps": 2.1635049137205256,
+            "pit": 0.3953950471278366
           },
           "calibrated": {
-            "probability": 0.9781476706204422,
-            "predictive_mean": 19.284272389761213,
-            "empirical_crps": 2.163504913720522,
-            "pit": 0.395395047127837
+            "probability": 0.9781476706204423,
+            "predictive_mean": 19.284272389761224,
+            "empirical_crps": 2.1635049137205256,
+            "pit": 0.3953950471278366
           }
         },
         {
@@ -3234,16 +3234,16 @@
           "truth_margin": -12.0379,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.05388925170581346,
-            "predictive_mean": -9.781645220705494,
+            "probability": 0.053889251705813504,
+            "predictive_mean": -9.78164522070549,
             "empirical_crps": 2.103005181945659,
-            "pit": 0.3563924796889735
+            "pit": 0.35639247968897336
           },
           "calibrated": {
-            "probability": 0.05388925170581346,
-            "predictive_mean": -9.781645220705494,
+            "probability": 0.053889251705813504,
+            "predictive_mean": -9.78164522070549,
             "empirical_crps": 2.103005181945659,
-            "pit": 0.3563924796889735
+            "pit": 0.35639247968897336
           }
         },
         {
@@ -3253,16 +3253,16 @@
           "truth_margin": -20.3485,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.008539508449699813,
-            "predictive_mean": -15.413964684249878,
-            "empirical_crps": 2.8208215516830615,
-            "pit": 0.20538211651061644
+            "probability": 0.008539508449699822,
+            "predictive_mean": -15.413964684249876,
+            "empirical_crps": 2.8208215516830624,
+            "pit": 0.20538211651061633
           },
           "calibrated": {
-            "probability": 0.008539508449699813,
-            "predictive_mean": -15.413964684249878,
-            "empirical_crps": 2.8208215516830615,
-            "pit": 0.20538211651061644
+            "probability": 0.008539508449699822,
+            "predictive_mean": -15.413964684249876,
+            "empirical_crps": 2.8208215516830624,
+            "pit": 0.20538211651061633
           }
         },
         {
@@ -3272,16 +3272,16 @@
           "truth_margin": -26.8382,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.020004860659320563,
-            "predictive_mean": -18.04341602769363,
-            "empirical_crps": 5.498621685076162,
-            "pit": 0.14166773643285982
+            "probability": 0.020004860659320604,
+            "predictive_mean": -18.043416027693624,
+            "empirical_crps": 5.498621685076169,
+            "pit": 0.14166773643285968
           },
           "calibrated": {
-            "probability": 0.020004860659320563,
-            "predictive_mean": -18.04341602769363,
-            "empirical_crps": 5.498621685076162,
-            "pit": 0.14166773643285982
+            "probability": 0.020004860659320604,
+            "predictive_mean": -18.043416027693624,
+            "empirical_crps": 5.498621685076169,
+            "pit": 0.14166773643285968
           }
         },
         {
@@ -3292,15 +3292,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9963082905426857,
-            "predictive_mean": 29.147087550448504,
-            "empirical_crps": 3.0402715967751313,
-            "pit": 0.6944785944144088
+            "predictive_mean": 29.147087550448514,
+            "empirical_crps": 3.0402715967751277,
+            "pit": 0.6944785944144085
           },
           "calibrated": {
             "probability": 0.9963082905426857,
-            "predictive_mean": 29.147087550448504,
-            "empirical_crps": 3.0402715967751313,
-            "pit": 0.6944785944144088
+            "predictive_mean": 29.147087550448514,
+            "empirical_crps": 3.0402715967751277,
+            "pit": 0.6944785944144085
           }
         },
         {
@@ -3310,16 +3310,16 @@
           "truth_margin": -9.2071,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.8364766875198418,
-            "predictive_mean": 6.035365838854812,
-            "empirical_crps": 12.018773405514331,
-            "pit": 0.00866256418597159
+            "probability": 0.8364766875198419,
+            "predictive_mean": 6.035365838854814,
+            "empirical_crps": 12.018773405514334,
+            "pit": 0.008662564185971581
           },
           "calibrated": {
-            "probability": 0.8364766875198418,
-            "predictive_mean": 6.035365838854812,
-            "empirical_crps": 12.018773405514331,
-            "pit": 0.00866256418597159
+            "probability": 0.8364766875198419,
+            "predictive_mean": 6.035365838854814,
+            "empirical_crps": 12.018773405514334,
+            "pit": 0.008662564185971581
           }
         },
         {
@@ -3330,15 +3330,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.8494592078308685,
-            "predictive_mean": 5.890514660783737,
-            "empirical_crps": 2.1937972820786418,
-            "pit": 0.23369655143205437
+            "predictive_mean": 5.890514660783741,
+            "empirical_crps": 2.193797282078644,
+            "pit": 0.23369655143205414
           },
           "calibrated": {
             "probability": 0.8494592078308685,
-            "predictive_mean": 5.890514660783737,
-            "empirical_crps": 2.1937972820786418,
-            "pit": 0.23369655143205437
+            "predictive_mean": 5.890514660783741,
+            "empirical_crps": 2.193797282078644,
+            "pit": 0.23369655143205414
           }
         },
         {
@@ -3348,16 +3348,16 @@
           "truth_margin": 5.6795,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.8484083640709474,
-            "predictive_mean": 6.135530552994861,
-            "empirical_crps": 1.3470713740352784,
-            "pit": 0.4576683782925757
+            "probability": 0.8484083640709477,
+            "predictive_mean": 6.135530552994863,
+            "empirical_crps": 1.3470713740352789,
+            "pit": 0.4576683782925755
           },
           "calibrated": {
-            "probability": 0.8484083640709474,
-            "predictive_mean": 6.135530552994861,
-            "empirical_crps": 1.3470713740352784,
-            "pit": 0.4576683782925757
+            "probability": 0.8484083640709477,
+            "predictive_mean": 6.135530552994863,
+            "empirical_crps": 1.3470713740352789,
+            "pit": 0.4576683782925755
           }
         },
         {
@@ -3367,16 +3367,16 @@
           "truth_margin": -10.1552,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.019771698488578134,
-            "predictive_mean": -11.89987763931513,
-            "empirical_crps": 1.5329840350679262,
-            "pit": 0.6136852161218332
+            "probability": 0.019771698488578154,
+            "predictive_mean": -11.899877639315129,
+            "empirical_crps": 1.5329840350679271,
+            "pit": 0.613685216121833
           },
           "calibrated": {
-            "probability": 0.019771698488578134,
-            "predictive_mean": -11.89987763931513,
-            "empirical_crps": 1.5329840350679262,
-            "pit": 0.6136852161218332
+            "probability": 0.019771698488578154,
+            "predictive_mean": -11.899877639315129,
+            "empirical_crps": 1.5329840350679271,
+            "pit": 0.613685216121833
           }
         },
         {
@@ -3386,16 +3386,16 @@
           "truth_margin": -10.0243,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.09041936910902038,
-            "predictive_mean": -8.267741259852514,
-            "empirical_crps": 1.4547542933874302,
-            "pit": 0.3875388479054034
+            "probability": 0.09041936910902043,
+            "predictive_mean": -8.267741259852512,
+            "empirical_crps": 1.4547542933874307,
+            "pit": 0.38753884790540316
           },
           "calibrated": {
-            "probability": 0.09041936910902038,
-            "predictive_mean": -8.267741259852514,
-            "empirical_crps": 1.4547542933874302,
-            "pit": 0.3875388479054034
+            "probability": 0.09041936910902043,
+            "predictive_mean": -8.267741259852512,
+            "empirical_crps": 1.4547542933874307,
+            "pit": 0.38753884790540316
           }
         },
         {
@@ -3405,16 +3405,16 @@
           "truth_margin": -1.8266,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.6943005321723533,
-            "predictive_mean": 2.9377844781844735,
-            "empirical_crps": 2.724149856334812,
-            "pit": 0.2062127474015961
+            "probability": 0.6943005321723534,
+            "predictive_mean": 2.937784478184476,
+            "empirical_crps": 2.7241498563348125,
+            "pit": 0.20621274740159592
           },
           "calibrated": {
-            "probability": 0.6943005321723533,
-            "predictive_mean": 2.9377844781844735,
-            "empirical_crps": 2.724149856334812,
-            "pit": 0.2062127474015961
+            "probability": 0.6943005321723534,
+            "predictive_mean": 2.937784478184476,
+            "empirical_crps": 2.7241498563348125,
+            "pit": 0.20621274740159592
           }
         },
         {
@@ -3424,16 +3424,16 @@
           "truth_margin": -43.9518,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.00413536317835701,
-            "predictive_mean": -23.82620257877304,
-            "empirical_crps": 14.120973145845017,
-            "pit": 0.015181346278957382
+            "probability": 0.004135363178357016,
+            "predictive_mean": -23.82620257877303,
+            "empirical_crps": 14.120973145845024,
+            "pit": 0.01518134627895737
           },
           "calibrated": {
-            "probability": 0.00413536317835701,
-            "predictive_mean": -23.82620257877304,
-            "empirical_crps": 14.120973145845017,
-            "pit": 0.015181346278957382
+            "probability": 0.004135363178357016,
+            "predictive_mean": -23.82620257877303,
+            "empirical_crps": 14.120973145845024,
+            "pit": 0.01518134627895737
           }
         },
         {
@@ -3444,15 +3444,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9862321900388784,
-            "predictive_mean": 13.533621894747107,
-            "empirical_crps": 1.5528099686576589,
-            "pit": 0.67750322798316
+            "predictive_mean": 13.533621894747109,
+            "empirical_crps": 1.5528099686576584,
+            "pit": 0.6775032279831599
           },
           "calibrated": {
             "probability": 0.9862321900388784,
-            "predictive_mean": 13.533621894747107,
-            "empirical_crps": 1.5528099686576589,
-            "pit": 0.67750322798316
+            "predictive_mean": 13.533621894747109,
+            "empirical_crps": 1.5528099686576584,
+            "pit": 0.6775032279831599
           }
         },
         {
@@ -3463,15 +3463,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9893863353102211,
-            "predictive_mean": 20.34366997615258,
-            "empirical_crps": 2.4564917501356214,
-            "pit": 0.2887030260829549
+            "predictive_mean": 20.343669976152587,
+            "empirical_crps": 2.456491750135623,
+            "pit": 0.2887030260829547
           },
           "calibrated": {
             "probability": 0.9893863353102211,
-            "predictive_mean": 20.34366997615258,
-            "empirical_crps": 2.4564917501356214,
-            "pit": 0.2887030260829549
+            "predictive_mean": 20.343669976152587,
+            "empirical_crps": 2.456491750135623,
+            "pit": 0.2887030260829547
           }
         },
         {
@@ -3482,15 +3482,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9779841343026066,
-            "predictive_mean": 14.101268203513838,
-            "empirical_crps": 4.400519977218279,
-            "pit": 0.11383418914628786
+            "predictive_mean": 14.10126820351384,
+            "empirical_crps": 4.400519977218281,
+            "pit": 0.11383418914628776
           },
           "calibrated": {
             "probability": 0.9779841343026066,
-            "predictive_mean": 14.101268203513838,
-            "empirical_crps": 4.400519977218279,
-            "pit": 0.11383418914628786
+            "predictive_mean": 14.10126820351384,
+            "empirical_crps": 4.400519977218281,
+            "pit": 0.11383418914628776
           }
         },
         {
@@ -3501,15 +3501,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.0,
-            "predictive_mean": -27.93718450558975,
-            "empirical_crps": 1.9961932599559131,
-            "pit": 0.269909317518231
+            "predictive_mean": -27.937184505589748,
+            "empirical_crps": 1.9961932599559145,
+            "pit": 0.2699093175182309
           },
           "calibrated": {
             "probability": 0.0,
-            "predictive_mean": -27.93718450558975,
-            "empirical_crps": 1.9961932599559131,
-            "pit": 0.269909317518231
+            "predictive_mean": -27.937184505589748,
+            "empirical_crps": 1.9961932599559145,
+            "pit": 0.2699093175182309
           }
         },
         {
@@ -3519,16 +3519,16 @@
           "truth_margin": 18.2748,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9449692407370771,
-            "predictive_mean": 13.975737611345629,
-            "empirical_crps": 2.9955828682986976,
-            "pit": 0.6989815108100013
+            "probability": 0.9449692407370773,
+            "predictive_mean": 13.975737611345636,
+            "empirical_crps": 2.995582868298694,
+            "pit": 0.6989815108100008
           },
           "calibrated": {
-            "probability": 0.9449692407370771,
-            "predictive_mean": 13.975737611345629,
-            "empirical_crps": 2.9955828682986976,
-            "pit": 0.6989815108100013
+            "probability": 0.9449692407370773,
+            "predictive_mean": 13.975737611345636,
+            "empirical_crps": 2.995582868298694,
+            "pit": 0.6989815108100008
           }
         },
         {
@@ -3539,15 +3539,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9904436537210426,
-            "predictive_mean": 22.174921906375737,
-            "empirical_crps": 7.017084437081186,
-            "pit": 0.9028902051530969
+            "predictive_mean": 22.174921906375744,
+            "empirical_crps": 7.017084437081177,
+            "pit": 0.9028902051530968
           },
           "calibrated": {
             "probability": 0.9904436537210426,
-            "predictive_mean": 22.174921906375737,
-            "empirical_crps": 7.017084437081186,
-            "pit": 0.9028902051530969
+            "predictive_mean": 22.174921906375744,
+            "empirical_crps": 7.017084437081177,
+            "pit": 0.9028902051530968
           }
         },
         {
@@ -3557,16 +3557,16 @@
           "truth_margin": -10.4158,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.10137144174469177,
-            "predictive_mean": -6.994575306776803,
-            "empirical_crps": 2.4832450179466026,
-            "pit": 0.2646583453863669
+            "probability": 0.10137144174469183,
+            "predictive_mean": -6.994575306776801,
+            "empirical_crps": 2.4832450179466035,
+            "pit": 0.2646583453863668
           },
           "calibrated": {
-            "probability": 0.10137144174469177,
-            "predictive_mean": -6.994575306776803,
-            "empirical_crps": 2.4832450179466026,
-            "pit": 0.2646583453863669
+            "probability": 0.10137144174469183,
+            "predictive_mean": -6.994575306776801,
+            "empirical_crps": 2.4832450179466035,
+            "pit": 0.2646583453863668
           }
         },
         {
@@ -3576,16 +3576,16 @@
           "truth_margin": -31.4705,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.002721826860521309,
-            "predictive_mean": -25.59921630536039,
-            "empirical_crps": 3.5529234211137783,
-            "pit": 0.23439279127654108
+            "probability": 0.0027218268605213145,
+            "predictive_mean": -25.59921630536038,
+            "empirical_crps": 3.5529234211137837,
+            "pit": 0.23439279127654084
           },
           "calibrated": {
-            "probability": 0.002721826860521309,
-            "predictive_mean": -25.59921630536039,
-            "empirical_crps": 3.5529234211137783,
-            "pit": 0.23439279127654108
+            "probability": 0.0027218268605213145,
+            "predictive_mean": -25.59921630536038,
+            "empirical_crps": 3.5529234211137837,
+            "pit": 0.23439279127654084
           }
         },
         {
@@ -3595,16 +3595,16 @@
           "truth_margin": -27.7703,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.005472798992385421,
-            "predictive_mean": -23.094058883753604,
-            "empirical_crps": 3.6392504931307306,
-            "pit": 0.28724414852423474
+            "probability": 0.005472798992385435,
+            "predictive_mean": -23.094058883753597,
+            "empirical_crps": 3.639250493130737,
+            "pit": 0.2872441485242344
           },
           "calibrated": {
-            "probability": 0.005472798992385421,
-            "predictive_mean": -23.094058883753604,
-            "empirical_crps": 3.6392504931307306,
-            "pit": 0.28724414852423474
+            "probability": 0.005472798992385435,
+            "predictive_mean": -23.094058883753597,
+            "empirical_crps": 3.639250493130737,
+            "pit": 0.2872441485242344
           }
         },
         {
@@ -3614,16 +3614,16 @@
           "truth_margin": -9.899,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.05182804476753552,
+            "probability": 0.051828044767535525,
             "predictive_mean": -9.67892497937152,
-            "empirical_crps": 1.20922928046682,
-            "pit": 0.48576747968897344
+            "empirical_crps": 1.2092292804668205,
+            "pit": 0.4857674796889734
           },
           "calibrated": {
-            "probability": 0.05182804476753552,
+            "probability": 0.051828044767535525,
             "predictive_mean": -9.67892497937152,
-            "empirical_crps": 1.20922928046682,
-            "pit": 0.48576747968897344
+            "empirical_crps": 1.2092292804668205,
+            "pit": 0.4857674796889734
           }
         },
         {
@@ -3634,15 +3634,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9732529163955923,
-            "predictive_mean": 13.25761941670391,
-            "empirical_crps": 1.6809090857201792,
-            "pit": 0.4242632608893688
+            "predictive_mean": 13.257619416703914,
+            "empirical_crps": 1.6809090857201805,
+            "pit": 0.42426326088936855
           },
           "calibrated": {
             "probability": 0.9732529163955923,
-            "predictive_mean": 13.25761941670391,
-            "empirical_crps": 1.6809090857201792,
-            "pit": 0.4242632608893688
+            "predictive_mean": 13.257619416703914,
+            "empirical_crps": 1.6809090857201805,
+            "pit": 0.42426326088936855
           }
         },
         {
@@ -3652,16 +3652,16 @@
           "truth_margin": -44.4921,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0014135363178357009,
-            "predictive_mean": -36.90876723222911,
-            "empirical_crps": 4.495591573885863,
-            "pit": 0.183035931509811
+            "probability": 0.0014135363178357017,
+            "predictive_mean": -36.9087672322291,
+            "empirical_crps": 4.495591573885868,
+            "pit": 0.18303593150981082
           },
           "calibrated": {
-            "probability": 0.0014135363178357009,
-            "predictive_mean": -36.90876723222911,
-            "empirical_crps": 4.495591573885863,
-            "pit": 0.183035931509811
+            "probability": 0.0014135363178357017,
+            "predictive_mean": -36.9087672322291,
+            "empirical_crps": 4.495591573885868,
+            "pit": 0.18303593150981082
           }
         },
         {
@@ -3671,16 +3671,16 @@
           "truth_margin": -46.2716,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.000163536317835701,
-            "predictive_mean": -46.759990155135355,
-            "empirical_crps": 2.0315174736500223,
-            "pit": 0.5198817675538876
+            "probability": 0.00016353631783570162,
+            "predictive_mean": -46.75999015513535,
+            "empirical_crps": 2.031517473650023,
+            "pit": 0.5198817675538872
           },
           "calibrated": {
-            "probability": 0.000163536317835701,
-            "predictive_mean": -46.759990155135355,
-            "empirical_crps": 2.0315174736500223,
-            "pit": 0.5198817675538876
+            "probability": 0.00016353631783570162,
+            "predictive_mean": -46.75999015513535,
+            "empirical_crps": 2.031517473650023,
+            "pit": 0.5198817675538872
           }
         }
       ],
@@ -3825,32 +3825,32 @@
         "excluded_missing_predictions": {}
       },
       "stack_weights": {
-        "pymc": 0.13958209010792338,
-        "state_space": 0.8604179098920767
+        "pymc": 0.13958209010792322,
+        "state_space": 0.8604179098920768
       },
       "stack_fit": {
         "method": "empirical_predictive_mixture_crps_v1",
-        "objective_crps": 2.8852222877650187,
+        "objective_crps": 2.885222287765019,
         "prediction_sha256": "543773eea5801538c10c8c7f9cb1d9a61e71c7796b7094b8a8f32d433ab28439",
         "seed": 21,
         "max_draws": 128
       },
       "training_case_ids_sha256": "a3829e4397f7f559d022d3cb6996c7477b456c00bb9a5e3abdf55ae0a57282a6",
       "training_truth_sha256": "727a2c1a908390489edffe27ce9470bc6426a2a1a4c90aa42c6f6e2578496983",
-      "plan_sha256": "41aaf604b09203239977d60efbe9b6feb75209259771de6e67d3fac794fe67e6",
+      "plan_sha256": "8aebd75bc06534e5b78c761332c024db95290cb75685fcf5049baf99cdce6c51",
       "scale_selection": {
         "objective": "training_empirical_margin_crps",
         "tie_break": "closest_to_1.0_then_lower",
         "selected_scale": 1.0,
-        "selected_training_crps": 2.88522228776502,
+        "selected_training_crps": 2.885222287765021,
         "candidate_scores": [
           {
             "scale": 1.0,
-            "empirical_crps": 2.88522228776502
+            "empirical_crps": 2.885222287765021
           },
           {
             "scale": 1.05,
-            "empirical_crps": 2.9060330663454748
+            "empirical_crps": 2.9060330663454743
           },
           {
             "scale": 1.1,
@@ -3858,7 +3858,7 @@
           },
           {
             "scale": 1.15,
-            "empirical_crps": 2.9560411556581503
+            "empirical_crps": 2.9560411556581494
           },
           {
             "scale": 1.2,
@@ -3878,19 +3878,19 @@
           },
           {
             "scale": 1.4,
-            "empirical_crps": 3.1240418333779743
+            "empirical_crps": 3.124041833377974
           },
           {
             "scale": 1.45,
-            "empirical_crps": 3.1637277023169132
+            "empirical_crps": 3.163727702316913
           },
           {
             "scale": 1.5,
-            "empirical_crps": 3.205093187363646
+            "empirical_crps": 3.2050931873636457
           },
           {
             "scale": 1.55,
-            "empirical_crps": 3.247915391333963
+            "empirical_crps": 3.2479153913339625
           },
           {
             "scale": 1.6,
@@ -3898,11 +3898,11 @@
           },
           {
             "scale": 1.65,
-            "empirical_crps": 3.3380427216827084
+            "empirical_crps": 3.3380427216827093
           },
           {
             "scale": 1.7,
-            "empirical_crps": 3.385074758932956
+            "empirical_crps": 3.3850747589329555
           },
           {
             "scale": 1.75,
@@ -3914,7 +3914,7 @@
           },
           {
             "scale": 1.85,
-            "empirical_crps": 3.5323124433112714
+            "empirical_crps": 3.53231244331127
           },
           {
             "scale": 1.9,
@@ -3926,7 +3926,7 @@
           },
           {
             "scale": 2.0,
-            "empirical_crps": 3.6880479431280087
+            "empirical_crps": 3.688047943128006
           }
         ],
         "seed": 21,
@@ -3934,9 +3934,9 @@
       },
       "raw": {
         "n": 68,
-        "empirical_crps": 4.184050412588797,
-        "brier": 0.034507091359528654,
-        "log_score": -0.11995197694728518,
+        "empirical_crps": 4.184050412588796,
+        "brier": 0.03450709135952866,
+        "log_score": -0.11995197694728524,
         "log_score_orientation": "higher_is_better",
         "reliability": [
           {
@@ -3978,7 +3978,7 @@
             "bin_lo": 0.6000000000000001,
             "bin_hi": 0.7000000000000001,
             "n": 1.0,
-            "mean_p": 0.6387824627265071,
+            "mean_p": 0.638782462726507,
             "mean_y": 0.0
           },
           {
@@ -4015,8 +4015,8 @@
         "calibration_claim_allowed": false,
         "calibration_slope_intercept": {
           "n": 68,
-          "slope": 1.0646705676750754,
-          "intercept": -0.04257223348133763,
+          "slope": 1.0646705676750756,
+          "intercept": -0.04257223348133767,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -4087,9 +4087,9 @@
       },
       "calibrated": {
         "n": 68,
-        "empirical_crps": 4.184050412588797,
-        "brier": 0.034507091359528654,
-        "log_score": -0.11995197694728518,
+        "empirical_crps": 4.184050412588796,
+        "brier": 0.03450709135952866,
+        "log_score": -0.11995197694728524,
         "log_score_orientation": "higher_is_better",
         "reliability": [
           {
@@ -4131,7 +4131,7 @@
             "bin_lo": 0.6000000000000001,
             "bin_hi": 0.7000000000000001,
             "n": 1.0,
-            "mean_p": 0.6387824627265071,
+            "mean_p": 0.638782462726507,
             "mean_y": 0.0
           },
           {
@@ -4168,8 +4168,8 @@
         "calibration_claim_allowed": false,
         "calibration_slope_intercept": {
           "n": 68,
-          "slope": 1.0646705676750754,
-          "intercept": -0.04257223348133763,
+          "slope": 1.0646705676750756,
+          "intercept": -0.04257223348133767,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -4246,16 +4246,16 @@
           "truth_margin": -36.653,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.002325522387365096,
+            "probability": 0.0023255223873650957,
             "predictive_mean": -27.389614501627108,
-            "empirical_crps": 6.409150265139211,
-            "pit": 0.10687246265669914
+            "empirical_crps": 6.40915026513921,
+            "pit": 0.10687246265669913
           },
           "calibrated": {
-            "probability": 0.002325522387365096,
+            "probability": 0.0023255223873650957,
             "predictive_mean": -27.389614501627108,
-            "empirical_crps": 6.409150265139211,
-            "pit": 0.10687246265669914
+            "empirical_crps": 6.40915026513921,
+            "pit": 0.10687246265669913
           }
         },
         {
@@ -4284,16 +4284,16 @@
           "truth_margin": 4.9921,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.7864021642593315,
-            "predictive_mean": 4.053144122538971,
+            "probability": 0.7864021642593314,
+            "predictive_mean": 4.053144122538969,
             "empirical_crps": 1.2307471262408272,
-            "pit": 0.562983358081495
+            "pit": 0.5629833580814951
           },
           "calibrated": {
-            "probability": 0.7864021642593315,
-            "predictive_mean": 4.053144122538971,
+            "probability": 0.7864021642593314,
+            "predictive_mean": 4.053144122538969,
             "empirical_crps": 1.2307471262408272,
-            "pit": 0.562983358081495
+            "pit": 0.5629833580814951
           }
         },
         {
@@ -4303,15 +4303,15 @@
           "truth_margin": 22.129,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9977617164189525,
-            "predictive_mean": 30.360903263213615,
-            "empirical_crps": 4.806015021938367,
+            "probability": 0.9977617164189524,
+            "predictive_mean": 30.36090326321361,
+            "empirical_crps": 4.806015021938365,
             "pit": 0.12831126862511189
           },
           "calibrated": {
-            "probability": 0.9977617164189525,
-            "predictive_mean": 30.360903263213615,
-            "empirical_crps": 4.806015021938367,
+            "probability": 0.9977617164189524,
+            "predictive_mean": 30.36090326321361,
+            "empirical_crps": 4.806015021938365,
             "pit": 0.12831126862511189
           }
         },
@@ -4322,15 +4322,15 @@
           "truth_margin": 21.7871,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.998299477612635,
-            "predictive_mean": 30.119881911653724,
-            "empirical_crps": 4.450338048193341,
+            "probability": 0.9982994776126349,
+            "predictive_mean": 30.11988191165372,
+            "empirical_crps": 4.45033804819334,
             "pit": 0.12376179101247696
           },
           "calibrated": {
-            "probability": 0.998299477612635,
-            "predictive_mean": 30.119881911653724,
-            "empirical_crps": 4.450338048193341,
+            "probability": 0.9982994776126349,
+            "predictive_mean": 30.11988191165372,
+            "empirical_crps": 4.45033804819334,
             "pit": 0.12376179101247696
           }
         },
@@ -4341,13 +4341,13 @@
           "truth_margin": 15.0472,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9722968656758094,
+            "probability": 0.9722968656758093,
             "predictive_mean": 10.171574694863068,
             "empirical_crps": 3.1994330568637235,
             "pit": 0.8367123133998421
           },
           "calibrated": {
-            "probability": 0.9722968656758094,
+            "probability": 0.9722968656758093,
             "predictive_mean": 10.171574694863068,
             "empirical_crps": 3.1994330568637235,
             "pit": 0.8367123133998421
@@ -4361,13 +4361,13 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9966861940315872,
-            "predictive_mean": 16.946958914291223,
+            "predictive_mean": 16.94695891429122,
             "empirical_crps": 1.557529742002143,
             "pit": 0.23406776117041325
           },
           "calibrated": {
             "probability": 0.9966861940315872,
-            "predictive_mean": 16.946958914291223,
+            "predictive_mean": 16.94695891429122,
             "empirical_crps": 1.557529742002143,
             "pit": 0.23406776117041325
           }
@@ -4380,13 +4380,13 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.21784768655361939,
-            "predictive_mean": -3.839537111543389,
+            "predictive_mean": -3.8395371115433887,
             "empirical_crps": 10.076800626461598,
             "pit": 0.013691417905238219
           },
           "calibrated": {
             "probability": 0.21784768655361939,
-            "predictive_mean": -3.839537111543389,
+            "predictive_mean": -3.8395371115433887,
             "empirical_crps": 10.076800626461598,
             "pit": 0.013691417905238219
           }
@@ -4401,13 +4401,13 @@
             "probability": 0.7429062686483812,
             "predictive_mean": 3.1203743899558223,
             "empirical_crps": 1.2637998676775575,
-            "pit": 0.4769921641895236
+            "pit": 0.47699216418952356
           },
           "calibrated": {
             "probability": 0.7429062686483812,
             "predictive_mean": 3.1203743899558223,
             "empirical_crps": 1.2637998676775575,
-            "pit": 0.4769921641895236
+            "pit": 0.47699216418952356
           }
         },
         {
@@ -4417,14 +4417,14 @@
           "truth_margin": 46.4531,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9993750000000001,
-            "predictive_mean": 31.193626808419644,
+            "probability": 0.999375,
+            "predictive_mean": 31.19362680841964,
             "empirical_crps": 10.987213208630727,
             "pit": 0.9732838805852067
           },
           "calibrated": {
-            "probability": 0.9993750000000001,
-            "predictive_mean": 31.193626808419644,
+            "probability": 0.999375,
+            "predictive_mean": 31.19362680841964,
             "empirical_crps": 10.987213208630727,
             "pit": 0.9732838805852067
           }
@@ -4437,15 +4437,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.03552343283790472,
-            "predictive_mean": -9.618885141664766,
-            "empirical_crps": 1.5998125167615513,
-            "pit": 0.29364589549460385
+            "predictive_mean": -9.618885141664764,
+            "empirical_crps": 1.5998125167615518,
+            "pit": 0.2936458954946038
           },
           "calibrated": {
             "probability": 0.03552343283790472,
-            "predictive_mean": -9.618885141664766,
-            "empirical_crps": 1.5998125167615513,
-            "pit": 0.29364589549460385
+            "predictive_mean": -9.618885141664764,
+            "empirical_crps": 1.5998125167615518,
+            "pit": 0.2936458954946038
           }
         },
         {
@@ -4455,16 +4455,16 @@
           "truth_margin": -35.721,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0012500000000000002,
+            "probability": 0.00125,
             "predictive_mean": -33.77155550343716,
-            "empirical_crps": 1.8118206212352401,
-            "pit": 0.39904835812803363
+            "empirical_crps": 1.811820621235241,
+            "pit": 0.3990483581280337
           },
           "calibrated": {
-            "probability": 0.0012500000000000002,
+            "probability": 0.00125,
             "predictive_mean": -33.77155550343716,
-            "empirical_crps": 1.8118206212352401,
-            "pit": 0.39904835812803363
+            "empirical_crps": 1.811820621235241,
+            "pit": 0.3990483581280337
           }
         },
         {
@@ -4474,16 +4474,16 @@
           "truth_margin": 15.5844,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.998299477612635,
-            "predictive_mean": 19.44349558622424,
-            "empirical_crps": 2.521508664737962,
-            "pit": 0.22572276114714396
+            "probability": 0.9982994776126349,
+            "predictive_mean": 19.443495586224238,
+            "empirical_crps": 2.5215086647379614,
+            "pit": 0.22572276114714399
           },
           "calibrated": {
-            "probability": 0.998299477612635,
-            "predictive_mean": 19.44349558622424,
-            "empirical_crps": 2.521508664737962,
-            "pit": 0.22572276114714396
+            "probability": 0.9982994776126349,
+            "predictive_mean": 19.443495586224238,
+            "empirical_crps": 2.5215086647379614,
+            "pit": 0.22572276114714399
           }
         },
         {
@@ -4493,16 +4493,16 @@
           "truth_margin": -21.5007,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.03529291047380891,
+            "probability": 0.035292910473808906,
             "predictive_mean": -9.743355177496449,
-            "empirical_crps": 8.534284750522662,
-            "pit": 0.021889328355777837
+            "empirical_crps": 8.53428475052266,
+            "pit": 0.021889328355777834
           },
           "calibrated": {
-            "probability": 0.03529291047380891,
+            "probability": 0.035292910473808906,
             "predictive_mean": -9.743355177496449,
-            "empirical_crps": 8.534284750522662,
-            "pit": 0.021889328355777837
+            "empirical_crps": 8.53428475052266,
+            "pit": 0.021889328355777834
           }
         },
         {
@@ -4512,15 +4512,15 @@
           "truth_margin": -23.6633,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.002325522387365096,
+            "probability": 0.0023255223873650957,
             "predictive_mean": -18.05129046260157,
-            "empirical_crps": 3.077156155987208,
+            "empirical_crps": 3.0771561559872076,
             "pit": 0.144881567138826
           },
           "calibrated": {
-            "probability": 0.002325522387365096,
+            "probability": 0.0023255223873650957,
             "predictive_mean": -18.05129046260157,
-            "empirical_crps": 3.077156155987208,
+            "empirical_crps": 3.0771561559872076,
             "pit": 0.144881567138826
           }
         },
@@ -4533,14 +4533,14 @@
           "raw": {
             "probability": 0.0,
             "predictive_mean": -23.94971425246721,
-            "empirical_crps": 1.2119267067664192,
-            "pit": 0.5238191044355884
+            "empirical_crps": 1.2119267067664183,
+            "pit": 0.5238191044355883
           },
           "calibrated": {
             "probability": 0.0,
             "predictive_mean": -23.94971425246721,
-            "empirical_crps": 1.2119267067664192,
-            "pit": 0.5238191044355884
+            "empirical_crps": 1.2119267067664183,
+            "pit": 0.5238191044355883
           }
         },
         {
@@ -4550,15 +4550,15 @@
           "truth_margin": -29.1462,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.011716119414793374,
+            "probability": 0.01171611941479337,
             "predictive_mean": -20.003231193066323,
-            "empirical_crps": 6.171482425037531,
+            "empirical_crps": 6.1714824250375315,
             "pit": 0.10829694026933404
           },
           "calibrated": {
-            "probability": 0.011716119414793374,
+            "probability": 0.01171611941479337,
             "predictive_mean": -20.003231193066323,
-            "empirical_crps": 6.171482425037531,
+            "empirical_crps": 6.1714824250375315,
             "pit": 0.10829694026933404
           }
         },
@@ -4607,13 +4607,13 @@
           "truth_margin": -3.2993,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.39276552243390367,
+            "probability": 0.3927655224339036,
             "predictive_mean": -1.3870800167211736,
             "empirical_crps": 1.3745656639183972,
             "pit": 0.3450821641197157
           },
           "calibrated": {
-            "probability": 0.39276552243390367,
+            "probability": 0.3927655224339036,
             "predictive_mean": -1.3870800167211736,
             "empirical_crps": 1.3745656639183972,
             "pit": 0.3450821641197157
@@ -4626,16 +4626,16 @@
           "truth_margin": -38.6143,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0004361940315872606,
+            "probability": 0.0004361940315872601,
             "predictive_mean": -36.65447149689901,
             "empirical_crps": 1.8666197046167783,
-            "pit": 0.3900067163258752
+            "pit": 0.39000671632587525
           },
           "calibrated": {
-            "probability": 0.0004361940315872606,
+            "probability": 0.0004361940315872601,
             "predictive_mean": -36.65447149689901,
             "empirical_crps": 1.8666197046167783,
-            "pit": 0.3900067163258752
+            "pit": 0.39000671632587525
           }
         },
         {
@@ -4646,15 +4646,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.8947564179517769,
-            "predictive_mean": 6.501630383725484,
-            "empirical_crps": 1.9310627047562656,
-            "pit": 0.6993399999301922
+            "predictive_mean": 6.501630383725482,
+            "empirical_crps": 1.9310627047562665,
+            "pit": 0.6993399999301921
           },
           "calibrated": {
             "probability": 0.8947564179517769,
-            "predictive_mean": 6.501630383725484,
-            "empirical_crps": 1.9310627047562656,
-            "pit": 0.6993399999301922
+            "predictive_mean": 6.501630383725482,
+            "empirical_crps": 1.9310627047562665,
+            "pit": 0.6993399999301921
           }
         },
         {
@@ -4664,14 +4664,14 @@
           "truth_margin": 0.8019,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.5297707463075547,
-            "predictive_mean": 0.49623414869710974,
+            "probability": 0.5297707463075546,
+            "predictive_mean": 0.49623414869710963,
             "empirical_crps": 0.9289174839194341,
             "pit": 0.5299831343009213
           },
           "calibrated": {
-            "probability": 0.5297707463075547,
-            "predictive_mean": 0.49623414869710974,
+            "probability": 0.5297707463075546,
+            "predictive_mean": 0.49623414869710963,
             "empirical_crps": 0.9289174839194341,
             "pit": 0.5299831343009213
           }
@@ -4684,13 +4684,13 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9994622388063175,
-            "predictive_mean": 23.84265936578443,
+            "predictive_mean": 23.842659365784428,
             "empirical_crps": 4.996577808662229,
             "pit": 0.05845835819784154
           },
           "calibrated": {
             "probability": 0.9994622388063175,
-            "predictive_mean": 23.84265936578443,
+            "predictive_mean": 23.842659365784428,
             "empirical_crps": 4.996577808662229,
             "pit": 0.05845835819784154
           }
@@ -4703,15 +4703,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.5006730597539353,
-            "predictive_mean": -0.0948000879505415,
-            "empirical_crps": 3.928302896211793,
-            "pit": 0.11379171639568307
+            "predictive_mean": -0.09480008795054164,
+            "empirical_crps": 3.9283028962117923,
+            "pit": 0.11379171639568306
           },
           "calibrated": {
             "probability": 0.5006730597539353,
-            "predictive_mean": -0.0948000879505415,
-            "empirical_crps": 3.928302896211793,
-            "pit": 0.11379171639568307
+            "predictive_mean": -0.09480008795054164,
+            "empirical_crps": 3.9283028962117923,
+            "pit": 0.11379171639568306
           }
         },
         {
@@ -4723,13 +4723,13 @@
           "raw": {
             "probability": 0.000537761193682548,
             "predictive_mean": -30.248207506096016,
-            "empirical_crps": 1.8808574874327646,
+            "empirical_crps": 1.8808574874327633,
             "pit": 0.27852873130508027
           },
           "calibrated": {
             "probability": 0.000537761193682548,
             "predictive_mean": -30.248207506096016,
-            "empirical_crps": 1.8808574874327646,
+            "empirical_crps": 1.8808574874327633,
             "pit": 0.27852873130508027
           }
         },
@@ -4740,15 +4740,15 @@
           "truth_margin": -27.3517,
           "outcome": 0.0,
           "raw": {
-            "probability": 8.723880631745212e-05,
-            "predictive_mean": -27.483992068691744,
-            "empirical_crps": 1.3670119309527413,
+            "probability": 8.723880631745201e-05,
+            "predictive_mean": -27.48399206869174,
+            "empirical_crps": 1.3670119309527418,
             "pit": 0.5106081343009212
           },
           "calibrated": {
-            "probability": 8.723880631745212e-05,
-            "predictive_mean": -27.483992068691744,
-            "empirical_crps": 1.3670119309527413,
+            "probability": 8.723880631745201e-05,
+            "predictive_mean": -27.48399206869174,
+            "empirical_crps": 1.3670119309527418,
             "pit": 0.5106081343009212
           }
         },
@@ -4759,15 +4759,15 @@
           "truth_margin": 15.4085,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9934596268694922,
-            "predictive_mean": 19.0392568987057,
-            "empirical_crps": 2.692775702263114,
+            "probability": 0.9934596268694921,
+            "predictive_mean": 19.039256898705695,
+            "empirical_crps": 2.6927757022631145,
             "pit": 0.2594310447514609
           },
           "calibrated": {
-            "probability": 0.9934596268694922,
-            "predictive_mean": 19.0392568987057,
-            "empirical_crps": 2.692775702263114,
+            "probability": 0.9934596268694921,
+            "predictive_mean": 19.039256898705695,
+            "empirical_crps": 2.6927757022631145,
             "pit": 0.2594310447514609
           }
         },
@@ -4780,13 +4780,13 @@
           "raw": {
             "probability": 0.9042603731537774,
             "predictive_mean": 6.618161557390401,
-            "empirical_crps": 1.4294033936743018,
+            "empirical_crps": 1.4294033936743022,
             "pit": 0.3590808208545407
           },
           "calibrated": {
             "probability": 0.9042603731537774,
             "predictive_mean": 6.618161557390401,
-            "empirical_crps": 1.4294033936743018,
+            "empirical_crps": 1.4294033936743022,
             "pit": 0.3590808208545407
           }
         },
@@ -4797,15 +4797,15 @@
           "truth_margin": -25.8965,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.011308582094761783,
-            "predictive_mean": -15.91808163890437,
-            "empirical_crps": 6.436081809472283,
+            "probability": 0.01130858209476178,
+            "predictive_mean": -15.918081638904368,
+            "empirical_crps": 6.436081809472282,
             "pit": 0.05972268655361937
           },
           "calibrated": {
-            "probability": 0.011308582094761783,
-            "predictive_mean": -15.91808163890437,
-            "empirical_crps": 6.436081809472283,
+            "probability": 0.01130858209476178,
+            "predictive_mean": -15.918081638904368,
+            "empirical_crps": 6.436081809472282,
             "pit": 0.05972268655361937
           }
         },
@@ -4816,15 +4816,15 @@
           "truth_margin": -45.3941,
           "outcome": 0.0,
           "raw": {
-            "probability": 8.723880631745212e-05,
-            "predictive_mean": -23.843431620952188,
-            "empirical_crps": 18.37436494870647,
+            "probability": 8.723880631745201e-05,
+            "predictive_mean": -23.843431620952185,
+            "empirical_crps": 18.374364948706468,
             "pit": 0.001075522387365096
           },
           "calibrated": {
-            "probability": 8.723880631745212e-05,
-            "predictive_mean": -23.843431620952188,
-            "empirical_crps": 18.37436494870647,
+            "probability": 8.723880631745201e-05,
+            "predictive_mean": -23.843431620952185,
+            "empirical_crps": 18.374364948706468,
             "pit": 0.001075522387365096
           }
         },
@@ -4835,16 +4835,16 @@
           "truth_margin": 41.9094,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9993750000000001,
+            "probability": 0.999375,
             "predictive_mean": 27.4251392793892,
-            "empirical_crps": 11.633970295198486,
-            "pit": 0.9807514178586997
+            "empirical_crps": 11.633970295198488,
+            "pit": 0.9807514178586996
           },
           "calibrated": {
-            "probability": 0.9993750000000001,
+            "probability": 0.999375,
             "predictive_mean": 27.4251392793892,
-            "empirical_crps": 11.633970295198486,
-            "pit": 0.9807514178586997
+            "empirical_crps": 11.633970295198488,
+            "pit": 0.9807514178586996
           }
         },
         {
@@ -4854,16 +4854,16 @@
           "truth_margin": 14.5506,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9839101492568572,
+            "probability": 0.983910149256857,
             "predictive_mean": 12.31061190857923,
-            "empirical_crps": 1.7005717902651538,
-            "pit": 0.6786914179052383
+            "empirical_crps": 1.7005717902651547,
+            "pit": 0.6786914179052382
           },
           "calibrated": {
-            "probability": 0.9839101492568572,
+            "probability": 0.983910149256857,
             "predictive_mean": 12.31061190857923,
-            "empirical_crps": 1.7005717902651538,
-            "pit": 0.6786914179052383
+            "empirical_crps": 1.7005717902651547,
+            "pit": 0.6786914179052382
           }
         },
         {
@@ -4873,16 +4873,16 @@
           "truth_margin": -1.0091,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.42163141795177683,
-            "predictive_mean": -1.1418730476540275,
-            "empirical_crps": 1.230283751349036,
-            "pit": 0.5050977611471439
+            "probability": 0.4216314179517768,
+            "predictive_mean": -1.1418730476540278,
+            "empirical_crps": 1.2302837513490354,
+            "pit": 0.505097761147144
           },
           "calibrated": {
-            "probability": 0.42163141795177683,
-            "predictive_mean": -1.1418730476540275,
-            "empirical_crps": 1.230283751349036,
-            "pit": 0.5050977611471439
+            "probability": 0.4216314179517768,
+            "predictive_mean": -1.1418730476540278,
+            "empirical_crps": 1.2302837513490354,
+            "pit": 0.505097761147144
           }
         },
         {
@@ -4892,13 +4892,13 @@
           "truth_margin": -36.653,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0019622388063174523,
+            "probability": 0.001962238806317452,
             "predictive_mean": -27.498602535901146,
             "empirical_crps": 5.676741787821537,
             "pit": 0.11531649249876283
           },
           "calibrated": {
-            "probability": 0.0019622388063174523,
+            "probability": 0.001962238806317452,
             "predictive_mean": -27.498602535901146,
             "empirical_crps": 5.676741787821537,
             "pit": 0.11531649249876283
@@ -4911,15 +4911,15 @@
           "truth_margin": -35.7829,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.002325522387365096,
+            "probability": 0.0023255223873650957,
             "predictive_mean": -29.244086126233878,
-            "empirical_crps": 4.370842721270713,
+            "empirical_crps": 4.370842721270714,
             "pit": 0.1957800745702553
           },
           "calibrated": {
-            "probability": 0.002325522387365096,
+            "probability": 0.0023255223873650957,
             "predictive_mean": -29.244086126233878,
-            "empirical_crps": 4.370842721270713,
+            "empirical_crps": 4.370842721270714,
             "pit": 0.1957800745702553
           }
         },
@@ -4930,16 +4930,16 @@
           "truth_margin": 4.9921,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.756661343334983,
-            "predictive_mean": 3.7651852527802148,
-            "empirical_crps": 1.569600238993457,
-            "pit": 0.5871185820482232
+            "probability": 0.7566613433349829,
+            "predictive_mean": 3.7651852527802143,
+            "empirical_crps": 1.5696002389934574,
+            "pit": 0.5871185820482233
           },
           "calibrated": {
-            "probability": 0.756661343334983,
-            "predictive_mean": 3.7651852527802148,
-            "empirical_crps": 1.569600238993457,
-            "pit": 0.5871185820482232
+            "probability": 0.7566613433349829,
+            "predictive_mean": 3.7651852527802143,
+            "empirical_crps": 1.5696002389934574,
+            "pit": 0.5871185820482233
           }
         },
         {
@@ -4950,13 +4950,13 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9964244776126349,
-            "predictive_mean": 29.780684393594804,
+            "predictive_mean": 29.7806843935948,
             "empirical_crps": 4.356162631181917,
             "pit": 0.14799097011139772
           },
           "calibrated": {
             "probability": 0.9964244776126349,
-            "predictive_mean": 29.780684393594804,
+            "predictive_mean": 29.7806843935948,
             "empirical_crps": 4.356162631181917,
             "pit": 0.14799097011139772
           }
@@ -4969,14 +4969,14 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9982265671620953,
-            "predictive_mean": 29.738725764495886,
-            "empirical_crps": 4.828814406841678,
+            "predictive_mean": 29.738725764495882,
+            "empirical_crps": 4.828814406841676,
             "pit": 0.15758343279136616
           },
           "calibrated": {
             "probability": 0.9982265671620953,
-            "predictive_mean": 29.738725764495886,
-            "empirical_crps": 4.828814406841678,
+            "predictive_mean": 29.738725764495882,
+            "empirical_crps": 4.828814406841676,
             "pit": 0.15758343279136616
           }
         },
@@ -4988,14 +4988,14 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9282291045053962,
-            "predictive_mean": 8.912981987751468,
-            "empirical_crps": 3.5222763822383043,
+            "predictive_mean": 8.912981987751467,
+            "empirical_crps": 3.5222763822383047,
             "pit": 0.8552891044588576
           },
           "calibrated": {
             "probability": 0.9282291045053962,
-            "predictive_mean": 8.912981987751468,
-            "empirical_crps": 3.5222763822383043,
+            "predictive_mean": 8.912981987751467,
+            "empirical_crps": 3.5222763822383047,
             "pit": 0.8552891044588576
           }
         },
@@ -5006,15 +5006,15 @@
           "truth_margin": 13.3562,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.986294253738984,
+            "probability": 0.9862942537389839,
             "predictive_mean": 16.994088433363473,
-            "empirical_crps": 2.7623074101477947,
+            "empirical_crps": 2.762307410147794,
             "pit": 0.2557370895029218
           },
           "calibrated": {
-            "probability": 0.986294253738984,
+            "probability": 0.9862942537389839,
             "predictive_mean": 16.994088433363473,
-            "empirical_crps": 2.7623074101477947,
+            "empirical_crps": 2.762307410147794,
             "pit": 0.2557370895029218
           }
         },
@@ -5026,15 +5026,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.24200268653035006,
-            "predictive_mean": -3.826118080236831,
+            "predictive_mean": -3.8261180802368306,
             "empirical_crps": 10.376798832538633,
-            "pit": 0.02353126864838115
+            "pit": 0.023531268648381152
           },
           "calibrated": {
             "probability": 0.24200268653035006,
-            "predictive_mean": -3.826118080236831,
+            "predictive_mean": -3.8261180802368306,
             "empirical_crps": 10.376798832538633,
-            "pit": 0.02353126864838115
+            "pit": 0.023531268648381152
           }
         },
         {
@@ -5044,16 +5044,16 @@
           "truth_margin": 2.8061,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.4378839552950777,
-            "predictive_mean": -0.8193190640952008,
-            "empirical_crps": 2.289844128935829,
-            "pit": 0.7356654477240328
+            "probability": 0.4378839552950776,
+            "predictive_mean": -0.8193190640952012,
+            "empirical_crps": 2.2898441289358304,
+            "pit": 0.7356654477240325
           },
           "calibrated": {
-            "probability": 0.4378839552950777,
-            "predictive_mean": -0.8193190640952008,
-            "empirical_crps": 2.289844128935829,
-            "pit": 0.7356654477240328
+            "probability": 0.4378839552950776,
+            "predictive_mean": -0.8193190640952012,
+            "empirical_crps": 2.2898441289358304,
+            "pit": 0.7356654477240325
           }
         },
         {
@@ -5063,14 +5063,14 @@
           "truth_margin": 46.4531,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9981250000000002,
-            "predictive_mean": 30.481097740990847,
+            "probability": 0.998125,
+            "predictive_mean": 30.481097740990844,
             "empirical_crps": 11.547590734066013,
             "pit": 0.9740117164189523
           },
           "calibrated": {
-            "probability": 0.9981250000000002,
-            "predictive_mean": 30.481097740990847,
+            "probability": 0.998125,
+            "predictive_mean": 30.481097740990844,
             "empirical_crps": 11.547590734066013,
             "pit": 0.9740117164189523
           }
@@ -5082,15 +5082,15 @@
           "truth_margin": -12.1968,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.08123440297257173,
-            "predictive_mean": -8.39593516603006,
-            "empirical_crps": 2.0325294082045966,
+            "probability": 0.08123440297257174,
+            "predictive_mean": -8.395935166030059,
+            "empirical_crps": 2.032529408204597,
             "pit": 0.24953134324190576
           },
           "calibrated": {
-            "probability": 0.08123440297257173,
-            "predictive_mean": -8.39593516603006,
-            "empirical_crps": 2.0325294082045966,
+            "probability": 0.08123440297257174,
+            "predictive_mean": -8.395935166030059,
+            "empirical_crps": 2.032529408204597,
             "pit": 0.24953134324190576
           }
         },
@@ -5101,13 +5101,13 @@
           "truth_margin": -35.721,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0012500000000000002,
+            "probability": 0.00125,
             "predictive_mean": -34.347001400085425,
             "empirical_crps": 2.5306771645511166,
             "pit": 0.42378791038073177
           },
           "calibrated": {
-            "probability": 0.0012500000000000002,
+            "probability": 0.00125,
             "predictive_mean": -34.347001400085425,
             "empirical_crps": 2.5306771645511166,
             "pit": 0.42378791038073177
@@ -5122,13 +5122,13 @@
           "raw": {
             "probability": 0.9911341044821269,
             "predictive_mean": 16.688643414237678,
-            "empirical_crps": 1.3104129481072202,
+            "empirical_crps": 1.3104129481072206,
             "pit": 0.42227746263342986
           },
           "calibrated": {
             "probability": 0.9911341044821269,
             "predictive_mean": 16.688643414237678,
-            "empirical_crps": 1.3104129481072202,
+            "empirical_crps": 1.3104129481072206,
             "pit": 0.42227746263342986
           }
         },
@@ -5141,13 +5141,13 @@
           "raw": {
             "probability": 0.05075522387365096,
             "predictive_mean": -10.976999464686866,
-            "empirical_crps": 7.243411709984739,
+            "empirical_crps": 7.24341170998474,
             "pit": 0.054941417905238224
           },
           "calibrated": {
             "probability": 0.05075522387365096,
             "predictive_mean": -10.976999464686866,
-            "empirical_crps": 7.243411709984739,
+            "empirical_crps": 7.24341170998474,
             "pit": 0.054941417905238224
           }
         },
@@ -5158,14 +5158,14 @@
           "truth_margin": -23.6633,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.005377611936825479,
-            "predictive_mean": -19.987999551201092,
+            "probability": 0.00537761193682548,
+            "predictive_mean": -19.987999551201096,
             "empirical_crps": 2.428739676780289,
             "pit": 0.2635405223175572
           },
           "calibrated": {
-            "probability": 0.005377611936825479,
-            "predictive_mean": -19.987999551201092,
+            "probability": 0.00537761193682548,
+            "predictive_mean": -19.987999551201096,
             "empirical_crps": 2.428739676780289,
             "pit": 0.2635405223175572
           }
@@ -5178,13 +5178,13 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.002238283581047644,
-            "predictive_mean": -24.352897791688754,
+            "predictive_mean": -24.35289779168875,
             "empirical_crps": 1.7267346275684359,
             "pit": 0.5454661194147934
           },
           "calibrated": {
             "probability": 0.002238283581047644,
-            "predictive_mean": -24.352897791688754,
+            "predictive_mean": -24.35289779168875,
             "empirical_crps": 1.7267346275684359,
             "pit": 0.5454661194147934
           }
@@ -5196,15 +5196,15 @@
           "truth_margin": -29.1462,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.009375000000000001,
+            "probability": 0.009375,
             "predictive_mean": -20.241412126422865,
-            "empirical_crps": 5.950137385233842,
+            "empirical_crps": 5.950137385233841,
             "pit": 0.11829567159768357
           },
           "calibrated": {
-            "probability": 0.009375000000000001,
+            "probability": 0.009375,
             "predictive_mean": -20.241412126422865,
-            "empirical_crps": 5.950137385233842,
+            "empirical_crps": 5.950137385233841,
             "pit": 0.11829567159768357
           }
         },
@@ -5216,13 +5216,13 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9978489552252698,
-            "predictive_mean": 30.970464100972986,
+            "predictive_mean": 30.970464100972983,
             "empirical_crps": 1.980637513248059,
             "pit": 0.5226967909659384
           },
           "calibrated": {
             "probability": 0.9978489552252698,
-            "predictive_mean": 30.970464100972986,
+            "predictive_mean": 30.970464100972983,
             "empirical_crps": 1.980637513248059,
             "pit": 0.5226967909659384
           }
@@ -5254,13 +5254,13 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.3777355970506976,
-            "predictive_mean": -1.7167541542167386,
+            "predictive_mean": -1.7167541542167388,
             "empirical_crps": 1.5459880517380258,
             "pit": 0.38588037306070017
           },
           "calibrated": {
             "probability": 0.3777355970506976,
-            "predictive_mean": -1.7167541542167386,
+            "predictive_mean": -1.7167541542167388,
             "empirical_crps": 1.5459880517380258,
             "pit": 0.38588037306070017
           }
@@ -5292,13 +5292,13 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.8227056716674915,
-            "predictive_mean": 5.260013829913568,
+            "predictive_mean": 5.260013829913567,
             "empirical_crps": 2.0973298294792353,
             "pit": 0.7531705224106344
           },
           "calibrated": {
             "probability": 0.8227056716674915,
-            "predictive_mean": 5.260013829913568,
+            "predictive_mean": 5.260013829913567,
             "empirical_crps": 2.0973298294792353,
             "pit": 0.7531705224106344
           }
@@ -5311,15 +5311,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.7078801492801264,
-            "predictive_mean": 3.0903186185275393,
-            "empirical_crps": 1.7784989568453327,
-            "pit": 0.3474688059451435
+            "predictive_mean": 3.090318618527539,
+            "empirical_crps": 1.7784989568453318,
+            "pit": 0.34746880594514346
           },
           "calibrated": {
             "probability": 0.7078801492801264,
-            "predictive_mean": 3.0903186185275393,
-            "empirical_crps": 1.7784989568453327,
-            "pit": 0.3474688059451435
+            "predictive_mean": 3.090318618527539,
+            "empirical_crps": 1.7784989568453318,
+            "pit": 0.34746880594514346
           }
         },
         {
@@ -5331,14 +5331,14 @@
           "raw": {
             "probability": 0.997674477612635,
             "predictive_mean": 23.926571042114787,
-            "empirical_crps": 5.219491108034088,
-            "pit": 0.09226567162095288
+            "empirical_crps": 5.219491108034086,
+            "pit": 0.0922656716209529
           },
           "calibrated": {
             "probability": 0.997674477612635,
             "predictive_mean": 23.926571042114787,
-            "empirical_crps": 5.219491108034088,
-            "pit": 0.09226567162095288
+            "empirical_crps": 5.219491108034086,
+            "pit": 0.0922656716209529
           }
         },
         {
@@ -5350,13 +5350,13 @@
           "raw": {
             "probability": 0.46589977610307975,
             "predictive_mean": -0.8019359671305784,
-            "empirical_crps": 3.9691384281506727,
+            "empirical_crps": 3.969138428150672,
             "pit": 0.1771080597073967
           },
           "calibrated": {
             "probability": 0.46589977610307975,
             "predictive_mean": -0.8019359671305784,
-            "empirical_crps": 3.9691384281506727,
+            "empirical_crps": 3.969138428150672,
             "pit": 0.1771080597073967
           }
         },
@@ -5367,13 +5367,13 @@
           "truth_margin": -33.4067,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0007994776126349042,
+            "probability": 0.000799477612634904,
             "predictive_mean": -36.4124195598768,
             "empirical_crps": 2.377050411784446,
             "pit": 0.658513134277652
           },
           "calibrated": {
-            "probability": 0.0007994776126349042,
+            "probability": 0.000799477612634904,
             "predictive_mean": -36.4124195598768,
             "empirical_crps": 2.377050411784446,
             "pit": 0.658513134277652
@@ -5405,16 +5405,16 @@
           "truth_margin": 15.4085,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9555390298653331,
-            "predictive_mean": 13.95638550544938,
+            "probability": 0.955539029865333,
+            "predictive_mean": 13.956385505449378,
             "empirical_crps": 1.8266235455983502,
-            "pit": 0.5754311193449856
+            "pit": 0.5754311193449855
           },
           "calibrated": {
-            "probability": 0.9555390298653331,
-            "predictive_mean": 13.95638550544938,
+            "probability": 0.955539029865333,
+            "predictive_mean": 13.956385505449378,
             "empirical_crps": 1.8266235455983502,
-            "pit": 0.5754311193449856
+            "pit": 0.5754311193449855
           }
         },
         {
@@ -5424,15 +5424,15 @@
           "truth_margin": 5.0351,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.8576041045053963,
-            "predictive_mean": 6.1961280944422485,
-            "empirical_crps": 1.396101644845967,
+            "probability": 0.8576041045053961,
+            "predictive_mean": 6.196128094442248,
+            "empirical_crps": 1.3961016448459667,
             "pit": 0.41288940294930243
           },
           "calibrated": {
-            "probability": 0.8576041045053963,
-            "predictive_mean": 6.1961280944422485,
-            "empirical_crps": 1.396101644845967,
+            "probability": 0.8576041045053961,
+            "predictive_mean": 6.196128094442248,
+            "empirical_crps": 1.3961016448459667,
             "pit": 0.41288940294930243
           }
         },
@@ -5446,13 +5446,13 @@
             "probability": 0.05264455222942879,
             "predictive_mean": -13.696563339917127,
             "empirical_crps": 7.670541737851701,
-            "pit": 0.06031776117041326
+            "pit": 0.060317761170413264
           },
           "calibrated": {
             "probability": 0.05264455222942879,
             "predictive_mean": -13.696563339917127,
             "empirical_crps": 7.670541737851701,
-            "pit": 0.06031776117041326
+            "pit": 0.060317761170413264
           }
         },
         {
@@ -5463,13 +5463,13 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.0,
-            "predictive_mean": -34.16445413884091,
+            "predictive_mean": -34.1644541388409,
             "empirical_crps": 8.281219832108135,
             "pit": 0.050842462679968406
           },
           "calibrated": {
             "probability": 0.0,
-            "predictive_mean": -34.16445413884091,
+            "predictive_mean": -34.1644541388409,
             "empirical_crps": 8.281219832108135,
             "pit": 0.050842462679968406
           }
@@ -5483,13 +5483,13 @@
           "raw": {
             "probability": 0.9947382835810477,
             "predictive_mean": 20.982402904824596,
-            "empirical_crps": 17.11991266648436,
+            "empirical_crps": 17.119912666484357,
             "pit": 0.99492582087781
           },
           "calibrated": {
             "probability": 0.9947382835810477,
             "predictive_mean": 20.982402904824596,
-            "empirical_crps": 17.11991266648436,
+            "empirical_crps": 17.119912666484357,
             "pit": 0.99492582087781
           }
         },
@@ -5500,15 +5500,15 @@
           "truth_margin": 14.5506,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.966963507477968,
+            "probability": 0.9669635074779679,
             "predictive_mean": 12.136391443907485,
-            "empirical_crps": 1.579611316473156,
+            "empirical_crps": 1.5796113164731564,
             "pit": 0.655429850673335
           },
           "calibrated": {
-            "probability": 0.966963507477968,
+            "probability": 0.9669635074779679,
             "predictive_mean": 12.136391443907485,
-            "empirical_crps": 1.579611316473156,
+            "empirical_crps": 1.5796113164731564,
             "pit": 0.655429850673335
           }
         },
@@ -5519,15 +5519,15 @@
           "truth_margin": -1.0091,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.6387824627265071,
-            "predictive_mean": 2.006565149649693,
-            "empirical_crps": 1.9753701240195478,
+            "probability": 0.638782462726507,
+            "predictive_mean": 2.0065651496496923,
+            "empirical_crps": 1.975370124019547,
             "pit": 0.2934701492103185
           },
           "calibrated": {
-            "probability": 0.6387824627265071,
-            "predictive_mean": 2.006565149649693,
-            "empirical_crps": 1.9753701240195478,
+            "probability": 0.638782462726507,
+            "predictive_mean": 2.0065651496496923,
+            "empirical_crps": 1.975370124019547,
             "pit": 0.2934701492103185
           }
         }
@@ -5673,8 +5673,8 @@
         "excluded_missing_predictions": {}
       },
       "stack_weights": {
-        "pymc": 0.16287308934263148,
-        "state_space": 0.8371269106573686
+        "pymc": 0.1628730893426316,
+        "state_space": 0.8371269106573684
       },
       "stack_fit": {
         "method": "empirical_predictive_mixture_crps_v1",
@@ -5685,24 +5685,24 @@
       },
       "training_case_ids_sha256": "dd635c06e3d1363c7914563a67b486ff7d7008a750fe7930fa6dfe734a482267",
       "training_truth_sha256": "07ba84a359e238b87c0e78e369adf84dc7bf5f7df868b59f48fdcbbb0d178350",
-      "plan_sha256": "062a2b1f943c4c09305ece2a9b1affb08068f0bd5f2cb353be5fa0a3bed83031",
+      "plan_sha256": "f6b76c6a6cf4f27dba0b611020850af17d0b1910d8c7cee75c274119609ee7be",
       "scale_selection": {
         "objective": "training_empirical_margin_crps",
         "tie_break": "closest_to_1.0_then_lower",
         "selected_scale": 1.0,
-        "selected_training_crps": 3.3888850133032764,
+        "selected_training_crps": 3.388885013303276,
         "candidate_scores": [
           {
             "scale": 1.0,
-            "empirical_crps": 3.3888850133032764
+            "empirical_crps": 3.388885013303276
           },
           {
             "scale": 1.05,
-            "empirical_crps": 3.4009490509993467
+            "empirical_crps": 3.4009490509993476
           },
           {
             "scale": 1.1,
-            "empirical_crps": 3.4163038455510413
+            "empirical_crps": 3.4163038455510417
           },
           {
             "scale": 1.15,
@@ -5710,7 +5710,7 @@
           },
           {
             "scale": 1.2,
-            "empirical_crps": 3.4556230815374227
+            "empirical_crps": 3.4556230815374223
           },
           {
             "scale": 1.25,
@@ -5718,7 +5718,7 @@
           },
           {
             "scale": 1.3,
-            "empirical_crps": 3.5055576925904326
+            "empirical_crps": 3.505557692590433
           },
           {
             "scale": 1.35,
@@ -5730,7 +5730,7 @@
           },
           {
             "scale": 1.45,
-            "empirical_crps": 3.5960313815046
+            "empirical_crps": 3.5960313815046008
           },
           {
             "scale": 1.5,
@@ -5738,7 +5738,7 @@
           },
           {
             "scale": 1.55,
-            "empirical_crps": 3.6664556928480216
+            "empirical_crps": 3.6664556928480225
           },
           {
             "scale": 1.6,
@@ -5746,15 +5746,15 @@
           },
           {
             "scale": 1.65,
-            "empirical_crps": 3.7435938147839014
+            "empirical_crps": 3.7435938147839027
           },
           {
             "scale": 1.7,
-            "empirical_crps": 3.784601723648624
+            "empirical_crps": 3.784601723648623
           },
           {
             "scale": 1.75,
-            "empirical_crps": 3.826912859719713
+            "empirical_crps": 3.8269128597197137
           },
           {
             "scale": 1.8,
@@ -5766,7 +5766,7 @@
           },
           {
             "scale": 1.9,
-            "empirical_crps": 3.9613420494829032
+            "empirical_crps": 3.9613420494829046
           },
           {
             "scale": 1.95,
@@ -5784,7 +5784,7 @@
         "n": 64,
         "empirical_crps": 2.694583221100081,
         "brier": 0.029318999489907984,
-        "log_score": -0.10621322368809243,
+        "log_score": -0.10621322368809244,
         "log_score_orientation": "higher_is_better",
         "reliability": [
           {
@@ -5826,7 +5826,7 @@
             "bin_lo": 0.6000000000000001,
             "bin_hi": 0.7000000000000001,
             "n": 1.0,
-            "mean_p": 0.6826501759955184,
+            "mean_p": 0.6826501759955185,
             "mean_y": 0.0
           },
           {
@@ -5863,8 +5863,8 @@
         "calibration_claim_allowed": false,
         "calibration_slope_intercept": {
           "n": 64,
-          "slope": 1.0679527031737317,
-          "intercept": -0.05892338379034319,
+          "slope": 1.0679527031737315,
+          "intercept": -0.05892338379034287,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -5874,7 +5874,7 @@
         "pit": {
           "n": 64,
           "mean": 0.3431807221107046,
-          "var": 0.04055131749089063,
+          "var": 0.04055131749089064,
           "expected_mean": 0.5,
           "expected_var": 0.08333333333333333,
           "histogram": [
@@ -5937,7 +5937,7 @@
         "n": 64,
         "empirical_crps": 2.694583221100081,
         "brier": 0.029318999489907984,
-        "log_score": -0.10621322368809243,
+        "log_score": -0.10621322368809244,
         "log_score_orientation": "higher_is_better",
         "reliability": [
           {
@@ -5979,7 +5979,7 @@
             "bin_lo": 0.6000000000000001,
             "bin_hi": 0.7000000000000001,
             "n": 1.0,
-            "mean_p": 0.6826501759955184,
+            "mean_p": 0.6826501759955185,
             "mean_y": 0.0
           },
           {
@@ -6016,8 +6016,8 @@
         "calibration_claim_allowed": false,
         "calibration_slope_intercept": {
           "n": 64,
-          "slope": 1.0679527031737317,
-          "intercept": -0.05892338379034319,
+          "slope": 1.0679527031737315,
+          "intercept": -0.05892338379034287,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -6027,7 +6027,7 @@
         "pit": {
           "n": 64,
           "mean": 0.3431807221107046,
-          "var": 0.04055131749089063,
+          "var": 0.04055131749089064,
           "expected_mean": 0.5,
           "expected_var": 0.08333333333333333,
           "histogram": [
@@ -6115,13 +6115,13 @@
           "raw": {
             "probability": 0.9979071827233567,
             "predictive_mean": 26.094860721913193,
-            "empirical_crps": 6.373181137770672,
+            "empirical_crps": 6.373181137770673,
             "pit": 0.05819612957482566
           },
           "calibrated": {
             "probability": 0.9979071827233567,
             "predictive_mean": 26.094860721913193,
-            "empirical_crps": 6.373181137770672,
+            "empirical_crps": 6.373181137770673,
             "pit": 0.05819612957482566
           }
         },
@@ -6172,14 +6172,14 @@
           "raw": {
             "probability": 0.9957125697658741,
             "predictive_mean": 19.145879448091918,
-            "empirical_crps": 1.340760882424119,
-            "pit": 0.4207059269376244
+            "empirical_crps": 1.34076088242412,
+            "pit": 0.4207059269376243
           },
           "calibrated": {
             "probability": 0.9957125697658741,
             "predictive_mean": 19.145879448091918,
-            "empirical_crps": 1.340760882424119,
-            "pit": 0.4207059269376244
+            "empirical_crps": 1.34076088242412,
+            "pit": 0.4207059269376243
           }
         },
         {
@@ -6189,15 +6189,15 @@
           "truth_margin": -12.9918,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.18964529238433753,
+            "probability": 0.1896452923843375,
             "predictive_mean": -4.41844119235569,
-            "empirical_crps": 5.638596114631919,
+            "empirical_crps": 5.63859611463192,
             "pit": 0.0498697524892306
           },
           "calibrated": {
-            "probability": 0.18964529238433753,
+            "probability": 0.1896452923843375,
             "predictive_mean": -4.41844119235569,
-            "empirical_crps": 5.638596114631919,
+            "empirical_crps": 5.63859611463192,
             "pit": 0.0498697524892306
           }
         },
@@ -6268,13 +6268,13 @@
             "probability": 0.9922941943622385,
             "predictive_mean": 16.15106265279722,
             "empirical_crps": 2.3595866644904984,
-            "pit": 0.23658766092529993
+            "pit": 0.23658766092529998
           },
           "calibrated": {
             "probability": 0.9922941943622385,
             "predictive_mean": 16.15106265279722,
             "empirical_crps": 2.3595866644904984,
-            "pit": 0.23658766092529993
+            "pit": 0.23658766092529998
           }
         },
         {
@@ -6286,14 +6286,14 @@
           "raw": {
             "probability": 0.7420918770181776,
             "predictive_mean": 3.1970297063743454,
-            "empirical_crps": 1.8601520109012286,
-            "pit": 0.2719635100243398
+            "empirical_crps": 1.8601520109012277,
+            "pit": 0.27196351002433977
           },
           "calibrated": {
             "probability": 0.7420918770181776,
             "predictive_mean": 3.1970297063743454,
-            "empirical_crps": 1.8601520109012286,
-            "pit": 0.2719635100243398
+            "empirical_crps": 1.8601520109012277,
+            "pit": 0.27196351002433977
           }
         },
         {
@@ -6305,13 +6305,13 @@
           "raw": {
             "probability": 0.9514415797227964,
             "predictive_mean": 9.352373532461646,
-            "empirical_crps": 3.801863088799638,
+            "empirical_crps": 3.801863088799637,
             "pit": 0.905899720936504
           },
           "calibrated": {
             "probability": 0.9514415797227964,
             "predictive_mean": 9.352373532461646,
-            "empirical_crps": 3.801863088799638,
+            "empirical_crps": 3.801863088799637,
             "pit": 0.905899720936504
           }
         },
@@ -6323,14 +6323,14 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.016060634553286844,
-            "predictive_mean": -12.31109820322279,
-            "empirical_crps": 1.5326195293891973,
+            "predictive_mean": -12.311098203222791,
+            "empirical_crps": 1.5326195293891978,
             "pit": 0.362114626278324
           },
           "calibrated": {
             "probability": 0.016060634553286844,
-            "predictive_mean": -12.31109820322279,
-            "empirical_crps": 1.5326195293891973,
+            "predictive_mean": -12.311098203222791,
+            "empirical_crps": 1.5326195293891978,
             "pit": 0.362114626278324
           }
         },
@@ -6341,16 +6341,16 @@
           "truth_margin": -25.6244,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.018854009956922366,
+            "probability": 0.01885400995692237,
             "predictive_mean": -17.952082953116307,
-            "empirical_crps": 4.949742849197286,
-            "pit": 0.14986532393706417
+            "empirical_crps": 4.949742849197287,
+            "pit": 0.14986532393706414
           },
           "calibrated": {
-            "probability": 0.018854009956922366,
+            "probability": 0.01885400995692237,
             "predictive_mean": -17.952082953116307,
-            "empirical_crps": 4.949742849197286,
-            "pit": 0.14986532393706417
+            "empirical_crps": 4.949742849197287,
+            "pit": 0.14986532393706414
           }
         },
         {
@@ -6361,13 +6361,13 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.040279149488670396,
-            "predictive_mean": -10.02472855957511,
+            "predictive_mean": -10.024728559575111,
             "empirical_crps": 1.7733970703821367,
             "pit": 0.7028708140475592
           },
           "calibrated": {
             "probability": 0.040279149488670396,
-            "predictive_mean": -10.02472855957511,
+            "predictive_mean": -10.024728559575111,
             "empirical_crps": 1.7733970703821367,
             "pit": 0.7028708140475592
           }
@@ -6379,15 +6379,15 @@
           "truth_margin": -33.0332,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0010464086383217108,
+            "probability": 0.0010464086383217106,
             "predictive_mean": -28.04917390373366,
-            "empirical_crps": 3.719074464029175,
+            "empirical_crps": 3.719074464029176,
             "pit": 0.16472749333957928
           },
           "calibrated": {
-            "probability": 0.0010464086383217108,
+            "probability": 0.0010464086383217106,
             "predictive_mean": -28.04917390373366,
-            "empirical_crps": 3.719074464029175,
+            "empirical_crps": 3.719074464029176,
             "pit": 0.16472749333957928
           }
         },
@@ -6398,15 +6398,15 @@
           "truth_margin": -25.1551,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.001569612957482566,
+            "probability": 0.0015696129574825658,
             "predictive_mean": -21.616280789635113,
-            "empirical_crps": 1.9972393365810523,
+            "empirical_crps": 1.9972393365810528,
             "pit": 0.26315123755384706
           },
           "calibrated": {
-            "probability": 0.001569612957482566,
+            "probability": 0.0015696129574825658,
             "predictive_mean": -21.616280789635113,
-            "empirical_crps": 1.9972393365810523,
+            "empirical_crps": 1.9972393365810528,
             "pit": 0.26315123755384706
           }
         },
@@ -6418,14 +6418,14 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9757125697658741,
-            "predictive_mean": 11.064660120541303,
-            "empirical_crps": 1.4843899483407235,
+            "predictive_mean": 11.064660120541301,
+            "empirical_crps": 1.484389948340724,
             "pit": 0.40288094516950956
           },
           "calibrated": {
             "probability": 0.9757125697658741,
-            "predictive_mean": 11.064660120541303,
-            "empirical_crps": 1.4843899483407235,
+            "predictive_mean": 11.064660120541301,
+            "empirical_crps": 1.484389948340724,
             "pit": 0.40288094516950956
           }
         },
@@ -6437,14 +6437,14 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9772252790634961,
-            "predictive_mean": 11.426976465468192,
-            "empirical_crps": 1.33827186149637,
+            "predictive_mean": 11.426976465468194,
+            "empirical_crps": 1.3382718614963691,
             "pit": 0.39550897840419574
           },
           "calibrated": {
             "probability": 0.9772252790634961,
-            "predictive_mean": 11.426976465468192,
-            "empirical_crps": 1.33827186149637,
+            "predictive_mean": 11.426976465468194,
+            "empirical_crps": 1.3382718614963691,
             "pit": 0.39550897840419574
           }
         },
@@ -6458,13 +6458,13 @@
             "probability": 0.8931623089342632,
             "predictive_mean": 6.602878184176765,
             "empirical_crps": 2.9419241749845417,
-            "pit": 0.17471199340699672
+            "pit": 0.1747119934069967
           },
           "calibrated": {
             "probability": 0.8931623089342632,
             "predictive_mean": 6.602878184176765,
             "empirical_crps": 2.9419241749845417,
-            "pit": 0.17471199340699672
+            "pit": 0.1747119934069967
           }
         },
         {
@@ -6475,13 +6475,13 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9989535913616783,
-            "predictive_mean": 22.78615387304952,
+            "predictive_mean": 22.786153873049525,
             "empirical_crps": 2.089704754549665,
             "pit": 0.25377623755384704
           },
           "calibrated": {
             "probability": 0.9989535913616783,
-            "predictive_mean": 22.78615387304952,
+            "predictive_mean": 22.786153873049525,
             "empirical_crps": 2.089704754549665,
             "pit": 0.25377623755384704
           }
@@ -6494,15 +6494,15 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.42064049993258257,
-            "predictive_mean": -0.9635182666121405,
+            "predictive_mean": -0.9635182666121402,
             "empirical_crps": 1.5360990030256172,
-            "pit": 0.2982135100243399
+            "pit": 0.2982135100243398
           },
           "calibrated": {
             "probability": 0.42064049993258257,
-            "predictive_mean": -0.9635182666121405,
+            "predictive_mean": -0.9635182666121402,
             "empirical_crps": 1.5360990030256172,
-            "pit": 0.2982135100243399
+            "pit": 0.2982135100243398
           }
         },
         {
@@ -6512,15 +6512,15 @@
           "truth_margin": -0.2228,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.6826501759955184,
-            "predictive_mean": 2.4167441095986257,
-            "empirical_crps": 1.856480979851753,
+            "probability": 0.6826501759955185,
+            "predictive_mean": 2.416744109598626,
+            "empirical_crps": 1.8564809798517539,
             "pit": 0.30399278081287306
           },
           "calibrated": {
-            "probability": 0.6826501759955184,
-            "predictive_mean": 2.4167441095986257,
-            "empirical_crps": 1.856480979851753,
+            "probability": 0.6826501759955185,
+            "predictive_mean": 2.416744109598626,
+            "empirical_crps": 1.8564809798517539,
             "pit": 0.30399278081287306
           }
         },
@@ -6533,13 +6533,13 @@
           "raw": {
             "probability": 0.9978053870425175,
             "predictive_mean": 18.61984337226801,
-            "empirical_crps": 1.582227984085962,
+            "empirical_crps": 1.5822279840859625,
             "pit": 0.611451377085595
           },
           "calibrated": {
             "probability": 0.9978053870425175,
             "predictive_mean": 18.61984337226801,
-            "empirical_crps": 1.582227984085962,
+            "empirical_crps": 1.5822279840859625,
             "pit": 0.611451377085595
           }
         },
@@ -6550,16 +6550,16 @@
           "truth_margin": -30.2519,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0006250000000000001,
+            "probability": 0.000625,
             "predictive_mean": -22.608633962864626,
-            "empirical_crps": 4.612728583652589,
-            "pit": 0.07745289370293817
+            "empirical_crps": 4.61272858365259,
+            "pit": 0.07745289370293816
           },
           "calibrated": {
-            "probability": 0.0006250000000000001,
+            "probability": 0.000625,
             "predictive_mean": -22.608633962864626,
-            "empirical_crps": 4.612728583652589,
-            "pit": 0.07745289370293817
+            "empirical_crps": 4.61272858365259,
+            "pit": 0.07745289370293816
           }
         },
         {
@@ -6588,16 +6588,16 @@
           "truth_margin": -32.6407,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0005232043191608554,
-            "predictive_mean": -29.266776230057392,
+            "probability": 0.0005232043191608553,
+            "predictive_mean": -29.26677623005739,
             "empirical_crps": 2.1501718842532895,
-            "pit": 0.265922803955802
+            "pit": 0.26592280395580203
           },
           "calibrated": {
-            "probability": 0.0005232043191608554,
-            "predictive_mean": -29.266776230057392,
+            "probability": 0.0005232043191608553,
+            "predictive_mean": -29.26677623005739,
             "empirical_crps": 2.1501718842532895,
-            "pit": 0.265922803955802
+            "pit": 0.26592280395580203
           }
         },
         {
@@ -6647,14 +6647,14 @@
           "raw": {
             "probability": 0.740359136167829,
             "predictive_mean": 3.0643229032188457,
-            "empirical_crps": 1.8068765865229657,
-            "pit": 0.31782276749203164
+            "empirical_crps": 1.8068765865229661,
+            "pit": 0.3178227674920316
           },
           "calibrated": {
             "probability": 0.740359136167829,
             "predictive_mean": 3.0643229032188457,
-            "empirical_crps": 1.8068765865229657,
-            "pit": 0.31782276749203164
+            "empirical_crps": 1.8068765865229661,
+            "pit": 0.3178227674920316
           }
         },
         {
@@ -6666,13 +6666,13 @@
           "raw": {
             "probability": 0.0,
             "predictive_mean": -40.031014664014286,
-            "empirical_crps": 1.7822756839226268,
+            "empirical_crps": 1.7822756839226264,
             "pit": 0.32570814121370756
           },
           "calibrated": {
             "probability": 0.0,
             "predictive_mean": -40.031014664014286,
-            "empirical_crps": 1.7822756839226268,
+            "empirical_crps": 1.7822756839226264,
             "pit": 0.32570814121370756
           }
         },
@@ -6683,13 +6683,13 @@
           "truth_margin": -51.3803,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0006250000000000001,
+            "probability": 0.000625,
             "predictive_mean": -47.60034607646789,
             "empirical_crps": 2.5198550949503016,
             "pit": 0.3083077226184635
           },
           "calibrated": {
-            "probability": 0.0006250000000000001,
+            "probability": 0.000625,
             "predictive_mean": -47.60034607646789,
             "empirical_crps": 2.5198550949503016,
             "pit": 0.3083077226184635
@@ -6742,14 +6742,14 @@
           "raw": {
             "probability": 0.9994767956808391,
             "predictive_mean": 26.94737382651084,
-            "empirical_crps": 6.964271781612563,
-            "pit": 0.05360331229818224
+            "empirical_crps": 6.964271781612561,
+            "pit": 0.053603312298182236
           },
           "calibrated": {
             "probability": 0.9994767956808391,
             "predictive_mean": 26.94737382651084,
-            "empirical_crps": 6.964271781612563,
-            "pit": 0.05360331229818224
+            "empirical_crps": 6.964271781612561,
+            "pit": 0.053603312298182236
           }
         },
         {
@@ -6761,14 +6761,14 @@
           "raw": {
             "probability": 0.9807410215958043,
             "predictive_mean": 17.911126826740475,
-            "empirical_crps": 2.278608254050254,
-            "pit": 0.46962885219328915
+            "empirical_crps": 2.278608254050255,
+            "pit": 0.4696288521932891
           },
           "calibrated": {
             "probability": 0.9807410215958043,
             "predictive_mean": 17.911126826740475,
-            "empirical_crps": 2.278608254050254,
-            "pit": 0.46962885219328915
+            "empirical_crps": 2.278608254050255,
+            "pit": 0.4696288521932891
           }
         },
         {
@@ -6780,14 +6780,14 @@
           "raw": {
             "probability": 0.9733570431916085,
             "predictive_mean": 16.213221857052574,
-            "empirical_crps": 1.7905984241186728,
-            "pit": 0.5851378305974848
+            "empirical_crps": 1.7905984241186719,
+            "pit": 0.5851378305974849
           },
           "calibrated": {
             "probability": 0.9733570431916085,
             "predictive_mean": 16.213221857052574,
-            "empirical_crps": 1.7905984241186728,
-            "pit": 0.5851378305974848
+            "empirical_crps": 1.7905984241186719,
+            "pit": 0.5851378305974849
           }
         },
         {
@@ -6799,13 +6799,13 @@
           "raw": {
             "probability": 0.22877180900168062,
             "predictive_mean": -4.229488732285018,
-            "empirical_crps": 5.037292878154108,
+            "empirical_crps": 5.037292878154109,
             "pit": 0.0725426777448954
           },
           "calibrated": {
             "probability": 0.22877180900168062,
             "predictive_mean": -4.229488732285018,
-            "empirical_crps": 5.037292878154108,
+            "empirical_crps": 5.037292878154109,
             "pit": 0.0725426777448954
           }
         },
@@ -6819,13 +6819,13 @@
             "probability": 0.9976017956808393,
             "predictive_mean": 30.815414847724313,
             "empirical_crps": 2.4372125192584315,
-            "pit": 0.6587718090016805
+            "pit": 0.6587718090016806
           },
           "calibrated": {
             "probability": 0.9976017956808393,
             "predictive_mean": 30.815414847724313,
             "empirical_crps": 2.4372125192584315,
-            "pit": 0.6587718090016805
+            "pit": 0.6587718090016806
           }
         },
         {
@@ -6835,16 +6835,16 @@
           "truth_margin": -20.4012,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.005944612957482567,
+            "probability": 0.0059446129574825665,
             "predictive_mean": -18.636981887261587,
             "empirical_crps": 1.7609337772073275,
-            "pit": 0.3924528937029382
+            "pit": 0.3924528937029381
           },
           "calibrated": {
-            "probability": 0.005944612957482567,
+            "probability": 0.0059446129574825665,
             "predictive_mean": -18.636981887261587,
             "empirical_crps": 1.7609337772073275,
-            "pit": 0.3924528937029382
+            "pit": 0.3924528937029381
           }
         },
         {
@@ -6876,13 +6876,13 @@
             "probability": 0.9586371329387448,
             "predictive_mean": 12.251850045738824,
             "empirical_crps": 1.6053770318879304,
-            "pit": 0.4773558603334171
+            "pit": 0.47735586033341715
           },
           "calibrated": {
             "probability": 0.9586371329387448,
             "predictive_mean": 12.251850045738824,
             "empirical_crps": 1.6053770318879304,
-            "pit": 0.4773558603334171
+            "pit": 0.47735586033341715
           }
         },
         {
@@ -6894,13 +6894,13 @@
           "raw": {
             "probability": 0.8213233438509089,
             "predictive_mean": 5.2930438475861585,
-            "empirical_crps": 2.843218387481987,
+            "empirical_crps": 2.8432183874819867,
             "pit": 0.193662430234126
           },
           "calibrated": {
             "probability": 0.8213233438509089,
             "predictive_mean": 5.2930438475861585,
-            "empirical_crps": 2.843218387481987,
+            "empirical_crps": 2.8432183874819867,
             "pit": 0.193662430234126
           }
         },
@@ -6911,13 +6911,13 @@
           "truth_margin": 16.2355,
           "outcome": 1.0,
           "raw": {
-            "probability": 0.9568038704251743,
+            "probability": 0.9568038704251745,
             "predictive_mean": 10.89072489132275,
             "empirical_crps": 3.0512470512734846,
             "pit": 0.8194723671286728
           },
           "calibrated": {
-            "probability": 0.9568038704251743,
+            "probability": 0.9568038704251745,
             "predictive_mean": 10.89072489132275,
             "empirical_crps": 3.0512470512734846,
             "pit": 0.8194723671286728
@@ -6930,15 +6930,15 @@
           "truth_margin": -14.0964,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.01138024751076941,
+            "probability": 0.011380247510769409,
             "predictive_mean": -14.368142561783941,
-            "empirical_crps": 1.385987328052133,
+            "empirical_crps": 1.3859873280521344,
             "pit": 0.5321595182993026
           },
           "calibrated": {
-            "probability": 0.01138024751076941,
+            "probability": 0.011380247510769409,
             "predictive_mean": -14.368142561783941,
-            "empirical_crps": 1.385987328052133,
+            "empirical_crps": 1.3859873280521344,
             "pit": 0.5321595182993026
           }
         },
@@ -6951,14 +6951,14 @@
           "raw": {
             "probability": 0.023446827233565788,
             "predictive_mean": -18.22273430749791,
-            "empirical_crps": 3.898395625942448,
-            "pit": 0.1742709900430776
+            "empirical_crps": 3.898395625942447,
+            "pit": 0.17427099004307764
           },
           "calibrated": {
             "probability": 0.023446827233565788,
             "predictive_mean": -18.22273430749791,
-            "empirical_crps": 3.898395625942448,
-            "pit": 0.1742709900430776
+            "empirical_crps": 3.898395625942447,
+            "pit": 0.17427099004307764
           }
         },
         {
@@ -6968,13 +6968,13 @@
           "truth_margin": -7.2782,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.08575967606293584,
+            "probability": 0.08575967606293586,
             "predictive_mean": -8.472434992047338,
             "empirical_crps": 1.2691687865843608,
             "pit": 0.5924418223225221
           },
           "calibrated": {
-            "probability": 0.08575967606293584,
+            "probability": 0.08575967606293586,
             "predictive_mean": -8.472434992047338,
             "empirical_crps": 1.2691687865843608,
             "pit": 0.5924418223225221
@@ -6987,15 +6987,15 @@
           "truth_margin": -33.0332,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0010464086383217108,
+            "probability": 0.0010464086383217106,
             "predictive_mean": -31.117284678124342,
-            "empirical_crps": 1.91297573418227,
+            "empirical_crps": 1.9129757341822695,
             "pit": 0.3893554052744026
           },
           "calibrated": {
-            "probability": 0.0010464086383217108,
+            "probability": 0.0010464086383217106,
             "predictive_mean": -31.117284678124342,
-            "empirical_crps": 1.91297573418227,
+            "empirical_crps": 1.9129757341822695,
             "pit": 0.3893554052744026
           }
         },
@@ -7007,14 +7007,14 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.002296408638321711,
-            "predictive_mean": -21.833828267220515,
-            "empirical_crps": 2.1680630641587646,
+            "predictive_mean": -21.83382826722051,
+            "empirical_crps": 2.168063064158765,
             "pit": 0.2877911611275523
           },
           "calibrated": {
             "probability": 0.002296408638321711,
-            "predictive_mean": -21.833828267220515,
-            "empirical_crps": 2.1680630641587646,
+            "predictive_mean": -21.83382826722051,
+            "empirical_crps": 2.168063064158765,
             "pit": 0.2877911611275523
           }
         },
@@ -7026,15 +7026,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9651893654467132,
-            "predictive_mean": 11.15438492672371,
-            "empirical_crps": 1.4435742867121233,
-            "pit": 0.4087073222551046
+            "predictive_mean": 11.154384926723711,
+            "empirical_crps": 1.4435742867121242,
+            "pit": 0.40870732225510464
           },
           "calibrated": {
             "probability": 0.9651893654467132,
-            "predictive_mean": 11.15438492672371,
-            "empirical_crps": 1.4435742867121233,
-            "pit": 0.4087073222551046
+            "predictive_mean": 11.154384926723711,
+            "empirical_crps": 1.4435742867121242,
+            "pit": 0.40870732225510464
           }
         },
         {
@@ -7065,14 +7065,14 @@
           "raw": {
             "probability": 0.9035059451695096,
             "predictive_mean": 7.610085343188571,
-            "empirical_crps": 3.769287511769408,
-            "pit": 0.1566669800861553
+            "empirical_crps": 3.769287511769409,
+            "pit": 0.15666698008615526
           },
           "calibrated": {
             "probability": 0.9035059451695096,
             "predictive_mean": 7.610085343188571,
-            "empirical_crps": 3.769287511769408,
-            "pit": 0.1566669800861553
+            "empirical_crps": 3.769287511769409,
+            "pit": 0.15666698008615526
           }
         },
         {
@@ -7085,13 +7085,13 @@
             "probability": 0.9984303870425175,
             "predictive_mean": 24.362802012951438,
             "empirical_crps": 2.840311946496797,
-            "pit": 0.20384958140475593
+            "pit": 0.20384958140475595
           },
           "calibrated": {
             "probability": 0.9984303870425175,
             "predictive_mean": 24.362802012951438,
             "empirical_crps": 2.840311946496797,
-            "pit": 0.20384958140475593
+            "pit": 0.20384958140475595
           }
         },
         {
@@ -7102,14 +7102,14 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.503171166038596,
-            "predictive_mean": -0.02183209688043153,
-            "empirical_crps": 2.7447307268948355,
+            "predictive_mean": -0.021832096880431195,
+            "empirical_crps": 2.744730726894835,
             "pit": 0.2710922409177662
           },
           "calibrated": {
             "probability": 0.503171166038596,
-            "predictive_mean": -0.02183209688043153,
-            "empirical_crps": 2.7447307268948355,
+            "predictive_mean": -0.021832096880431195,
+            "empirical_crps": 2.744730726894835,
             "pit": 0.2710922409177662
           }
         },
@@ -7121,14 +7121,14 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.7050746178685263,
-            "predictive_mean": 3.094394495676547,
-            "empirical_crps": 1.696321492196272,
+            "predictive_mean": 3.0943944956765472,
+            "empirical_crps": 1.6963214921962724,
             "pit": 0.28386474757818686
           },
           "calibrated": {
             "probability": 0.7050746178685263,
-            "predictive_mean": 3.094394495676547,
-            "empirical_crps": 1.696321492196272,
+            "predictive_mean": 3.0943944956765472,
+            "empirical_crps": 1.6963214921962724,
             "pit": 0.28386474757818686
           }
         },
@@ -7140,15 +7140,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9833854950215388,
-            "predictive_mean": 18.747270605566904,
+            "predictive_mean": 18.747270605566907,
             "empirical_crps": 1.8444000445382596,
-            "pit": 0.586691003363919
+            "pit": 0.5866910033639191
           },
           "calibrated": {
             "probability": 0.9833854950215388,
-            "predictive_mean": 18.747270605566904,
+            "predictive_mean": 18.747270605566907,
             "empirical_crps": 1.8444000445382596,
-            "pit": 0.586691003363919
+            "pit": 0.5866910033639191
           }
         },
         {
@@ -7158,16 +7158,16 @@
           "truth_margin": -30.2519,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0010464086383217108,
+            "probability": 0.0010464086383217106,
             "predictive_mean": -22.40840254606506,
             "empirical_crps": 5.120917464806011,
-            "pit": 0.09386159304363784
+            "pit": 0.09386159304363782
           },
           "calibrated": {
-            "probability": 0.0010464086383217108,
+            "probability": 0.0010464086383217106,
             "predictive_mean": -22.40840254606506,
             "empirical_crps": 5.120917464806011,
-            "pit": 0.09386159304363784
+            "pit": 0.09386159304363782
           }
         },
         {
@@ -7178,13 +7178,13 @@
           "outcome": 0.0,
           "raw": {
             "probability": 0.13223507642629476,
-            "predictive_mean": -6.913527694124294,
+            "predictive_mean": -6.913527694124295,
             "empirical_crps": 1.53559383011019,
             "pit": 0.39890648506461646
           },
           "calibrated": {
             "probability": 0.13223507642629476,
-            "predictive_mean": -6.913527694124294,
+            "predictive_mean": -6.913527694124295,
             "empirical_crps": 1.53559383011019,
             "pit": 0.39890648506461646
           }
@@ -7196,15 +7196,15 @@
           "truth_margin": -32.6407,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.0005232043191608554,
+            "probability": 0.0005232043191608553,
             "predictive_mean": -35.108581711172604,
-            "empirical_crps": 1.7793251937224164,
+            "empirical_crps": 1.7793251937224173,
             "pit": 0.6452639833152395
           },
           "calibrated": {
-            "probability": 0.0005232043191608554,
+            "probability": 0.0005232043191608553,
             "predictive_mean": -35.108581711172604,
-            "empirical_crps": 1.7793251937224164,
+            "empirical_crps": 1.7793251937224173,
             "pit": 0.6452639833152395
           }
         },
@@ -7216,15 +7216,15 @@
           "outcome": 1.0,
           "raw": {
             "probability": 0.9718180963401395,
-            "predictive_mean": 11.43648295746231,
-            "empirical_crps": 1.7348683178550623,
-            "pit": 0.32452705651245006
+            "predictive_mean": 11.436482957462312,
+            "empirical_crps": 1.734868317855062,
+            "pit": 0.32452705651245
           },
           "calibrated": {
             "probability": 0.9718180963401395,
-            "predictive_mean": 11.43648295746231,
-            "empirical_crps": 1.7348683178550623,
-            "pit": 0.32452705651245006
+            "predictive_mean": 11.436482957462312,
+            "empirical_crps": 1.734868317855062,
+            "pit": 0.32452705651245
           }
         },
         {
@@ -7237,13 +7237,13 @@
             "probability": 0.983125,
             "predictive_mean": 14.348899358350366,
             "empirical_crps": 2.2890053899845375,
-            "pit": 0.7476346760629358
+            "pit": 0.7476346760629359
           },
           "calibrated": {
             "probability": 0.983125,
             "predictive_mean": 14.348899358350366,
             "empirical_crps": 2.2890053899845375,
-            "pit": 0.7476346760629358
+            "pit": 0.7476346760629359
           }
         },
         {
@@ -7256,13 +7256,13 @@
             "probability": 0.7473479434875501,
             "predictive_mean": 3.77855344557645,
             "empirical_crps": 1.8429096796005844,
-            "pit": 0.3066340997040586
+            "pit": 0.3066340997040585
           },
           "calibrated": {
             "probability": 0.7473479434875501,
             "predictive_mean": 3.77855344557645,
             "empirical_crps": 1.8429096796005844,
-            "pit": 0.3066340997040586
+            "pit": 0.3066340997040585
           }
         },
         {
@@ -7274,14 +7274,14 @@
           "raw": {
             "probability": 0.0,
             "predictive_mean": -40.00821686198303,
-            "empirical_crps": 2.196369141029058,
-            "pit": 0.350925958490351
+            "empirical_crps": 2.1963691410290584,
+            "pit": 0.35092595849035096
           },
           "calibrated": {
             "probability": 0.0,
             "predictive_mean": -40.00821686198303,
-            "empirical_crps": 2.196369141029058,
-            "pit": 0.350925958490351
+            "empirical_crps": 2.1963691410290584,
+            "pit": 0.35092595849035096
           }
         },
         {
@@ -7291,16 +7291,16 @@
           "truth_margin": -51.3803,
           "outcome": 0.0,
           "raw": {
-            "probability": 0.00020359136167828935,
+            "probability": 0.0002035913616782895,
             "predictive_mean": -47.57585841105494,
             "empirical_crps": 2.54127382295425,
-            "pit": 0.3195314850646165
+            "pit": 0.3195314850646164
           },
           "calibrated": {
-            "probability": 0.00020359136167828935,
+            "probability": 0.0002035913616782895,
             "predictive_mean": -47.57585841105494,
             "empirical_crps": 2.54127382295425,
-            "pit": 0.3195314850646165
+            "pit": 0.3195314850646164
           }
         }
       ],
@@ -7314,16 +7314,16 @@
   },
   "raw_production_stack": {
     "n": 264,
-    "empirical_crps": 3.2643606289051585,
-    "brier": 0.05007028690499672,
-    "log_score": -0.16020395577761518,
+    "empirical_crps": 3.264360628905159,
+    "brier": 0.050070286904996715,
+    "log_score": -0.16020395577761515,
     "log_score_orientation": "higher_is_better",
     "reliability": [
       {
         "bin_lo": 0.0,
         "bin_hi": 0.1,
         "n": 93.0,
-        "mean_p": 0.014839750332203054,
+        "mean_p": 0.014839750332203062,
         "mean_y": 0.010752688172043012
       },
       {
@@ -7344,7 +7344,7 @@
         "bin_lo": 0.30000000000000004,
         "bin_hi": 0.4,
         "n": 4.0,
-        "mean_p": 0.356455025869448,
+        "mean_p": 0.3564550258694481,
         "mean_y": 0.25
       },
       {
@@ -7402,8 +7402,8 @@
     "calibration_claim_allowed": true,
     "calibration_slope_intercept": {
       "n": 264,
-      "slope": 1.017652867957208,
-      "intercept": -0.011619048049378253,
+      "slope": 1.0176528679572079,
+      "intercept": -0.011619048049378383,
       "ok": true,
       "ideal": {
         "slope": 1.0,
@@ -7412,7 +7412,7 @@
     },
     "pit": {
       "n": 264,
-      "mean": 0.4254364136325385,
+      "mean": 0.4254364136325384,
       "var": 0.06775030519931308,
       "expected_mean": 0.5,
       "expected_var": 0.08333333333333333,
@@ -7477,16 +7477,16 @@
   },
   "experimental_calibrated_stack": {
     "n": 264,
-    "empirical_crps": 3.2643606289051585,
-    "brier": 0.05007028690499672,
-    "log_score": -0.16020395577761518,
+    "empirical_crps": 3.264360628905159,
+    "brier": 0.050070286904996715,
+    "log_score": -0.16020395577761515,
     "log_score_orientation": "higher_is_better",
     "reliability": [
       {
         "bin_lo": 0.0,
         "bin_hi": 0.1,
         "n": 93.0,
-        "mean_p": 0.014839750332203054,
+        "mean_p": 0.014839750332203062,
         "mean_y": 0.010752688172043012
       },
       {
@@ -7507,7 +7507,7 @@
         "bin_lo": 0.30000000000000004,
         "bin_hi": 0.4,
         "n": 4.0,
-        "mean_p": 0.356455025869448,
+        "mean_p": 0.3564550258694481,
         "mean_y": 0.25
       },
       {
@@ -7565,8 +7565,8 @@
     "calibration_claim_allowed": true,
     "calibration_slope_intercept": {
       "n": 264,
-      "slope": 1.017652867957208,
-      "intercept": -0.011619048049378253,
+      "slope": 1.0176528679572079,
+      "intercept": -0.011619048049378383,
       "ok": true,
       "ideal": {
         "slope": 1.0,
@@ -7575,7 +7575,7 @@
     },
     "pit": {
       "n": 264,
-      "mean": 0.4254364136325385,
+      "mean": 0.4254364136325384,
       "var": 0.06775030519931308,
       "expected_mean": 0.5,
       "expected_var": 0.08333333333333333,
@@ -7658,15 +7658,15 @@
         },
         {
           "scale": 1.1,
-          "empirical_crps": 3.2499790094687935
+          "empirical_crps": 3.249979009468794
         },
         {
           "scale": 1.15,
-          "empirical_crps": 3.269482967230712
+          "empirical_crps": 3.2694829672307115
         },
         {
           "scale": 1.2,
-          "empirical_crps": 3.29195273114169
+          "empirical_crps": 3.2919527311416896
         },
         {
           "scale": 1.25,
@@ -7690,7 +7690,7 @@
         },
         {
           "scale": 1.5,
-          "empirical_crps": 3.475143462981954
+          "empirical_crps": 3.4751434629819546
         },
         {
           "scale": 1.55,
@@ -7698,31 +7698,31 @@
         },
         {
           "scale": 1.6,
-          "empirical_crps": 3.5512928181058694
+          "empirical_crps": 3.5512928181058685
         },
         {
           "scale": 1.65,
-          "empirical_crps": 3.591706702254671
+          "empirical_crps": 3.591706702254672
         },
         {
           "scale": 1.7,
-          "empirical_crps": 3.633630218042261
+          "empirical_crps": 3.63363021804226
         },
         {
           "scale": 1.75,
-          "empirical_crps": 3.676813728474071
+          "empirical_crps": 3.676813728474072
         },
         {
           "scale": 1.8,
-          "empirical_crps": 3.721267745202273
+          "empirical_crps": 3.721267745202272
         },
         {
           "scale": 1.85,
-          "empirical_crps": 3.766829506212421
+          "empirical_crps": 3.7668295062124204
         },
         {
           "scale": 1.9,
-          "empirical_crps": 3.8136352549590393
+          "empirical_crps": 3.813635254959039
         },
         {
           "scale": 1.95,
@@ -7730,15 +7730,15 @@
         },
         {
           "scale": 2.0,
-          "empirical_crps": 3.9101102867040503
+          "empirical_crps": 3.910110286704051
         }
       ],
       "seed": 21,
       "max_draws": 128
     },
     "all_history_stack_weights": {
-      "pymc": 0.12478137058685498,
-      "state_space": 0.875218629413145
+      "pymc": 0.12478137058685514,
+      "state_space": 0.8752186294131449
     },
     "note": "Diagnostic only; run_forecast does not apply this scale."
   },
@@ -7749,6 +7749,6 @@
     "scale_selection_is_training_only": true,
     "heldout_truth_used_only_for_evaluation": true
   },
-  "artifact_fingerprint_sha256": "3db531b875b52fb826a6622de650ae5f8daf2aba67f9e7de48b8c1d404905129",
+  "artifact_fingerprint_sha256": "d234df3444cd843d112c6ebfdb65a59294fd0fa2560f19439ccbbd442fa0ae83",
   "path": "data/artifacts/stack_reliability_crossfit_latest.json"
 }

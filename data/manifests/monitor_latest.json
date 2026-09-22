@@ -1,8 +1,8 @@
 {
   "ok": false,
-  "checked_at": "2026-09-22T00:09:14.972578+00:00",
+  "checked_at": "2026-09-22T01:14:17.083025+00:00",
   "model_version": "senate-hierarchical-v0.9.21",
-  "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+  "run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
   "checks": [
     {
       "name": "has_races",
@@ -18,14 +18,14 @@
       "name": "control_probs_sum_to_one",
       "ok": true,
       "detail": {
-        "p_dem": 0.81942,
-        "p_rep": 0.18058
+        "p_dem": 0.76448,
+        "p_rep": 0.23552
       }
     },
     {
       "name": "expected_seats_in_range",
       "ok": true,
-      "detail": 53.29766
+      "detail": 52.28902
     },
     {
       "name": "min_polls",
@@ -35,7 +35,7 @@
     {
       "name": "min_enop",
       "ok": true,
-      "detail": 144.68380050572844
+      "detail": 143.9682661277819
     },
     {
       "name": "has_oh_fl_specials",
@@ -47,8 +47,10 @@
     },
     {
       "name": "ratings_match_p_dem",
-      "ok": true,
-      "detail": []
+      "ok": false,
+      "detail": [
+        "senate-2026-WY"
+      ]
     },
     {
       "name": "no_duplicate_race_ids",
@@ -73,14 +75,14 @@
       "ok": true,
       "detail": {
         "alerts": [],
-        "mcse_control": 0.0017202956931876565,
+        "mcse_control": 0.0018976318378442114,
         "n_draws": 50000.0
       }
     },
     {
       "name": "peer_release_gate",
       "ok": true,
-      "detail": 0.33942000000000005
+      "detail": 0.28448000000000007
     },
     {
       "name": "chamber_reconcile",
@@ -124,13 +126,13 @@
       "name": "polls_file_present",
       "ok": true,
       "detail": {
-        "age_hours": 0.07
+        "age_hours": 0.06
       }
     },
     {
       "name": "run_manifest_present",
       "ok": true,
-      "detail": "/home/runner/work/electionmodel26/electionmodel26/data/manifests/run_senate-2026_2026-09-13_ensemble_stack+overlays_20260901.json"
+      "detail": "/home/runner/work/electionmodel26/electionmodel26/data/manifests/run_senate-2026_2026-09-20_ensemble_stack+overlays_20260901.json"
     },
     {
       "name": "manifest_model_version",
@@ -152,31 +154,41 @@
     {
       "name": "generic_ballot_recorded",
       "ok": true,
-      "detail": 5.852513615064197
+      "detail": 5.7459422124828174
     },
     {
       "name": "peer_brier_crps_gate",
       "ok": true,
       "detail": {
-        "max_abs_control_gap": 0.33942000000000005,
+        "max_abs_control_gap": 0.28448000000000007,
         "race_scores": {
           "ddhq": {
             "n": 10,
-            "brier_vs_peer_favorite": 0.28802840836,
-            "mae": 0.18419000000000002,
-            "crps_proxy": 0.18419000000000002,
+            "brier_vs_peer_favorite": 0.24967668308000004,
+            "mae": 0.16658199999999998,
+            "crps_proxy": 0.16658199999999998,
             "ok": false
           },
           "kalshi": {
-            "n": 9,
-            "brier_vs_peer_favorite": 0.08794554168888888,
-            "mae": 0.07239486552816354,
-            "crps_proxy": 0.07239486552816354,
+            "n": 10,
+            "brier_vs_peer_favorite": 0.09758468308000001,
+            "mae": 0.07042298632253245,
+            "crps_proxy": 0.07042298632253245,
             "ok": true
           }
         },
         "reasons": []
       }
+    },
+    {
+      "name": "layer_warnings",
+      "ok": false,
+      "detail": [
+        {
+          "layer": "markets",
+          "error": "live market retrieval cannot be backdated or future-dated: requested available_at=2026-09-20, retrieval date=2026-09-22"
+        }
+      ]
     },
     {
       "name": "evidence_eligibility",
@@ -210,7 +222,7 @@
       "name": "stack_weights_fresh",
       "ok": true,
       "detail": {
-        "age_hours": 0.11801614767975277
+        "age_hours": 0.10458881086773343
       }
     },
     {
@@ -230,6 +242,8 @@
     }
   ],
   "alerts": [
+    "rating/probability inconsistency",
+    "layer_warnings=1",
     "evidence not publication-eligible: structural prior metadata missing: prior_source, prior_provenance_sha256, prior_production_eligible",
     "artifact claims publication but evidence tiers are ineligible",
     "acceptance gates failed: G4, G7, COHERENCE",
