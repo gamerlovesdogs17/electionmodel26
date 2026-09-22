@@ -18,6 +18,57 @@ from scipy.optimize import minimize
 DrawMap = Mapping[str, Mapping[str, Sequence[float]]]
 
 
+def _normalized_weights(
+    weights: Mapping[str, float], *, available_models: Sequence[str]
+) -> dict[str, float]:
+    """Validate and normalize a nonnegative mixture on known model IDs."""
+    available = set(available_models)
+    unknown = sorted(set(weights) - available)
+    if unknown:
+        raise ValueError(f"weights reference unknown models: {unknown}")
+    normalized = {str(model): float(weight) for model, weight in weights.items()}
+    if not normalized or any(not np.isfinite(value) or value < 0 for value in normalized.values()):
+        raise ValueError("mixture weights must be finite and nonnegative")
+    total = float(sum(normalized.values()))
+    if total <= 0:
+        raise ValueError("mixture weights must have positive mass")
+    return {model: value / total for model, value in normalized.items() if value > 0}
+
+
+def weighted_mixture_mean(
+    draws: Mapping[str, Sequence[float]], weights: Mapping[str, float]
+) -> float:
+    """Return the exact empirical mean of a weighted draw mixture."""
+    w = _normalized_weights(weights, available_models=sorted(draws))
+    means = {}
+    for model in w:
+        values = np.asarray(draws[model], dtype=np.float64)
+        if values.ndim != 1 or len(values) < 2 or not np.isfinite(values).all():
+            raise ValueError("each predictive distribution needs at least two finite draws")
+        means[model] = float(values.mean())
+    return float(sum(w[model] * means[model] for model in w))
+
+
+def widen_mixture_draws(
+    draws: Mapping[str, Sequence[float]],
+    weights: Mapping[str, float],
+    *,
+    scale: float,
+) -> dict[str, np.ndarray]:
+    """Scale all distributions around their shared mixture mean.
+
+    The same center is used for every component, so the weighted empirical
+    mean is preserved exactly up to floating-point rounding.
+    """
+    if not np.isfinite(scale) or scale <= 0:
+        raise ValueError("scale must be finite and positive")
+    center = weighted_mixture_mean(draws, weights)
+    return {
+        model: center + float(scale) * (np.asarray(values, dtype=np.float64) - center)
+        for model, values in draws.items()
+    }
+
+
 def prediction_fingerprint(
     draws: DrawMap, truths: Mapping[str, float], *, seed: int, max_draws: int
 ) -> str:
@@ -53,6 +104,179 @@ def empirical_crps(draws: Sequence[float], truth: float) -> float:
     if x.ndim != 1 or len(x) < 2 or not np.isfinite(x).all() or not np.isfinite(truth):
         raise ValueError("finite one-dimensional draws and truth are required")
     return float(np.abs(x - truth).mean() - 0.5 * np.abs(x[:, None] - x[None, :]).mean())
+
+
+def _case_samples(
+    draws: DrawMap,
+    *,
+    models: Sequence[str],
+    case: str,
+    seed: int,
+    max_draws: int,
+) -> dict[str, np.ndarray]:
+    samples: dict[str, np.ndarray] = {}
+    for model in models:
+        digest = hashlib.sha256(f"{seed}:{case}:{len(draws[model][case])}".encode()).digest()
+        local_seed = int.from_bytes(digest[:8], "little")
+        samples[model] = _sample(
+            draws[model][case], seed=local_seed, max_draws=max_draws,
+        )
+    return samples
+
+
+def mixture_crps_scale_grid(
+    draws: DrawMap,
+    truths: Mapping[str, float],
+    weights: Mapping[str, float],
+    scales: Sequence[float],
+    *,
+    seed: int = 0,
+    max_draws: int = 128,
+) -> list[dict[str, float]]:
+    """Score a predeclared scale grid without resampling for each scale.
+
+    For positive ``s``, pairwise distances after widening equal ``s`` times
+    their raw value. This computes that term once per case and keeps scale
+    selection deterministic and inexpensive.
+    """
+    if max_draws < 2:
+        raise ValueError("max_draws must be at least two")
+    grid = [float(scale) for scale in scales]
+    if not grid or any(not np.isfinite(scale) or scale <= 0 for scale in grid):
+        raise ValueError("scales must be a nonempty sequence of positive finite values")
+    w = _normalized_weights(weights, available_models=sorted(draws))
+    models = sorted(w)
+    cases = sorted(set(truths).intersection(*(set(draws[model]) for model in models)))
+    if not cases:
+        raise ValueError("no complete truth/draw cases for mixture evaluation")
+    totals = np.zeros(len(grid), dtype=np.float64)
+    for case in cases:
+        truth = float(truths[case])
+        if not np.isfinite(truth):
+            raise ValueError(f"nonfinite truth for {case}")
+        samples = _case_samples(
+            draws, models=models, case=case, seed=seed, max_draws=max_draws,
+        )
+        center = float(sum(w[model] * samples[model].mean() for model in models))
+        pairwise = 0.0
+        for left in models:
+            for right in models:
+                pairwise += (
+                    w[left]
+                    * w[right]
+                    * float(np.abs(samples[left][:, None] - samples[right][None, :]).mean())
+                )
+        for index, scale in enumerate(grid):
+            first = sum(
+                w[model]
+                * float(np.abs(center + scale * (samples[model] - center) - truth).mean())
+                for model in models
+            )
+            totals[index] += first - 0.5 * scale * pairwise
+    return [
+        {"scale": scale, "empirical_crps": float(total / len(cases))}
+        for scale, total in zip(grid, totals)
+    ]
+
+
+def evaluate_predictive_mixture(
+    draws: DrawMap,
+    truths: Mapping[str, float],
+    weights: Mapping[str, float],
+    *,
+    scale: float = 1.0,
+    seed: int = 0,
+    max_draws: int = 128,
+) -> dict[str, Any]:
+    """Evaluate a fixed empirical mixture with exact empirical event probabilities.
+
+    CRPS uses the same deterministic draw cap as the production stack
+    optimizer. Binary probabilities use every frozen draw, avoiding mixture
+    resampling noise.
+    """
+    if not np.isfinite(scale) or scale <= 0:
+        raise ValueError("scale must be finite and positive")
+    w = _normalized_weights(weights, available_models=sorted(draws))
+    models = sorted(w)
+    cases = sorted(set(truths).intersection(*(set(draws[model]) for model in models)))
+    if not cases:
+        raise ValueError("no complete truth/draw cases for mixture evaluation")
+    grid_scores = mixture_crps_scale_grid(
+        draws, truths, w, [scale], seed=seed, max_draws=max_draws,
+    )
+    rows: list[dict[str, Any]] = []
+    for case in cases:
+        truth = float(truths[case])
+        full = {
+            model: np.asarray(draws[model][case], dtype=np.float64)
+            for model in models
+        }
+        center = float(sum(w[model] * full[model].mean() for model in models))
+        transformed = {
+            model: center + float(scale) * (full[model] - center)
+            for model in models
+        }
+        probability = float(sum(
+            w[model] * float(np.mean(transformed[model] > 0.0))
+            for model in models
+        ))
+        outcome = float(truth > 0.0)
+        pit = float(sum(
+            w[model]
+            * float(
+                np.mean(transformed[model] < truth)
+                + 0.5 * np.mean(transformed[model] == truth)
+            )
+            for model in models
+        ))
+        samples = _case_samples(
+            draws, models=models, case=case, seed=seed, max_draws=max_draws,
+        )
+        sample_center = float(sum(w[model] * samples[model].mean() for model in models))
+        scaled_samples = {
+            model: sample_center + float(scale) * (samples[model] - sample_center)
+            for model in models
+        }
+        first = sum(
+            w[model] * float(np.abs(scaled_samples[model] - truth).mean())
+            for model in models
+        )
+        second = sum(
+            w[left]
+            * w[right]
+            * float(np.abs(
+                scaled_samples[left][:, None] - scaled_samples[right][None, :]
+            ).mean())
+            for left in models
+            for right in models
+        )
+        rows.append({
+            "case_id": case,
+            "truth": truth,
+            "outcome": outcome,
+            "probability": probability,
+            "predictive_mean": center,
+            "empirical_crps": float(first - 0.5 * second),
+            "pit": pit,
+        })
+    probs = np.asarray([row["probability"] for row in rows], dtype=np.float64)
+    outcomes = np.asarray([row["outcome"] for row in rows], dtype=np.float64)
+    selected = np.where(outcomes > 0.5, probs, 1.0 - probs)
+    return {
+        "n": len(rows),
+        "scale": float(scale),
+        "weights": w,
+        "empirical_crps": float(np.mean([row["empirical_crps"] for row in rows])),
+        "grid_consistency_crps": grid_scores[0]["empirical_crps"],
+        "brier": float(np.mean((probs - outcomes) ** 2)),
+        "log_score": float(np.mean(np.log(np.clip(selected, 1e-12, 1.0)))),
+        "log_score_orientation": "higher_is_better",
+        "cases": rows,
+        "seed": int(seed),
+        "max_draws": int(max_draws),
+        "probability_method": "exact_weighted_empirical_exceedance",
+        "crps_method": "empirical_predictive_mixture_crps_deterministic_subsample",
+    }
 
 
 def fit_predictive_mixture(

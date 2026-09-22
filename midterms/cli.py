@@ -706,17 +706,20 @@ def main(argv: list[str] | None = None) -> None:
     )
     p_elig.add_argument("--election-id", default="senate-2026")
     p_elig.add_argument("--as-of", default=None)
-    p_elig.set_defaults(
-        func=lambda a: print(
-            json.dumps(
-                __import__(
-                    "midterms.evidence.eligibility", fromlist=["write_eligibility_report"]
-                ).write_eligibility_report(a.election_id, as_of=a.as_of),
-                indent=2,
-                default=str,
-            )
-        )
+    p_elig.add_argument(
+        "--strict", action="store_true",
+        help="Exit nonzero after writing the report when publication eligibility fails",
     )
+
+    def _evidence_eligibility(a: argparse.Namespace) -> None:
+        report = __import__(
+            "midterms.evidence.eligibility", fromlist=["write_eligibility_report"]
+        ).write_eligibility_report(a.election_id, as_of=a.as_of)
+        print(json.dumps(report, indent=2, default=str))
+        if a.strict and not report.get("publishable"):
+            raise SystemExit(1)
+
+    p_elig.set_defaults(func=_evidence_eligibility)
 
     p_svd = sub.add_parser(
         "compare-static-dynamic",
@@ -817,6 +820,26 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
+    p_crossfit = sub.add_parser(
+        "crossfit-stack-reliability",
+        help=(
+            "Cross-fit stack reliability from frozen historical predictive distributions only; "
+            "performs no model refits or network calls"
+        ),
+    )
+    p_crossfit.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.stack_reliability_crossfit",
+                    fromlist=["write_stack_reliability_crossfit"],
+                ).write_stack_reliability_crossfit(),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
     p_nq = sub.add_parser(
         "numerical-check",
         help="MCSE / convergence gate on latest forecast (audit P2.3 / G9)",
@@ -889,18 +912,21 @@ def main(argv: list[str] | None = None) -> None:
         "acceptance-gates",
         help="Aggregate G1–G11 acceptance report (first publishable milestone)",
     )
-    p_acc.set_defaults(
-        func=lambda a: print(
-            json.dumps(
-                __import__(
-                    "midterms.validation.acceptance_gates",
-                    fromlist=["evaluate_acceptance_gates"],
-                ).evaluate_acceptance_gates(),
-                indent=2,
-                default=str,
-            )
-        )
+    p_acc.add_argument(
+        "--strict", action="store_true",
+        help="Exit nonzero after writing the report when research acceptance fails",
     )
+
+    def _acceptance_gates(a: argparse.Namespace) -> None:
+        report = __import__(
+            "midterms.validation.acceptance_gates",
+            fromlist=["evaluate_acceptance_gates"],
+        ).evaluate_acceptance_gates()
+        print(json.dumps(report, indent=2, default=str))
+        if a.strict and not report.get("ok"):
+            raise SystemExit(1)
+
+    p_acc.set_defaults(func=_acceptance_gates)
 
     p_pub = sub.add_parser(
         "publish-live",

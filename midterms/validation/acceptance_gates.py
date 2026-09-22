@@ -454,15 +454,68 @@ def evaluate_acceptance_gates(
     g7_detail: dict[str, Any] = {}
     rel = cal.get("reliability") or (cal.get("margin_scores") or {}).get("reliability")
     rel_gate = (cal.get("margin_scores") or {}).get("reliability_gate")
-    # Prefer multi-cycle nested OOF reliability (means+sds) when available.
+    g7_multi_cycle = multi_cycle
+    g7_n = cal.get("n")
+    # Prefer a source-matching raw cycle-cross-fitted production-stack block.
+    # The experimental calibrated block is diagnostic only until production
+    # explicitly adopts that transform.
+    crossfit_path = art_dir / "stack_reliability_crossfit_latest.json"
+    crossfit = _load_json(crossfit_path)
+    crossfit_valid = False
+    if crossfit is not None:
+        try:
+            from midterms.validation.stack_reliability_crossfit import (
+                validate_crossfit_artifact,
+            )
+
+            crossfit_check = validate_crossfit_artifact(
+                crossfit,
+                nested_path=art_dir / "nested_component_loo.json",
+                stack_path=art_dir / "stack_weights_oof.json",
+            )
+        except Exception as exc:  # noqa: BLE001
+            crossfit_check = {"ok": False, "failures": [str(exc)]}
+        g7_detail["crossfit_validation"] = crossfit_check
+        crossfit_valid = bool(crossfit_check.get("ok"))
+    else:
+        g7_detail["crossfit_validation"] = {
+            "ok": False,
+            "failures": ["crossfit artifact missing"],
+        }
+    if crossfit_valid:
+        raw_crossfit = crossfit.get("raw_production_stack") or {}
+        rel = raw_crossfit.get("reliability")
+        rel_gate = raw_crossfit.get("reliability_overconfidence")
+        g7_detail["source"] = "stack_reliability_crossfit.raw_production_stack"
+        g7_detail["crossfit_procedure"] = crossfit.get("procedure")
+        g7_detail["crossfit_raw_metrics"] = {
+            key: raw_crossfit.get(key)
+            for key in ("n", "empirical_crps", "brier", "log_score")
+        }
+        experimental = crossfit.get("experimental_calibrated_stack") or {}
+        g7_detail["experimental_calibration_not_production"] = {
+            "production_adopted": experimental.get("production_adopted"),
+            "g7_eligible": experimental.get("g7_eligible"),
+            "reliability_overconfidence": experimental.get("reliability_overconfidence"),
+            "empirical_crps": experimental.get("empirical_crps"),
+            "brier": experimental.get("brier"),
+            "log_score": experimental.get("log_score"),
+        }
+        g7_n = raw_crossfit.get("n")
+        g7_multi_cycle = len(crossfit.get("outer_cycles") or []) >= 2
+
+    # Transparently fall back to component-spine reliability when the crossfit
+    # artifact is absent or rejected by lineage/leakage validation.
     nested_rel_block = (nested or {}).get("reliability") or {}
-    if nested_rel_block.get("reliability"):
+    if not crossfit_valid and nested_rel_block.get("reliability"):
         rel = nested_rel_block["reliability"]
         rel_gate = nested_rel_block.get("reliability_gate")
         g7_detail["source"] = "nested_component_loo.reliability"
+        g7_detail["crossfit_fallback"] = True
         g7_detail["nested_reliability_n"] = nested_rel_block.get("n")
         g7_detail["nested_reliability_spine"] = nested_rel_block.get("spine")
         g7_detail["nested_brier"] = nested_rel_block.get("brier")
+        g7_n = nested_rel_block.get("n")
     if rel_gate is None and rel:
         from midterms.validation.metrics import reliability_overconfidence
 
@@ -471,11 +524,11 @@ def evaluate_acceptance_gates(
         g7_detail["n_bins"] = len(rel)
         g7_detail["reliability_gate"] = rel_gate
         g7_detail["sample_sizes_disclosed"] = all("n" in b for b in rel)
-        g7_detail["calibration_n"] = (
-            nested_rel_block.get("n") if nested_rel_block.get("n") else cal.get("n")
+        g7_detail["calibration_n"] = g7_n
+        g7_detail["nested_multi_cycle"] = g7_multi_cycle
+        claim_ok = bool(
+            rel_gate and rel_gate.get("calibration_claim_allowed") and g7_multi_cycle
         )
-        g7_detail["nested_multi_cycle"] = multi_cycle
-        claim_ok = bool(rel_gate and rel_gate.get("calibration_claim_allowed") and multi_cycle)
         overconf = bool(rel_gate and rel_gate.get("n_overconfident"))
         thin = bool((rel_gate or {}).get("thin_sample"))
         if claim_ok:
@@ -509,8 +562,15 @@ def evaluate_acceptance_gates(
             evidence=[
                 str(art_dir / "validation_report_latest.json"),
                 str(art_dir / "nested_component_loo.json"),
+                str(crossfit_path),
             ],
-            notes=["Calibration plots must disclose sample sizes; overconfidence blocks claims."],
+            notes=[
+                (
+                    "G7 uses raw cross-fitted production-stack reliability when its lineage "
+                    "matches; experimental calibration cannot satisfy G7 until production "
+                    "adopts it."
+                )
+            ],
         )
     )
 
@@ -780,8 +840,6 @@ def evaluate_acceptance_gates(
         g11_detail["publication_surface"] = forecast.get("publication_surface")
         g11_detail["has_limitations"] = bool(forecast.get("limitations"))
         g11_detail["forecast_model_version"] = forecast.get("model_version")
-        from midterms.config import PUBLIC_LIVE_ENABLED
-
         fv = str(forecast.get("model_version") or "")
         if fv and fv != MODEL_VERSION:
             g11_ok = False

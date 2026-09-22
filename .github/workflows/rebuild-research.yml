@@ -2,18 +2,29 @@ name: Rebuild Research Forecast
 
 on:
   workflow_dispatch:
-
-permissions:
-  contents: write
+    inputs:
+      as_of:
+        description: Forecast evidence cutoff YYYY-MM-DD. Leave blank for the current UTC date.
+        required: false
+        type: string
+        default: ""
 
 jobs:
   rebuild:
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    permissions:
+      contents: write
+    outputs:
+      as_of: ${{ steps.resolve_as_of.outputs.as_of }}
+      commit_created: ${{ steps.commit.outputs.commit_created }}
+      commit_sha: ${{ steps.commit.outputs.commit_sha }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -27,11 +38,42 @@ jobs:
       - name: Run full test suite
         run: pytest -q
 
+      - name: Resolve evidence cutoff
+        id: resolve_as_of
+        shell: bash
+        env:
+          REQUESTED_AS_OF: ${{ inputs.as_of }}
+        run: |
+          TODAY="$(date -u +%F)"
+          AS_OF="${REQUESTED_AS_OF:-$TODAY}"
+          if [[ ! "$AS_OF" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "as_of must use ISO YYYY-MM-DD format" >&2
+            exit 1
+          fi
+          if [[ "$(date -u -d "$AS_OF" +%F 2>/dev/null || true)" != "$AS_OF" ]]; then
+            echo "as_of is not a valid calendar date: $AS_OF" >&2
+            exit 1
+          fi
+          if [[ "$AS_OF" > "$TODAY" ]]; then
+            echo "as_of cannot be later than workflow UTC date $TODAY" >&2
+            exit 1
+          fi
+          echo "AS_OF=$AS_OF" >> "$GITHUB_ENV"
+          echo "as_of=$AS_OF" >> "$GITHUB_OUTPUT"
+          echo "Using evidence cutoff $AS_OF"
+
+      - name: Strict publication evidence preflight
+        run: |
+          python -m midterms.cli evidence-eligibility \
+            --election-id senate-2026 \
+            --as-of "$AS_OF" \
+            --strict
+
       - name: Run publication-quality research forecast
         run: |
           python -m midterms.cli forecast \
             --election-id senate-2026 \
-            --as-of 2026-09-20 \
+            --as-of "$AS_OF" \
             --method pymc \
             --require-publishable \
             --n-joint-sims 50000
@@ -41,6 +83,9 @@ jobs:
 
       - name: Validation report
         run: python -m midterms.cli validation-report --full
+
+      - name: Cross-fitted stack reliability from frozen OOF predictions
+        run: python -m midterms.cli crossfit-stack-reliability
 
       - name: Independent rebuild
         run: python -m midterms.cli verify-rebuild --independent
@@ -56,7 +101,7 @@ jobs:
           PY
 
       - name: Acceptance gates
-        run: python -m midterms.cli acceptance-gates
+        run: python -m midterms.cli acceptance-gates --strict
 
       - name: Upload generated artifacts
         if: always()
@@ -70,6 +115,7 @@ jobs:
             web/public/data/forecast_latest.json
 
       - name: Commit successful rebuild
+        id: commit
         if: success()
         run: |
           git config user.name "github-actions[bot]"
@@ -79,7 +125,55 @@ jobs:
 
           if git diff --cached --quiet; then
             echo "No generated changes to commit."
+            echo "commit_created=false" >> "$GITHUB_OUTPUT"
+            echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           else
-            git commit -m "model: rebuild research forecast 2026-09-20"
-            git push
+            git commit -m "model: rebuild research forecast ${AS_OF} [rebuild-deploys-pages]"
+            git push origin HEAD:main
+            echo "commit_created=true" >> "$GITHUB_OUTPUT"
+            echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
+
+  deploy_pages:
+    needs: rebuild
+    if: needs.rebuild.result == 'success' && needs.rebuild.outputs.commit_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout updated main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install and build static site
+        working-directory: web
+        env:
+          GITHUB_PAGES: "true"
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/out
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
