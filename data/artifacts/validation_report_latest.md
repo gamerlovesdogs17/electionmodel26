@@ -1,6 +1,6 @@
 # Validation report — senate-hierarchical-v0.9.21
 
-Generated: 2026-09-19T19:05:07.968335+00:00
+Generated: 2026-09-22T00:13:50.822660+00:00
 Primary holdout: 2022
 
 ## Stack weights
@@ -20,47 +20,45 @@ Primary holdout: 2022
 ## Calibration (60-day lead)
 
 - n: 34
-- Brier: 0.05691536629815605
-- Mean 90% interval score: 43.28371220551403
+- Brier: 0.05452155071603785
+- Mean 90% interval score: 43.789193914642226
 
 ## Peer release gate
 
 ```json
 {
   "ok": true,
-  "control_ok": false,
+  "control_ok": true,
   "control_soft": true,
   "control_gaps": {
-    "ddhq": 0.356375,
-    "kalshi": 0.31657301980198016
+    "ddhq": 0.28448000000000007,
+    "kalshi": 0.17537108910891097
   },
-  "primary_control_gap": 0.31657301980198016,
-  "max_abs_control_gap": 0.356375,
+  "primary_control_gap": 0.17537108910891097,
+  "max_abs_control_gap": 0.28448000000000007,
   "race_scores": {
     "ddhq": {
       "n": 10,
-      "brier_vs_peer_favorite": 0.22321035156250005,
-      "mae": 0.12411249999999999,
-      "crps_proxy": 0.12411249999999999,
+      "brier_vs_peer_favorite": 0.24967668308000004,
+      "mae": 0.16658199999999998,
+      "crps_proxy": 0.16658199999999998,
       "ok": false
     },
     "kalshi": {
       "n": 10,
-      "brier_vs_peer_favorite": 0.15701035156249998,
-      "mae": 0.11267341824598616,
-      "crps_proxy": 0.11267341824598616,
+      "brier_vs_peer_favorite": 0.09758468308000001,
+      "mae": 0.07042298632253245,
+      "crps_proxy": 0.07042298632253245,
       "ok": true
     }
   },
   "race_ok": true,
-  "mean_peer_disagreement": 0.15949111626578813,
+  "mean_peer_disagreement": 0.16886770682566685,
   "null_margin_races": [],
   "method": "ensemble_stack+overlays",
   "core_method": "pymc",
-  "generic_ballot": 5.852513615064197,
-  "reasons": [
-    "control gap vs primary peer large (gap=0.317 > 0.25); gaps={'ddhq': 0.356375, 'kalshi': 0.31657301980198016} \u2014 informational under blueprint \u00a72 (peers not averaged)"
-  ],
+  "generic_ballot": 5.7459422124828174,
+  "reasons": [],
   "thresholds": {
     "max_abs_control_gap": 0.25,
     "race_brier": 0.22,
@@ -68,7 +66,7 @@ Primary holdout: 2022
     "control_gap_hard_fail": false
   },
   "note": "Peers are a release gate for integrity/race calibration only \u2014 never averaged into the ensemble (blueprint \u00a72). Chamber control gap vs markets is soft/informational.",
-  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\peer_gate_latest.json"
+  "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/peer_gate_latest.json"
 }
 ```
 
@@ -85,8 +83,8 @@ Primary holdout: 2022
 ## Acceptance gates (Milestone-0 / G1–G11)
 
 - ok: False
-- pass/partial/fail: 7/2/2
-- failures: ['G8', 'G10']
+- pass/partial/fail: 9/0/2
+- failures: ['G7', 'G10', 'COHERENCE']
 
 ## Limitations
 

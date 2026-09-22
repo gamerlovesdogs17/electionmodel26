@@ -1,7 +1,7 @@
 {
   "audit_item": "Milestone-0",
   "model_version": "senate-hierarchical-v0.9.21",
-  "generated_at": "2026-09-20T05:16:25.198294+00:00",
+  "generated_at": "2026-09-22T00:16:34.256143+00:00",
   "archive_scope": "2014-2024",
   "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
   "gates": {
@@ -23,7 +23,7 @@
         "failures": []
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/chamber_reconcile_latest.json"
       ],
       "failure_behavior": "Stop replay.",
       "notes": [
@@ -47,7 +47,7 @@
         "failures": []
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/chamber_reconcile_latest.json"
       ],
       "failure_behavior": "Stop scoring.",
       "notes": [
@@ -69,7 +69,7 @@
         ]
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\poll_coverage_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/poll_coverage_latest.json"
       ],
       "failure_behavior": "Mark thin races; prohibit complete-cycle claim.",
       "notes": []
@@ -94,15 +94,16 @@
           "races",
           "ratings",
           "results",
+          "structural_prior",
           "wiki_vote_scrape"
         ],
         "coherence_ok": true,
         "coherence_notes": [],
-        "forecast_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
-        "evidence_fingerprint": "ee423a8968bfa1f51d68088d08d2d7d71e62da75e8aca0796e7d40e5f6c61351"
+        "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+        "evidence_fingerprint": "cb508c8b3137a67c9f65044c4affab3782edd09a2e3559bb18e4628c60039e2f"
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\evidence_eligibility_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
       ],
       "failure_behavior": "Leakage failure.",
       "notes": [
@@ -121,13 +122,13 @@
         "no_weight_remapping": true,
         "stack_source_spine": "pymc",
         "reproduction_ok": true,
-        "matrix_sha256": "cd9edadc6d2ca4abcfc56f06493a804acc00eef14a76d9d4396825c27492a824",
+        "matrix_sha256": "3b7c9259e61e2d2ecc96de7f29bb912989baba532c35d3d54c098c44ea3cfbc1",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json",
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/stack_weights_oof.json"
       ],
       "failure_behavior": "Invalidate run.",
       "notes": [
@@ -141,17 +142,18 @@
       "status": "pass",
       "detail": {
         "g8_metric": "crps",
-        "mean_crps": 4.173214075030193,
+        "mean_crps": 3.6943665144892015,
         "mean_crps_by_component": {
-          "state_space": 3.5331400039943577,
-          "shrinkage_polls": 4.767375284808708,
-          "equal_weight_polls": 5.07513239520805,
-          "poll_only_state_space": 9.201080046285327,
-          "ridge_fundamentals": 5.042712737757732,
-          "pymc": 4.173214075030193,
-          "last_election_swing": 4.9211098267056705,
-          "hier_no_terminal_race": 4.336243341700774,
-          "hier_no_similarity": 4.34027596303231
+          "last_election_swing": 5.069359682562458,
+          "hier_no_terminal_race": 4.125569021471124,
+          "equal_weight_polls": 4.910778389624224,
+          "ridge_fundamentals": 4.672744360658557,
+          "pymc_dynamic": 4.1953877198537475,
+          "state_space": 3.2117406825901225,
+          "poll_only_state_space": 9.300249087917908,
+          "shrinkage_polls": 4.518267390846893,
+          "pymc": 3.6943665144892015,
+          "hier_no_similarity": 4.131253683791597
         },
         "n_folds": 4,
         "n_outer_years": 4,
@@ -163,14 +165,14 @@
         "freeze_before_truth": true,
         "spine_label": "pymc",
         "validation_calibration": {
-          "n": 132,
-          "brier": 0.04140106151343855,
+          "n": 34,
+          "brier": 0.05452155071603785,
           "has_margin_scores": true,
-          "log_score": -0.20031564684438355,
+          "log_score": -0.19025085137834624,
           "calibration_slope_intercept": {
             "n": 34,
-            "slope": 1.1380596563736143,
-            "intercept": -0.08561575943327543,
+            "slope": 1.1251958171197205,
+            "intercept": -0.07585784469488333,
             "ok": true,
             "ideal": {
               "slope": 1.0,
@@ -179,8 +181,8 @@
           },
           "pit": {
             "n": 34,
-            "mean": 0.4373964992298807,
-            "var": 0.057210662255936004,
+            "mean": 0.4468075181562987,
+            "var": 0.05393895561224451,
             "expected_mean": 0.5,
             "expected_var": 0.08333333333333333,
             "histogram": [
@@ -192,37 +194,37 @@
               {
                 "bin_lo": 0.1,
                 "bin_hi": 0.2,
-                "n": 4.0
+                "n": 3.0
               },
               {
                 "bin_lo": 0.2,
                 "bin_hi": 0.30000000000000004,
-                "n": 5.0
+                "n": 2.0
               },
               {
                 "bin_lo": 0.30000000000000004,
                 "bin_hi": 0.4,
-                "n": 7.0
+                "n": 11.0
               },
               {
                 "bin_lo": 0.4,
                 "bin_hi": 0.5,
-                "n": 5.0
+                "n": 3.0
               },
               {
                 "bin_lo": 0.5,
                 "bin_hi": 0.6000000000000001,
-                "n": 3.0
+                "n": 4.0
               },
               {
                 "bin_lo": 0.6000000000000001,
                 "bin_hi": 0.7000000000000001,
-                "n": 2.0
+                "n": 4.0
               },
               {
                 "bin_lo": 0.7000000000000001,
                 "bin_hi": 0.8,
-                "n": 3.0
+                "n": 2.0
               },
               {
                 "bin_lo": 0.8,
@@ -240,18 +242,18 @@
         },
         "shadow_evaluations": [
           {
-            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z\\evaluation.json",
+            "path": "/home/runner/work/electionmodel26/electionmodel26/data/shadow/milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z/evaluation.json",
             "spine_crps": 3.588344785515356
           },
           {
-            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z\\evaluation.json",
+            "path": "/home/runner/work/electionmodel26/electionmodel26/data/shadow/shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z/evaluation.json",
             "spine_crps": 4.854064061143937
           }
         ]
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json",
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/validation_report_latest.json"
       ],
       "failure_behavior": "No calibration claim.",
       "notes": [
@@ -261,30 +263,40 @@
     "G7": {
       "id": "G7",
       "name": "Reliability",
-      "ok": true,
-      "status": "pass",
+      "ok": false,
+      "status": "fail",
       "detail": {
         "source": "nested_component_loo.reliability",
-        "nested_reliability_n": 132,
+        "nested_reliability_n": 264,
         "nested_reliability_spine": "pymc",
-        "nested_brier": 0.04140106151343855,
+        "nested_brier": 0.0443663819831204,
         "n_bins": 10,
         "reliability_gate": {
           "sample_sizes_disclosed": true,
-          "overconfident_bins": [],
-          "n_overconfident": 0,
-          "total_n": 132.0,
-          "n_adequate_bins": 3,
+          "overconfident_bins": [
+            {
+              "bin_lo": 0.8,
+              "bin_hi": 0.9,
+              "n": 16.0,
+              "mean_p": 0.844867380940749,
+              "mean_y": 0.6875,
+              "gap": 0.15736738094074898
+            }
+          ],
+          "n_overconfident": 1,
+          "total_n": 264.0,
+          "n_adequate_bins": 5,
           "thin_sample": false,
-          "calibration_claim_allowed": true
+          "calibration_claim_allowed": false
         },
         "sample_sizes_disclosed": true,
-        "calibration_n": 132,
-        "nested_multi_cycle": true
+        "calibration_n": 264,
+        "nested_multi_cycle": true,
+        "alert": "material overconfidence \u2014 recalibrate or widen; no calibration claim"
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json",
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/validation_report_latest.json",
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json"
       ],
       "failure_behavior": "Recalibrate or widen.",
       "notes": [
@@ -299,21 +311,22 @@
       "detail": {
         "keep": [
           "state_space",
-          "ridge_fundamentals",
           "similarity_terminal",
           "terminal_race"
         ],
         "disable": [
           "poll_only_state_space",
+          "ridge_fundamentals",
+          "pymc_dynamic",
           "last_election_swing",
           "equal_weight_polls",
           "shrinkage_polls"
         ],
-        "n_components": 8,
+        "n_components": 9,
         "disabled_still_weighted": []
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json"
       ],
       "failure_behavior": "Disable component.",
       "notes": [
@@ -327,10 +340,10 @@
       "status": "pass",
       "detail": {
         "alerts": [],
-        "mcse_control": 0.0017202956931876565
+        "mcse_control": 0.0018976318378442114
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
       ],
       "failure_behavior": "Do not publish.",
       "notes": []
@@ -338,53 +351,53 @@
     "G10": {
       "id": "G10",
       "name": "Reproducibility",
-      "ok": true,
-      "status": "pass",
+      "ok": false,
+      "status": "partial",
       "detail": {
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
           "ok": true,
-          "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+          "run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
           "error": null,
-          "forecast_hash_expected": "527c2426c6bb7a0962bfe998554f2180b983ac7b1b9c14fbde1cc475d2690521",
-          "forecast_hash_actual": "527c2426c6bb7a0962bfe998554f2180b983ac7b1b9c14fbde1cc475d2690521"
+          "forecast_hash_expected": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca",
+          "forecast_hash_actual": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca"
         },
         "independent_rebuild": {
           "ok": true,
-          "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\independent_rebuild_latest.json",
+          "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/independent_rebuild_latest.json",
           "comparison": {
             "ok": true,
             "checks": [
               {
                 "name": "p_dem_majority",
                 "ok": true,
-                "delta": 0.0035200000000000786,
+                "delta": 0.005879999999999996,
                 "tol": 0.01
               },
               {
                 "name": "expected_dem_seats",
                 "ok": true,
-                "delta": 0.02656000000000347,
+                "delta": 0.01601999999999748,
                 "tol": 0.15
               },
               {
                 "name": "max_race_p_dem",
                 "ok": true,
-                "delta": 0.006620000000000015,
+                "delta": 0.011379999999999946,
                 "tol": 0.02
               }
             ],
-            "mean_abs_race_p_dem": 0.001666285714285722,
+            "mean_abs_race_p_dem": 0.0011857142857142789,
             "n_races_compared": 35
           },
           "domain_ok": true,
           "error": null,
           "run_id_match": true,
-          "forecast_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
-          "rebuild_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+          "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+          "rebuild_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
           "freshness": {
-            "forecast_generated_at": "2026-09-20T05:15:29.235571+00:00",
-            "rebuild_generated_at": "2026-09-20T05:16:22.422255+00:00",
+            "forecast_generated_at": "2026-09-22T00:12:42.704270+00:00",
+            "rebuild_generated_at": "2026-09-22T00:16:30.893048+00:00",
             "rebuild_after_forecast": true
           },
           "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact."
@@ -392,46 +405,46 @@
         "shadow_verify": [
           {
             "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": false,
-            "signature_status": "unverifiable",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z",
             "model_version": "senate-hierarchical-v0.9.16"
           },
           {
             "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025440Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": false,
-            "signature_status": "unverifiable",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025440Z",
             "model_version": "senate-hierarchical-v0.9.19"
           },
           {
             "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025447Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": false,
-            "signature_status": "unverifiable",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025447Z",
             "model_version": "senate-hierarchical-v0.9.19"
           },
           {
             "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": false,
-            "signature_status": "unverifiable",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
             "model_version": "senate-hierarchical-v0.9.19"
           },
           {
             "shadow_id": "shadow_senate-2026_2026-09-13_senate-hierarchical-v0.9.21_20260919T211818Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": true,
-            "signature_status": "verified",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2026_2026-09-13_senate-hierarchical-v0.9.21_20260919T211818Z",
             "model_version": "senate-hierarchical-v0.9.21"
           }
@@ -439,9 +452,10 @@
         "shadow_rows_checked": 5,
         "shadow_signature_note": "signature_status=verified \u2192 Ed25519 ok against historical key_id; missing \u2192 hashes-only; unverifiable \u2192 hash ok but key does not verify (e.g. rotated trust root); failed \u2192 integrity/corrupt seal. PUBLIC_LIVE requires verified; research accepts missing/unverifiable with hashes.",
         "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
+        "promotion_block": "incomplete reproducibility evidence \u2014 research partial only",
         "release_identity": {
           "ok": true,
-          "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\release_identity_v0921.json",
+          "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0921.json",
           "mismatches": {},
           "PUBLIC_LIVE_ENABLED": false,
           "model_version": "senate-hierarchical-v0.9.21",
@@ -450,7 +464,7 @@
         }
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\shadow_publications.jsonl"
+        "/home/runner/work/electionmodel26/electionmodel26/data/manifests/shadow_publications.jsonl"
       ],
       "failure_behavior": "Reject release.",
       "notes": []
@@ -473,7 +487,7 @@
         "poll_coverage_present": true
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\MODEL_CARD.md"
+        "/home/runner/work/electionmodel26/electionmodel26/MODEL_CARD.md"
       ],
       "failure_behavior": "Withhold public artifact.",
       "notes": [
@@ -500,7 +514,7 @@
         "failures": []
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/chamber_reconcile_latest.json"
       ],
       "failure_behavior": "Stop replay.",
       "notes": [
@@ -524,7 +538,7 @@
         "failures": []
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\chamber_reconcile_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/chamber_reconcile_latest.json"
       ],
       "failure_behavior": "Stop scoring.",
       "notes": [
@@ -546,7 +560,7 @@
         ]
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\poll_coverage_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/poll_coverage_latest.json"
       ],
       "failure_behavior": "Mark thin races; prohibit complete-cycle claim.",
       "notes": []
@@ -571,15 +585,16 @@
           "races",
           "ratings",
           "results",
+          "structural_prior",
           "wiki_vote_scrape"
         ],
         "coherence_ok": true,
         "coherence_notes": [],
-        "forecast_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
-        "evidence_fingerprint": "ee423a8968bfa1f51d68088d08d2d7d71e62da75e8aca0796e7d40e5f6c61351"
+        "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+        "evidence_fingerprint": "cb508c8b3137a67c9f65044c4affab3782edd09a2e3559bb18e4628c60039e2f"
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\evidence_eligibility_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
       ],
       "failure_behavior": "Leakage failure.",
       "notes": [
@@ -598,13 +613,13 @@
         "no_weight_remapping": true,
         "stack_source_spine": "pymc",
         "reproduction_ok": true,
-        "matrix_sha256": "cd9edadc6d2ca4abcfc56f06493a804acc00eef14a76d9d4396825c27492a824",
+        "matrix_sha256": "3b7c9259e61e2d2ecc96de7f29bb912989baba532c35d3d54c098c44ea3cfbc1",
         "forecast_method": "ensemble_stack+overlays",
         "forecast_core": "pymc"
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json",
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/stack_weights_oof.json"
       ],
       "failure_behavior": "Invalidate run.",
       "notes": [
@@ -618,17 +633,18 @@
       "status": "pass",
       "detail": {
         "g8_metric": "crps",
-        "mean_crps": 4.173214075030193,
+        "mean_crps": 3.6943665144892015,
         "mean_crps_by_component": {
-          "state_space": 3.5331400039943577,
-          "shrinkage_polls": 4.767375284808708,
-          "equal_weight_polls": 5.07513239520805,
-          "poll_only_state_space": 9.201080046285327,
-          "ridge_fundamentals": 5.042712737757732,
-          "pymc": 4.173214075030193,
-          "last_election_swing": 4.9211098267056705,
-          "hier_no_terminal_race": 4.336243341700774,
-          "hier_no_similarity": 4.34027596303231
+          "last_election_swing": 5.069359682562458,
+          "hier_no_terminal_race": 4.125569021471124,
+          "equal_weight_polls": 4.910778389624224,
+          "ridge_fundamentals": 4.672744360658557,
+          "pymc_dynamic": 4.1953877198537475,
+          "state_space": 3.2117406825901225,
+          "poll_only_state_space": 9.300249087917908,
+          "shrinkage_polls": 4.518267390846893,
+          "pymc": 3.6943665144892015,
+          "hier_no_similarity": 4.131253683791597
         },
         "n_folds": 4,
         "n_outer_years": 4,
@@ -640,14 +656,14 @@
         "freeze_before_truth": true,
         "spine_label": "pymc",
         "validation_calibration": {
-          "n": 132,
-          "brier": 0.04140106151343855,
+          "n": 34,
+          "brier": 0.05452155071603785,
           "has_margin_scores": true,
-          "log_score": -0.20031564684438355,
+          "log_score": -0.19025085137834624,
           "calibration_slope_intercept": {
             "n": 34,
-            "slope": 1.1380596563736143,
-            "intercept": -0.08561575943327543,
+            "slope": 1.1251958171197205,
+            "intercept": -0.07585784469488333,
             "ok": true,
             "ideal": {
               "slope": 1.0,
@@ -656,8 +672,8 @@
           },
           "pit": {
             "n": 34,
-            "mean": 0.4373964992298807,
-            "var": 0.057210662255936004,
+            "mean": 0.4468075181562987,
+            "var": 0.05393895561224451,
             "expected_mean": 0.5,
             "expected_var": 0.08333333333333333,
             "histogram": [
@@ -669,37 +685,37 @@
               {
                 "bin_lo": 0.1,
                 "bin_hi": 0.2,
-                "n": 4.0
+                "n": 3.0
               },
               {
                 "bin_lo": 0.2,
                 "bin_hi": 0.30000000000000004,
-                "n": 5.0
+                "n": 2.0
               },
               {
                 "bin_lo": 0.30000000000000004,
                 "bin_hi": 0.4,
-                "n": 7.0
+                "n": 11.0
               },
               {
                 "bin_lo": 0.4,
                 "bin_hi": 0.5,
-                "n": 5.0
+                "n": 3.0
               },
               {
                 "bin_lo": 0.5,
                 "bin_hi": 0.6000000000000001,
-                "n": 3.0
+                "n": 4.0
               },
               {
                 "bin_lo": 0.6000000000000001,
                 "bin_hi": 0.7000000000000001,
-                "n": 2.0
+                "n": 4.0
               },
               {
                 "bin_lo": 0.7000000000000001,
                 "bin_hi": 0.8,
-                "n": 3.0
+                "n": 2.0
               },
               {
                 "bin_lo": 0.8,
@@ -717,18 +733,18 @@
         },
         "shadow_evaluations": [
           {
-            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z\\evaluation.json",
+            "path": "/home/runner/work/electionmodel26/electionmodel26/data/shadow/milestone_senate-2022_2022-09-09_senate-hierarchical-v0.9.13_20260913T221046Z/evaluation.json",
             "spine_crps": 3.588344785515356
           },
           {
-            "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z\\evaluation.json",
+            "path": "/home/runner/work/electionmodel26/electionmodel26/data/shadow/shadow_senate-2022_2022-09-09_senate-hierarchical-v0.9.12_20260913T220145Z/evaluation.json",
             "spine_crps": 4.854064061143937
           }
         ]
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json",
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json",
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/validation_report_latest.json"
       ],
       "failure_behavior": "No calibration claim.",
       "notes": [
@@ -738,30 +754,40 @@
     {
       "id": "G7",
       "name": "Reliability",
-      "ok": true,
-      "status": "pass",
+      "ok": false,
+      "status": "fail",
       "detail": {
         "source": "nested_component_loo.reliability",
-        "nested_reliability_n": 132,
+        "nested_reliability_n": 264,
         "nested_reliability_spine": "pymc",
-        "nested_brier": 0.04140106151343855,
+        "nested_brier": 0.0443663819831204,
         "n_bins": 10,
         "reliability_gate": {
           "sample_sizes_disclosed": true,
-          "overconfident_bins": [],
-          "n_overconfident": 0,
-          "total_n": 132.0,
-          "n_adequate_bins": 3,
+          "overconfident_bins": [
+            {
+              "bin_lo": 0.8,
+              "bin_hi": 0.9,
+              "n": 16.0,
+              "mean_p": 0.844867380940749,
+              "mean_y": 0.6875,
+              "gap": 0.15736738094074898
+            }
+          ],
+          "n_overconfident": 1,
+          "total_n": 264.0,
+          "n_adequate_bins": 5,
           "thin_sample": false,
-          "calibration_claim_allowed": true
+          "calibration_claim_allowed": false
         },
         "sample_sizes_disclosed": true,
-        "calibration_n": 132,
-        "nested_multi_cycle": true
+        "calibration_n": 264,
+        "nested_multi_cycle": true,
+        "alert": "material overconfidence \u2014 recalibrate or widen; no calibration claim"
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\validation_report_latest.json",
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/validation_report_latest.json",
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json"
       ],
       "failure_behavior": "Recalibrate or widen.",
       "notes": [
@@ -776,21 +802,22 @@
       "detail": {
         "keep": [
           "state_space",
-          "ridge_fundamentals",
           "similarity_terminal",
           "terminal_race"
         ],
         "disable": [
           "poll_only_state_space",
+          "ridge_fundamentals",
+          "pymc_dynamic",
           "last_election_swing",
           "equal_weight_polls",
           "shrinkage_polls"
         ],
-        "n_components": 8,
+        "n_components": 9,
         "disabled_still_weighted": []
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\nested_component_loo.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json"
       ],
       "failure_behavior": "Disable component.",
       "notes": [
@@ -804,10 +831,10 @@
       "status": "pass",
       "detail": {
         "alerts": [],
-        "mcse_control": 0.0017202956931876565
+        "mcse_control": 0.0018976318378442114
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\forecast_latest.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
       ],
       "failure_behavior": "Do not publish.",
       "notes": []
@@ -815,53 +842,53 @@
     {
       "id": "G10",
       "name": "Reproducibility",
-      "ok": true,
-      "status": "pass",
+      "ok": false,
+      "status": "partial",
       "detail": {
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
           "ok": true,
-          "run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+          "run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
           "error": null,
-          "forecast_hash_expected": "527c2426c6bb7a0962bfe998554f2180b983ac7b1b9c14fbde1cc475d2690521",
-          "forecast_hash_actual": "527c2426c6bb7a0962bfe998554f2180b983ac7b1b9c14fbde1cc475d2690521"
+          "forecast_hash_expected": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca",
+          "forecast_hash_actual": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca"
         },
         "independent_rebuild": {
           "ok": true,
-          "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\independent_rebuild_latest.json",
+          "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/independent_rebuild_latest.json",
           "comparison": {
             "ok": true,
             "checks": [
               {
                 "name": "p_dem_majority",
                 "ok": true,
-                "delta": 0.0035200000000000786,
+                "delta": 0.005879999999999996,
                 "tol": 0.01
               },
               {
                 "name": "expected_dem_seats",
                 "ok": true,
-                "delta": 0.02656000000000347,
+                "delta": 0.01601999999999748,
                 "tol": 0.15
               },
               {
                 "name": "max_race_p_dem",
                 "ok": true,
-                "delta": 0.006620000000000015,
+                "delta": 0.011379999999999946,
                 "tol": 0.02
               }
             ],
-            "mean_abs_race_p_dem": 0.001666285714285722,
+            "mean_abs_race_p_dem": 0.0011857142857142789,
             "n_races_compared": 35
           },
           "domain_ok": true,
           "error": null,
           "run_id_match": true,
-          "forecast_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
-          "rebuild_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+          "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+          "rebuild_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
           "freshness": {
-            "forecast_generated_at": "2026-09-20T05:15:29.235571+00:00",
-            "rebuild_generated_at": "2026-09-20T05:16:22.422255+00:00",
+            "forecast_generated_at": "2026-09-22T00:12:42.704270+00:00",
+            "rebuild_generated_at": "2026-09-22T00:16:30.893048+00:00",
             "rebuild_after_forecast": true
           },
           "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact."
@@ -869,46 +896,46 @@
         "shadow_verify": [
           {
             "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": false,
-            "signature_status": "unverifiable",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.16_20260913T225719Z",
             "model_version": "senate-hierarchical-v0.9.16"
           },
           {
             "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025440Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": false,
-            "signature_status": "unverifiable",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025440Z",
             "model_version": "senate-hierarchical-v0.9.19"
           },
           {
             "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025447Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": false,
-            "signature_status": "unverifiable",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T025447Z",
             "model_version": "senate-hierarchical-v0.9.19"
           },
           {
             "shadow_id": "live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": false,
-            "signature_status": "unverifiable",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\live_public_senate-2026_2026-09-13_senate-hierarchical-v0.9.19_20260915T030541Z",
             "model_version": "senate-hierarchical-v0.9.19"
           },
           {
             "shadow_id": "shadow_senate-2026_2026-09-13_senate-hierarchical-v0.9.21_20260919T211818Z",
-            "ok": true,
-            "hashes_ok": true,
-            "signatures_ok": true,
-            "signature_status": "verified",
+            "ok": false,
+            "hashes_ok": null,
+            "signatures_ok": null,
+            "signature_status": null,
             "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\shadow\\shadow_senate-2026_2026-09-13_senate-hierarchical-v0.9.21_20260919T211818Z",
             "model_version": "senate-hierarchical-v0.9.21"
           }
@@ -916,9 +943,10 @@
         "shadow_rows_checked": 5,
         "shadow_signature_note": "signature_status=verified \u2192 Ed25519 ok against historical key_id; missing \u2192 hashes-only; unverifiable \u2192 hash ok but key does not verify (e.g. rotated trust root); failed \u2192 integrity/corrupt seal. PUBLIC_LIVE requires verified; research accepts missing/unverifiable with hashes.",
         "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
+        "promotion_block": "incomplete reproducibility evidence \u2014 research partial only",
         "release_identity": {
           "ok": true,
-          "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\release_identity_v0921.json",
+          "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0921.json",
           "mismatches": {},
           "PUBLIC_LIVE_ENABLED": false,
           "model_version": "senate-hierarchical-v0.9.21",
@@ -927,7 +955,7 @@
         }
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\manifests\\shadow_publications.jsonl"
+        "/home/runner/work/electionmodel26/electionmodel26/data/manifests/shadow_publications.jsonl"
       ],
       "failure_behavior": "Reject release.",
       "notes": []
@@ -950,7 +978,7 @@
         "poll_coverage_present": true
       },
       "evidence": [
-        "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\MODEL_CARD.md"
+        "/home/runner/work/electionmodel26/electionmodel26/MODEL_CARD.md"
       ],
       "failure_behavior": "Withhold public artifact.",
       "notes": [
@@ -958,14 +986,20 @@
       ]
     }
   ],
-  "ok": true,
-  "promotion_ok": true,
-  "n_pass": 11,
-  "n_partial": 0,
-  "n_fail": 0,
-  "failures": [],
-  "research_failures": [],
-  "partials": [],
+  "ok": false,
+  "promotion_ok": false,
+  "n_pass": 9,
+  "n_partial": 1,
+  "n_fail": 1,
+  "failures": [
+    "G7"
+  ],
+  "research_failures": [
+    "G7"
+  ],
+  "partials": [
+    "G10"
+  ],
   "milestone": {
     "name": "first_publishable",
     "public_live_probabilities": false,
@@ -985,13 +1019,13 @@
     "ok": true,
     "mismatches": [],
     "notes": [],
-    "forecast_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
-    "snapshot_id": "643eb7eb47f2026b",
+    "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+    "snapshot_id": "f68f5d42ed8d283b",
     "model_version": "senate-hierarchical-v0.9.21",
     "forecast_publishable": true,
     "PUBLIC_LIVE_ENABLED": false,
     "live_locked": true,
-    "generated_at": "2026-09-20T05:16:25.201296+00:00",
-    "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\run_coherence_latest.json"
+    "generated_at": "2026-09-22T00:16:34.392662+00:00",
+    "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/run_coherence_latest.json"
   }
 }

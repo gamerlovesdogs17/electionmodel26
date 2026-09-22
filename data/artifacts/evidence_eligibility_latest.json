@@ -3,7 +3,7 @@
   "publishable": true,
   "run_class": "publication",
   "election_id": "senate-2026",
-  "as_of": "2026-09-13",
+  "as_of": "2026-09-20",
   "reasons": [],
   "domains": {
     "races": {
@@ -19,12 +19,17 @@
       "blocked_n": 0,
       "eligible_n": 320,
       "stale": false,
-      "latest_age_hours": 72.0
+      "latest_age_hours": 240.0
     },
     "results": {
       "n": 0,
       "tier_counts": {},
       "blocked_n": 0
+    },
+    "structural_prior": {
+      "eligible": true,
+      "blocked_n": 0,
+      "reason": null
     },
     "finance": {
       "tier": "first_party",
@@ -40,7 +45,7 @@
       "eligible": false,
       "n": 1,
       "quarantine": "parser_development_only",
-      "path": "C:/Users/zydlo/OneDrive/Desktop/electionmodel26/data/raw/external/certified_vote_counts.json",
+      "path": "/home/runner/work/electionmodel26/electionmodel26/data/raw/external/certified_vote_counts.json",
       "note": "parser_development_only \u2014 not canonical truth (v0.9.21)"
     },
     "economics": {
@@ -76,8 +81,21 @@
     "markets": {
       "tier": "aggregator",
       "eligible": true,
-      "n": 22,
-      "blocked_reason": null
+      "n": 33,
+      "blocked_reason": null,
+      "mapping_integrity": {
+        "ok": true,
+        "parser_version": "kalshi-v3-candidate-audit",
+        "json_hash_mode": "canonical_json_sha256_v1",
+        "n_enabled": 33,
+        "n_disabled": 2,
+        "audit_sha256": "ead95054ab00e1c9f8da677134462e580045cf6c978ee9d53b5c68bfd67511c1",
+        "byte_hash_diagnostics": {
+          "raw_sha256": false,
+          "normalized_control_sha256": false,
+          "mapping_audit_sha256": false
+        }
+      }
     }
   },
   "chamber_reconcile_ok": null,
@@ -103,25 +121,26 @@
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-09-20T05:22:34.232880+00:00",
+  "checked_at": "2026-09-22T00:16:30.834868+00:00",
   "evidence_fingerprint": {
-    "sha256": "cb26de69539cd1ce864cfe1f13278ed21a3fc34a220e372a1ad3951334f08b40",
+    "sha256": "cb508c8b3137a67c9f65044c4affab3782edd09a2e3559bb18e4628c60039e2f",
     "manifests": {
-      "fundraising_shares.json": "75e999deadc6be3c67f9dd10b5d8b2109c2215017400fc0d6e67a2bac667f5ba",
-      "economics_vintages.json": "a91a8fa505217256f695dc98936fb64b1f0e7ad522a5c4e95d9c3888247037aa",
-      "pres_approval.json": "4839fe287c3a3197b4266a9bd64aee42bfc3054453a3d7e17c3c58e93bfdaccd",
-      "demography.json": "6c5e35aa46dab6141c7a2e6d86d41f27ac6baef8dc7882d875135a302eead90d",
-      "expert_ratings.json": "c4b8538ccb77c209a1b2df5c6ad8de70c488bca6097677a92936c2cddcca272c",
-      "markets_kalshi.json": "ddb0d2f358401de89dfdf75c2d19d6eed5abc3231e4bedb0c306f6b181de8481",
-      "official_senate_ballots.json": "2992707af6852d0133b83c4a69b29a4eae3f8282426299a070d5b6f7f7634b24",
-      "wiki_ratings.json": "42589857b2aea131d8caa0d61e0ef3bc1885719e3ecf32b1c389913648000fa6"
+      "fundraising_shares.json": "4f1ce3dd1c495991305bc139ebf720dab2cbc8bba722b88a833b185aad20777f",
+      "economics_vintages.json": "a177278d1a535b07bafb921e7421ad1083e02bc9c3a6766b39025019c3ae602c",
+      "pres_approval.json": "ed816cef70bcea85d50988cdc681e46c6c2152a233ffe2a11d1f73bf9fc91378",
+      "demography.json": "055cca5b3bf6e7cbda9cc5d04050772bafec3e83498e0659330d792d38f32040",
+      "expert_ratings.json": "2371f2378f31daa90a92b19c273b6fc276d34e7fcaebdaa84f0ab79e5fa2dbee",
+      "markets_kalshi.json": "e4b7db23dd6bff8f37c8d6c59e7b6b177913d8bed2ac3e928023dfcddebbe22e",
+      "official_senate_ballots.json": "338d51d4615db5aba3fb51f0bd4bbc1a96a1184cfc20305378002fb43f5c7728",
+      "presidential_vote_sources.json": "09798a5aa0a0a388357bf7e102ae69056a0d567ef5d23532114cefef3b8ca337",
+      "wiki_ratings.json": "5eb9412932b1d47e8ca5b938cdc8f423f6967f4baabf30f374cfa02c4c9e274a"
     },
-    "generated_at": "2026-09-20T05:22:34.235880+00:00"
+    "generated_at": "2026-09-22T00:16:30.835928+00:00"
   },
   "model_version": "senate-hierarchical-v0.9.21",
   "PUBLIC_LIVE_ENABLED": false,
-  "forecast_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_19",
-  "snapshot_id": "643eb7eb47f2026b",
-  "forecast_generated_at": "2026-09-20T05:22:34.149937+00:00",
-  "identity_checked_at": "2026-09-20T05:22:34.235880+00:00"
+  "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+  "snapshot_id": "f68f5d42ed8d283b",
+  "forecast_generated_at": "2026-09-22T00:16:30.724107+00:00",
+  "identity_checked_at": "2026-09-22T00:16:30.835937+00:00"
 }

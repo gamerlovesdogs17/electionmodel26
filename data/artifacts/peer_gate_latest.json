@@ -1,38 +1,36 @@
 {
   "ok": true,
-  "control_ok": false,
+  "control_ok": true,
   "control_soft": true,
   "control_gaps": {
-    "ddhq": 0.356375,
-    "kalshi": 0.31657301980198016
+    "ddhq": 0.28448000000000007,
+    "kalshi": 0.17537108910891097
   },
-  "primary_control_gap": 0.31657301980198016,
-  "max_abs_control_gap": 0.356375,
+  "primary_control_gap": 0.17537108910891097,
+  "max_abs_control_gap": 0.28448000000000007,
   "race_scores": {
     "ddhq": {
       "n": 10,
-      "brier_vs_peer_favorite": 0.22321035156250005,
-      "mae": 0.12411249999999999,
-      "crps_proxy": 0.12411249999999999,
+      "brier_vs_peer_favorite": 0.24967668308000004,
+      "mae": 0.16658199999999998,
+      "crps_proxy": 0.16658199999999998,
       "ok": false
     },
     "kalshi": {
       "n": 10,
-      "brier_vs_peer_favorite": 0.15701035156249998,
-      "mae": 0.11267341824598616,
-      "crps_proxy": 0.11267341824598616,
+      "brier_vs_peer_favorite": 0.09758468308000001,
+      "mae": 0.07042298632253245,
+      "crps_proxy": 0.07042298632253245,
       "ok": true
     }
   },
   "race_ok": true,
-  "mean_peer_disagreement": 0.15949111626578813,
+  "mean_peer_disagreement": 0.16886770682566685,
   "null_margin_races": [],
   "method": "ensemble_stack+overlays",
   "core_method": "pymc",
-  "generic_ballot": 5.852513615064197,
-  "reasons": [
-    "control gap vs primary peer large (gap=0.317 > 0.25); gaps={'ddhq': 0.356375, 'kalshi': 0.31657301980198016} \u2014 informational under blueprint \u00a72 (peers not averaged)"
-  ],
+  "generic_ballot": 5.7459422124828174,
+  "reasons": [],
   "thresholds": {
     "max_abs_control_gap": 0.25,
     "race_brier": 0.22,
