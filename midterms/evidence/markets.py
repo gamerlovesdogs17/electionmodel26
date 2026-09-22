@@ -18,7 +18,7 @@ import pandas as pd
 
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 
-PARSER_VERSION = "kalshi-v3-candidate-audit"
+PARSER_VERSION = "kalshi-v4-contract-semantics"
 JSON_HASH_MODE = "canonical_json_sha256_v1"
 KALSHI = "https://api.elections.kalshi.com/trade-api/v2"
 
@@ -110,6 +110,44 @@ def _matches_name(ticker: str, title: str, candidate_name: str) -> bool:
     return False
 
 
+def validate_candidate_contract_family(
+    event_ticker: str,
+    markets: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Prove a family is one exhaustive set of mutually exclusive candidate wins.
+
+    The ingest adapter must preserve these semantic fields from a source event
+    or rules object.  Similar ticker prefixes alone are insufficient proof.
+    """
+    contracts = [m for m in markets if str(m.get("ticker") or "").startswith(event_ticker + "-")]
+    reasons: list[str] = []
+    if len(contracts) < 2:
+        reasons.append("candidate family has fewer than two contracts")
+    if any(str(m.get("event_ticker") or event_ticker) != event_ticker for m in contracts):
+        reasons.append("contracts do not share one event")
+    if any(str(m.get("outcome_type") or "") != "candidate_win" for m in contracts):
+        reasons.append("candidate-win outcome semantics are unverified")
+    if any(m.get("mutually_exclusive") is not True for m in contracts):
+        reasons.append("mutual exclusivity is unverified")
+    if any(m.get("event_exhaustive") is not True for m in contracts):
+        reasons.append("event exhaustiveness is unverified")
+    candidate_ids = [str(m.get("candidate_id") or "").strip() for m in contracts]
+    if any(not value for value in candidate_ids):
+        reasons.append("candidate outcome identity is missing")
+    elif len(candidate_ids) != len(set(candidate_ids)):
+        reasons.append("duplicate candidate outcome")
+    if any(str(m.get("contract_scope") or "candidate") != "candidate" for m in contracts):
+        reasons.append("unrelated proposition contract is mixed into event")
+    return {
+        "ok": not reasons,
+        "event_ticker": event_ticker,
+        "n_contracts": len(contracts),
+        "candidate_ids": candidate_ids,
+        "reasons": reasons,
+        "semantic_version": "candidate-contract-family-v1",
+    }
+
+
 def map_race_event(
     *, race_id: str, event_ticker: str, markets: list[dict[str, Any]], ticket: dict[str, Any]
 ) -> tuple[dict[str, Any] | None, str | None]:
@@ -123,6 +161,9 @@ def map_race_event(
     rep_name = str(ticket.get("rep_name") or "").strip()
     if not target_name or not rep_name or not target_party:
         return None, "missing modeled candidate identity"
+    family = validate_candidate_contract_family(event_ticker, markets)
+    if not family["ok"]:
+        return None, "unsafe contract family: " + "; ".join(family["reasons"])
     contracts: list[dict[str, Any]] = []
     for m in markets:
         ticker = str(m.get("ticker") or "")
@@ -192,6 +233,7 @@ def map_race_event(
         "candidate_contracts": contracts,
         "normalization_contracts": len(contracts),
         "market_mapping": "named_candidate" if named_targets else "party_contract_with_identity_registry",
+        "contract_family_validation": family,
     }, None
 
 
@@ -228,7 +270,8 @@ def audit_race_event(
     ) else 0.0
     normalized = (
         {row["contract_id"]: row["raw_price"] / total for row in raw_contracts}
-        if total > 0 and len({row["contract_id"] for row in raw_contracts}) == len(raw_contracts)
+        if mapped is not None and total > 0
+        and len({row["contract_id"] for row in raw_contracts}) == len(raw_contracts)
         else None
     )
     return {
@@ -249,6 +292,10 @@ def audit_race_event(
         "fetch_status": "ok",
         "parser_version": PARSER_VERSION,
         "disable_reason": reason,
+        "contract_family_validation": (
+            mapped.get("contract_family_validation") if mapped
+            else validate_candidate_contract_family(event_ticker, markets)
+        ),
     }
 
 

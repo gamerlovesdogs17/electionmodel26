@@ -19,8 +19,12 @@ from midterms.validation.decomposition_schema import Decomposition, DiagnosticTe
 
 
 def _contract(event, suffix, title, price):
-    return {"ticker": f"{event}-{suffix}", "title": title,
-            "last_price_dollars": str(price)}
+    return {
+        "ticker": f"{event}-{suffix}", "event_ticker": event, "title": title,
+        "last_price_dollars": str(price), "outcome_type": "candidate_win",
+        "mutually_exclusive": True, "event_exhaustive": True,
+        "contract_scope": "candidate", "candidate_id": suffix,
+    }
 
 
 def test_named_nonmajor_contract_overrides_generic_party_marker():
@@ -69,7 +73,7 @@ def test_ordinary_two_contract_event_and_ambiguity_disable():
     assert audit["ambiguous_or_unsafe"] is True
     assert audit["disable_reason"]
     assert audit["matched_modeled_contract_id"] is None
-    assert sum(audit["normalized_event_probabilities"].values()) == pytest.approx(1.0)
+    assert audit["normalized_event_probabilities"] is None
 
 
 def test_other_ballot_label_requires_named_contract():

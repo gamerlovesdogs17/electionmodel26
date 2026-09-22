@@ -1,5 +1,48 @@
 # Incomplete validation status — 2026-09-20
 
+## Superseding code status — 2026-09-22
+
+The September 20 research artifacts were produced before the blueprint
+capability changes now in the repository. They remain historical evidence for
+their exact code/data lineage and must not be treated as validation of the new
+sampler gates, optional poll structures, same-family ablations, candidate and
+demographic vintage contracts, economic evidence classes, overlay policy,
+market semantics, institutional interface or joint-score protocol.
+
+### Code complete in this pass
+
+- Prior-predictive summaries, grouped PPC utilities and deterministic synthetic SBC.
+- Divergence/tree-depth/BFMI/acceptance extraction and publication fail-closed logic.
+- Optional hierarchical sponsor/questionnaire/study structures shared by static and dynamic PyMC.
+- Same-family PyMC structural ablation registry and fitting path.
+- Candidate timeline schema/loader with effective and available time filters.
+- Demographic snapshot metadata interface and explicit reuse approximation.
+- Economic vintage classification: ALFRED production-capable; FRED latest,
+  World Bank annual and fixtures ineligible for historical replay.
+- Overlay validation contract and core-only publication fallback for unvalidated layers.
+- Candidate-market contract-family semantic validation.
+- Draw-level threshold/runoff architecture with unvalidated transitions disabled.
+- Explicit auxiliary turnout interface.
+- Deterministic energy, variogram and seat-count CRPS utilities with race-order seals.
+- Domain freshness policy and expanded portable environment lock.
+- Formal `BLUEPRINT_COMPLIANCE_AUDIT.json` / `.md`.
+
+### Still pending source ingest or user-initiated expensive validation
+
+- Sourced bitemporal candidate/race timelines for all replay cutoffs.
+- Point-in-time demographic source snapshots or an approved documented approximation.
+- Complete ALFRED real-time history needed by historical folds.
+- Market refresh under `kalshi-v4-contract-semantics`.
+- Model-specific prior predictive and posterior predictive artifacts.
+- Larger PyMC SBC study.
+- Formal same-family nested OOF and optional poll-term ablations.
+- Overlay incremental-value validation and populated contracts.
+- Historical joint-score evaluation, stack refit/reproduction and calibration checks.
+- Production reference fit with complete sampler health, 50,000 joint simulations,
+  independent rebuild, run coherence and strict G1-G11.
+
+No current forecast or expensive validation chain was run on 2026-09-22.
+
 The code and historical stack validation have advanced, but the **current
 research forecast has not been rerun**. On 2026-09-20 the user explicitly
 declared a modeling assumption that Independent candidates and held Independent

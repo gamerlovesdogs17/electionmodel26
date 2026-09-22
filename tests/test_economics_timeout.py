@@ -24,6 +24,7 @@ def test_timeout_preserves_non_fixture_store(tmp_path: Path, monkeypatch):
                 "value": 1.2,
                 "revision": 0,
                 "election_year": 2026,
+                "status": "alfred_realtime",
             }
         ]
     )
@@ -75,7 +76,7 @@ def test_worldbank_fallback_when_fred_times_out(tmp_path: Path, monkeypatch):
         meta = econ.try_refresh_alfred(as_of="2026-09-01")
 
     assert meta.get("used_fixtures") is False
-    assert meta.get("publication_eligible") is True
+    assert meta.get("publication_eligible") is False
     assert meta.get("source") == "worldbank_gdppc_yoy"
     assert meta.get("timeout") is True
     stored = pd.read_parquet(tmp_path / "economics_vintages.parquet")

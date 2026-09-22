@@ -14,6 +14,9 @@ MCSE_CONTROL_MAX = 0.01  # 1pp on P(Dem control); needs ~2500 draws at p=0.5
 MCSE_SEATS_MAX = 0.15  # seats
 RHAT_MAX = 1.05
 ESS_BULK_MIN_FRAC = 0.10  # ess_bulk >= frac * n_samples for worst race
+DIVERGENCES_MAX = 0
+TREE_DEPTH_HITS_MAX = 0
+BFMI_MIN = 0.20
 MIN_POSTERIOR_SAMPLES = 1600  # routine development diagnostic
 PRODUCTION_POSTERIOR_SAMPLES = PRODUCTION_DRAWS * PRODUCTION_CHAINS
 MIN_SIM_DRAWS = 2500  # chamber / stacked predictive draws (CI floor)
@@ -110,13 +113,89 @@ def idata_convergence(idata: Any, *, var_name: str = "mu_final") -> dict[str, An
                 "ess_bulk_min_frac": float(np.nanmin(ess_bulk) / max(n_samples, 1)),
             }
         )
+        out["sampler_health"] = idata_sampler_health(idata)
     except Exception as exc:  # noqa: BLE001
         try:
             fallback = _numpy_rank_convergence(idata, var_name=var_name)
+            fallback["sampler_health"] = idata_sampler_health(idata)
             fallback["arviz_error"] = str(exc)
             return fallback
         except Exception as fallback_exc:  # noqa: BLE001
             out["error"] = f"ArviZ: {exc}; NumPy fallback: {fallback_exc}"
+    return out
+
+
+def idata_sampler_health(idata: Any) -> dict[str, Any]:
+    """Extract NUTS health diagnostics without treating absence as success."""
+    out: dict[str, Any] = {
+        "available": False,
+        "divergence_available": False,
+        "tree_depth_available": False,
+        "bfmi_available": False,
+        "acceptance_available": False,
+    }
+    stats = getattr(idata, "sample_stats", None)
+    if stats is None:
+        out["error"] = "sample_stats group is missing"
+        return out
+
+    def arr(*names: str) -> np.ndarray | None:
+        for name in names:
+            try:
+                if name in stats:
+                    return np.asarray(stats[name].values, dtype=float)
+            except (TypeError, AttributeError):
+                continue
+        return None
+
+    diverging = arr("diverging", "divergence")
+    if diverging is not None and diverging.size:
+        out.update({
+            "divergence_available": True,
+            "n_transitions": int(diverging.size),
+            "n_divergent": int(np.sum(diverging.astype(bool))),
+            "divergence_fraction": float(np.mean(diverging.astype(bool))),
+        })
+
+    reached = arr("reached_max_treedepth", "reached_max_tree_depth")
+    tree_depth = arr("tree_depth", "depth")
+    if reached is not None and reached.size:
+        out.update({
+            "tree_depth_available": True,
+            "n_tree_depth_hits": int(np.sum(reached.astype(bool))),
+        })
+    elif tree_depth is not None and tree_depth.size:
+        out.update({
+            "tree_depth_available": True,
+            "n_tree_depth_hits": None,
+            "max_tree_depth_observed": int(np.max(tree_depth)),
+            "note_tree_depth": "maximum configured depth was not recorded; hit count unavailable",
+        })
+    if tree_depth is not None and tree_depth.size:
+        out["max_tree_depth_observed"] = int(np.max(tree_depth))
+
+    accept = arr("acceptance_rate", "mean_tree_accept", "accept")
+    if accept is not None and accept.size:
+        out.update({
+            "acceptance_available": True,
+            "acceptance_mean": float(np.mean(accept)),
+            "acceptance_min": float(np.min(accept)),
+            "acceptance_max": float(np.max(accept)),
+        })
+
+    try:
+        import arviz as az
+
+        bfmi = np.asarray(az.bfmi(idata), dtype=float)
+        if bfmi.size and np.isfinite(bfmi).all():
+            out.update({
+                "bfmi_available": True,
+                "bfmi_min": float(np.min(bfmi)),
+                "bfmi_by_chain": [float(x) for x in bfmi.ravel()],
+            })
+    except Exception as exc:  # noqa: BLE001
+        out["bfmi_error"] = str(exc)
+    out["available"] = bool(out["divergence_available"])
     return out
 
 
@@ -343,6 +422,29 @@ def evaluate_numerical_quality(
             {"ess_bulk_min": conv.get("ess_bulk_min"), "frac": frac},
             f"ess_bulk_min_frac={frac:.3f} < {ESS_BULK_MIN_FRAC}",
         )
+        sampler = conv.get("sampler_health") or {}
+        if sampler.get("divergence_available"):
+            n_divergent = int(sampler.get("n_divergent") or 0)
+            add(
+                "divergences",
+                n_divergent <= DIVERGENCES_MAX,
+                {"n": n_divergent, "fraction": sampler.get("divergence_fraction")},
+                f"divergent transitions {n_divergent} > {DIVERGENCES_MAX}",
+            )
+        elif publishable:
+            add(
+                "divergences_reported", False, sampler,
+                "divergence diagnostics unavailable for publishable run",
+            )
+        if sampler.get("tree_depth_available") and sampler.get("n_tree_depth_hits") is not None:
+            hits = int(sampler["n_tree_depth_hits"])
+            add(
+                "tree_depth_hits", hits <= TREE_DEPTH_HITS_MAX, hits,
+                f"maximum tree-depth hits {hits} > {TREE_DEPTH_HITS_MAX}",
+            )
+        if sampler.get("bfmi_available"):
+            bfmi = float(sampler.get("bfmi_min") or 0.0)
+            add("bfmi", bfmi >= BFMI_MIN, bfmi, f"BFMI {bfmi:.3f} < {BFMI_MIN}")
     elif publishable:
         # Publishable PyMC runs should report convergence; fast-only is soft
         add(
@@ -368,6 +470,9 @@ def evaluate_numerical_quality(
             "mcse_seats_max": MCSE_SEATS_MAX,
             "rhat_max": RHAT_MAX,
             "ess_bulk_min_frac": ESS_BULK_MIN_FRAC,
+            "divergences_max": DIVERGENCES_MAX,
+            "tree_depth_hits_max": TREE_DEPTH_HITS_MAX,
+            "bfmi_min": BFMI_MIN,
             "min_posterior_samples": posterior_floor,
             "production_draws": PRODUCTION_DRAWS,
             "production_tune": PRODUCTION_TUNE,

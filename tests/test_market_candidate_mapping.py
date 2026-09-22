@@ -8,7 +8,13 @@ from midterms.evidence.markets import map_race_event
 
 
 def _contract(event: str, suffix: str, title: str, price: float):
-    return {"ticker": f"{event}-{suffix}", "title": title, "last_price_dollars": price}
+    return {
+        "ticker": f"{event}-{suffix}", "event_ticker": event,
+        "title": title, "last_price_dollars": price,
+        "outcome_type": "candidate_win", "mutually_exclusive": True,
+        "event_exhaustive": True, "contract_scope": "candidate",
+        "candidate_id": suffix,
+    }
 
 
 def test_ordinary_two_candidate_event():

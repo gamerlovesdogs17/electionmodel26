@@ -6,6 +6,8 @@ import hashlib
 import json
 import platform
 import sys
+import contextlib
+import io
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -18,19 +20,72 @@ def environment_lock() -> dict[str, Any]:
     try:
         import importlib.metadata as md
 
-        for name in ("numpy", "pandas", "scipy", "pymc", "pyarrow"):
+        for name in (
+            "numpy", "pandas", "scipy", "pymc", "pytensor", "arviz",
+            "matplotlib", "pyarrow",
+        ):
             try:
                 pkgs[name] = md.version(name)
             except md.PackageNotFoundError:
                 pkgs[name] = None
     except Exception:  # noqa: BLE001
         pass
+    dependency_files = [
+        ROOT / name for name in ("pyproject.toml", "uv.lock", "poetry.lock", "requirements.lock")
+        if (ROOT / name).exists()
+    ]
+    dependency_hash = hashlib.sha256()
+    for path in sorted(dependency_files):
+        dependency_hash.update(path.name.encode("utf-8"))
+        dependency_hash.update(path.read_bytes())
+    try:
+        import numpy as np
+
+        capture = io.StringIO()
+        with contextlib.redirect_stdout(capture):
+            np.show_config()
+        numerical_backend = capture.getvalue().strip()
+    except Exception as exc:  # noqa: BLE001
+        numerical_backend = f"unavailable: {exc}"
     return {
+        "schema_version": "environment-lock-v2",
         "python": sys.version,
         "platform": platform.platform(),
         "packages": pkgs,
+        "numerical_backend": numerical_backend,
+        "dependency_lock_sha256": dependency_hash.hexdigest() if dependency_files else None,
+        "dependency_files": [path.relative_to(ROOT).as_posix() for path in dependency_files],
         "locked_at": datetime.now(timezone.utc).isoformat(),
     }
+
+
+def repository_relative_path(path: str | Path) -> str:
+    """Serialize workspace paths portably; reject paths outside the repository."""
+    resolved = Path(path).resolve()
+    try:
+        return resolved.relative_to(ROOT.resolve()).as_posix()
+    except ValueError as exc:
+        raise ValueError(f"artifact path is outside repository: {resolved}") from exc
+
+
+def portable_artifact_reference(path: str | Path) -> str:
+    """Return a repository path or content-addressed reference for temp outputs."""
+    candidate = Path(path)
+    try:
+        return repository_relative_path(candidate)
+    except ValueError:
+        digest = hashlib.sha256(candidate.read_bytes()).hexdigest() if candidate.is_file() else "directory"
+        return f"artifact:{digest}:{candidate.name}"
+
+
+def resolve_repository_path(path: str | Path) -> Path:
+    candidate = Path(path)
+    resolved = candidate.resolve() if candidate.is_absolute() else (ROOT / candidate).resolve()
+    try:
+        resolved.relative_to(ROOT.resolve())
+    except ValueError as exc:
+        raise ValueError(f"manifest path escapes repository: {path}") from exc
+    return resolved
 
 
 def snapshot_domain_hashes() -> dict[str, str]:
@@ -68,8 +123,9 @@ def verify_rebuild(*, run_id: str | None = None) -> dict[str, Any]:
     actual = hashlib.sha256(actual_bytes).hexdigest()
     ok = bool(expected) and expected == actual
     draws_ok = None
-    draws_path = Path(str((man.get("paths") or {}).get("draws") or ""))
-    if draws_path.exists() and (man.get("output_hashes") or {}).get("draws"):
+    draws_value = str((man.get("paths") or {}).get("draws") or "")
+    draws_path = resolve_repository_path(draws_value) if draws_value else Path()
+    if draws_value and draws_path.is_file() and (man.get("output_hashes") or {}).get("draws"):
         draws_ok = hashlib.sha256(draws_path.read_bytes()).hexdigest() == man["output_hashes"]["draws"]
         ok = ok and bool(draws_ok)
     return {
@@ -102,9 +158,14 @@ def _load_sealed_forecast(manifest: dict[str, Any], *, release_dir: Path | None)
         candidates.append(release_dir / "forecast.json")
     paths = manifest.get("paths") or {}
     for key in ("forecast", "forecast_latest"):
-        p = Path(str(paths.get(key) or ""))
-        if p:
-            candidates.append(p)
+        value = str(paths.get(key) or "")
+        if value:
+            try:
+                candidates.append(resolve_repository_path(value))
+            except ValueError:
+                # Legacy absolute path may be unavailable on another host; the
+                # content-addressed repository candidates below remain portable.
+                pass
     rid = manifest.get("run_id")
     if rid:
         candidates.append(ROOT / "data" / "releases" / str(rid) / "forecast.json")

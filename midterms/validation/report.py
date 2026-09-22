@@ -89,6 +89,8 @@ def build_validation_report(
         if probs:
             calibration = {
                 "n": len(probs),
+                "validation_role": "exploratory_same_holdout_diagnostic",
+                "formal_acceptance_eligible": False,
                 "reliability": reliability_bins(np.array(probs), np.array(outcomes)),
                 "mean_interval_score_90": float(np.mean(interval_scores)),
                 "brier": float(np.mean((np.array(probs) - np.array(outcomes)) ** 2)),
@@ -172,6 +174,15 @@ def build_validation_report(
             "validation_status": (cycle or {}).get("validation_status"),
         },
         "calibration": calibration,
+        "joint_proper_scores": (
+            json.loads((ARTIFACTS_DIR / "joint_scores_oof_latest.json").read_text())
+            if (ARTIFACTS_DIR / "joint_scores_oof_latest.json").exists()
+            else {
+                "status": "requires_rebuild",
+                "capability": "joint-proper-scores-v1",
+                "reason": "historical frozen joint draws have not been rescored",
+            }
+        ),
         "stack_weights_artifact": stack_weights,
         "stack_weights_meta": stack_meta,
         "chamber_reconcile": chamber_reconcile,

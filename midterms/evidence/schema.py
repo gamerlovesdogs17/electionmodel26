@@ -116,6 +116,13 @@ RACE_COLUMNS = [
     "vacancy_reason",  # appointment | resignation | death | None
     "ballot_status",  # nominated | withdrawn | deceased | write_in
     "effective_election_day",  # runoff day when phase advances; else election_day
+    # Bitemporal candidate/race state (nullable until a sourced timeline exists)
+    "candidate_state_effective_at",
+    "candidate_state_available_at",
+    "candidate_state_retrieved_at",
+    "candidate_state_source_hash",
+    "candidate_state_parser_version",
+    "candidate_timeline_status",
 ]
 
 
@@ -141,7 +148,10 @@ def is_active_ballot_row(row: dict[str, Any] | Any) -> bool:
     if bool(get("not_up", False)):
         return False
     status = str(get("ballot_status") or "nominated").lower()
-    if status in {"withdrawn", "deceased"}:
+    if status in {
+        "withdrawn", "deceased", "not_yet_known", "unknown_as_of",
+        "declared", "filed", "not_qualified", "ineligible",
+    }:
         return False
     phase = str(get("election_phase") or "general").lower()
     if phase in {"runoff_pending"}:

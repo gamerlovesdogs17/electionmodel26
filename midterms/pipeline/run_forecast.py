@@ -167,6 +167,28 @@ def run_forecast(
         method=method,
         allow_fast_fallback=allow_fast_fallback,
     )
+    overlay_validation: dict[str, Any] = {
+        "policy": "development_requested_overlays",
+        "use_ratings": bool(with_ratings),
+        "use_race_markets": bool(with_markets),
+        "use_control_market": bool(with_markets),
+    }
+    if require_publishable:
+        from midterms.validation.overlay_validation import publication_overlay_policy
+
+        overlay_validation = publication_overlay_policy(
+            rating_weight=rating_weight,
+            market_weight=market_weight,
+            control_weight=control_weight,
+        )
+        # Clear policy: unvalidated optional layers are compare-only and the
+        # publication fit runs core-only for those layers.
+        with_ratings = bool(with_ratings and overlay_validation["use_ratings"])
+        with_markets = bool(
+            with_markets
+            and overlay_validation["use_race_markets"]
+            and overlay_validation["use_control_market"]
+        )
     from midterms.evidence.economics import try_refresh_alfred, yoy_growth_as_of
     from midterms.evidence.approval import approval_as_of, write_approval_store
     from midterms.evidence.demography import attach_demo_features
@@ -191,7 +213,9 @@ def run_forecast(
     from midterms.model.scenarios import run_scenarios
     from midterms.model.turnout import turnout_layer, undecided_allocation
     from midterms.simulate.institutional import apply_vacancy_defaults, maybe_materialize_runoff_rows
-    from midterms.ops.reproducibility import environment_lock, snapshot_domain_hashes
+    from midterms.ops.reproducibility import (
+        environment_lock, portable_artifact_reference, snapshot_domain_hashes,
+    )
     from midterms.ops.run_coherence import evidence_manifest_fingerprint, stamp_eligibility_identity
     from midterms.ops.signing import sign_payload
 
@@ -309,8 +333,17 @@ def run_forecast(
 
     wh = Warehouse(ensure_fixtures=False)
     snap = wh.build_as_of(as_of, election_id)
+    if require_publishable and not bool((snap.candidate_timeline or {}).get("production_eligible")):
+        raise ValueError(
+            "publication candidate/race snapshot lacks a complete bitemporal timeline: "
+            + str((snap.candidate_timeline or {}).get("status") or "missing")
+        )
     # Overlay FEC fundraising shares onto race rows used by fundamentals
     snap.races = attach_fundraising_to_races(snap.races, as_of=as_of)
+    if require_publishable:
+        from midterms.evidence.demography import demographic_snapshot_as_of
+
+        demographic_snapshot_as_of(as_of, require_point_in_time=True)
     snap.races = attach_demo_features(apply_vacancy_defaults(snap.races))
     if election_id == "senate-2026":
         from midterms.evidence.outcome_identity import require_explicit_caucus
@@ -325,7 +358,12 @@ def run_forecast(
         year = int(str(snap.races["election_day"].iloc[0])[:4])
     except Exception:  # noqa: BLE001
         year = None
-    yoy = yoy_growth_as_of(as_of, election_year=year)
+    yoy = yoy_growth_as_of(
+        as_of, election_year=year,
+        require_historical_vintage=require_publishable,
+    )
+    if require_publishable and yoy is None:
+        raise ValueError("publication fundamentals require a verified real-time economic vintage")
     if yoy is not None:
         snap.races = snap.races.copy()
         snap.races["real_income_yoy"] = yoy
@@ -827,6 +865,7 @@ def run_forecast(
             "run_class": run_class,
             "publishable": run_publishable,
             "publication_inference_requested": bool(require_publishable),
+            "overlay_validation": overlay_validation,
             "n_joint_sims": int(getattr(sim, "n_joint_sims", len(sim.seat_draws))),
             "n_posterior_margin_draws": int(
                 getattr(sim, "n_posterior_margin_draws", fit.draws_margin.shape[0])
@@ -993,6 +1032,9 @@ def run_forecast(
         "stack_artifact_sha256": stack_artifact_sha,
         "domain_hashes": snapshot_domain_hashes(),
         "environment_lock": environment_lock(),
+        "freshness_policy_version": __import__(
+            "midterms.evidence.freshness", fromlist=["FRESHNESS_POLICY_VERSION"]
+        ).FRESHNESS_POLICY_VERSION,
         "seed": seed,
         "draws": fit.diagnostics.get("draws"),
         "tune": tune if method.startswith("pymc") else None,
@@ -1002,9 +1044,9 @@ def run_forecast(
             "draws": hashlib.sha256(draws_path.read_bytes()).hexdigest(),
         },
         "paths": {
-            "forecast": str(artifact_path),
-            "forecast_latest": str(demo_path),
-            "draws": str(draws_path),
+            "forecast": portable_artifact_reference(artifact_path),
+            "forecast_latest": portable_artifact_reference(demo_path),
+            "draws": portable_artifact_reference(draws_path),
         },
         "rebuild_mode": bool(rebuild_mode),
     }

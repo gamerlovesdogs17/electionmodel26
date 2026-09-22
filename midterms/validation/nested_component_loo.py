@@ -231,7 +231,11 @@ def _generic_ballot(snap) -> float:
     return float((merged["two_party_margin"] - merged["prior_lean"]).mean())
 
 
-def _fit_hierarchical(snap, *, method: str, n_draws: int, seed: int, gb: float, terminal_scales=None):
+def _fit_hierarchical(
+    snap, *, method: str, n_draws: int, seed: int, gb: float,
+    terminal_scales=None, poll_structure=None,
+    include_similarity: bool = True, include_terminal_race: bool = True,
+):
     if method == "pymc":
         return fit_pymc(
             snap,
@@ -241,6 +245,9 @@ def _fit_hierarchical(snap, *, method: str, n_draws: int, seed: int, gb: float, 
             seed=seed,
             generic_ballot=gb,
             terminal_scales=terminal_scales,
+            poll_structure=poll_structure,
+            include_similarity=include_similarity,
+            include_terminal_race=include_terminal_race,
         )
     if method in {"pymc_dynamic", "pymc-dynamic"}:
         return fit_pymc_dynamic(
@@ -251,6 +258,9 @@ def _fit_hierarchical(snap, *, method: str, n_draws: int, seed: int, gb: float, 
             seed=seed,
             generic_ballot=gb,
             terminal_scales=terminal_scales,
+            poll_structure=poll_structure,
+            include_similarity=include_similarity,
+            include_terminal_race=include_terminal_race,
         )
     return fit_fast_approximation(
         snap,
@@ -270,6 +280,7 @@ def freeze_component_predictions(
     hierarchical_method: str = "fast",
     n_draws: int = 600,
     seed: int = 21,
+    poll_structure=None,
 ) -> dict[str, FrozenPrediction]:
     """
     Fit every component and freeze predictive distributions.
@@ -306,7 +317,8 @@ def freeze_component_predictions(
         hier_name,
         lambda: _freeze_from_fit(
             _fit_hierarchical(
-                snap, method=hierarchical_method, n_draws=n_draws, seed=seed, gb=gb
+                snap, method=hierarchical_method, n_draws=n_draws, seed=seed, gb=gb,
+                poll_structure=poll_structure,
             ),
             component=hier_name,
             election_id=election_id,
@@ -318,25 +330,24 @@ def freeze_component_predictions(
     )
 
     # Structural variants of hierarchical spine (G8 optional structure)
-    scales_no_sim = {**active_scales(), "sim_scale": 0.0}
-    scales_no_race = {**active_scales(), "terminal_race_sd": 0.0}
     _safe(
         "hier_no_similarity",
         lambda: _freeze_from_fit(
             _fit_hierarchical(
                 snap,
-                method="fast",
+                method=hierarchical_method,
                 n_draws=n_draws,
-                seed=seed + 3,
+                seed=seed,
                 gb=gb,
-                terminal_scales=scales_no_sim,
+                include_similarity=False,
+                poll_structure=poll_structure,
             ),
             component="hier_no_similarity",
             election_id=election_id,
             holdout_year=holdout_year,
             lead_days=lead_days,
             as_of=as_of,
-            seed=seed + 3,
+            seed=seed,
         ),
     )
     _safe(
@@ -344,18 +355,19 @@ def freeze_component_predictions(
         lambda: _freeze_from_fit(
             _fit_hierarchical(
                 snap,
-                method="fast",
+                method=hierarchical_method,
                 n_draws=n_draws,
-                seed=seed + 5,
+                seed=seed,
                 gb=gb,
-                terminal_scales=scales_no_race,
+                include_terminal_race=False,
+                poll_structure=poll_structure,
             ),
             component="hier_no_terminal_race",
             election_id=election_id,
             holdout_year=holdout_year,
             lead_days=lead_days,
             as_of=as_of,
-            seed=seed + 5,
+            seed=seed,
         ),
     )
 
@@ -432,6 +444,32 @@ def freeze_component_predictions(
                 component="pymc", election_id=election_id,
                 holdout_year=holdout_year, lead_days=lead_days,
                 as_of=as_of, seed=seed + 23,
+            ),
+        )
+
+    # Optional poll-structure ablations are only meaningful when the base
+    # challenger actually enables the named term.
+    from midterms.model.poll_structure import PollStructureConfig
+
+    base_poll_structure = PollStructureConfig.coerce(poll_structure)
+    for feature, component in (
+        ("study_effect", "hier_no_study_effect"),
+        ("sponsor_effect", "hier_no_sponsor_effect"),
+        ("questionnaire_effect", "hier_no_questionnaire_effect"),
+    ):
+        if hier_name not in {"pymc", "pymc_dynamic"} or not getattr(base_poll_structure, feature):
+            continue
+        disabled = {**base_poll_structure.__dict__, feature: False}
+        _safe(
+            component,
+            lambda component=component, disabled=disabled: _freeze_from_fit(
+                _fit_hierarchical(
+                    snap, method=hierarchical_method, n_draws=n_draws,
+                    seed=seed, gb=gb, poll_structure=disabled,
+                ),
+                component=component, election_id=election_id,
+                holdout_year=holdout_year, lead_days=lead_days,
+                as_of=as_of, seed=seed,
             ),
         )
 
@@ -583,7 +621,16 @@ def _g8_recommendations(
                     keep_votes += 1
         if name.startswith("hier_no_"):
             # Recommend keeping the *feature* (similarity / race terminal)
-            feature = "similarity_terminal" if "similarity" in name else "terminal_race"
+            if "similarity" in name:
+                feature = "similarity_terminal"
+            elif "terminal_race" in name:
+                feature = "terminal_race"
+            elif "study" in name:
+                feature = "study_effect"
+            elif "sponsor" in name:
+                feature = "sponsor_effect"
+            else:
+                feature = "questionnaire_effect"
             recommend = "keep" if n and keep_votes >= max(1, (n + 1) // 2) else "drop_or_shrink"
             recs[feature] = {
                 "ablation_component": name,
@@ -706,6 +753,7 @@ def repair_failed_oof_inference(
         component=component, election_id=election_id, holdout_year=year,
         lead_days=lead_days, as_of=as_of, seed=int(original["seed"]),
     )
+
     replacement.evidence_snapshot_id = snap.snapshot_id
     replacement.prior_snapshot_sha256 = snap.prior_snapshot_sha256
     replacement.presidential_source_sha256 = snap.presidential_source_sha256

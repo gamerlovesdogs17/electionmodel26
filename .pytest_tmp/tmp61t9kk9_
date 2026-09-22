@@ -1,7 +1,0 @@
-def alloc(val, sh0, sh1):
-    sh0_item = sh0.item()
-    sh1_item = sh1.item()
-    scalar_shape = (sh0_item, sh1_item)
-    res = np.empty(scalar_shape, dtype=np.float64)
-    res[...] = val[0, 0]
-    return res

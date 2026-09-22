@@ -306,7 +306,10 @@ def estimate_coefs_nested(
             from midterms.evidence.economics import yoy_growth_as_of
 
             ed = date.fromisoformat(str(races["election_day"].iloc[0])[:10])
-            real_income = yoy_growth_as_of(ed - timedelta(days=30), election_year=year)
+            real_income = yoy_growth_as_of(
+                ed - timedelta(days=30), election_year=year,
+                require_historical_vintage=True,
+            )
         except Exception:  # noqa: BLE001
             real_income = None
         X, y, names = build_design(races, results, polls=polls, real_income_yoy=real_income)

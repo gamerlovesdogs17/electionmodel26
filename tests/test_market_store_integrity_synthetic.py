@@ -112,10 +112,10 @@ def test_market_store_missing_json_and_changed_parquet_fail_closed(tmp_path, mon
     assert "normalized_races_sha256" in result["reason"]
 
 
-def test_checked_in_market_store_passes_semantic_integrity():
+def test_checked_in_market_store_is_stale_after_semantic_parser_upgrade():
     result = markets.verify_market_store_integrity(as_of="2026-09-20")
-    assert result["ok"], result.get("reason")
-    assert result["json_hash_mode"] == markets.JSON_HASH_MODE
+    assert result["ok"] is False
+    assert "stale" in result.get("reason", "")
 
 
 def test_live_market_refresh_cannot_backdate_retrieval(tmp_path, monkeypatch):

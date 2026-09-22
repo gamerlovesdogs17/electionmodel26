@@ -32,6 +32,11 @@ from midterms.model.effects import (
 )
 from midterms.model.fundamentals import fundamentals_mean
 from midterms.model.poll_weights import attach_poll_weights, global_enop, race_enop_summary
+from midterms.model.poll_structure import (
+    PollStructureConfig,
+    add_optional_poll_effects,
+    encode_poll_structure,
+)
 from midterms.model.terminal import (
     active_scales,
     add_similarity_terminal,
@@ -84,13 +89,23 @@ def _measurement_effects(pm, prep: dict):
     return mode_eff, pop_eff, coords_extra
 
 
-def _prepare(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0):
+def _prepare(
+    snapshot: EvidenceSnapshot,
+    generic_ballot: float = 0.0,
+    poll_structure: PollStructureConfig | dict | None = None,
+):
+    structure_config = PollStructureConfig.coerce(poll_structure)
     races = snapshot.races.copy()
     if len(races):
         races = races[races.apply(is_active_ballot_row, axis=1)].reset_index(drop=True)
     polls = snapshot.polls.copy()
     polls = polls[polls["race_id"].isin(set(races["race_id"]))]
-    polls = attach_poll_weights(polls, as_of=snapshot.as_of)
+    polls = attach_poll_weights(
+        polls,
+        as_of=snapshot.as_of,
+        study_cluster_power=0.55 if structure_config.use_heuristic_study_downweight else 0.0,
+    )
+    structure = encode_poll_structure(polls, structure_config)
 
     real_income_yoy = None
     try:
@@ -201,6 +216,13 @@ def _prepare(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0):
         "enop_by_race": race_enop_summary(polls),
         "n_polls_raw": int(len(snapshot.polls)),
         "n_polls_weighted": int(len(polls)),
+        "poll_structure_config": structure_config,
+        "poll_sponsor": structure["sponsor_idx"],
+        "sponsor_ids": structure["sponsor_ids"],
+        "poll_questionnaire": structure["questionnaire_idx"],
+        "questionnaire_ids": structure["questionnaire_ids"],
+        "poll_study": structure["study_idx"],
+        "study_ids": structure["study_ids"],
     }
 
 
@@ -213,10 +235,13 @@ def fit_pymc(
     seed: int = 20260901,
     generic_ballot: float = 0.0,
     terminal_scales: dict | None = None,
+    poll_structure: PollStructureConfig | dict | None = None,
+    include_similarity: bool = True,
+    include_terminal_race: bool = True,
 ) -> FitResult:
     import pymc as pm
 
-    prep = _prepare(snapshot, generic_ballot=generic_ballot)
+    prep = _prepare(snapshot, generic_ballot=generic_ballot, poll_structure=poll_structure)
     n_races = len(prep["race_ids"])
     # Blueprint §7.2 Morris split: future movement contracts; terminal ED error does not.
     future_sd = float(4.5 * np.sqrt(max(prep["days_to_ed"], 1) / 120.0))
@@ -229,6 +254,9 @@ def fit_pymc(
         "pollster": prep["pollster_ids"] or ["_none"],
         "mode": list(MODE_ORDER),
         "pop": list(POP_ORDER),
+        "sponsor": prep["sponsor_ids"] or ["_none"],
+        "questionnaire": prep["questionnaire_ids"] or ["_none"],
+        "study": prep["study_ids"] or ["_none"],
     }
 
     with pm.Model(coords=coords) as model:  # noqa: F841
@@ -269,6 +297,9 @@ def fit_pymc(
             )
 
         mode_eff, pop_eff, _ = _measurement_effects(pm, prep)
+        optional_poll_offset, optional_poll_effects = add_optional_poll_effects(
+            pm, prep, prep["poll_structure_config"]
+        )
 
         if len(prep["poll_y"]):
             sigma_obs = pm.math.sqrt(prep["poll_se"] ** 2 + extra[prep["poll_house"]] ** 2)
@@ -277,6 +308,7 @@ def fit_pymc(
                 + house[prep["poll_house"]]
                 + mode_eff[prep["poll_mode"]]
                 + pop_eff[prep["poll_pop"]]
+                + optional_poll_offset
             )
             pm.StudentT(
                 "polls",
@@ -290,12 +322,13 @@ def fit_pymc(
         terminal_nat = pm.StudentT(
             "terminal_nat", nu=4, mu=0.0, sigma=scales["terminal_nat_sd"]
         )
-        terminal_race = pm.StudentT(
-            "terminal_race",
-            nu=5,
-            mu=0.0,
-            sigma=scales["terminal_race_sd"],
-            dims="race",
+        terminal_race = (
+            pm.StudentT(
+                "terminal_race", nu=5, mu=0.0,
+                sigma=scales["terminal_race_sd"], dims="race",
+            )
+            if include_terminal_race
+            else np.zeros(n_races, dtype=float)
         )
         mu_final = pm.Deterministic(
             "mu_final", mu_ed + terminal_nat + terminal_race, dims="race"
@@ -321,7 +354,8 @@ def fit_pymc(
     mu = posterior["mu_final"].stack(sample=("chain", "draw")).values.T
     contested = prep["races"].set_index("race_id").loc[prep["race_ids"]].reset_index()
     rng = np.random.default_rng(seed + 17)
-    mu = add_similarity_terminal(mu, contested, rng, **scales)
+    if include_similarity:
+        mu = add_similarity_terminal(mu, contested, rng, **scales)
     mean = mu.mean(axis=0)
     sd = mu.std(axis=0)
     house_mean = {}
@@ -368,7 +402,13 @@ def fit_pymc(
             "n_posterior_samples": int(draws * chains),
             "latent_path": "static_election_day",
             "measurement_effects": "hierarchical_mode_pop",
-            "terminal_layers": "national+race+similarity",
+            "optional_poll_structure": prep["poll_structure_config"].to_dict(),
+            "optional_poll_effects_active": optional_poll_effects,
+            "terminal_layers": {
+                "national": True,
+                "race": bool(include_terminal_race),
+                "similarity": bool(include_similarity),
+            },
             "convergence": conv,
             "mode_effects_mean": mode_mean,
             "pop_effects_mean": pop_mean,
@@ -382,11 +422,17 @@ def fit_pymc(
     )
 
 
-def _prepare_weekly_path(snapshot: EvidenceSnapshot, generic_ballot: float = 0.0) -> dict:
+def _prepare_weekly_path(
+    snapshot: EvidenceSnapshot,
+    generic_ballot: float = 0.0,
+    poll_structure: PollStructureConfig | dict | None = None,
+) -> dict:
     """Extend _prepare with a weekly calendar index for dynamic latent paths."""
     from datetime import timedelta
 
-    prep = _prepare(snapshot, generic_ballot=generic_ballot)
+    prep = _prepare(
+        snapshot, generic_ballot=generic_ballot, poll_structure=poll_structure
+    )
     ed = prep["election_day"]
     as_of = prep["as_of"]
     field_ends = [d for d in prep.get("poll_field_end") or [] if d is not None]
@@ -440,6 +486,9 @@ def fit_pymc_dynamic(
     seed: int = 20260901,
     generic_ballot: float = 0.0,
     terminal_scales: dict | None = None,
+    poll_structure: PollStructureConfig | dict | None = None,
+    include_similarity: bool = True,
+    include_terminal_race: bool = True,
 ) -> FitResult:
     """
     Unified dynamic hierarchical core (blueprint §7.1–7.2 / Finding 3).
@@ -455,7 +504,9 @@ def fit_pymc_dynamic(
     """
     import pymc as pm
 
-    prep = _prepare_weekly_path(snapshot, generic_ballot=generic_ballot)
+    prep = _prepare_weekly_path(
+        snapshot, generic_ballot=generic_ballot, poll_structure=poll_structure
+    )
     n_races = len(prep["race_ids"])
     t_weeks = int(prep["n_weeks"])
     day_gaps = np.asarray(prep["day_gaps"], dtype=float)
@@ -502,6 +553,9 @@ def fit_pymc_dynamic(
         "pollster": prep["pollster_ids"] or ["_none"],
         "mode": list(MODE_ORDER),
         "pop": list(POP_ORDER),
+        "sponsor": prep["sponsor_ids"] or ["_none"],
+        "questionnaire": prep["questionnaire_ids"] or ["_none"],
+        "study": prep["study_ids"] or ["_none"],
     }
 
     with pm.Model(coords=coords) as model:  # noqa: F841
@@ -543,6 +597,9 @@ def fit_pymc_dynamic(
             )
 
         mode_eff, pop_eff, _ = _measurement_effects(pm, prep)
+        optional_poll_offset, optional_poll_effects = add_optional_poll_effects(
+            pm, prep, prep["poll_structure_config"]
+        )
 
         if len(prep["poll_y"]):
             sigma_obs = pm.math.sqrt(prep["poll_se"] ** 2 + extra[prep["poll_house"]] ** 2)
@@ -551,6 +608,7 @@ def fit_pymc_dynamic(
                 + house[prep["poll_house"]]
                 + mode_eff[prep["poll_mode"]]
                 + pop_eff[prep["poll_pop"]]
+                + optional_poll_offset
             )
             pm.StudentT(
                 "polls",
@@ -564,12 +622,13 @@ def fit_pymc_dynamic(
         terminal_nat = pm.StudentT(
             "terminal_nat", nu=4, mu=0.0, sigma=dyn_scales["terminal_nat_sd"]
         )
-        terminal_race = pm.StudentT(
-            "terminal_race",
-            nu=5,
-            mu=0.0,
-            sigma=dyn_scales["terminal_race_sd"],
-            dims="race",
+        terminal_race = (
+            pm.StudentT(
+                "terminal_race", nu=5, mu=0.0,
+                sigma=dyn_scales["terminal_race_sd"], dims="race",
+            )
+            if include_terminal_race
+            else np.zeros(n_races, dtype=float)
         )
         mu_final = pm.Deterministic(
             "mu_final",
@@ -603,7 +662,8 @@ def fit_pymc_dynamic(
     mu = posterior["mu_final"].stack(sample=("chain", "draw")).values.T
     contested = prep["races"].set_index("race_id").loc[prep["race_ids"]].reset_index()
     rng = np.random.default_rng(seed + 19)
-    mu = add_similarity_terminal(mu, contested, rng, **dyn_scales)
+    if include_similarity:
+        mu = add_similarity_terminal(mu, contested, rng, **dyn_scales)
     mean = mu.mean(axis=0)
     sd = mu.std(axis=0)
     house_mean = {}
@@ -653,7 +713,14 @@ def fit_pymc_dynamic(
             "n_posterior_samples": int(draws * chains),
             "latent_path": "weekly_random_walk_morris_calibrated",
             "measurement_effects": "hierarchical_mode_pop",
-            "terminal_layers": "reduced_nat+race+similarity_after_rw",
+            "optional_poll_structure": prep["poll_structure_config"].to_dict(),
+            "optional_poll_effects_active": optional_poll_effects,
+            "terminal_layers": {
+                "national": True,
+                "race": bool(include_terminal_race),
+                "similarity": bool(include_similarity),
+                "after_random_walk": True,
+            },
             "convergence": conv,
             "enop_global": prep["enop_global"],
             "enop_by_race_mean": float(np.mean(list(prep["enop_by_race"].values())))

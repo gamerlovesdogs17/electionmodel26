@@ -1,5 +1,10 @@
 # Model card — Senate hierarchical v0.9.21
 
+> **Validation status (2026-09-22):** code capability changed after the last
+> research rebuild. Existing forecast, OOF, stack, validation and acceptance
+> artifacts do not validate these changes. `PUBLIC_LIVE_ENABLED=False`; the
+> surface remains `research_only`. See `BLUEPRINT_COMPLIANCE_AUDIT.md`.
+
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
 - **Estimands:** two-party margins; joint Dem seats; chamber control (≥51 Dem; ≤50 → R via VP)
@@ -12,9 +17,9 @@
 
 ## Architecture (five layers — do not conflate)
 1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
-2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural ablations are diagnostics and are excluded from the production simplex.
+2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural ablations are diagnostics and are excluded from the production simplex. PyMC structural ablations now retain the same model family, snapshot, seed policy and fitting settings; they are pending a new run.
 3. **Distributional mixture code** — nonnegative weights from empirical predictive-mixture CRPS over frozen draws. Mean-score softmax is diagnostic only. The formal four-cycle 60/30-day OOF archive and stack were refitted on 2026-09-20; the current forecast and downstream acceptance artifacts remain stale.
-4. **Overlays** — expert ratings + Kalshi race/control soft pulls (ablatable; never forced to market).
+4. **Overlays** — expert ratings + Kalshi race/control soft pulls are optional. Publication use requires an exact-weight timestamp-pure nested-OOS validation contract; otherwise the publication fit runs core-only and records the layers as compare-only.
 5. **Final correlated chamber simulator** — joint margin draws → seats → control. Simulation count is separate from posterior sample count (`n_joint_sims` vs `n_posterior_samples`). Independent Bernoulli foil is diagnostic only.
 
 ## Update cadence
@@ -31,13 +36,40 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 | Polls (live 2026) | VoteHub CC BY | Required for `run_class=publication`; fixtures are non-publication |
 | Polls (historical) | FiveThirtyEight / ABC News (CC BY; Wayback/sealed) | Candidate identity + official race_id map; `--allow-synthetic` CI only |
 | Pollster quality | VoteHub + FTE fill-in | House ≠ reliability |
-| Economics | FRED public CSV / World Bank GDPPC YoY fallback | Observation vs available_at; fixtures are leakage canaries |
+| Economics | ALFRED real-time vintages preferred | FRED latest/revised and World Bank annual are degraded substitutes for historical replay; fixtures are leakage canaries |
 | Approval | VoteHub Trump approval aggregates | As-of store; aggregator tier |
 | Finance | OpenFEC API or FEC `weball` bulk | Matched-window share; bulk is first_party when API 429s |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
-| Markets | Kalshi | Soft overlays; `SENATE{ST}S` for FL/OH specials; chamber calibration **off** by default |
-| Demography | MEDSL ACS county means (state aggregate) | Similarity / covariance; aggregator tier |
+| Markets | Kalshi | Candidate mapping plus verified candidate-win/exclusive/exhaustive contract-family semantics required before normalization |
+| Demography | MEDSL ACS county means (state aggregate) | 2018 snapshot reuse is an explicit approximation until point-in-time source availability is sealed |
+
+## Bayesian and sampler diagnostics
+
+- Prior-predictive summaries report margin extremes and ranges for national,
+  house, measurement, movement and terminal terms.
+- Posterior-predictive utilities report standardized residuals, grouped
+  residuals and interval coverage by pollster/mode/population/study.
+- A deterministic synthetic SBC harness is available; its small conjugate
+  example tests plumbing and does not establish real-model adequacy.
+- Publication numerical quality now requires explicit divergence diagnostics
+  with zero divergent transitions. Tree-depth hits and BFMI are checked when
+  available; missing divergence status cannot pass publication.
+
+## Optional poll structures
+
+Sponsor, questionnaire-family and shared-study effects use hierarchical
+shrinkage and stable identifiers in both static and dynamic PyMC. They are off
+by default. When an explicit study effect is enabled, heuristic study
+downweighting defaults off to avoid counting the same dependence twice.
+
+## Temporal and institutional limits
+
+Candidate/race timeline schemas distinguish effective, available and retrieved
+times. Current real timeline coverage is incomplete and publication execution
+fails closed. The draw-level institutional interface supports thresholds,
+advancement and linked runoff draws, but no empirically validated runoff
+transition is enabled. Turnout remains auxiliary and does not drive seat math.
 | Results | Certified archive + MEDSL 2016 + fixtures | Prefer certified |
 | Structural state prior | Federal Election Commission official presidential files, 2012–2024 | Statewide two-party margin minus national two-party margin; latest 2/3 + previous 1/3 by source availability; 50-state sealed side table |
 | Race universe | Wikipedia Class II / 2026 schedule + constitutional roster | Chamber reconcile gate **2014–2024** |

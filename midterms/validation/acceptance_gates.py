@@ -452,8 +452,10 @@ def evaluate_acceptance_gates(
     g7_ok = False
     g7_status = "fail"
     g7_detail: dict[str, Any] = {}
-    rel = cal.get("reliability") or (cal.get("margin_scores") or {}).get("reliability")
-    rel_gate = (cal.get("margin_scores") or {}).get("reliability_gate")
+    # A single-holdout calibration diagnostic is exploratory and cannot
+    # satisfy G7. Formal reliability must come from frozen multi-cycle OOF.
+    rel = None
+    rel_gate = None
     g7_multi_cycle = multi_cycle
     g7_n = cal.get("n")
     # Prefer a source-matching raw cycle-cross-fitted production-stack block.
@@ -934,6 +936,16 @@ def evaluate_acceptance_gates(
         },
         "exit_condition": (
             "Unified G1–G11 acceptance artifact retained; milestone shadow uses production spine."
+        ),
+    }
+    compliance_path = ROOT / "BLUEPRINT_COMPLIANCE_AUDIT.json"
+    compliance = _load_json(compliance_path)
+    report["blueprint_extensions"] = {
+        "code_capability_gates": (compliance or {}).get("code_capability_gates") or {},
+        "empirical_validation_gates": (compliance or {}).get("empirical_validation_gates") or {},
+        "note": (
+            "Extension gates are reported separately from G1-G11. Code presence "
+            "does not satisfy empirical validation; pending/stale states require a rebuild."
         ),
     }
 

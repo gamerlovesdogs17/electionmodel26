@@ -49,6 +49,16 @@ def test_evaluate_numerical_quality_passes_with_enough_draws():
             "r_hat_max": 1.01,
             "ess_bulk_min": 400,
             "ess_bulk_min_frac": 0.2,
+            "sampler_health": {
+                "available": True,
+                "divergence_available": True,
+                "n_divergent": 0,
+                "divergence_fraction": 0.0,
+                "tree_depth_available": True,
+                "n_tree_depth_hits": 0,
+                "bfmi_available": True,
+                "bfmi_min": 0.8,
+            },
         },
         seed=7,
         publishable=True,
@@ -84,3 +94,28 @@ def test_evaluate_fails_when_too_few_draws_publishable():
     )
     assert report["ok"] is False
     assert any("sim draws" in a or "MCSE" in a or "posterior" in a for a in report["alerts"])
+
+
+def test_sampler_health_missing_or_divergent_fails_only_publication_profile():
+    common = {
+        "available": True, "r_hat_max": 1.01,
+        "ess_bulk_min": 500, "ess_bulk_min_frac": 0.2,
+    }
+    missing = evaluate_numerical_quality(
+        convergence=common, n_posterior_samples=8000,
+        draws=2000, tune=2000, chains=4, publishable=True,
+    )
+    assert missing["ok"] is False
+    assert any(c["name"] == "divergences_reported" and not c["ok"] for c in missing["checks"])
+    development = evaluate_numerical_quality(convergence=common, publishable=False)
+    assert development["ok"] is True
+    divergent = evaluate_numerical_quality(
+        convergence={**common, "sampler_health": {
+            "divergence_available": True, "n_divergent": 2,
+            "divergence_fraction": 0.001,
+        }},
+        n_posterior_samples=8000, draws=2000, tune=2000, chains=4,
+        publishable=True,
+    )
+    assert divergent["ok"] is False
+    assert any(c["name"] == "divergences" and not c["ok"] for c in divergent["checks"])

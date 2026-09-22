@@ -7,6 +7,10 @@ Blueprint §§11–12 roles and change control (Senate research production).
 Truth_v1 ledger/expectations are unified; Wikipedia vote scrape remains quarantined.
 `publish-live` fail-closes until multi-cycle nested validation and fold-pure evidence
 clear a fresh review. Thin/single-cycle calibration claims are blocked by G6/G7.
+New blueprint extensions separate code capability from empirical proof. A
+capability marked implemented in `BLUEPRINT_COMPLIANCE_AUDIT.json` does not
+permit publication while its empirical gate is pending, stale, requires a
+refresh, or requires a rebuild.
 
 Current surface: `research_only`. Do not label research runs as live.
 
@@ -46,6 +50,12 @@ Set `MIDTERMS_REQUIRE_SIGNING=1` to fail closed when signatures are missing.
 - Leakage canary on `build_as_of`
 - Source outage → last sealed artifact + stale alerts
 - Fold-pure stack weights (no holdout peeking)
+- Same-family structural ablations (no PyMC-to-fast substitution)
+- Prior predictive, grouped PPC, and synthetic SBC diagnostics
+- Explicit zero-divergence publication rule and sampler-health availability
+- Candidate/race bitemporal snapshots and demographic/economic vintage checks
+- Verified market contract-family semantics and overlay validation contracts
+- Joint energy/variogram/seat-count scoring with sealed race ordering
 - Rebuild hash check (`verify-rebuild`)
 
 House / Electoral College remain out of scope.

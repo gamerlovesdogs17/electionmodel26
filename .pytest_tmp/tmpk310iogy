@@ -1,4 +1,0 @@
-
-def specify_shape(x, shape_0):
-    assert x.shape[0] == shape_0, f'SpecifyShape: dim {0} of input has shape {x.shape[0]}, expected {shape_0.item()}.'
-    return x

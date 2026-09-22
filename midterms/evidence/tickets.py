@@ -6,6 +6,8 @@ from typing import Any
 
 from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
 
+TICKET_REGISTRY_VERSION = "tickets-2026-20260920-v1"
+
 # General-election tickets (Class II + 2026 specials), Sep 2026 research snapshot.
 # Prefer nominated / ballot-qualified major candidates; not an endorsement.
 # dem_party is a ballot label. Caucus affiliation is separate metadata.

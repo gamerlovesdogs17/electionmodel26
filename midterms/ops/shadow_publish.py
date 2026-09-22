@@ -25,6 +25,7 @@ from midterms.config import (
     PRIMARY_HOLDOUT,
     ROOT,
 )
+from midterms.ops.reproducibility import repository_relative_path
 from midterms.evidence.warehouse import Warehouse
 from midterms.ops.reproducibility import environment_lock, snapshot_domain_hashes
 from midterms.validation.nested_component_loo import (
@@ -313,9 +314,9 @@ def publish_historical_shadow(
         "domain_hashes": snapshot_domain_hashes(),
         "file_hashes": hashes,
         "paths": {
-            "shadow_dir": str(dest),
-            "frozen_predictions": str(pred_path),
-            "evaluation": str(dest / "evaluation.json"),
+            "shadow_dir": repository_relative_path(dest),
+            "frozen_predictions": repository_relative_path(pred_path),
+            "evaluation": repository_relative_path(dest / "evaluation.json"),
         },
         "spine_crps": evaluation.get("spine_crps"),
         "exit_condition": (
@@ -339,12 +340,12 @@ def publish_historical_shadow(
         "spine_label": spine,
         "frozen_at": frozen_payload["frozen_at"],
         "spine_crps": evaluation.get("spine_crps"),
-        "path": str(dest),
+        "path": repository_relative_path(dest),
         "manifest_sha256": _sha256_bytes(man_text.encode("utf-8")),
     }
     append_shadow_index(index_entry)
-    manifest["index_path"] = str(SHADOW_INDEX)
-    manifest["path"] = str(dest)
+    manifest["index_path"] = repository_relative_path(SHADOW_INDEX)
+    manifest["path"] = repository_relative_path(dest)
     return manifest
 
 
@@ -448,7 +449,10 @@ def publish_live_shadow(
         "environment": environment_lock(),
         "domain_hashes": snapshot_domain_hashes(),
         "file_hashes": hashes,
-        "paths": {"shadow_dir": str(dest), "forecast": str(dest / "forecast.json")},
+        "paths": {
+            "shadow_dir": repository_relative_path(dest),
+            "forecast": repository_relative_path(dest / "forecast.json"),
+        },
         "publishable": bool(art.get("publishable") or (art.get("diagnostics") or {}).get("publishable")),
         "run_class": art.get("run_class") or (art.get("diagnostics") or {}).get("run_class"),
         "exit_condition": "At least one cycle of frozen, timestamped evaluation is retained.",
@@ -465,11 +469,11 @@ def publish_live_shadow(
             "as_of": as_of,
             "model_version": MODEL_VERSION,
             "frozen_at": manifest["frozen_at"],
-            "path": str(dest),
+            "path": repository_relative_path(dest),
             "manifest_sha256": _sha256_bytes(man_text.encode("utf-8")),
         }
     )
-    manifest["path"] = str(dest)
+    manifest["path"] = repository_relative_path(dest)
     return manifest
 
 

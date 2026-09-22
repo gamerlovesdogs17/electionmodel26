@@ -1,8 +1,0 @@
-def numba_composite(nominal_scalar_variable, nominal_scalar_variable_1):
-    # add(1.0, i0)
-    scalar_variable_43 = add_5(scalar_constant_32, nominal_scalar_variable)
-    # mul(-0.38580246913580246, i1)
-    scalar_variable_44 = mul_14(scalar_constant_33, nominal_scalar_variable_1)
-    # true_div(mul.0, add.0)
-    scalar_variable_45 = divide_3(scalar_variable_44, scalar_variable_43)
-    return scalar_variable_45

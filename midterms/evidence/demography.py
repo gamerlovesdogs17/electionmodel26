@@ -7,8 +7,9 @@ up to state means. Fallback: compact research snapshot table.
 
 from __future__ import annotations
 
+import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -147,6 +148,8 @@ def write_demography_store(*, prefer_medsl: bool = True) -> dict[str, Any]:
         tier = "aggregator"
         source_url = "https://dataverse.harvard.edu/dataverse/medsl"
         note = "State means from MEDSL 2018 election-context ACS county fields (vendored CSV)."
+        source_year = 2018
+        raw_sha256 = hashlib.sha256(MEDSL_PATH.read_bytes()).hexdigest()
     else:
         df = pd.DataFrame(
             [{"state": st, **vals, "source": "embedded_research_snapshot"} for st, vals in STATE_DEMO.items()]
@@ -154,6 +157,15 @@ def write_demography_store(*, prefer_medsl: bool = True) -> dict[str, Any]:
         tier = "curated"
         source_url = None
         note = "Embedded research snapshot — replace via MEDSL/Census store."
+        source_year = None
+        raw_sha256 = None
+    df = df.copy()
+    df["source_year"] = source_year
+    df["available_at"] = None
+    df["retrieved_at"] = datetime.now(timezone.utc).isoformat()
+    df["source_sha256"] = raw_sha256
+    df["feature_version"] = "state-demo-v1"
+    df["production_eligible"] = False
     out = NORMALIZED_DIR / "demography.parquet"
     df.to_parquet(out, index=False)
     man = {
@@ -164,6 +176,12 @@ def write_demography_store(*, prefer_medsl: bool = True) -> dict[str, Any]:
         "source_url": source_url,
         "path": str(out),
         "note": note,
+        "source_year": source_year,
+        "available_at": None,
+        "source_sha256": raw_sha256,
+        "feature_version": "state-demo-v1",
+        "production_eligible": False,
+        "eligibility_reason": "source publication availability is not sealed; cycle reuse is an explicit approximation",
     }
     (MANIFESTS_DIR / "demography.json").write_text(json.dumps(man, indent=2))
     return man
@@ -188,6 +206,55 @@ def _demo_lookup() -> dict[str, dict[str, float]]:
         except Exception:  # noqa: BLE001
             pass
     return STATE_DEMO
+
+
+def demographic_snapshot_metadata(
+    as_of: str | date,
+    *,
+    source_year: int = 2018,
+    available_at: str | date | None = None,
+) -> dict[str, Any]:
+    """Describe snapshot timing without manufacturing a release date."""
+    cutoff = date.fromisoformat(as_of) if isinstance(as_of, str) else as_of
+    available = date.fromisoformat(available_at) if isinstance(available_at, str) else available_at
+    future_source = source_year > cutoff.year
+    availability_verified = available is not None
+    known = availability_verified and available <= cutoff and not future_source
+    return {
+        "schema_version": "demographic-snapshot-v1",
+        "as_of": cutoff.isoformat(),
+        "source_year": int(source_year),
+        "available_at": available.isoformat() if available else None,
+        "availability_verified": availability_verified,
+        "future_source": future_source,
+        "reused_outside_natural_vintage": cutoff.year != source_year,
+        "modeling_approximation": cutoff.year != source_year,
+        "production_eligible": known,
+        "sensitivity_hook": "disable_similarity_or_compare_cycle_specific_snapshot",
+    }
+
+
+def demographic_snapshot_as_of(
+    as_of: str | date,
+    *,
+    require_point_in_time: bool = False,
+) -> tuple[dict[str, dict[str, float]], dict[str, Any]]:
+    """Load features plus their explicit vintage eligibility metadata."""
+    manifest_path = MANIFESTS_DIR / "demography.json"
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    meta = demographic_snapshot_metadata(
+        as_of,
+        source_year=int(manifest.get("source_year") or 2018),
+        available_at=manifest.get("available_at"),
+    )
+    meta.update({
+        "source_sha256": manifest.get("source_sha256"),
+        "feature_version": manifest.get("feature_version") or "state-demo-v1",
+        "source": manifest.get("source_url") or "embedded_research_snapshot",
+    })
+    if require_point_in_time and not meta["production_eligible"]:
+        raise ValueError("demographic snapshot lacks verified point-in-time availability")
+    return _demo_lookup(), meta
 
 
 def demo_feature_vector(state: str) -> np.ndarray:

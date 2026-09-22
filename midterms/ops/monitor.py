@@ -307,13 +307,29 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
         except (json.JSONDecodeError, OSError):
             pass
 
-    # Source freshness: polls parquet mtime vs artifact
+    # Domain-aware freshness: retrieval and observation staleness are distinct.
     polls_path = NORMALIZED_DIR / "polls.parquet"
     if polls_path.exists():
-        age_hours = (datetime.now().timestamp() - polls_path.stat().st_mtime) / 3600.0
-        add("polls_file_present", True, {"age_hours": round(age_hours, 2)})
-        if age_hours > 24 * 14:
-            alerts.append(f"polls parquet age {age_hours:.0f}h (>14d)")
+        import pandas as pd
+
+        from midterms.evidence.freshness import classify_freshness
+
+        frame = pd.read_parquet(polls_path, columns=["available_at"])
+        observed = pd.to_datetime(frame["available_at"], errors="coerce").max() if len(frame) else None
+        retrieved = datetime.fromtimestamp(polls_path.stat().st_mtime, tz=timezone.utc)
+        freshness = classify_freshness(
+            "polls", retrieved_at=retrieved,
+            observed_at=observed if pd.notna(observed) else None,
+            source_available=bool(len(frame)),
+        )
+        add("polls_file_present", True, freshness)
+        soft.append({
+            "name": "polls_domain_freshness",
+            "ok": freshness["status"] == "fresh",
+            "detail": freshness,
+        })
+        if freshness["status"] != "fresh":
+            alerts.append(f"poll freshness status={freshness['status']}")
     else:
         add("polls_file_present", False, None, "missing polls.parquet")
 

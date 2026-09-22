@@ -235,7 +235,7 @@ def _audit_configured_domains(*, as_of: str | None = None) -> dict[str, Any]:
     }
 
     econ = _load("economics_vintages.json")
-    if econ and (econ.get("production_series") or []):
+    if econ and (econ.get("production_series") or []) and bool(econ.get("publication_eligible")):
         domains["economics"] = {
             "tier": str(econ.get("tier") or "first_party"),
             "eligible": True,

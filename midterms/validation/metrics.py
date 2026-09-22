@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 import numpy as np
@@ -180,7 +181,9 @@ def reliability_overconfidence(
     }
 
 
-def energy_score(samples: np.ndarray, y: np.ndarray) -> float:
+def energy_score(
+    samples: np.ndarray, y: np.ndarray, *, max_pair_draws: int = 400, seed: int = 0
+) -> float:
     """
     Energy score for multivariate predictive samples.
     samples: (n_draws, d), y: (d,)
@@ -191,8 +194,10 @@ def energy_score(samples: np.ndarray, y: np.ndarray) -> float:
         return float("nan")
     term1 = float(np.mean(np.linalg.norm(s - y[None, :], axis=1)))
     # pairwise
-    n = min(s.shape[0], 400)
-    sub = s[:n]
+    n = min(s.shape[0], int(max_pair_draws))
+    rng = np.random.default_rng(seed)
+    idx = np.sort(rng.choice(s.shape[0], size=n, replace=False)) if n < s.shape[0] else np.arange(n)
+    sub = s[idx]
     diffs = sub[:, None, :] - sub[None, :, :]
     term2 = float(np.mean(np.linalg.norm(diffs, axis=2)))
     return term1 - 0.5 * term2
@@ -214,6 +219,54 @@ def variogram_score(samples: np.ndarray, y: np.ndarray, *, p: float = 0.5) -> fl
             score += (obs - pred) ** 2
             n_pairs += 1
     return float(score / max(n_pairs, 1))
+
+
+def seat_count_crps(seat_draws: np.ndarray, observed_seats: int | float) -> float:
+    """Exact empirical CRPS for a one-dimensional chamber seat distribution."""
+    x = np.sort(np.asarray(seat_draws, dtype=float).ravel())
+    if x.size == 0 or not np.isfinite(x).all() or not np.isfinite(observed_seats):
+        return float("nan")
+    term1 = float(np.mean(np.abs(x - float(observed_seats))))
+    # E|X-X'| from sorted samples, including the zero diagonal.
+    coefficients = 2.0 * np.arange(1, len(x) + 1) - len(x) - 1.0
+    pair = float(2.0 * np.sum(coefficients * x) / (len(x) ** 2))
+    return term1 - 0.5 * pair
+
+
+def score_joint_draws(
+    samples: np.ndarray,
+    observed: np.ndarray,
+    *,
+    race_ids: list[str],
+    observed_race_ids: list[str],
+    seat_draws: np.ndarray | None = None,
+    observed_seats: int | None = None,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Versioned dependence-aware score block with a sealed race order."""
+    if list(race_ids) != list(observed_race_ids):
+        raise ValueError("joint score race ordering differs from truth ordering")
+    s = np.asarray(samples, dtype=float)
+    y = np.asarray(observed, dtype=float)
+    if s.ndim != 2 or s.shape[1] != len(race_ids) or len(y) != len(race_ids):
+        raise ValueError("joint draws/truth dimensions do not match race ordering")
+    order_sha = hashlib.sha256(
+        "\n".join(race_ids).encode("utf-8")
+    ).hexdigest()
+    result: dict[str, Any] = {
+        "protocol_version": "joint-proper-scores-v1",
+        "n_draws": int(s.shape[0]),
+        "n_dimensions": int(s.shape[1]),
+        "race_order_sha256": order_sha,
+        "subsampling_seed": int(seed),
+        "energy_score": energy_score(s, y, seed=seed),
+        "variogram_score_p05": variogram_score(s, y, p=0.5),
+    }
+    if seat_draws is not None or observed_seats is not None:
+        if seat_draws is None or observed_seats is None:
+            raise ValueError("seat draws and observed seat count must be supplied together")
+        result["seat_count_crps"] = seat_count_crps(seat_draws, observed_seats)
+    return result
 
 
 def score_margins_extended(

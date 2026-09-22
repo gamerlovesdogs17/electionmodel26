@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -18,6 +19,10 @@ from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 # ALFRED series commonly used in election fundamentals work.
 DEFAULT_SERIES = "A229RX0"  # Real Disposable Personal Income: Per Capita
 PARSER_VERSION = "alfred-v2"
+VINTAGE_CLASS_ALFRED = "alfred_realtime_vintage"
+VINTAGE_CLASS_FRED_LATEST = "fred_latest_revised"
+VINTAGE_CLASS_WORLD_BANK = "world_bank_annual_substitute"
+VINTAGE_CLASS_FIXTURE = "synthetic_fixture_canary"
 WB_GDPPC_SERIES = "WB_NY_GDP_PCAP_KD_ZG"
 WB_SOURCE_URL = "https://api.worldbank.org/v2/country/US/indicator/NY.GDP.PCAP.KD.ZG"
 
@@ -55,7 +60,9 @@ def fetch_alfred_observations(
     url = "https://api.stlouisfed.org/fred/series/observations?" + urlencode(params)
     req = Request(url, headers={"User-Agent": "midterms-senate-model/0.2 (research)"})
     with urlopen(req, timeout=15) as resp:
-        payload = json.loads(resp.read().decode("utf-8"))
+        raw_bytes = resp.read()
+        payload = json.loads(raw_bytes.decode("utf-8"))
+    source_sha256 = hashlib.sha256(raw_bytes).hexdigest()
     rows = []
     for obs in payload.get("observations") or []:
         if obs.get("value") in {".", "", None}:
@@ -72,6 +79,9 @@ def fetch_alfred_observations(
                 "vintage_id": f"{series_id}|{obs['date']}|{obs.get('realtime_start')}",
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
                 "parser_version": PARSER_VERSION,
+                "status": "alfred_realtime",
+                "source_url": f"https://fred.stlouisfed.org/series/{series_id}",
+                "source_sha256": source_sha256,
             }
         )
     return pd.DataFrame(rows)
@@ -90,7 +100,9 @@ def fetch_worldbank_us_gdppc_yoy() -> pd.DataFrame:
     )
     req = Request(url, headers={"User-Agent": "midterms-senate-model/0.9 (research)"})
     with urlopen(req, timeout=20) as resp:
-        payload = json.loads(resp.read().decode("utf-8"))
+        raw_bytes = resp.read()
+        payload = json.loads(raw_bytes.decode("utf-8"))
+    source_sha256 = hashlib.sha256(raw_bytes).hexdigest()
     rows_in = payload[1] if isinstance(payload, list) and len(payload) > 1 else []
     retrieved = datetime.now(timezone.utc).isoformat()
     out = []
@@ -100,8 +112,9 @@ def fetch_worldbank_us_gdppc_yoy() -> pd.DataFrame:
         year = str(item.get("date") or "")[:4]
         if not year.isdigit():
             continue
-        # Stamp mid-year availability for annual series (known by year-end + lag).
-        avail = f"{year}-12-31"
+        # The API does not expose historical release/revision timestamps.  Do
+        # not manufacture one from the observation year.
+        avail = None
         out.append(
             {
                 "series_id": WB_GDPPC_SERIES,
@@ -119,6 +132,7 @@ def fetch_worldbank_us_gdppc_yoy() -> pd.DataFrame:
                 "parser_version": PARSER_VERSION,
                 "status": "worldbank_api",
                 "source_url": WB_SOURCE_URL,
+                "source_sha256": source_sha256,
             }
         )
     return pd.DataFrame(out)
@@ -203,7 +217,9 @@ def fetch_fred_public_csv(series_id: str = DEFAULT_SERIES) -> pd.DataFrame:
     req = Request(url, headers={"User-Agent": "midterms-senate-model/0.9 (research)"})
     # Keep timeout tight so forecast refresh fails closed quickly rather than hanging.
     with urlopen(req, timeout=15) as resp:
-        text = resp.read().decode("utf-8")
+        raw_bytes = resp.read()
+        text = raw_bytes.decode("utf-8")
+    source_sha256 = hashlib.sha256(raw_bytes).hexdigest()
     from io import StringIO
 
     raw = pd.read_csv(StringIO(text))
@@ -230,9 +246,9 @@ def fetch_fred_public_csv(series_id: str = DEFAULT_SERIES) -> pd.DataFrame:
             {
                 "series_id": series_id,
                 "observation_date": obs,
-                "realtime_start": obs,
+                "realtime_start": None,
                 "realtime_end": "9999-12-31",
-                "available_at": obs,
+                "available_at": retrieved[:10],
                 "value": v,
                 "revision": 0,
                 "vintage_id": f"{series_id}|{obs}|public_csv",
@@ -241,6 +257,7 @@ def fetch_fred_public_csv(series_id: str = DEFAULT_SERIES) -> pd.DataFrame:
                 "parser_version": PARSER_VERSION,
                 "status": "fred_public_csv",
                 "source_url": url,
+                "source_sha256": source_sha256,
             }
         )
     return pd.DataFrame(rows)
@@ -262,9 +279,9 @@ def _yoy_rows_from_levels(levels: pd.DataFrame, *, series_id: str = DEFAULT_SERI
             {
                 "series_id": f"{series_id}_YOY",
                 "observation_date": obs,
-                "realtime_start": obs,
+                "realtime_start": None,
                 "realtime_end": "9999-12-31",
-                "available_at": obs,
+                "available_at": str(g.iloc[i].get("available_at") or "")[:10] or None,
                 "value": yoy,
                 "revision": 0,
                 "vintage_id": f"{series_id}_YOY|{obs}|r0",
@@ -275,9 +292,31 @@ def _yoy_rows_from_levels(levels: pd.DataFrame, *, series_id: str = DEFAULT_SERI
                 "parser_version": PARSER_VERSION,
                 "status": "fred_public_csv_yoy",
                 "source_url": f"https://fred.stlouisfed.org/series/{series_id}",
+                "source_sha256": g.iloc[i].get("source_sha256"),
             }
         )
     return pd.DataFrame(rows)
+
+
+def classify_economic_vintages(df: pd.DataFrame) -> pd.DataFrame:
+    """Attach evidence classes without upgrading substitutes to real-time vintages."""
+    out = df.copy()
+    classes: list[str] = []
+    for _, row in out.iterrows():
+        series = str(row.get("series_id") or "")
+        status = str(row.get("status") or "").lower()
+        if "fixture" in series.lower() or "fixture" in status:
+            classes.append(VINTAGE_CLASS_FIXTURE)
+        elif "worldbank" in status or series.startswith("WB_"):
+            classes.append(VINTAGE_CLASS_WORLD_BANK)
+        elif "alfred" in status:
+            classes.append(VINTAGE_CLASS_ALFRED)
+        else:
+            classes.append(VINTAGE_CLASS_FRED_LATEST)
+    out["vintage_class"] = classes
+    out["historical_replay_eligible"] = out["vintage_class"].eq(VINTAGE_CLASS_ALFRED)
+    out["production_eligible"] = out["vintage_class"].eq(VINTAGE_CLASS_ALFRED)
+    return out
 
 
 def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
@@ -296,6 +335,7 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
                 df = None
         if df is None or len(df) == 0:
             df = build_fixture_vintages()
+    df = classify_economic_vintages(df)
     raw_path = RAW_DIR / "economics_vintages.csv"
     df.to_csv(raw_path, index=False)
     try:
@@ -307,7 +347,14 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
             raise
     n_rev = int((df["revision"] > 0).sum()) if "revision" in df.columns else 0
     series = sorted(df["series_id"].astype(str).unique().tolist())
-    production_series = [s for s in series if "FIXTURE" not in s]
+    eligible_rows = df[df["production_eligible"].fillna(False).astype(bool)]
+    production_series = sorted(eligible_rows["series_id"].astype(str).unique().tolist())
+    substitute_series = sorted(
+        df.loc[
+            df["vintage_class"].isin([VINTAGE_CLASS_FRED_LATEST, VINTAGE_CLASS_WORLD_BANK]),
+            "series_id",
+        ].astype(str).unique().tolist()
+    )
     source_url = "https://fred.stlouisfed.org/series/A229RX0"
     if any("WB_" in s for s in production_series) and not any("A229RX0" in s for s in production_series):
         source_url = WB_SOURCE_URL
@@ -318,7 +365,10 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
         "series": series,
         "production_series": production_series,
         "source_url": source_url,
-        "tier": "first_party" if production_series else "synthetic",
+        "tier": "first_party" if production_series else "degraded",
+        "publication_eligible": bool(production_series),
+        "substitute_series": substitute_series,
+        "vintage_classes": sorted(df["vintage_class"].astype(str).unique().tolist()),
         "parser_version": PARSER_VERSION,
         "note": (
             "Production YoY from FRED/ALFRED when available; World Bank US GDPPC "
@@ -336,6 +386,7 @@ def yoy_growth_as_of(
     *,
     election_year: int | None = None,
     allow_fixture_canary: bool = False,
+    require_historical_vintage: bool = False,
 ) -> float | None:
     """
     Return vintage YoY real-income growth (%) known by as_of.
@@ -352,6 +403,7 @@ def yoy_growth_as_of(
         else:
             return None
     df = pd.read_parquet(path)
+    df = classify_economic_vintages(df)
     as_of_d = date.fromisoformat(as_of) if isinstance(as_of, str) else as_of
     if "available_at" in df.columns:
         avail = pd.to_datetime(df["available_at"]).dt.date
@@ -363,6 +415,10 @@ def yoy_growth_as_of(
         usable = df.copy()
     if usable.empty:
         return None
+    if require_historical_vintage:
+        usable = usable[usable["historical_replay_eligible"].fillna(False).astype(bool)]
+        if usable.empty:
+            return None
     # Prefer production YoY series over fixtures — never silent fixture downgrade.
     # Prefer FRED RDPI when present; else World Bank / other non-fixture series.
     prod = usable[~usable["series_id"].astype(str).str.contains("FIXTURE")]
@@ -424,7 +480,9 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
                         "preserved_existing": True,
                         "timeout": timed_out,
                         "error": err,
-                        "publication_eligible": True,
+                        "publication_eligible": bool(
+                            classify_economic_vintages(existing)["production_eligible"].any()
+                        ),
                         "note": "preserved existing non-fixture store after read failure",
                         **paths,
                     }
@@ -464,11 +522,11 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
             "used_fixtures": False,
             "timeout": timed_out,
             "error": err,
-            "publication_eligible": True,
+            "publication_eligible": False,
             "source": "worldbank_gdppc_yoy",
             "note": (
                 "FRED/ALFRED RDPI unavailable; using World Bank US real GDP per capita "
-                "annual growth as production YoY substitute (not RDPI)."
+                "annual growth as degraded comparison evidence (not a real-time RDPI vintage)."
             ),
             **paths,
         }
@@ -532,5 +590,6 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
         "yoy": yoy,
         "used_fixtures": False,
         "source": source,
+        "publication_eligible": source == "alfred_api",
         **paths,
     }

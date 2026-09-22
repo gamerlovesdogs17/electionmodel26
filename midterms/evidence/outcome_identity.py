@@ -98,18 +98,23 @@ def identity_from_ticket(race_id: str, ticket: dict[str, str | None]) -> Contest
 
 def attach_2026_ticket_identities(races: pd.DataFrame) -> pd.DataFrame:
     """Join curated ticket identities to active 2026 rows without touching truth."""
-    from midterms.evidence.tickets import TICKETS_2026
+    from midterms.evidence.tickets import TICKETS_2026, TICKET_REGISTRY_VERSION
 
     out = races.copy()
     for col in (
         "modeled_candidate_id", "modeled_ballot_party", "modeled_caucus",
         "modeled_caucus_basis", "opposing_candidate_id", "opposing_ballot_party",
         "opposing_caucus", "opposing_caucus_basis", "identity_source",
+        "identity_available_at", "identity_registry_version",
     ):
         if col not in out.columns:
             out[col] = None
     for index, row in out.iterrows():
         if str(row.get("election_id")) != "senate-2026" or bool(row.get("not_up")):
+            continue
+        # A sourced as-of identity always wins.  The undated registry is only
+        # a development fallback for rows whose timeline evidence is missing.
+        if str(row.get("candidate_timeline_status") or "") == "point_in_time":
             continue
         ticket = TICKETS_2026.get(str(row.get("state")))
         if ticket is None:
@@ -126,6 +131,8 @@ def attach_2026_ticket_identities(races: pd.DataFrame) -> pd.DataFrame:
             "opposing_caucus": opposing.caucus_affiliation,
             "opposing_caucus_basis": opposing.caucus_basis,
             "identity_source": "dated_ticket_registry",
+            "identity_available_at": None,
+            "identity_registry_version": TICKET_REGISTRY_VERSION,
         }
         for key, value in updates.items():
             out.at[index, key] = value

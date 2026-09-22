@@ -40,6 +40,7 @@ class EvidenceSnapshot:
     presidential_source_years: tuple[int, ...] = ()
     prior_snapshot_sha256: str | None = None
     prior_snapshot_path: str | None = None
+    candidate_timeline: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         n_contested = (
@@ -57,6 +58,7 @@ class EvidenceSnapshot:
             "presidential_source_years": list(self.presidential_source_years),
             "prior_snapshot_sha256": self.prior_snapshot_sha256,
             "prior_snapshot_path": self.prior_snapshot_path,
+            "candidate_timeline": self.candidate_timeline,
         }
 
 
@@ -72,6 +74,10 @@ class Warehouse:
         except Exception:  # noqa: BLE001
             self.polls = align_poll_frame(self.polls)
         self.races = pd.read_parquet(self.normalized_dir / "races.parquet")
+        timeline_path = self.normalized_dir / "candidate_timeline.parquet"
+        self.candidate_timeline = (
+            pd.read_parquet(timeline_path) if timeline_path.exists() else pd.DataFrame()
+        )
         try:
             from midterms.evidence.official_ballot import merge_official_into_races
 
@@ -177,6 +183,13 @@ class Warehouse:
         else:
             results_known = results
 
+        # Resolve candidate/race state before filtering inactive ballot rows.
+        from midterms.evidence.candidate_timeline import apply_candidate_timeline
+
+        races, candidate_timeline_meta = apply_candidate_timeline(
+            races, getattr(self, "candidate_timeline", pd.DataFrame()), as_of=as_of_d
+        )
+
         # Drop inactive ballot rows from contested forecast universe (keep held)
         if len(races):
             mask = races.apply(
@@ -193,6 +206,8 @@ class Warehouse:
         if election_id == "senate-2026" and len(races):
             from midterms.evidence.outcome_identity import attach_2026_ticket_identities
 
+            # Development fallback only. The snapshot remains explicitly
+            # degraded until a sourced bitemporal candidate timeline exists.
             races = attach_2026_ticket_identities(races)
 
         # Verify source bytes, then attach one point-in-time derived side table
@@ -251,6 +266,7 @@ class Warehouse:
             presidential_source_years=source_years,
             prior_snapshot_sha256=prior_snapshot_sha,
             prior_snapshot_path=prior_snapshot_path,
+            candidate_timeline=candidate_timeline_meta,
         )
 
     def inject_future_poll_for_canary(self, election_id: str, as_of: str | date) -> pd.DataFrame:

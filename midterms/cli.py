@@ -19,6 +19,22 @@ def main(argv: list[str] | None = None) -> None:
     p_fix = sub.add_parser("build-fixtures", help="Generate synthetic evidence fixtures")
     p_fix.set_defaults(func=lambda a: print(json.dumps(build_fixtures(), indent=2)))
 
+    p_bayes = sub.add_parser(
+        "synthetic-bayesian-diagnostics",
+        help="Run cheap synthetic SBC only; does not read election evidence or fit the forecast",
+    )
+    p_bayes.add_argument("--replications", type=int, default=20)
+    p_bayes.add_argument("--seed", type=int, default=7)
+    p_bayes.set_defaults(
+        func=lambda a: print(json.dumps(
+            __import__(
+                "midterms.validation.bayesian_diagnostics",
+                fromlist=["gaussian_location_sbc"],
+            ).gaussian_location_sbc(replications=a.replications, seed=a.seed),
+            indent=2,
+        ))
+    )
+
     p_pres = sub.add_parser(
         "build-presidential-vote-store",
         help="Verify pinned FEC raw files and rebuild the statewide vote-count source store",

@@ -2,10 +2,51 @@
 
 from __future__ import annotations
 
-from typing import Any
+from dataclasses import asdict, dataclass
+from typing import Any, Protocol
 
 import numpy as np
 import pandas as pd
+
+
+@dataclass(frozen=True)
+class TurnoutLayerConfig:
+    enabled: bool = False
+    version: str = "turnout-interface-v1"
+    propagate_to_primary_simulation: bool = False
+
+
+class TurnoutModel(Protocol):
+    def draw(self, races: pd.DataFrame, *, n_draws: int, seed: int) -> dict[str, Any]: ...
+
+
+def run_turnout_interface(
+    races: pd.DataFrame,
+    *,
+    config: TurnoutLayerConfig | None = None,
+    model: TurnoutModel | None = None,
+    n_draws: int = 0,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Opt-in future interface; the current auxiliary foil cannot alter seat math."""
+    cfg = config or TurnoutLayerConfig()
+    if not cfg.enabled:
+        return {
+            "config": asdict(cfg),
+            "status": "disabled",
+            "primary_simulation_affected": False,
+        }
+    if model is None:
+        raise ValueError("enabled turnout layer requires a validated model implementation")
+    if cfg.propagate_to_primary_simulation:
+        raise ValueError("turnout propagation is not validated for production")
+    result = model.draw(races, n_draws=int(n_draws), seed=int(seed))
+    return {
+        "config": asdict(cfg),
+        "status": "auxiliary_only",
+        "primary_simulation_affected": False,
+        "draws": result,
+    }
 
 
 def undecided_allocation(
@@ -53,7 +94,7 @@ def turnout_layer(
     base_turnout: float = 0.52,
     seed: int = 0,
 ) -> list[dict[str, Any]]:
-    """Uncertainty-bearing turnout foil (does not alter chamber seat math)."""
+    """Auxiliary turnout foil; it does not propagate into primary seat math."""
     rng = np.random.default_rng(seed)
     rows = []
     for _, row in races.iterrows():

@@ -4,6 +4,33 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-22 — blueprint capability remediation (validation pending)
+
+- Added a machine-readable and readable blueprint compliance audit. Capability
+  status is separate from empirical validation; existing model artifacts are
+  stale relative to this code.
+- Added reusable prior-predictive, grouped posterior-predictive and synthetic
+  SBC diagnostics. No current model was fit and no real-data performance claim
+  was made.
+- Added NUTS divergence, tree-depth, BFMI and acceptance diagnostics. A
+  publication run must report zero divergences; missing divergence information
+  fails closed.
+- Added optional shrinkage-safe sponsor, questionnaire and study effects shared
+  by static/dynamic PyMC. They remain off pending same-family nested OOS tests.
+- PyMC no-similarity and no-terminal-race ablations now retain the reference
+  family and seed policy. Optional poll-term ablations are registered.
+- Added bitemporal candidate timeline, demographic-vintage, economic evidence
+  class, overlay-validation, market-semantic, draw-level institutional,
+  turnout-interface, domain-freshness, and optional fundamentals challenger
+  contracts. Missing real source history remains explicit and fail closed.
+- Added deterministic joint energy/variogram and seat-count CRPS utilities with
+  sealed race ordering. Historical joint scores require regeneration.
+- Environment locks now include PyMC/ArviZ/PyTensor/Matplotlib, numerical backend
+  text and dependency hashes. New run/shadow references are repository relative
+  or content addressed where possible.
+- No forecast, network refresh, historical PyMC OOF, stack refit, joint election
+  simulation, publication, or GitHub Action was run.
+
 ## 2026-09-20 — declared Independent caucus accounting assumption (no model rerun)
 
 - At the user's direction, all modeled Independent challengers in the current
