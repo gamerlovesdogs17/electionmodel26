@@ -3,7 +3,7 @@
   "publishable": true,
   "run_class": "publication",
   "election_id": "senate-2026",
-  "as_of": "2026-09-20",
+  "as_of": "2026-09-22",
   "reasons": [],
   "domains": {
     "races": {
@@ -19,7 +19,7 @@
       "blocked_n": 0,
       "eligible_n": 320,
       "stale": false,
-      "latest_age_hours": 240.0
+      "latest_age_hours": 288.0
     },
     "results": {
       "n": 0,
@@ -89,11 +89,11 @@
         "json_hash_mode": "canonical_json_sha256_v1",
         "n_enabled": 33,
         "n_disabled": 2,
-        "audit_sha256": "ead95054ab00e1c9f8da677134462e580045cf6c978ee9d53b5c68bfd67511c1",
+        "audit_sha256": "015c37937d5343940a9a25222fcc1ebfbdd1b3db7f43ba5930306159c3a6a919",
         "byte_hash_diagnostics": {
-          "raw_sha256": false,
-          "normalized_control_sha256": false,
-          "mapping_audit_sha256": false
+          "raw_sha256": true,
+          "normalized_control_sha256": true,
+          "mapping_audit_sha256": true
         }
       }
     }
@@ -121,26 +121,26 @@
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-09-22T00:16:30.834868+00:00",
+  "checked_at": "2026-09-22T01:20:56.418731+00:00",
   "evidence_fingerprint": {
-    "sha256": "cb508c8b3137a67c9f65044c4affab3782edd09a2e3559bb18e4628c60039e2f",
+    "sha256": "66f4e260ff716dba911de8da30ba07a7b5f712e37a5e909098551622a8233ecc",
     "manifests": {
-      "fundraising_shares.json": "4f1ce3dd1c495991305bc139ebf720dab2cbc8bba722b88a833b185aad20777f",
-      "economics_vintages.json": "a177278d1a535b07bafb921e7421ad1083e02bc9c3a6766b39025019c3ae602c",
-      "pres_approval.json": "ed816cef70bcea85d50988cdc681e46c6c2152a233ffe2a11d1f73bf9fc91378",
-      "demography.json": "055cca5b3bf6e7cbda9cc5d04050772bafec3e83498e0659330d792d38f32040",
-      "expert_ratings.json": "2371f2378f31daa90a92b19c273b6fc276d34e7fcaebdaa84f0ab79e5fa2dbee",
-      "markets_kalshi.json": "e4b7db23dd6bff8f37c8d6c59e7b6b177913d8bed2ac3e928023dfcddebbe22e",
-      "official_senate_ballots.json": "338d51d4615db5aba3fb51f0bd4bbc1a96a1184cfc20305378002fb43f5c7728",
+      "fundraising_shares.json": "9d066d2ca9cfb020cbf37719627f46cd2a09326809726a332be81fa0b6b9bca9",
+      "economics_vintages.json": "a8b969b3f1c5b0b5ebfd91604e731027e15e8e6e2be5c2d701a8dd120761c2e6",
+      "pres_approval.json": "37f9725e8dfe8f7625ddf4fc450ca9c997c20c901f97473e68e135ed7cf012d3",
+      "demography.json": "8b009bf8f191006ff44db559a871bf3f60a1e439ff12b929a031cbaf92afbb9c",
+      "expert_ratings.json": "626aba81604531c17b221c41165c3cff6cb35ea4c9fd613672fdfc1da5b08ad6",
+      "markets_kalshi.json": "495734f2f1af917ad001828da3f09d1659944a5f627f5a6499c0009beed4721e",
+      "official_senate_ballots.json": "060db09678108eda582bbb660a0a31e996dacf9c9b6cf87352fead1f37d61972",
       "presidential_vote_sources.json": "09798a5aa0a0a388357bf7e102ae69056a0d567ef5d23532114cefef3b8ca337",
-      "wiki_ratings.json": "5eb9412932b1d47e8ca5b938cdc8f423f6967f4baabf30f374cfa02c4c9e274a"
+      "wiki_ratings.json": "130fec70c426abab9027a85f83c930d796c6a523c6edc9aabe40a3942585c4fd"
     },
-    "generated_at": "2026-09-22T00:16:30.835928+00:00"
+    "generated_at": "2026-09-22T01:20:56.419844+00:00"
   },
   "model_version": "senate-hierarchical-v0.9.21",
   "PUBLIC_LIVE_ENABLED": false,
-  "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-  "snapshot_id": "f68f5d42ed8d283b",
-  "forecast_generated_at": "2026-09-22T00:16:30.724107+00:00",
-  "identity_checked_at": "2026-09-22T00:16:30.835937+00:00"
+  "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+  "snapshot_id": "1f4ed31a06661e95",
+  "forecast_generated_at": "2026-09-22T01:20:56.313315+00:00",
+  "identity_checked_at": "2026-09-22T01:20:56.419869+00:00"
 }

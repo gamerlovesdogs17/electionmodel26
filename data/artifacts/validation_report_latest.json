@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T00:13:50.822660+00:00",
+  "generated_at": "2026-09-22T01:18:26.251876+00:00",
   "model_version": "senate-hierarchical-v0.9.21",
   "primary_holdout": 2022,
   "quick": false,
@@ -2150,33 +2150,33 @@
     "control_ok": true,
     "control_soft": true,
     "control_gaps": {
-      "ddhq": 0.28448000000000007,
-      "kalshi": 0.17537108910891097
+      "ddhq": 0.28342,
+      "kalshi": 0.15842
     },
-    "primary_control_gap": 0.17537108910891097,
-    "max_abs_control_gap": 0.28448000000000007,
+    "primary_control_gap": 0.15842,
+    "max_abs_control_gap": 0.28342,
     "race_scores": {
       "ddhq": {
         "n": 10,
-        "brier_vs_peer_favorite": 0.24967668308000004,
-        "mae": 0.16658199999999998,
-        "crps_proxy": 0.16658199999999998,
+        "brier_vs_peer_favorite": 0.24501868219999995,
+        "mae": 0.172282,
+        "crps_proxy": 0.172282,
         "ok": false
       },
       "kalshi": {
         "n": 10,
-        "brier_vs_peer_favorite": 0.09758468308000001,
-        "mae": 0.07042298632253245,
-        "crps_proxy": 0.07042298632253245,
+        "brier_vs_peer_favorite": 0.0941426822,
+        "mae": 0.0756177349461474,
+        "crps_proxy": 0.0756177349461474,
         "ok": true
       }
     },
     "race_ok": true,
-    "mean_peer_disagreement": 0.16886770682566685,
+    "mean_peer_disagreement": 0.17306066125195163,
     "null_margin_races": [],
     "method": "ensemble_stack+overlays",
     "core_method": "pymc",
-    "generic_ballot": 5.7459422124828174,
+    "generic_ballot": 5.745942212482818,
     "reasons": [],
     "thresholds": {
       "max_abs_control_gap": 0.25,
@@ -2190,7 +2190,7 @@
   "acceptance_gates": {
     "audit_item": "Milestone-0",
     "model_version": "senate-hierarchical-v0.9.21",
-    "generated_at": "2026-09-22T00:13:53.601279+00:00",
+    "generated_at": "2026-09-22T01:18:30.085087+00:00",
     "archive_scope": "2014-2024",
     "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
     "gates": {
@@ -2288,8 +2288,8 @@
           ],
           "coherence_ok": true,
           "coherence_notes": [],
-          "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-          "evidence_fingerprint": "cb508c8b3137a67c9f65044c4affab3782edd09a2e3559bb18e4628c60039e2f"
+          "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+          "evidence_fingerprint": "66f4e260ff716dba911de8da30ba07a7b5f712e37a5e909098551622a8233ecc"
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
@@ -2354,14 +2354,14 @@
           "freeze_before_truth": true,
           "spine_label": "pymc",
           "validation_calibration": {
-            "n": 132,
-            "brier": 0.04140106151343855,
+            "n": 34,
+            "brier": 0.05452155071603785,
             "has_margin_scores": true,
-            "log_score": -0.20031564684438355,
+            "log_score": -0.19025085137834624,
             "calibration_slope_intercept": {
               "n": 34,
-              "slope": 1.1380596563736143,
-              "intercept": -0.08561575943327543,
+              "slope": 1.1251958171197205,
+              "intercept": -0.07585784469488333,
               "ok": true,
               "ideal": {
                 "slope": 1.0,
@@ -2370,8 +2370,8 @@
             },
             "pit": {
               "n": 34,
-              "mean": 0.4373964992298807,
-              "var": 0.057210662255936004,
+              "mean": 0.4468075181562987,
+              "var": 0.05393895561224451,
               "expected_mean": 0.5,
               "expected_var": 0.08333333333333333,
               "histogram": [
@@ -2383,37 +2383,37 @@
                 {
                   "bin_lo": 0.1,
                   "bin_hi": 0.2,
-                  "n": 4.0
+                  "n": 3.0
                 },
                 {
                   "bin_lo": 0.2,
                   "bin_hi": 0.30000000000000004,
-                  "n": 5.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.30000000000000004,
                   "bin_hi": 0.4,
-                  "n": 7.0
+                  "n": 11.0
                 },
                 {
                   "bin_lo": 0.4,
                   "bin_hi": 0.5,
-                  "n": 5.0
+                  "n": 3.0
                 },
                 {
                   "bin_lo": 0.5,
                   "bin_hi": 0.6000000000000001,
-                  "n": 3.0
+                  "n": 4.0
                 },
                 {
                   "bin_lo": 0.6000000000000001,
                   "bin_hi": 0.7000000000000001,
-                  "n": 2.0
+                  "n": 4.0
                 },
                 {
                   "bin_lo": 0.7000000000000001,
                   "bin_hi": 0.8,
-                  "n": 3.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.8,
@@ -2455,7 +2455,14 @@
         "ok": false,
         "status": "fail",
         "detail": {
+          "crossfit_validation": {
+            "ok": false,
+            "failures": [
+              "stack artifact fingerprint mismatch"
+            ]
+          },
           "source": "nested_component_loo.reliability",
+          "crossfit_fallback": true,
           "nested_reliability_n": 264,
           "nested_reliability_spine": "pymc",
           "nested_brier": 0.0443663819831204,
@@ -2485,11 +2492,12 @@
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/validation_report_latest.json",
-          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json"
+          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json",
+          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/stack_reliability_crossfit_latest.json"
         ],
         "failure_behavior": "Recalibrate or widen.",
         "notes": [
-          "Calibration plots must disclose sample sizes; overconfidence blocks claims."
+          "G7 uses raw cross-fitted production-stack reliability when its lineage matches; experimental calibration cannot satisfy G7 until production adopts it."
         ]
       },
       "G8": {
@@ -2529,7 +2537,7 @@
         "status": "pass",
         "detail": {
           "alerts": [],
-          "mcse_control": 0.0018976318378442114
+          "mcse_control": 0.0019005783519760505
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
@@ -2546,10 +2554,10 @@
           "mode": "hash_seal_and_independent",
           "verify_rebuild": {
             "ok": true,
-            "run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+            "run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
             "error": null,
-            "forecast_hash_expected": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca",
-            "forecast_hash_actual": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca"
+            "forecast_hash_expected": "7f7b40b7d1ada67530666689b7ae33f3704ca954336bf566b2561c772004e39d",
+            "forecast_hash_actual": "7f7b40b7d1ada67530666689b7ae33f3704ca954336bf566b2561c772004e39d"
           },
           "independent_rebuild": {
             "ok": false,
@@ -2560,33 +2568,33 @@
                 {
                   "name": "p_dem_majority",
                   "ok": true,
-                  "delta": 0.0035200000000000786,
+                  "delta": 0.005879999999999996,
                   "tol": 0.01
                 },
                 {
                   "name": "expected_dem_seats",
                   "ok": true,
-                  "delta": 0.02656000000000347,
+                  "delta": 0.01601999999999748,
                   "tol": 0.15
                 },
                 {
                   "name": "max_race_p_dem",
                   "ok": true,
-                  "delta": 0.006620000000000015,
+                  "delta": 0.011379999999999946,
                   "tol": 0.02
                 }
               ],
-              "mean_abs_race_p_dem": 0.001666285714285722,
+              "mean_abs_race_p_dem": 0.0011857142857142789,
               "n_races_compared": 35
             },
             "domain_ok": true,
             "error": null,
             "run_id_match": false,
-            "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-            "rebuild_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+            "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+            "rebuild_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
             "freshness": {
-              "forecast_generated_at": "2026-09-22T00:12:42.704270+00:00",
-              "rebuild_generated_at": "2026-09-20T05:16:22.422255+00:00",
+              "forecast_generated_at": "2026-09-22T01:17:30.263013+00:00",
+              "rebuild_generated_at": "2026-09-22T00:16:30.893048+00:00",
               "rebuild_after_forecast": false
             },
             "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact.",
@@ -2780,8 +2788,8 @@
           ],
           "coherence_ok": true,
           "coherence_notes": [],
-          "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-          "evidence_fingerprint": "cb508c8b3137a67c9f65044c4affab3782edd09a2e3559bb18e4628c60039e2f"
+          "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+          "evidence_fingerprint": "66f4e260ff716dba911de8da30ba07a7b5f712e37a5e909098551622a8233ecc"
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
@@ -2846,14 +2854,14 @@
           "freeze_before_truth": true,
           "spine_label": "pymc",
           "validation_calibration": {
-            "n": 132,
-            "brier": 0.04140106151343855,
+            "n": 34,
+            "brier": 0.05452155071603785,
             "has_margin_scores": true,
-            "log_score": -0.20031564684438355,
+            "log_score": -0.19025085137834624,
             "calibration_slope_intercept": {
               "n": 34,
-              "slope": 1.1380596563736143,
-              "intercept": -0.08561575943327543,
+              "slope": 1.1251958171197205,
+              "intercept": -0.07585784469488333,
               "ok": true,
               "ideal": {
                 "slope": 1.0,
@@ -2862,8 +2870,8 @@
             },
             "pit": {
               "n": 34,
-              "mean": 0.4373964992298807,
-              "var": 0.057210662255936004,
+              "mean": 0.4468075181562987,
+              "var": 0.05393895561224451,
               "expected_mean": 0.5,
               "expected_var": 0.08333333333333333,
               "histogram": [
@@ -2875,37 +2883,37 @@
                 {
                   "bin_lo": 0.1,
                   "bin_hi": 0.2,
-                  "n": 4.0
+                  "n": 3.0
                 },
                 {
                   "bin_lo": 0.2,
                   "bin_hi": 0.30000000000000004,
-                  "n": 5.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.30000000000000004,
                   "bin_hi": 0.4,
-                  "n": 7.0
+                  "n": 11.0
                 },
                 {
                   "bin_lo": 0.4,
                   "bin_hi": 0.5,
-                  "n": 5.0
+                  "n": 3.0
                 },
                 {
                   "bin_lo": 0.5,
                   "bin_hi": 0.6000000000000001,
-                  "n": 3.0
+                  "n": 4.0
                 },
                 {
                   "bin_lo": 0.6000000000000001,
                   "bin_hi": 0.7000000000000001,
-                  "n": 2.0
+                  "n": 4.0
                 },
                 {
                   "bin_lo": 0.7000000000000001,
                   "bin_hi": 0.8,
-                  "n": 3.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.8,
@@ -2947,7 +2955,14 @@
         "ok": false,
         "status": "fail",
         "detail": {
+          "crossfit_validation": {
+            "ok": false,
+            "failures": [
+              "stack artifact fingerprint mismatch"
+            ]
+          },
           "source": "nested_component_loo.reliability",
+          "crossfit_fallback": true,
           "nested_reliability_n": 264,
           "nested_reliability_spine": "pymc",
           "nested_brier": 0.0443663819831204,
@@ -2977,11 +2992,12 @@
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/validation_report_latest.json",
-          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json"
+          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json",
+          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/stack_reliability_crossfit_latest.json"
         ],
         "failure_behavior": "Recalibrate or widen.",
         "notes": [
-          "Calibration plots must disclose sample sizes; overconfidence blocks claims."
+          "G7 uses raw cross-fitted production-stack reliability when its lineage matches; experimental calibration cannot satisfy G7 until production adopts it."
         ]
       },
       {
@@ -3021,7 +3037,7 @@
         "status": "pass",
         "detail": {
           "alerts": [],
-          "mcse_control": 0.0018976318378442114
+          "mcse_control": 0.0019005783519760505
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
@@ -3038,10 +3054,10 @@
           "mode": "hash_seal_and_independent",
           "verify_rebuild": {
             "ok": true,
-            "run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+            "run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
             "error": null,
-            "forecast_hash_expected": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca",
-            "forecast_hash_actual": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca"
+            "forecast_hash_expected": "7f7b40b7d1ada67530666689b7ae33f3704ca954336bf566b2561c772004e39d",
+            "forecast_hash_actual": "7f7b40b7d1ada67530666689b7ae33f3704ca954336bf566b2561c772004e39d"
           },
           "independent_rebuild": {
             "ok": false,
@@ -3052,33 +3068,33 @@
                 {
                   "name": "p_dem_majority",
                   "ok": true,
-                  "delta": 0.0035200000000000786,
+                  "delta": 0.005879999999999996,
                   "tol": 0.01
                 },
                 {
                   "name": "expected_dem_seats",
                   "ok": true,
-                  "delta": 0.02656000000000347,
+                  "delta": 0.01601999999999748,
                   "tol": 0.15
                 },
                 {
                   "name": "max_race_p_dem",
                   "ok": true,
-                  "delta": 0.006620000000000015,
+                  "delta": 0.011379999999999946,
                   "tol": 0.02
                 }
               ],
-              "mean_abs_race_p_dem": 0.001666285714285722,
+              "mean_abs_race_p_dem": 0.0011857142857142789,
               "n_races_compared": 35
             },
             "domain_ok": true,
             "error": null,
             "run_id_match": false,
-            "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-            "rebuild_run_id": "senate-2026_2026-09-13_ensemble_stack+overlays_20260901",
+            "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+            "rebuild_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
             "freshness": {
-              "forecast_generated_at": "2026-09-22T00:12:42.704270+00:00",
-              "rebuild_generated_at": "2026-09-20T05:16:22.422255+00:00",
+              "forecast_generated_at": "2026-09-22T01:17:30.263013+00:00",
+              "rebuild_generated_at": "2026-09-22T00:16:30.893048+00:00",
               "rebuild_after_forecast": false
             },
             "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact.",
@@ -3209,16 +3225,16 @@
     "run_coherence": {
       "ok": false,
       "mismatches": [
-        "independent_rebuild run_id=senate-2026_2026-09-13_ensemble_stack+overlays_20260901 != forecast.run_id=senate-2026_2026-09-20_ensemble_stack+overlays_20260901"
+        "independent_rebuild run_id=senate-2026_2026-09-20_ensemble_stack+overlays_20260901 != forecast.run_id=senate-2026_2026-09-22_ensemble_stack+overlays_20260901"
       ],
       "notes": [],
-      "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-      "snapshot_id": "f68f5d42ed8d283b",
+      "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+      "snapshot_id": "1f4ed31a06661e95",
       "model_version": "senate-hierarchical-v0.9.21",
       "forecast_publishable": true,
       "PUBLIC_LIVE_ENABLED": false,
       "live_locked": true,
-      "generated_at": "2026-09-22T00:13:53.614667+00:00",
+      "generated_at": "2026-09-22T01:18:30.099784+00:00",
       "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/run_coherence_latest.json"
     },
     "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/acceptance_gates_latest.json",
@@ -3251,29 +3267,29 @@
       {
         "pollster_id": "Center Street PAC",
         "n_polls": 25,
-        "crps": 4.766556509158752,
-        "brier": 0.05021070415968314,
-        "delta_crps": 0.11146317936530181,
-        "delta_brier": 0.0015355368583924514
+        "crps": 4.799244893360748,
+        "brier": 0.05000046916648859,
+        "delta_crps": 0.14415156356729764,
+        "delta_brier": 0.0013253018651979073
       },
       {
         "pollster_id": "Trafalgar Group",
         "n_polls": 14,
-        "crps": 4.054387550668024,
-        "brier": 0.05235359557586004,
-        "delta_crps": -0.600705779125426,
-        "delta_brier": 0.0036784282745693578
+        "crps": 4.236931087447823,
+        "brier": 0.05761498791570294,
+        "delta_crps": -0.4181622423456268,
+        "delta_brier": 0.008939820614412251
       },
       {
         "pollster_id": "Emerson",
         "n_polls": 11,
-        "crps": 4.676298094032036,
-        "brier": 0.05403404596101078,
-        "delta_crps": 0.021204764238585305,
-        "delta_brier": 0.0053588786597200955
+        "crps": 4.676029830141558,
+        "brier": 0.0532122461876355,
+        "delta_crps": 0.02093650034810768,
+        "delta_brier": 0.004537078886344817
       }
     ],
-    "mean_abs_delta_crps": 0.2444579075764377,
+    "mean_abs_delta_crps": 0.1944167687536774,
     "note": "Leave-pollster-out: large positive delta_crps means that pollster was important; stable scores imply robustness to single-house dominance.",
     "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/leave_pollster_out_latest.json"
   }

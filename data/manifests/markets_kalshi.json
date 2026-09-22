@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-20T21:01:54.347073+00:00",
+  "generated_at": "2026-09-22T01:15:11.576566+00:00",
   "election_id": "senate-2026",
-  "available_at": "2026-09-20",
-  "retrieval_date": "2026-09-20",
+  "available_at": "2026-09-22",
+  "retrieval_date": "2026-09-22",
   "n_races": 33,
-  "control_p_dem": 0.5891089108910891,
-  "control_p_rep": 0.41089108910891087,
+  "control_p_dem": 0.605,
+  "control_p_rep": 0.395,
   "errors": [
     {
       "state": "KY",
@@ -33,23 +33,23 @@
           {
             "contract_id": "SENATEMT-26-IND",
             "title": "Will Independents win the Senate race in Montana?",
-            "raw_price": 0.0865
+            "raw_price": 0.08099999999999999
           },
           {
             "contract_id": "SENATEMT-26-R",
             "title": "Will Republicans win the Senate race in Montana?",
-            "raw_price": 0.914
+            "raw_price": 0.9175
           },
           {
             "contract_id": "SENATEMT-26-D",
             "title": "Will Democratics win the Senate race in Montana?",
-            "raw_price": 0.007
+            "raw_price": 0.0095
           }
         ],
         "normalized_event_probabilities": {
-          "SENATEMT-26-IND": 0.08585607940446649,
-          "SENATEMT-26-R": 0.9071960297766749,
-          "SENATEMT-26-D": 0.006947890818858561
+          "SENATEMT-26-IND": 0.08035714285714285,
+          "SENATEMT-26-R": 0.910218253968254,
+          "SENATEMT-26-D": 0.009424603174603174
         },
         "mapping_method": null,
         "ambiguous_or_unsafe": true,
@@ -62,32 +62,25 @@
   ],
   "control_error": null,
   "parser_version": "kalshi-v3-candidate-audit",
-  "raw_sha256": "8f89b4f8a604395e6ecc9f1fd436a3af5f4f28a4a9e2f8382ee637a600d0916d",
+  "json_hash_mode": "canonical_json_sha256_v1",
+  "raw_sha256": "e3b94bbf34c92ecd13109b5179f60915a7d5907b076b6b24450a6ce89e9d0dfa",
+  "raw_canonical_json_sha256": "5ecfdb200a81422ea1108cd7e55298babf40efb00d8aec61033160d49b3f7430",
   "mapping_audit": {
     "path": "data/normalized/markets_mapping_audit.json",
-    "sha256": "3383c2a8e4b1a6fbf3771be2974d58a9763118278a664254ad21a5cd97c9127a",
-    "n_enabled": 33,
-    "n_disabled": 2,
+    "sha256": "e91764449393e1dbaadf24460ab8dfe2be64ba90095a6f588c42182722003872",
     "hash_mode": "canonical_json_sha256_v1",
-    "canonical_json_sha256": "ead95054ab00e1c9f8da677134462e580045cf6c978ee9d53b5c68bfd67511c1"
+    "canonical_json_sha256": "015c37937d5343940a9a25222fcc1ebfbdd1b3db7f43ba5930306159c3a6a919",
+    "n_enabled": 33,
+    "n_disabled": 2
   },
-  "normalized_races_sha256": "88333a7e079b2b9daf5c209129d04ce6ee30d6bd2e286c30e7d7e95ec6e4f8e9",
-  "normalized_control_sha256": "39bde0c775a19c01e558c38f962beacff219501a9d92106605c64c73814dea21",
+  "normalized_races_sha256": "55b81c1e182aeea2f8d16c3545e0a7ecdbbe0b1a84938000016718d5fc8c6d41",
+  "normalized_control_sha256": "554ff3968683d7e6182836bc49c739b37c54108ee3cf4c64eeb13f497c07153b",
+  "normalized_control_canonical_json_sha256": "b376c600b3d81ebcafcfa435764fcf7e37468f0ae5941a5d3b7c1e5fb64cce1d",
   "source_url": "https://api.elections.kalshi.com/",
   "tier": "aggregator",
   "paths": {
-    "raw": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\raw\\external\\kalshi_senate.json",
-    "races": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\markets.parquet",
-    "control": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\normalized\\markets_control.json"
-  },
-  "json_hash_mode": "canonical_json_sha256_v1",
-  "raw_canonical_json_sha256": "b5c3fe85d4896b97ea3ab6865619b6e099b57ec8fbb663cd8d9df33a440db07e",
-  "normalized_control_canonical_json_sha256": "2d97235de2470844e9fab28ee99d9887afb6a4d39eb1ad1a0216ad1a90240abd",
-  "integrity_migration": {
-    "from": "platform_specific_json_byte_sha256",
-    "to": "canonical_json_sha256_v1",
-    "reason": "git_lf_crlf_normalization",
-    "semantic_equivalence_verified": true,
-    "legacy_byte_hashes_retained": true
+    "raw": "/home/runner/work/electionmodel26/electionmodel26/data/raw/external/kalshi_senate.json",
+    "races": "/home/runner/work/electionmodel26/electionmodel26/data/normalized/markets.parquet",
+    "control": "/home/runner/work/electionmodel26/electionmodel26/data/normalized/markets_control.json"
   }
 }

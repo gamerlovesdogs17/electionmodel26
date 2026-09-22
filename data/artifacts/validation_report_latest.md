@@ -1,6 +1,6 @@
 # Validation report — senate-hierarchical-v0.9.21
 
-Generated: 2026-09-22T00:13:50.822660+00:00
+Generated: 2026-09-22T01:18:26.251876+00:00
 Primary holdout: 2022
 
 ## Stack weights
@@ -31,33 +31,33 @@ Primary holdout: 2022
   "control_ok": true,
   "control_soft": true,
   "control_gaps": {
-    "ddhq": 0.28448000000000007,
-    "kalshi": 0.17537108910891097
+    "ddhq": 0.28342,
+    "kalshi": 0.15842
   },
-  "primary_control_gap": 0.17537108910891097,
-  "max_abs_control_gap": 0.28448000000000007,
+  "primary_control_gap": 0.15842,
+  "max_abs_control_gap": 0.28342,
   "race_scores": {
     "ddhq": {
       "n": 10,
-      "brier_vs_peer_favorite": 0.24967668308000004,
-      "mae": 0.16658199999999998,
-      "crps_proxy": 0.16658199999999998,
+      "brier_vs_peer_favorite": 0.24501868219999995,
+      "mae": 0.172282,
+      "crps_proxy": 0.172282,
       "ok": false
     },
     "kalshi": {
       "n": 10,
-      "brier_vs_peer_favorite": 0.09758468308000001,
-      "mae": 0.07042298632253245,
-      "crps_proxy": 0.07042298632253245,
+      "brier_vs_peer_favorite": 0.0941426822,
+      "mae": 0.0756177349461474,
+      "crps_proxy": 0.0756177349461474,
       "ok": true
     }
   },
   "race_ok": true,
-  "mean_peer_disagreement": 0.16886770682566685,
+  "mean_peer_disagreement": 0.17306066125195163,
   "null_margin_races": [],
   "method": "ensemble_stack+overlays",
   "core_method": "pymc",
-  "generic_ballot": 5.7459422124828174,
+  "generic_ballot": 5.745942212482818,
   "reasons": [],
   "thresholds": {
     "max_abs_control_gap": 0.25,

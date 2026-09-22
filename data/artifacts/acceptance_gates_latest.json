@@ -1,7 +1,7 @@
 {
   "audit_item": "Milestone-0",
   "model_version": "senate-hierarchical-v0.9.21",
-  "generated_at": "2026-09-22T00:16:34.256143+00:00",
+  "generated_at": "2026-09-22T01:21:01.250819+00:00",
   "archive_scope": "2014-2024",
   "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
   "gates": {
@@ -99,8 +99,8 @@
         ],
         "coherence_ok": true,
         "coherence_notes": [],
-        "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-        "evidence_fingerprint": "cb508c8b3137a67c9f65044c4affab3782edd09a2e3559bb18e4628c60039e2f"
+        "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+        "evidence_fingerprint": "66f4e260ff716dba911de8da30ba07a7b5f712e37a5e909098551622a8233ecc"
       },
       "evidence": [
         "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
@@ -263,44 +263,59 @@
     "G7": {
       "id": "G7",
       "name": "Reliability",
-      "ok": false,
-      "status": "fail",
+      "ok": true,
+      "status": "pass",
       "detail": {
-        "source": "nested_component_loo.reliability",
-        "nested_reliability_n": 264,
-        "nested_reliability_spine": "pymc",
-        "nested_brier": 0.0443663819831204,
+        "crossfit_validation": {
+          "ok": true,
+          "failures": []
+        },
+        "source": "stack_reliability_crossfit.raw_production_stack",
+        "crossfit_procedure": "cycle_cross_fitted_production_stack",
+        "crossfit_raw_metrics": {
+          "n": 264,
+          "empirical_crps": 3.264360628905159,
+          "brier": 0.050070286904996715,
+          "log_score": -0.16020395577761515
+        },
+        "experimental_calibration_not_production": {
+          "production_adopted": false,
+          "g7_eligible": false,
+          "reliability_overconfidence": {
+            "sample_sizes_disclosed": true,
+            "overconfident_bins": [],
+            "n_overconfident": 0,
+            "total_n": 264.0,
+            "n_adequate_bins": 6,
+            "thin_sample": false,
+            "calibration_claim_allowed": true
+          },
+          "empirical_crps": 3.264360628905159,
+          "brier": 0.050070286904996715,
+          "log_score": -0.16020395577761515
+        },
         "n_bins": 10,
         "reliability_gate": {
           "sample_sizes_disclosed": true,
-          "overconfident_bins": [
-            {
-              "bin_lo": 0.8,
-              "bin_hi": 0.9,
-              "n": 16.0,
-              "mean_p": 0.844867380940749,
-              "mean_y": 0.6875,
-              "gap": 0.15736738094074898
-            }
-          ],
-          "n_overconfident": 1,
+          "overconfident_bins": [],
+          "n_overconfident": 0,
           "total_n": 264.0,
-          "n_adequate_bins": 5,
+          "n_adequate_bins": 6,
           "thin_sample": false,
-          "calibration_claim_allowed": false
+          "calibration_claim_allowed": true
         },
         "sample_sizes_disclosed": true,
         "calibration_n": 264,
-        "nested_multi_cycle": true,
-        "alert": "material overconfidence \u2014 recalibrate or widen; no calibration claim"
+        "nested_multi_cycle": true
       },
       "evidence": [
         "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/validation_report_latest.json",
-        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json",
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/stack_reliability_crossfit_latest.json"
       ],
       "failure_behavior": "Recalibrate or widen.",
       "notes": [
-        "Calibration plots must disclose sample sizes; overconfidence blocks claims."
+        "G7 uses raw cross-fitted production-stack reliability when its lineage matches; experimental calibration cannot satisfy G7 until production adopts it."
       ]
     },
     "G8": {
@@ -340,7 +355,7 @@
       "status": "pass",
       "detail": {
         "alerts": [],
-        "mcse_control": 0.0018976318378442114
+        "mcse_control": 0.0019005783519760505
       },
       "evidence": [
         "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
@@ -357,10 +372,10 @@
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
           "ok": true,
-          "run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+          "run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
           "error": null,
-          "forecast_hash_expected": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca",
-          "forecast_hash_actual": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca"
+          "forecast_hash_expected": "7f7b40b7d1ada67530666689b7ae33f3704ca954336bf566b2561c772004e39d",
+          "forecast_hash_actual": "7f7b40b7d1ada67530666689b7ae33f3704ca954336bf566b2561c772004e39d"
         },
         "independent_rebuild": {
           "ok": true,
@@ -371,33 +386,33 @@
               {
                 "name": "p_dem_majority",
                 "ok": true,
-                "delta": 0.005879999999999996,
+                "delta": 0.0038199999999999346,
                 "tol": 0.01
               },
               {
                 "name": "expected_dem_seats",
                 "ok": true,
-                "delta": 0.01601999999999748,
+                "delta": 0.008700000000004593,
                 "tol": 0.15
               },
               {
                 "name": "max_race_p_dem",
                 "ok": true,
-                "delta": 0.011379999999999946,
+                "delta": 0.008859999999999979,
                 "tol": 0.02
               }
             ],
-            "mean_abs_race_p_dem": 0.0011857142857142789,
+            "mean_abs_race_p_dem": 0.0010394285714285718,
             "n_races_compared": 35
           },
           "domain_ok": true,
           "error": null,
           "run_id_match": true,
-          "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-          "rebuild_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+          "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+          "rebuild_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
           "freshness": {
-            "forecast_generated_at": "2026-09-22T00:12:42.704270+00:00",
-            "rebuild_generated_at": "2026-09-22T00:16:30.893048+00:00",
+            "forecast_generated_at": "2026-09-22T01:17:30.263013+00:00",
+            "rebuild_generated_at": "2026-09-22T01:20:56.483280+00:00",
             "rebuild_after_forecast": true
           },
           "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact."
@@ -590,8 +605,8 @@
         ],
         "coherence_ok": true,
         "coherence_notes": [],
-        "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-        "evidence_fingerprint": "cb508c8b3137a67c9f65044c4affab3782edd09a2e3559bb18e4628c60039e2f"
+        "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+        "evidence_fingerprint": "66f4e260ff716dba911de8da30ba07a7b5f712e37a5e909098551622a8233ecc"
       },
       "evidence": [
         "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
@@ -754,44 +769,59 @@
     {
       "id": "G7",
       "name": "Reliability",
-      "ok": false,
-      "status": "fail",
+      "ok": true,
+      "status": "pass",
       "detail": {
-        "source": "nested_component_loo.reliability",
-        "nested_reliability_n": 264,
-        "nested_reliability_spine": "pymc",
-        "nested_brier": 0.0443663819831204,
+        "crossfit_validation": {
+          "ok": true,
+          "failures": []
+        },
+        "source": "stack_reliability_crossfit.raw_production_stack",
+        "crossfit_procedure": "cycle_cross_fitted_production_stack",
+        "crossfit_raw_metrics": {
+          "n": 264,
+          "empirical_crps": 3.264360628905159,
+          "brier": 0.050070286904996715,
+          "log_score": -0.16020395577761515
+        },
+        "experimental_calibration_not_production": {
+          "production_adopted": false,
+          "g7_eligible": false,
+          "reliability_overconfidence": {
+            "sample_sizes_disclosed": true,
+            "overconfident_bins": [],
+            "n_overconfident": 0,
+            "total_n": 264.0,
+            "n_adequate_bins": 6,
+            "thin_sample": false,
+            "calibration_claim_allowed": true
+          },
+          "empirical_crps": 3.264360628905159,
+          "brier": 0.050070286904996715,
+          "log_score": -0.16020395577761515
+        },
         "n_bins": 10,
         "reliability_gate": {
           "sample_sizes_disclosed": true,
-          "overconfident_bins": [
-            {
-              "bin_lo": 0.8,
-              "bin_hi": 0.9,
-              "n": 16.0,
-              "mean_p": 0.844867380940749,
-              "mean_y": 0.6875,
-              "gap": 0.15736738094074898
-            }
-          ],
-          "n_overconfident": 1,
+          "overconfident_bins": [],
+          "n_overconfident": 0,
           "total_n": 264.0,
-          "n_adequate_bins": 5,
+          "n_adequate_bins": 6,
           "thin_sample": false,
-          "calibration_claim_allowed": false
+          "calibration_claim_allowed": true
         },
         "sample_sizes_disclosed": true,
         "calibration_n": 264,
-        "nested_multi_cycle": true,
-        "alert": "material overconfidence \u2014 recalibrate or widen; no calibration claim"
+        "nested_multi_cycle": true
       },
       "evidence": [
         "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/validation_report_latest.json",
-        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json"
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_component_loo.json",
+        "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/stack_reliability_crossfit_latest.json"
       ],
       "failure_behavior": "Recalibrate or widen.",
       "notes": [
-        "Calibration plots must disclose sample sizes; overconfidence blocks claims."
+        "G7 uses raw cross-fitted production-stack reliability when its lineage matches; experimental calibration cannot satisfy G7 until production adopts it."
       ]
     },
     {
@@ -831,7 +861,7 @@
       "status": "pass",
       "detail": {
         "alerts": [],
-        "mcse_control": 0.0018976318378442114
+        "mcse_control": 0.0019005783519760505
       },
       "evidence": [
         "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
@@ -848,10 +878,10 @@
         "mode": "hash_seal_and_independent",
         "verify_rebuild": {
           "ok": true,
-          "run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+          "run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
           "error": null,
-          "forecast_hash_expected": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca",
-          "forecast_hash_actual": "d10a6d64cfc41d7b3e0ebd6addd55c058af2fa3ea18e5b4e107769104d7f95ca"
+          "forecast_hash_expected": "7f7b40b7d1ada67530666689b7ae33f3704ca954336bf566b2561c772004e39d",
+          "forecast_hash_actual": "7f7b40b7d1ada67530666689b7ae33f3704ca954336bf566b2561c772004e39d"
         },
         "independent_rebuild": {
           "ok": true,
@@ -862,33 +892,33 @@
               {
                 "name": "p_dem_majority",
                 "ok": true,
-                "delta": 0.005879999999999996,
+                "delta": 0.0038199999999999346,
                 "tol": 0.01
               },
               {
                 "name": "expected_dem_seats",
                 "ok": true,
-                "delta": 0.01601999999999748,
+                "delta": 0.008700000000004593,
                 "tol": 0.15
               },
               {
                 "name": "max_race_p_dem",
                 "ok": true,
-                "delta": 0.011379999999999946,
+                "delta": 0.008859999999999979,
                 "tol": 0.02
               }
             ],
-            "mean_abs_race_p_dem": 0.0011857142857142789,
+            "mean_abs_race_p_dem": 0.0010394285714285718,
             "n_races_compared": 35
           },
           "domain_ok": true,
           "error": null,
           "run_id_match": true,
-          "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-          "rebuild_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
+          "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+          "rebuild_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
           "freshness": {
-            "forecast_generated_at": "2026-09-22T00:12:42.704270+00:00",
-            "rebuild_generated_at": "2026-09-22T00:16:30.893048+00:00",
+            "forecast_generated_at": "2026-09-22T01:17:30.263013+00:00",
+            "rebuild_generated_at": "2026-09-22T01:20:56.483280+00:00",
             "rebuild_after_forecast": true
           },
           "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact."
@@ -986,17 +1016,13 @@
       ]
     }
   ],
-  "ok": false,
+  "ok": true,
   "promotion_ok": false,
-  "n_pass": 9,
+  "n_pass": 10,
   "n_partial": 1,
-  "n_fail": 1,
-  "failures": [
-    "G7"
-  ],
-  "research_failures": [
-    "G7"
-  ],
+  "n_fail": 0,
+  "failures": [],
+  "research_failures": [],
   "partials": [
     "G10"
   ],
@@ -1019,13 +1045,13 @@
     "ok": true,
     "mismatches": [],
     "notes": [],
-    "forecast_run_id": "senate-2026_2026-09-20_ensemble_stack+overlays_20260901",
-    "snapshot_id": "f68f5d42ed8d283b",
+    "forecast_run_id": "senate-2026_2026-09-22_ensemble_stack+overlays_20260901",
+    "snapshot_id": "1f4ed31a06661e95",
     "model_version": "senate-hierarchical-v0.9.21",
     "forecast_publishable": true,
     "PUBLIC_LIVE_ENABLED": false,
     "live_locked": true,
-    "generated_at": "2026-09-22T00:16:34.392662+00:00",
+    "generated_at": "2026-09-22T01:21:01.332465+00:00",
     "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/run_coherence_latest.json"
   }
 }
