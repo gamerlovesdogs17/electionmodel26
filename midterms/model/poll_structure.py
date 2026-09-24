@@ -6,15 +6,14 @@ nested validation run establishes incremental value.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
-
-MISSING_CATEGORY = "__unknown__"
-POLL_STRUCTURE_VERSION = "poll-structure-v1"
+MISSING_CATEGORY = "missing-row"
+POLL_STRUCTURE_VERSION = "poll-structure-v2"
 
 
 @dataclass(frozen=True)
@@ -42,6 +41,15 @@ class PollStructureConfig:
             "effective_heuristic_study_downweight": self.use_heuristic_study_downweight,
         }
 
+    def merged(self, overrides: dict[str, Any] | None) -> "PollStructureConfig":
+        """Materialize a challenger as explicit deltas from this reference."""
+        overrides = dict(overrides or {})
+        valid = set(asdict(self))
+        unknown = sorted(set(overrides) - valid)
+        if unknown:
+            raise KeyError(f"unknown poll-structure override(s): {', '.join(unknown)}")
+        return replace(self, **overrides)
+
     @property
     def use_heuristic_study_downweight(self) -> bool:
         if self.heuristic_study_downweight is not None:
@@ -49,13 +57,21 @@ class PollStructureConfig:
         return not self.study_effect
 
 
-def _stable_codes(values: pd.Series, *, missing_unique: bool = False) -> tuple[np.ndarray, list[str]]:
+def _stable_codes(
+    values: pd.Series,
+    *,
+    missing_unique: bool = False,
+    row_keys: pd.Series | None = None,
+) -> tuple[np.ndarray, list[str]]:
     labels: list[str] = []
     for pos, value in enumerate(values.tolist()):
         if value is None or (isinstance(value, float) and pd.isna(value)) or not str(value).strip():
-            labels.append(f"{MISSING_CATEGORY}:{pos}" if missing_unique else MISSING_CATEGORY)
+            key = str(row_keys.iloc[pos]) if row_keys is not None else str(pos)
+            labels.append(f"{MISSING_CATEGORY}:{key}" if missing_unique else MISSING_CATEGORY)
         else:
-            labels.append(str(value).strip())
+            # Namespace real source identities so they cannot collide with the
+            # reserved per-row missing labels.
+            labels.append(f"known:{str(value).strip()}")
     levels = sorted(set(labels))
     lookup = {value: idx for idx, value in enumerate(levels)}
     return np.asarray([lookup[value] for value in labels], dtype=int), levels
@@ -67,11 +83,27 @@ def encode_poll_structure(
 ) -> dict[str, Any]:
     """Return stable categorical IDs and poll-level indices.
 
-    Missing study IDs are deliberately unique by row: unrelated polls with
-    absent metadata must not acquire a shared latent study shock.
+    Missing sponsor, questionnaire and study IDs are deliberately unique by
+    row: absent metadata is not evidence that unrelated polls share a latent
+    effect. Known source identities continue to share an effect.
     """
     cfg = PollStructureConfig.coerce(config)
     frame = polls.reset_index(drop=True)
+
+    if "poll_id" in frame.columns:
+        base_keys = frame["poll_id"].fillna("").astype(str).str.strip()
+    else:
+        base_keys = pd.Series([""] * len(frame), dtype=str)
+    # Duplicate/missing poll IDs remain separated deterministically within a
+    # fixed input snapshot. The warehouse snapshot itself canonicalizes rows.
+    counts: dict[str, int] = {}
+    keys: list[str] = []
+    for pos, value in enumerate(base_keys.tolist()):
+        stem = value or f"row-{pos}"
+        occurrence = counts.get(stem, 0)
+        counts[stem] = occurrence + 1
+        keys.append(f"{stem}#{occurrence}")
+    row_keys = pd.Series(keys, dtype=str)
 
     def col(name: str) -> pd.Series:
         if name in frame.columns:
@@ -81,9 +113,15 @@ def encode_poll_structure(
     questionnaire = col("questionnaire_hash").copy()
     if questionnaire.isna().all() or questionnaire.astype(str).str.strip().isin({"", "None", "nan"}).all():
         questionnaire = col("question_id")
-    sponsor_idx, sponsor_ids = _stable_codes(col("sponsor_id"))
-    questionnaire_idx, questionnaire_ids = _stable_codes(questionnaire)
-    study_idx, study_ids = _stable_codes(col("study_id"), missing_unique=True)
+    sponsor_idx, sponsor_ids = _stable_codes(
+        col("sponsor_id"), missing_unique=True, row_keys=row_keys
+    )
+    questionnaire_idx, questionnaire_ids = _stable_codes(
+        questionnaire, missing_unique=True, row_keys=row_keys
+    )
+    study_idx, study_ids = _stable_codes(
+        col("study_id"), missing_unique=True, row_keys=row_keys
+    )
     return {
         "config": cfg,
         "sponsor_idx": sponsor_idx,
@@ -92,6 +130,7 @@ def encode_poll_structure(
         "questionnaire_ids": questionnaire_ids,
         "study_idx": study_idx,
         "study_ids": study_ids,
+        "missing_metadata_policy": "unique_row_reserved_namespace_v1",
     }
 
 

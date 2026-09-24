@@ -50,3 +50,15 @@ def test_snapshot_id_stable(warehouse: Warehouse):
     a = warehouse.build_as_of("2022-09-01", "senate-2022")
     b = warehouse.build_as_of("2022-09-01", "senate-2022")
     assert a.snapshot_id == b.snapshot_id
+
+
+def test_future_unavailable_poll_does_not_change_snapshot_id(warehouse: Warehouse):
+    as_of = date(2022, 9, 1)
+    baseline = warehouse.build_as_of(as_of, "senate-2022")
+    original = warehouse.polls
+    try:
+        warehouse.polls = warehouse.inject_future_poll_for_canary("senate-2022", as_of)
+        mutated = warehouse.build_as_of(as_of, "senate-2022")
+    finally:
+        warehouse.polls = original
+    assert mutated.snapshot_id == baseline.snapshot_id

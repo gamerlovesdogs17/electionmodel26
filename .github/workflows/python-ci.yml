@@ -1,0 +1,50 @@
+name: Python CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  cheap-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install supported dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Verify supported probabilistic stack
+        run: |
+          python - <<'PY'
+          import arviz
+          import matplotlib
+          import pymc
+
+          major = int(pymc.__version__.split(".", 1)[0])
+          print("pymc", pymc.__version__)
+          print("arviz", arviz.__version__)
+          print("matplotlib", matplotlib.__version__)
+          if major >= 6:
+              raise SystemExit("unsupported PyMC major version")
+          PY
+
+      - name: Run cheap unit and synthetic tests
+        run: |
+          pytest -q \
+            tests/test_blueprint_infrastructure.py \
+            tests/test_pre_rebuild_hardening.py \
+            tests/test_generic_empirical_mixture.py \
+            tests/test_generic_registry_and_prior.py \
+            tests/test_generic_market_identity_diagnostics.py \
+            tests/test_strict_cli_and_workflow.py

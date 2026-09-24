@@ -1,10 +1,12 @@
 # Blueprint compliance audit
 
-**Audit date:** 2026-09-22
+**Audit date:** 2026-09-23
 
 **Scope:** code and statistical infrastructure only
 
-**Current artifacts:** stale relative to this code
+**Model boundary:** `senate-hierarchical-v0.9.22`
+
+**Current artifacts:** v0.9.21 empirical artifacts are stale for this code
 
 **Public live:** disabled
 
@@ -16,7 +18,7 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 
 | Area | Classification | Publication implication |
 |---|---|---|
-| Warehouse/as-of polls and truth | Implemented with variation | Candidate timeline remains a blocker |
+| Warehouse/as-of polls and truth | Implemented with variation | Canonical content identity is complete; real timeline coverage remains a blocker |
 | Raw immutability and hashes | Implemented | New ingests must use the same contracts |
 | Poll measurement, pollster, mode/pop, ENOP | Implemented | Optional metadata terms still require OOS testing |
 | Sponsor/questionnaire/study terms | Blocked by real-data validation | Off by default |
@@ -34,8 +36,8 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 | Prior predictive/PPC/SBC | Capability implemented | Model-specific artifacts still pending |
 | Sampler health | Capability implemented | Current reference fit must be rerun |
 | Reproducibility/lineage/MCSE | Implemented with variation | Legacy absolute paths remain historical records |
-| Domain freshness | Implemented with variation | Next source refresh must populate statuses |
-| Acceptance gates | Implemented with variation | New empirical gates remain pending/requires rebuild |
+| Domain freshness | Implemented with variation | Retrieval and observation age are enforced only for enabled layers; adapter status coverage remains incomplete |
+| Acceptance gates | Implemented with variation | Machine-readable v0.9.22 empirical gates remain pending/requires rebuild |
 
 ## Important deviations and decisions
 
@@ -46,6 +48,10 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 - A 2018 demographic table is labeled as a reuse approximation. No earlier historical snapshot is fabricated.
 - Ordinary FRED latest/revised data and World Bank annual data are degraded substitutes for historical replay; only traceable ALFRED real-time vintages qualify.
 - Single-holdout calibration in the legacy validation report is exploratory and cannot satisfy formal reliability acceptance.
+- Stored v0.9.21 OOF, stack, forecast, and diagnostic artifacts cannot satisfy a
+  v0.9.22 extension gate. Metadata is not rewritten across the version boundary.
+- Same-family ablations freeze reference and challenger configurations and must
+  show exactly one changed feature. No-op ablations are ineligible.
 
 ## Required real-data work
 

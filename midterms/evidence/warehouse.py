@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -13,10 +14,150 @@ import pandas as pd
 
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR, ROOT
 from midterms.evidence.fixtures import build_fixtures
+from midterms.evidence.historical_polls import merge_historical_polls
 from midterms.evidence.ratings import rating_for
 from midterms.evidence.results_archive import merge_certified_into_results
-from midterms.evidence.historical_polls import merge_historical_polls
-from midterms.evidence.schema import is_active_ballot_row, align_poll_frame
+from midterms.evidence.schema import align_poll_frame, is_active_ballot_row
+
+SNAPSHOT_FINGERPRINT_VERSION = "evidence-snapshot-fingerprint-v2"
+
+
+def _canonical_value(value: Any) -> Any:
+    """Return a platform-independent strict-JSON representation."""
+    if value is None:
+        return None
+    if isinstance(value, (datetime, date, pd.Timestamp)):
+        return pd.Timestamp(value).isoformat()
+    if hasattr(value, "item") and not isinstance(value, (str, bytes, dict, list, tuple)):
+        try:
+            value = value.item()
+        except (TypeError, ValueError):
+            pass
+    if isinstance(value, float):
+        return None if not math.isfinite(value) else value
+    if isinstance(value, dict):
+        return {str(k): _canonical_value(v) for k, v in sorted(value.items(), key=lambda x: str(x[0]))}
+    if isinstance(value, set):
+        normalized = [_canonical_value(v) for v in value]
+        return sorted(
+            normalized,
+            key=lambda item: json.dumps(
+                item, sort_keys=True, separators=(",", ":"), allow_nan=False,
+            ),
+        )
+    if isinstance(value, (list, tuple)):
+        return [_canonical_value(v) for v in value]
+    try:
+        if pd.isna(value):
+            return None
+    except (TypeError, ValueError):
+        pass
+    if isinstance(value, (str, int, bool)):
+        return value
+    return str(value)
+
+
+def _semantic_sha256(payload: Any) -> str:
+    canonical = json.dumps(
+        _canonical_value(payload), sort_keys=True, separators=(",", ":"), allow_nan=False,
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def dataframe_semantic_sha256(frame: pd.DataFrame) -> str:
+    """Hash dataframe meaning independently of row/column order and newlines."""
+    columns = sorted(str(column) for column in frame.columns)
+    records = [
+        {column: _canonical_value(row.get(column)) for column in columns}
+        for row in frame.to_dict(orient="records")
+    ]
+    records.sort(key=lambda row: json.dumps(row, sort_keys=True, separators=(",", ":"), allow_nan=False))
+    return _semantic_sha256({"columns": columns, "records": records})
+
+
+def evidence_snapshot_fingerprint(
+    *,
+    election_id: str,
+    as_of: str | date,
+    polls: pd.DataFrame,
+    races: pd.DataFrame,
+    candidate_timeline: dict[str, Any] | None,
+    pollster_ratings: dict[str, Any] | None,
+    prior_snapshot_sha256: str | None,
+    presidential_source_sha256: str | None,
+    presidential_source_years: tuple[int, ...] | list[int] = (),
+    material_source_hashes: dict[str, str | None] | None = None,
+) -> tuple[str, dict[str, str | None]]:
+    """Create a content-addressed identity from selected, knowable evidence."""
+    components: dict[str, str | None] = {
+        "polls_semantic_sha256": dataframe_semantic_sha256(polls),
+        "races_semantic_sha256": dataframe_semantic_sha256(races),
+        "candidate_timeline_sha256": _semantic_sha256(candidate_timeline or {}),
+        "pollster_ratings_sha256": _semantic_sha256(pollster_ratings or {}),
+        "structural_prior_snapshot_sha256": prior_snapshot_sha256,
+        "presidential_source_set_sha256": presidential_source_sha256,
+        **{
+            f"material_source_{name}_sha256": value
+            for name, value in sorted((material_source_hashes or {}).items())
+        },
+    }
+    payload = {
+        "schema_version": SNAPSHOT_FINGERPRINT_VERSION,
+        "election_id": str(election_id),
+        "as_of": _parse_day(as_of).isoformat(),
+        "presidential_source_years": [int(year) for year in presidential_source_years],
+        "components": components,
+    }
+    return _semantic_sha256(payload), components
+
+
+def _selected_material_source_hashes(
+    *, normalized_dir: Path, as_of: date, election_id: str,
+) -> dict[str, str | None]:
+    """Hash only knowable rows from secondary stores used by the fit."""
+    stores = {
+        "finance": "fundraising_shares.parquet",
+        "economics": "economics_vintages.parquet",
+        "approval": "pres_approval.parquet",
+        "demographics": "demography.parquet",
+    }
+    manifest_names = {
+        "finance": "fundraising_shares.json",
+        "economics": "economics_vintages.json",
+        "approval": "pres_approval.json",
+        "demographics": "demography.json",
+    }
+    identity_keys = (
+        "source_url", "source", "tier", "license", "parser_version",
+        "source_sha256", "normalized_sha256", "vintage_class",
+    )
+    hashes: dict[str, str | None] = {}
+    for domain, filename in stores.items():
+        path = normalized_dir / filename
+        if not path.exists():
+            hashes[domain] = None
+            continue
+        frame = pd.read_parquet(path)
+        if "election_id" in frame.columns:
+            frame = frame[frame["election_id"].astype(str) == election_id]
+        if "available_at" in frame.columns:
+            available = frame["available_at"].map(_parse_day)
+            frame = frame[available.notna() & (available <= as_of)]
+        manifest_path = MANIFESTS_DIR / manifest_names[domain]
+        manifest_identity: dict[str, Any] = {}
+        if manifest_path.exists():
+            try:
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                manifest_identity = {
+                    key: manifest.get(key) for key in identity_keys if manifest.get(key) is not None
+                }
+            except (OSError, json.JSONDecodeError):
+                manifest_identity = {"manifest_status": "invalid_json"}
+        hashes[domain] = _semantic_sha256({
+            "selected_rows_sha256": dataframe_semantic_sha256(frame),
+            "source_identity": manifest_identity,
+        })
+    return hashes
 
 
 def _parse_day(value: str | date | datetime | pd.Timestamp | None) -> date | None:
@@ -41,6 +182,8 @@ class EvidenceSnapshot:
     prior_snapshot_sha256: str | None = None
     prior_snapshot_path: str | None = None
     candidate_timeline: dict[str, Any] | None = None
+    fingerprint_schema: str = SNAPSHOT_FINGERPRINT_VERSION
+    component_hashes: dict[str, str | None] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         n_contested = (
@@ -59,6 +202,8 @@ class EvidenceSnapshot:
             "prior_snapshot_sha256": self.prior_snapshot_sha256,
             "prior_snapshot_path": self.prior_snapshot_path,
             "candidate_timeline": self.candidate_timeline,
+            "fingerprint_schema": self.fingerprint_schema,
+            "component_hashes": self.component_hashes,
         }
 
 
@@ -198,7 +343,9 @@ class Warehouse:
             )
             races = races[mask]
         if len(races):
-            from midterms.evidence.outcome_identity import attach_declared_held_independent_caucus
+            from midterms.evidence.outcome_identity import (
+                attach_declared_held_independent_caucus,
+            )
 
             # Existing normalized stores may predate the explicit caucus columns.
             # Attach the declared accounting assumption in the model snapshot.
@@ -218,7 +365,9 @@ class Warehouse:
         prior_snapshot_path = None
         if self.normalized_dir.resolve() == NORMALIZED_DIR.resolve():
             from midterms.evidence.presidential_results import (
-                SOURCE_MANIFEST_PATH, select_source_years, verified_source_set_sha256,
+                SOURCE_MANIFEST_PATH,
+                select_source_years,
+                verified_source_set_sha256,
             )
 
             if SOURCE_MANIFEST_PATH.exists():
@@ -226,7 +375,8 @@ class Warehouse:
                 source_years = select_source_years(as_of_d)
                 if source_years:
                     from midterms.evidence.presidential_prior import (
-                        attach_prior_snapshot, materialize_prior_snapshot,
+                        attach_prior_snapshot,
+                        materialize_prior_snapshot,
                     )
 
                     prior_snapshot, prior_path = materialize_prior_snapshot(as_of_d)
@@ -246,17 +396,29 @@ class Warehouse:
 
         polls, rating_meta = self._attach_poll_priors(polls.reset_index(drop=True), as_of_d)
 
-        blob = (
-            f"{election_id}|{as_of_d.isoformat()}|{len(polls)}|"
-            f"{polls['poll_id'].astype(str).sum() if len(polls) else ''}"
-            f"|{source_sha or ''}|{','.join(map(str, source_years))}|{prior_snapshot_sha or ''}"
+        races = races.reset_index(drop=True)
+        material_source_hashes = _selected_material_source_hashes(
+            normalized_dir=self.normalized_dir,
+            as_of=as_of_d,
+            election_id=election_id,
         )
-        snapshot_id = hashlib.sha256(blob.encode()).hexdigest()[:16]
+        snapshot_id, component_hashes = evidence_snapshot_fingerprint(
+            election_id=election_id,
+            as_of=as_of_d,
+            polls=polls,
+            races=races,
+            candidate_timeline=candidate_timeline_meta,
+            pollster_ratings=rating_meta,
+            prior_snapshot_sha256=prior_snapshot_sha,
+            presidential_source_sha256=source_sha,
+            presidential_source_years=source_years,
+            material_source_hashes=material_source_hashes,
+        )
         return EvidenceSnapshot(
             as_of=as_of_d,
             election_id=election_id,
             polls=polls,
-            races=races.reset_index(drop=True),
+            races=races,
             results_known=results_known.reset_index(drop=True)
             if len(results_known)
             else results_known,
@@ -267,6 +429,7 @@ class Warehouse:
             prior_snapshot_sha256=prior_snapshot_sha,
             prior_snapshot_path=prior_snapshot_path,
             candidate_timeline=candidate_timeline_meta,
+            component_hashes=component_hashes,
         )
 
     def inject_future_poll_for_canary(self, election_id: str, as_of: str | date) -> pd.DataFrame:

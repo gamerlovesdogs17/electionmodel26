@@ -1,8 +1,8 @@
-# Model card — Senate hierarchical v0.9.21
+# Model card — Senate hierarchical v0.9.22
 
-> **Validation status (2026-09-22):** code capability changed after the last
+> **Validation status (2026-09-23):** v0.9.22 code capability changed after the last
 > research rebuild. Existing forecast, OOF, stack, validation and acceptance
-> artifacts do not validate these changes. `PUBLIC_LIVE_ENABLED=False`; the
+> artifacts are v0.9.21 evidence and do not validate v0.9.22. `PUBLIC_LIVE_ENABLED=False`; the
 > surface remains `research_only`. See `BLUEPRINT_COMPLIANCE_AUDIT.md`.
 
 ## Target
@@ -17,7 +17,7 @@
 
 ## Architecture (five layers — do not conflate)
 1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
-2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural ablations are diagnostics and are excluded from the production simplex. PyMC structural ablations now retain the same model family, snapshot, seed policy and fitting settings; they are pending a new run.
+2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural ablations are diagnostics and are excluded from the production simplex. PyMC structural ablations now retain the same model family, snapshot, seed policy and fitting settings. Each is a declared delta from a frozen reference configuration; no-op challengers are ineligible. They are pending a new run.
 3. **Distributional mixture code** — nonnegative weights from empirical predictive-mixture CRPS over frozen draws. Mean-score softmax is diagnostic only. The formal four-cycle 60/30-day OOF archive and stack were refitted on 2026-09-20; the current forecast and downstream acceptance artifacts remain stale.
 4. **Overlays** — expert ratings + Kalshi race/control soft pulls are optional. Publication use requires an exact-weight timestamp-pure nested-OOS validation contract; otherwise the publication fit runs core-only and records the layers as compare-only.
 5. **Final correlated chamber simulator** — joint margin draws → seats → control. Simulation count is separate from posterior sample count (`n_joint_sims` vs `n_posterior_samples`). Independent Bernoulli foil is diagnostic only.
@@ -59,7 +59,9 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 ## Optional poll structures
 
 Sponsor, questionnaire-family and shared-study effects use hierarchical
-shrinkage and stable identifiers in both static and dynamic PyMC. They are off
+shrinkage and stable identifiers in both static and dynamic PyMC. Missing
+metadata receives a unique reserved row identity and cannot create a shared
+latent group. They are off
 by default. When an explicit study effect is enabled, heuristic study
 downweighting defaults off to avoid counting the same dependence twice.
 
@@ -84,6 +86,10 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
   fetch/audit coverage, unchanged store bytes, and a market vintage no later
   than the forecast `as_of`.
 - Forecast writes `evidence_eligibility_latest.json` with matching `forecast_run_id` + `evidence_fingerprint`
+- `evidence-snapshot-fingerprint-v2` hashes selected forecasting rows and
+  component source identities using canonical serialization.
+- The effective production-domain contract marks sources as required core,
+  conditionally required, compare-only, disabled, or quarantine-only.
 - Development may continue with `run_class=non_publication` (UI banner mandatory)
 
 ## Core model

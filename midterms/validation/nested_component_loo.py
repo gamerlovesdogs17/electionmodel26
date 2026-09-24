@@ -29,6 +29,7 @@ from midterms.model.challengers import (
     fit_ridge_fundamentals,
 )
 from midterms.model.ensemble import weights_from_oof_scores
+from midterms.model.poll_structure import PollStructureConfig
 from midterms.model.pymc_model import (
     FitResult,
     draws_from_baseline_forecasts,
@@ -37,7 +38,6 @@ from midterms.model.pymc_model import (
     fit_pymc_dynamic,
 )
 from midterms.model.state_space import fit_state_space
-from midterms.model.terminal import active_scales
 from midterms.validation.artifact_lineage import (
     frozen_index_semantic_sha256,
     json_text_sha256_variants,
@@ -62,6 +62,9 @@ OPTIONAL_COMPONENTS = (
 STRUCTURAL_VARIANTS = (
     "hier_no_similarity",
     "hier_no_terminal_race",
+    "hier_no_study_effect",
+    "hier_no_sponsor_effect",
+    "hier_no_questionnaire_effect",
 )
 
 
@@ -88,6 +91,7 @@ class FrozenPrediction:
     evidence_snapshot_id: str | None = None
     prior_snapshot_sha256: str | None = None
     presidential_source_sha256: str | None = None
+    structural_ablation_lineage: dict[str, Any] | None = None
 
 
 def _draws_fingerprint(draws: dict[str, Any]) -> str:
@@ -123,6 +127,7 @@ def _freeze_from_fit(
     lead_days: int,
     as_of: date,
     seed: int,
+    structural_ablation_lineage: dict[str, Any] | None = None,
 ) -> FrozenPrediction:
     matrix = np.asarray(fit.draws_margin, dtype=float)
     if matrix.ndim != 2 or matrix.shape[1] != len(fit.race_ids) or not np.isfinite(matrix).all():
@@ -160,8 +165,15 @@ def _freeze_from_fit(
         seed=seed,
         status="ok",
         draws_by_race=by_race,
-        fit_settings={k: diagnostics.get(k) for k in ("draws", "tune", "chains", "seed", "convergence")},
+        fit_settings={
+            k: diagnostics.get(k)
+            for k in (
+                "draws", "tune", "chains", "seed", "convergence",
+                "prior_predictive", "posterior_predictive",
+            )
+        },
         prediction_sha256=_draws_fingerprint(by_race),
+        structural_ablation_lineage=structural_ablation_lineage,
     )
 
 
@@ -329,47 +341,60 @@ def freeze_component_predictions(
         ),
     )
 
-    # Structural variants of hierarchical spine (G8 optional structure)
-    _safe(
-        "hier_no_similarity",
-        lambda: _freeze_from_fit(
+    # Structural variants are materialized from the same reference fit and
+    # must prove exactly one declared change in their frozen lineage.
+    from midterms.validation.structural_ablations import (
+        STRUCTURAL_ABLATIONS,
+        same_family_fit_spec,
+    )
+
+    reference_poll_structure = PollStructureConfig.coerce(poll_structure)
+    reference_inference = {
+        "draws": max(n_draws // 2, OOF_PYMC_DRAWS_PER_CHAIN),
+        "tune": max(n_draws // 2, OOF_PYMC_TUNE_PER_CHAIN),
+        "chains": OOF_PYMC_CHAINS,
+    }
+    for ablation_id in ("hier_no_similarity", "hier_no_terminal_race"):
+        ablation = next(a for a in STRUCTURAL_ABLATIONS if a.identifier == ablation_id)
+        spec = same_family_fit_spec(
+            base_method=hierarchical_method,
+            base_seed=seed,
+            ablation=ablation,
+            reference_poll_structure=reference_poll_structure,
+            reference_fit_config=reference_inference,
+        )
+        if not spec["eligible"] or hier_name not in {"pymc", "pymc_dynamic"}:
+            frozen[ablation_id] = _failed_freeze(
+                ablation_id, election_id=election_id, holdout_year=holdout_year,
+                lead_days=lead_days, as_of=as_of, seed=seed,
+                error=spec["ineligible_reason"] or "ablation unsupported by reference family",
+            )
+            frozen[ablation_id].status = "ineligible"
+            frozen[ablation_id].structural_ablation_lineage = spec
+            continue
+        challenger = spec["challenger_config"]
+        _safe(
+            ablation_id,
+            lambda ablation_id=ablation_id, challenger=challenger, spec=spec: _freeze_from_fit(
             _fit_hierarchical(
                 snap,
                 method=hierarchical_method,
                 n_draws=n_draws,
                 seed=seed,
                 gb=gb,
-                include_similarity=False,
-                poll_structure=poll_structure,
+                include_similarity=bool(challenger["include_similarity"]),
+                include_terminal_race=bool(challenger["include_terminal_race"]),
+                poll_structure=reference_poll_structure,
             ),
-            component="hier_no_similarity",
+            component=ablation_id,
             election_id=election_id,
             holdout_year=holdout_year,
             lead_days=lead_days,
             as_of=as_of,
             seed=seed,
+            structural_ablation_lineage=spec,
         ),
-    )
-    _safe(
-        "hier_no_terminal_race",
-        lambda: _freeze_from_fit(
-            _fit_hierarchical(
-                snap,
-                method=hierarchical_method,
-                n_draws=n_draws,
-                seed=seed,
-                gb=gb,
-                include_terminal_race=False,
-                poll_structure=poll_structure,
-            ),
-            component="hier_no_terminal_race",
-            election_id=election_id,
-            holdout_year=holdout_year,
-            lead_days=lead_days,
-            as_of=as_of,
-            seed=seed,
-        ),
-    )
+        )
 
     _safe(
         "state_space",
@@ -449,27 +474,37 @@ def freeze_component_predictions(
 
     # Optional poll-structure ablations are only meaningful when the base
     # challenger actually enables the named term.
-    from midterms.model.poll_structure import PollStructureConfig
-
     base_poll_structure = PollStructureConfig.coerce(poll_structure)
-    for feature, component in (
-        ("study_effect", "hier_no_study_effect"),
-        ("sponsor_effect", "hier_no_sponsor_effect"),
-        ("questionnaire_effect", "hier_no_questionnaire_effect"),
-    ):
-        if hier_name not in {"pymc", "pymc_dynamic"} or not getattr(base_poll_structure, feature):
+    for ablation in STRUCTURAL_ABLATIONS:
+        if not ablation.poll_structure_overrides:
             continue
-        disabled = {**base_poll_structure.__dict__, feature: False}
+        spec = same_family_fit_spec(
+            base_method=hierarchical_method, base_seed=seed, ablation=ablation,
+            reference_poll_structure=base_poll_structure,
+            reference_fit_config=reference_inference,
+        )
+        component = ablation.identifier
+        if hier_name not in {"pymc", "pymc_dynamic"} or not spec["eligible"]:
+            frozen[component] = _failed_freeze(
+                component, election_id=election_id, holdout_year=holdout_year,
+                lead_days=lead_days, as_of=as_of, seed=seed,
+                error=spec["ineligible_reason"] or "ablation unsupported by reference family",
+            )
+            frozen[component].status = "ineligible"
+            frozen[component].structural_ablation_lineage = spec
+            continue
+        challenger_poll = base_poll_structure.merged(ablation.poll_structure_overrides)
         _safe(
             component,
-            lambda component=component, disabled=disabled: _freeze_from_fit(
+            lambda component=component, challenger_poll=challenger_poll, spec=spec: _freeze_from_fit(
                 _fit_hierarchical(
                     snap, method=hierarchical_method, n_draws=n_draws,
-                    seed=seed, gb=gb, poll_structure=disabled,
+                    seed=seed, gb=gb, poll_structure=challenger_poll,
                 ),
                 component=component, election_id=election_id,
                 holdout_year=holdout_year, lead_days=lead_days,
                 as_of=as_of, seed=seed,
+                structural_ablation_lineage=spec,
             ),
         )
 
@@ -1042,6 +1077,8 @@ def run_nested_component_loo(
     freeze_path.write_text(
         json.dumps(
             {
+                "schema_version": "nested-component-frozen-index-v2",
+                "model_version": MODEL_VERSION,
                 "n": len(frozen_archive),
                 "entries": [
                     {
@@ -1059,6 +1096,7 @@ def run_nested_component_loo(
                         "evidence_snapshot_id": e.get("evidence_snapshot_id"),
                         "prior_snapshot_sha256": e.get("prior_snapshot_sha256"),
                         "presidential_source_sha256": e.get("presidential_source_sha256"),
+                        "structural_ablation_lineage": e.get("structural_ablation_lineage"),
                         "error": e.get("error"),
                     }
                     for e in frozen_archive
@@ -1073,4 +1111,32 @@ def run_nested_component_loo(
     # Frozen draws dominate this artifact. Compact encoding keeps the
     # reproducibility record practical to version and transfer.
     out_path.write_text(json.dumps(report, separators=(",", ":"), default=str))
+    posterior_entries = [
+        {
+            "component": entry["component"],
+            "holdout_year": entry["holdout_year"],
+            "lead_days": entry["lead_days"],
+            "prediction_sha256": entry.get("prediction_sha256"),
+            "diagnostic": (entry.get("fit_settings") or {}).get("posterior_predictive"),
+        }
+        for entry in frozen_archive
+        if entry.get("component") in {"pymc", "pymc_dynamic"}
+        and entry.get("status") == "ok"
+    ]
+    posterior_ok = bool(posterior_entries) and all(
+        bool((entry.get("diagnostic") or {}).get("available"))
+        for entry in posterior_entries
+    )
+    (out_path.parent / "posterior_predictive_oof_latest.json").write_text(
+        json.dumps({
+            "schema_version": "posterior-predictive-oof-v1",
+            "model_version": MODEL_VERSION,
+            "source_nested_sha256": hashlib.sha256(out_path.read_bytes()).hexdigest(),
+            "source_frozen_draws_sha256": report["frozen_draws_sha256"],
+            "freeze_before_truth": True,
+            "entries": posterior_entries,
+            "ok": posterior_ok,
+        }, indent=2, default=str),
+        encoding="utf-8",
+    )
     return report

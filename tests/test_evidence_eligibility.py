@@ -5,10 +5,10 @@ from __future__ import annotations
 import pytest
 
 from midterms.evidence.eligibility import (
+    _classify_manifest_domain,
     assert_publishable,
     audit_evidence,
     classify_poll_row,
-    _classify_manifest_domain,
 )
 
 
@@ -40,11 +40,12 @@ def test_2026_live_evidence_domains_enumerated():
         assert rep["reasons"]
 
 
-def test_2022_fte_polls_are_publication_eligible():
+def test_2022_replay_fails_closed_without_complete_as_of_identity_and_freshness():
     rep = audit_evidence(election_id="senate-2022", as_of="2022-11-01")
-    assert rep["publishable"] is True, rep.get("reasons")
-    assert rep["run_class"] == "publication"
+    assert rep["publishable"] is False
+    assert rep["run_class"] == "non_publication"
     assert (rep["domains"]["polls"].get("blocked_n") or 0) == 0
+    assert rep["domains"]["candidate_timeline"]["publication_eligible"] is False
 
 
 def test_require_publishable_respects_eligibility():

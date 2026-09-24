@@ -7,6 +7,7 @@ import json
 
 import pytest
 
+from midterms.config import MODEL_VERSION
 from midterms.model.empirical_mixture import empirical_crps, fit_predictive_mixture
 from midterms.validation.artifact_lineage import frozen_index_semantic_sha256
 from midterms.validation.stack_weights import (
@@ -66,6 +67,7 @@ def test_stack_artifact_reproduces_from_synthetic_frozen_draws(tmp_path):
         synthetic_draws, sort_keys=True, separators=(",", ":"), allow_nan=False,
     ).encode()).hexdigest()
     nested.write_text(json.dumps({
+        "model_version": MODEL_VERSION,
         "crps_by_fold": {"group_a": {"first": 1.0, "second": 1.0},
                          "group_b": {"first": 1.0, "second": 1.0}},
         "oof_draws": synthetic_draws,
@@ -103,12 +105,15 @@ def test_stack_artifact_reproduces_from_synthetic_frozen_draws(tmp_path):
 def test_formal_stack_refuses_incomplete_required_candidate(tmp_path):
     nested_path = tmp_path / "synthetic_formal_nested.json"
     frozen_index = tmp_path / "synthetic_formal_nested_frozen.json"
-    frozen_index.write_text('{"entries": []}', encoding="utf-8")
+    frozen_index.write_text(json.dumps({
+        "model_version": MODEL_VERSION, "entries": [],
+    }), encoding="utf-8")
     draws = {"pymc": {"2018:60:synthetic": [-1.0, 1.0]}}
     fingerprint = hashlib.sha256(json.dumps(
         draws, sort_keys=True, separators=(",", ":"), allow_nan=False,
     ).encode()).hexdigest()
     nested_path.write_text(json.dumps({
+        "model_version": MODEL_VERSION,
         "stack_training_protocol": "formal_60_30_v1",
         "oof_crps_method": "exact_empirical_predictive_draws",
         "years": [2018, 2020, 2022, 2024], "lead_days": [60, 30],
@@ -153,7 +158,9 @@ def test_formal_stack_index_lineage_ignores_serialization_but_rejects_prediction
         ).hexdigest(),
         "fit_settings": {"synthetic": True},
     } for year in years for lead in leads for model in models]
-    index_payload = {"n": len(entries), "entries": entries}
+    index_payload = {
+        "model_version": MODEL_VERSION, "n": len(entries), "entries": entries,
+    }
     frozen_index.write_text(json.dumps(index_payload, indent=2), encoding="utf-8")
     draw_hash = hashlib.sha256(json.dumps(
         draws, sort_keys=True, separators=(",", ":"), allow_nan=False,
@@ -163,6 +170,7 @@ def test_formal_stack_index_lineage_ignores_serialization_but_rejects_prediction
         for year in years
     }
     nested_path.write_text(json.dumps({
+        "model_version": MODEL_VERSION,
         "stack_training_protocol": "formal_60_30_v1",
         "oof_crps_method": "exact_empirical_predictive_draws",
         "years": years,
@@ -186,7 +194,10 @@ def test_formal_stack_index_lineage_ignores_serialization_but_rejects_prediction
     assert verify_reproducible(fitted)["ok"] is True
 
     # Same entries, different entry order, key order, whitespace, and line endings.
-    equivalent = {"entries": list(reversed(entries)), "n": len(entries)}
+    equivalent = {
+        "entries": list(reversed(entries)), "n": len(entries),
+        "model_version": MODEL_VERSION,
+    }
     frozen_index.write_bytes(json.dumps(equivalent, separators=(",", ":")).replace(
         "},{", "},\r\n{",
     ).encode("utf-8"))

@@ -5,19 +5,16 @@ from __future__ import annotations
 import argparse
 import json
 
-from midterms.evidence.fixtures import build_fixtures
-from midterms.evidence.ingest import merge_live_polls_into_warehouse, try_fetch_preferred
-from midterms.evidence.ratings import write_normalized_ratings
-from midterms.pipeline.run_forecast import replay_baselines, run_forecast
-from midterms.validation.cycle_replay import replay_all_cycles, replay_cycle
-
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="midterms", description="Senate probability model")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_fix = sub.add_parser("build-fixtures", help="Generate synthetic evidence fixtures")
-    p_fix.set_defaults(func=lambda a: print(json.dumps(build_fixtures(), indent=2)))
+    p_fix.set_defaults(func=lambda a: print(json.dumps(
+        __import__("midterms.evidence.fixtures", fromlist=["build_fixtures"]).build_fixtures(),
+        indent=2,
+    )))
 
     p_bayes = sub.add_parser(
         "synthetic-bayesian-diagnostics",
@@ -61,7 +58,10 @@ def main(argv: list[str] | None = None) -> None:
         "fetch-external",
         help="Fetch VoteHub polls/ratings (+ MEDSL/FTE archives when reachable)",
     )
-    p_fetch.set_defaults(func=lambda a: print(json.dumps(try_fetch_preferred(), indent=2)))
+    p_fetch.set_defaults(func=lambda a: print(json.dumps(
+        __import__("midterms.evidence.ingest", fromlist=["try_fetch_preferred"]).try_fetch_preferred(),
+        indent=2,
+    )))
 
     p_econ = sub.add_parser("fetch-economics", help="Build ALFRED/fixture economic vintage store")
     p_econ.set_defaults(
@@ -166,6 +166,9 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     def _merge(a: argparse.Namespace) -> None:
+        from midterms.evidence.ingest import merge_live_polls_into_warehouse
+        from midterms.evidence.ratings import write_normalized_ratings
+
         write_normalized_ratings()
         summary = merge_live_polls_into_warehouse(
             election_id=a.election_id,
@@ -237,6 +240,8 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     def _forecast(a: argparse.Namespace) -> None:
+        from midterms.pipeline.run_forecast import run_forecast
+
         gb_meta = None
         gb = a.generic_ballot
         if gb is None:
@@ -302,7 +307,10 @@ def main(argv: list[str] | None = None) -> None:
 
     p_rep = sub.add_parser("replay-baselines", help="Holdout as-of baseline replay")
     p_rep.add_argument("--year", type=int, default=2022)
-    p_rep.set_defaults(func=lambda a: print(json.dumps(replay_baselines(a.year), indent=2)))
+    p_rep.set_defaults(func=lambda a: print(json.dumps(
+        __import__("midterms.pipeline.run_forecast", fromlist=["replay_baselines"]).replay_baselines(a.year),
+        indent=2,
+    )))
 
     p_cycle = sub.add_parser(
         "replay-cycle",
@@ -323,6 +331,8 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     def _cycle(a: argparse.Namespace) -> None:
+        from midterms.validation.cycle_replay import replay_all_cycles, replay_cycle
+
         if a.all:
             summary = replay_all_cycles(
                 allow_synthetic=a.allow_synthetic,
@@ -427,6 +437,7 @@ def main(argv: list[str] | None = None) -> None:
 
     def _serve(a: argparse.Namespace) -> None:
         import uvicorn
+
         from midterms.api.app import app
 
         uvicorn.run(app, host=a.host, port=a.port, log_level="info")
@@ -726,11 +737,33 @@ def main(argv: list[str] | None = None) -> None:
         "--strict", action="store_true",
         help="Exit nonzero after writing the report when publication eligibility fails",
     )
+    p_elig.add_argument(
+        "--publication-config", action="store_true",
+        help="Derive evidence dependencies from the effective publication overlay policy",
+    )
 
     def _evidence_eligibility(a: argparse.Namespace) -> None:
-        report = __import__(
-            "midterms.evidence.eligibility", fromlist=["write_eligibility_report"]
-        ).write_eligibility_report(a.election_id, as_of=a.as_of)
+        eligibility_module = __import__(
+            "midterms.evidence.eligibility",
+            fromlist=["effective_production_domain_contract", "write_eligibility_report"],
+        )
+        contract = None
+        if a.publication_config:
+            policy = __import__(
+                "midterms.validation.overlay_validation",
+                fromlist=["publication_overlay_policy"],
+            ).publication_overlay_policy(
+                rating_weight=0.15, market_weight=0.12, control_weight=0.15,
+            )
+            contract = eligibility_module.effective_production_domain_contract(
+                use_ratings=bool(policy["use_ratings"]),
+                use_markets=bool(
+                    policy["use_race_markets"] and policy["use_control_market"]
+                ),
+            )
+        report = eligibility_module.write_eligibility_report(
+            a.election_id, as_of=a.as_of, domain_contract=contract,
+        )
         print(json.dumps(report, indent=2, default=str))
         if a.strict and not report.get("publishable"):
             raise SystemExit(1)
@@ -856,6 +889,23 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
+    p_joint_oof = sub.add_parser(
+        "joint-oof-scores",
+        help="Score draw-aligned historical joint distributions from the frozen OOF artifact",
+    )
+    p_joint_oof.add_argument("--strict", action="store_true")
+
+    def _joint_oof_scores(a: argparse.Namespace) -> None:
+        report = __import__(
+            "midterms.validation.joint_oof_scores",
+            fromlist=["write_joint_oof_scores"],
+        ).write_joint_oof_scores()
+        print(json.dumps(report, indent=2, default=str))
+        if a.strict and not report.get("ok"):
+            raise SystemExit(1)
+
+    p_joint_oof.set_defaults(func=_joint_oof_scores)
+
     p_nq = sub.add_parser(
         "numerical-check",
         help="MCSE / convergence gate on latest forecast (audit P2.3 / G9)",
@@ -939,10 +989,31 @@ def main(argv: list[str] | None = None) -> None:
             fromlist=["evaluate_acceptance_gates"],
         ).evaluate_acceptance_gates()
         print(json.dumps(report, indent=2, default=str))
-        if a.strict and not report.get("ok"):
+        if a.strict and not report.get("full_validation_ok", report.get("ok")):
             raise SystemExit(1)
 
     p_acc.set_defaults(func=_acceptance_gates)
+
+    p_ext = sub.add_parser(
+        "blueprint-extension-gates",
+        help="Evaluate lineage-compatible blueprint empirical extension gates",
+    )
+    p_ext.add_argument("--strict", action="store_true")
+    p_ext.add_argument(
+        "--source-only", action="store_true",
+        help="Check source ingest/refresh blockers before expensive fitting",
+    )
+
+    def _blueprint_extension_gates(a: argparse.Namespace) -> None:
+        report = __import__(
+            "midterms.validation.blueprint_extension_gates",
+            fromlist=["evaluate_blueprint_extension_gates"],
+        ).evaluate_blueprint_extension_gates(source_only=a.source_only)
+        print(json.dumps(report, indent=2, default=str))
+        if a.strict and not report.get("required_ok"):
+            raise SystemExit(1)
+
+    p_ext.set_defaults(func=_blueprint_extension_gates)
 
     p_pub = sub.add_parser(
         "publish-live",

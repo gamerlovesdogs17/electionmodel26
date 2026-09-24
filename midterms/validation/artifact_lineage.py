@@ -9,8 +9,20 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from midterms.config import MODEL_VERSION
+
 FROZEN_INDEX_SEMANTIC_VERSION = "frozen_prediction_index_semantic_v1"
 _NON_SEMANTIC_INDEX_FIELDS = frozenset({"path", "generated_at", "created_at"})
+
+
+def require_current_model_version(
+    payload: Mapping[str, Any], *, field: str = "model_version", label: str = "artifact",
+) -> str:
+    """Fail closed when empirical evidence belongs to an older code boundary."""
+    actual = str(payload.get(field) or "")
+    if actual != MODEL_VERSION:
+        raise ValueError(f"stale {label} model_version: {actual or None} != {MODEL_VERSION}")
+    return actual
 
 
 def frozen_index_semantic_payload(payload: Mapping[str, Any]) -> dict[str, Any]:

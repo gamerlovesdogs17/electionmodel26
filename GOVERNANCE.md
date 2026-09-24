@@ -3,7 +3,7 @@
 Blueprint §§11–12 roles and change control (Senate research production).
 
 ## Public live probabilities
-**HOLD (17 Sep 2026 data-drop audit / v0.9.21):** `PUBLIC_LIVE_ENABLED=False`.
+**HOLD (23 Sep 2026 pre-rebuild boundary / v0.9.22):** `PUBLIC_LIVE_ENABLED=False`.
 Truth_v1 ledger/expectations are unified; Wikipedia vote scrape remains quarantined.
 `publish-live` fail-closes until multi-cycle nested validation and fold-pure evidence
 clear a fresh review. Thin/single-cycle calibration claims are blocked by G6/G7.
@@ -11,6 +11,9 @@ New blueprint extensions separate code capability from empirical proof. A
 capability marked implemented in `BLUEPRINT_COMPLIANCE_AUDIT.json` does not
 permit publication while its empirical gate is pending, stale, requires a
 refresh, or requires a rebuild.
+Strict research acceptance requires both the unchanged G1-G11 report and the
+separate version-bound blueprint extension evaluation. Old-version empirical
+artifacts remain historical records and cannot be relabeled as current.
 
 Current surface: `research_only`. Do not label research runs as live.
 

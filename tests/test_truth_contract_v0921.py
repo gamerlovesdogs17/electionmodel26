@@ -2,15 +2,9 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
-import pytest
-
 from midterms.config import MODEL_VERSION, PUBLIC_LIVE_ENABLED, ROOT
 from midterms.evidence.official_ledger import load_expectations, load_ledger
 from midterms.evidence.truth_contract import (
-    CONTEST_REQUIRED,
     EXPECTATION_REQUIRED,
     SCHEMA_VERSION,
     WIKI_QUARANTINE_LABEL,
@@ -149,6 +143,6 @@ def test_legacy_builder_redirects_to_truth_v1():
     assert callable(rebuild_canonical_truth)
 
 
-def test_live_stays_off_on_v0921():
+def test_live_stays_off_on_v0922():
     assert PUBLIC_LIVE_ENABLED is False
-    assert "v0.9.21" in MODEL_VERSION or MODEL_VERSION.endswith("v0.9.21")
+    assert MODEL_VERSION.endswith("v0.9.22")

@@ -13,7 +13,7 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.9.21"
+MODEL_VERSION = "senate-hierarchical-v0.9.22"
 
 # Blueprint audit 14 Sep 2026 (v0.9.19 review): HOLD live until truth ledger,
 # vintages, fold purity, and version-coherent release clearance are repaired.

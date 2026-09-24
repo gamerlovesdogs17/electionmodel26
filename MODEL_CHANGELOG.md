@@ -4,6 +4,32 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-23 — v0.9.22 pre-rebuild integration boundary
+
+- Bumped the active model version from `senate-hierarchical-v0.9.21` to
+  `senate-hierarchical-v0.9.22`. Existing v0.9.21 releases remain immutable
+  historical records; their OOF, stack and diagnostic artifacts are now
+  explicitly stale for v0.9.22 empirical claims.
+- Same-family structural ablations are materialized as one declared delta from
+  a reference configuration. Reference/challenger configs and the exact changed
+  feature are frozen in lineage; a disabled-reference no-op is ineligible.
+- Missing sponsor, questionnaire and study metadata uses distinct reserved
+  row identities instead of a shared substantive latent group.
+- Evidence snapshots now use `evidence-snapshot-fingerprint-v2`, a canonical
+  semantic hash of selected polls, races, candidate timeline, rating snapshot,
+  and structural-prior/source identities.
+- Eligibility now enforces point-in-time candidate identity, source-provenance
+  freshness, and an effective-domain map. The source preflight audits the
+  formal 2018/2020/2022/2024 at 60/30-day identity cutoffs before fitting.
+  Disabled optional overlays remain visible without becoming hard dependencies.
+- Blueprint extension gates now distinguish code capability from version-bound
+  empirical proof. The rebuild workflow regenerates OOF before stack fitting,
+  reuses each PyMC fit for prior/PPC/sampler diagnostics, creates aligned joint
+  OOF scores, and commits only after strict G1-G11 plus extension evaluation.
+- Added cheap Python 3.11 push/PR CI with an explicit PyMC `<6` check.
+- No forecast, historical OOF fit, source refresh, simulation, publication, or
+  GitHub Actions workflow was run in this pass.
+
 ## 2026-09-22 — blueprint capability remediation (validation pending)
 
 - Added a machine-readable and readable blueprint compliance audit. Capability

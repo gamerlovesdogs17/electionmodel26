@@ -13,7 +13,127 @@ from typing import Any
 
 import pandas as pd
 
-from midterms.config import ARTIFACTS_DIR, MANIFESTS_DIR, NORMALIZED_DIR
+from midterms.config import ARTIFACTS_DIR, MANIFESTS_DIR, MODEL_VERSION, NORMALIZED_DIR
+from midterms.evidence.freshness import classify_freshness
+
+DOMAIN_CONTRACT_VERSION = "production-domain-contract-v1"
+ROLE_HARD = "required_core"
+ROLE_CONDITIONAL = "conditionally_required"
+ROLE_COMPARE = "compare_only"
+ROLE_DISABLED = "disabled"
+ROLE_QUARANTINE = "quarantine_only"
+
+
+def effective_production_domain_contract(
+    *, use_ratings: bool = False, use_markets: bool = False,
+) -> dict[str, Any]:
+    """Declare which evidence domains actually determine the requested fit."""
+    roles = {
+        "races": ROLE_HARD,
+        "polls": ROLE_HARD,
+        "structural_prior": ROLE_HARD,
+        "candidate_timeline": ROLE_HARD,
+        "finance": ROLE_HARD,
+        "economics": ROLE_HARD,
+        "approval": ROLE_HARD,
+        "demographics": ROLE_HARD,
+        "results": ROLE_COMPARE,
+        "ratings": ROLE_CONDITIONAL if use_ratings else ROLE_DISABLED,
+        "markets": ROLE_CONDITIONAL if use_markets else ROLE_DISABLED,
+        "wiki_vote_scrape": ROLE_QUARANTINE,
+    }
+    return {
+        "schema_version": DOMAIN_CONTRACT_VERSION,
+        "roles": roles,
+        "use_ratings": bool(use_ratings),
+        "use_markets": bool(use_markets),
+    }
+
+
+def apply_domain_contract(
+    domains: dict[str, dict[str, Any]], contract: dict[str, Any],
+) -> tuple[dict[str, dict[str, Any]], list[str]]:
+    """Attach roles and return failures only for evidence used by the fit."""
+    roles = dict(contract.get("roles") or {})
+    failures: list[str] = []
+    out: dict[str, dict[str, Any]] = {}
+    for name, original in domains.items():
+        block = dict(original)
+        role = roles.get(name, ROLE_COMPARE)
+        block["production_role"] = role
+        hard = role in {ROLE_HARD, ROLE_CONDITIONAL}
+        fresh = block.get("freshness")
+        freshness_ok = fresh is None or fresh.get("status") == "fresh"
+        domain_ok = bool(block.get("eligible", True)) and freshness_ok
+        block["hard_dependency"] = hard
+        block["effective_eligible"] = domain_ok if hard else None
+        if hard and not domain_ok:
+            reason = (
+                block.get("blocked_reason") or block.get("reason")
+                or (fresh or {}).get("status") or "ineligible"
+            )
+            failures.append(f"{name} domain blocked ({block.get('tier', 'unknown')}): {reason}")
+        out[name] = block
+    for name, role in roles.items():
+        if role in {ROLE_HARD, ROLE_CONDITIONAL} and name not in out:
+            failures.append(f"{name} required domain is missing")
+    return out, failures
+
+
+def _latest_value(frame: pd.DataFrame, column: str) -> str | None:
+    if column not in frame.columns or frame.empty:
+        return None
+    parsed = pd.to_datetime(frame[column], errors="coerce", utc=True)
+    return parsed.max().isoformat() if parsed.notna().any() else None
+
+
+def _manifest_time(manifest: dict[str, Any] | None, *keys: str) -> str | None:
+    if not manifest:
+        return None
+    for key in keys:
+        value = manifest.get(key)
+        if value:
+            return str(value)
+    nested = manifest.get("fetch_meta") or {}
+    for key in keys:
+        if nested.get(key):
+            return str(nested[key])
+    return None
+
+
+def domain_freshness_from_provenance(
+    domain: str,
+    *,
+    checked_at: str,
+    manifest: dict[str, Any] | None = None,
+    retrieved_at: str | None = None,
+    observed_at: str | None = None,
+    source_available: bool = True,
+) -> dict[str, Any]:
+    """Classify provenance timestamps without consulting filesystem mtimes."""
+    parser_status = "ok"
+    refresh_status = "ok"
+    schema_status = "ok"
+    if manifest:
+        if manifest.get("fetch_error") or manifest.get("refresh_error"):
+            refresh_status = str(manifest.get("fetch_error") or manifest.get("refresh_error"))
+        if manifest.get("parser_status") not in (None, "ok"):
+            parser_status = str(manifest["parser_status"])
+        if manifest.get("schema_status") not in (None, "ok"):
+            schema_status = str(manifest["schema_status"])
+    return classify_freshness(
+        domain, checked_at=checked_at,
+        retrieved_at=retrieved_at or _manifest_time(
+            manifest, "retrieved_at", "retrieval_date", "generated_at", "available_at"
+        ),
+        observed_at=observed_at or _manifest_time(
+            manifest, "observed_at", "data_through", "latest_observation", "available_at"
+        ),
+        source_available=source_available,
+        refresh_status=refresh_status,
+        parser_status=parser_status,
+        schema_status=schema_status,
+    )
 
 # Ordered from strongest to weakest
 TIERS = (
@@ -359,6 +479,8 @@ def audit_evidence(
     results: pd.DataFrame | None = None,
     max_poll_age_days: float | None = 21.0,
     as_of: str | None = None,
+    domain_contract: dict[str, Any] | None = None,
+    candidate_timeline: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """
     Classify warehouse evidence for an election and decide publishability.
@@ -368,11 +490,17 @@ def audit_evidence(
     from midterms.evidence.warehouse import Warehouse
 
     wh = None
+    snapshot = None
     if polls is None or races is None or results is None:
         wh = Warehouse(ensure_fixtures=False)
-        polls = polls if polls is not None else wh.polls
-        races = races if races is not None else wh.races
+        if as_of:
+            snapshot = wh.build_as_of(as_of, election_id)
+        polls = polls if polls is not None else (snapshot.polls if snapshot else wh.polls)
+        races = races if races is not None else (snapshot.races if snapshot else wh.races)
         results = results if results is not None else wh.results
+        candidate_timeline = candidate_timeline or (
+            snapshot.candidate_timeline if snapshot else None
+        )
 
     polls_e = polls[polls["election_id"].astype(str) == election_id].copy() if len(polls) else polls
     races_e = races[races["election_id"].astype(str) == election_id].copy() if len(races) else races
@@ -402,6 +530,7 @@ def audit_evidence(
             "eligible_n": int(poll_tiers.isin(list(PUBLICATION_ELIGIBLE)).sum())
             if len(poll_tiers)
             else 0,
+            "eligible": False,
         },
         "results": {
             "n": int(len(results_e)),
@@ -411,37 +540,35 @@ def audit_evidence(
             else 0,
         },
     }
-    if election_id == "senate-2026":
-        prior_error = None
-        if as_of:
-            try:
-                from midterms.evidence.presidential_prior import (
-                    attach_prior_snapshot, materialize_prior_snapshot,
-                )
+    prior_error = None
+    if as_of:
+        try:
+            from midterms.evidence.presidential_prior import (
+                attach_prior_snapshot,
+                materialize_prior_snapshot,
+            )
 
-                prior_snapshot, _ = materialize_prior_snapshot(pd.Timestamp(as_of).date())
-                races_e = attach_prior_snapshot(races_e, prior_snapshot)
-            except (FileNotFoundError, KeyError, TypeError, ValueError) as exc:
-                prior_error = str(exc)
-        prior_audit = audit_structural_prior(races_e)
-        if prior_error:
-            prior_audit = {"eligible": False, "blocked_n": len(races_e),
-                           "reason": f"structural prior source verification failed: {prior_error}"}
-        domains["structural_prior"] = prior_audit
-        if not prior_audit["eligible"]:
-            reasons.append(str(prior_audit["reason"]))
+            prior_snapshot, _ = materialize_prior_snapshot(pd.Timestamp(as_of).date())
+            races_e = attach_prior_snapshot(races_e, prior_snapshot)
+        except (FileNotFoundError, KeyError, TypeError, ValueError) as exc:
+            prior_error = str(exc)
+    prior_audit = audit_structural_prior(races_e)
+    if prior_error:
+        prior_audit = {"eligible": False, "blocked_n": len(races_e),
+                       "reason": f"structural prior source verification failed: {prior_error}"}
+    domains["structural_prior"] = prior_audit
+    if not prior_audit["eligible"]:
+        reasons.append(str(prior_audit["reason"]))
+
+    from midterms.evidence.candidate_timeline import audit_candidate_timeline
+
+    domains["candidate_timeline"] = audit_candidate_timeline(
+        races_e, candidate_timeline,
+    )
 
     # Fresh audit R-04: every configured live domain
     extra = _audit_configured_domains(as_of=as_of)
     domains.update(extra)
-    for name, block in extra.items():
-        if block.get("quarantine"):
-            continue  # informational quarantine records are not live inputs
-        if election_id == "senate-2026" and not block.get("eligible", True):
-            reasons.append(
-                f"{name} domain blocked ({block.get('tier')}): "
-                f"{block.get('blocked_reason') or block.get('reason') or 'ineligible'}"
-            )
 
     # Poll eligibility: target election must not be majority synthetic/untraceable
     n_polls = int(len(polls_e))
@@ -455,6 +582,9 @@ def audit_evidence(
         )
     if race_tier not in PUBLICATION_ELIGIBLE:
         reasons.append(f"race universe tier={race_tier} not publication-eligible")
+    domains["polls"]["eligible"] = n_polls > 0 and blocked_polls < max(
+        1, int(0.05 * n_polls)
+    )
 
     # Staleness for live cycle
     stale = False
@@ -475,6 +605,71 @@ def audit_evidence(
                 )
     domains["polls"]["stale"] = stale
     domains["polls"]["latest_age_hours"] = max_age_h
+    # Operational freshness is a current-cycle concern. Historical replay uses
+    # point-in-time availability/vintage gates; old observations are expected
+    # and must not be mislabeled as an operational outage.
+    if as_of and election_id == "senate-2026":
+        freshness_checked_at = datetime.now(timezone.utc).isoformat()
+        domains["polls"]["freshness"] = domain_freshness_from_provenance(
+            "polls", checked_at=freshness_checked_at,
+            retrieved_at=_latest_value(polls_e, "retrieved_at"),
+            observed_at=_latest_value(polls_e, "field_end"),
+            source_available=bool(n_polls),
+        )
+        timeline_meta = candidate_timeline or {}
+        domains["candidate_timeline"]["freshness"] = domain_freshness_from_provenance(
+            "candidate_ballot", checked_at=freshness_checked_at,
+            retrieved_at=timeline_meta.get("latest_retrieved_at"),
+            observed_at=timeline_meta.get("latest_effective_at"),
+            source_available=bool(timeline_meta.get("n_events_applied")),
+        )
+
+        manifest_names = {
+            "finance": "fundraising_shares.json",
+            "economics": "economics_vintages.json",
+            "approval": "pres_approval.json",
+            "demographics": "demography.json",
+            "ratings": "expert_ratings.json",
+            "markets": "markets_kalshi.json",
+        }
+        freshness_names = {
+            "finance": "finance", "economics": "economics",
+            "approval": "approval", "demographics": "demographics",
+            "ratings": "ratings", "markets": "markets",
+        }
+        observation_sources = {
+            "finance": ("fundraising_shares.parquet", "available_at"),
+            "economics": ("economics_vintages.parquet", "observation_date"),
+            "approval": ("pres_approval.parquet", "available_at"),
+            "ratings": ("expert_ratings.parquet", "available_at"),
+        }
+        for name, filename in manifest_names.items():
+            path = MANIFESTS_DIR / filename
+            manifest = None
+            if path.exists():
+                try:
+                    manifest = json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    manifest = {"parser_status": "manifest_json_invalid"}
+            observed_at = None
+            source = observation_sources.get(name)
+            if source and (NORMALIZED_DIR / source[0]).exists():
+                observed_frame = pd.read_parquet(
+                    NORMALIZED_DIR / source[0], columns=[source[1]],
+                )
+                observed_at = _latest_value(observed_frame, source[1])
+            domains[name]["freshness"] = domain_freshness_from_provenance(
+                freshness_names[name], checked_at=freshness_checked_at, manifest=manifest,
+                observed_at=observed_at,
+                source_available=manifest is not None,
+            )
+
+    contract = domain_contract or effective_production_domain_contract()
+    domains, contract_failures = apply_domain_contract(domains, contract)
+    # Domain-role evaluation supersedes unconditional optional-domain blocking.
+    reasons = [reason for reason in reasons if "domain blocked" not in reason]
+    reasons.extend(contract_failures)
+    reasons = list(dict.fromkeys(reasons))
 
     chamber_ok = None
     coverage_ok = None
@@ -506,6 +701,7 @@ def audit_evidence(
     publishable = len(reasons) == 0 and n_polls > 0
     run_class = "publication" if publishable else "non_publication"
     report = {
+        "model_version": MODEL_VERSION,
         "ok": publishable,
         "publishable": publishable,
         "run_class": run_class,
@@ -513,6 +709,7 @@ def audit_evidence(
         "as_of": as_of,
         "reasons": reasons,
         "domains": domains,
+        "effective_domain_contract": contract,
         "chamber_reconcile_ok": chamber_ok,
         "poll_coverage_ok": coverage_ok,
         "tiers": list(TIERS),
@@ -534,8 +731,11 @@ def write_eligibility_report(
     run_id: str | None = None,
     snapshot_id: str | None = None,
     forecast_generated_at: str | None = None,
+    domain_contract: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    report = audit_evidence(election_id=election_id, as_of=as_of)
+    report = audit_evidence(
+        election_id=election_id, as_of=as_of, domain_contract=domain_contract,
+    )
     from midterms.ops.run_coherence import stamp_eligibility_identity
 
     report = stamp_eligibility_identity(
@@ -560,6 +760,7 @@ def assert_publishable(
     *,
     as_of: str | None = None,
     allow_non_publication: bool = True,
+    domain_contract: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """
     Evaluate eligibility.
@@ -567,7 +768,9 @@ def assert_publishable(
     If not publishable and ``allow_non_publication`` is False, raise.
     Otherwise return the report (caller must stamp run_class on the artifact).
     """
-    report = audit_evidence(election_id=election_id, as_of=as_of)
+    report = audit_evidence(
+        election_id=election_id, as_of=as_of, domain_contract=domain_contract,
+    )
     if not report["publishable"] and not allow_non_publication:
         raise ValueError(
             "Evidence not publication-eligible for "

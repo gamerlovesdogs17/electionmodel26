@@ -13,7 +13,6 @@ from typing import Any
 
 import pandas as pd
 
-
 TIMELINE_SCHEMA_VERSION = "candidate-timeline-v1"
 TIMELINE_COLUMNS = (
     "event_id", "race_id", "candidate_id", "modeled_side", "event_type",
@@ -21,6 +20,13 @@ TIMELINE_COLUMNS = (
     "ballot_party", "caucus_affiliation", "caucus_basis", "incumbent_status",
     "vacancy_reason", "election_phase", "ballot_status", "source_url",
     "source_hash", "parser_version",
+)
+
+REQUIRED_CONTESTED_IDENTITY_COLUMNS = (
+    "modeled_candidate_id",
+    "modeled_ballot_party",
+    "opposing_candidate_id",
+    "opposing_ballot_party",
 )
 
 
@@ -49,6 +55,11 @@ def apply_candidate_timeline(
     """Apply only events both effective and knowable by ``as_of``."""
     cutoff = pd.Timestamp(as_of).date()
     out = races.copy()
+    required_mask = (
+        ~out["not_up"].fillna(False).astype(bool)
+        if "not_up" in out.columns else pd.Series(True, index=out.index)
+    )
+    required_race_ids = sorted(out.loc[required_mask, "race_id"].astype(str).unique())
     events = align_candidate_timeline(timeline)
     if events.empty:
         out["candidate_timeline_status"] = "degraded_missing_timeline"
@@ -58,6 +69,14 @@ def apply_candidate_timeline(
             "production_eligible": False,
             "snapshot_sha256": None,
             "n_events_applied": 0,
+            "n_required_races": len(required_race_ids),
+            "n_point_in_time": 0,
+            "n_degraded": len(required_race_ids),
+            "required_race_ids": required_race_ids,
+            "traceable": False,
+            "reasons": ["candidate timeline source is missing"],
+            "latest_retrieved_at": None,
+            "latest_effective_at": None,
         }
     for column in ("effective_at", "available_at"):
         parsed = pd.to_datetime(events[column], errors="coerce").dt.date
@@ -125,14 +144,34 @@ def apply_candidate_timeline(
     out["candidate_timeline_status"] = out["candidate_timeline_status"].fillna(
         "degraded_no_event_for_race"
     )
-    traceable = bool(len(usable)) and all(
-        usable[column].notna().all() and usable[column].astype(str).str.strip().ne("").all()
+    identity_complete = pd.Series(True, index=out.index)
+    for column in REQUIRED_CONTESTED_IDENTITY_COLUMNS:
+        values = out[column]
+        identity_complete &= values.notna() & values.astype(str).str.strip().ne("")
+    incomplete_required = required_mask & ~identity_complete
+    out.loc[
+        incomplete_required & out["candidate_timeline_status"].eq("point_in_time"),
+        "candidate_timeline_status",
+    ] = "degraded_incomplete_identity"
+    required_usable = usable[usable["race_id"].astype(str).isin(required_race_ids)]
+    traceable = bool(len(required_usable) or not required_race_ids) and all(
+        required_usable[column].notna().all()
+        and required_usable[column].astype(str).str.strip().ne("").all()
         for column in ("retrieved_at", "source_url", "source_hash", "parser_version")
     )
-    complete = out["candidate_timeline_status"].eq("point_in_time").all()
+    required_status = out.loc[required_mask, "candidate_timeline_status"]
+    complete = bool(required_status.eq("point_in_time").all())
     status = "point_in_time" if complete and traceable else (
         "partial_untraceable" if complete else "partial"
     )
+    n_point_in_time = int(required_status.eq("point_in_time").sum())
+    reasons: list[str] = []
+    if n_point_in_time != len(required_race_ids):
+        reasons.append(
+            f"{len(required_race_ids) - n_point_in_time} required contested races lack a complete as-of identity"
+        )
+    if not traceable:
+        reasons.append("required timeline events lack complete source traceability")
     return out, {
         "schema_version": TIMELINE_SCHEMA_VERSION,
         "status": status,
@@ -141,4 +180,120 @@ def apply_candidate_timeline(
         "snapshot_sha256": candidate_timeline_fingerprint(usable),
         "n_events_applied": int(len(usable)),
         "as_of": cutoff.isoformat(),
+        "n_required_races": len(required_race_ids),
+        "n_point_in_time": n_point_in_time,
+        "n_degraded": len(required_race_ids) - n_point_in_time,
+        "required_race_ids": required_race_ids,
+        "reasons": reasons,
+        "latest_retrieved_at": (
+            pd.to_datetime(required_usable["retrieved_at"], errors="coerce", utc=True).max().isoformat()
+            if len(required_usable)
+            and pd.to_datetime(required_usable["retrieved_at"], errors="coerce", utc=True).notna().any()
+            else None
+        ),
+        "latest_effective_at": (
+            max(required_usable["effective_at"]).isoformat() if len(required_usable) else None
+        ),
+    }
+
+
+def audit_candidate_timeline(
+    races: pd.DataFrame,
+    metadata: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Return the publication gate for candidate identity at an as-of snapshot."""
+    meta = dict(metadata or {})
+    required = (
+        races[~races["not_up"].fillna(False).astype(bool)]
+        if "not_up" in races.columns else races
+    )
+    statuses = (
+        required["candidate_timeline_status"].fillna("degraded_missing_status").astype(str)
+        if "candidate_timeline_status" in required.columns else
+        pd.Series(["degraded_missing_status"] * len(required), dtype=str)
+    )
+    n_point = int(statuses.eq("point_in_time").sum())
+    n_required = int(len(required))
+    reasons = list(meta.get("reasons") or [])
+    if n_point != n_required:
+        reasons.append(f"{n_required - n_point} required contested races use degraded identity")
+    missing_identity = 0
+    for _, row in required.iterrows():
+        if any(
+            pd.isna(row.get(column)) or not str(row.get(column)).strip()
+            for column in REQUIRED_CONTESTED_IDENTITY_COLUMNS
+        ):
+            missing_identity += 1
+    if missing_identity:
+        reasons.append(
+            f"{missing_identity} required contested races lack complete modeled/opposing identity"
+        )
+    if not meta.get("traceable") and n_required:
+        reasons.append("candidate timeline is not source-traceable")
+    snapshot_hash = meta.get("snapshot_sha256")
+    if n_required and not snapshot_hash:
+        reasons.append("candidate timeline snapshot hash is missing")
+    eligible = n_point == n_required and missing_identity == 0 and bool(meta.get("traceable") or n_required == 0) and (
+        bool(snapshot_hash) or n_required == 0
+    )
+    return {
+        "status": "point_in_time" if eligible else str(meta.get("status") or "degraded"),
+        "n_required_races": n_required,
+        "n_point_in_time": n_point,
+        "n_degraded": n_required - n_point,
+        "n_incomplete_identity": missing_identity,
+        "required_identity_columns": list(REQUIRED_CONTESTED_IDENTITY_COLUMNS),
+        "traceable": bool(meta.get("traceable")),
+        "snapshot_sha256": snapshot_hash,
+        "reasons": sorted(set(reasons)),
+        "eligible": eligible,
+        "publication_eligible": eligible,
+        "held_seats_excluded": True,
+        "schema_version": meta.get("schema_version") or TIMELINE_SCHEMA_VERSION,
+    }
+
+
+def audit_candidate_timeline_history(
+    races: pd.DataFrame,
+    timeline: pd.DataFrame,
+    *,
+    cutoffs: dict[str, str | date],
+) -> dict[str, Any]:
+    """Audit point-in-time identity coverage at predeclared historical cutoffs."""
+    rows: list[dict[str, Any]] = []
+    for election_id, cutoff in sorted(cutoffs.items()):
+        subset = races[
+            races["election_id"].astype(str).eq(str(election_id))
+        ].copy()
+        if subset.empty:
+            rows.append({
+                "election_id": str(election_id),
+                "as_of": pd.Timestamp(cutoff).date().isoformat(),
+                "status": "degraded_missing_race_universe",
+                "n_required_races": 0,
+                "n_point_in_time": 0,
+                "n_degraded": 0,
+                "traceable": False,
+                "snapshot_sha256": None,
+                "reasons": ["race universe is missing at required historical cutoff"],
+                "eligible": False,
+                "publication_eligible": False,
+            })
+            continue
+        applied, metadata = apply_candidate_timeline(subset, timeline, as_of=cutoff)
+        audit = audit_candidate_timeline(applied, metadata)
+        rows.append({
+            "election_id": str(election_id),
+            "as_of": pd.Timestamp(cutoff).date().isoformat(),
+            **audit,
+        })
+    blocking = [
+        f"{row['election_id']}@{row['as_of']}"
+        for row in rows if not row["publication_eligible"]
+    ]
+    return {
+        "schema_version": "candidate-timeline-history-audit-v1",
+        "cutoffs": rows,
+        "blocking_cutoffs": blocking,
+        "publication_eligible": bool(rows) and not blocking,
     }

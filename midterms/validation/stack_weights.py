@@ -21,6 +21,7 @@ from midterms.validation.artifact_lineage import (
     FROZEN_INDEX_SEMANTIC_VERSION,
     frozen_index_semantic_sha256,
     json_text_sha256_variants,
+    require_current_model_version,
 )
 
 # Structural ablation labels are diagnostics, not stack members.
@@ -28,6 +29,9 @@ EXCLUDE_FROM_STACK = frozenset(
     {
         "hier_no_similarity",
         "hier_no_terminal_race",
+        "hier_no_study_effect",
+        "hier_no_sponsor_effect",
+        "hier_no_questionnaire_effect",
     }
 )
 
@@ -264,6 +268,7 @@ def fit_stack_weights_from_nested_loo(
             f"missing {nested_path}; run nested-component-loo (P2.1) first"
         )
     nested = json.loads(nested_path.read_text())
+    require_current_model_version(nested, label="nested OOF")
     if nested.get("frozen_draws_sha256") != _draws_fingerprint(nested.get("oof_draws") or {}):
         raise ValueError("nested OOF frozen draw fingerprint missing or stale")
     if nested.get("stack_training_protocol") == "formal_60_30_v1":
@@ -346,6 +351,9 @@ def load_oof_stack_weights(
     if not path.exists():
         return {}, {"source": "missing", "path": str(path)}
     payload = json.loads(path.read_text())
+    require_current_model_version(
+        payload, field="source_model_version", label="stack artifact",
+    )
     if payload.get("stacking_mode") != "empirical_predictive_mixture_crps_v1":
         raise ValueError("stale stack artifact: rebuild from frozen predictive draws")
     provenance: dict[str, Any] = {

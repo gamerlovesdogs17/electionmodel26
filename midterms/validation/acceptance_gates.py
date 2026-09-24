@@ -13,7 +13,6 @@ from typing import Any
 
 from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, PUBLIC_LIVE_ENABLED, ROOT
 
-
 GATE_FAILURE = {
     "G1": "Stop replay.",
     "G2": "Stop scoring.",
@@ -201,7 +200,6 @@ def evaluate_acceptance_gates(
             )
         )
     else:
-        publishable = bool(eligibility.get("publishable") or eligibility.get("ok"))
         reasons = eligibility.get("reasons") or []
         run_class = eligibility.get("run_class") or "unknown"
         domains = eligibility.get("domains") or {}
@@ -723,8 +721,8 @@ def evaluate_acceptance_gates(
             "error": "missing independent_rebuild_latest.json — run verify-rebuild --independent",
         }
     try:
-        from midterms.ops.shadow_publish import list_shadow_publications, verify_shadow
         from midterms.config import PUBLIC_LIVE_ENABLED as _LIVE
+        from midterms.ops.shadow_publish import list_shadow_publications, verify_shadow
 
         rows = list_shadow_publications()
         forecast_mv = str((forecast or {}).get("model_version") or MODEL_VERSION)
@@ -940,9 +938,17 @@ def evaluate_acceptance_gates(
     }
     compliance_path = ROOT / "BLUEPRINT_COMPLIANCE_AUDIT.json"
     compliance = _load_json(compliance_path)
+    from midterms.validation.blueprint_extension_gates import (
+        evaluate_blueprint_extension_gates,
+    )
+
+    extension_evaluation = evaluate_blueprint_extension_gates(
+        compliance_path=compliance_path, artifacts_dir=art_dir,
+    )
     report["blueprint_extensions"] = {
         "code_capability_gates": (compliance or {}).get("code_capability_gates") or {},
         "empirical_validation_gates": (compliance or {}).get("empirical_validation_gates") or {},
+        "evaluation": extension_evaluation,
         "note": (
             "Extension gates are reported separately from G1-G11. Code presence "
             "does not satisfy empirical validation; pending/stale states require a rebuild."
@@ -962,6 +968,14 @@ def evaluate_acceptance_gates(
         report.setdefault("failures", [])
         if "COHERENCE" not in report["failures"]:
             report["failures"] = list(report["failures"]) + ["COHERENCE"]
+    report["g1_g11_ok"] = bool(report.get("ok"))
+    report["full_validation_ok"] = bool(
+        report.get("ok")
+        and coherence.get("ok")
+        and extension_evaluation.get("required_ok")
+    )
+    if not extension_evaluation.get("required_ok"):
+        report["promotion_ok"] = False
 
     if write:
         art_dir.mkdir(parents=True, exist_ok=True)

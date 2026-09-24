@@ -7,14 +7,17 @@ from typing import Any
 
 import pandas as pd
 
-
-FRESHNESS_POLICY_VERSION = "domain-freshness-v1"
+FRESHNESS_POLICY_VERSION = "domain-freshness-v2"
 DEFAULT_MAX_AGES_DAYS = {
     "polls": {"retrieval": 7, "observation": 28},
     "markets": {"retrieval": 2, "observation": 2},
     "finance": {"retrieval": 14, "observation": 45},
     "ratings": {"retrieval": 14, "observation": 45},
     "economics": {"retrieval": 35, "observation": 120},
+    "approval": {"retrieval": 14, "observation": 45},
+    "demographics": {"retrieval": 365, "observation": 730},
+    "structural_prior": {"retrieval": 365, "observation": 1460},
+    "races": {"retrieval": 30, "observation": 90},
     "candidate_ballot": {"retrieval": 14, "observation": 60},
 }
 
@@ -37,6 +40,8 @@ def classify_freshness(
     now = pd.Timestamp(checked_at or datetime.now(timezone.utc))
     now = now.tz_localize("UTC") if now.tzinfo is None else now.tz_convert("UTC")
     reasons: list[str] = []
+    retrieval_age: float | None = None
+    observation_age: float | None = None
     if parser_status != "ok":
         status = "parser_failed"
         reasons.append(parser_status)
@@ -55,8 +60,13 @@ def classify_freshness(
         retrieved = pd.Timestamp(retrieved_at)
         if retrieved.tzinfo is None:
             retrieved = retrieved.tz_localize("UTC")
+        else:
+            retrieved = retrieved.tz_convert("UTC")
         retrieval_age = float((now - retrieved).total_seconds() / 86400.0)
-        if retrieval_age > limits["retrieval"]:
+        if retrieval_age < 0:
+            status = "future_timestamp"
+            reasons.append("retrieval timestamp is later than checked_at")
+        elif retrieval_age > limits["retrieval"]:
             status = "stale_retrieval"
         elif observed_at is None:
             status = "unavailable"
@@ -65,8 +75,14 @@ def classify_freshness(
             observed = pd.Timestamp(observed_at)
             if observed.tzinfo is None:
                 observed = observed.tz_localize("UTC")
+            else:
+                observed = observed.tz_convert("UTC")
             observation_age = float((now - observed).total_seconds() / 86400.0)
-            status = "stale_observation" if observation_age > limits["observation"] else "fresh"
+            if observation_age < 0:
+                status = "future_timestamp"
+                reasons.append("observation timestamp is later than checked_at")
+            else:
+                status = "stale_observation" if observation_age > limits["observation"] else "fresh"
     return {
         "policy_version": FRESHNESS_POLICY_VERSION,
         "domain": domain,
@@ -74,4 +90,6 @@ def classify_freshness(
         "limits_days": dict(limits),
         "source_available": bool(source_available),
         "reasons": reasons,
+        "retrieval_age_days": retrieval_age,
+        "observation_age_days": observation_age,
     }

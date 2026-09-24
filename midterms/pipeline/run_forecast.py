@@ -27,8 +27,8 @@ from midterms.config import (
     PUBLICATION_SURFACE_DEFAULT,
     ROOT,
 )
-from midterms.evidence.warehouse import Warehouse, write_run_manifest
 from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
+from midterms.evidence.warehouse import Warehouse, write_run_manifest
 from midterms.model.pymc_model import (
     FitResult,
     draws_from_baseline_forecasts,
@@ -36,8 +36,8 @@ from midterms.model.pymc_model import (
     fit_pymc,
     fit_pymc_dynamic,
 )
-from midterms.simulate.chamber import independent_bernoulli_foil, simulate_chamber
 from midterms.pipeline.inference_settings import resolve_inference_settings
+from midterms.simulate.chamber import independent_bernoulli_foil, simulate_chamber
 
 
 def _git_commit() -> str:
@@ -189,17 +189,26 @@ def run_forecast(
             and overlay_validation["use_race_markets"]
             and overlay_validation["use_control_market"]
         )
-    from midterms.evidence.economics import try_refresh_alfred, yoy_growth_as_of
     from midterms.evidence.approval import approval_as_of, write_approval_store
     from midterms.evidence.demography import attach_demo_features
-    from midterms.evidence.eligibility import assert_publishable, write_eligibility_report
+    from midterms.evidence.economics import try_refresh_alfred, yoy_growth_as_of
+    from midterms.evidence.eligibility import (
+        assert_publishable,
+        effective_production_domain_contract,
+        write_eligibility_report,
+    )
     from midterms.evidence.expert_ratings import (
         ensure_expert_ratings_store,
         ratings_for_races,
     )
     from midterms.evidence.fec import attach_fundraising_to_races, write_finance_store
-    from midterms.evidence.markets import load_control_market, load_race_markets, write_markets_store
+    from midterms.evidence.markets import (
+        load_control_market,
+        load_race_markets,
+        write_markets_store,
+    )
     from midterms.evidence.peers import compare_to_peers, write_peer_snapshots
+    from midterms.model.challengers import build_challenger_draws
     from midterms.model.overlays import (
         apply_control_market_overlay,
         apply_market_overlay,
@@ -208,22 +217,33 @@ def run_forecast(
         overlay_report,
         shift_draws_to_means,
     )
-    from midterms.model.state_space import fit_state_space
-    from midterms.model.challengers import build_challenger_draws
     from midterms.model.scenarios import run_scenarios
+    from midterms.model.state_space import fit_state_space
     from midterms.model.turnout import turnout_layer, undecided_allocation
-    from midterms.simulate.institutional import apply_vacancy_defaults, maybe_materialize_runoff_rows
     from midterms.ops.reproducibility import (
-        environment_lock, portable_artifact_reference, snapshot_domain_hashes,
+        environment_lock,
+        portable_artifact_reference,
+        snapshot_domain_hashes,
     )
-    from midterms.ops.run_coherence import evidence_manifest_fingerprint, stamp_eligibility_identity
+    from midterms.ops.run_coherence import (
+        evidence_manifest_fingerprint,
+        stamp_eligibility_identity,
+    )
     from midterms.ops.signing import sign_payload
+    from midterms.simulate.institutional import (
+        apply_vacancy_defaults,
+        maybe_materialize_runoff_rows,
+    )
 
     # Evidence eligibility (audit P0.4) — before fitting so ineligible runs are labeled
+    effective_domain_contract = effective_production_domain_contract(
+        use_ratings=with_ratings, use_markets=with_markets,
+    )
     eligibility = assert_publishable(
         election_id,
         as_of=str(as_of)[:10],
         allow_non_publication=allow_non_publication and not require_publishable,
+        domain_contract=effective_domain_contract,
     )
     if require_publishable and not eligibility.get("publishable"):
         raise ValueError(
@@ -321,6 +341,7 @@ def run_forecast(
             election_id,
             as_of=str(as_of)[:10],
             allow_non_publication=allow_non_publication and not require_publishable,
+            domain_contract=effective_domain_contract,
         )
         if require_publishable and not eligibility.get("publishable"):
             raise ValueError(
@@ -800,6 +821,7 @@ def run_forecast(
             "run_class": eligibility.get("run_class"),
             "reasons": eligibility.get("reasons"),
             "domains": eligibility.get("domains"),
+            "effective_domain_contract": eligibility.get("effective_domain_contract"),
             "forecast_run_id": run_id,
             "snapshot_id": str(snap.snapshot_id),
             "evidence_fingerprint": evidence_fp,
@@ -973,6 +995,20 @@ def run_forecast(
         "rows": decomposition_rows,
     }), indent=2, allow_nan=False), encoding="utf-8")
 
+    prior_diagnostic = (fit.diagnostics or {}).get("prior_predictive") or {}
+    (out_dir / "prior_predictive_latest.json").write_text(
+        json.dumps(_json_safe({
+            "schema_version": "current-model-prior-predictive-v1",
+            "model_version": MODEL_VERSION,
+            "run_id": run_id,
+            "snapshot_id": snap.snapshot_id,
+            "forecast_sha256": hashlib.sha256(payload).hexdigest(),
+            "diagnostic": prior_diagnostic,
+            "ok": bool(prior_diagnostic.get("ok")),
+        }), indent=2, allow_nan=False),
+        encoding="utf-8",
+    )
+
     # Keep eligibility artifact identity-tied to this exact forecast run.
     write_eligibility_report(
         election_id,
@@ -980,6 +1016,7 @@ def run_forecast(
         run_id=run_id,
         snapshot_id=str(snap.snapshot_id),
         forecast_generated_at=str(artifact.get("generated_at")),
+        domain_contract=effective_domain_contract,
     )
 
     draws_path = out_dir / f"draws_{run_id}.npz"
@@ -1013,6 +1050,7 @@ def run_forecast(
         "control_calibrate": control_calibrate,
         "allow_fast_fallback": allow_fast_fallback,
         "independent_caucus_basis": INDEPENDENT_DEM_CAUCUSES_BASIS,
+        "effective_domain_contract": effective_domain_contract,
     }
     manifest = {
         "run_id": run_id,
@@ -1030,6 +1068,7 @@ def run_forecast(
         "market_store_sha256": market_store_sha,
         "market_audit_sha256": market_audit_sha,
         "stack_artifact_sha256": stack_artifact_sha,
+        "effective_domain_contract": effective_domain_contract,
         "domain_hashes": snapshot_domain_hashes(),
         "environment_lock": environment_lock(),
         "freshness_policy_version": __import__(

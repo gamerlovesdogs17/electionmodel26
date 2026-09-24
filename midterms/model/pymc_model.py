@@ -22,6 +22,7 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
+from midterms.evidence.schema import is_active_ballot_row
 from midterms.evidence.warehouse import EvidenceSnapshot
 from midterms.model.effects import (
     MODE_ORDER,
@@ -31,11 +32,15 @@ from midterms.model.effects import (
     fixed_population_offset,
 )
 from midterms.model.fundamentals import fundamentals_mean
-from midterms.model.poll_weights import attach_poll_weights, global_enop, race_enop_summary
 from midterms.model.poll_structure import (
     PollStructureConfig,
     add_optional_poll_effects,
     encode_poll_structure,
+)
+from midterms.model.poll_weights import (
+    attach_poll_weights,
+    global_enop,
+    race_enop_summary,
 )
 from midterms.model.terminal import (
     active_scales,
@@ -44,7 +49,6 @@ from midterms.model.terminal import (
     error_budget_block,
     scales_kwargs,
 )
-from midterms.evidence.schema import is_active_ballot_row
 
 
 @dataclass
@@ -330,10 +334,13 @@ def fit_pymc(
             if include_terminal_race
             else np.zeros(n_races, dtype=float)
         )
-        mu_final = pm.Deterministic(
+        pm.Deterministic(
             "mu_final", mu_ed + terminal_nat + terminal_race, dims="race"
         )
 
+        prior_idata = pm.sample_prior_predictive(
+            samples=200, random_seed=seed + 1001,
+        )
         idata = pm.sample(
             draws=draws,
             tune=tune,
@@ -345,10 +352,40 @@ def fit_pymc(
             compute_convergence_checks=False,
             cores=1,
         )
+        posterior_predictive_idata = None
+        if len(prep["poll_y"]):
+            per_chain = max(1, min(draws, 200 // max(chains, 1)))
+            posterior_predictive_idata = pm.sample_posterior_predictive(
+                idata.sel(draw=slice(0, per_chain - 1)),
+                var_names=["polls"], random_seed=seed + 1002,
+                progressbar=False, return_inferencedata=True,
+            )
 
     from midterms.validation.numerical_quality import idata_convergence
 
     conv = idata_convergence(idata, var_name="mu_final")
+    from midterms.validation.bayesian_diagnostics import (
+        posterior_predictive_checks,
+        prior_predictive_diagnostics,
+    )
+
+    prior_diagnostic = prior_predictive_diagnostics(prior_idata)
+    posterior_diagnostic = {"available": False, "reason": "no poll observations"}
+    if posterior_predictive_idata is not None:
+        predictive = np.asarray(
+            posterior_predictive_idata.posterior_predictive["polls"].values, dtype=float,
+        ).reshape(-1, len(prep["poll_y"]))
+        posterior_diagnostic = {
+            "available": True,
+            **posterior_predictive_checks(
+                prep["poll_y"], predictive,
+                groups={
+                    "pollster": np.asarray(prep["poll_house"]),
+                    "mode": np.asarray(prep["poll_mode"]),
+                    "population": np.asarray(prep["poll_pop"]),
+                },
+            ),
+        }
 
     posterior = idata.posterior
     mu = posterior["mu_final"].stack(sample=("chain", "draw")).values.T
@@ -410,6 +447,8 @@ def fit_pymc(
                 "similarity": bool(include_similarity),
             },
             "convergence": conv,
+            "prior_predictive": prior_diagnostic,
+            "posterior_predictive": posterior_diagnostic,
             "mode_effects_mean": mode_mean,
             "pop_effects_mean": pop_mean,
             "enop_global": prep["enop_global"],
@@ -630,7 +669,7 @@ def fit_pymc_dynamic(
             if include_terminal_race
             else np.zeros(n_races, dtype=float)
         )
-        mu_final = pm.Deterministic(
+        pm.Deterministic(
             "mu_final",
             theta[:, ed_week] + terminal_nat + terminal_race,
             dims="race",
@@ -642,6 +681,9 @@ def fit_pymc_dynamic(
             dims="race",
         )
 
+        prior_idata = pm.sample_prior_predictive(
+            samples=200, random_seed=seed + 1001,
+        )
         idata = pm.sample(
             draws=draws,
             tune=tune,
@@ -653,10 +695,40 @@ def fit_pymc_dynamic(
             compute_convergence_checks=False,
             cores=1,
         )
+        posterior_predictive_idata = None
+        if len(prep["poll_y"]):
+            per_chain = max(1, min(draws, 200 // max(chains, 1)))
+            posterior_predictive_idata = pm.sample_posterior_predictive(
+                idata.sel(draw=slice(0, per_chain - 1)),
+                var_names=["polls"], random_seed=seed + 1002,
+                progressbar=False, return_inferencedata=True,
+            )
 
     from midterms.validation.numerical_quality import idata_convergence
 
     conv = idata_convergence(idata, var_name="mu_final")
+    from midterms.validation.bayesian_diagnostics import (
+        posterior_predictive_checks,
+        prior_predictive_diagnostics,
+    )
+
+    prior_diagnostic = prior_predictive_diagnostics(prior_idata)
+    posterior_diagnostic = {"available": False, "reason": "no poll observations"}
+    if posterior_predictive_idata is not None:
+        predictive = np.asarray(
+            posterior_predictive_idata.posterior_predictive["polls"].values, dtype=float,
+        ).reshape(-1, len(prep["poll_y"]))
+        posterior_diagnostic = {
+            "available": True,
+            **posterior_predictive_checks(
+                prep["poll_y"], predictive,
+                groups={
+                    "pollster": np.asarray(prep["poll_house"]),
+                    "mode": np.asarray(prep["poll_mode"]),
+                    "population": np.asarray(prep["poll_pop"]),
+                },
+            ),
+        }
 
     posterior = idata.posterior
     mu = posterior["mu_final"].stack(sample=("chain", "draw")).values.T
@@ -722,6 +794,8 @@ def fit_pymc_dynamic(
                 "after_random_walk": True,
             },
             "convergence": conv,
+            "prior_predictive": prior_diagnostic,
+            "posterior_predictive": posterior_diagnostic,
             "enop_global": prep["enop_global"],
             "enop_by_race_mean": float(np.mean(list(prep["enop_by_race"].values())))
             if prep["enop_by_race"]
@@ -867,7 +941,6 @@ def draws_from_baseline_forecasts(
     race_ids: list[str] | None = None,
 ) -> np.ndarray:
     """Independent Normal draws from baseline mean/sd — used as stackable challenger."""
-    from midterms.baselines.models import RaceForecast
 
     rng = np.random.default_rng(seed)
     by_id = {f.race_id: f for f in forecasts}
