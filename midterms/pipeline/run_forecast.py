@@ -354,6 +354,21 @@ def run_forecast(
 
     wh = Warehouse(ensure_fixtures=False)
     snap = wh.build_as_of(as_of, election_id)
+    evidence_bundle = None
+    if require_publishable:
+        import os
+
+        from midterms.evidence.preparation import load_latest_evidence_bundle
+
+        evidence_bundle = load_latest_evidence_bundle(
+            expected_id=os.environ.get("EVIDENCE_BUNDLE_ID") or None,
+        )
+        if evidence_bundle.get("model_version") != MODEL_VERSION:
+            raise ValueError("sealed evidence bundle model version differs from current code")
+        if str(evidence_bundle.get("as_of")) != str(as_of)[:10]:
+            raise ValueError("sealed evidence bundle as_of differs from requested forecast cutoff")
+        if evidence_bundle.get("current_snapshot_id") != snap.snapshot_id:
+            raise ValueError("sealed evidence bundle current snapshot differs from warehouse snapshot")
     if require_publishable and not bool((snap.candidate_timeline or {}).get("production_eligible")):
         raise ValueError(
             "publication candidate/race snapshot lacks a complete bitemporal timeline: "
@@ -361,11 +376,16 @@ def run_forecast(
         )
     # Overlay FEC fundraising shares onto race rows used by fundamentals
     snap.races = attach_fundraising_to_races(snap.races, as_of=as_of)
-    if require_publishable:
-        from midterms.evidence.demography import demographic_snapshot_as_of
+    from midterms.evidence.demography import demographic_snapshot_as_of
 
-        demographic_snapshot_as_of(as_of, require_point_in_time=True)
-    snap.races = attach_demo_features(apply_vacancy_defaults(snap.races))
+    demographic_lookup, _demographic_meta = demographic_snapshot_as_of(
+        as_of,
+        require_point_in_time=require_publishable,
+    )
+    snap.races = attach_demo_features(
+        apply_vacancy_defaults(snap.races),
+        lookup=demographic_lookup,
+    )
     if election_id == "senate-2026":
         from midterms.evidence.outcome_identity import require_explicit_caucus
 
@@ -476,6 +496,8 @@ def run_forecast(
         if require_publishable:
             if stack_provenance.get("source_model_version") != MODEL_VERSION:
                 raise ValueError("production stack model version differs from current code")
+            if evidence_bundle and stack_provenance.get("source_evidence_bundle_id") != evidence_bundle.get("evidence_bundle_id"):
+                raise ValueError("production stack evidence bundle differs from current forecast bundle")
             if stack_provenance.get("source_stack_training_protocol") != "formal_60_30_v1":
                 raise ValueError("production stack was not trained on the declared 60/30 protocol")
             prior_folds = stack_provenance.get("source_prior_snapshot_sha256_by_fold_lead") or {}
@@ -827,6 +849,12 @@ def run_forecast(
             "evidence_fingerprint": evidence_fp,
         },
         "evidence_fingerprint": evidence_fp,
+        "evidence_bundle_id": (
+            evidence_bundle.get("evidence_bundle_id") if evidence_bundle else None
+        ),
+        "evidence_bundle_sha256": (
+            evidence_bundle.get("evidence_bundle_sha256") if evidence_bundle else None
+        ),
         "presidential_source_sha256": snap.presidential_source_sha256,
         "presidential_source_years": list(snap.presidential_source_years),
         "prior_store_sha256": snap.prior_snapshot_sha256,

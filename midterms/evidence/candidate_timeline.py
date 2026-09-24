@@ -9,18 +9,34 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-TIMELINE_SCHEMA_VERSION = "candidate-timeline-v1"
+from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, ROOT
+
+TIMELINE_SCHEMA_VERSION = "candidate-timeline-v2"
+TIMELINE_PARSER_VERSION = "candidate-timeline-ingest-v1"
 TIMELINE_COLUMNS = (
-    "event_id", "race_id", "candidate_id", "modeled_side", "event_type",
+    "election_id", "event_id", "race_id", "candidate_id", "modeled_side", "event_type",
     "effective_at", "available_at", "retrieved_at", "candidate_name",
     "ballot_party", "caucus_affiliation", "caucus_basis", "incumbent_status",
     "vacancy_reason", "election_phase", "ballot_status", "source_url",
-    "source_hash", "parser_version",
+    "source_tier", "source_object_sha256", "source_hash", "parser_version",
+    "valid_from", "valid_to", "correction_of_event_id",
 )
+
+REQUIRED_SOURCE_COLUMNS = (
+    "election_id", "event_id", "race_id", "candidate_id", "modeled_side",
+    "event_type", "effective_at", "available_at", "retrieved_at", "source_url",
+    "source_tier", "source_object_sha256", "parser_version", "valid_from",
+)
+ALLOWED_EVENT_TYPES = frozenset({
+    "declared", "entered", "nomination", "nominated", "ballot_qualification",
+    "qualified", "withdrawal", "withdrawn", "replacement", "party_change",
+    "status_change", "vacancy", "runoff_advancement", "special_election_phase",
+})
 
 REQUIRED_CONTESTED_IDENTITY_COLUMNS = (
     "modeled_candidate_id",
@@ -44,6 +60,97 @@ def candidate_timeline_fingerprint(frame: pd.DataFrame) -> str:
     ).to_dict(orient="records")
     payload = json.dumps(records, sort_keys=True, separators=(",", ":"), allow_nan=False)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _read_timeline_input(path: Path) -> pd.DataFrame:
+    suffix = path.suffix.lower()
+    if suffix == ".csv":
+        return pd.read_csv(path)
+    if suffix in {".parquet", ".pq"}:
+        return pd.read_parquet(path)
+    if suffix == ".json":
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(payload, dict):
+            payload = payload.get("events")
+        if not isinstance(payload, list):
+            raise ValueError("candidate timeline JSON must be a list or {'events': [...]} object")
+        return pd.DataFrame(payload)
+    raise ValueError("candidate timeline input must be CSV, JSON, or Parquet")
+
+
+def validate_candidate_timeline_source(frame: pd.DataFrame) -> pd.DataFrame:
+    """Validate source-backed bitemporal events without inventing missing facts."""
+    missing_columns = sorted(set(REQUIRED_SOURCE_COLUMNS) - set(frame.columns))
+    if missing_columns:
+        raise ValueError(f"candidate timeline missing required columns: {missing_columns}")
+    out = align_candidate_timeline(frame)
+    for column in REQUIRED_SOURCE_COLUMNS:
+        missing = out[column].isna() | out[column].astype(str).str.strip().eq("")
+        if missing.any():
+            raise ValueError(f"candidate timeline has {int(missing.sum())} blank {column} values")
+    if not out["modeled_side"].astype(str).isin({"modeled", "opposing"}).all():
+        raise ValueError("candidate timeline modeled_side must be modeled or opposing")
+    invalid_events = sorted(set(out["event_type"].astype(str)) - ALLOWED_EVENT_TYPES)
+    if invalid_events:
+        raise ValueError(f"candidate timeline has unsupported event types: {invalid_events}")
+    for column in ("effective_at", "available_at", "retrieved_at", "valid_from"):
+        parsed = pd.to_datetime(out[column], errors="coerce", utc=True)
+        if parsed.isna().any():
+            raise ValueError(f"candidate timeline has invalid {column}")
+        out[column] = parsed.dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    valid_to = pd.to_datetime(out["valid_to"], errors="coerce", utc=True)
+    supplied_valid_to = out["valid_to"].notna() & out["valid_to"].astype(str).str.strip().ne("")
+    if (supplied_valid_to & valid_to.isna()).any():
+        raise ValueError("candidate timeline has invalid valid_to")
+    out["valid_to"] = valid_to.dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    if out["event_id"].astype(str).duplicated().any():
+        raise ValueError("candidate timeline event_id must be unique; corrections need a new event_id")
+    hashes = out["source_object_sha256"].astype(str).str.lower()
+    if not hashes.str.fullmatch(r"[0-9a-f]{64}").all():
+        raise ValueError("candidate timeline source_object_sha256 must be a SHA-256 hex digest")
+    out["source_hash"] = out["source_hash"].where(
+        out["source_hash"].notna() & out["source_hash"].astype(str).str.strip().ne(""),
+        out["source_object_sha256"],
+    )
+    return out.sort_values(
+        ["election_id", "race_id", "available_at", "effective_at", "event_id"],
+        kind="stable",
+    ).reset_index(drop=True)
+
+
+def ingest_candidate_timeline(
+    input_path: str | Path,
+    *,
+    normalized_path: Path | None = None,
+    manifest_path: Path | None = None,
+) -> dict[str, Any]:
+    """Seal a supplied source-backed candidate history into the warehouse."""
+    path = Path(input_path)
+    raw_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+    normalized = validate_candidate_timeline_source(_read_timeline_input(path))
+    semantic_sha256 = candidate_timeline_fingerprint(normalized)
+    normalized_path = normalized_path or (NORMALIZED_DIR / "candidate_timeline.parquet")
+    manifest_path = manifest_path or (MANIFESTS_DIR / "candidate_timeline.json")
+    normalized_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    normalized.to_parquet(normalized_path, index=False)
+    elections = sorted(normalized["election_id"].astype(str).unique())
+    manifest = {
+        "schema_version": TIMELINE_SCHEMA_VERSION,
+        "parser_version": TIMELINE_PARSER_VERSION,
+        "raw_input_sha256": raw_sha256,
+        "normalized_semantic_sha256": semantic_sha256,
+        "n_events": int(len(normalized)),
+        "election_ids": elections,
+        "normalized_path": (
+            normalized_path.resolve().relative_to(ROOT.resolve()).as_posix()
+            if normalized_path.resolve().is_relative_to(ROOT.resolve()) else normalized_path.name
+        ),
+        "source_traceability_required": True,
+        "production_eligible": True,
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    return manifest
 
 
 def apply_candidate_timeline(
@@ -84,6 +191,14 @@ def apply_candidate_timeline(
             raise ValueError(f"candidate timeline has missing/invalid {column}")
         events[column] = parsed
     usable = events[(events["effective_at"] <= cutoff) & (events["available_at"] <= cutoff)].copy()
+    if "valid_from" in usable.columns:
+        cutoff_ts = pd.Timestamp(cutoff).tz_localize("UTC")
+        valid_from = pd.to_datetime(usable["valid_from"], errors="coerce", utc=True)
+        valid_to = pd.to_datetime(usable["valid_to"], errors="coerce", utc=True)
+        usable = usable[
+            (valid_from.isna() | (valid_from <= cutoff_ts))
+            & (valid_to.isna() | (valid_to > cutoff_ts))
+        ]
     usable = usable.sort_values(
         ["race_id", "modeled_side", "effective_at", "available_at", "event_id"], kind="stable"
     )

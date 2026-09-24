@@ -65,6 +65,9 @@ STRUCTURAL_VARIANTS = (
     "hier_no_study_effect",
     "hier_no_sponsor_effect",
     "hier_no_questionnaire_effect",
+    "hier_plus_study_effect",
+    "hier_plus_sponsor_effect",
+    "hier_plus_questionnaire_effect",
 )
 
 
@@ -344,6 +347,7 @@ def freeze_component_predictions(
     # Structural variants are materialized from the same reference fit and
     # must prove exactly one declared change in their frozen lineage.
     from midterms.validation.structural_ablations import (
+        ALL_STRUCTURAL_VARIANTS,
         STRUCTURAL_ABLATIONS,
         same_family_fit_spec,
     )
@@ -475,7 +479,7 @@ def freeze_component_predictions(
     # Optional poll-structure ablations are only meaningful when the base
     # challenger actually enables the named term.
     base_poll_structure = PollStructureConfig.coerce(poll_structure)
-    for ablation in STRUCTURAL_ABLATIONS:
+    for ablation in ALL_STRUCTURAL_VARIANTS:
         if not ablation.poll_structure_overrides:
             continue
         spec = same_family_fit_spec(
@@ -674,6 +678,16 @@ def _g8_recommendations(
                 "recommend": recommend,
                 "deltas_spine_minus_ablation": deltas,
             }
+        elif name.startswith("hier_plus_"):
+            feature = name.removeprefix("hier_plus_")
+            recommend = "add" if n and keep_votes >= max(1, (n + 1) // 2) else "keep_base"
+            recs[feature] = {
+                "addition_component": name,
+                "keep_votes": keep_votes,
+                "n_folds": n,
+                "recommend": recommend,
+                "deltas_spine_minus_challenger": deltas,
+            }
         else:
             recommend = "keep" if n and keep_votes >= max(1, (n + 1) // 2) else "disable"
             recs[name] = {
@@ -870,6 +884,7 @@ def run_nested_component_loo(
     n_draws: int = 1600,
     seed: int = 21,
     out_path: Path | None = None,
+    evidence_bundle_path: Path | str | None = None,
 ) -> dict[str, Any]:
     """
     Outer leave-one-cycle-out: freeze every component's predictions, then score.
@@ -877,6 +892,17 @@ def run_nested_component_loo(
     Writes ``nested_component_loo.json`` with OOF CRPS matrix, failures, and G8
     recommendations. Does **not** remap fast→pymc.
     """
+    bundle: dict[str, Any] | None = None
+    if evidence_bundle_path is not None:
+        from midterms.evidence.evidence_bundle import verify_evidence_bundle
+
+        bundle_path = Path(evidence_bundle_path)
+        bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+        verification = verify_evidence_bundle(bundle)
+        if not verification["ok"]:
+            raise ValueError(f"historical validation evidence bundle is invalid: {verification}")
+        if bundle.get("model_version") != MODEL_VERSION:
+            raise ValueError("historical validation bundle model version is stale")
     wh = Warehouse()
     spine = (
         "pymc_dynamic"
@@ -909,6 +935,14 @@ def run_nested_component_loo(
         for lead in lead_days:
             as_of = ed - timedelta(days=lead)
             snap = wh.build_as_of(as_of, election_id)
+            if bundle is not None:
+                label = f"{election_id}-lead-{lead}"
+                expected_snapshot = (bundle.get("historical_snapshot_ids") or {}).get(label)
+                if not expected_snapshot or expected_snapshot != snap.snapshot_id:
+                    raise ValueError(
+                        f"sealed evidence bundle snapshot mismatch for {label}: "
+                        f"{expected_snapshot} != {snap.snapshot_id}"
+                    )
             prior_snapshot_sha256_by_fold_lead[str(year)][str(lead)] = snap.prior_snapshot_sha256
             source_set_sha256_by_fold_lead[str(year)][str(lead)] = snap.presidential_source_sha256
             frozen = freeze_component_predictions(
@@ -1033,6 +1067,8 @@ def run_nested_component_loo(
         "lead_days": list(lead_days),
         "hierarchical_method": hierarchical_method,
         "model_version": MODEL_VERSION,
+        "evidence_bundle_id": bundle.get("evidence_bundle_id") if bundle else None,
+        "evidence_bundle_sha256": bundle.get("evidence_bundle_sha256") if bundle else None,
         "stack_training_protocol": "formal_60_30_v1" if lead_days == (60, 30) else "diagnostic_custom_leads",
         "pymc_validation_inference": {
             "draws_per_chain_floor": OOF_PYMC_DRAWS_PER_CHAIN,
@@ -1066,7 +1102,8 @@ def run_nested_component_loo(
         "note": (
             "Outer leave-one-cycle-out for every stackable component + structural "
             "terminal ablations. Each declared lead is retained as a separate frozen "
-            "case; empirical draws feed predictive-mixture stacking."
+            "case; empirical draws feed predictive-mixture stacking. Same-family "
+            "structural variants remain diagnostics and never enter the stack."
         ),
     }
     out_path = out_path or (ARTIFACTS_DIR / "nested_component_loo.json")

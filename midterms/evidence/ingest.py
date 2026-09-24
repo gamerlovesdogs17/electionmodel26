@@ -494,10 +494,11 @@ def merge_live_polls_into_warehouse(
     *,
     election_id: str = DEMO_ELECTION_ID,
     replace_synthetic_for_election: bool = True,
+    payload_path: Path | None = None,
 ) -> dict[str, Any]:
     """Normalize VoteHub polls and merge into normalized polls.parquet."""
     write_normalized_ratings()
-    live = normalize_votehub_senate_polls(election_id=election_id)
+    live = normalize_votehub_senate_polls(path=payload_path, election_id=election_id)
     if live.empty:
         return {"n_live": 0, "warning": "no VoteHub polls normalized"}
 

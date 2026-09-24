@@ -240,6 +240,30 @@ def demographic_snapshot_as_of(
     require_point_in_time: bool = False,
 ) -> tuple[dict[str, dict[str, float]], dict[str, Any]]:
     """Load features plus their explicit vintage eligibility metadata."""
+    vintage_path = NORMALIZED_DIR / "demographic_vintages.parquet"
+    vintage_manifest_path = MANIFESTS_DIR / "demographic_vintages.json"
+    if vintage_path.exists() and vintage_manifest_path.exists():
+        from midterms.evidence.demographic_vintages import select_demographic_vintage
+
+        frame = pd.read_parquet(vintage_path)
+        selected, meta = select_demographic_vintage(frame, as_of=as_of)
+        manifest = json.loads(vintage_manifest_path.read_text(encoding="utf-8"))
+        lookup = {
+            str(row["state"]): {
+                key: float(row[key]) for key in ("college", "nonwhite", "density", "age", "urban")
+            }
+            for _, row in selected.iterrows()
+        }
+        meta.update({
+            "schema_version": manifest.get("schema_version"),
+            "source_sha256": manifest.get("raw_input_sha256"),
+            "feature_version": sorted(selected["feature_definition_version"].astype(str).unique()) if len(selected) else [],
+            "source": sorted(selected["source_url"].astype(str).unique()) if len(selected) else [],
+            "manifest_sha256": hashlib.sha256(vintage_manifest_path.read_bytes()).hexdigest(),
+        })
+        if require_point_in_time and not meta["production_eligible"]:
+            raise ValueError("demographic snapshot lacks verified point-in-time availability")
+        return lookup, meta
     manifest_path = MANIFESTS_DIR / "demography.json"
     manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
     meta = demographic_snapshot_metadata(
@@ -257,8 +281,12 @@ def demographic_snapshot_as_of(
     return _demo_lookup(), meta
 
 
-def demo_feature_vector(state: str) -> np.ndarray:
-    lookup = _demo_lookup()
+def demo_feature_vector(
+    state: str,
+    *,
+    lookup: dict[str, dict[str, float]] | None = None,
+) -> np.ndarray:
+    lookup = lookup or _demo_lookup()
     d = lookup.get(state, {"college": 0.3, "nonwhite": 0.3, "density": 2.0, "age": 0.0, "urban": 0.7})
     return np.array(
         [d["college"], d["nonwhite"], d["density"] / 4.0, d["age"], d["urban"]],
@@ -266,9 +294,13 @@ def demo_feature_vector(state: str) -> np.ndarray:
     )
 
 
-def attach_demo_features(races: pd.DataFrame) -> pd.DataFrame:
+def attach_demo_features(
+    races: pd.DataFrame,
+    *,
+    lookup: dict[str, dict[str, float]] | None = None,
+) -> pd.DataFrame:
     out = races.copy()
-    feats = [demo_feature_vector(str(s)) for s in out["state"]]
+    feats = [demo_feature_vector(str(s), lookup=lookup) for s in out["state"]]
     mat = np.vstack(feats) if feats else np.zeros((0, 5))
     out["demo_college"] = mat[:, 0] if len(mat) else []
     out["demo_nonwhite"] = mat[:, 1] if len(mat) else []

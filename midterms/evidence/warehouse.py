@@ -119,13 +119,21 @@ def _selected_material_source_hashes(
         "finance": "fundraising_shares.parquet",
         "economics": "economics_vintages.parquet",
         "approval": "pres_approval.parquet",
-        "demographics": "demography.parquet",
+        "demographics": (
+            "demographic_vintages.parquet"
+            if (normalized_dir / "demographic_vintages.parquet").exists()
+            else "demography.parquet"
+        ),
     }
     manifest_names = {
         "finance": "fundraising_shares.json",
         "economics": "economics_vintages.json",
         "approval": "pres_approval.json",
-        "demographics": "demography.json",
+        "demographics": (
+            "demographic_vintages.json"
+            if stores["demographics"] == "demographic_vintages.parquet"
+            else "demography.json"
+        ),
     }
     identity_keys = (
         "source_url", "source", "tier", "license", "parser_version",
@@ -140,8 +148,13 @@ def _selected_material_source_hashes(
         frame = pd.read_parquet(path)
         if "election_id" in frame.columns:
             frame = frame[frame["election_id"].astype(str) == election_id]
-        if "available_at" in frame.columns:
-            available = frame["available_at"].map(_parse_day)
+        availability_column = (
+            "available_at" if "available_at" in frame.columns
+            else "official_release_date" if "official_release_date" in frame.columns
+            else None
+        )
+        if availability_column:
+            available = frame[availability_column].map(_parse_day)
             frame = frame[available.notna() & (available <= as_of)]
         manifest_path = MANIFESTS_DIR / manifest_names[domain]
         manifest_identity: dict[str, Any] = {}
@@ -387,6 +400,15 @@ class Warehouse:
             races["prior_source"] = "legacy_unverified_fixture"
         else:
             races["prior_source"] = races["prior_source"].fillna("legacy_unverified_fixture")
+
+        # Bind the selected point-in-time demographic vintage into the race
+        # frame so similarity never consults a process-global/current lookup.
+        from midterms.evidence.demography import attach_demo_features, demographic_snapshot_as_of
+
+        demo_lookup, _demo_meta = demographic_snapshot_as_of(
+            as_of_d, require_point_in_time=False,
+        )
+        races = attach_demo_features(races, lookup=demo_lookup)
 
         # Leakage canary: if any remaining poll has available_at > as_of, fail closed
         if len(polls):

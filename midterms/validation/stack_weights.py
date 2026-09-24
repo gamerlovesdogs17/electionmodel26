@@ -32,6 +32,9 @@ EXCLUDE_FROM_STACK = frozenset(
         "hier_no_study_effect",
         "hier_no_sponsor_effect",
         "hier_no_questionnaire_effect",
+        "hier_plus_study_effect",
+        "hier_plus_sponsor_effect",
+        "hier_plus_questionnaire_effect",
     }
 )
 
@@ -180,6 +183,10 @@ def reproduce_weights(payload: dict[str, Any]) -> dict[str, float]:
     elif payload.get("source_stack_training_protocol") == "formal_60_30_v1":
         raise ValueError("formal stack lacks nested OOF artifact fingerprint")
     nested = json.loads(nested_path.read_text(encoding="utf-8"))
+    if nested.get("evidence_bundle_id") != payload.get("source_evidence_bundle_id"):
+        raise ValueError("stack evidence bundle lineage changed")
+    if nested.get("evidence_bundle_sha256") != payload.get("source_evidence_bundle_sha256"):
+        raise ValueError("stack evidence bundle fingerprint changed")
     if payload.get("source_stack_training_protocol") == "formal_60_30_v1":
         frozen_index = nested_path.with_name(f"{nested_path.stem}_frozen.json")
         if not frozen_index.is_file():
@@ -328,6 +335,8 @@ def fit_stack_weights_from_nested_loo(
             nested_path.with_name(f"{nested_path.stem}_frozen.json")
         )
     fitted["source_model_version"] = nested.get("model_version")
+    fitted["source_evidence_bundle_id"] = nested.get("evidence_bundle_id")
+    fitted["source_evidence_bundle_sha256"] = nested.get("evidence_bundle_sha256")
     fitted["source_stack_training_protocol"] = nested.get("stack_training_protocol")
     ver = verify_reproducible(fitted)
     fitted["reproduction"] = ver
@@ -365,6 +374,8 @@ def load_oof_stack_weights(
         "excluded_g8_disable": payload.get("excluded_g8_disable"),
         "source_spine_label": payload.get("source_spine_label"),
         "source_model_version": payload.get("source_model_version"),
+        "source_evidence_bundle_id": payload.get("source_evidence_bundle_id"),
+        "source_evidence_bundle_sha256": payload.get("source_evidence_bundle_sha256"),
         "source_stack_training_protocol": payload.get("source_stack_training_protocol"),
         "source_nested_sha256": payload.get("source_nested_sha256"),
         "source_frozen_index_semantic_sha256": payload.get(

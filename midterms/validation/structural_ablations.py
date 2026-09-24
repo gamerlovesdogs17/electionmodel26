@@ -7,7 +7,7 @@ from typing import Any
 
 from midterms.model.poll_structure import PollStructureConfig
 
-ABLATION_REGISTRY_VERSION = "same-family-ablation-v2"
+ABLATION_REGISTRY_VERSION = "same-family-ablation-v3"
 
 
 @dataclass(frozen=True)
@@ -34,6 +34,26 @@ STRUCTURAL_ABLATIONS: tuple[StructuralAblation, ...] = (
         poll_structure_overrides={"questionnaire_effect": False},
     ),
 )
+
+# Positive, single-term additions for the v0.9.22 same-family validation grid.
+# These are specification diagnostics only. They are deliberately distinct
+# from stackable forecast components.
+STRUCTURAL_CHALLENGERS: tuple[StructuralAblation, ...] = (
+    StructuralAblation(
+        "hier_plus_study_effect", "study_effect",
+        poll_structure_overrides={"study_effect": True},
+    ),
+    StructuralAblation(
+        "hier_plus_sponsor_effect", "sponsor_effect",
+        poll_structure_overrides={"sponsor_effect": True},
+    ),
+    StructuralAblation(
+        "hier_plus_questionnaire_effect", "questionnaire_effect",
+        poll_structure_overrides={"questionnaire_effect": True},
+    ),
+)
+
+ALL_STRUCTURAL_VARIANTS = STRUCTURAL_ABLATIONS + STRUCTURAL_CHALLENGERS
 
 
 def same_family_fit_spec(
@@ -78,7 +98,7 @@ def same_family_fit_spec(
         "is_noop": is_noop,
         "eligible": eligible,
         "ineligible_reason": (
-            "declared feature is already disabled in the reference" if is_noop else
+            "declared feature already has the requested value in the reference" if is_noop else
             None if eligible else "challenger changed more than its declared feature"
         ),
         "same_model_family": True,
@@ -87,7 +107,7 @@ def same_family_fit_spec(
 
 
 def ablation_by_id(identifier: str) -> StructuralAblation:
-    for item in STRUCTURAL_ABLATIONS:
+    for item in ALL_STRUCTURAL_VARIANTS:
         if item.identifier == identifier:
             return item
     raise KeyError(identifier)

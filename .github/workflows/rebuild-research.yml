@@ -4,92 +4,180 @@ on:
   workflow_dispatch:
     inputs:
       as_of:
-        description: Forecast evidence cutoff YYYY-MM-DD. Leave blank for the current UTC date.
+        description: Forecast evidence cutoff YYYY-MM-DD. Leave blank for current UTC date.
         required: false
         type: string
         default: ""
+      refresh_safe_sources:
+        description: Refresh only source adapters approved for unattended preparation.
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: research-rebuild
+  cancel-in-progress: false
 
 jobs:
-  rebuild:
+  prepare_evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 45
     permissions:
       contents: write
     outputs:
-      as_of: ${{ steps.resolve_as_of.outputs.as_of }}
-      commit_created: ${{ steps.commit.outputs.commit_created }}
-      commit_sha: ${{ steps.commit.outputs.commit_sha }}
-
+      as_of: ${{ steps.resolve.outputs.as_of }}
+      evidence_bundle_id: ${{ steps.bundle.outputs.evidence_bundle_id }}
+      evidence_commit_sha: ${{ steps.commit.outputs.evidence_commit_sha }}
     steps:
-      - name: Checkout
+      - name: Checkout main for evidence preparation
         uses: actions/checkout@v4
         with:
           ref: main
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
-
       - name: Install
         run: pip install -e ".[dev]"
-
-      - name: Run full test suite
-        run: pytest -q
-
-      - name: Resolve evidence cutoff
-        id: resolve_as_of
+      - name: Resolve AS_OF
+        id: resolve
         shell: bash
         env:
           REQUESTED_AS_OF: ${{ inputs.as_of }}
         run: |
           TODAY="$(date -u +%F)"
           AS_OF="${REQUESTED_AS_OF:-$TODAY}"
-          if [[ ! "$AS_OF" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
-            echo "as_of must use ISO YYYY-MM-DD format" >&2
-            exit 1
-          fi
-          if [[ "$(date -u -d "$AS_OF" +%F 2>/dev/null || true)" != "$AS_OF" ]]; then
-            echo "as_of is not a valid calendar date: $AS_OF" >&2
-            exit 1
-          fi
-          if [[ "$AS_OF" > "$TODAY" ]]; then
-            echo "as_of cannot be later than workflow UTC date $TODAY" >&2
-            exit 1
-          fi
+          [[ "$AS_OF" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "invalid ISO date" >&2; exit 1; }
+          [[ "$(date -u -d "$AS_OF" +%F 2>/dev/null || true)" == "$AS_OF" ]] || { echo "invalid calendar date" >&2; exit 1; }
+          [[ "$AS_OF" > "$TODAY" ]] && { echo "as_of cannot be later than $TODAY" >&2; exit 1; }
           echo "AS_OF=$AS_OF" >> "$GITHUB_ENV"
           echo "as_of=$AS_OF" >> "$GITHUB_OUTPUT"
-          echo "Using evidence cutoff $AS_OF"
+      - name: Source readiness audit
+        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
+      - name: Refresh safe sources
+        if: inputs.refresh_safe_sources
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe
+      - name: Seal and strictly verify evidence bundle
+        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode seal --strict
+      - name: Strict blueprint source gates
+        run: python -m midterms.cli blueprint-extension-gates --source-only --strict
+      - name: Read sealed bundle ID
+        id: bundle
+        shell: bash
+        run: |
+          BUNDLE_ID="$(python -c "import json; print(json.load(open('data/manifests/evidence_bundle_latest.json'))['evidence_bundle_id'])")"
+          echo "evidence_bundle_id=$BUNDLE_ID" >> "$GITHUB_OUTPUT"
+      - name: Upload evidence artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-evidence-${{ steps.resolve.outputs.as_of }}
+          path: |
+            data/artifacts/source_readiness_latest.json
+            data/manifests/
+            data/normalized/
+            data/raw/external/
+      - name: Commit coherent evidence state
+        id: commit
+        if: success()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/raw/external data/normalized data/manifests data/artifacts/source_readiness_latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "evidence: seal research snapshot ${AS_OF} [no-model-fit]"
+            git push origin HEAD:main
+          fi
+          echo "evidence_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Strict publication evidence preflight
+  rebuild:
+    needs: prepare_evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      contents: write
+    outputs:
+      commit_created: ${{ steps.commit.outputs.commit_created }}
+      commit_sha: ${{ steps.commit.outputs.commit_sha }}
+    env:
+      AS_OF: ${{ needs.prepare_evidence.outputs.as_of }}
+      EVIDENCE_BUNDLE_ID: ${{ needs.prepare_evidence.outputs.evidence_bundle_id }}
+    steps:
+      - name: Checkout exact evidence commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare_evidence.outputs.evidence_commit_sha }}
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Run full test suite
+        run: pytest -q
+      - name: Verify exact sealed evidence bundle
+        shell: bash
+        run: |
+          BUNDLE_FILE="$(python -c "import json; p=json.load(open('data/manifests/evidence_bundle_latest.json')); print('data/manifests/'+p['manifest'])")"
+          echo "EVIDENCE_BUNDLE_PATH=$BUNDLE_FILE" >> "$GITHUB_ENV"
+          python -m midterms.cli verify-evidence-bundle --path "$BUNDLE_FILE" --expected-id "$EVIDENCE_BUNDLE_ID"
+      - name: Strict effective publication-domain eligibility
         run: |
           python -m midterms.cli evidence-eligibility \
             --election-id senate-2026 \
             --as-of "$AS_OF" \
             --publication-config \
             --strict
-
-      - name: Strict source and freshness extension preflight
-        run: python -m midterms.cli blueprint-extension-gates --source-only --strict
-
-      - name: Regenerate freeze-before-truth historical OOF
+      - name: Restore semantic historical validation cache
+        id: historical-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            data/artifacts/nested_component_loo.json
+            data/artifacts/nested_component_loo_frozen.json
+            data/artifacts/posterior_predictive_oof_latest.json
+            data/artifacts/poll_structure_crossfit_latest.json
+          key: historical-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v1
+      - name: Regenerate freeze-before-truth historical OOF and same-family challengers
+        if: steps.historical-cache.outputs.cache-hit != 'true'
         run: |
           python -m midterms.cli nested-component-loo \
             --hierarchical-method pymc \
             --years 2018,2020,2022,2024 \
             --leads 60,30 \
-            --draws 1600
-
-      - name: Fit predictive-mixture stack from regenerated OOF
+            --draws 1600 \
+            --evidence-bundle "$EVIDENCE_BUNDLE_PATH"
+      - name: Cross-fit single-term poll-structure selection
+        run: |
+          python - <<'PY'
+          import json, os
+          nested = json.load(open('data/artifacts/nested_component_loo.json'))
+          if nested.get('evidence_bundle_id') != os.environ['EVIDENCE_BUNDLE_ID']:
+              raise SystemExit('cached historical OOF belongs to a different evidence bundle')
+          PY
+          python -m midterms.cli poll-structure-crossfit --strict
+      - name: Reverify OOF lineage and fit predictive-mixture stack
         run: python -m midterms.cli fit-stack-weights
-
+      - name: Save verified historical validation cache
+        if: steps.historical-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            data/artifacts/nested_component_loo.json
+            data/artifacts/nested_component_loo_frozen.json
+            data/artifacts/posterior_predictive_oof_latest.json
+            data/artifacts/poll_structure_crossfit_latest.json
+          key: historical-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v1
       - name: Cross-fitted production-stack reliability
         run: python -m midterms.cli crossfit-stack-reliability
-
       - name: Joint historical proper scores
         run: python -m midterms.cli joint-oof-scores --strict
-
       - name: Run publication-quality research forecast
         run: |
           python -m midterms.cli forecast \
@@ -98,16 +186,12 @@ jobs:
             --method pymc \
             --require-publishable \
             --n-joint-sims 50000
-
       - name: Numerical quality
         run: python -m midterms.cli numerical-check --publishable
-
-      - name: Validation report and posterior diagnostics
+      - name: Validation report and reused posterior diagnostics
         run: python -m midterms.cli validation-report --full
-
       - name: Independent rebuild
         run: python -m midterms.cli verify-rebuild --independent
-
       - name: Run coherence check
         run: |
           python - <<'PY'
@@ -117,43 +201,47 @@ jobs:
           if not result.get("ok"):
               raise SystemExit(1)
           PY
-
       - name: G1-G11 and blueprint extension gates
         run: python -m midterms.cli acceptance-gates --strict
-
-      - name: Upload generated artifacts
+      - name: Upload generated model artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: research-forecast-artifacts
+          name: research-rebuild-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}
           path: |
             data/artifacts/
             data/releases/
             data/manifests/
             web/public/data/forecast_latest.json
-
-      - name: Commit successful rebuild
+      - name: Refuse artifact push if main diverged from evidence commit
+        if: success()
+        shell: bash
+        run: |
+          git fetch origin main
+          [[ "$(git rev-parse origin/main)" == "${{ needs.prepare_evidence.outputs.evidence_commit_sha }}" ]] || {
+            echo "origin/main changed after evidence seal; refusing mixed-lineage artifact commit" >&2
+            exit 1
+          }
+      - name: Commit successful model artifacts
         id: commit
         if: success()
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add data/artifacts data/releases data/manifests web/public/data/forecast_latest.json
-
           if git diff --cached --quiet; then
-            echo "No generated changes to commit."
             echo "commit_created=false" >> "$GITHUB_OUTPUT"
             echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           else
-            git commit -m "model: rebuild research forecast ${AS_OF} [rebuild-deploys-pages]"
+            git commit -m "model: rebuild research forecast ${AS_OF} [bundle ${EVIDENCE_BUNDLE_ID}]"
             git push origin HEAD:main
             echo "commit_created=true" >> "$GITHUB_OUTPUT"
             echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
 
   deploy_pages:
-    needs: rebuild
+    needs: [prepare_evidence, rebuild]
     if: needs.rebuild.result == 'success' && needs.rebuild.outputs.commit_created == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -167,18 +255,16 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout updated main
+      - name: Checkout updated main after model artifact commit
         uses: actions/checkout@v4
         with:
           ref: main
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
           cache-dependency-path: web/package-lock.json
-
       - name: Install and build static site
         working-directory: web
         env:
@@ -186,12 +272,10 @@ jobs:
         run: |
           npm ci
           npm run build
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: web/out
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

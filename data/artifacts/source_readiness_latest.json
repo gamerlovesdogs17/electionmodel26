@@ -1,0 +1,1231 @@
+{
+  "schema_version": "source-readiness-v1",
+  "model_version": "senate-hierarchical-v0.9.22",
+  "election_id": "senate-2026",
+  "as_of": "2026-09-24",
+  "ready_for_expensive_rebuild": false,
+  "source_preparation_registry_version": "source-preparation-registry-v1",
+  "effective_registry": {
+    "registry_version": "source-preparation-registry-v1",
+    "enabled_optional_features": [],
+    "domains": {
+      "polls": {
+        "name": "polls",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.ingest",
+        "refresh_supported": true,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/polls.parquet",
+        "manifest_output": "data/manifests/historical_poll_cycles.json",
+        "freshness_policy": "poll-observation-and-retrieval-v1",
+        "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
+        "refresh_class": "safe_network",
+        "enabled": true,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "races": {
+        "name": "races",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.official_ballot",
+        "refresh_supported": true,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/races_official.parquet",
+        "manifest_output": "data/manifests/official_senate_ballots.json",
+        "freshness_policy": "official-ballot-versioned-v1",
+        "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
+        "refresh_class": "safe_offline",
+        "enabled": true,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "candidate_timeline": {
+        "name": "candidate_timeline",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.candidate_timeline",
+        "refresh_supported": false,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/candidate_timeline.parquet",
+        "manifest_output": "data/manifests/candidate_timeline.json",
+        "freshness_policy": "candidate-bitemporal-v1",
+        "eligibility_checker": "midterms.evidence.candidate_timeline.audit_candidate_timeline_history",
+        "refresh_class": "manual",
+        "enabled": true,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "pollster_ratings": {
+        "name": "pollster_ratings",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.ratings",
+        "refresh_supported": true,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/pollster_ratings.parquet",
+        "manifest_output": "data/manifests/pollster_ratings.json",
+        "freshness_policy": "rating-available-at-v1",
+        "eligibility_checker": "midterms.evidence.ratings.build_rating_lookup_with_meta",
+        "refresh_class": "safe_network",
+        "enabled": true,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "presidential_prior": {
+        "name": "presidential_prior",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.presidential_results",
+        "refresh_supported": true,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/presidential_vote_counts.parquet",
+        "manifest_output": "data/manifests/presidential_vote_sources.json",
+        "freshness_policy": "immutable-certified-results-v1",
+        "eligibility_checker": "midterms.evidence.presidential_results.verified_source_set_sha256",
+        "refresh_class": "safe_offline",
+        "enabled": true,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "demographics": {
+        "name": "demographics",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": "similarity",
+        "adapter": "midterms.evidence.demographic_vintages",
+        "refresh_supported": false,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/demographic_vintages.parquet",
+        "manifest_output": "data/manifests/demographic_vintages.json",
+        "freshness_policy": "official-release-date-v1",
+        "eligibility_checker": "midterms.evidence.demographic_vintages.select_demographic_vintage",
+        "refresh_class": "manual",
+        "enabled": false,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "economics": {
+        "name": "economics",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.economics",
+        "refresh_supported": true,
+        "historical_backfill_supported": true,
+        "secrets_required": [
+          "FRED_API_KEY"
+        ],
+        "normalized_output": "data/normalized/economics_vintages.parquet",
+        "manifest_output": "data/manifests/economics_vintages.json",
+        "freshness_policy": "alfred-realtime-vintage-v1",
+        "eligibility_checker": "midterms.evidence.economics.audit_realtime_economic_coverage",
+        "refresh_class": "safe_network",
+        "enabled": true,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "finance": {
+        "name": "finance",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.fec",
+        "refresh_supported": true,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/fundraising_shares.parquet",
+        "manifest_output": "data/manifests/fundraising_shares.json",
+        "freshness_policy": "fec-filing-availability-v1",
+        "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
+        "refresh_class": "safe_network",
+        "enabled": true,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "approval": {
+        "name": "approval",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.approval",
+        "refresh_supported": true,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/pres_approval.parquet",
+        "manifest_output": "data/manifests/pres_approval.json",
+        "freshness_policy": "approval-observation-v1",
+        "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
+        "refresh_class": "safe_network",
+        "enabled": true,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "generic_ballot": {
+        "name": "generic_ballot",
+        "required_for_core": true,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.ingest",
+        "refresh_supported": true,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/polls.parquet",
+        "manifest_output": "data/manifests/merge_live_polls.json",
+        "freshness_policy": "generic-ballot-observation-v1",
+        "eligibility_checker": "midterms.evidence.ingest.generic_ballot_aggregate",
+        "refresh_class": "safe_network",
+        "enabled": true,
+        "hard_for_current_run": true,
+        "hard_for_historical_run": true
+      },
+      "expert_ratings": {
+        "name": "expert_ratings",
+        "required_for_core": false,
+        "required_for_historical_validation": false,
+        "optional_feature_dependency": "expert_ratings_overlay",
+        "adapter": "midterms.evidence.wiki_ratings",
+        "refresh_supported": true,
+        "historical_backfill_supported": false,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/expert_ratings.parquet",
+        "manifest_output": "data/manifests/expert_ratings.json",
+        "freshness_policy": "ratings-retrieval-v1",
+        "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
+        "refresh_class": "safe_network",
+        "enabled": false,
+        "hard_for_current_run": false,
+        "hard_for_historical_run": false
+      },
+      "markets": {
+        "name": "markets",
+        "required_for_core": false,
+        "required_for_historical_validation": false,
+        "optional_feature_dependency": "market_overlay",
+        "adapter": "midterms.evidence.markets",
+        "refresh_supported": true,
+        "historical_backfill_supported": false,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/markets.parquet",
+        "manifest_output": "data/manifests/markets_kalshi.json",
+        "freshness_policy": "market-retrieval-v1",
+        "eligibility_checker": "midterms.evidence.markets.verify_market_store_integrity",
+        "refresh_class": "safe_network",
+        "enabled": false,
+        "hard_for_current_run": false,
+        "hard_for_historical_run": false
+      },
+      "official_results": {
+        "name": "official_results",
+        "required_for_core": false,
+        "required_for_historical_validation": true,
+        "optional_feature_dependency": null,
+        "adapter": "midterms.evidence.official_ledger",
+        "refresh_supported": true,
+        "historical_backfill_supported": true,
+        "secrets_required": [],
+        "normalized_output": "data/normalized/results_certified.parquet",
+        "manifest_output": "data/manifests/official_senate_ballots.json",
+        "freshness_policy": "certification-availability-v1",
+        "eligibility_checker": "midterms.evidence.truth_contract.validate_truth_contract",
+        "refresh_class": "safe_offline",
+        "enabled": true,
+        "hard_for_current_run": false,
+        "hard_for_historical_run": true
+      }
+    }
+  },
+  "domains": {
+    "polls": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.ingest",
+      "status": "ready",
+      "reasons": [],
+      "n_current_rows": 320,
+      "historical_cutoff_counts": {
+        "senate-2018-lead-60": 289,
+        "senate-2018-lead-30": 435,
+        "senate-2020-lead-60": 290,
+        "senate-2020-lead-30": 446,
+        "senate-2022-lead-60": 207,
+        "senate-2022-lead-30": 340,
+        "senate-2024-lead-60": 376,
+        "senate-2024-lead-30": 567
+      },
+      "missing_cutoffs": [],
+      "semantic_sha256": "10c68ad57d5c1137a0f052254d47c7f1223486cfe47771df7623d8cdc7fd8911"
+    },
+    "races": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.official_ballot",
+      "status": "ready",
+      "reasons": [],
+      "missing_election_ids": [],
+      "semantic_sha256": "4f4727db74732187dafadef6c09a7af8cb70a3f7c63809304853b2e8dba9b736"
+    },
+    "candidate_timeline": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.candidate_timeline",
+      "status": "missing",
+      "reasons": [
+        "source-backed candidate identity is incomplete at required cutoffs"
+      ],
+      "cutoffs": {
+        "senate-2018-lead-60": {
+          "status": "degraded_missing_timeline",
+          "n_required_races": 35,
+          "n_point_in_time": 0,
+          "n_degraded": 35,
+          "n_incomplete_identity": 35,
+          "required_identity_columns": [
+            "modeled_candidate_id",
+            "modeled_ballot_party",
+            "opposing_candidate_id",
+            "opposing_ballot_party"
+          ],
+          "traceable": false,
+          "snapshot_sha256": null,
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ],
+          "eligible": false,
+          "publication_eligible": false,
+          "held_seats_excluded": true,
+          "schema_version": "candidate-timeline-v2"
+        },
+        "senate-2018-lead-30": {
+          "status": "degraded_missing_timeline",
+          "n_required_races": 35,
+          "n_point_in_time": 0,
+          "n_degraded": 35,
+          "n_incomplete_identity": 35,
+          "required_identity_columns": [
+            "modeled_candidate_id",
+            "modeled_ballot_party",
+            "opposing_candidate_id",
+            "opposing_ballot_party"
+          ],
+          "traceable": false,
+          "snapshot_sha256": null,
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ],
+          "eligible": false,
+          "publication_eligible": false,
+          "held_seats_excluded": true,
+          "schema_version": "candidate-timeline-v2"
+        },
+        "senate-2020-lead-60": {
+          "status": "degraded_missing_timeline",
+          "n_required_races": 35,
+          "n_point_in_time": 0,
+          "n_degraded": 35,
+          "n_incomplete_identity": 35,
+          "required_identity_columns": [
+            "modeled_candidate_id",
+            "modeled_ballot_party",
+            "opposing_candidate_id",
+            "opposing_ballot_party"
+          ],
+          "traceable": false,
+          "snapshot_sha256": null,
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ],
+          "eligible": false,
+          "publication_eligible": false,
+          "held_seats_excluded": true,
+          "schema_version": "candidate-timeline-v2"
+        },
+        "senate-2020-lead-30": {
+          "status": "degraded_missing_timeline",
+          "n_required_races": 35,
+          "n_point_in_time": 0,
+          "n_degraded": 35,
+          "n_incomplete_identity": 35,
+          "required_identity_columns": [
+            "modeled_candidate_id",
+            "modeled_ballot_party",
+            "opposing_candidate_id",
+            "opposing_ballot_party"
+          ],
+          "traceable": false,
+          "snapshot_sha256": null,
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ],
+          "eligible": false,
+          "publication_eligible": false,
+          "held_seats_excluded": true,
+          "schema_version": "candidate-timeline-v2"
+        },
+        "senate-2022-lead-60": {
+          "status": "degraded_missing_timeline",
+          "n_required_races": 36,
+          "n_point_in_time": 0,
+          "n_degraded": 36,
+          "n_incomplete_identity": 36,
+          "required_identity_columns": [
+            "modeled_candidate_id",
+            "modeled_ballot_party",
+            "opposing_candidate_id",
+            "opposing_ballot_party"
+          ],
+          "traceable": false,
+          "snapshot_sha256": null,
+          "reasons": [
+            "36 required contested races lack complete modeled/opposing identity",
+            "36 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ],
+          "eligible": false,
+          "publication_eligible": false,
+          "held_seats_excluded": true,
+          "schema_version": "candidate-timeline-v2"
+        },
+        "senate-2022-lead-30": {
+          "status": "degraded_missing_timeline",
+          "n_required_races": 36,
+          "n_point_in_time": 0,
+          "n_degraded": 36,
+          "n_incomplete_identity": 36,
+          "required_identity_columns": [
+            "modeled_candidate_id",
+            "modeled_ballot_party",
+            "opposing_candidate_id",
+            "opposing_ballot_party"
+          ],
+          "traceable": false,
+          "snapshot_sha256": null,
+          "reasons": [
+            "36 required contested races lack complete modeled/opposing identity",
+            "36 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ],
+          "eligible": false,
+          "publication_eligible": false,
+          "held_seats_excluded": true,
+          "schema_version": "candidate-timeline-v2"
+        },
+        "senate-2024-lead-60": {
+          "status": "degraded_missing_timeline",
+          "n_required_races": 35,
+          "n_point_in_time": 0,
+          "n_degraded": 35,
+          "n_incomplete_identity": 35,
+          "required_identity_columns": [
+            "modeled_candidate_id",
+            "modeled_ballot_party",
+            "opposing_candidate_id",
+            "opposing_ballot_party"
+          ],
+          "traceable": false,
+          "snapshot_sha256": null,
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ],
+          "eligible": false,
+          "publication_eligible": false,
+          "held_seats_excluded": true,
+          "schema_version": "candidate-timeline-v2"
+        },
+        "senate-2024-lead-30": {
+          "status": "degraded_missing_timeline",
+          "n_required_races": 35,
+          "n_point_in_time": 0,
+          "n_degraded": 35,
+          "n_incomplete_identity": 35,
+          "required_identity_columns": [
+            "modeled_candidate_id",
+            "modeled_ballot_party",
+            "opposing_candidate_id",
+            "opposing_ballot_party"
+          ],
+          "traceable": false,
+          "snapshot_sha256": null,
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ],
+          "eligible": false,
+          "publication_eligible": false,
+          "held_seats_excluded": true,
+          "schema_version": "candidate-timeline-v2"
+        },
+        "senate-2026-current": {
+          "status": "degraded_missing_timeline",
+          "n_required_races": 35,
+          "n_point_in_time": 0,
+          "n_degraded": 35,
+          "n_incomplete_identity": 35,
+          "required_identity_columns": [
+            "modeled_candidate_id",
+            "modeled_ballot_party",
+            "opposing_candidate_id",
+            "opposing_ballot_party"
+          ],
+          "traceable": false,
+          "snapshot_sha256": null,
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ],
+          "eligible": false,
+          "publication_eligible": false,
+          "held_seats_excluded": true,
+          "schema_version": "candidate-timeline-v2"
+        }
+      },
+      "missing_coverage": [
+        {
+          "cutoff": "senate-2018-lead-60",
+          "as_of": "2018-09-07",
+          "race_ids": [
+            "senate-2018-AZ",
+            "senate-2018-CA",
+            "senate-2018-CT",
+            "senate-2018-DE",
+            "senate-2018-FL",
+            "senate-2018-HI",
+            "senate-2018-IN",
+            "senate-2018-MA",
+            "senate-2018-MD",
+            "senate-2018-ME",
+            "senate-2018-MI",
+            "senate-2018-MN",
+            "senate-2018-MN-special",
+            "senate-2018-MO",
+            "senate-2018-MS",
+            "senate-2018-MS-special",
+            "senate-2018-MT",
+            "senate-2018-ND",
+            "senate-2018-NE",
+            "senate-2018-NJ",
+            "senate-2018-NM",
+            "senate-2018-NV",
+            "senate-2018-NY",
+            "senate-2018-OH",
+            "senate-2018-PA",
+            "senate-2018-RI",
+            "senate-2018-TN",
+            "senate-2018-TX",
+            "senate-2018-UT",
+            "senate-2018-VA",
+            "senate-2018-VT",
+            "senate-2018-WA",
+            "senate-2018-WI",
+            "senate-2018-WV",
+            "senate-2018-WY"
+          ],
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ]
+        },
+        {
+          "cutoff": "senate-2018-lead-30",
+          "as_of": "2018-10-07",
+          "race_ids": [
+            "senate-2018-AZ",
+            "senate-2018-CA",
+            "senate-2018-CT",
+            "senate-2018-DE",
+            "senate-2018-FL",
+            "senate-2018-HI",
+            "senate-2018-IN",
+            "senate-2018-MA",
+            "senate-2018-MD",
+            "senate-2018-ME",
+            "senate-2018-MI",
+            "senate-2018-MN",
+            "senate-2018-MN-special",
+            "senate-2018-MO",
+            "senate-2018-MS",
+            "senate-2018-MS-special",
+            "senate-2018-MT",
+            "senate-2018-ND",
+            "senate-2018-NE",
+            "senate-2018-NJ",
+            "senate-2018-NM",
+            "senate-2018-NV",
+            "senate-2018-NY",
+            "senate-2018-OH",
+            "senate-2018-PA",
+            "senate-2018-RI",
+            "senate-2018-TN",
+            "senate-2018-TX",
+            "senate-2018-UT",
+            "senate-2018-VA",
+            "senate-2018-VT",
+            "senate-2018-WA",
+            "senate-2018-WI",
+            "senate-2018-WV",
+            "senate-2018-WY"
+          ],
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ]
+        },
+        {
+          "cutoff": "senate-2020-lead-60",
+          "as_of": "2020-09-04",
+          "race_ids": [
+            "senate-2020-AK",
+            "senate-2020-AL",
+            "senate-2020-AR",
+            "senate-2020-AZ-special",
+            "senate-2020-CO",
+            "senate-2020-DE",
+            "senate-2020-GA",
+            "senate-2020-GA-special",
+            "senate-2020-IA",
+            "senate-2020-ID",
+            "senate-2020-IL",
+            "senate-2020-KS",
+            "senate-2020-KY",
+            "senate-2020-LA",
+            "senate-2020-MA",
+            "senate-2020-ME",
+            "senate-2020-MI",
+            "senate-2020-MN",
+            "senate-2020-MS",
+            "senate-2020-MT",
+            "senate-2020-NC",
+            "senate-2020-NE",
+            "senate-2020-NH",
+            "senate-2020-NJ",
+            "senate-2020-NM",
+            "senate-2020-OK",
+            "senate-2020-OR",
+            "senate-2020-RI",
+            "senate-2020-SC",
+            "senate-2020-SD",
+            "senate-2020-TN",
+            "senate-2020-TX",
+            "senate-2020-VA",
+            "senate-2020-WV",
+            "senate-2020-WY"
+          ],
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ]
+        },
+        {
+          "cutoff": "senate-2020-lead-30",
+          "as_of": "2020-10-04",
+          "race_ids": [
+            "senate-2020-AK",
+            "senate-2020-AL",
+            "senate-2020-AR",
+            "senate-2020-AZ-special",
+            "senate-2020-CO",
+            "senate-2020-DE",
+            "senate-2020-GA",
+            "senate-2020-GA-special",
+            "senate-2020-IA",
+            "senate-2020-ID",
+            "senate-2020-IL",
+            "senate-2020-KS",
+            "senate-2020-KY",
+            "senate-2020-LA",
+            "senate-2020-MA",
+            "senate-2020-ME",
+            "senate-2020-MI",
+            "senate-2020-MN",
+            "senate-2020-MS",
+            "senate-2020-MT",
+            "senate-2020-NC",
+            "senate-2020-NE",
+            "senate-2020-NH",
+            "senate-2020-NJ",
+            "senate-2020-NM",
+            "senate-2020-OK",
+            "senate-2020-OR",
+            "senate-2020-RI",
+            "senate-2020-SC",
+            "senate-2020-SD",
+            "senate-2020-TN",
+            "senate-2020-TX",
+            "senate-2020-VA",
+            "senate-2020-WV",
+            "senate-2020-WY"
+          ],
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ]
+        },
+        {
+          "cutoff": "senate-2022-lead-60",
+          "as_of": "2022-09-09",
+          "race_ids": [
+            "senate-2022-AK",
+            "senate-2022-AL",
+            "senate-2022-AR",
+            "senate-2022-AZ",
+            "senate-2022-CA",
+            "senate-2022-CA-unexpired",
+            "senate-2022-CO",
+            "senate-2022-CT",
+            "senate-2022-FL",
+            "senate-2022-GA",
+            "senate-2022-HI",
+            "senate-2022-IA",
+            "senate-2022-ID",
+            "senate-2022-IL",
+            "senate-2022-IN",
+            "senate-2022-KS",
+            "senate-2022-KY",
+            "senate-2022-LA",
+            "senate-2022-MD",
+            "senate-2022-MO",
+            "senate-2022-NC",
+            "senate-2022-ND",
+            "senate-2022-NH",
+            "senate-2022-NV",
+            "senate-2022-NY",
+            "senate-2022-OH",
+            "senate-2022-OK",
+            "senate-2022-OK-special",
+            "senate-2022-OR",
+            "senate-2022-PA",
+            "senate-2022-SC",
+            "senate-2022-SD",
+            "senate-2022-UT",
+            "senate-2022-VT",
+            "senate-2022-WA",
+            "senate-2022-WI"
+          ],
+          "reasons": [
+            "36 required contested races lack complete modeled/opposing identity",
+            "36 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ]
+        },
+        {
+          "cutoff": "senate-2022-lead-30",
+          "as_of": "2022-10-09",
+          "race_ids": [
+            "senate-2022-AK",
+            "senate-2022-AL",
+            "senate-2022-AR",
+            "senate-2022-AZ",
+            "senate-2022-CA",
+            "senate-2022-CA-unexpired",
+            "senate-2022-CO",
+            "senate-2022-CT",
+            "senate-2022-FL",
+            "senate-2022-GA",
+            "senate-2022-HI",
+            "senate-2022-IA",
+            "senate-2022-ID",
+            "senate-2022-IL",
+            "senate-2022-IN",
+            "senate-2022-KS",
+            "senate-2022-KY",
+            "senate-2022-LA",
+            "senate-2022-MD",
+            "senate-2022-MO",
+            "senate-2022-NC",
+            "senate-2022-ND",
+            "senate-2022-NH",
+            "senate-2022-NV",
+            "senate-2022-NY",
+            "senate-2022-OH",
+            "senate-2022-OK",
+            "senate-2022-OK-special",
+            "senate-2022-OR",
+            "senate-2022-PA",
+            "senate-2022-SC",
+            "senate-2022-SD",
+            "senate-2022-UT",
+            "senate-2022-VT",
+            "senate-2022-WA",
+            "senate-2022-WI"
+          ],
+          "reasons": [
+            "36 required contested races lack complete modeled/opposing identity",
+            "36 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ]
+        },
+        {
+          "cutoff": "senate-2024-lead-60",
+          "as_of": "2024-09-06",
+          "race_ids": [
+            "senate-2024-AZ",
+            "senate-2024-CA",
+            "senate-2024-CA-unexpired",
+            "senate-2024-CT",
+            "senate-2024-DE",
+            "senate-2024-FL",
+            "senate-2024-HI",
+            "senate-2024-IN",
+            "senate-2024-MA",
+            "senate-2024-MD",
+            "senate-2024-ME",
+            "senate-2024-MI",
+            "senate-2024-MN",
+            "senate-2024-MO",
+            "senate-2024-MS",
+            "senate-2024-MT",
+            "senate-2024-ND",
+            "senate-2024-NE",
+            "senate-2024-NE-unexpired",
+            "senate-2024-NJ",
+            "senate-2024-NM",
+            "senate-2024-NV",
+            "senate-2024-NY",
+            "senate-2024-OH",
+            "senate-2024-PA",
+            "senate-2024-RI",
+            "senate-2024-TN",
+            "senate-2024-TX",
+            "senate-2024-UT",
+            "senate-2024-VA",
+            "senate-2024-VT",
+            "senate-2024-WA",
+            "senate-2024-WI",
+            "senate-2024-WV",
+            "senate-2024-WY"
+          ],
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ]
+        },
+        {
+          "cutoff": "senate-2024-lead-30",
+          "as_of": "2024-10-06",
+          "race_ids": [
+            "senate-2024-AZ",
+            "senate-2024-CA",
+            "senate-2024-CA-unexpired",
+            "senate-2024-CT",
+            "senate-2024-DE",
+            "senate-2024-FL",
+            "senate-2024-HI",
+            "senate-2024-IN",
+            "senate-2024-MA",
+            "senate-2024-MD",
+            "senate-2024-ME",
+            "senate-2024-MI",
+            "senate-2024-MN",
+            "senate-2024-MO",
+            "senate-2024-MS",
+            "senate-2024-MT",
+            "senate-2024-ND",
+            "senate-2024-NE",
+            "senate-2024-NE-unexpired",
+            "senate-2024-NJ",
+            "senate-2024-NM",
+            "senate-2024-NV",
+            "senate-2024-NY",
+            "senate-2024-OH",
+            "senate-2024-PA",
+            "senate-2024-RI",
+            "senate-2024-TN",
+            "senate-2024-TX",
+            "senate-2024-UT",
+            "senate-2024-VA",
+            "senate-2024-VT",
+            "senate-2024-WA",
+            "senate-2024-WI",
+            "senate-2024-WV",
+            "senate-2024-WY"
+          ],
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ]
+        },
+        {
+          "cutoff": "senate-2026-current",
+          "as_of": "2026-09-24",
+          "race_ids": [
+            "senate-2026-AK",
+            "senate-2026-AL",
+            "senate-2026-AR",
+            "senate-2026-CO",
+            "senate-2026-DE",
+            "senate-2026-FL",
+            "senate-2026-GA",
+            "senate-2026-IA",
+            "senate-2026-ID",
+            "senate-2026-IL",
+            "senate-2026-KS",
+            "senate-2026-KY",
+            "senate-2026-LA",
+            "senate-2026-MA",
+            "senate-2026-ME",
+            "senate-2026-MI",
+            "senate-2026-MN",
+            "senate-2026-MS",
+            "senate-2026-MT",
+            "senate-2026-NC",
+            "senate-2026-NE",
+            "senate-2026-NH",
+            "senate-2026-NJ",
+            "senate-2026-NM",
+            "senate-2026-OH",
+            "senate-2026-OK",
+            "senate-2026-OR",
+            "senate-2026-RI",
+            "senate-2026-SC",
+            "senate-2026-SD",
+            "senate-2026-TN",
+            "senate-2026-TX",
+            "senate-2026-VA",
+            "senate-2026-WV",
+            "senate-2026-WY"
+          ],
+          "reasons": [
+            "35 required contested races lack complete modeled/opposing identity",
+            "35 required contested races use degraded identity",
+            "candidate timeline is not source-traceable",
+            "candidate timeline snapshot hash is missing",
+            "candidate timeline source is missing"
+          ]
+        }
+      ],
+      "manifest_sha256": null,
+      "semantic_sha256": null,
+      "parser_version": null
+    },
+    "pollster_ratings": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.ratings",
+      "status": "incomplete_coverage",
+      "reasons": [
+        "no source-backed pollster ratings were available for historical cutoffs"
+      ],
+      "manifest_sha256": "f1277bd6350b94e68551b7340b415ecb6cf314dbcbc38c161d02b296218bffe0",
+      "semantic_sha256": "3690dd6464a57439436cb75295378b8fcd4e853ae04da6e28eaa839f42f66d33",
+      "parser_version": null
+    },
+    "presidential_prior": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.presidential_results",
+      "status": "ready",
+      "reasons": [],
+      "manifest_sha256": "6a9a0e4815e7fc3a99f827c44f40d3f6a55ad8a54163bb104ff13273229baa24",
+      "semantic_sha256": "50be4766ead46d24274347a4bc9fb54219d73b4b6c803f228c73c4371b43b5dd",
+      "parser_version": "fec-presidential-vote-counts-v1"
+    },
+    "demographics": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.demographic_vintages",
+      "status": "missing",
+      "reasons": [
+        "cycle-aware demographic vintages lack verified official release dates/coverage"
+      ],
+      "cutoffs": {},
+      "missing_cutoffs": [
+        "senate-2018-lead-60",
+        "senate-2018-lead-30",
+        "senate-2020-lead-60",
+        "senate-2020-lead-30",
+        "senate-2022-lead-60",
+        "senate-2022-lead-30",
+        "senate-2024-lead-60",
+        "senate-2024-lead-30",
+        "current"
+      ],
+      "manifest_sha256": null,
+      "semantic_sha256": null,
+      "parser_version": null
+    },
+    "economics": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.economics",
+      "status": "missing_secret",
+      "reasons": [
+        "ALFRED real-time vintages are unavailable for one or more required cutoffs"
+      ],
+      "coverage": {
+        "schema_version": "economic-realtime-vintage-v1",
+        "status": "missing_secret",
+        "publication_eligible": false,
+        "required_secret": "FRED_API_KEY",
+        "secret_available": false,
+        "cutoffs": {
+          "current": {
+            "as_of": "2026-09-24",
+            "status": "incomplete_coverage",
+            "n_rows": 0,
+            "series_ids": [],
+            "semantic_sha256": null
+          },
+          "senate-2018-lead-30": {
+            "as_of": "2018-10-07",
+            "status": "incomplete_coverage",
+            "n_rows": 0,
+            "series_ids": [],
+            "semantic_sha256": null
+          },
+          "senate-2018-lead-60": {
+            "as_of": "2018-09-07",
+            "status": "incomplete_coverage",
+            "n_rows": 0,
+            "series_ids": [],
+            "semantic_sha256": null
+          },
+          "senate-2020-lead-30": {
+            "as_of": "2020-10-04",
+            "status": "incomplete_coverage",
+            "n_rows": 0,
+            "series_ids": [],
+            "semantic_sha256": null
+          },
+          "senate-2020-lead-60": {
+            "as_of": "2020-09-04",
+            "status": "incomplete_coverage",
+            "n_rows": 0,
+            "series_ids": [],
+            "semantic_sha256": null
+          },
+          "senate-2022-lead-30": {
+            "as_of": "2022-10-09",
+            "status": "incomplete_coverage",
+            "n_rows": 0,
+            "series_ids": [],
+            "semantic_sha256": null
+          },
+          "senate-2022-lead-60": {
+            "as_of": "2022-09-09",
+            "status": "incomplete_coverage",
+            "n_rows": 0,
+            "series_ids": [],
+            "semantic_sha256": null
+          },
+          "senate-2024-lead-30": {
+            "as_of": "2024-10-06",
+            "status": "incomplete_coverage",
+            "n_rows": 0,
+            "series_ids": [],
+            "semantic_sha256": null
+          },
+          "senate-2024-lead-60": {
+            "as_of": "2024-09-06",
+            "status": "incomplete_coverage",
+            "n_rows": 0,
+            "series_ids": [],
+            "semantic_sha256": null
+          }
+        },
+        "blocking_cutoffs": [
+          "current",
+          "senate-2018-lead-30",
+          "senate-2018-lead-60",
+          "senate-2020-lead-30",
+          "senate-2020-lead-60",
+          "senate-2022-lead-30",
+          "senate-2022-lead-60",
+          "senate-2024-lead-30",
+          "senate-2024-lead-60"
+        ],
+        "substitutes_present": [
+          "synthetic_fixture_canary",
+          "world_bank_annual_substitute"
+        ],
+        "note": "FRED-latest, World Bank, and fixture rows cannot clear the historical real-time gate."
+      },
+      "manifest_sha256": "15fd8b96edaa000730e9bcca9d8189f627cf23e6f8d96606ea1718f5a65c5d4a",
+      "semantic_sha256": null,
+      "parser_version": "alfred-v2"
+    },
+    "finance": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.fec",
+      "status": "incomplete_coverage",
+      "reasons": [
+        "source-backed finance rows are absent for historical validation cycles"
+      ],
+      "manifest_sha256": "49cc56a301b9cf865ba55080a3b970e3c1c36b1f0ebbcc0bb9c8d00f934d47f9",
+      "semantic_sha256": "980fe92610aa227078cf3d4247e5427868a66a521ff41f7dd92a38d884753fc1",
+      "parser_version": "fec-v1"
+    },
+    "approval": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.approval",
+      "status": "untraceable",
+      "reasons": [
+        "historical approval rows are curated snapshots rather than immutable source-backed vintages"
+      ],
+      "manifest_sha256": "589b7927ec275bb0b3308fbcc951ca8d6d1a53ed214cfe5195a33a097a808fde",
+      "semantic_sha256": "8fbcb354a44d373f7797248aec96387d69d1291a1646b0fc2df2f869a8aa338b",
+      "parser_version": "approval-v2"
+    },
+    "generic_ballot": {
+      "required_for_core": true,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.ingest",
+      "status": "ready",
+      "reasons": [],
+      "semantic_sha256": "eec4436c0dd0061791be6c55c32c5462bcdd4c7af87b589f19de4d4df423ebe3",
+      "historical_method": "derived_from_frozen_senate_poll_deviation"
+    },
+    "expert_ratings": {
+      "required_for_core": false,
+      "required_for_historical_validation": false,
+      "adapter": "midterms.evidence.wiki_ratings",
+      "status": "optional_disabled",
+      "reasons": [
+        "expert_ratings_overlay is disabled"
+      ]
+    },
+    "markets": {
+      "required_for_core": false,
+      "required_for_historical_validation": false,
+      "adapter": "midterms.evidence.markets",
+      "status": "optional_disabled",
+      "reasons": [
+        "market_overlay is disabled"
+      ]
+    },
+    "official_results": {
+      "required_for_core": false,
+      "required_for_historical_validation": true,
+      "adapter": "midterms.evidence.official_ledger",
+      "status": "ready",
+      "reasons": [],
+      "manifest_sha256": "f346b87bd04cd0c2f907488bf1ed84a64283d29f3d2fb2f389aed3e5804d71e8",
+      "semantic_sha256": "714391ef5d6e6452633278cfb9e6386771a5fa02f75fbea31cabb71cf06c708c",
+      "parser_version": "official-ledger-v2"
+    }
+  },
+  "historical_cutoffs": {
+    "senate-2018-lead-60": "2018-09-07",
+    "senate-2018-lead-30": "2018-10-07",
+    "senate-2020-lead-60": "2020-09-04",
+    "senate-2020-lead-30": "2020-10-04",
+    "senate-2022-lead-60": "2022-09-09",
+    "senate-2022-lead-30": "2022-10-09",
+    "senate-2024-lead-60": "2024-09-06",
+    "senate-2024-lead-30": "2024-10-06"
+  },
+  "blockers": [
+    {
+      "domain": "candidate_timeline",
+      "status": "missing",
+      "reasons": [
+        "source-backed candidate identity is incomplete at required cutoffs"
+      ]
+    },
+    {
+      "domain": "pollster_ratings",
+      "status": "incomplete_coverage",
+      "reasons": [
+        "no source-backed pollster ratings were available for historical cutoffs"
+      ]
+    },
+    {
+      "domain": "demographics",
+      "status": "missing",
+      "reasons": [
+        "cycle-aware demographic vintages lack verified official release dates/coverage"
+      ]
+    },
+    {
+      "domain": "economics",
+      "status": "missing_secret",
+      "reasons": [
+        "ALFRED real-time vintages are unavailable for one or more required cutoffs"
+      ]
+    },
+    {
+      "domain": "finance",
+      "status": "incomplete_coverage",
+      "reasons": [
+        "source-backed finance rows are absent for historical validation cycles"
+      ]
+    },
+    {
+      "domain": "approval",
+      "status": "untraceable",
+      "reasons": [
+        "historical approval rows are curated snapshots rather than immutable source-backed vintages"
+      ]
+    }
+  ],
+  "warnings": [],
+  "optional_disabled_domains": [
+    "expert_ratings",
+    "markets"
+  ]
+}

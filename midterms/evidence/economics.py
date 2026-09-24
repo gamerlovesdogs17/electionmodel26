@@ -19,6 +19,7 @@ from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 # ALFRED series commonly used in election fundamentals work.
 DEFAULT_SERIES = "A229RX0"  # Real Disposable Personal Income: Per Capita
 PARSER_VERSION = "alfred-v2"
+ECONOMIC_VINTAGE_SCHEMA_VERSION = "economic-realtime-vintage-v1"
 VINTAGE_CLASS_ALFRED = "alfred_realtime_vintage"
 VINTAGE_CLASS_FRED_LATEST = "fred_latest_revised"
 VINTAGE_CLASS_WORLD_BANK = "world_bank_annual_substitute"
@@ -319,6 +320,105 @@ def classify_economic_vintages(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def economic_vintage_semantic_sha256(df: pd.DataFrame) -> str:
+    """Hash normalized economic meaning independently of row order."""
+    columns = sorted(str(column) for column in df.columns)
+    records: list[dict[str, Any]] = []
+    for row in df.to_dict(orient="records"):
+        record: dict[str, Any] = {}
+        for column in columns:
+            value = row.get(column)
+            record[column] = None if pd.isna(value) else value
+        records.append(record)
+    records.sort(
+        key=lambda row: json.dumps(row, sort_keys=True, separators=(",", ":"), default=str)
+    )
+    blob = json.dumps(
+        {"schema_version": ECONOMIC_VINTAGE_SCHEMA_VERSION, "records": records},
+        sort_keys=True, separators=(",", ":"), allow_nan=False, default=str,
+    )
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def select_realtime_vintage_as_of(
+    df: pd.DataFrame,
+    *,
+    as_of: str | date,
+    series_id: str | None = None,
+) -> pd.DataFrame:
+    """Return only ALFRED revisions that were knowable at ``as_of``.
+
+    Later revisions are excluded using both the explicit availability field and
+    the ALFRED real-time start.  For each observation date the latest version
+    already available at the cutoff wins.
+    """
+    cutoff = pd.Timestamp(as_of).date()
+    rows = classify_economic_vintages(df)
+    rows = rows[rows["vintage_class"].eq(VINTAGE_CLASS_ALFRED)].copy()
+    if series_id is not None:
+        rows = rows[rows["series_id"].astype(str).eq(series_id)]
+    if rows.empty:
+        return rows
+    def dates(column: str) -> pd.Series:
+        values = rows[column] if column in rows.columns else pd.Series(None, index=rows.index)
+        return pd.to_datetime(values, errors="coerce").dt.date
+
+    available = dates("available_at")
+    realtime_start = dates("realtime_start")
+    observation = dates("observation_date")
+    rows = rows[
+        available.notna() & realtime_start.notna() & observation.notna()
+        & (available <= cutoff) & (realtime_start <= cutoff) & (observation <= cutoff)
+    ].copy()
+    if rows.empty:
+        return rows
+    rows["_rt"] = pd.to_datetime(rows["realtime_start"], errors="coerce")
+    rows = rows.sort_values(
+        ["series_id", "observation_date", "_rt", "vintage_id"], kind="stable",
+    ).groupby(["series_id", "observation_date"], as_index=False).tail(1)
+    return rows.drop(columns=["_rt"]).reset_index(drop=True)
+
+
+def audit_realtime_economic_coverage(
+    df: pd.DataFrame,
+    *,
+    cutoffs: dict[str, str | date],
+    api_key_available: bool | None = None,
+) -> dict[str, Any]:
+    """Audit historical ALFRED coverage without treating substitutes as valid."""
+    rows = classify_economic_vintages(df)
+    realtime = rows[rows["historical_replay_eligible"].fillna(False).astype(bool)]
+    by_cutoff: dict[str, Any] = {}
+    blockers: list[str] = []
+    for name, cutoff in sorted(cutoffs.items()):
+        selected = select_realtime_vintage_as_of(realtime, as_of=cutoff)
+        ready = bool(len(selected))
+        by_cutoff[name] = {
+            "as_of": pd.Timestamp(cutoff).date().isoformat(),
+            "status": "ready" if ready else "incomplete_coverage",
+            "n_rows": int(len(selected)),
+            "series_ids": sorted(selected["series_id"].astype(str).unique()) if ready else [],
+            "semantic_sha256": economic_vintage_semantic_sha256(selected) if ready else None,
+        }
+        if not ready:
+            blockers.append(name)
+    key_available = bool(_fred_api_key()) if api_key_available is None else bool(api_key_available)
+    status = "ready" if not blockers else ("missing_secret" if not key_available else "incomplete_coverage")
+    return {
+        "schema_version": ECONOMIC_VINTAGE_SCHEMA_VERSION,
+        "status": status,
+        "publication_eligible": not blockers,
+        "required_secret": "FRED_API_KEY",
+        "secret_available": key_available,
+        "cutoffs": by_cutoff,
+        "blocking_cutoffs": blockers,
+        "substitutes_present": sorted(
+            set(rows.loc[~rows["historical_replay_eligible"].fillna(False).astype(bool), "vintage_class"].astype(str))
+        ),
+        "note": "FRED-latest, World Bank, and fixture rows cannot clear the historical real-time gate.",
+    }
+
+
 def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
@@ -359,6 +459,7 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
     if any("WB_" in s for s in production_series) and not any("A229RX0" in s for s in production_series):
         source_url = WB_SOURCE_URL
     man = {
+        "schema_version": ECONOMIC_VINTAGE_SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "n_rows": int(len(df)),
         "n_revisions": n_rev,
@@ -370,6 +471,7 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
         "substitute_series": substitute_series,
         "vintage_classes": sorted(df["vintage_class"].astype(str).unique().tolist()),
         "parser_version": PARSER_VERSION,
+        "normalized_semantic_sha256": economic_vintage_semantic_sha256(df),
         "note": (
             "Production YoY from FRED/ALFRED when available; World Bank US GDPPC "
             "YoY as substitute when FRED is blocked; RDPI_YOY_FIXTURE retained only "

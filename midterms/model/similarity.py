@@ -27,9 +27,15 @@ def race_feature_matrix(races: pd.DataFrame) -> np.ndarray:
             X[i, len(regions) + 2] = (float(share) - 0.5) * 2.0 if share == share else 0.0
         except (TypeError, ValueError):
             X[i, len(regions) + 2] = 0.0
-        X[i, len(regions) + 3 : len(regions) + 3 + n_demo] = demo_feature_vector(
-            str(row["state"] if "state" in row.index else row.get("state", "XX"))
-        )
+        demo_columns = ("demo_college", "demo_nonwhite", "demo_density", "demo_age", "demo_urban")
+        if all(column in row.index and pd.notna(row.get(column)) for column in demo_columns):
+            X[i, len(regions) + 3 : len(regions) + 3 + n_demo] = [
+                float(row[column]) for column in demo_columns
+            ]
+        else:
+            X[i, len(regions) + 3 : len(regions) + 3 + n_demo] = demo_feature_vector(
+                str(row["state"] if "state" in row.index else row.get("state", "XX"))
+            )
     for j in range(len(regions), X.shape[1]):
         col = X[:, j]
         sd = float(col.std())

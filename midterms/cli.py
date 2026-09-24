@@ -824,6 +824,27 @@ def main(argv: list[str] | None = None) -> None:
         "nested-component-loo",
         help="Freeze-then-score nested LOO for every component (audit P2.1)",
     )
+
+    p_structure = sub.add_parser(
+        "poll-structure-crossfit",
+        help="Select single-term poll structures from existing frozen OOF scores only",
+    )
+    p_structure.add_argument("--strict", action="store_true")
+
+    def _poll_structure_crossfit(a: argparse.Namespace) -> None:
+        try:
+            report = __import__(
+                "midterms.validation.poll_structure_selection",
+                fromlist=["write_poll_structure_crossfit"],
+            ).write_poll_structure_crossfit()
+        except (ValueError, FileNotFoundError) as exc:
+            print(json.dumps({"ok": False, "error": str(exc)}, indent=2))
+            if a.strict:
+                raise SystemExit(1) from exc
+            return
+        print(json.dumps(report, indent=2, default=str))
+
+    p_structure.set_defaults(func=_poll_structure_crossfit)
     p_nloo.add_argument("--draws", type=int, default=1600)
     p_nloo.add_argument(
         "--hierarchical-method",
@@ -833,6 +854,10 @@ def main(argv: list[str] | None = None) -> None:
     )
     p_nloo.add_argument("--years", default="2018,2020,2022,2024")
     p_nloo.add_argument("--leads", default="60,30")
+    p_nloo.add_argument(
+        "--evidence-bundle", default=None,
+        help="Sealed evidence bundle whose historical snapshot IDs must match every fold",
+    )
     p_nloo.set_defaults(
         func=lambda a: print(
             json.dumps(
@@ -844,6 +869,7 @@ def main(argv: list[str] | None = None) -> None:
                     lead_days=tuple(int(x) for x in a.leads.split(",") if x.strip()),
                     hierarchical_method=a.hierarchical_method,
                     n_draws=a.draws,
+                    evidence_bundle_path=a.evidence_bundle,
                 ),
                 indent=2,
                 default=str,
@@ -905,6 +931,90 @@ def main(argv: list[str] | None = None) -> None:
             raise SystemExit(1)
 
     p_joint_oof.set_defaults(func=_joint_oof_scores)
+
+    p_ready = sub.add_parser(
+        "source-readiness",
+        help="Audit current and historical source coverage without fitting or network access",
+    )
+    p_ready.add_argument("--election-id", default="senate-2026")
+    p_ready.add_argument("--as-of", required=True)
+    p_ready.add_argument("--strict", action="store_true")
+
+    def _source_readiness(a: argparse.Namespace) -> None:
+        report = __import__(
+            "midterms.evidence.source_readiness", fromlist=["write_source_readiness"],
+        ).write_source_readiness(election_id=a.election_id, as_of=a.as_of)
+        print(json.dumps(report, indent=2, default=str))
+        if a.strict and not report["ready_for_expensive_rebuild"]:
+            raise SystemExit(1)
+
+    p_ready.set_defaults(func=_source_readiness)
+
+    p_timeline = sub.add_parser(
+        "ingest-candidate-timeline",
+        help="Validate and seal a source-backed candidate timeline CSV/JSON/Parquet",
+    )
+    p_timeline.add_argument("--input", required=True)
+    p_timeline.set_defaults(
+        func=lambda a: print(json.dumps(__import__(
+            "midterms.evidence.candidate_timeline", fromlist=["ingest_candidate_timeline"],
+        ).ingest_candidate_timeline(a.input), indent=2, default=str))
+    )
+
+    p_demo = sub.add_parser(
+        "ingest-demographic-vintages",
+        help="Validate and seal state demographic vintages with official release dates",
+    )
+    p_demo.add_argument("--input", required=True)
+    p_demo.set_defaults(
+        func=lambda a: print(json.dumps(__import__(
+            "midterms.evidence.demographic_vintages", fromlist=["ingest_demographic_vintages"],
+        ).ingest_demographic_vintages(a.input), indent=2, default=str))
+    )
+
+    p_prepare = sub.add_parser(
+        "prepare-evidence",
+        help="Audit, safely refresh, or seal evidence; never fits a forecasting model",
+    )
+    p_prepare.add_argument("--election-id", default="senate-2026")
+    p_prepare.add_argument("--as-of", required=True)
+    p_prepare.add_argument("--mode", choices=("audit", "refresh-safe", "seal"), default="audit")
+    p_prepare.add_argument("--strict", action="store_true")
+
+    def _prepare_evidence(a: argparse.Namespace) -> None:
+        try:
+            report = __import__(
+                "midterms.evidence.preparation", fromlist=["prepare_evidence"],
+            ).prepare_evidence(
+                election_id=a.election_id, as_of=a.as_of, mode=a.mode, strict=a.strict,
+            )
+        except ValueError as exc:
+            print(json.dumps({"ok": False, "mode": a.mode, "error": str(exc)}, indent=2))
+            if a.strict:
+                raise SystemExit(1) from exc
+            return
+        print(json.dumps(report, indent=2, default=str))
+        if a.strict and report.get("strict_failure"):
+            raise SystemExit(1)
+
+    p_prepare.set_defaults(func=_prepare_evidence)
+
+    p_bundle = sub.add_parser(
+        "verify-evidence-bundle",
+        help="Verify a sealed content-addressed evidence bundle",
+    )
+    p_bundle.add_argument("--path", required=True)
+    p_bundle.add_argument("--expected-id", default=None)
+
+    def _verify_evidence_bundle(a: argparse.Namespace) -> None:
+        report = __import__(
+            "midterms.evidence.preparation", fromlist=["verify_bundle_file"],
+        ).verify_bundle_file(a.path, expected_id=a.expected_id)
+        print(json.dumps(report, indent=2))
+        if not report["ok"]:
+            raise SystemExit(1)
+
+    p_bundle.set_defaults(func=_verify_evidence_bundle)
 
     p_nq = sub.add_parser(
         "numerical-check",

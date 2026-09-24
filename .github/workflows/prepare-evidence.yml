@@ -1,0 +1,130 @@
+name: Prepare Evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      as_of:
+        description: Evidence cutoff YYYY-MM-DD. Leave blank for current UTC date.
+        required: false
+        type: string
+        default: ""
+      refresh_safe_sources:
+        description: Refresh only adapters classified safe for unattended preparation.
+        required: true
+        type: boolean
+        default: true
+      seal:
+        description: Require green readiness and write a content-addressed evidence bundle.
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: prepare-evidence
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    outputs:
+      evidence_bundle_id: ${{ steps.outputs.outputs.evidence_bundle_id }}
+      evidence_commit_sha: ${{ steps.commit.outputs.evidence_commit_sha }}
+      as_of: ${{ steps.resolve.outputs.as_of }}
+      commit_created: ${{ steps.commit.outputs.commit_created }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install supported project dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Verify supported probabilistic dependencies
+        run: |
+          python - <<'PY'
+          import pymc
+          if int(pymc.__version__.split('.', 1)[0]) >= 6:
+              raise SystemExit(f"unsupported PyMC version: {pymc.__version__}")
+          print("pymc", pymc.__version__)
+          PY
+
+      - name: Resolve AS_OF
+        id: resolve
+        shell: bash
+        env:
+          REQUESTED_AS_OF: ${{ inputs.as_of }}
+        run: |
+          TODAY="$(date -u +%F)"
+          AS_OF="${REQUESTED_AS_OF:-$TODAY}"
+          [[ "$AS_OF" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "invalid ISO date" >&2; exit 1; }
+          [[ "$(date -u -d "$AS_OF" +%F 2>/dev/null || true)" == "$AS_OF" ]] || { echo "invalid calendar date" >&2; exit 1; }
+          [[ "$AS_OF" > "$TODAY" ]] && { echo "as_of cannot be in the future" >&2; exit 1; }
+          echo "AS_OF=$AS_OF" >> "$GITHUB_ENV"
+          echo "as_of=$AS_OF" >> "$GITHUB_OUTPUT"
+
+      - name: Audit source readiness before refresh
+        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
+
+      - name: Refresh publication-safe adapters
+        if: inputs.refresh_safe_sources
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe
+
+      - name: Seal evidence bundle
+        if: inputs.seal
+        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode seal --strict
+
+      - name: Strict readiness without seal
+        if: ${{ !inputs.seal }}
+        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --strict
+
+      - name: Read evidence outputs
+        id: outputs
+        shell: bash
+        run: |
+          if [[ -f data/manifests/evidence_bundle_latest.json ]]; then
+            BUNDLE_ID="$(python -c "import json; print(json.load(open('data/manifests/evidence_bundle_latest.json'))['evidence_bundle_id'])")"
+          else
+            BUNDLE_ID=""
+          fi
+          echo "evidence_bundle_id=$BUNDLE_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Upload evidence diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-preparation-${{ steps.resolve.outputs.as_of }}
+          path: |
+            data/artifacts/source_readiness_latest.json
+            data/manifests/
+            data/normalized/
+            data/raw/external/
+
+      - name: Commit sealed evidence only after all gates pass
+        id: commit
+        if: success()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/raw/external data/normalized data/manifests data/artifacts/source_readiness_latest.json
+          if git diff --cached --quiet; then
+            echo "commit_created=false" >> "$GITHUB_OUTPUT"
+            echo "evidence_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "evidence: seal research snapshot ${AS_OF} [no-model-fit]"
+            git push origin HEAD:main
+            echo "commit_created=true" >> "$GITHUB_OUTPUT"
+            echo "evidence_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          fi
