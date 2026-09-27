@@ -23,6 +23,7 @@ class SourceDomain:
     freshness_policy: str
     eligibility_checker: str
     refresh_class: str = "manual"
+    secrets_required_if_no_sealed_source: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -47,15 +48,16 @@ SOURCE_DOMAINS: tuple[SourceDomain, ...] = (
     SourceDomain("demographics", True, True, "similarity", "midterms.evidence.demographic_vintages", False, True, (),
                  "data/normalized/demographic_vintages.parquet", "data/manifests/demographic_vintages.json",
                  "official-release-date-v1", "midterms.evidence.demographic_vintages.select_demographic_vintage"),
-    SourceDomain("economics", True, True, None, "midterms.evidence.economics", True, True, ("FRED_API_KEY",),
+    SourceDomain("economics", True, True, None, "midterms.evidence.economics", True, True, (),
                  "data/normalized/economics_vintages.parquet", "data/manifests/economics_vintages.json",
-                 "alfred-realtime-vintage-v1", "midterms.evidence.economics.audit_realtime_economic_coverage", "safe_network"),
+                 "alfred-realtime-vintage-v1", "midterms.evidence.economics.audit_realtime_economic_coverage",
+                 "safe_local_or_network", ("FRED_API_KEY",)),
     SourceDomain("finance", True, True, None, "midterms.evidence.fec", True, True, (),
                  "data/normalized/fundraising_shares.parquet", "data/manifests/fundraising_shares.json",
                  "fec-filing-availability-v1", "midterms.evidence.eligibility.audit_evidence", "safe_network"),
-    SourceDomain("approval", True, True, None, "midterms.evidence.approval", True, True, (),
+    SourceDomain("approval", True, True, None, "midterms.evidence.approval", False, True, (),
                  "data/normalized/pres_approval.parquet", "data/manifests/pres_approval.json",
-                 "approval-observation-v1", "midterms.evidence.eligibility.audit_evidence", "safe_network"),
+                 "approval-observation-v1", "midterms.evidence.eligibility.audit_evidence", "manual"),
     SourceDomain("generic_ballot", True, True, None, "midterms.evidence.ingest", True, True, (),
                  "data/normalized/polls.parquet", "data/manifests/merge_live_polls.json",
                  "generic-ballot-observation-v1", "midterms.evidence.ingest.generic_ballot_aggregate", "safe_network"),

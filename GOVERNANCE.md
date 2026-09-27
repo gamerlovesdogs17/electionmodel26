@@ -3,7 +3,7 @@
 Blueprint §§11–12 roles and change control (Senate research production).
 
 ## Public live probabilities
-**HOLD (23 Sep 2026 pre-rebuild boundary / v0.9.22):** `PUBLIC_LIVE_ENABLED=False`.
+**HOLD (27 Sep 2026 pre-rebuild boundary / v0.9.22):** `PUBLIC_LIVE_ENABLED=False`.
 Truth_v1 ledger/expectations are unified; Wikipedia vote scrape remains quarantined.
 `publish-live` fail-closes until multi-cycle nested validation and fold-pure evidence
 clear a fresh review. Thin/single-cycle calibration claims are blocked by G6/G7.
@@ -16,6 +16,19 @@ separate version-bound blueprint extension evaluation. Old-version empirical
 artifacts remain historical records and cannot be relabeled as current.
 
 Current surface: `research_only`. Do not label research runs as live.
+
+## Evidence preparation boundary
+
+Expensive validation must consume a sealed, content-addressed evidence bundle.
+The preparation stage may audit and refresh only registered safe adapters, then
+must pass strict source readiness before writing or committing the bundle. The
+model stage checks out the exact evidence commit, verifies the bundle ID, and
+must not refresh evidence while fitting. Cache hits are performance aids only;
+restored artifacts still have to pass their own semantic lineage checks.
+
+The current source audit is allowed to remain red. Missing real evidence must
+be ingested or refreshed; fixtures, current registries, and degraded substitutes
+cannot be relabeled to clear a historical source gate.
 
 ## Roles
 | Role | Responsibility |

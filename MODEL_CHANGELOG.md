@@ -4,6 +4,35 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-27 — v0.9.22 source preparation and positive challenger boundary
+
+- Added three same-family positive poll-structure challengers: plus-study,
+  plus-sponsor, and plus-questionnaire. Each changes exactly one field relative
+  to the all-off reference and remains excluded from the production stack.
+- Added a predeclared cycle-cross-fitted selection procedure over the base and
+  the three single additions. Each held-out cycle is excluded from its own
+  selection; ties, incomplete evidence, and weak conflicting evidence select
+  the simpler base. Multi-term interactions are deferred.
+- Added immutable candidate-timeline and release-dated demographic ingest
+  contracts, a strict multi-cutoff ALFRED preparation adapter, a central source
+  registry, and a cheap machine-readable source-readiness audit.
+- Added canonical evidence bundles binding current and historical snapshots,
+  source hashes, parser versions and policy versions. Publication OOF, stack,
+  and forecast paths now require the exact sealed bundle.
+- Added a manual evidence-only workflow and refactored the research rebuild into
+  prepare-evidence, exact-commit rebuild, and post-success Pages deployment
+  jobs. Semantic cache keys permit expensive OOF reuse only after lineage
+  verification.
+- The checked-in ALFRED observations-by-vintage export is now normalized with
+  its raw hash, encoded vintage dates, source export time, and semantic store
+  hash. It clears the economic source cutoffs without a network fetch.
+- The 2026-09-27 readiness audit remains intentionally red for candidate
+  timelines, historical pollster-rating availability, point-in-time
+  demographics, historical finance, and source-backed historical approval.
+  Markets and expert ratings remain disabled optional domains.
+- No forecast, historical PyMC fit, production stack refit, simulation, source
+  refresh, live publication, or GitHub Actions workflow was run in this pass.
+
 ## 2026-09-23 — v0.9.22 pre-rebuild integration boundary
 
 - Bumped the active model version from `senate-hierarchical-v0.9.21` to

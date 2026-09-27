@@ -1,6 +1,6 @@
 {
   "schema_version": "blueprint-compliance-audit-v2",
-  "generated_at": "2026-09-23",
+  "generated_at": "2026-09-27",
   "scope": "code_and_statistical_infrastructure_only",
   "public_live_enabled": false,
   "publication_surface": "research_only",
@@ -20,8 +20,8 @@
     "sampler_health": "implemented",
     "optional_poll_structures": "implemented",
     "same_family_ablations": "implemented",
-    "candidate_timeline": "implemented_with_reasonable_variation",
-    "demographic_vintages": "partial",
+    "candidate_timeline": "implemented",
+    "demographic_vintages": "implemented",
     "economic_vintage_classes": "implemented",
     "overlay_contract": "implemented",
     "market_semantics": "implemented",
@@ -32,7 +32,16 @@
     "portable_references": "implemented_with_reasonable_variation",
     "content_addressed_snapshot": "implemented",
     "enabled_domain_contract": "implemented",
-    "blueprint_extension_gate": "implemented"
+    "blueprint_extension_gate": "implemented",
+    "positive_poll_structure_challengers": "implemented",
+    "poll_structure_crossfit_selection": "implemented",
+    "candidate_timeline_ingest": "implemented",
+    "demographic_vintage_ingest": "implemented",
+    "economic_realtime_backfill_adapter": "implemented",
+    "source_preparation_registry": "implemented",
+    "source_readiness_audit": "implemented",
+    "content_addressed_evidence_bundle": "implemented",
+    "two_stage_rebuild_workflow": "implemented"
   },
   "empirical_validation_gates": {
     "prior_predictive_current_model": "requires_rebuild",
@@ -43,12 +52,13 @@
     "same_family_ablation_oos": "requires_rebuild",
     "candidate_timeline_real_data": "pending_source_ingest",
     "demographic_point_in_time_snapshots": "pending_source_ingest",
-    "economic_realtime_history": "pending_source_ingest",
+    "economic_realtime_history": "source_ready",
     "overlay_incremental_value": "requires_rebuild",
     "market_contract_semantics_refresh": "requires_refresh",
     "institutional_transition_model": "pending_empirical_fit",
     "joint_scores_historical": "requires_rebuild",
-    "freshness_current_domains": "requires_refresh"
+    "freshness_current_domains": "requires_refresh",
+    "poll_structure_positive_crossfit": "requires_rebuild"
   },
   "requirements": [
     {
@@ -59,7 +69,7 @@
         "midterms/evidence/warehouse.py",
         "midterms/evidence/point_in_time.py"
       ],
-      "current_implementation": "As-of filtering plus evidence-snapshot-fingerprint-v2 hashes selected poll rows, race rows, candidate timeline, rating snapshot, and structural-prior lineage.",
+      "current_implementation": "As-of filtering plus evidence-snapshot-fingerprint-v2 hashes selected poll rows, race rows, candidate timeline, rating snapshot, structural-prior lineage and the selected point-in-time demographic source.",
       "remaining_issue": "Candidate timeline coverage is incomplete and explicitly degraded.",
       "severity": "high",
       "blocks_publication_quality_research": true,
@@ -136,8 +146,8 @@
         "midterms/model/poll_structure.py",
         "midterms/model/pymc_model.py"
       ],
-      "current_implementation": "Optional shrinkage effects use collision-proof known IDs and unique-row missing metadata groups; ablations merge one declared override into the reference configuration.",
-      "remaining_issue": "All are off by default and need nested same-family OOS evaluation.",
+      "current_implementation": "Sponsor, questionnaire and study effects use shrinkage-safe stable identities. Three positive same-family challengers enable exactly one term relative to the all-off reference; structural diagnostics are excluded from stacking.",
+      "remaining_issue": "The single-addition cycle-cross-fitted selection procedure requires a new v0.9.22 historical OOF rebuild.",
       "severity": "medium",
       "blocks_publication_quality_research": false,
       "requires_expensive_model_fitting": true,
@@ -419,7 +429,7 @@
         "midterms/validation/artifact_lineage.py",
         "midterms/validation/numerical_quality.py"
       ],
-      "current_implementation": "Environment v2 captures numerical packages, BLAS text, dependency hashes and platform; new manifests use repository/content references.",
+      "current_implementation": "Content-addressed evidence bundles bind current and historical snapshot IDs, source semantic hashes, parser versions and registry/freshness versions. Model stages require the exact bundle ID and retain semantic cache keys.",
       "remaining_issue": "Legacy manifests retain absolute paths and must remain legacy records.",
       "severity": "high",
       "blocks_publication_quality_research": false,
@@ -434,7 +444,7 @@
         "midterms/evidence/freshness.py",
         "midterms/ops/monitor.py"
       ],
-      "current_implementation": "Versioned source-provenance freshness is enforced by effective production-domain role; poll observation age uses field_end and future timestamps fail closed.",
+      "current_implementation": "A central source-preparation registry and cheap source-readiness audit distinguish missing, incomplete, untraceable, stale, unavailable, adapter, secret and disabled states before any model fit.",
       "remaining_issue": "Every source adapter must emit refresh/parser status on the next ingest.",
       "severity": "high",
       "blocks_publication_quality_research": true,
@@ -455,6 +465,41 @@
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
       "proposed_validation_test": "Run full dependency-ordered rebuild and require strict gates."
+    },
+    {
+      "id": "poll_structure_selection_crossfit",
+      "blueprint_requirement": "Leakage-safe selection among the base poll structure and single-term additions",
+      "classification": "implemented",
+      "code_paths": [
+        "midterms/validation/poll_structure_selection.py",
+        "midterms/validation/nested_component_loo.py",
+        "midterms/validation/structural_ablations.py"
+      ],
+      "current_implementation": "Each outer cycle selects from base, plus-study, plus-sponsor and plus-questionnaire using only the other cycles. Strict majority plus lower pooled CRPS is required; ties and incomplete evidence choose the base.",
+      "remaining_issue": "No v0.9.22 positive-challenger OOF draws exist yet.",
+      "severity": "high",
+      "blocks_publication_quality_research": true,
+      "requires_expensive_model_fitting": true,
+      "proposed_validation_test": "Regenerate the four-cycle 60/30 OOF archive and write a lineage-bound poll_structure_crossfit_latest.json artifact."
+    },
+    {
+      "id": "source_preparation_and_sealing",
+      "blueprint_requirement": "Machine-auditable source preparation before expensive fitting",
+      "classification": "implemented",
+      "code_paths": [
+        "midterms/evidence/source_registry.py",
+        "midterms/evidence/source_readiness.py",
+        "midterms/evidence/preparation.py",
+        "midterms/evidence/evidence_bundle.py",
+        ".github/workflows/prepare-evidence.yml",
+        ".github/workflows/rebuild-research.yml"
+      ],
+      "current_implementation": "Audit, safe-refresh and seal modes fail before fitting unless all hard current and historical source domains are ready. A semantic evidence bundle pins the exact snapshots consumed by OOF and forecast stages.",
+      "remaining_issue": "The present repository lacks complete real candidate timelines, point-in-time demographic vintages, ALFRED coverage and several historical covariate stores.",
+      "severity": "critical",
+      "blocks_publication_quality_research": true,
+      "requires_expensive_model_fitting": false,
+      "proposed_validation_test": "Ingest or refresh each reported blocker, seal the bundle, then require strict source-only extension gates before historical inference."
     }
   ],
   "model_version": "senate-hierarchical-v0.9.22",
@@ -481,16 +526,16 @@
     },
     "candidate_timeline_real_data": {
       "declared_status": "pending_source_ingest",
-      "required_artifact": "data/artifacts/evidence_eligibility_latest.json",
+      "required_artifact": "data/manifests/candidate_timeline.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
     "demographic_point_in_time_snapshots": {
       "declared_status": "pending_source_ingest",
-      "required_artifact": "data/manifests/demography.json",
+      "required_artifact": "data/manifests/demographic_vintages.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
     "economic_realtime_history": {
-      "declared_status": "pending_source_ingest",
+      "declared_status": "source_ready",
       "required_artifact": "data/manifests/economics_vintages.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
@@ -503,6 +548,35 @@
       "declared_status": "requires_refresh",
       "required_artifact": "data/artifacts/evidence_eligibility_latest.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
+    },
+    "poll_structure_positive_crossfit": {
+      "declared_status": "requires_rebuild",
+      "required_artifact": "data/artifacts/poll_structure_crossfit_latest.json",
+      "required_model_version": "senate-hierarchical-v0.9.22"
     }
+  },
+  "source_readiness_status": {
+    "as_of": "2026-09-27",
+    "ready_for_expensive_rebuild": false,
+    "ready_domains": [
+      "polls",
+      "races",
+      "presidential_prior",
+      "economics",
+      "generic_ballot",
+      "official_results"
+    ],
+    "blocking_domains": {
+      "candidate_timeline": "incomplete_coverage",
+      "pollster_ratings": "incomplete_coverage",
+      "demographics": "missing",
+      "finance": "incomplete_coverage",
+      "approval": "untraceable"
+    },
+    "optional_disabled_domains": [
+      "expert_ratings",
+      "markets"
+    ],
+    "artifact": "data/artifacts/source_readiness_latest.json"
   }
 }

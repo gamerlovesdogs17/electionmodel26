@@ -8,8 +8,14 @@ from pathlib import Path
 from typing import Any
 
 from midterms.config import MANIFESTS_DIR, MODEL_VERSION
-from midterms.evidence.evidence_bundle import build_evidence_bundle, write_evidence_bundle
-from midterms.evidence.source_readiness import required_historical_cutoffs, write_source_readiness
+from midterms.evidence.evidence_bundle import (
+    build_evidence_bundle,
+    write_evidence_bundle,
+)
+from midterms.evidence.source_readiness import (
+    required_historical_cutoffs,
+    write_source_readiness,
+)
 
 PREPARE_EVIDENCE_VERSION = "prepare-evidence-v1"
 
@@ -29,11 +35,23 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
         results["presidential_prior"] = {"status": "refresh_failed", "error": str(exc)}
 
     key = os.environ.get("FRED_API_KEY") or os.environ.get("ALFRED_API_KEY")
-    if key:
-        try:
-            from midterms.evidence.economics import try_refresh_alfred
+    from midterms.evidence.economics import SEALED_ALFRED_ARCHIVE
 
-            results["economics"] = try_refresh_alfred(as_of=as_of)
+    if SEALED_ALFRED_ARCHIVE.is_file():
+        try:
+            from midterms.evidence.economics import ingest_alfred_vintage_archive
+
+            results["economics"] = ingest_alfred_vintage_archive(SEALED_ALFRED_ARCHIVE)
+        except Exception as exc:  # noqa: BLE001
+            results["economics"] = {"status": "refresh_failed", "error": str(exc)}
+    elif key:
+        try:
+            from midterms.evidence.economics import refresh_alfred_realtime_cutoffs
+
+            results["economics"] = refresh_alfred_realtime_cutoffs({
+                **required_historical_cutoffs(),
+                "current": as_of,
+            })
         except Exception as exc:  # noqa: BLE001
             results["economics"] = {"status": "refresh_failed", "error": str(exc)}
     else:
@@ -64,12 +82,13 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         results["polls"] = {"status": "refresh_failed", "error": str(exc)}
 
-    try:
-        from midterms.evidence.approval import write_approval_store
-
-        results["approval"] = write_approval_store(prefer_votehub=True)
-    except Exception as exc:  # noqa: BLE001
-        results["approval"] = {"status": "refresh_failed", "error": str(exc)}
+    results["approval"] = {
+        "status": "adapter_not_configured",
+        "reason": (
+            "automatic approval refresh is disabled until the checked-in historical "
+            "archive has sealed source URL/license/retrieval metadata"
+        ),
+    }
     results["finance"] = {
         "status": "adapter_not_configured",
         "reason": "unattended finance refresh remains disabled until sealed-store preservation is guaranteed",

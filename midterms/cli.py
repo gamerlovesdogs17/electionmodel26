@@ -972,6 +972,20 @@ def main(argv: list[str] | None = None) -> None:
         ).ingest_demographic_vintages(a.input), indent=2, default=str))
     )
 
+    p_alfred = sub.add_parser(
+        "ingest-alfred-vintages",
+        help="Validate and seal a local ALFRED observations-by-vintage archive",
+    )
+    p_alfred.add_argument(
+        "--input",
+        default="data/raw/external/A229RX0_alfred_vintages_2018_2026.zip",
+    )
+    p_alfred.set_defaults(
+        func=lambda a: print(json.dumps(__import__(
+            "midterms.evidence.economics", fromlist=["ingest_alfred_vintage_archive"],
+        ).ingest_alfred_vintage_archive(a.input), indent=2, default=str))
+    )
+
     p_prepare = sub.add_parser(
         "prepare-evidence",
         help="Audit, safely refresh, or seal evidence; never fits a forecasting model",

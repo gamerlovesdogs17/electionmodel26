@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import zipfile
 from pathlib import Path
 
 import pandas as pd
@@ -14,12 +15,20 @@ from midterms.evidence.candidate_timeline import (
 from midterms.evidence.demographic_vintages import select_demographic_vintage
 from midterms.evidence.economics import (
     audit_realtime_economic_coverage,
+    ingest_alfred_vintage_archive,
+    refresh_alfred_realtime_cutoffs,
     select_realtime_vintage_as_of,
 )
-from midterms.evidence.evidence_bundle import build_evidence_bundle, verify_evidence_bundle
+from midterms.evidence.evidence_bundle import (
+    build_evidence_bundle,
+    verify_evidence_bundle,
+)
 from midterms.evidence.source_readiness import (
     audit_source_readiness,
     evaluate_readiness_gate,
+)
+from midterms.validation.blueprint_extension_gates import (
+    evaluate_blueprint_extension_gates,
 )
 
 HASH = "a" * 64
@@ -86,6 +95,77 @@ def test_missing_economic_secret_is_machine_readable():
     )
     assert report["status"] == "missing_secret"
     assert report["required_secret"] == "FRED_API_KEY"
+
+
+def test_strict_alfred_backfill_does_not_mutate_on_partial_failure(
+    monkeypatch, tmp_path: Path,
+):
+    from midterms.evidence import economics
+
+    monkeypatch.setenv("FRED_API_KEY", "synthetic-key")
+    monkeypatch.setattr(economics, "NORMALIZED_DIR", tmp_path / "normalized")
+    calls = []
+
+    def fake_fetch(*, realtime_end, **_kwargs):
+        calls.append(realtime_end)
+        if len(calls) == 2:
+            return pd.DataFrame()
+        dates = pd.date_range("2019-01-01", periods=13, freq="MS")
+        return pd.DataFrame([{
+            "series_id": "S", "observation_date": day.date().isoformat(),
+            "realtime_start": realtime_end, "realtime_end": realtime_end,
+            "available_at": realtime_end, "value": float(index + 1),
+            "revision": 0, "vintage_id": f"S|{day.date()}|{realtime_end}",
+            "retrieved_at": "2026-01-01", "parser_version": "test-v1",
+            "status": "alfred_realtime", "source_url": "https://example.test",
+            "source_sha256": HASH,
+        } for index, day in enumerate(dates)])
+
+    monkeypatch.setattr(economics, "fetch_alfred_observations", fake_fetch)
+    report = refresh_alfred_realtime_cutoffs({"a": "2020-01-01", "b": "2020-02-01"})
+    assert report["status"] == "refresh_failed"
+    assert report["store_mutated"] is False
+    assert not (tmp_path / "normalized" / "economics_vintages.parquet").exists()
+
+
+def test_sealed_alfred_archive_uses_column_vintage_dates(monkeypatch, tmp_path: Path):
+    from midterms.evidence import economics
+
+    archive = tmp_path / "alfred.zip"
+    csv = "observation_date,A229RX0_20200115\n" + "\n".join(
+        f"{day.date().isoformat()},{100 + index}"
+        for index, day in enumerate(pd.date_range("2019-01-01", periods=13, freq="MS"))
+    )
+    with zipfile.ZipFile(archive, "w") as bundle:
+        bundle.writestr("README.txt", "File Created: 2026-09-24 6:11 PM CDT\n")
+        bundle.writestr("vintages.csv", csv)
+    monkeypatch.setattr(economics, "RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(economics, "NORMALIZED_DIR", tmp_path / "normalized")
+    monkeypatch.setattr(economics, "MANIFESTS_DIR", tmp_path / "manifests")
+    report = ingest_alfred_vintage_archive(archive)
+    stored = pd.read_parquet(tmp_path / "normalized" / "economics_vintages.parquet")
+    first_bytes = {
+        name: (tmp_path / directory / name).read_bytes()
+        for directory, name in (
+            ("manifests", "economics_vintages.json"),
+            ("normalized", "economics_vintages.parquet"),
+            ("raw", "economics_vintages.csv"),
+        )
+    }
+    ingest_alfred_vintage_archive(archive)
+    assert report["status"] == "ready"
+    assert set(stored["available_at"].astype(str)) == {"2020-01-15"}
+    assert set(stored["retrieved_at_basis"].dropna()) == {
+        "alfred_source_export_created_at"
+    }
+    assert first_bytes == {
+        name: (tmp_path / directory / name).read_bytes()
+        for directory, name in (
+            ("manifests", "economics_vintages.json"),
+            ("normalized", "economics_vintages.parquet"),
+            ("raw", "economics_vintages.csv"),
+        )
+    }
 
 
 def test_disabled_optional_domain_does_not_block_but_required_core_does():
@@ -161,3 +241,35 @@ def test_workflow_has_two_stage_lineage_and_fail_closed_order():
     assert "if: needs.rebuild.result == 'success'" in rebuild
     assert "workflow_dispatch:" in prepare
     assert "publish-live" not in rebuild and "publish-live" not in prepare
+
+
+def test_source_only_extension_gate_reads_sealed_readiness(tmp_path: Path):
+    artifacts = tmp_path / "artifacts"
+    artifacts.mkdir()
+    domains = {
+        name: {
+            "status": "ready", "required_for_core": True,
+            "required_for_historical_validation": True,
+        }
+        for name in ("candidate_timeline", "demographics", "economics")
+    }
+    (artifacts / "source_readiness_latest.json").write_text(json.dumps({
+        "model_version": "senate-hierarchical-v0.9.22",
+        "ready_for_expensive_rebuild": True,
+        "domains": domains,
+    }), encoding="utf-8")
+    compliance = tmp_path / "compliance.json"
+    compliance.write_text(json.dumps({"empirical_validation_gates": {}}), encoding="utf-8")
+    report = evaluate_blueprint_extension_gates(
+        compliance_path=compliance,
+        artifacts_dir=artifacts,
+        source_only=True,
+        disabled_features={
+            "poll_structure_nested_oos", "overlay_incremental_value",
+            "market_contract_semantics_refresh", "institutional_transition_model",
+        },
+    )
+    assert report["gates"]["candidate_timeline_real_data"]["status"] == "pass"
+    assert report["gates"]["demographic_point_in_time_snapshots"]["status"] == "pass"
+    assert report["gates"]["economic_realtime_history"]["status"] == "pass"
+    assert report["gates"]["market_contract_semantics_refresh"]["status"] == "intentionally_deferred"

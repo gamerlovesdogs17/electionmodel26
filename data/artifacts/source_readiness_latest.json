@@ -2,7 +2,7 @@
   "schema_version": "source-readiness-v1",
   "model_version": "senate-hierarchical-v0.9.22",
   "election_id": "senate-2026",
-  "as_of": "2026-09-24",
+  "as_of": "2026-09-27",
   "ready_for_expensive_rebuild": false,
   "source_preparation_registry_version": "source-preparation-registry-v1",
   "effective_registry": {
@@ -23,6 +23,7 @@
         "freshness_policy": "poll-observation-and-retrieval-v1",
         "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
         "refresh_class": "safe_network",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
@@ -41,6 +42,7 @@
         "freshness_policy": "official-ballot-versioned-v1",
         "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
         "refresh_class": "safe_offline",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
@@ -59,6 +61,7 @@
         "freshness_policy": "candidate-bitemporal-v1",
         "eligibility_checker": "midterms.evidence.candidate_timeline.audit_candidate_timeline_history",
         "refresh_class": "manual",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
@@ -77,6 +80,7 @@
         "freshness_policy": "rating-available-at-v1",
         "eligibility_checker": "midterms.evidence.ratings.build_rating_lookup_with_meta",
         "refresh_class": "safe_network",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
@@ -95,6 +99,7 @@
         "freshness_policy": "immutable-certified-results-v1",
         "eligibility_checker": "midterms.evidence.presidential_results.verified_source_set_sha256",
         "refresh_class": "safe_offline",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
@@ -113,7 +118,8 @@
         "freshness_policy": "official-release-date-v1",
         "eligibility_checker": "midterms.evidence.demographic_vintages.select_demographic_vintage",
         "refresh_class": "manual",
-        "enabled": false,
+        "secrets_required_if_no_sealed_source": [],
+        "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
       },
@@ -125,14 +131,15 @@
         "adapter": "midterms.evidence.economics",
         "refresh_supported": true,
         "historical_backfill_supported": true,
-        "secrets_required": [
-          "FRED_API_KEY"
-        ],
+        "secrets_required": [],
         "normalized_output": "data/normalized/economics_vintages.parquet",
         "manifest_output": "data/manifests/economics_vintages.json",
         "freshness_policy": "alfred-realtime-vintage-v1",
         "eligibility_checker": "midterms.evidence.economics.audit_realtime_economic_coverage",
-        "refresh_class": "safe_network",
+        "refresh_class": "safe_local_or_network",
+        "secrets_required_if_no_sealed_source": [
+          "FRED_API_KEY"
+        ],
         "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
@@ -151,6 +158,7 @@
         "freshness_policy": "fec-filing-availability-v1",
         "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
         "refresh_class": "safe_network",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
@@ -161,14 +169,15 @@
         "required_for_historical_validation": true,
         "optional_feature_dependency": null,
         "adapter": "midterms.evidence.approval",
-        "refresh_supported": true,
+        "refresh_supported": false,
         "historical_backfill_supported": true,
         "secrets_required": [],
         "normalized_output": "data/normalized/pres_approval.parquet",
         "manifest_output": "data/manifests/pres_approval.json",
         "freshness_policy": "approval-observation-v1",
         "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
-        "refresh_class": "safe_network",
+        "refresh_class": "manual",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
@@ -187,6 +196,7 @@
         "freshness_policy": "generic-ballot-observation-v1",
         "eligibility_checker": "midterms.evidence.ingest.generic_ballot_aggregate",
         "refresh_class": "safe_network",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": true,
         "hard_for_historical_run": true
@@ -205,6 +215,7 @@
         "freshness_policy": "ratings-retrieval-v1",
         "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
         "refresh_class": "safe_network",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": false,
         "hard_for_current_run": false,
         "hard_for_historical_run": false
@@ -223,6 +234,7 @@
         "freshness_policy": "market-retrieval-v1",
         "eligibility_checker": "midterms.evidence.markets.verify_market_store_integrity",
         "refresh_class": "safe_network",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": false,
         "hard_for_current_run": false,
         "hard_for_historical_run": false
@@ -241,6 +253,7 @@
         "freshness_policy": "certification-availability-v1",
         "eligibility_checker": "midterms.evidence.truth_contract.validate_truth_contract",
         "refresh_class": "safe_offline",
+        "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": false,
         "hard_for_historical_run": true
@@ -281,9 +294,9 @@
       "required_for_core": true,
       "required_for_historical_validation": true,
       "adapter": "midterms.evidence.candidate_timeline",
-      "status": "missing",
+      "status": "incomplete_coverage",
       "reasons": [
-        "source-backed candidate identity is incomplete at required cutoffs"
+        "official FEC declaration filings are present but do not establish nomination or ballot identity"
       ],
       "cutoffs": {
         "senate-2018-lead-60": {
@@ -910,7 +923,7 @@
         },
         {
           "cutoff": "senate-2026-current",
-          "as_of": "2026-09-24",
+          "as_of": "2026-09-27",
           "race_ids": [
             "senate-2026-AK",
             "senate-2026-AL",
@@ -959,7 +972,14 @@
       ],
       "manifest_sha256": null,
       "semantic_sha256": null,
-      "parser_version": null
+      "parser_version": null,
+      "raw_filing_source_hashes": {
+        "fec_form2_2018.csv": "fb70182d14fe625e0a94da9ff1c93814002afbdc51cd52a4955bdb4d541c034a",
+        "fec_form2_2020.csv": "2265f5395a297bd5fb6ebeb59a2baad89489fe74877d12ae67e18c0dcd72b4bf",
+        "fec_form2_2022.csv": "aeff3f69c40f0efa10a4c9a333bd44d74d498c27a7713d5bbd134ffea7c82a69",
+        "fec_form2_2024.csv": "d2bf1d8b530ed500a930c7b62038d36aace3445ed40fb8590ea65dffc40b4fa3",
+        "fec_form2_2026.csv": "19f07830de98f448962a00c1f7dae4d56203c17829e6d7a3b077a5cf38595a8f"
+      }
     },
     "pollster_ratings": {
       "required_for_core": true,
@@ -967,11 +987,18 @@
       "adapter": "midterms.evidence.ratings",
       "status": "incomplete_coverage",
       "reasons": [
-        "no source-backed pollster ratings were available for historical cutoffs"
+        "no source-backed pollster ratings were available for historical cutoffs",
+        "raw rating snapshots are present but lack sealed source availability dates"
       ],
       "manifest_sha256": "f1277bd6350b94e68551b7340b415ecb6cf314dbcbc38c161d02b296218bffe0",
       "semantic_sha256": "3690dd6464a57439436cb75295378b8fcd4e853ae04da6e28eaa839f42f66d33",
-      "parser_version": null
+      "parser_version": null,
+      "raw_source_hashes": {
+        "pollster_ratings_2018.csv": "710139e06c88649a6f7ce30b854c74219c9495f0e80d5e6c0848d98364d1e5a3",
+        "pollster_ratings_2020.csv": "b26bd623e798e3fdfa6ef4ef22ff9489478269aef9b159e33592773000053b91",
+        "pollster_ratings_2021.csv": "31faf5ecfe61f55af58be37e885afbc258d653f60e8817c95dfc3bebb9a423ce",
+        "pollster_ratings_2023.csv": "8501615e7bff043dd3ed0452b875a93f519cec546c190a5d0a462272c387d923"
+      }
     },
     "presidential_prior": {
       "required_for_core": true,
@@ -981,7 +1008,8 @@
       "reasons": [],
       "manifest_sha256": "6a9a0e4815e7fc3a99f827c44f40d3f6a55ad8a54163bb104ff13273229baa24",
       "semantic_sha256": "50be4766ead46d24274347a4bc9fb54219d73b4b6c803f228c73c4371b43b5dd",
-      "parser_version": "fec-presidential-vote-counts-v1"
+      "parser_version": "fec-presidential-vote-counts-v1",
+      "raw_source_hashes": {}
     },
     "demographics": {
       "required_for_core": true,
@@ -1011,100 +1039,112 @@
       "required_for_core": true,
       "required_for_historical_validation": true,
       "adapter": "midterms.evidence.economics",
-      "status": "missing_secret",
-      "reasons": [
-        "ALFRED real-time vintages are unavailable for one or more required cutoffs"
-      ],
+      "status": "ready",
+      "reasons": [],
       "coverage": {
         "schema_version": "economic-realtime-vintage-v1",
-        "status": "missing_secret",
-        "publication_eligible": false,
-        "required_secret": "FRED_API_KEY",
+        "status": "ready",
+        "publication_eligible": true,
+        "required_secret": null,
         "secret_available": false,
         "cutoffs": {
           "current": {
-            "as_of": "2026-09-24",
-            "status": "incomplete_coverage",
-            "n_rows": 0,
-            "series_ids": [],
-            "semantic_sha256": null
+            "as_of": "2026-09-27",
+            "status": "ready",
+            "n_rows": 820,
+            "series_ids": [
+              "A229RX0",
+              "A229RX0_YOY"
+            ],
+            "semantic_sha256": "54f8798ca601922abd1adfb31646252c95c293ddeec5b0a0cefa95c97077461a"
           },
           "senate-2018-lead-30": {
             "as_of": "2018-10-07",
-            "status": "incomplete_coverage",
-            "n_rows": 0,
-            "series_ids": [],
-            "semantic_sha256": null
+            "status": "ready",
+            "n_rows": 718,
+            "series_ids": [
+              "A229RX0",
+              "A229RX0_YOY"
+            ],
+            "semantic_sha256": "ecce5508517fef8de0cb5a30890235b0cd21278c8526744c5aa6232fcc2a45b4"
           },
           "senate-2018-lead-60": {
             "as_of": "2018-09-07",
-            "status": "incomplete_coverage",
-            "n_rows": 0,
-            "series_ids": [],
-            "semantic_sha256": null
+            "status": "ready",
+            "n_rows": 716,
+            "series_ids": [
+              "A229RX0",
+              "A229RX0_YOY"
+            ],
+            "semantic_sha256": "360560375a032cdd674bb975faa3c2349e87c4fdaf2e9ab11db36f077649439f"
           },
           "senate-2020-lead-30": {
             "as_of": "2020-10-04",
-            "status": "incomplete_coverage",
-            "n_rows": 0,
-            "series_ids": [],
-            "semantic_sha256": null
+            "status": "ready",
+            "n_rows": 744,
+            "series_ids": [
+              "A229RX0",
+              "A229RX0_YOY"
+            ],
+            "semantic_sha256": "69687dcfe7cdb8e6e6259f6efe2f4263efabb490b9e09e7bcc93139b97ab5c32"
           },
           "senate-2020-lead-60": {
             "as_of": "2020-09-04",
-            "status": "incomplete_coverage",
-            "n_rows": 0,
-            "series_ids": [],
-            "semantic_sha256": null
+            "status": "ready",
+            "n_rows": 742,
+            "series_ids": [
+              "A229RX0",
+              "A229RX0_YOY"
+            ],
+            "semantic_sha256": "6aad03819677f4722b4d8ba943c1511fbefdc2c5cb58dd280fcd937db79332fa"
           },
           "senate-2022-lead-30": {
             "as_of": "2022-10-09",
-            "status": "incomplete_coverage",
-            "n_rows": 0,
-            "series_ids": [],
-            "semantic_sha256": null
+            "status": "ready",
+            "n_rows": 770,
+            "series_ids": [
+              "A229RX0",
+              "A229RX0_YOY"
+            ],
+            "semantic_sha256": "744dd509d1042d1c859e80c4a562447c8f6573f631cd572bb1a26c24a321281e"
           },
           "senate-2022-lead-60": {
             "as_of": "2022-09-09",
-            "status": "incomplete_coverage",
-            "n_rows": 0,
-            "series_ids": [],
-            "semantic_sha256": null
+            "status": "ready",
+            "n_rows": 768,
+            "series_ids": [
+              "A229RX0",
+              "A229RX0_YOY"
+            ],
+            "semantic_sha256": "7313704e388cd0cc10e76870bd46a53690ac35b333465fa9fc304595d933eacf"
           },
           "senate-2024-lead-30": {
             "as_of": "2024-10-06",
-            "status": "incomplete_coverage",
-            "n_rows": 0,
-            "series_ids": [],
-            "semantic_sha256": null
+            "status": "ready",
+            "n_rows": 796,
+            "series_ids": [
+              "A229RX0",
+              "A229RX0_YOY"
+            ],
+            "semantic_sha256": "eb926e48c046a20447f816ee83c25a3341325035dbd889a93f2121c254b57a0e"
           },
           "senate-2024-lead-60": {
             "as_of": "2024-09-06",
-            "status": "incomplete_coverage",
-            "n_rows": 0,
-            "series_ids": [],
-            "semantic_sha256": null
+            "status": "ready",
+            "n_rows": 794,
+            "series_ids": [
+              "A229RX0",
+              "A229RX0_YOY"
+            ],
+            "semantic_sha256": "9efa72dc639ada3d305a836183a2c202315a74ff39f4cd6b46b76ec6707afaa5"
           }
         },
-        "blocking_cutoffs": [
-          "current",
-          "senate-2018-lead-30",
-          "senate-2018-lead-60",
-          "senate-2020-lead-30",
-          "senate-2020-lead-60",
-          "senate-2022-lead-30",
-          "senate-2022-lead-60",
-          "senate-2024-lead-30",
-          "senate-2024-lead-60"
-        ],
-        "substitutes_present": [
-          "synthetic_fixture_canary",
-          "world_bank_annual_substitute"
-        ],
+        "blocking_cutoffs": [],
+        "substitutes_present": [],
         "note": "FRED-latest, World Bank, and fixture rows cannot clear the historical real-time gate."
       },
-      "manifest_sha256": "15fd8b96edaa000730e9bcca9d8189f627cf23e6f8d96606ea1718f5a65c5d4a",
-      "semantic_sha256": null,
+      "manifest_sha256": "bb169dcc52230b30fe38e25e2c081b20ae713784a910fac0d243894593742217",
+      "semantic_sha256": "4b58f1c8aff34b8147e36347feeee1ca95b02abd8cbc7f1a9dd19291135e47ed",
       "parser_version": "alfred-v2"
     },
     "finance": {
@@ -1117,7 +1157,8 @@
       ],
       "manifest_sha256": "49cc56a301b9cf865ba55080a3b970e3c1c36b1f0ebbcc0bb9c8d00f934d47f9",
       "semantic_sha256": "980fe92610aa227078cf3d4247e5427868a66a521ff41f7dd92a38d884753fc1",
-      "parser_version": "fec-v1"
+      "parser_version": "fec-v1",
+      "raw_source_hashes": {}
     },
     "approval": {
       "required_for_core": true,
@@ -1125,11 +1166,15 @@
       "adapter": "midterms.evidence.approval",
       "status": "untraceable",
       "reasons": [
-        "historical approval rows are curated snapshots rather than immutable source-backed vintages"
+        "historical approval rows are curated snapshots rather than immutable source-backed vintages",
+        "raw approval polls are present but source URL/license/retrieval lineage is not sealed"
       ],
       "manifest_sha256": "589b7927ec275bb0b3308fbcc951ca8d6d1a53ed214cfe5195a33a097a808fde",
       "semantic_sha256": "8fbcb354a44d373f7797248aec96387d69d1291a1646b0fc2df2f869a8aa338b",
-      "parser_version": "approval-v2"
+      "parser_version": "approval-v2",
+      "raw_source_hashes": {
+        "historical_presidential_approval_polls_1937_2024.csv": "4b1af55780883bc1db20c3215fbf8ce17e37f395177445f43af36fed17e827f3"
+      }
     },
     "generic_ballot": {
       "required_for_core": true,
@@ -1166,7 +1211,8 @@
       "reasons": [],
       "manifest_sha256": "f346b87bd04cd0c2f907488bf1ed84a64283d29f3d2fb2f389aed3e5804d71e8",
       "semantic_sha256": "714391ef5d6e6452633278cfb9e6386771a5fa02f75fbea31cabb71cf06c708c",
-      "parser_version": "official-ledger-v2"
+      "parser_version": "official-ledger-v2",
+      "raw_source_hashes": {}
     }
   },
   "historical_cutoffs": {
@@ -1182,16 +1228,17 @@
   "blockers": [
     {
       "domain": "candidate_timeline",
-      "status": "missing",
+      "status": "incomplete_coverage",
       "reasons": [
-        "source-backed candidate identity is incomplete at required cutoffs"
+        "official FEC declaration filings are present but do not establish nomination or ballot identity"
       ]
     },
     {
       "domain": "pollster_ratings",
       "status": "incomplete_coverage",
       "reasons": [
-        "no source-backed pollster ratings were available for historical cutoffs"
+        "no source-backed pollster ratings were available for historical cutoffs",
+        "raw rating snapshots are present but lack sealed source availability dates"
       ]
     },
     {
@@ -1199,13 +1246,6 @@
       "status": "missing",
       "reasons": [
         "cycle-aware demographic vintages lack verified official release dates/coverage"
-      ]
-    },
-    {
-      "domain": "economics",
-      "status": "missing_secret",
-      "reasons": [
-        "ALFRED real-time vintages are unavailable for one or more required cutoffs"
       ]
     },
     {
@@ -1219,7 +1259,8 @@
       "domain": "approval",
       "status": "untraceable",
       "reasons": [
-        "historical approval rows are curated snapshots rather than immutable source-backed vintages"
+        "historical approval rows are curated snapshots rather than immutable source-backed vintages",
+        "raw approval polls are present but source URL/license/retrieval lineage is not sealed"
       ]
     }
   ],

@@ -1,6 +1,6 @@
 # Model card — Senate hierarchical v0.9.22
 
-> **Validation status (2026-09-23):** v0.9.22 code capability changed after the last
+> **Validation status (2026-09-27):** v0.9.22 code capability changed after the last
 > research rebuild. Existing forecast, OOF, stack, validation and acceptance
 > artifacts are v0.9.21 evidence and do not validate v0.9.22. `PUBLIC_LIVE_ENABLED=False`; the
 > surface remains `research_only`. See `BLUEPRINT_COMPLIANCE_AUDIT.md`.
@@ -17,8 +17,8 @@
 
 ## Architecture (five layers — do not conflate)
 1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
-2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural ablations are diagnostics and are excluded from the production simplex. PyMC structural ablations now retain the same model family, snapshot, seed policy and fitting settings. Each is a declared delta from a frozen reference configuration; no-op challengers are ineligible. They are pending a new run.
-3. **Distributional mixture code** — nonnegative weights from empirical predictive-mixture CRPS over frozen draws. Mean-score softmax is diagnostic only. The formal four-cycle 60/30-day OOF archive and stack were refitted on 2026-09-20; the current forecast and downstream acceptance artifacts remain stale.
+2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural challengers are diagnostics and are excluded from the production simplex. Three positive same-family challengers each enable exactly one of study, sponsor, or questionnaire relative to the all-off reference. No-op challengers are ineligible. They are pending a new run.
+3. **Distributional mixture code** — nonnegative weights from empirical predictive-mixture CRPS over frozen draws. Mean-score softmax is diagnostic only. The last four-cycle 60/30-day OOF archive and stack are v0.9.21 records and do not validate v0.9.22.
 4. **Overlays** — expert ratings + Kalshi race/control soft pulls are optional. Publication use requires an exact-weight timestamp-pure nested-OOS validation contract; otherwise the publication fit runs core-only and records the layers as compare-only.
 5. **Final correlated chamber simulator** — joint margin draws → seats → control. Simulation count is separate from posterior sample count (`n_joint_sims` vs `n_posterior_samples`). Independent Bernoulli foil is diagnostic only.
 
@@ -35,14 +35,15 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 | --- | --- | --- |
 | Polls (live 2026) | VoteHub CC BY | Required for `run_class=publication`; fixtures are non-publication |
 | Polls (historical) | FiveThirtyEight / ABC News (CC BY; Wayback/sealed) | Candidate identity + official race_id map; `--allow-synthetic` CI only |
-| Pollster quality | VoteHub + FTE fill-in | House ≠ reliability |
-| Economics | ALFRED real-time vintages preferred | FRED latest/revised and World Bank annual are degraded substitutes for historical replay; fixtures are leakage canaries |
-| Approval | VoteHub Trump approval aggregates | As-of store; aggregator tier |
-| Finance | OpenFEC API or FEC `weball` bulk | Matched-window share; bulk is first_party when API 429s |
+| Pollster quality | VoteHub plus sealed FiveThirtyEight snapshots | Raw historical snapshots exist, but their exact availability lineage is not yet sealed |
+| Economics | Sealed ALFRED observations-by-vintage archive | All formal 60/30 cutoffs plus the current cutoff are source-ready; FRED latest, World Bank and fixtures cannot clear the gate |
+| Approval | Historical raw polling archive (provenance pending) | Current normalized history is curated; source URL, license, retrieval time and immutable lineage must be sealed before use |
+| Finance | OpenFEC API or FEC `weball` bulk | Matched-window share; source-backed historical-cycle coverage remains pending |
+| Candidate identity | FEC Form 2 declarations plus nomination/ballot sources | Declarations are sealed but do not establish nominee or ballot identity; required point-in-time coverage remains pending |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
 | Markets | Kalshi | Candidate mapping plus verified candidate-win/exclusive/exhaustive contract-family semantics required before normalization |
-| Demography | MEDSL ACS county means (state aggregate) | 2018 snapshot reuse is an explicit approximation until point-in-time source availability is sealed |
+| Demography | Release-dated official state vintage adapter | Existing MEDSL 2018 reuse is degraded; a complete immutable point-in-time store still must be ingested |
 
 ## Bayesian and sampler diagnostics
 
@@ -64,6 +65,11 @@ metadata receives a unique reserved row identity and cannot create a shared
 latent group. They are off
 by default. When an explicit study effect is enabled, heuristic study
 downweighting defaults off to avoid counting the same dependence twice.
+The predeclared selection set contains the all-off base plus one addition at a
+time. For each held-out cycle, the other cycles alone select a structure. A
+challenger must beat the base in a strict majority and have lower pooled
+empirical CRPS; ties and incomplete evidence select the base. Multi-term
+interaction structures are deferred for v0.9.22.
 
 ## Temporal and institutional limits
 
@@ -90,6 +96,10 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
   component source identities using canonical serialization.
 - The effective production-domain contract marks sources as required core,
   conditionally required, compare-only, disabled, or quarantine-only.
+- `source-readiness` audits current evidence plus 2018/2020/2022/2024 at formal
+  60/30-day cutoffs without fitting. `prepare-evidence --mode seal` writes a
+  canonical bundle binding every required source and snapshot. Publishable OOF,
+  stack and forecast stages must consume the exact bundle ID.
 - Development may continue with `run_class=non_publication` (UI banner mandatory)
 
 ## Core model
@@ -104,10 +114,9 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 - **Non-production:** `fast` hierarchical-t approximation (CI / `--allow-fast-fallback` only)
 - Generic ballot: VoteHub **21-day trailing weighted average** (Winsorized headline D−R)
 - **Morris §7.2:** current opinion ≠ future movement ≠ Election-Day terminal polling error
-- Formal OOF was rerun with 264 eligible cases and zero fit failures after two
-  convergence-only dynamic refits at 2000/2000/4. Candidate scores use exact
-  empirical CRPS of frozen draws. The production mixture reproduces from those
-  draws; `pymc_dynamic` received zero weight under the predeclared screen.
+- The retained 264-case OOF and its prior stack result are v0.9.21 historical
+  evidence. No v0.9.22 structural challenger, OOF, selection, or stack result
+  exists until the next sealed-evidence rebuild.
 - Fundamentals prior; ENOP / caps / study clustering; hierarchical mode/pop; named **error_budget**
 - Ratings / markets overlays with ablation
 - Fold-pure stack weights (`stack_provenance`); never manually assign positive weight
@@ -140,7 +149,9 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 - Runoff contests use decisive-stage `election_day` with `available_at` day-after bound.
 - G6/G7 require multi-cycle nested evidence before “calibrated” language.
 - Private signing keys must never appear in handoff ZIPs.
-- Production economics use FRED / WB; fixture series are canaries only.
+- Formal v0.9.22 replay requires ALFRED real-time vintages. The sealed archive
+  now provides them; FRED / WB substitutes remain degraded and fixtures are
+  canaries only. The overall source gate remains red on other domains.
 - Finance prefers OpenFEC; FEC weball bulk is the rate-limit alternative (same filings).
 - `pymc_dynamic` must earn OOF mass before displacing static pymc as reference or mixture member.
 - Poll coverage for 2014/2016 is not production-gated.

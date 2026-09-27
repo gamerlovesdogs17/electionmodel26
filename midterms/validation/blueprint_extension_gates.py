@@ -23,6 +23,9 @@ GATE_REQUIREMENTS: dict[str, dict[str, Any]] = {
     "full_model_sbc": {"artifact": "full_model_sbc_latest.json", "required": False},
     "sampler_health_current_reference": {"artifact": "forecast_latest.json", "required": True},
     "poll_structure_nested_oos": {"artifact": "nested_component_loo.json", "required": False, "disabled_feature": True},
+    "poll_structure_positive_crossfit": {
+        "artifact": "poll_structure_crossfit_latest.json", "required": True,
+    },
     "same_family_ablation_oos": {"artifact": "nested_component_loo.json", "required": True},
     "candidate_timeline_real_data": {"artifact": "evidence_eligibility_latest.json", "required": True, "source_gate": True},
     "demographic_point_in_time_snapshots": {"artifact": None, "required": True, "source_gate": True},
@@ -71,6 +74,7 @@ def evaluate_blueprint_extension_gates(
     artifacts_dir = artifacts_dir or ARTIFACTS_DIR
     compliance = _read(compliance_path) or {}
     declared = compliance.get("empirical_validation_gates") or {}
+    source_readiness = _read(artifacts_dir / "source_readiness_latest.json") or {}
     if disabled_features is None:
         disabled = {
             "poll_structure_nested_oos", "overlay_incremental_value",
@@ -133,22 +137,63 @@ def evaluate_blueprint_extension_gates(
             "required_artifact": artifact_name,
             "artifact_sha256": _sha256(path) if path else None,
         }
-        if source_only and not req.get("source_gate"):
+        if source_only and name in disabled and not required:
+            result.update({
+                "status": "intentionally_deferred", "ok": True,
+                "reason": "feature is disabled in the effective production configuration",
+            })
+        elif source_only and req.get("source_gate"):
+            domain_name = {
+                "candidate_timeline_real_data": "candidate_timeline",
+                "demographic_point_in_time_snapshots": "demographics",
+                "economic_realtime_history": "economics",
+            }.get(name)
+            if name == "freshness_current_domains":
+                used = {
+                    key: block for key, block in (source_readiness.get("domains") or {}).items()
+                    if block.get("required_for_core") or block.get("required_for_historical_validation")
+                }
+                failed = sorted(key for key, block in used.items() if block.get("status") != "ready")
+                ok = bool(used) and not failed and bool(
+                    source_readiness.get("ready_for_expensive_rebuild")
+                )
+                result.update({
+                    "status": "pass" if ok else "blocked", "ok": ok,
+                    "source_readiness_model_version": source_readiness.get("model_version"),
+                    "failed_required_domains": failed,
+                    "reason": None if ok else "sealed source-readiness report has unresolved required domains",
+                })
+            else:
+                block = (source_readiness.get("domains") or {}).get(domain_name or "") or {}
+                ok = (
+                    source_readiness.get("model_version") == model_version
+                    and block.get("status") == "ready"
+                )
+                result.update({
+                    "status": "pass" if ok else "blocked", "ok": ok,
+                    "source_readiness_model_version": source_readiness.get("model_version"),
+                    "source_domain": domain_name,
+                    "source_status": block.get("status"),
+                    "reason": None if ok else f"source-readiness domain {domain_name} is not ready",
+                })
+        elif source_only and not req.get("source_gate"):
             result.update({
                 "status": "not_applicable", "ok": True,
                 "reason": "not part of the source-integrity preflight",
             })
         elif name == "demographic_point_in_time_snapshots":
-            manifest = _read(ROOT / "data" / "manifests" / "demography.json") or {}
-            ok = bool(manifest.get("historical_point_in_time_eligible"))
+            manifest = _read(ROOT / "data" / "manifests" / "demographic_vintages.json") or {}
+            readiness_block = (source_readiness.get("domains") or {}).get("demographics") or {}
+            ok = bool(manifest.get("production_eligible")) and readiness_block.get("status") == "ready"
             result.update({
                 "status": "pass" if ok else "blocked", "ok": ok,
                 "reason": None if ok else "historical point-in-time demographic source is not sealed",
-                "required_manifest": "data/manifests/demography.json",
+                "required_manifest": "data/manifests/demographic_vintages.json",
             })
         elif name == "economic_realtime_history":
             manifest = _read(ROOT / "data" / "manifests" / "economics_vintages.json") or {}
-            ok = bool(manifest.get("historical_replay_eligible"))
+            readiness_block = (source_readiness.get("domains") or {}).get("economics") or {}
+            ok = bool(manifest.get("publication_eligible")) and readiness_block.get("status") == "ready"
             result.update({
                 "status": "pass" if ok else "blocked", "ok": ok,
                 "reason": None if ok else "historical real-time economic vintages are not sealed",
@@ -330,6 +375,32 @@ def evaluate_blueprint_extension_gates(
                     "frozen_index_model_version": frozen.get("model_version"),
                     "required_frozen_index_semantic_sha256": semantic_expected,
                     "actual_frozen_index_semantic_sha256": semantic_actual,
+                })
+            elif name == "poll_structure_positive_crossfit":
+                nested_path = artifacts_dir / "nested_component_loo.json"
+                expected_nested_sha = _sha256(nested_path)
+                folds = payload.get("outer_folds") or []
+                expected_candidates = {
+                    "pymc", "hier_plus_study_effect", "hier_plus_sponsor_effect",
+                    "hier_plus_questionnaire_effect",
+                }
+                candidates = set(payload.get("candidate_set") or [])
+                ok = (
+                    expected_nested_sha is not None
+                    and payload.get("source_nested_loo_sha256") == expected_nested_sha
+                    and payload.get("freeze_before_truth") is True
+                    and candidates == expected_candidates
+                    and len(folds) == 4
+                    and all(fold.get("heldout_truth_used_for_selection") is False for fold in folds)
+                )
+                result.update({
+                    "status": "pass" if ok else "blocked", "ok": ok,
+                    "reason": None if ok else (
+                        "positive poll-structure crossfit is missing, incomplete, or not bound to current OOF"
+                    ),
+                    "required_source_sha256": expected_nested_sha,
+                    "artifact_source_sha256": payload.get("source_nested_loo_sha256"),
+                    "n_outer_folds": len(folds),
                 })
             elif name == "poll_structure_nested_oos":
                 frozen_path = artifacts_dir / "nested_component_loo_frozen.json"

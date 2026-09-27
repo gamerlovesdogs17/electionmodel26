@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-import json
 import hashlib
+import io
+import json
 import os
-from datetime import date, datetime, timedelta, timezone
+import re
+import zipfile
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
@@ -26,6 +29,7 @@ VINTAGE_CLASS_WORLD_BANK = "world_bank_annual_substitute"
 VINTAGE_CLASS_FIXTURE = "synthetic_fixture_canary"
 WB_GDPPC_SERIES = "WB_NY_GDP_PCAP_KD_ZG"
 WB_SOURCE_URL = "https://api.worldbank.org/v2/country/US/indicator/NY.GDP.PCAP.KD.ZG"
+SEALED_ALFRED_ARCHIVE = RAW_DIR / "external" / "A229RX0_alfred_vintages_2018_2026.zip"
 
 
 def _fred_api_key() -> str | None:
@@ -47,7 +51,7 @@ def fetch_alfred_observations(
     if not key:
         return pd.DataFrame()
 
-    as_of = realtime_end or date.today()
+    as_of = realtime_end or datetime.now(UTC).date()
     if not isinstance(as_of, str):
         as_of = as_of.isoformat()
 
@@ -78,7 +82,7 @@ def fetch_alfred_observations(
                 "value": float(obs["value"]),
                 "revision": 0,
                 "vintage_id": f"{series_id}|{obs['date']}|{obs.get('realtime_start')}",
-                "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                "retrieved_at": datetime.now(UTC).isoformat(),
                 "parser_version": PARSER_VERSION,
                 "status": "alfred_realtime",
                 "source_url": f"https://fred.stlouisfed.org/series/{series_id}",
@@ -105,7 +109,7 @@ def fetch_worldbank_us_gdppc_yoy() -> pd.DataFrame:
         payload = json.loads(raw_bytes.decode("utf-8"))
     source_sha256 = hashlib.sha256(raw_bytes).hexdigest()
     rows_in = payload[1] if isinstance(payload, list) and len(payload) > 1 else []
-    retrieved = datetime.now(timezone.utc).isoformat()
+    retrieved = datetime.now(UTC).isoformat()
     out = []
     for item in rows_in or []:
         if item.get("value") is None:
@@ -181,7 +185,7 @@ def build_fixture_vintages() -> pd.DataFrame:
                     "lead_days": lead,
                     "seasonal_adjustment": "SA",
                     "release_lag_days": 30,
-                    "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                    "retrieved_at": datetime.now(UTC).isoformat(),
                     "parser_version": PARSER_VERSION,
                     "status": "fixture_preliminary",
                 }
@@ -204,7 +208,7 @@ def build_fixture_vintages() -> pd.DataFrame:
                     "lead_days": lead,
                     "seasonal_adjustment": "SA",
                     "release_lag_days": 30,
-                    "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                    "retrieved_at": datetime.now(UTC).isoformat(),
                     "parser_version": PARSER_VERSION,
                     "status": "fixture_revised",
                 }
@@ -233,7 +237,7 @@ def fetch_fred_public_csv(series_id: str = DEFAULT_SERIES) -> pd.DataFrame:
     else:
         value_col = series_id
     rows = []
-    retrieved = datetime.now(timezone.utc).isoformat()
+    retrieved = datetime.now(UTC).isoformat()
     for _, r in raw.iterrows():
         val = r.get(value_col)
         if val is None or (isinstance(val, float) and pd.isna(val)):
@@ -289,7 +293,7 @@ def _yoy_rows_from_levels(levels: pd.DataFrame, *, series_id: str = DEFAULT_SERI
                 "transformation": "yoy_pct",
                 "election_year": int(obs[:4]),
                 "lead_days": None,
-                "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                "retrieved_at": datetime.now(UTC).isoformat(),
                 "parser_version": PARSER_VERSION,
                 "status": "fred_public_csv_yoy",
                 "source_url": f"https://fred.stlouisfed.org/series/{series_id}",
@@ -338,6 +342,108 @@ def economic_vintage_semantic_sha256(df: pd.DataFrame) -> str:
         sort_keys=True, separators=(",", ":"), allow_nan=False, default=str,
     )
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def ingest_alfred_vintage_archive(
+    path: str | Path = SEALED_ALFRED_ARCHIVE,
+) -> dict[str, Any]:
+    """Normalize a sealed ALFRED observations-by-vintage export.
+
+    Vintage dates come from the export's column names, never filesystem
+    timestamps. The source export creation time retained in its README is
+    recorded with an explicit basis and is not used as historical availability.
+    """
+    archive_path = Path(path)
+    raw_bytes = archive_path.read_bytes()
+    source_sha256 = hashlib.sha256(raw_bytes).hexdigest()
+    with zipfile.ZipFile(io.BytesIO(raw_bytes)) as bundle:
+        csv_names = [name for name in bundle.namelist() if name.lower().endswith(".csv")]
+        if len(csv_names) != 1:
+            raise ValueError("sealed ALFRED archive must contain exactly one CSV")
+        table = pd.read_csv(bundle.open(csv_names[0]))
+        readme = bundle.read("README.txt").decode("utf-8", errors="replace")
+    if "observation_date" not in table.columns:
+        raise ValueError("ALFRED archive is missing observation_date")
+    created_match = re.search(r"File Created:\s*([^\r\n]+)", readme)
+    source_export_created_raw = created_match.group(1).strip() if created_match else None
+    source_export_created_at = None
+    if source_export_created_raw:
+        local_text = re.sub(r"\s+C[DS]T$", "", source_export_created_raw)
+        source_export_created_at = (
+            pd.Timestamp(local_text, tz="America/Chicago").tz_convert("UTC").isoformat()
+        )
+
+    rows: list[dict[str, Any]] = []
+    cutoff_meta: dict[str, Any] = {}
+    for column in table.columns:
+        match = re.fullmatch(rf"{re.escape(DEFAULT_SERIES)}_(\d{{8}})", str(column))
+        if not match:
+            continue
+        token = match.group(1)
+        cutoff = date.fromisoformat(f"{token[:4]}-{token[4:6]}-{token[6:8]}").isoformat()
+        levels = pd.DataFrame({
+            "observation_date": table["observation_date"].astype(str),
+            "value": pd.to_numeric(table[column], errors="coerce"),
+        }).dropna(subset=["value"])
+        for item in levels.itertuples(index=False):
+            rows.append({
+                "series_id": DEFAULT_SERIES,
+                "observation_date": str(item.observation_date)[:10],
+                "realtime_start": cutoff,
+                "realtime_end": cutoff,
+                "available_at": cutoff,
+                "value": float(item.value),
+                "revision": 0,
+                "vintage_id": f"{DEFAULT_SERIES}|{item.observation_date}|{cutoff}",
+                "retrieved_at": source_export_created_at,
+                "retrieved_at_basis": "alfred_source_export_created_at",
+                "parser_version": PARSER_VERSION,
+                "status": "alfred_realtime_archive",
+                "source_url": f"https://alfred.stlouisfed.org/series?seid={DEFAULT_SERIES}",
+                "source_sha256": source_sha256,
+            })
+        ordered = levels.sort_values("observation_date").reset_index(drop=True)
+        yoy = None
+        if len(ordered) >= 13:
+            latest = float(ordered.iloc[-1]["value"])
+            year_ago = float(ordered.iloc[-13]["value"])
+            yoy = 100.0 * (latest / year_ago - 1.0) if year_ago else None
+        if yoy is not None:
+            rows.append({
+                "series_id": DEFAULT_SERIES + "_YOY",
+                "observation_date": cutoff,
+                "realtime_start": cutoff,
+                "realtime_end": cutoff,
+                "available_at": cutoff,
+                "value": yoy,
+                "revision": 0,
+                "vintage_id": f"{DEFAULT_SERIES}_YOY|{cutoff}|r0",
+                "transformation": "yoy_pct",
+                "election_year": int(cutoff[:4]),
+                "lead_days": None,
+                "retrieved_at": source_export_created_at,
+                "retrieved_at_basis": "alfred_source_export_created_at",
+                "parser_version": PARSER_VERSION,
+                "status": "alfred_realtime_archive_derived",
+                "source_url": f"https://alfred.stlouisfed.org/series?seid={DEFAULT_SERIES}",
+                "source_sha256": source_sha256,
+            })
+        cutoff_meta[cutoff] = {"n_level_rows": len(levels), "derived_yoy": yoy}
+    if not rows:
+        raise ValueError("ALFRED archive contains no recognized vintage columns")
+    normalized = pd.DataFrame(rows)
+    paths = write_economic_store(normalized, generated_at=source_export_created_at)
+    return {
+        "status": "ready",
+        "source_sha256": source_sha256,
+        "source_export_created_at": source_export_created_at,
+        "source_export_created_raw": source_export_created_raw,
+        "retrieved_at_basis": "alfred_source_export_created_at",
+        "cutoffs": cutoff_meta,
+        "n_rows": len(normalized),
+        "publication_eligible": True,
+        **paths,
+    }
 
 
 def select_realtime_vintage_as_of(
@@ -396,7 +502,7 @@ def audit_realtime_economic_coverage(
         by_cutoff[name] = {
             "as_of": pd.Timestamp(cutoff).date().isoformat(),
             "status": "ready" if ready else "incomplete_coverage",
-            "n_rows": int(len(selected)),
+            "n_rows": len(selected),
             "series_ids": sorted(selected["series_id"].astype(str).unique()) if ready else [],
             "semantic_sha256": economic_vintage_semantic_sha256(selected) if ready else None,
         }
@@ -408,7 +514,7 @@ def audit_realtime_economic_coverage(
         "schema_version": ECONOMIC_VINTAGE_SCHEMA_VERSION,
         "status": status,
         "publication_eligible": not blockers,
-        "required_secret": "FRED_API_KEY",
+        "required_secret": "FRED_API_KEY" if blockers else None,
         "secret_available": key_available,
         "cutoffs": by_cutoff,
         "blocking_cutoffs": blockers,
@@ -419,7 +525,11 @@ def audit_realtime_economic_coverage(
     }
 
 
-def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
+def write_economic_store(
+    df: pd.DataFrame | None = None,
+    *,
+    generated_at: str | None = None,
+) -> dict[str, str]:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
     MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -455,23 +565,38 @@ def write_economic_store(df: pd.DataFrame | None = None) -> dict[str, str]:
             "series_id",
         ].astype(str).unique().tolist()
     )
-    source_url = "https://fred.stlouisfed.org/series/A229RX0"
+    source_urls = sorted(
+        value
+        for value in df.get("source_url", pd.Series(dtype=str)).dropna().astype(str).unique()
+        if value
+    )
+    source_url = source_urls[0] if source_urls else "https://fred.stlouisfed.org/series/A229RX0"
     if any("WB_" in s for s in production_series) and not any("A229RX0" in s for s in production_series):
         source_url = WB_SOURCE_URL
     man = {
         "schema_version": ECONOMIC_VINTAGE_SCHEMA_VERSION,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "n_rows": int(len(df)),
+        "generated_at": generated_at or datetime.now(UTC).isoformat(),
+        "n_rows": len(df),
         "n_revisions": n_rev,
         "series": series,
         "production_series": production_series,
         "source_url": source_url,
+        "source_urls": source_urls,
         "tier": "first_party" if production_series else "degraded",
         "publication_eligible": bool(production_series),
         "substitute_series": substitute_series,
         "vintage_classes": sorted(df["vintage_class"].astype(str).unique().tolist()),
         "parser_version": PARSER_VERSION,
         "normalized_semantic_sha256": economic_vintage_semantic_sha256(df),
+        "source_sha256s": sorted(
+            value
+            for value in df.get("source_sha256", pd.Series(dtype=str))
+            .dropna()
+            .astype(str)
+            .unique()
+            if value
+        ),
+        "historical_replay_eligible": bool(production_series),
         "note": (
             "Production YoY from FRED/ALFRED when available; World Bank US GDPPC "
             "YoY as substitute when FRED is blocked; RDPI_YOY_FIXTURE retained only "
@@ -552,7 +677,6 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
     fixtures = build_fixture_vintages()
     live = pd.DataFrame()
     public = pd.DataFrame()
-    wb = pd.DataFrame()
     fetch_error: str | None = None
     timed_out = False
     try:
@@ -588,7 +712,7 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
                         "note": "preserved existing non-fixture store after read failure",
                         **paths,
                     }
-            except Exception:  # noqa: BLE001
+            except Exception:  # noqa: BLE001,S110
                 pass
         # Prefer World Bank (real public series) over synthetic fixtures.
         try:
@@ -619,7 +743,7 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
         paths = write_economic_store(merged)
         yoy_val = float(wb_local.sort_values("observation_date").iloc[-1]["value"])
         return {
-            "live_rows": int(len(wb_local)),
+            "live_rows": len(wb_local),
             "yoy": yoy_val,
             "used_fixtures": False,
             "timeout": timed_out,
@@ -658,7 +782,7 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
     frames.append(fixtures)
 
     if yoy is not None and live.empty is False:
-        as_of_d = as_of or date.today()
+        as_of_d = as_of or datetime.now(UTC).date()
         if not isinstance(as_of_d, str):
             as_of_d = as_of_d.isoformat()
         frames.append(
@@ -676,7 +800,7 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
                         "transformation": "yoy_pct",
                         "election_year": int(str(as_of_d)[:4]),
                         "lead_days": None,
-                        "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                        "retrieved_at": datetime.now(UTC).isoformat(),
                         "parser_version": PARSER_VERSION,
                         "status": "alfred_live",
                         "source_url": f"https://fred.stlouisfed.org/series/{DEFAULT_SERIES}",
@@ -693,5 +817,102 @@ def try_refresh_alfred(as_of: str | date | None = None) -> dict[str, Any]:
         "used_fixtures": False,
         "source": source,
         "publication_eligible": source == "alfred_api",
+        **paths,
+    }
+
+
+def refresh_alfred_realtime_cutoffs(
+    cutoffs: dict[str, str | date],
+) -> dict[str, Any]:
+    """Fetch and seal exact ALFRED slices for every required replay cutoff.
+
+    Unlike :func:`try_refresh_alfred`, this preparation adapter never
+    substitutes current FRED, World Bank, or fixture values for a missing
+    real-time slice. It waits until every requested slice succeeds before
+    mutating the normalized store.
+    """
+    if not _fred_api_key():
+        return {
+            "status": "missing_secret",
+            "required_secret": "FRED_API_KEY",
+            "publication_eligible": False,
+        }
+
+    fetched: list[pd.DataFrame] = []
+    failures: dict[str, str] = {}
+    cutoff_meta: dict[str, Any] = {}
+    for label, cutoff in sorted(cutoffs.items()):
+        cutoff_day = pd.Timestamp(cutoff).date().isoformat()
+        try:
+            levels = fetch_alfred_observations(realtime_end=cutoff_day)
+        except Exception as exc:  # noqa: BLE001
+            failures[label] = str(exc)
+            continue
+        if levels.empty:
+            failures[label] = "ALFRED returned no observations for cutoff"
+            continue
+        fetched.append(levels)
+        ordered = levels.sort_values("observation_date").reset_index(drop=True)
+        yoy = None
+        if len(ordered) >= 13:
+            latest = float(ordered.iloc[-1]["value"])
+            year_ago = float(ordered.iloc[-13]["value"])
+            yoy = 100.0 * (latest / year_ago - 1.0) if year_ago else None
+        if yoy is not None:
+            fetched.append(pd.DataFrame([{
+                "series_id": DEFAULT_SERIES + "_YOY",
+                "observation_date": cutoff_day,
+                "realtime_start": cutoff_day,
+                "realtime_end": cutoff_day,
+                "available_at": cutoff_day,
+                "value": yoy,
+                "revision": 0,
+                "vintage_id": f"{DEFAULT_SERIES}_YOY|{cutoff_day}|r0",
+                "transformation": "yoy_pct",
+                "election_year": int(cutoff_day[:4]),
+                "lead_days": None,
+                "retrieved_at": ordered.iloc[-1].get("retrieved_at"),
+                "parser_version": PARSER_VERSION,
+                "status": "alfred_realtime_derived",
+                "source_url": f"https://fred.stlouisfed.org/series/{DEFAULT_SERIES}",
+                "source_sha256": ordered.iloc[-1].get("source_sha256"),
+            }]))
+        cutoff_meta[label] = {
+            "as_of": cutoff_day,
+            "n_level_rows": len(levels),
+            "derived_yoy": yoy,
+        }
+
+    if failures:
+        return {
+            "status": "refresh_failed",
+            "publication_eligible": False,
+            "failures": failures,
+            "cutoffs_retrieved": cutoff_meta,
+            "store_mutated": False,
+        }
+
+    frames: list[pd.DataFrame] = [*fetched, build_fixture_vintages()]
+    existing_path = NORMALIZED_DIR / "economics_vintages.parquet"
+    if existing_path.is_file():
+        try:
+            frames.insert(0, pd.read_parquet(existing_path))
+        except Exception:  # noqa: BLE001,S110
+            pass
+    merged = pd.concat(frames, ignore_index=True, sort=False)
+    if "vintage_id" in merged.columns:
+        merged = merged.drop_duplicates(subset=["vintage_id"], keep="last")
+    paths = write_economic_store(merged)
+    audit = audit_realtime_economic_coverage(
+        merged,
+        cutoffs=cutoffs,
+        api_key_available=True,
+    )
+    return {
+        "status": audit["status"],
+        "publication_eligible": audit["publication_eligible"],
+        "cutoffs_retrieved": cutoff_meta,
+        "coverage": audit,
+        "store_mutated": True,
         **paths,
     }

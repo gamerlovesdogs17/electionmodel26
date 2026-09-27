@@ -11,7 +11,13 @@ from typing import Any
 
 import pandas as pd
 
-from midterms.config import ARTIFACTS_DIR, MANIFESTS_DIR, MODEL_VERSION, NORMALIZED_DIR, RAW_DIR
+from midterms.config import (
+    ARTIFACTS_DIR,
+    MANIFESTS_DIR,
+    MODEL_VERSION,
+    NORMALIZED_DIR,
+    RAW_DIR,
+)
 from midterms.evidence.candidate_timeline import (
     apply_candidate_timeline,
     audit_candidate_timeline,
@@ -117,7 +123,7 @@ def audit_source_readiness(
         status = "ready" if len(current) and not missing_cutoffs else "incomplete_coverage"
         domains["polls"].update({
             "status": status,
-            "n_current_rows": int(len(current)),
+            "n_current_rows": len(current),
             "historical_cutoff_counts": counts,
             "missing_cutoffs": missing_cutoffs,
             "semantic_sha256": dataframe_semantic_sha256(polls),
@@ -167,8 +173,10 @@ def audit_source_readiness(
     timeline_manifest, timeline_manifest_sha, timeline_manifest_error = _manifest(
         manifests_dir / "candidate_timeline.json"
     )
+    filing_sources = sorted((raw_dir / "external").glob("fec_form2_*.csv"))
+    filing_source_hashes = {path.name: _sha(path) for path in filing_sources}
     timeline_status = "ready" if timeline_rows and not missing_timeline else (
-        "missing" if not timeline_path.is_file() else "incomplete_coverage"
+        "missing" if not timeline_path.is_file() and not filing_sources else "incomplete_coverage"
     )
     if timeline_manifest_error and timeline_path.is_file():
         timeline_status = timeline_manifest_error
@@ -182,8 +190,13 @@ def audit_source_readiness(
             if timeline_manifest else None
         ),
         "parser_version": (timeline_manifest or {}).get("parser_version") if timeline_manifest else None,
+        "raw_filing_source_hashes": filing_source_hashes,
         "reasons": [] if timeline_status == "ready" else [
-            "source-backed candidate identity is incomplete at required cutoffs"
+            (
+                "official FEC declaration filings are present but do not establish nomination or ballot identity"
+                if filing_sources and not timeline_path.is_file()
+                else "source-backed candidate identity is incomplete at required cutoffs"
+            )
         ],
     })
 
@@ -271,6 +284,7 @@ def audit_source_readiness(
         "official_results": ("results_certified.parquet", "official_senate_ballots.json"),
     }
     for name, (data_name, manifest_name) in simple.items():
+        raw_source_hashes: dict[str, str | None] = {}
         data_path = normalized_dir / data_name
         manifest, manifest_sha, manifest_error = _manifest(manifests_dir / manifest_name)
         status = manifest_error or ("ready" if data_path.is_file() else "missing")
@@ -285,6 +299,14 @@ def audit_source_readiness(
             if not any(available.notna() & (available <= required_historical_cutoffs()["senate-2018-lead-60"])):
                 status = "incomplete_coverage"
                 reasons.append("no source-backed pollster ratings were available for historical cutoffs")
+            vintages = sorted((raw_dir / "external").glob("pollster_ratings_*.csv"))
+            if vintages:
+                reasons.append(
+                    "raw rating snapshots are present but lack sealed source availability dates"
+                )
+                raw_source_hashes = {path.name: _sha(path) for path in vintages}
+            else:
+                raw_source_hashes = {}
         elif name == "finance" and len(frame):
             elections = set(frame.get("election_id", pd.Series(dtype=str)).astype(str))
             required = {f"senate-{year}" for year in HISTORICAL_YEARS}
@@ -296,11 +318,20 @@ def audit_source_readiness(
             if historical.empty or historical.get("source", pd.Series(dtype=str)).astype(str).str.contains("curated", case=False).any():
                 status = "untraceable"
                 reasons.append("historical approval rows are curated snapshots rather than immutable source-backed vintages")
+            approval_raw = raw_dir / "external" / "historical_presidential_approval_polls_1937_2024.csv"
+            raw_source_hashes = (
+                {approval_raw.name: _sha(approval_raw)} if approval_raw.is_file() else {}
+            )
+            if approval_raw.is_file():
+                reasons.append(
+                    "raw approval polls are present but source URL/license/retrieval lineage is not sealed"
+                )
         domains[name].update({
             "status": status,
             "manifest_sha256": manifest_sha,
             "semantic_sha256": semantic,
             "parser_version": (manifest or {}).get("parser_version") if manifest else None,
+            "raw_source_hashes": raw_source_hashes,
             "reasons": reasons or ([] if status == "ready" else [f"{name} store or manifest is unavailable"]),
         })
 
