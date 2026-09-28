@@ -355,6 +355,10 @@ def run_forecast(
     wh = Warehouse(ensure_fixtures=False)
     snap = wh.build_as_of(as_of, election_id)
     evidence_bundle = None
+    validated_model_spec = None
+    from midterms.model.poll_structure import PollStructureConfig
+
+    selected_poll_structure = PollStructureConfig()
     if require_publishable:
         import os
 
@@ -369,6 +373,16 @@ def run_forecast(
             raise ValueError("sealed evidence bundle as_of differs from requested forecast cutoff")
         if evidence_bundle.get("current_snapshot_id") != snap.snapshot_id:
             raise ValueError("sealed evidence bundle current snapshot differs from warehouse snapshot")
+        from midterms.validation.validated_model_spec import (
+            load_validated_model_spec,
+            verify_validated_spec_artifacts,
+        )
+
+        validated_model_spec, selected_poll_structure = load_validated_model_spec(
+            expected_evidence_bundle_id=evidence_bundle.get("evidence_bundle_id"),
+            expected_evidence_bundle_sha256=evidence_bundle.get("evidence_bundle_sha256"),
+        )
+        verify_validated_spec_artifacts(validated_model_spec)
     if require_publishable and not bool((snap.candidate_timeline or {}).get("production_eligible")):
         raise ValueError(
             "publication candidate/race snapshot lacks a complete bitemporal timeline: "
@@ -416,7 +430,8 @@ def run_forecast(
     if method == "pymc":
         try:
             fit = fit_pymc(
-                snap, draws=draws, tune=tune, chains=chains, seed=seed, generic_ballot=generic_ballot
+                snap, draws=draws, tune=tune, chains=chains, seed=seed,
+                generic_ballot=generic_ballot, poll_structure=selected_poll_structure,
             )
         except Exception as exc:  # noqa: BLE001
             if not allow_fast_fallback:
@@ -435,14 +450,16 @@ def run_forecast(
     elif method == "pymc_dynamic":
         try:
             fit = fit_pymc_dynamic(
-                snap, draws=draws, tune=tune, chains=chains, seed=seed, generic_ballot=generic_ballot
+                snap, draws=draws, tune=tune, chains=chains, seed=seed,
+                generic_ballot=generic_ballot, poll_structure=selected_poll_structure,
             )
         except Exception as exc:  # noqa: BLE001
             if not allow_fast_fallback:
                 raise
             layer_warnings.append({"layer": "pymc_dynamic", "error": str(exc), "degraded": "pymc"})
             fit = fit_pymc(
-                snap, draws=draws, tune=tune, chains=chains, seed=seed, generic_ballot=generic_ballot
+                snap, draws=draws, tune=tune, chains=chains, seed=seed,
+                generic_ballot=generic_ballot, poll_structure=selected_poll_structure,
             )
             fit.diagnostics = {
                 **(fit.diagnostics or {}),
@@ -500,6 +517,16 @@ def run_forecast(
                 raise ValueError("production stack evidence bundle differs from current forecast bundle")
             if stack_provenance.get("source_stack_training_protocol") != "formal_60_30_v1":
                 raise ValueError("production stack was not trained on the declared 60/30 protocol")
+            if stack_provenance.get("source_validation_phase") != "canonical_poll_structure":
+                raise ValueError("production stack was not trained by the canonical OOF pass")
+            if stack_provenance.get("source_poll_structure_config_id") != (
+                validated_model_spec or {}
+            ).get("selected_poll_structure_id"):
+                raise ValueError("production stack poll structure differs from validated model spec")
+            if stack_provenance.get("artifact_sha256") != (
+                validated_model_spec or {}
+            ).get("stack_weights_sha256"):
+                raise ValueError("production stack artifact differs from validated model spec")
             prior_folds = stack_provenance.get("source_prior_snapshot_sha256_by_fold_lead") or {}
             source_folds = stack_provenance.get("source_presidential_source_sha256_by_fold_lead") or {}
             prior_digests = [digest for leads in prior_folds.values() for digest in leads.values()]
@@ -529,12 +556,14 @@ def run_forecast(
             separate_static = fit_pymc(
                 snap, draws=draws, tune=tune, chains=chains,
                 seed=seed + 29, generic_ballot=generic_ballot,
+                poll_structure=selected_poll_structure,
             )
             component_draws["pymc"] = separate_static.draws_margin
         if weights.get("pymc_dynamic", 0.0) > 0 and "pymc_dynamic" not in component_draws:
             separate_dynamic = fit_pymc_dynamic(
                 snap, draws=draws, tune=tune, chains=chains,
                 seed=seed + 31, generic_ballot=generic_ballot,
+                poll_structure=selected_poll_structure,
             )
             component_draws["pymc_dynamic"] = separate_dynamic.draws_margin
         try:
@@ -861,6 +890,12 @@ def run_forecast(
         "market_store_sha256": market_store_sha,
         "market_audit_sha256": market_audit_sha,
         "stack_artifact_sha256": stack_artifact_sha,
+        "validated_model_spec_sha256": (
+            (validated_model_spec or {}).get("spec_sha256")
+        ),
+        "selected_poll_structure_id": (
+            (validated_model_spec or {}).get("selected_poll_structure_id")
+        ),
         "decomposition_artifact": decomposition_path.name,
         "snapshot_ids": {"evidence": str(snap.snapshot_id)},
         "generic_ballot": float(generic_ballot),
@@ -915,6 +950,19 @@ def run_forecast(
             "run_class": run_class,
             "publishable": run_publishable,
             "publication_inference_requested": bool(require_publishable),
+            "selected_poll_structure": selected_poll_structure.to_dict(),
+            "validated_model_spec": (
+                {
+                    "schema_version": validated_model_spec.get("schema_version"),
+                    "spec_sha256": validated_model_spec.get("spec_sha256"),
+                    "selected_poll_structure_id": validated_model_spec.get(
+                        "selected_poll_structure_id"
+                    ),
+                    "canonical_oof_sha256": validated_model_spec.get("canonical_oof_sha256"),
+                    "stack_weights_sha256": validated_model_spec.get("stack_weights_sha256"),
+                }
+                if validated_model_spec else None
+            ),
             "overlay_validation": overlay_validation,
             "n_joint_sims": int(getattr(sim, "n_joint_sims", len(sim.seat_draws))),
             "n_posterior_margin_draws": int(
@@ -1079,6 +1127,10 @@ def run_forecast(
         "allow_fast_fallback": allow_fast_fallback,
         "independent_caucus_basis": INDEPENDENT_DEM_CAUCUSES_BASIS,
         "effective_domain_contract": effective_domain_contract,
+        "poll_structure": selected_poll_structure.to_dict(),
+        "validated_model_spec_sha256": (
+            (validated_model_spec or {}).get("spec_sha256")
+        ),
     }
     manifest = {
         "run_id": run_id,
@@ -1096,6 +1148,12 @@ def run_forecast(
         "market_store_sha256": market_store_sha,
         "market_audit_sha256": market_audit_sha,
         "stack_artifact_sha256": stack_artifact_sha,
+        "validated_model_spec_sha256": (
+            (validated_model_spec or {}).get("spec_sha256")
+        ),
+        "selected_poll_structure_id": (
+            (validated_model_spec or {}).get("selected_poll_structure_id")
+        ),
         "effective_domain_contract": effective_domain_contract,
         "domain_hashes": snapshot_domain_hashes(),
         "environment_lock": environment_lock(),

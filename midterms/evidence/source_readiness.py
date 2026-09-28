@@ -301,30 +301,47 @@ def audit_source_readiness(
                 reasons.append("no source-backed pollster ratings were available for historical cutoffs")
             vintages = sorted((raw_dir / "external").glob("pollster_ratings_*.csv"))
             if vintages:
-                reasons.append(
-                    "raw rating snapshots are present but lack sealed source availability dates"
-                )
+                if not (manifest or {}).get("sources"):
+                    reasons.append(
+                        "raw rating snapshots are present but lack sealed source availability dates"
+                    )
                 raw_source_hashes = {path.name: _sha(path) for path in vintages}
             else:
                 raw_source_hashes = {}
         elif name == "finance" and len(frame):
             elections = set(frame.get("election_id", pd.Series(dtype=str)).astype(str))
             required = {f"senate-{year}" for year in HISTORICAL_YEARS}
-            if not required.issubset(elections):
+            receipt_safe = (
+                "availability_basis" in frame.columns
+                and frame["availability_basis"].astype(str).eq("fec_receipt_date").all()
+            )
+            if not required.issubset(elections) or not receipt_safe:
                 status = "incomplete_coverage"
-                reasons.append("source-backed finance rows are absent for historical validation cycles")
+                reasons.append(
+                    "report-level FEC finance with receipt-date amendment resolution is absent "
+                    "for one or more historical validation cycles"
+                )
         elif name == "approval" and len(frame):
             historical = frame[pd.to_numeric(frame.get("year"), errors="coerce").isin(HISTORICAL_YEARS)]
-            if historical.empty or historical.get("source", pd.Series(dtype=str)).astype(str).str.contains("curated", case=False).any():
+            strict_historical = bool(
+                len(historical)
+                and "production_eligible" in historical.columns
+                and historical["production_eligible"].fillna(False).astype(bool).all()
+                and bool((manifest or {}).get("historical_production_eligible"))
+            )
+            if not strict_historical:
                 status = "untraceable"
-                reasons.append("historical approval rows are curated snapshots rather than immutable source-backed vintages")
+                reasons.append(
+                    "historical approval archive lacks per-poll publication timestamps "
+                    "and sealed retrieval/license lineage"
+                )
             approval_raw = raw_dir / "external" / "historical_presidential_approval_polls_1937_2024.csv"
             raw_source_hashes = (
                 {approval_raw.name: _sha(approval_raw)} if approval_raw.is_file() else {}
             )
             if approval_raw.is_file():
                 reasons.append(
-                    "raw approval polls are present but source URL/license/retrieval lineage is not sealed"
+                    "raw approval polls are parsed at formal cutoffs using poll_end only as an explicit proxy"
                 )
         domains[name].update({
             "status": status,

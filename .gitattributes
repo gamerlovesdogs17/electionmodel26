@@ -4,3 +4,10 @@
 # Immutable raw API capture: preserve the fetched bytes; semantic JSON hashes
 # separately protect its parsed evidence across platforms.
 data/raw/external/kalshi_senate.json -text
+
+# Immutable historical source captures: keep repository blob bytes identical
+# on Windows and Linux so exact source hashes remain reproducible.
+data/raw/external/historical_presidential_approval_polls_1937_2024.csv -text
+data/raw/external/fec_form2_*.csv -text
+data/raw/external/pollster_ratings_*.csv -text
+data/raw/external/census_state_urban_rural_2020_2010.xlsx -text

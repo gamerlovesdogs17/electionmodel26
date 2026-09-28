@@ -41,7 +41,13 @@
     "source_preparation_registry": "implemented",
     "source_readiness_audit": "implemented",
     "content_addressed_evidence_bundle": "implemented",
-    "two_stage_rebuild_workflow": "implemented"
+    "two_stage_rebuild_workflow": "implemented",
+    "approval_poll_archive_preparation": "implemented",
+    "official_census_demographic_preparation": "implemented",
+    "fec_report_receipt_amendment_resolution": "implemented",
+    "verified_pollster_snapshot_availability": "implemented",
+    "canonical_poll_structure_oof": "implemented",
+    "validated_model_spec_lineage": "implemented"
   },
   "empirical_validation_gates": {
     "prior_predictive_current_model": "requires_rebuild",
@@ -58,7 +64,11 @@
     "institutional_transition_model": "pending_empirical_fit",
     "joint_scores_historical": "requires_rebuild",
     "freshness_current_domains": "requires_refresh",
-    "poll_structure_positive_crossfit": "requires_rebuild"
+    "poll_structure_positive_crossfit": "requires_rebuild",
+    "pollster_ratings_point_in_time": "pending_source_ingest",
+    "finance_report_level_history": "pending_source_ingest",
+    "approval_poll_timing_lineage": "pending_source_ingest",
+    "validated_model_spec_lineage": "requires_rebuild"
   },
   "requirements": [
     {
@@ -494,8 +504,8 @@
         ".github/workflows/prepare-evidence.yml",
         ".github/workflows/rebuild-research.yml"
       ],
-      "current_implementation": "Audit, safe-refresh and seal modes fail before fitting unless all hard current and historical source domains are ready. A semantic evidence bundle pins the exact snapshots consumed by OOF and forecast stages.",
-      "remaining_issue": "The present repository lacks complete real candidate timelines, point-in-time demographic vintages, ALFRED coverage and several historical covariate stores.",
+      "current_implementation": "The workflow enforces a two-pass contract: structural selection freezes a candidate model spec; a separately keyed canonical pass reruns static and dynamic PyMC with that selected PollStructureConfig. Final model-spec lineage binds the bundle, readiness, canonical OOF, stack and calibration artifacts.",
+      "remaining_issue": "Five required source domains must clear before the selection and canonical OOF passes can run.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,
@@ -521,7 +531,7 @@
     },
     "same_family_ablation_oos": {
       "declared_status": "requires_rebuild",
-      "required_artifact": "data/artifacts/nested_component_loo_frozen.json",
+      "required_artifact": "data/artifacts/nested_component_loo_selection_frozen.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
     "candidate_timeline_real_data": {
@@ -552,6 +562,31 @@
     "poll_structure_positive_crossfit": {
       "declared_status": "requires_rebuild",
       "required_artifact": "data/artifacts/poll_structure_crossfit_latest.json",
+      "required_model_version": "senate-hierarchical-v0.9.22"
+    },
+    "pollster_ratings_point_in_time": {
+      "declared_status": "pending_source_ingest",
+      "required_artifact": "data/manifests/pollster_ratings.json",
+      "required_model_version": "senate-hierarchical-v0.9.22"
+    },
+    "finance_report_level_history": {
+      "declared_status": "pending_source_ingest",
+      "required_artifact": "data/manifests/fundraising_shares.json",
+      "required_model_version": "senate-hierarchical-v0.9.22"
+    },
+    "approval_poll_timing_lineage": {
+      "declared_status": "pending_source_ingest",
+      "required_artifact": "data/manifests/pres_approval.json",
+      "required_model_version": "senate-hierarchical-v0.9.22"
+    },
+    "validated_model_spec_lineage": {
+      "declared_status": "requires_rebuild",
+      "required_artifact": "data/artifacts/validated_model_spec_latest.json",
+      "required_model_version": "senate-hierarchical-v0.9.22"
+    },
+    "poll_structure_nested_oos": {
+      "declared_status": "requires_rebuild",
+      "required_artifact": "data/artifacts/nested_component_loo_canonical.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     }
   },

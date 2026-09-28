@@ -974,11 +974,11 @@
       "semantic_sha256": null,
       "parser_version": null,
       "raw_filing_source_hashes": {
-        "fec_form2_2018.csv": "fb70182d14fe625e0a94da9ff1c93814002afbdc51cd52a4955bdb4d541c034a",
-        "fec_form2_2020.csv": "2265f5395a297bd5fb6ebeb59a2baad89489fe74877d12ae67e18c0dcd72b4bf",
-        "fec_form2_2022.csv": "aeff3f69c40f0efa10a4c9a333bd44d74d498c27a7713d5bbd134ffea7c82a69",
-        "fec_form2_2024.csv": "d2bf1d8b530ed500a930c7b62038d36aace3445ed40fb8590ea65dffc40b4fa3",
-        "fec_form2_2026.csv": "19f07830de98f448962a00c1f7dae4d56203c17829e6d7a3b077a5cf38595a8f"
+        "fec_form2_2018.csv": "faf409bbd6c4d1d0a9f6f35df611b65842afaa3137d6d2bb5d04b0fb32c5891a",
+        "fec_form2_2020.csv": "8548e8db9fe27dcbece9b1ed2850b50bce1165ca7b731c79aaa0069c9de3bf4d",
+        "fec_form2_2022.csv": "708b2844a41edc3f7b0a59a5b6187b6057d821809d448504835553f88f24ea47",
+        "fec_form2_2024.csv": "904d93f8b5a9f51a82033e0369a2ae4b88b6ee3cfb2578f68ed09434cfe5c23b",
+        "fec_form2_2026.csv": "e0b37f8ca7ad10958f1d56acb540fde22a72833a599818c1b27ce63ed8570346"
       }
     },
     "pollster_ratings": {
@@ -987,16 +987,15 @@
       "adapter": "midterms.evidence.ratings",
       "status": "incomplete_coverage",
       "reasons": [
-        "no source-backed pollster ratings were available for historical cutoffs",
-        "raw rating snapshots are present but lack sealed source availability dates"
+        "no source-backed pollster ratings were available for historical cutoffs"
       ],
-      "manifest_sha256": "f1277bd6350b94e68551b7340b415ecb6cf314dbcbc38c161d02b296218bffe0",
-      "semantic_sha256": "3690dd6464a57439436cb75295378b8fcd4e853ae04da6e28eaa839f42f66d33",
-      "parser_version": null,
+      "manifest_sha256": "7fd1a4cf49abb1290d78c20ce300be40aeb0bb9562f850102298d624533cec06",
+      "semantic_sha256": "915468616ff66ae1dfb7e2103fe51d38033d9f6d1c27be40115e97ffd023de09",
+      "parser_version": "pollster-rating-vintage-v1",
       "raw_source_hashes": {
         "pollster_ratings_2018.csv": "710139e06c88649a6f7ce30b854c74219c9495f0e80d5e6c0848d98364d1e5a3",
         "pollster_ratings_2020.csv": "b26bd623e798e3fdfa6ef4ef22ff9489478269aef9b159e33592773000053b91",
-        "pollster_ratings_2021.csv": "31faf5ecfe61f55af58be37e885afbc258d653f60e8817c95dfc3bebb9a423ce",
+        "pollster_ratings_2021.csv": "3627784a4e872da094f58ca13c37518cad37273a145b4de93310048ceea733c6",
         "pollster_ratings_2023.csv": "8501615e7bff043dd3ed0452b875a93f519cec546c190a5d0a462272c387d923"
       }
     },
@@ -1153,7 +1152,7 @@
       "adapter": "midterms.evidence.fec",
       "status": "incomplete_coverage",
       "reasons": [
-        "source-backed finance rows are absent for historical validation cycles"
+        "report-level FEC finance with receipt-date amendment resolution is absent for one or more historical validation cycles"
       ],
       "manifest_sha256": "49cc56a301b9cf865ba55080a3b970e3c1c36b1f0ebbcc0bb9c8d00f934d47f9",
       "semantic_sha256": "980fe92610aa227078cf3d4247e5427868a66a521ff41f7dd92a38d884753fc1",
@@ -1166,14 +1165,14 @@
       "adapter": "midterms.evidence.approval",
       "status": "untraceable",
       "reasons": [
-        "historical approval rows are curated snapshots rather than immutable source-backed vintages",
-        "raw approval polls are present but source URL/license/retrieval lineage is not sealed"
+        "historical approval archive lacks per-poll publication timestamps and sealed retrieval/license lineage",
+        "raw approval polls are parsed at formal cutoffs using poll_end only as an explicit proxy"
       ],
-      "manifest_sha256": "589b7927ec275bb0b3308fbcc951ca8d6d1a53ed214cfe5195a33a097a808fde",
-      "semantic_sha256": "8fbcb354a44d373f7797248aec96387d69d1291a1646b0fc2df2f869a8aa338b",
-      "parser_version": "approval-v2",
+      "manifest_sha256": "64c52a4d3bd13059477a2a2059816a4350c7d4de960d0be9c487ac5e89d27844",
+      "semantic_sha256": "3d1778eb6fcff2ed3f0287b2763b20c3452874984c7a79155d49cc91c0108ac3",
+      "parser_version": "approval-v3-point-in-time-archive",
       "raw_source_hashes": {
-        "historical_presidential_approval_polls_1937_2024.csv": "4b1af55780883bc1db20c3215fbf8ce17e37f395177445f43af36fed17e827f3"
+        "historical_presidential_approval_polls_1937_2024.csv": "013d5eacf9dbfd808353cbb0a3c233de75d0033182353e8446d2555332f36aa6"
       }
     },
     "generic_ballot": {
@@ -1237,8 +1236,7 @@
       "domain": "pollster_ratings",
       "status": "incomplete_coverage",
       "reasons": [
-        "no source-backed pollster ratings were available for historical cutoffs",
-        "raw rating snapshots are present but lack sealed source availability dates"
+        "no source-backed pollster ratings were available for historical cutoffs"
       ]
     },
     {
@@ -1252,15 +1250,15 @@
       "domain": "finance",
       "status": "incomplete_coverage",
       "reasons": [
-        "source-backed finance rows are absent for historical validation cycles"
+        "report-level FEC finance with receipt-date amendment resolution is absent for one or more historical validation cycles"
       ]
     },
     {
       "domain": "approval",
       "status": "untraceable",
       "reasons": [
-        "historical approval rows are curated snapshots rather than immutable source-backed vintages",
-        "raw approval polls are present but source URL/license/retrieval lineage is not sealed"
+        "historical approval archive lacks per-poll publication timestamps and sealed retrieval/license lineage",
+        "raw approval polls are parsed at formal cutoffs using poll_end only as an explicit proxy"
       ]
     }
   ],

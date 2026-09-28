@@ -1,8 +1,52 @@
 {
-  "n": 549,
-  "votehub_n": 41,
-  "fte_n": 508,
-  "path": "/home/runner/work/electionmodel26/electionmodel26/data/normalized/pollster_ratings.parquet",
-  "generated_at": "2026-09-22T01:10:47.530803+00:00",
-  "note": "Living VoteHub/FTE dumps stamped with retrieval mtime; historical as-of lookups exclude post-cutoff living stamps."
+  "schema_version": "pollster-rating-vintages-v1",
+  "parser_version": "pollster-rating-vintage-v1",
+  "normalized_semantic_sha256": "74575e830a0eaed767228beb45819fba67cd5f03caf33e73c53b69a97fc00795",
+  "sources": [
+    {
+      "content_vintage": "2018",
+      "status": "verified",
+      "available_at": "2019-11-05",
+      "sha256": "710139e06c88649a6f7ce30b854c74219c9495f0e80d5e6c0848d98364d1e5a3",
+      "source_commit": "1ae301f",
+      "source_url": "https://github.com/fivethirtyeight/data/commit/1ae301f"
+    },
+    {
+      "content_vintage": "2020",
+      "status": "verified",
+      "available_at": "2021-03-19",
+      "sha256": "b26bd623e798e3fdfa6ef4ef22ff9489478269aef9b159e33592773000053b91",
+      "source_commit": "c1b4d2",
+      "source_url": "https://github.com/fivethirtyeight/data/commit/c1b4d2"
+    },
+    {
+      "content_vintage": "2023",
+      "status": "verified",
+      "available_at": "2024-01-25",
+      "sha256": "8501615e7bff043dd3ed0452b875a93f519cec546c190a5d0a462272c387d923",
+      "source_commit": "fea5d9",
+      "source_url": "https://github.com/fivethirtyeight/data/commit/fea5d9"
+    },
+    {
+      "content_vintage": "2021",
+      "status": "unverified_excluded",
+      "reason": "checked-in bytes do not match a verified source commit",
+      "sha256": "3627784a4e872da094f58ca13c37518cad37273a145b4de93310048ceea733c6"
+    }
+  ],
+  "n_rows": 1366,
+  "content_vintages": [
+    "2018",
+    "2020",
+    "2023"
+  ],
+  "available_at_values": [
+    "2019-11-05",
+    "2021-03-19",
+    "2024-01-25"
+  ],
+  "source_integrity_verified": true,
+  "production_eligible": false,
+  "production_ineligible_reason": "no verified snapshot was publicly available by the formal 2018 cutoffs",
+  "known_historical_gap": "no rating snapshot was publicly available by the 2018 formal cutoffs"
 }

@@ -19,7 +19,7 @@ import pandas as pd
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 from midterms.evidence.tickets import TICKETS_2026
 
-PARSER_VERSION = "fec-v1"
+PARSER_VERSION = "fec-v2-report-receipt-asof"
 OPENFEC = "https://api.open.fec.gov/v1"
 # FEC all-candidates summary (no API key; same underlying filings as OpenFEC).
 WEBALL_URL = "https://www.fec.gov/files/bulk-downloads/{cycle}/weball{yy}.zip"
@@ -56,6 +56,143 @@ WEBALL_COLS = [
     "indiv_refunds",
     "cmte_refunds",
 ]
+
+REPORT_REQUIRED_COLUMNS = {
+    "committee_id", "report_type", "coverage_start_date", "coverage_end_date",
+    "receipt_date", "filing_id", "amendment_indicator", "receipts",
+    "disbursements", "cash_on_hand_end_period",
+}
+LINK_REQUIRED_COLUMNS = {
+    "candidate_id", "committee_id", "state", "party", "available_at",
+}
+
+
+def resolve_form3_reports_as_of(
+    reports: pd.DataFrame, *, as_of: str | date,
+) -> pd.DataFrame:
+    """Resolve report amendments using only filings received by the cutoff.
+
+    ``coverage_end_date`` identifies the reporting period. ``receipt_date`` is
+    the sole availability clock. A later amendment cannot replace a filing in
+    an earlier replay.
+    """
+    missing = sorted(REPORT_REQUIRED_COLUMNS - set(reports.columns))
+    if missing:
+        raise ValueError(f"FEC Form 3 reports missing columns: {missing}")
+    cutoff = pd.Timestamp(as_of).date()
+    work = reports.copy()
+    work["receipt_date"] = pd.to_datetime(work["receipt_date"], errors="coerce").dt.date
+    work["coverage_start_date"] = pd.to_datetime(
+        work["coverage_start_date"], errors="coerce"
+    ).dt.date
+    work["coverage_end_date"] = pd.to_datetime(
+        work["coverage_end_date"], errors="coerce"
+    ).dt.date
+    work = work[work["receipt_date"].notna() & (work["receipt_date"] <= cutoff)].copy()
+    if work.empty:
+        return work.assign(available_at=pd.Series(dtype=str))
+    for column in ("receipts", "disbursements", "cash_on_hand_end_period"):
+        work[column] = pd.to_numeric(work[column], errors="coerce").fillna(0.0)
+    if "amendment_chain_id" not in work.columns:
+        work["amendment_chain_id"] = work.apply(
+            lambda row: "|".join(map(str, (
+                row["committee_id"], row["report_type"],
+                row["coverage_start_date"], row["coverage_end_date"],
+            ))), axis=1,
+        )
+    work["available_at"] = work["receipt_date"].map(date.isoformat)
+    # Receipt ordering is authoritative; filing_id is a deterministic tiebreak.
+    work = work.sort_values(
+        ["amendment_chain_id", "receipt_date", "filing_id"], kind="stable",
+    )
+    return work.groupby("amendment_chain_id", as_index=False, sort=True).tail(1).reset_index(drop=True)
+
+
+def select_candidate_committee_reports_as_of(
+    reports: pd.DataFrame,
+    candidate_committees: pd.DataFrame,
+    *,
+    as_of: str | date,
+) -> pd.DataFrame:
+    """Select each candidate committee's latest valid Form 3 report as of cutoff."""
+    missing = sorted(LINK_REQUIRED_COLUMNS - set(candidate_committees.columns))
+    if missing:
+        raise ValueError(f"FEC candidate/committee links missing columns: {missing}")
+    cutoff = pd.Timestamp(as_of).date()
+    links = candidate_committees.copy()
+    links["available_at"] = pd.to_datetime(links["available_at"], errors="coerce").dt.date
+    links = links[links["available_at"].notna() & (links["available_at"] <= cutoff)].copy()
+    if "is_authorized" in links.columns:
+        links = links[links["is_authorized"].fillna(False).astype(bool)]
+    links = links.sort_values(
+        ["candidate_id", "committee_id", "available_at"], kind="stable"
+    ).drop_duplicates(["candidate_id", "committee_id"], keep="last")
+    resolved = resolve_form3_reports_as_of(reports, as_of=cutoff)
+    merged = links.merge(resolved, on="committee_id", how="inner", validate="one_to_many")
+    if merged.empty:
+        return merged
+    merged = merged.sort_values(
+        ["candidate_id", "committee_id", "coverage_end_date", "receipt_date", "filing_id"],
+        kind="stable",
+    )
+    return merged.groupby(
+        ["candidate_id", "committee_id"], as_index=False, sort=True
+    ).tail(1).reset_index(drop=True)
+
+
+def report_level_fundraising_shares_as_of(
+    reports: pd.DataFrame,
+    candidate_committees: pd.DataFrame,
+    *,
+    election_id: str,
+    as_of: str | date,
+) -> pd.DataFrame:
+    """Derive race finance features from receipt-safe official report summaries."""
+    selected = select_candidate_committee_reports_as_of(
+        reports, candidate_committees, as_of=as_of,
+    )
+    rows: list[dict[str, Any]] = []
+    if selected.empty:
+        return pd.DataFrame(rows)
+    by_candidate = selected.groupby(
+        ["candidate_id", "state", "party"], as_index=False, sort=True
+    ).agg(
+        receipts=("receipts", "sum"),
+        disbursements=("disbursements", "sum"),
+        cash_on_hand_end_period=("cash_on_hand_end_period", "sum"),
+        available_at=("available_at", "max"),
+        filing_ids=("filing_id", lambda values: sorted(map(str, values))),
+        committee_ids=("committee_id", lambda values: sorted(map(str, values))),
+    )
+    for state, group in by_candidate.groupby("state", sort=True):
+        dem = group[group["party"].astype(str).map(_normalize_party).eq("DEM")]
+        rep = group[group["party"].astype(str).map(_normalize_party).eq("REP")]
+        dem_receipts = float(dem["receipts"].sum())
+        rep_receipts = float(rep["receipts"].sum())
+        dem_cash = float(dem["cash_on_hand_end_period"].sum())
+        rep_cash = float(rep["cash_on_hand_end_period"].sum())
+        receipts_total = dem_receipts + rep_receipts
+        cash_total = dem_cash + rep_cash
+        rows.append({
+            "election_id": election_id,
+            "state": str(state),
+            "race_id": f"{election_id}-{state}",
+            "fundraising_share": dem_receipts / receipts_total if receipts_total else 0.5,
+            "cash_share": dem_cash / cash_total if cash_total else 0.5,
+            "dem_receipts": dem_receipts,
+            "rep_receipts": rep_receipts,
+            "dem_disbursements": float(dem["disbursements"].sum()),
+            "rep_disbursements": float(rep["disbursements"].sum()),
+            "dem_cash_on_hand": dem_cash,
+            "rep_cash_on_hand": rep_cash,
+            "filing_ids": sorted(sum(group["filing_ids"].tolist(), [])),
+            "committee_ids": sorted(sum(group["committee_ids"].tolist(), [])),
+            "available_at": max(group["available_at"]),
+            "availability_basis": "fec_receipt_date",
+            "source": "fec_form3_report_summaries",
+            "parser_version": PARSER_VERSION,
+        })
+    return pd.DataFrame(rows)
 
 
 def _fec_api_key() -> str:

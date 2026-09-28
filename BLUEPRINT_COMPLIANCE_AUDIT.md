@@ -60,6 +60,13 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 - `source-readiness` is the pre-fit authority. `prepare-evidence --mode seal`
   writes a content-addressed bundle only after every hard current and historical
   domain is ready. OOF, stack and forecast stages require that exact bundle ID.
+- Poll-structure validation is deliberately two-stage. The selection pass may
+  compare the all-off reference with one-term structural challengers, then
+  freezes `validated_model_spec_candidate.json`. A separately keyed canonical
+  pass refits the static and dynamic candidates with that selected structure.
+  Only the canonical OOF may feed the stack, and the finalized validated model
+  spec must bind the bundle, source-readiness report, selected structure,
+  canonical OOF, stack and calibration artifact before publication fitting.
 
 ## Current source blockers
 
@@ -69,13 +76,19 @@ weaker substitute. The 2026-09-27 audit nevertheless remains correctly red:
 
 - candidate timeline: sealed FEC declarations do not establish nomination or
   ballot identity at the formal 60/30 historical cutoffs or current cutoff;
-- pollster ratings: no source-backed historical availability coverage;
+- pollster ratings: verified source-commit dates exist for the 2018, 2020 and
+  2023 content vintages, but none was public by the formal 2018 cutoffs;
 - demographics: no sealed release-dated point-in-time vintage store;
-- finance: no source-backed historical-cycle coverage;
-- presidential approval: historical rows are curated and untraceable.
+- finance: report-level, receipt-date and amendment-safe code exists, but the
+  historical Form 3 report/committee store has not been ingested;
+- presidential approval: the vendored poll rows now drive formal-cutoff
+  aggregates, but the archive lacks per-poll publication timestamps plus sealed
+  retrieval/license lineage, so `poll_end` remains an ineligible proxy.
 
 Markets and expert ratings are disabled optional domains and do not block the
 core rebuild. After these five source blockers are cleared, the expensive action
-must regenerate the positive structural challengers, cross-fitted selection,
-nested OOF, joint scores, stack evidence, Bayesian diagnostics and sampler
-health before strict acceptance can be reconsidered.
+must run the selection OOF, freeze the selected poll structure, regenerate the
+canonical OOF under that structure, and then regenerate joint scores, stack
+evidence, reliability calibration, Bayesian diagnostics and sampler health
+before strict acceptance can be reconsidered. The finalized
+`validated_model_spec_latest.json` is itself a required empirical gate.

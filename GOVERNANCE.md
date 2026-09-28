@@ -30,6 +30,15 @@ The current source audit is allowed to remain red. Missing real evidence must
 be ingested or refreshed; fixtures, current registries, and degraded substitutes
 cannot be relabeled to clear a historical source gate.
 
+Poll-structure selection and production validation use separate expensive
+passes. The first pass evaluates only same-family one-term structural changes
+and freezes a candidate spec. The second pass regenerates canonical static and
+dynamic OOF predictions under the selected configuration. Structural challenger
+labels never enter the production stack. A final validated model spec must bind
+the evidence bundle, source-readiness hash, selection, canonical OOF, stack and
+calibration artifacts before any publishable fit. A cache hit does not relax
+any of these semantic checks.
+
 ## Roles
 | Role | Responsibility |
 | --- | --- |

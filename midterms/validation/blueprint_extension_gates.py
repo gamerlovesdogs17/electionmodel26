@@ -22,14 +22,18 @@ GATE_REQUIREMENTS: dict[str, dict[str, Any]] = {
     "posterior_predictive_historical": {"artifact": "posterior_predictive_oof_latest.json", "required": True},
     "full_model_sbc": {"artifact": "full_model_sbc_latest.json", "required": False},
     "sampler_health_current_reference": {"artifact": "forecast_latest.json", "required": True},
-    "poll_structure_nested_oos": {"artifact": "nested_component_loo.json", "required": False, "disabled_feature": True},
+    "poll_structure_nested_oos": {"artifact": "nested_component_loo_canonical.json", "required": False, "disabled_feature": True},
     "poll_structure_positive_crossfit": {
         "artifact": "poll_structure_crossfit_latest.json", "required": True,
     },
-    "same_family_ablation_oos": {"artifact": "nested_component_loo.json", "required": True},
+    "same_family_ablation_oos": {"artifact": "nested_component_loo_selection.json", "required": True},
+    "validated_model_spec_lineage": {"artifact": "validated_model_spec_latest.json", "required": True},
     "candidate_timeline_real_data": {"artifact": "evidence_eligibility_latest.json", "required": True, "source_gate": True},
+    "pollster_ratings_point_in_time": {"artifact": None, "required": True, "source_gate": True},
     "demographic_point_in_time_snapshots": {"artifact": None, "required": True, "source_gate": True},
     "economic_realtime_history": {"artifact": None, "required": True, "source_gate": True},
+    "finance_report_level_history": {"artifact": None, "required": True, "source_gate": True},
+    "approval_poll_timing_lineage": {"artifact": None, "required": True, "source_gate": True},
     "overlay_incremental_value": {"artifact": "overlay_validation.json", "required": False, "disabled_feature": True},
     "market_contract_semantics_refresh": {"artifact": None, "required": False, "disabled_feature": True, "source_gate": True},
     "institutional_transition_model": {"artifact": None, "required": False, "disabled_feature": True},
@@ -84,7 +88,9 @@ def evaluate_blueprint_extension_gates(
         current_forecast = forecast if _artifact_model_version(forecast) == model_version else {}
         if current_forecast:
             poll_structure = (
-                (current_forecast.get("diagnostics") or {}).get("optional_poll_structure") or {}
+                (current_forecast.get("diagnostics") or {}).get("selected_poll_structure")
+                or (current_forecast.get("diagnostics") or {}).get("optional_poll_structure")
+                or {}
             )
         else:
             from midterms.model.poll_structure import PollStructureConfig
@@ -126,6 +132,16 @@ def evaluate_blueprint_extension_gates(
         req = dict(GATE_REQUIREMENTS.get(name) or {"artifact": None, "required": True})
         artifact_name = req.get("artifact")
         path = artifacts_dir / artifact_name if artifact_name else None
+        # Read-only compatibility for pre-two-pass diagnostic fixtures. New
+        # rebuilds must use the phase-specific names, but a legacy artifact is
+        # still inspected (and normally blocked) so the report explains the
+        # actual lineage mismatch instead of reducing it to "missing".
+        if path is not None and not path.exists() and name in {
+            "same_family_ablation_oos", "poll_structure_nested_oos",
+        }:
+            legacy_path = artifacts_dir / "nested_component_loo.json"
+            if legacy_path.exists():
+                path = legacy_path
         payload = _read(path) if path else None
         required = bool(req.get("required")) or bool(
             req.get("disabled_feature") and name not in disabled
@@ -145,8 +161,11 @@ def evaluate_blueprint_extension_gates(
         elif source_only and req.get("source_gate"):
             domain_name = {
                 "candidate_timeline_real_data": "candidate_timeline",
+                "pollster_ratings_point_in_time": "pollster_ratings",
                 "demographic_point_in_time_snapshots": "demographics",
                 "economic_realtime_history": "economics",
+                "finance_report_level_history": "finance",
+                "approval_poll_timing_lineage": "approval",
             }.get(name)
             if name == "freshness_current_domains":
                 used = {
@@ -181,14 +200,31 @@ def evaluate_blueprint_extension_gates(
                 "status": "not_applicable", "ok": True,
                 "reason": "not part of the source-integrity preflight",
             })
-        elif name == "demographic_point_in_time_snapshots":
-            manifest = _read(ROOT / "data" / "manifests" / "demographic_vintages.json") or {}
-            readiness_block = (source_readiness.get("domains") or {}).get("demographics") or {}
-            ok = bool(manifest.get("production_eligible")) and readiness_block.get("status") == "ready"
+        elif name in {
+            "pollster_ratings_point_in_time", "demographic_point_in_time_snapshots",
+            "finance_report_level_history", "approval_poll_timing_lineage",
+        }:
+            domain_name = {
+                "pollster_ratings_point_in_time": "pollster_ratings",
+                "demographic_point_in_time_snapshots": "demographics",
+                "finance_report_level_history": "finance",
+                "approval_poll_timing_lineage": "approval",
+            }[name]
+            manifest_name = {
+                "pollster_ratings": "pollster_ratings.json",
+                "demographics": "demographic_vintages.json",
+                "finance": "fundraising_shares.json",
+                "approval": "pres_approval.json",
+            }[domain_name]
+            manifest = _read(ROOT / "data" / "manifests" / manifest_name) or {}
+            readiness_block = (source_readiness.get("domains") or {}).get(domain_name) or {}
+            ok = readiness_block.get("status") == "ready" and bool(manifest)
             result.update({
                 "status": "pass" if ok else "blocked", "ok": ok,
-                "reason": None if ok else "historical point-in-time demographic source is not sealed",
-                "required_manifest": "data/manifests/demographic_vintages.json",
+                "reason": None if ok else f"source-readiness domain {domain_name} is not ready",
+                "source_domain": domain_name,
+                "source_status": readiness_block.get("status"),
+                "required_manifest": f"data/manifests/{manifest_name}",
             })
         elif name == "economic_realtime_history":
             manifest = _read(ROOT / "data" / "manifests" / "economics_vintages.json") or {}
@@ -235,7 +271,7 @@ def evaluate_blueprint_extension_gates(
                     "reason": None if ok else "prior predictive artifact is not bound to current forecast",
                 })
             elif name in {"posterior_predictive_historical", "joint_scores_historical"}:
-                nested_path = artifacts_dir / "nested_component_loo.json"
+                nested_path = artifacts_dir / "nested_component_loo_canonical.json"
                 nested = _read(nested_path) or {}
                 expected = _sha256(nested_path)
                 actual = payload.get("source_nested_sha256")
@@ -327,7 +363,11 @@ def evaluate_blueprint_extension_gates(
                     "convergence_available": convergence.get("available"),
                 })
             elif name == "same_family_ablation_oos":
-                frozen_path = artifacts_dir / "nested_component_loo_frozen.json"
+                frozen_path = artifacts_dir / "nested_component_loo_selection_frozen.json"
+                if not frozen_path.exists():
+                    legacy_frozen_path = artifacts_dir / "nested_component_loo_frozen.json"
+                    if legacy_frozen_path.exists():
+                        frozen_path = legacy_frozen_path
                 frozen = _read(frozen_path) or {}
                 semantic_actual = (
                     frozen_index_semantic_sha256(frozen_path) if frozen else None
@@ -377,7 +417,7 @@ def evaluate_blueprint_extension_gates(
                     "actual_frozen_index_semantic_sha256": semantic_actual,
                 })
             elif name == "poll_structure_positive_crossfit":
-                nested_path = artifacts_dir / "nested_component_loo.json"
+                nested_path = artifacts_dir / "nested_component_loo_selection.json"
                 expected_nested_sha = _sha256(nested_path)
                 folds = payload.get("outer_folds") or []
                 expected_candidates = {
@@ -403,67 +443,65 @@ def evaluate_blueprint_extension_gates(
                     "n_outer_folds": len(folds),
                 })
             elif name == "poll_structure_nested_oos":
-                frozen_path = artifacts_dir / "nested_component_loo_frozen.json"
-                frozen = _read(frozen_path) or {}
-                semantic_actual = (
-                    frozen_index_semantic_sha256(frozen_path) if frozen else None
-                )
-                semantic_expected = payload.get("frozen_index_semantic_sha256")
-                frozen_lineage_ok = (
-                    frozen.get("model_version") == model_version
-                    and bool(semantic_expected)
-                    and semantic_actual == semantic_expected
-                )
-                component_by_feature = {
+                spec_path = artifacts_dir / "validated_model_spec_latest.json"
+                spec = _read(spec_path) or {}
+                selected = spec.get("selected_poll_structure") or {}
+                selected_features = {
+                    feature for feature in (
+                        "sponsor_effect", "questionnaire_effect", "study_effect"
+                    ) if bool(selected.get(feature))
+                }
+                feature_to_ablation = {
+                    "study_effect": "hier_no_study_effect",
                     "sponsor_effect": "hier_no_sponsor_effect",
                     "questionnaire_effect": "hier_no_questionnaire_effect",
-                    "study_effect": "hier_no_study_effect",
                 }
-                required_components = {
-                    component_by_feature[feature]: feature
-                    for feature in enabled_poll_features
-                }
-                validated: set[str] = set()
-                for entry in frozen.get("entries") or []:
-                    component = str(entry.get("component") or "")
-                    feature = required_components.get(component)
-                    if not feature:
-                        continue
-                    lineage = entry.get("structural_ablation_lineage") or {}
-                    if (
-                        entry.get("status") == "ok"
-                        and lineage.get("eligible")
-                        and lineage.get("changed_features") == [feature]
-                    ):
-                        validated.add(component)
+                required_ablation_ids = sorted(
+                    feature_to_ablation[feature] for feature in enabled_poll_features
+                )
+                canonical_ok = bool(spec) and (
+                    payload.get("validation_phase") == "canonical_poll_structure"
+                    and payload.get("poll_structure_config_id")
+                    == spec.get("selected_poll_structure_id")
+                    and _sha256(artifacts_dir / "nested_component_loo_canonical.json")
+                    == spec.get("canonical_oof_sha256")
+                )
                 ok = (
-                    frozen_lineage_ok
-                    and bool(required_components)
-                    and validated == set(required_components)
-                    and all(
-                        (payload.get("g8_recommendations") or {}).get(feature, {}).get(
-                            "recommend"
-                        ) == "keep"
-                        for feature in enabled_poll_features
-                    )
+                    bool(enabled_poll_features)
+                    and selected_features == enabled_poll_features
+                    and canonical_ok
                 )
                 result.update({
                     "status": "pass" if ok else "blocked", "ok": ok,
                     "reason": None if ok else (
-                        "enabled poll structures lack current one-change nested OOS "
-                        "lineage with a fold-majority keep recommendation"
+                        "enabled poll structure is not bound through selection to canonical OOF"
                     ),
                     "enabled_poll_features": sorted(enabled_poll_features),
-                    "required_ablation_ids": sorted(required_components),
-                    "validated_ablation_ids": sorted(validated),
-                    "feature_recommendations": {
-                        feature: (payload.get("g8_recommendations") or {}).get(
-                            feature, {}
-                        ).get("recommend")
-                        for feature in sorted(enabled_poll_features)
-                    },
-                    "required_frozen_index_semantic_sha256": semantic_expected,
-                    "actual_frozen_index_semantic_sha256": semantic_actual,
+                    "selected_poll_features": sorted(selected_features),
+                    "required_ablation_ids": required_ablation_ids,
+                    "validated_model_spec_sha256": _sha256(spec_path),
+                })
+            elif name == "validated_model_spec_lineage":
+                from midterms.validation.validated_model_spec import (
+                    load_validated_model_spec,
+                    verify_validated_spec_artifacts,
+                )
+
+                try:
+                    spec, _ = load_validated_model_spec(path=path)
+                    checks = verify_validated_spec_artifacts(
+                        spec, artifacts_dir=artifacts_dir,
+                    )
+                    ok = bool(spec.get("production_research_eligible")) and all(checks.values())
+                    error = None
+                except Exception as exc:  # noqa: BLE001
+                    ok, checks, error = False, {}, str(exc)
+                result.update({
+                    "status": "pass" if ok else "blocked", "ok": ok,
+                    "reason": None if ok else (
+                        error or "validated model spec lineage is incomplete"
+                    ),
+                    "artifact_bindings": checks,
                 })
             elif payload.get("ok") is False or payload.get("publishable") is False:
                 result.update({

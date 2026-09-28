@@ -35,15 +35,15 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 | --- | --- | --- |
 | Polls (live 2026) | VoteHub CC BY | Required for `run_class=publication`; fixtures are non-publication |
 | Polls (historical) | FiveThirtyEight / ABC News (CC BY; Wayback/sealed) | Candidate identity + official race_id map; `--allow-synthetic` CI only |
-| Pollster quality | VoteHub plus sealed FiveThirtyEight snapshots | Raw historical snapshots exist, but their exact availability lineage is not yet sealed |
+| Pollster quality | VoteHub plus sealed FiveThirtyEight snapshots | Exact source-commit dates are sealed for the 2018/2020/2023 content vintages; none was public by the formal 2018 cutoffs, and the mismatched 2021 file is excluded |
 | Economics | Sealed ALFRED observations-by-vintage archive | All formal 60/30 cutoffs plus the current cutoff are source-ready; FRED latest, World Bank and fixtures cannot clear the gate |
-| Approval | Historical raw polling archive (provenance pending) | Current normalized history is curated; source URL, license, retrieval time and immutable lineage must be sealed before use |
-| Finance | OpenFEC API or FEC `weball` bulk | Matched-window share; source-backed historical-cycle coverage remains pending |
+| Approval | Vendored compiled individual-poll archive plus VoteHub current polls | Formal historical cutoffs use a fixed 30-day aggregate; missing per-poll publication time and retrieval/license lineage keep it strict-ineligible |
+| Finance | Official FEC candidate/committee links plus Form 3 report summaries | Receipt-date and amendment-safe code exists; historical report coverage remains pending. Candidate-cycle/weball totals cannot clear replay readiness |
 | Candidate identity | FEC Form 2 declarations plus nomination/ballot sources | Declarations are sealed but do not establish nominee or ballot identity; required point-in-time coverage remains pending |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
 | Markets | Kalshi | Candidate mapping plus verified candidate-win/exclusive/exhaustive contract-family semantics required before normalization |
-| Demography | Release-dated official state vintage adapter | Existing MEDSL 2018 reuse is degraded; a complete immutable point-in-time store still must be ingested |
+| Demography | Official ACS 5-year and Census urban/rural files | Release policy and parser are implemented; the urban workbook is sealed, but official ACS raw responses are not yet ingested |
 
 ## Bayesian and sampler diagnostics
 
@@ -70,6 +70,17 @@ time. For each held-out cycle, the other cycles alone select a structure. A
 challenger must beat the base in a strict majority and have lower pooled
 empirical CRPS; ties and incomplete evidence select the base. Multi-term
 interaction structures are deferred for v0.9.22.
+
+Selection and production fitting use two distinct expensive passes. The first
+pass evaluates the all-off reference and one-term challengers and writes a
+candidate model spec. The second pass refits canonical static and dynamic PyMC
+with the selected configuration, excludes structural labels from stacking, and
+is the only OOF artifact permitted to train the production stack. A final
+`validated_model_spec_latest.json` binds the evidence bundle, source-readiness
+hash, selected structure, canonical OOF, stack, calibration artifact, cycles,
+lead cutoffs, and code commit. Publication fitting loads that spec and passes
+the selected structure to every static/dynamic fit; defaulting silently to the
+all-off configuration is forbidden.
 
 ## Temporal and institutional limits
 
@@ -152,7 +163,15 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 - Formal v0.9.22 replay requires ALFRED real-time vintages. The sealed archive
   now provides them; FRED / WB substitutes remain degraded and fixtures are
   canaries only. The overall source gate remains red on other domains.
-- Finance prefers OpenFEC; FEC weball bulk is the rate-limit alternative (same filings).
+- Historical finance requires candidate/committee-linked Form 3 reports with
+  receipt-date amendment resolution. OpenFEC/weball candidate-cycle totals are
+  development/current-cycle inputs and cannot qualify a historical replay.
+- Candidate declarations do not establish nomination or ballot qualification.
+- Historical approval uses actual poll rows but remains strict-ineligible until
+  publication timing and retrieval/license lineage are sourced.
+- Demographic preparation is cutoff-safe in code. The current Census API
+  returned a key-required response; that response was discarded, no newer
+  substitute was used, and the official ACS state files remain a source blocker.
 - `pymc_dynamic` must earn OOF mass before displacing static pymc as reference or mixture member.
 - Poll coverage for 2014/2016 is not production-gated.
 - Peer snapshots are compare-only and never averaged into the ensemble.

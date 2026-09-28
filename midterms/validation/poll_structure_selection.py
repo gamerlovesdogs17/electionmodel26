@@ -135,6 +135,12 @@ def crossfit_structure_selection(
             "heldout_truth_used_for_selection": False,
         })
     final = select_structure(scores_by_cycle)
+    from midterms.validation.validated_model_spec import (
+        poll_structure_for_selection,
+        poll_structure_identity,
+    )
+
+    selected_config = poll_structure_for_selection(final["selected_structure"])
     return {
         "schema_version": SELECTION_SCHEMA_VERSION,
         "model_version": model_version,
@@ -156,6 +162,8 @@ def crossfit_structure_selection(
         },
         "final_production_candidate_recommendation": {
             **final,
+            "selected_poll_structure": selected_config.to_dict(),
+            "selected_poll_structure_id": poll_structure_identity(selected_config),
             "status": "recommendation_pending_adoption",
             "evidence_scope": "all_available_historical_cycles_after_crossfit_evaluation",
             "untouched_fifth_cycle": False,
@@ -190,6 +198,10 @@ def write_poll_structure_crossfit(
         source_frozen_draws_sha256=str(nested.get("frozen_draws_sha256") or ""),
         model_version=str(nested["model_version"]),
     )
+    report["source_validation_phase"] = nested.get("validation_phase")
+    report["source_evidence_bundle_id"] = nested.get("evidence_bundle_id")
+    report["source_evidence_bundle_sha256"] = nested.get("evidence_bundle_sha256")
+    report["source_poll_structure_config_id"] = nested.get("poll_structure_config_id")
     out_path = out_path or (ARTIFACTS_DIR / "poll_structure_crossfit_latest.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")

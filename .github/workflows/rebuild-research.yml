@@ -134,50 +134,113 @@ jobs:
             --as-of "$AS_OF" \
             --publication-config \
             --strict
-      - name: Restore semantic historical validation cache
-        id: historical-cache
+      - name: Restore poll-structure selection-pass cache
+        id: selection-cache
         uses: actions/cache/restore@v4
         with:
           path: |
-            data/artifacts/nested_component_loo.json
-            data/artifacts/nested_component_loo_frozen.json
+            data/artifacts/nested_component_loo_selection.json
+            data/artifacts/nested_component_loo_selection_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
             data/artifacts/poll_structure_crossfit_latest.json
-          key: historical-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v1
-      - name: Regenerate freeze-before-truth historical OOF and same-family challengers
-        if: steps.historical-cache.outputs.cache-hit != 'true'
+          key: selection-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
+      - name: Selection-pass freeze-before-truth OOF and same-family challengers
+        if: steps.selection-cache.outputs.cache-hit != 'true'
         run: |
           python -m midterms.cli nested-component-loo \
             --hierarchical-method pymc \
             --years 2018,2020,2022,2024 \
             --leads 60,30 \
             --draws 1600 \
-            --evidence-bundle "$EVIDENCE_BUNDLE_PATH"
+            --validation-phase poll_structure_selection \
+            --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
+            --out data/artifacts/nested_component_loo_selection.json
       - name: Cross-fit single-term poll-structure selection
         run: |
           python - <<'PY'
           import json, os
-          nested = json.load(open('data/artifacts/nested_component_loo.json'))
+          nested = json.load(open('data/artifacts/nested_component_loo_selection.json'))
           if nested.get('evidence_bundle_id') != os.environ['EVIDENCE_BUNDLE_ID']:
-              raise SystemExit('cached historical OOF belongs to a different evidence bundle')
+            raise SystemExit('cached historical OOF belongs to a different evidence bundle')
+          if nested.get('validation_phase') != 'poll_structure_selection':
+            raise SystemExit('selection cache phase mismatch')
           PY
-          python -m midterms.cli poll-structure-crossfit --strict
-      - name: Reverify OOF lineage and fit predictive-mixture stack
-        run: python -m midterms.cli fit-stack-weights
-      - name: Save verified historical validation cache
-        if: steps.historical-cache.outputs.cache-hit != 'true'
+          python -m midterms.cli poll-structure-crossfit \
+            --nested-path data/artifacts/nested_component_loo_selection.json \
+            --out data/artifacts/poll_structure_crossfit_latest.json \
+            --strict
+      - name: Freeze selected structure and evidence into candidate model spec
+        run: |
+          python -m midterms.cli freeze-model-spec-candidate \
+            --selection data/artifacts/poll_structure_crossfit_latest.json \
+            --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
+            --source-readiness data/artifacts/source_readiness_latest.json \
+            --code-commit-sha "$(git rev-parse HEAD)" \
+            --out data/artifacts/validated_model_spec_candidate.json
+      - name: Save selection-pass validation cache
+        if: steps.selection-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: |
-            data/artifacts/nested_component_loo.json
-            data/artifacts/nested_component_loo_frozen.json
+            data/artifacts/nested_component_loo_selection.json
+            data/artifacts/nested_component_loo_selection_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
             data/artifacts/poll_structure_crossfit_latest.json
-          key: historical-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v1
+          key: selection-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
+      - name: Restore canonical selected-structure OOF cache
+        id: canonical-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            data/artifacts/nested_component_loo_canonical.json
+            data/artifacts/nested_component_loo_canonical_frozen.json
+            data/artifacts/posterior_predictive_oof_latest.json
+          key: canonical-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json') }}-2018-2024-60-30-pymc1600-seed-v2
+      - name: Canonical OOF using the frozen selected poll structure
+        if: steps.canonical-cache.outputs.cache-hit != 'true'
+        run: |
+          python -m midterms.cli nested-component-loo \
+            --hierarchical-method pymc \
+            --years 2018,2020,2022,2024 \
+            --leads 60,30 \
+            --draws 1600 \
+            --validation-phase canonical_poll_structure \
+            --model-spec-candidate data/artifacts/validated_model_spec_candidate.json \
+            --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
+            --out data/artifacts/nested_component_loo_canonical.json
+      - name: Fit predictive-mixture stack from canonical OOF only
+        run: |
+          python -m midterms.cli fit-stack-weights \
+            --nested-path data/artifacts/nested_component_loo_canonical.json \
+            --out data/artifacts/stack_weights_oof.json \
+            --require-canonical
+      - name: Save canonical OOF cache
+        if: steps.canonical-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            data/artifacts/nested_component_loo_canonical.json
+            data/artifacts/nested_component_loo_canonical_frozen.json
+            data/artifacts/posterior_predictive_oof_latest.json
+          key: canonical-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json') }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Cross-fitted production-stack reliability
-        run: python -m midterms.cli crossfit-stack-reliability
+        run: |
+          python -m midterms.cli crossfit-stack-reliability \
+            --nested-path data/artifacts/nested_component_loo_canonical.json \
+            --stack-path data/artifacts/stack_weights_oof.json
       - name: Joint historical proper scores
-        run: python -m midterms.cli joint-oof-scores --strict
+        run: |
+          python -m midterms.cli joint-oof-scores --strict \
+            --nested-path data/artifacts/nested_component_loo_canonical.json
+      - name: Finalize validated model spec
+        run: |
+          python -m midterms.cli finalize-validated-model-spec \
+            --candidate data/artifacts/validated_model_spec_candidate.json \
+            --canonical-oof data/artifacts/nested_component_loo_canonical.json \
+            --stack data/artifacts/stack_weights_oof.json \
+            --calibration data/artifacts/stack_reliability_crossfit_latest.json \
+            --code-commit-sha "$(git rev-parse HEAD)" \
+            --out data/artifacts/validated_model_spec_latest.json
       - name: Run publication-quality research forecast
         run: |
           python -m midterms.cli forecast \

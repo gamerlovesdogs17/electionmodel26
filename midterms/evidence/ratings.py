@@ -13,6 +13,7 @@ Point-in-time contract (audit):
 from __future__ import annotations
 
 import json
+import hashlib
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -21,6 +22,7 @@ from typing import Any
 import pandas as pd
 
 from midterms.config import MANIFESTS_DIR, RAW_DIR
+from midterms.config import NORMALIZED_DIR
 from midterms.evidence.candidates import canonicalize_pollster, normalize_candidate_key
 
 GRADE_QUALITY = {
@@ -41,6 +43,30 @@ DEFAULT_EXTRA_SD = 2.2
 # historical publication date). Historical backtests before this date use
 # prior_default unless a vintaged ratings snapshot is present.
 RATINGS_SNAPSHOT_FLOOR = date(2024, 1, 1)
+
+# Availability comes from the public source repository commit that introduced
+# the exact checked-in bytes, never from the vintage-looking filename.
+VERIFIED_VENDORED_RATING_SNAPSHOTS: dict[str, dict[str, str]] = {
+    "2018": {
+        "available_at": "2019-11-05",
+        "sha256": "710139e06c88649a6f7ce30b854c74219c9495f0e80d5e6c0848d98364d1e5a3",
+        "source_commit": "1ae301f",
+        "source_url": "https://github.com/fivethirtyeight/data/commit/1ae301f",
+    },
+    "2020": {
+        "available_at": "2021-03-19",
+        "sha256": "b26bd623e798e3fdfa6ef4ef22ff9489478269aef9b159e33592773000053b91",
+        "source_commit": "c1b4d2",
+        "source_url": "https://github.com/fivethirtyeight/data/commit/c1b4d2",
+    },
+    "2023": {
+        "available_at": "2024-01-25",
+        "sha256": "8501615e7bff043dd3ed0452b875a93f519cec546c190a5d0a462272c387d923",
+        "source_commit": "fea5d9",
+        "source_url": "https://github.com/fivethirtyeight/data/commit/fea5d9",
+    },
+}
+UNVERIFIED_VENDORED_RATING_SNAPSHOTS = {"2021": "checked-in bytes do not match a verified source commit"}
 
 
 @dataclass
@@ -64,6 +90,122 @@ class PollsterRating:
         if self.percent_error is not None and self.percent_error > 0:
             return float(max(1.0, min(4.5, 0.55 * self.percent_error)))
         return DEFAULT_EXTRA_SD
+
+
+def _signed_party_value(value: Any) -> float:
+    if value is None or pd.isna(value):
+        return 0.0
+    text = str(value).strip()
+    try:
+        return float(text)
+    except ValueError:
+        pass
+    import re
+
+    match = re.search(r"([DR])\s*\+?\s*(-?\d+(?:\.\d+)?)", text, re.I)
+    if not match:
+        return 0.0
+    magnitude = float(match.group(2))
+    return magnitude if match.group(1).upper() == "D" else -magnitude
+
+
+def prepare_vendored_pollster_rating_vintages(
+    *,
+    raw_dir: Path = RAW_DIR,
+    normalized_path: Path | None = None,
+    manifest_path: Path | None = None,
+) -> dict[str, Any]:
+    """Seal exact-source historical rating snapshots with defensible availability."""
+    rows: list[dict[str, Any]] = []
+    source_blocks: list[dict[str, Any]] = []
+    for vintage, metadata in sorted(VERIFIED_VENDORED_RATING_SNAPSHOTS.items()):
+        path = raw_dir / "external" / f"pollster_ratings_{vintage}.csv"
+        if not path.is_file():
+            source_blocks.append({"content_vintage": vintage, "status": "missing"})
+            continue
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual != metadata["sha256"]:
+            source_blocks.append({
+                "content_vintage": vintage, "status": "hash_mismatch",
+                "expected_sha256": metadata["sha256"], "actual_sha256": actual,
+            })
+            continue
+        frame = pd.read_csv(path)
+        pollster_column = "Pollster"
+        grade_column = "538 Grade"
+        if pollster_column not in frame.columns or grade_column not in frame.columns:
+            raise ValueError(f"rating snapshot {vintage} lacks Pollster/538 Grade")
+        for _, record in frame.iterrows():
+            name = str(record[pollster_column]).strip()
+            if not name:
+                continue
+            grade = None if pd.isna(record.get(grade_column)) else str(record.get(grade_column))
+            quality = GRADE_QUALITY.get(grade or "", DEFAULT_QUALITY)
+            bias_raw = record.get("House Effect", record.get("Mean-Reverted Bias"))
+            rows.append({
+                "pollster": name,
+                "pollster_key": normalize_candidate_key(canonicalize_pollster(name)),
+                "grade": grade,
+                "quality_weight": quality,
+                "house_effect_dem_pp": _signed_party_value(bias_raw),
+                "percent_error": pd.to_numeric(record.get("Simple Average Error"), errors="coerce"),
+                "relative_error": None,
+                "herding_error_pct": None,
+                "within_moe_pct": None,
+                "source": "fivethirtyeight_historical_rating_snapshot",
+                "content_vintage": vintage,
+                "available_at": metadata["available_at"],
+                "source_commit": metadata["source_commit"],
+                "source_url": metadata["source_url"],
+                "source_sha256": actual,
+                "parser_version": "pollster-rating-vintage-v1",
+                "provenance": "verified_source_commit",
+            })
+        source_blocks.append({
+            "content_vintage": vintage, "status": "verified",
+            "available_at": metadata["available_at"], "sha256": actual,
+            "source_commit": metadata["source_commit"], "source_url": metadata["source_url"],
+        })
+    for vintage, reason in sorted(UNVERIFIED_VENDORED_RATING_SNAPSHOTS.items()):
+        path = raw_dir / "external" / f"pollster_ratings_{vintage}.csv"
+        source_blocks.append({
+            "content_vintage": vintage,
+            "status": "unverified_excluded",
+            "reason": reason,
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None,
+        })
+    output = pd.DataFrame(rows)
+    if output.empty:
+        raise ValueError("no verified pollster rating snapshots are available")
+    output = output.sort_values(
+        ["available_at", "content_vintage", "pollster_key"], kind="stable"
+    ).reset_index(drop=True)
+    normalized_path = normalized_path or (NORMALIZED_DIR / "pollster_ratings.parquet")
+    manifest_path = manifest_path or (MANIFESTS_DIR / "pollster_ratings.json")
+    normalized_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    output.to_parquet(normalized_path, index=False)
+    semantic = hashlib.sha256(json.dumps(
+        output.fillna("").astype(str).to_dict(orient="records"),
+        sort_keys=True, separators=(",", ":"),
+    ).encode("utf-8")).hexdigest()
+    manifest = {
+        "schema_version": "pollster-rating-vintages-v1",
+        "parser_version": "pollster-rating-vintage-v1",
+        "normalized_semantic_sha256": semantic,
+        "sources": source_blocks,
+        "n_rows": int(len(output)),
+        "content_vintages": sorted(output["content_vintage"].unique()),
+        "available_at_values": sorted(output["available_at"].unique()),
+        "source_integrity_verified": True,
+        "production_eligible": False,
+        "production_ineligible_reason": (
+            "no verified snapshot was publicly available by the formal 2018 cutoffs"
+        ),
+        "known_historical_gap": "no rating snapshot was publicly available by the 2018 formal cutoffs",
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    return manifest
 
 
 def _votehub_scorecards_path() -> Path:

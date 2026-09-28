@@ -34,8 +34,12 @@ REQUIRED_SOURCE_COLUMNS = (
 )
 ALLOWED_EVENT_TYPES = frozenset({
     "declared", "entered", "nomination", "nominated", "ballot_qualification",
-    "qualified", "withdrawal", "withdrawn", "replacement", "party_change",
+    "qualified", "qualification", "withdrawal", "withdrawn", "replacement", "party_change",
     "status_change", "vacancy", "runoff_advancement", "special_election_phase",
+})
+BALLOT_IDENTITY_EVENT_TYPES = frozenset({
+    "nomination", "nominated", "ballot_qualification", "qualified", "qualification",
+    "replacement", "runoff_advancement",
 })
 
 REQUIRED_CONTESTED_IDENTITY_COLUMNS = (
@@ -153,6 +157,44 @@ def ingest_candidate_timeline(
     return manifest
 
 
+def parse_fec_form2_candidate_filings(
+    input_path: str | Path, *, election_year: int,
+) -> pd.DataFrame:
+    """Normalize official declarations while preserving filer != nominee.
+
+    Form 2 proves that a person filed with the FEC. It does not prove party
+    nomination, ballot qualification, or general-election appearance, and is
+    therefore never emitted as a ballot-identity event.
+    """
+    path = Path(input_path)
+    frame = pd.read_csv(path)
+    required = {
+        "CANDIDATE_ID", "CANDIDATE_NAME", "PARTY_CODE", "CANDIDATE_OFFICE_CODE",
+        "CANDIDATE_OFFICE_STATE_CODE", "ELECTION_YEAR", "RECEIPT_DATE",
+        "BEGIN_IMAGE_NUMBER",
+    }
+    missing = sorted(required - set(frame.columns))
+    if missing:
+        raise ValueError(f"FEC Form 2 source missing columns: {missing}")
+    out = frame[
+        frame["CANDIDATE_OFFICE_CODE"].astype(str).eq("S")
+        & pd.to_numeric(frame["ELECTION_YEAR"], errors="coerce").eq(int(election_year))
+    ].copy()
+    out["available_at"] = pd.to_datetime(
+        out["RECEIPT_DATE"], format="%d-%b-%y", errors="coerce"
+    ).dt.date
+    out = out[out["available_at"].notna()].copy()
+    out["event_type"] = "fec_candidate_filing"
+    out["establishes_nomination"] = False
+    out["establishes_ballot_qualification"] = False
+    out["source_object_sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    out["source_url"] = "https://www.fec.gov/data/browse-data/?tab=candidates"
+    out["parser_version"] = "fec-form2-filing-v1"
+    return out.sort_values(
+        ["available_at", "CANDIDATE_OFFICE_STATE_CODE", "CANDIDATE_ID"], kind="stable"
+    ).reset_index(drop=True)
+
+
 def apply_candidate_timeline(
     races: pd.DataFrame,
     timeline: pd.DataFrame,
@@ -245,17 +287,21 @@ def apply_candidate_timeline(
                 if source == "incumbent_status":
                     value = str(value).lower() == "open"
                 out.at[idx, target] = value
-        if str(event["event_type"]).lower() in {"withdrawal", "withdrawn"}:
+        event_type = str(event["event_type"]).lower()
+        if event_type in {"withdrawal", "withdrawn"}:
             out.at[idx, "ballot_status"] = "withdrawn"
-        elif str(event["event_type"]).lower() in {"nomination", "nominated"} and (
+        elif event_type in {"nomination", "nominated"} and (
             pd.isna(event["ballot_status"]) or str(event["ballot_status"]) == ""
         ):
             out.at[idx, "ballot_status"] = "nominated"
-        elif str(event["event_type"]).lower() in {"ballot_qualification", "qualified"} and (
+        elif event_type in {"ballot_qualification", "qualified", "qualification"} and (
             pd.isna(event["ballot_status"]) or str(event["ballot_status"]) == ""
         ):
             out.at[idx, "ballot_status"] = "qualified"
-        out.at[idx, "candidate_timeline_status"] = "point_in_time"
+        if event_type in BALLOT_IDENTITY_EVENT_TYPES:
+            out.at[idx, "candidate_timeline_status"] = "point_in_time"
+        elif out.at[idx, "candidate_timeline_status"] != "point_in_time":
+            out.at[idx, "candidate_timeline_status"] = "degraded_filer_or_nonballot_event"
     out["candidate_timeline_status"] = out["candidate_timeline_status"].fillna(
         "degraded_no_event_for_race"
     )

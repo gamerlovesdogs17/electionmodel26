@@ -1,17 +1,25 @@
 {
-  "generated_at": "2026-09-22T01:14:51.768297+00:00",
-  "n": 54,
-  "n_votehub": 36,
-  "n_historical_curated": 18,
-  "parser_version": "approval-v2",
-  "source_url": "https://api.votehub.com/polls?subject=donald-trump&poll_type=approval",
-  "tier": "aggregator",
-  "license": "CC BY 4.0",
-  "attribution": "Polling data from VoteHub (https://votehub.com)",
+  "generated_at": "2026-09-28T01:24:07.708226+00:00",
+  "n": 8,
+  "n_votehub": 0,
+  "n_historical_archive_cutoffs": 8,
+  "parser_version": "approval-v3-point-in-time-archive",
+  "historical_source_url": "https://github.com/lorenzo-ruffino/approval_rate_usa_president/blob/cfb4d48b11513a9ff350247a92148b7a366a9963/historical_approval_polls.csv",
+  "historical_source_provider": "Lorenzo Ruffino compiled presidential approval poll archive",
+  "historical_raw_sha256": "013d5eacf9dbfd808353cbb0a3c233de75d0033182353e8446d2555332f36aa6",
+  "historical_window_days": 30,
+  "historical_availability_basis": "field_end_proxy_missing_publication_timestamp",
+  "historical_production_eligible": false,
+  "historical_ineligible_reason": "per-poll publication timestamps and sealed retrieval/license lineage are absent",
+  "source_url": "https://github.com/lorenzo-ruffino/approval_rate_usa_president/blob/cfb4d48b11513a9ff350247a92148b7a366a9963/historical_approval_polls.csv",
+  "tier": "compiled_archive",
+  "license": null,
+  "attribution": null,
   "fetch_error": null,
-  "note": "Live net approval from VoteHub Trump approval polls (recency-weighted); pre-2025 cycles retain curated vintages for as-of backtests.",
+  "archive_error": null,
+  "note": "Historical compiled poll archive only; strict historical lineage is incomplete.",
   "paths": {
-    "raw": "/home/runner/work/electionmodel26/electionmodel26/data/raw/external/pres_approval_vintages.json",
-    "normalized": "/home/runner/work/electionmodel26/electionmodel26/data/normalized/pres_approval.parquet"
+    "raw": "data/raw/external/pres_approval_vintages.json",
+    "normalized": "data/normalized/pres_approval.parquet"
   }
 }

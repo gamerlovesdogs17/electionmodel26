@@ -397,6 +397,7 @@ def build_crossfit_report(
     })
     report: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
+        "model_version": nested.get("model_version"),
         "procedure": PROCEDURE,
         "generated_at": datetime.now(UTC).isoformat(),
         "complete": True,

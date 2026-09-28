@@ -82,13 +82,18 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         results["polls"] = {"status": "refresh_failed", "error": str(exc)}
 
-    results["approval"] = {
-        "status": "adapter_not_configured",
-        "reason": (
-            "automatic approval refresh is disabled until the checked-in historical "
-            "archive has sealed source URL/license/retrieval metadata"
-        ),
-    }
+    try:
+        from midterms.evidence.approval import write_approval_store
+
+        results["approval"] = write_approval_store(prefer_votehub=False)
+    except Exception as exc:  # noqa: BLE001
+        results["approval"] = {"status": "refresh_failed", "error": str(exc)}
+    try:
+        from midterms.evidence.ratings import prepare_vendored_pollster_rating_vintages
+
+        results["pollster_ratings"] = prepare_vendored_pollster_rating_vintages()
+    except Exception as exc:  # noqa: BLE001
+        results["pollster_ratings"] = {"status": "refresh_failed", "error": str(exc)}
     results["finance"] = {
         "status": "adapter_not_configured",
         "reason": "unattended finance refresh remains disabled until sealed-store preservation is guaranteed",

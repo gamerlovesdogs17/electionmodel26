@@ -70,7 +70,7 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
-    p_fec = sub.add_parser("fetch-finance", help="Fetch OpenFEC Senate totals → fundraising shares")
+    p_fec = sub.add_parser("fetch-finance", help="Fetch OpenFEC Senate totals into fundraising shares")
     p_fec.add_argument("--cycle", type=int, default=2026)
     p_fec.set_defaults(
         func=lambda a: print(
@@ -220,7 +220,7 @@ def main(argv: list[str] | None = None) -> None:
     p_run.add_argument(
         "--control-calibrate",
         action="store_true",
-        help="Opt-in hard chamber calibration to market P(control) — off by default",
+        help="Opt-in hard chamber calibration to market P(control); off by default",
     )
     p_run.add_argument(
         "--allow-fast-fallback",
@@ -481,7 +481,7 @@ def main(argv: list[str] | None = None) -> None:
         "reconcile-chamber",
         help="Official ballot + 100-seat/control reconciliation gate (audit P0.2)",
     )
-    p_rec.add_argument("--year", type=int, default=None, help="Single year; default gate years 2018–2024")
+    p_rec.add_argument("--year", type=int, default=None, help="Single year; default gate years 2018-2024")
     p_rec.add_argument(
         "--all-meta",
         action="store_true",
@@ -571,7 +571,7 @@ def main(argv: list[str] | None = None) -> None:
 
     p_ref = sub.add_parser(
         "refresh",
-        help="Fetch → ingest → forecast → monitor (ops refresh chain)",
+        help="Fetch, ingest, forecast, then monitor (ops refresh chain)",
     )
     p_ref.add_argument("--election-id", default="senate-2026")
     p_ref.add_argument("--as-of", default="2026-09-01")
@@ -830,13 +830,18 @@ def main(argv: list[str] | None = None) -> None:
         help="Select single-term poll structures from existing frozen OOF scores only",
     )
     p_structure.add_argument("--strict", action="store_true")
+    p_structure.add_argument("--nested-path", default=None)
+    p_structure.add_argument("--out", default=None)
 
     def _poll_structure_crossfit(a: argparse.Namespace) -> None:
         try:
             report = __import__(
                 "midterms.validation.poll_structure_selection",
                 fromlist=["write_poll_structure_crossfit"],
-            ).write_poll_structure_crossfit()
+            ).write_poll_structure_crossfit(
+                nested_path=Path(a.nested_path) if a.nested_path else None,
+                out_path=Path(a.out) if a.out else None,
+            )
         except (ValueError, FileNotFoundError) as exc:
             print(json.dumps({"ok": False, "error": str(exc)}, indent=2))
             if a.strict:
@@ -850,7 +855,7 @@ def main(argv: list[str] | None = None) -> None:
         "--hierarchical-method",
         default="pymc",
         choices=("fast", "pymc", "pymc_dynamic"),
-        help="Hierarchical spine for LOO (pymc default — align with production)",
+        help="Hierarchical spine for LOO (pymc default; align with production)",
     )
     p_nloo.add_argument("--years", default="2018,2020,2022,2024")
     p_nloo.add_argument("--leads", default="60,30")
@@ -858,6 +863,13 @@ def main(argv: list[str] | None = None) -> None:
         "--evidence-bundle", default=None,
         help="Sealed evidence bundle whose historical snapshot IDs must match every fold",
     )
+    p_nloo.add_argument(
+        "--validation-phase",
+        choices=("poll_structure_selection", "canonical_poll_structure"),
+        default="poll_structure_selection",
+    )
+    p_nloo.add_argument("--model-spec-candidate", default=None)
+    p_nloo.add_argument("--out", default=None)
     p_nloo.set_defaults(
         func=lambda a: print(
             json.dumps(
@@ -870,6 +882,9 @@ def main(argv: list[str] | None = None) -> None:
                     hierarchical_method=a.hierarchical_method,
                     n_draws=a.draws,
                     evidence_bundle_path=a.evidence_bundle,
+                    validation_phase=a.validation_phase,
+                    model_spec_candidate_path=a.model_spec_candidate,
+                    out_path=Path(a.out) if a.out else None,
                 ),
                 indent=2,
                 default=str,
@@ -882,18 +897,68 @@ def main(argv: list[str] | None = None) -> None:
         help="Fit reproducible OOF ensemble weights from nested LOO matrix (audit P2.2)",
     )
     p_sw.add_argument("--temperature", type=float, default=0.75)
+    p_sw.add_argument("--nested-path", default=None)
+    p_sw.add_argument("--out", default=None)
+    p_sw.add_argument("--require-canonical", action="store_true")
     p_sw.set_defaults(
         func=lambda a: print(
             json.dumps(
                 __import__(
                     "midterms.validation.stack_weights",
                     fromlist=["fit_stack_weights_from_nested_loo"],
-                ).fit_stack_weights_from_nested_loo(temperature=a.temperature),
+                ).fit_stack_weights_from_nested_loo(
+                    temperature=a.temperature,
+                    nested_path=Path(a.nested_path) if a.nested_path else None,
+                    out_path=Path(a.out) if a.out else None,
+                    require_canonical=a.require_canonical,
+                ),
                 indent=2,
                 default=str,
             )
         )
     )
+
+    p_spec_candidate = sub.add_parser(
+        "freeze-model-spec-candidate",
+        help="Bind the selected poll structure to a sealed evidence bundle before canonical OOF",
+    )
+    p_spec_candidate.add_argument("--selection", default=None)
+    p_spec_candidate.add_argument("--evidence-bundle", required=True)
+    p_spec_candidate.add_argument("--source-readiness", default=None)
+    p_spec_candidate.add_argument("--out", default=None)
+    p_spec_candidate.add_argument("--code-commit-sha", default=None)
+    p_spec_candidate.set_defaults(func=lambda a: print(json.dumps(__import__(
+        "midterms.validation.validated_model_spec",
+        fromlist=["write_candidate_model_spec"],
+    ).write_candidate_model_spec(
+        selection_path=a.selection,
+        evidence_bundle_path=a.evidence_bundle,
+        source_readiness_path=a.source_readiness,
+        out_path=a.out,
+        code_commit_sha=a.code_commit_sha,
+    ), indent=2, default=str)))
+
+    p_spec_final = sub.add_parser(
+        "finalize-validated-model-spec",
+        help="Finalize the canonical OOF, stack, and calibration lineage contract",
+    )
+    p_spec_final.add_argument("--candidate", required=True)
+    p_spec_final.add_argument("--canonical-oof", required=True)
+    p_spec_final.add_argument("--stack", required=True)
+    p_spec_final.add_argument("--calibration", required=True)
+    p_spec_final.add_argument("--out", default=None)
+    p_spec_final.add_argument("--code-commit-sha", default=None)
+    p_spec_final.set_defaults(func=lambda a: print(json.dumps(__import__(
+        "midterms.validation.validated_model_spec",
+        fromlist=["finalize_validated_model_spec"],
+    ).finalize_validated_model_spec(
+        candidate_path=a.candidate,
+        canonical_oof_path=a.canonical_oof,
+        stack_path=a.stack,
+        calibration_path=a.calibration,
+        out_path=a.out,
+        code_commit_sha=a.code_commit_sha,
+    ), indent=2, default=str)))
 
     p_crossfit = sub.add_parser(
         "crossfit-stack-reliability",
@@ -902,13 +967,29 @@ def main(argv: list[str] | None = None) -> None:
             "performs no model refits or network calls"
         ),
     )
+    p_crossfit.add_argument("--nested-path", default=None)
+    p_crossfit.add_argument("--stack-path", default=None)
+    p_crossfit.add_argument("--out", default=None)
     p_crossfit.set_defaults(
         func=lambda a: print(
             json.dumps(
                 __import__(
                     "midterms.validation.stack_reliability_crossfit",
                     fromlist=["write_stack_reliability_crossfit"],
-                ).write_stack_reliability_crossfit(),
+                ).write_stack_reliability_crossfit(
+                    nested_path=Path(a.nested_path) if a.nested_path else __import__(
+                        "midterms.validation.stack_reliability_crossfit",
+                        fromlist=["NESTED_LOO_PATH"],
+                    ).NESTED_LOO_PATH,
+                    stack_path=Path(a.stack_path) if a.stack_path else __import__(
+                        "midterms.validation.stack_reliability_crossfit",
+                        fromlist=["STACK_WEIGHTS_PATH"],
+                    ).STACK_WEIGHTS_PATH,
+                    out_path=Path(a.out) if a.out else __import__(
+                        "midterms.validation.stack_reliability_crossfit",
+                        fromlist=["DEFAULT_OUT_PATH"],
+                    ).DEFAULT_OUT_PATH,
+                ),
                 indent=2,
                 default=str,
             )
@@ -920,12 +1001,17 @@ def main(argv: list[str] | None = None) -> None:
         help="Score draw-aligned historical joint distributions from the frozen OOF artifact",
     )
     p_joint_oof.add_argument("--strict", action="store_true")
+    p_joint_oof.add_argument("--nested-path", default=None)
+    p_joint_oof.add_argument("--out", default=None)
 
     def _joint_oof_scores(a: argparse.Namespace) -> None:
         report = __import__(
             "midterms.validation.joint_oof_scores",
             fromlist=["write_joint_oof_scores"],
-        ).write_joint_oof_scores()
+        ).write_joint_oof_scores(
+            nested_path=Path(a.nested_path) if a.nested_path else None,
+            out_path=Path(a.out) if a.out else None,
+        )
         print(json.dumps(report, indent=2, default=str))
         if a.strict and not report.get("ok"):
             raise SystemExit(1)
@@ -971,6 +1057,18 @@ def main(argv: list[str] | None = None) -> None:
             "midterms.evidence.demographic_vintages", fromlist=["ingest_demographic_vintages"],
         ).ingest_demographic_vintages(a.input), indent=2, default=str))
     )
+
+    p_demo_official = sub.add_parser(
+        "prepare-official-census-demographics",
+        help="Fetch/seal official ACS and Census urban vintages for declared replay cutoffs",
+    )
+    p_demo_official.add_argument("--no-fetch", action="store_true")
+    p_demo_official.set_defaults(func=lambda a: print(json.dumps(__import__(
+        "midterms.evidence.demographic_vintages",
+        fromlist=["prepare_official_census_demographic_vintages"],
+    ).prepare_official_census_demographic_vintages(
+        fetch_missing=not a.no_fetch,
+    ), indent=2, default=str)))
 
     p_alfred = sub.add_parser(
         "ingest-alfred-vintages",
@@ -1100,7 +1198,7 @@ def main(argv: list[str] | None = None) -> None:
 
     p_acc = sub.add_parser(
         "acceptance-gates",
-        help="Aggregate G1–G11 acceptance report (first publishable milestone)",
+        help="Aggregate G1-G11 acceptance report (first publishable milestone)",
     )
     p_acc.add_argument(
         "--strict", action="store_true",
@@ -1141,7 +1239,7 @@ def main(argv: list[str] | None = None) -> None:
 
     p_pub = sub.add_parser(
         "publish-live",
-        help="Publish public-facing live probabilities (requires green G1–G11)",
+        help="Publish public-facing live probabilities (requires green G1-G11)",
     )
     p_pub.add_argument("--no-shadow", action="store_true", help="Skip live shadow seal")
     p_pub.add_argument("--no-web", action="store_true", help="Skip web/public sync")

@@ -267,6 +267,7 @@ def fit_stack_weights_from_nested_loo(
     nested_path: Path | None = None,
     out_path: Path | None = None,
     temperature: float = 0.75,
+    require_canonical: bool = False,
 ) -> dict[str, Any]:
     """Load P2.1 artifact, fit P2.2 weights, write ``stack_weights_oof.json``."""
     nested_path = nested_path or NESTED_LOO_PATH
@@ -276,6 +277,13 @@ def fit_stack_weights_from_nested_loo(
         )
     nested = json.loads(nested_path.read_text())
     require_current_model_version(nested, label="nested OOF")
+    if require_canonical:
+        from midterms.validation.validated_model_spec import CANONICAL_OOF_PHASE
+
+        if nested.get("validation_phase") != CANONICAL_OOF_PHASE:
+            raise ValueError("production stack requires the canonical poll-structure OOF pass")
+        if not nested.get("poll_structure_config_id"):
+            raise ValueError("canonical OOF lacks selected poll-structure lineage")
     if nested.get("frozen_draws_sha256") != _draws_fingerprint(nested.get("oof_draws") or {}):
         raise ValueError("nested OOF frozen draw fingerprint missing or stale")
     if nested.get("stack_training_protocol") == "formal_60_30_v1":
@@ -338,6 +346,10 @@ def fit_stack_weights_from_nested_loo(
     fitted["source_evidence_bundle_id"] = nested.get("evidence_bundle_id")
     fitted["source_evidence_bundle_sha256"] = nested.get("evidence_bundle_sha256")
     fitted["source_stack_training_protocol"] = nested.get("stack_training_protocol")
+    fitted["source_validation_phase"] = nested.get("validation_phase")
+    fitted["source_poll_structure_config"] = nested.get("poll_structure_config")
+    fitted["source_poll_structure_config_id"] = nested.get("poll_structure_config_id")
+    fitted["source_model_spec_candidate_sha256"] = nested.get("model_spec_candidate_sha256")
     ver = verify_reproducible(fitted)
     fitted["reproduction"] = ver
     if not ver["ok"]:
@@ -377,6 +389,10 @@ def load_oof_stack_weights(
         "source_evidence_bundle_id": payload.get("source_evidence_bundle_id"),
         "source_evidence_bundle_sha256": payload.get("source_evidence_bundle_sha256"),
         "source_stack_training_protocol": payload.get("source_stack_training_protocol"),
+        "source_validation_phase": payload.get("source_validation_phase"),
+        "source_poll_structure_config": payload.get("source_poll_structure_config"),
+        "source_poll_structure_config_id": payload.get("source_poll_structure_config_id"),
+        "source_model_spec_candidate_sha256": payload.get("source_model_spec_candidate_sha256"),
         "source_nested_sha256": payload.get("source_nested_sha256"),
         "source_frozen_index_semantic_sha256": payload.get(
             "source_frozen_index_semantic_sha256"

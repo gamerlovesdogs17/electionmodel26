@@ -296,6 +296,7 @@ def freeze_component_predictions(
     n_draws: int = 600,
     seed: int = 21,
     poll_structure=None,
+    include_structural_challengers: bool = True,
 ) -> dict[str, FrozenPrediction]:
     """
     Fit every component and freeze predictive distributions.
@@ -358,7 +359,10 @@ def freeze_component_predictions(
         "tune": max(n_draws // 2, OOF_PYMC_TUNE_PER_CHAIN),
         "chains": OOF_PYMC_CHAINS,
     }
-    for ablation_id in ("hier_no_similarity", "hier_no_terminal_race"):
+    for ablation_id in (
+        ("hier_no_similarity", "hier_no_terminal_race")
+        if include_structural_challengers else ()
+    ):
         ablation = next(a for a in STRUCTURAL_ABLATIONS if a.identifier == ablation_id)
         spec = same_family_fit_spec(
             base_method=hierarchical_method,
@@ -452,6 +456,7 @@ def freeze_component_predictions(
                     chains=OOF_PYMC_CHAINS,
                     seed=seed + 19,
                     generic_ballot=gb,
+                    poll_structure=reference_poll_structure,
                 ),
                 component="pymc_dynamic",
                 election_id=election_id,
@@ -469,6 +474,7 @@ def freeze_component_predictions(
                     snap, draws=max(n_draws // 2, OOF_PYMC_DRAWS_PER_CHAIN),
                     tune=max(n_draws // 2, OOF_PYMC_TUNE_PER_CHAIN),
                     chains=OOF_PYMC_CHAINS, seed=seed + 23, generic_ballot=gb,
+                    poll_structure=reference_poll_structure,
                 ),
                 component="pymc", election_id=election_id,
                 holdout_year=holdout_year, lead_days=lead_days,
@@ -479,7 +485,7 @@ def freeze_component_predictions(
     # Optional poll-structure ablations are only meaningful when the base
     # challenger actually enables the named term.
     base_poll_structure = PollStructureConfig.coerce(poll_structure)
-    for ablation in ALL_STRUCTURAL_VARIANTS:
+    for ablation in (ALL_STRUCTURAL_VARIANTS if include_structural_challengers else ()):
         if not ablation.poll_structure_overrides:
             continue
         spec = same_family_fit_spec(
@@ -776,6 +782,9 @@ def repair_failed_oof_inference(
     out_path = out_path or (ARTIFACTS_DIR / "nested_component_loo.json")
     index_path = out_path.with_name(f"{out_path.stem}_frozen.json")
     index = json.loads(index_path.read_text(encoding="utf-8"))
+    from midterms.validation.validated_model_spec import poll_structure_from_dict
+
+    repair_poll_structure = poll_structure_from_dict(index.get("poll_structure_config"))
     matches = [entry for entry in index["entries"] if (
         entry["component"] == component and entry["holdout_year"] == year
         and entry["lead_days"] == lead_days and entry["status"] == "failed"
@@ -798,6 +807,7 @@ def repair_failed_oof_inference(
         fit_fn(
             snap, draws=draws_per_chain, tune=tune_per_chain, chains=chains,
             seed=int(original["seed"]), generic_ballot=_generic_ballot(snap),
+            poll_structure=repair_poll_structure,
         ),
         component=component, election_id=election_id, holdout_year=year,
         lead_days=lead_days, as_of=as_of, seed=int(original["seed"]),
@@ -885,6 +895,9 @@ def run_nested_component_loo(
     seed: int = 21,
     out_path: Path | None = None,
     evidence_bundle_path: Path | str | None = None,
+    poll_structure: PollStructureConfig | dict[str, Any] | None = None,
+    validation_phase: str = "poll_structure_selection",
+    model_spec_candidate_path: Path | str | None = None,
 ) -> dict[str, Any]:
     """
     Outer leave-one-cycle-out: freeze every component's predictions, then score.
@@ -892,6 +905,28 @@ def run_nested_component_loo(
     Writes ``nested_component_loo.json`` with OOF CRPS matrix, failures, and G8
     recommendations. Does **not** remap fast→pymc.
     """
+    from midterms.validation.validated_model_spec import (
+        CANONICAL_OOF_PHASE,
+        SELECTION_OOF_PHASE,
+        load_candidate_model_spec,
+        poll_structure_from_dict,
+        poll_structure_identity,
+    )
+
+    if validation_phase not in {SELECTION_OOF_PHASE, CANONICAL_OOF_PHASE}:
+        raise ValueError("validation_phase must be poll_structure_selection or canonical_poll_structure")
+    candidate_spec: dict[str, Any] | None = None
+    if validation_phase == CANONICAL_OOF_PHASE:
+        if model_spec_candidate_path is None:
+            raise ValueError("canonical OOF requires a validated model candidate spec")
+        candidate_spec = load_candidate_model_spec(model_spec_candidate_path)
+        selected = poll_structure_from_dict(candidate_spec["selected_poll_structure"])
+        if poll_structure is not None and PollStructureConfig.coerce(poll_structure) != selected:
+            raise ValueError("canonical OOF poll structure differs from candidate spec")
+        poll_structure = selected
+    reference_poll_structure = PollStructureConfig.coerce(poll_structure)
+    poll_structure_config_id = poll_structure_identity(reference_poll_structure)
+
     bundle: dict[str, Any] | None = None
     if evidence_bundle_path is not None:
         from midterms.evidence.evidence_bundle import verify_evidence_bundle
@@ -903,6 +938,11 @@ def run_nested_component_loo(
             raise ValueError(f"historical validation evidence bundle is invalid: {verification}")
         if bundle.get("model_version") != MODEL_VERSION:
             raise ValueError("historical validation bundle model version is stale")
+        if candidate_spec is not None:
+            if bundle.get("evidence_bundle_id") != candidate_spec.get("evidence_bundle_id"):
+                raise ValueError("canonical OOF evidence bundle differs from candidate spec")
+            if bundle.get("evidence_bundle_sha256") != candidate_spec.get("evidence_bundle_sha256"):
+                raise ValueError("canonical OOF evidence bundle hash differs from candidate spec")
     wh = Warehouse()
     spine = (
         "pymc_dynamic"
@@ -953,6 +993,8 @@ def run_nested_component_loo(
                 hierarchical_method=hierarchical_method,
                 n_draws=n_draws,
                 seed=seed + year + lead,
+                poll_structure=reference_poll_structure,
+                include_structural_challengers=validation_phase == SELECTION_OOF_PHASE,
             )
             lead_frozen[str(lead)] = frozen
             for name, fp in frozen.items():
@@ -1067,6 +1109,13 @@ def run_nested_component_loo(
         "lead_days": list(lead_days),
         "hierarchical_method": hierarchical_method,
         "model_version": MODEL_VERSION,
+        "validation_phase": validation_phase,
+        "poll_structure_config": reference_poll_structure.to_dict(),
+        "poll_structure_config_id": poll_structure_config_id,
+        "model_spec_candidate_sha256": (
+            hashlib.sha256(Path(model_spec_candidate_path).read_bytes()).hexdigest()
+            if model_spec_candidate_path is not None else None
+        ),
         "evidence_bundle_id": bundle.get("evidence_bundle_id") if bundle else None,
         "evidence_bundle_sha256": bundle.get("evidence_bundle_sha256") if bundle else None,
         "stack_training_protocol": "formal_60_30_v1" if lead_days == (60, 30) else "diagnostic_custom_leads",
@@ -1106,7 +1155,13 @@ def run_nested_component_loo(
             "structural variants remain diagnostics and never enter the stack."
         ),
     }
-    out_path = out_path or (ARTIFACTS_DIR / "nested_component_loo.json")
+    out_path = out_path or (
+        ARTIFACTS_DIR / (
+            "nested_component_loo_canonical.json"
+            if validation_phase == CANONICAL_OOF_PHASE
+            else "nested_component_loo.json"
+        )
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     report["path"] = str(out_path)
     # Persist a compact freeze index (not full means) alongside report
@@ -1116,6 +1171,9 @@ def run_nested_component_loo(
             {
                 "schema_version": "nested-component-frozen-index-v2",
                 "model_version": MODEL_VERSION,
+                "validation_phase": validation_phase,
+                "poll_structure_config": reference_poll_structure.to_dict(),
+                "poll_structure_config_id": poll_structure_config_id,
                 "n": len(frozen_archive),
                 "entries": [
                     {

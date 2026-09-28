@@ -4,6 +4,49 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-27 — v0.9.22 final source/selection integration (rebuild still blocked)
+
+- Cheap Python CI now runs both v0.9.22 source-preparation and poll-structure
+  preparation suites, plus the final lineage integration tests. It still
+  excludes production inference.
+- Historical approval now parses the vendored individual-poll archive and
+  builds deterministic 30-day aggregates at every formal 60/30 cutoff. The
+  archive bytes and SHA-256 are preserved. `poll_end` is explicitly labeled an
+  availability proxy; missing publication timestamps and retrieval/license
+  lineage keep strict approval readiness red. Curated values are fallback-only.
+- Added the official Census ACS/urban source path with the predeclared
+  2016/2018/2020/2022/2024 ACS vintages, official release dates, 2010-versus-2020
+  urban availability policy, exact requested feature formulas, and preserved
+  legacy urban-share density transformation. The valid official urban workbook
+  is sealed; the ACS endpoint required a key during preparation, so no HTML
+  error response or substitute data was retained and demographics remain red.
+- Added report-level FEC Form 3 availability and amendment resolution. Receipt
+  date controls knowledge; later amendments cannot replace an earlier filing
+  before receipt. Existing candidate-cycle totals cannot clear historical
+  finance readiness, and no fake historical rows were generated.
+- FEC Form 2 files are parsed only as candidate filings. Filing, nomination,
+  ballot qualification, and general-election identity remain separate;
+  declarations cannot satisfy candidate-timeline publication eligibility.
+- Verified the exact public source-commit availability dates for the checked-in
+  2018, 2020 and 2023 pollster snapshots. The mismatched 2021 file is excluded.
+  Because the first verified snapshot was public after the 2018 election,
+  historical pollster-rating readiness remains incomplete.
+- Immutable approval, FEC Form 2, pollster-rating and Census workbook captures
+  now use narrow Git `-text` rules so exact source hashes are identical on
+  Windows and Linux. Derived approval lineage was regenerated from the existing
+  repository blob bytes; no observation value was changed.
+- Added a two-stage structural contract: a selection OOF pass freezes a
+  candidate model spec, then a separate canonical OOF pass refits static and
+  dynamic PyMC using exactly that selected `PollStructureConfig`. Only the
+  canonical pass may train production stack weights.
+- Added `validated_model_spec_candidate.json` and
+  `validated_model_spec_latest.json` lineage contracts. A publishable forecast
+  now fails closed on a missing/stale spec, evidence bundle, canonical OOF,
+  stack, calibration artifact, or selected poll structure, and passes the
+  selected structure into every static/dynamic PyMC fit.
+- No forecast, historical OOF/PyMC fit, stack refit, 50,000-draw simulation,
+  live publication, or GitHub Actions workflow was run.
+
 ## 2026-09-27 — v0.9.22 source preparation and positive challenger boundary
 
 - Added three same-family positive poll-structure challengers: plus-study,
