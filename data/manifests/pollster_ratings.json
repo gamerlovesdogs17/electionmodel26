@@ -1,15 +1,15 @@
 {
   "schema_version": "pollster-rating-vintages-v1",
   "parser_version": "pollster-rating-vintage-v1",
-  "normalized_semantic_sha256": "74575e830a0eaed767228beb45819fba67cd5f03caf33e73c53b69a97fc00795",
+  "normalized_semantic_sha256": "4911f135b9f6bd959355119cbae71a492f82f33295f2368010aac87bc21a08f5",
   "sources": [
     {
       "content_vintage": "2018",
       "status": "verified",
-      "available_at": "2019-11-05",
+      "available_at": "2018-05-31",
       "sha256": "710139e06c88649a6f7ce30b854c74219c9495f0e80d5e6c0848d98364d1e5a3",
-      "source_commit": "1ae301f",
-      "source_url": "https://github.com/fivethirtyeight/data/commit/1ae301f"
+      "source_commit": "de2dfac210b1d63c8a1c160a1e6acbf8dc0b7e6f",
+      "source_url": "https://github.com/fivethirtyeight/data/commit/de2dfac210b1d63c8a1c160a1e6acbf8dc0b7e6f"
     },
     {
       "content_vintage": "2020",
@@ -41,12 +41,12 @@
     "2023"
   ],
   "available_at_values": [
-    "2019-11-05",
+    "2018-05-31",
     "2021-03-19",
     "2024-01-25"
   ],
   "source_integrity_verified": true,
-  "production_eligible": false,
-  "production_ineligible_reason": "no verified snapshot was publicly available by the formal 2018 cutoffs",
-  "known_historical_gap": "no rating snapshot was publicly available by the 2018 formal cutoffs"
+  "production_eligible": true,
+  "production_ineligible_reason": null,
+  "known_historical_gap": null
 }

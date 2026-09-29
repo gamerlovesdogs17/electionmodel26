@@ -1,16 +1,18 @@
 """Presidential approval vintages for as-of fundamentals (blueprint §5.1).
 
 Live path: VoteHub CC BY approval polls for the sitting president (``donald-trump``).
-Historical replay uses the vendored individual-poll archive.  That archive does
-not contain publication timestamps, so ``poll_end`` is retained as an explicit
-availability proxy and the resulting rows remain ineligible for strict replay.
+Historical replay prefers immutable Internet Archive captures of FiveThirtyEight
+poll files.  Their ``createddate``/``created_at`` fields are the poll-record
+publication timestamps used for point-in-time filtering; field end remains an
+observation date and is never promoted to availability.  The older compiled
+archive remains an explicitly non-production fallback.
 """
 
 from __future__ import annotations
 
-import json
 import hashlib
-from datetime import date, datetime, timedelta, timezone
+import json
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +33,46 @@ HISTORICAL_ARCHIVE_PROVIDER = "Lorenzo Ruffino compiled presidential approval po
 HISTORICAL_WINDOW_DAYS = 30
 HISTORICAL_ARCHIVE_REPOSITORY_ADDED_AT = "2026-09-24T23:21:53Z"
 PRESIDENT_PARTY = {"Barack Obama": "D", "Donald Trump": "R", "Joe Biden": "D"}
+
+SOURCE_BACKED_APPROVAL_PARSER_VERSION = "approval-v4-fte-created-at"
+SOURCE_BACKED_APPROVAL_SOURCES: tuple[dict[str, str], ...] = (
+    {
+        "source_id": "fte-trump-approval-20210414",
+        "path": "fte_trump_approval_polls_20210414.csv",
+        "provider": "FiveThirtyEight",
+        "original_url": (
+            "https://projects.fivethirtyeight.com/trump-approval-data/"
+            "approval_polllist.csv"
+        ),
+        "archive_url": (
+            "https://web.archive.org/web/20210414015923id_/https://"
+            "projects.fivethirtyeight.com/trump-approval-data/approval_polllist.csv"
+        ),
+        "archive_captured_at": "2021-04-14T01:59:23Z",
+        "sha256": "6f116dae09aaf042d42b123c11284ae918b6bd14849e61b7282504037c8a15f3",
+        "license": "CC BY 4.0",
+        "availability_column": "createddate",
+        "format": "fte_trump_approval_v1",
+    },
+    {
+        "source_id": "fte-biden-approval-20241129",
+        "path": "fte_biden_approval_polls_20241129.csv",
+        "provider": "FiveThirtyEight",
+        "original_url": (
+            "https://projects.fivethirtyeight.com/polls-page/data/"
+            "president_approval_polls.csv"
+        ),
+        "archive_url": (
+            "https://web.archive.org/web/20241129175748id_/https://"
+            "projects.fivethirtyeight.com/polls-page/data/president_approval_polls.csv"
+        ),
+        "archive_captured_at": "2024-11-29T17:57:48Z",
+        "sha256": "e16909073b63bbbc7f1fcddfc276cd5606ad5c4c5adcdb86f9baf4c86991ec2c",
+        "license": "CC BY 4.0",
+        "availability_column": "created_at",
+        "format": "fte_biden_approval_v1",
+    },
+)
 
 # Historical curated snapshots (pre-VoteHub coverage) for midterm as-of runs.
 HISTORICAL_APPROVAL_VINTAGES: list[dict[str, Any]] = [
@@ -119,7 +161,7 @@ def aggregate_historical_approval_cutoffs(
             "available_at": cutoff.isoformat(),
             "white_house_party": PRESIDENT_PARTY[presidents[0]],
             "net_approval": round(net, 6),
-            "n_polls": int(len(window)),
+            "n_polls": len(window),
             "window_days": int(window_days),
             "source": "vendored_compiled_individual_approval_polls",
             "source_url": HISTORICAL_ARCHIVE_SOURCE_URL,
@@ -133,6 +175,204 @@ def aggregate_historical_approval_cutoffs(
             "production_ineligible_reason": (
                 "archive lacks per-poll publication timestamps and sealed retrieval/license lineage"
             ),
+            "poll_ids_sha256": hashlib.sha256(
+                "\n".join(sorted(window["poll_id"].astype(str))).encode("utf-8")
+            ).hexdigest(),
+        })
+    return pd.DataFrame(rows)
+
+
+def parse_source_backed_approval_polls(
+    *,
+    raw_dir: Path = RAW_DIR,
+    sources: tuple[dict[str, str], ...] = SOURCE_BACKED_APPROVAL_SOURCES,
+) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
+    """Parse hash-locked FTE polls with row-level publication timestamps.
+
+    ``createddate`` and ``created_at`` mean the date the poll record was added
+    to the source data.  They are used as availability timestamps.  Field end
+    is retained separately as the observation date.  A missing file, hash
+    mismatch, unknown format, or invalid timestamp fails closed.
+    """
+    frames: list[pd.DataFrame] = []
+    source_blocks: list[dict[str, Any]] = []
+    external = raw_dir / "external"
+    receipt_path = external / "fte_approval_sources_receipt.json"
+    if not receipt_path.is_file():
+        raise FileNotFoundError(f"approval source receipt is missing: {receipt_path}")
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if receipt.get("schema_version") != "fte-approval-source-receipt-v1":
+        raise ValueError("approval source receipt schema is unsupported")
+    retrieved_at = pd.to_datetime(receipt.get("retrieved_at"), errors="coerce", utc=True)
+    if pd.isna(retrieved_at):
+        raise ValueError("approval source receipt has invalid retrieved_at")
+    receipt_sources = {
+        str(item.get("source_id")): item for item in receipt.get("sources") or []
+    }
+    receipt_sha256 = hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+    for source in sources:
+        path = external / source["path"]
+        if not path.is_file():
+            raise FileNotFoundError(f"approval source is missing: {path}")
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual != source["sha256"]:
+            raise ValueError(
+                f"approval source hash mismatch for {source['source_id']}: "
+                f"expected {source['sha256']}, got {actual}"
+            )
+        receipt_source = receipt_sources.get(source["source_id"])
+        if not receipt_source:
+            raise ValueError(f"approval source receipt omits {source['source_id']}")
+        for key in ("path", "original_url", "archive_url", "archive_captured_at", "sha256"):
+            if str(receipt_source.get(key)) != str(source.get(key)):
+                raise ValueError(
+                    f"approval source receipt {key} mismatch for {source['source_id']}"
+                )
+        if int(receipt_source.get("bytes") or -1) != path.stat().st_size:
+            raise ValueError(f"approval source byte length mismatch for {source['source_id']}")
+        raw = pd.read_csv(path)
+        source_format = source["format"]
+        if source_format == "fte_trump_approval_v1":
+            required = {
+                "president", "subgroup", "startdate", "enddate", "pollster",
+                "samplesize", "approve", "disapprove", "poll_id",
+                "question_id", "createddate",
+            }
+            missing = sorted(required - set(raw.columns))
+            if missing:
+                raise ValueError(f"{source['source_id']} missing columns: {missing}")
+            raw = raw[raw["subgroup"].astype(str).eq("All polls")].copy()
+            frame = pd.DataFrame({
+                "president": raw["president"],
+                "poll_start": raw["startdate"],
+                "poll_end": raw["enddate"],
+                "available_at": raw["createddate"],
+                "pollster": raw["pollster"],
+                "sample_size": raw["samplesize"],
+                "approval": raw["approve"],
+                "disapproval": raw["disapprove"],
+                "poll_id_source": raw["poll_id"],
+                "question_id": raw["question_id"],
+                "population": raw["population"],
+                "state": None,
+            })
+        elif source_format == "fte_biden_approval_v1":
+            required = {
+                "politician", "start_date", "end_date", "pollster",
+                "sample_size", "yes", "no", "poll_id", "question_id",
+                "created_at", "state",
+            }
+            missing = sorted(required - set(raw.columns))
+            if missing:
+                raise ValueError(f"{source['source_id']} missing columns: {missing}")
+            # The fundamentals covariate is national presidential approval.
+            # State-specific approval questions are not interchangeable with it.
+            raw = raw[raw["state"].isna()].copy()
+            frame = pd.DataFrame({
+                "president": raw["politician"],
+                "poll_start": raw["start_date"],
+                "poll_end": raw["end_date"],
+                "available_at": raw["created_at"],
+                "pollster": raw["pollster"],
+                "sample_size": raw["sample_size"],
+                "approval": raw["yes"],
+                "disapproval": raw["no"],
+                "poll_id_source": raw["poll_id"],
+                "question_id": raw["question_id"],
+                "population": raw["population"],
+                "state": raw["state"],
+            })
+        else:
+            raise ValueError(f"unsupported approval source format: {source_format}")
+
+        for column in ("poll_start", "poll_end", "available_at"):
+            frame[column] = pd.to_datetime(
+                frame[column], errors="coerce", format="mixed"
+            ).dt.date
+        for column in ("sample_size", "approval", "disapproval"):
+            frame[column] = pd.to_numeric(frame[column], errors="coerce")
+        frame = frame.dropna(
+            subset=["president", "poll_start", "poll_end", "available_at", "approval", "disapproval"]
+        ).copy()
+        capture_date = pd.Timestamp(source["archive_captured_at"]).date()
+        if (frame["available_at"] > capture_date).any():
+            raise ValueError(f"{source['source_id']} contains availability after archive capture")
+        if (frame["poll_end"] < frame["poll_start"]).any():
+            raise ValueError(f"{source['source_id']} contains inverted field dates")
+        frame["net_approval"] = frame["approval"] - frame["disapproval"]
+        frame["availability_basis"] = "fte_poll_record_created_at"
+        frame["source_id"] = source["source_id"]
+        frame["source_url"] = source["original_url"]
+        frame["source_archive_url"] = source["archive_url"]
+        frame["source_sha256"] = actual
+        frame["source_provider"] = source["provider"]
+        frame["source_license"] = source["license"]
+        source_id = source["source_id"]
+        frame["poll_id"] = frame.apply(
+            lambda row, source_id=source_id: hashlib.sha256("|".join([
+                source_id, str(row["poll_id_source"]),
+                str(row["question_id"]), str(row["population"]),
+            ]).encode("utf-8")).hexdigest()[:24],
+            axis=1,
+        )
+        frames.append(frame)
+        source_blocks.append({
+            **source,
+            "status": "verified",
+            "actual_sha256": actual,
+            "retrieved_at": retrieved_at.isoformat(),
+            "receipt_path": receipt_path.name,
+            "receipt_sha256": receipt_sha256,
+            "n_parsed_rows": len(frame),
+        })
+
+    polls = pd.concat(frames, ignore_index=True)
+    polls = polls.sort_values(
+        ["available_at", "poll_end", "source_id", "poll_id"], kind="stable"
+    ).reset_index(drop=True)
+    return polls, source_blocks
+
+
+def aggregate_source_backed_approval_cutoffs(
+    polls: pd.DataFrame,
+    *,
+    cutoffs: dict[str, str | date],
+    window_days: int = HISTORICAL_WINDOW_DAYS,
+) -> pd.DataFrame:
+    """Aggregate only poll records published by each formal replay cutoff."""
+    rows: list[dict[str, Any]] = []
+    for label, cutoff_value in sorted(cutoffs.items()):
+        cutoff = pd.Timestamp(cutoff_value).date()
+        lower = cutoff - timedelta(days=window_days)
+        window = polls[
+            (polls["available_at"] <= cutoff)
+            & (polls["poll_end"] >= lower)
+            & (polls["poll_end"] <= cutoff)
+        ].copy()
+        if window.empty:
+            continue
+        weights = np.sqrt(window["sample_size"].fillna(800.0).clip(lower=100.0))
+        net = float(np.average(window["net_approval"].to_numpy(float), weights=weights))
+        presidents = sorted(window["president"].astype(str).unique())
+        if len(presidents) != 1 or presidents[0] not in PRESIDENT_PARTY:
+            raise ValueError(f"approval cutoff {label} has ambiguous president identity: {presidents}")
+        rows.append({
+            "cutoff_id": label,
+            "year": int(label.split("-")[1]),
+            "available_at": cutoff.isoformat(),
+            "max_poll_available_at": max(window["available_at"]).isoformat(),
+            "white_house_party": PRESIDENT_PARTY[presidents[0]],
+            "net_approval": round(net, 6),
+            "n_polls": len(window),
+            "window_days": int(window_days),
+            "source": "fte_archived_individual_approval_polls",
+            "source_url": sorted(window["source_archive_url"].astype(str).unique()),
+            "source_provider": "FiveThirtyEight via Internet Archive capture",
+            "source_sha256": sorted(window["source_sha256"].astype(str).unique()),
+            "parser_version": SOURCE_BACKED_APPROVAL_PARSER_VERSION,
+            "availability_basis": "fte_poll_record_created_at",
+            "production_eligible": True,
+            "production_ineligible_reason": None,
             "poll_ids_sha256": hashlib.sha256(
                 "\n".join(sorted(window["poll_id"].astype(str))).encode("utf-8")
             ).hexdigest(),
@@ -231,7 +471,7 @@ def aggregate_votehub_approval_vintages(
     stamps = sorted(set(stamps))
 
     out_rows = []
-    retrieved = datetime.now(timezone.utc).isoformat()
+    retrieved = datetime.now(UTC).isoformat()
     for as_of in stamps:
         lo = as_of.toordinal() - int(window_days)
         window = df[
@@ -248,7 +488,7 @@ def aggregate_votehub_approval_vintages(
                 "available_at": as_of.isoformat(),
                 "white_house_party": white_house_party,
                 "net_approval": round(net, 2),
-                "n_polls": int(len(window)),
+                "n_polls": len(window),
                 "window_days": window_days,
                 "source": "votehub_approval_aggregate",
                 "retrieved_at": retrieved,
@@ -263,11 +503,33 @@ def write_approval_store(*, prefer_votehub: bool = True) -> dict[str, Any]:
     NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
     MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
 
+    generated_at = datetime.now(UTC).isoformat()
     archive_error: str | None = None
-    archive_sha256: str | None = None
-    if HISTORICAL_ARCHIVE.is_file():
+    source_backed_error: str | None = None
+    archive_sha256: str | None = (
+        hashlib.sha256(HISTORICAL_ARCHIVE.read_bytes()).hexdigest()
+        if HISTORICAL_ARCHIVE.is_file() else None
+    )
+    source_blocks: list[dict[str, Any]] = []
+    try:
+        source_polls, source_blocks = parse_source_backed_approval_polls()
+        from midterms.evidence.source_readiness import required_historical_cutoffs
+
+        hist = aggregate_source_backed_approval_cutoffs(
+            source_polls,
+            cutoffs=required_historical_cutoffs(),
+        )
+        required_years = {2018, 2020, 2022, 2024}
+        if set(pd.to_numeric(hist.get("year"), errors="coerce").dropna().astype(int)) != required_years:
+            raise ValueError("source-backed approval polls do not cover all historical cycles")
+    except Exception as exc:  # noqa: BLE001
+        source_backed_error = str(exc)
+        hist = pd.DataFrame()
+
+    # The compiled archive remains a non-production fallback only.  It is
+    # consulted when the hash-locked, timestamped sources are unavailable.
+    if hist.empty and HISTORICAL_ARCHIVE.is_file():
         try:
-            archive_sha256 = hashlib.sha256(HISTORICAL_ARCHIVE.read_bytes()).hexdigest()
             from midterms.evidence.source_readiness import required_historical_cutoffs
 
             hist = aggregate_historical_approval_cutoffs(
@@ -279,8 +541,8 @@ def write_approval_store(*, prefer_votehub: bool = True) -> dict[str, Any]:
             archive_error = str(exc)
             hist = pd.DataFrame()
     else:
-        archive_error = "vendored historical approval archive is missing"
-        hist = pd.DataFrame()
+        if hist.empty:
+            archive_error = "vendored historical approval archive is missing"
     if hist.empty:
         hist = pd.DataFrame(HISTORICAL_APPROVAL_VINTAGES)
         hist["source"] = "curated_nonproduction_fixture"
@@ -313,9 +575,9 @@ def write_approval_store(*, prefer_votehub: bool = True) -> dict[str, Any]:
         json.dumps(
             {
                 "rows": df.to_dict(orient="records"),
-                "parser_version": PARSER_VERSION,
-                "votehub_n": int(len(live)),
-                "historical_n": int(len(hist)),
+                "parser_version": SOURCE_BACKED_APPROVAL_PARSER_VERSION,
+                "votehub_n": len(live),
+                "historical_n": len(hist),
             },
             indent=2,
             default=str,
@@ -326,35 +588,62 @@ def write_approval_store(*, prefer_votehub: bool = True) -> dict[str, Any]:
 
     live_n = int((df["source"] == "votehub_approval_aggregate").sum())
     historical_eligible = bool(len(hist)) and bool(hist["production_eligible"].fillna(False).all())
-    tier = "aggregator" if live_n > 0 else "compiled_archive"
+    source_backed = bool(
+        len(hist)
+        and hist["source"].astype(str).eq("fte_archived_individual_approval_polls").all()
+    )
+    tier = "aggregator" if (live_n > 0 or source_backed) else "compiled_archive"
     man = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "n": int(len(df)),
+        "generated_at": generated_at,
+        "n": len(df),
         "n_votehub": live_n,
-        "n_historical_archive_cutoffs": int(len(hist)),
-        "parser_version": PARSER_VERSION,
-        "historical_source_url": HISTORICAL_ARCHIVE_SOURCE_URL,
-        "historical_source_provider": HISTORICAL_ARCHIVE_PROVIDER,
+        "n_historical_archive_cutoffs": len(hist),
+        "parser_version": (
+            SOURCE_BACKED_APPROVAL_PARSER_VERSION if source_backed else PARSER_VERSION
+        ),
+        "historical_sources": source_blocks,
+        "historical_source_url": (
+            [block["archive_url"] for block in source_blocks]
+            if source_backed else HISTORICAL_ARCHIVE_SOURCE_URL
+        ),
+        "historical_source_provider": (
+            "FiveThirtyEight via immutable Internet Archive captures"
+            if source_backed else HISTORICAL_ARCHIVE_PROVIDER
+        ),
         "historical_raw_sha256": archive_sha256,
+        "historical_raw_sha256s": {
+            block["path"]: block["actual_sha256"] for block in source_blocks
+        },
         "historical_window_days": HISTORICAL_WINDOW_DAYS,
-        "historical_availability_basis": "field_end_proxy_missing_publication_timestamp",
+        "historical_availability_basis": (
+            "fte_poll_record_created_at"
+            if source_backed else "field_end_proxy_missing_publication_timestamp"
+        ),
         "historical_production_eligible": historical_eligible,
         "historical_ineligible_reason": (
             None if historical_eligible else
             "per-poll publication timestamps and sealed retrieval/license lineage are absent"
         ),
-        "source_url": VOTEHUB_SOURCE_URL if live_n else HISTORICAL_ARCHIVE_SOURCE_URL,
+        "source_url": (
+            VOTEHUB_SOURCE_URL if live_n
+            else [block["archive_url"] for block in source_blocks]
+            if source_backed else HISTORICAL_ARCHIVE_SOURCE_URL
+        ),
         "tier": tier,
-        "license": "CC BY 4.0" if live_n else None,
-        "attribution": "Polling data from VoteHub (https://votehub.com)" if live_n else None,
+        "license": "CC BY 4.0" if (live_n or source_backed) else None,
+        "attribution": (
+            "Historical polling data from FiveThirtyEight; archived by the Internet Archive"
+            if source_backed else
+            "Polling data from VoteHub (https://votehub.com)" if live_n else None
+        ),
         "fetch_error": fetch_error,
+        "source_backed_error": source_backed_error,
         "archive_error": archive_error,
         "note": (
-            "Live net approval from VoteHub; historical cutoffs use a fixed-window "
-            "individual-poll archive and remain strict-ineligible until publication timestamps "
-            "and source retrieval/license lineage are established."
-            if live_n
-            else "Historical compiled poll archive only; strict historical lineage is incomplete."
+            "Historical cutoffs use hash-locked FiveThirtyEight poll records and filter on "
+            "the source created_at timestamp; field end is observation timing only."
+            if source_backed else
+            "Historical compiled poll archive only; strict historical lineage is incomplete."
         ),
         "paths": {
             "raw": raw.relative_to(ROOT).as_posix(),

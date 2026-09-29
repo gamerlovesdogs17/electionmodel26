@@ -311,15 +311,30 @@ def audit_source_readiness(
         elif name == "finance" and len(frame):
             elections = set(frame.get("election_id", pd.Series(dtype=str)).astype(str))
             required = {f"senate-{year}" for year in HISTORICAL_YEARS}
+            missing_elections = sorted(required - elections)
             receipt_safe = (
                 "availability_basis" in frame.columns
                 and frame["availability_basis"].astype(str).eq("fec_receipt_date").all()
             )
-            if not required.issubset(elections) or not receipt_safe:
+            missing_cutoffs = [
+                label for label in historical_cutoffs
+                if "-".join(label.split("-")[:2]) in missing_elections
+            ]
+            domains[name].update({
+                "missing_election_ids": missing_elections,
+                "missing_cutoffs": missing_cutoffs,
+                "receipt_date_safe": receipt_safe,
+            })
+            if missing_elections:
                 status = "incomplete_coverage"
                 reasons.append(
-                    "report-level FEC finance with receipt-date amendment resolution is absent "
-                    "for one or more historical validation cycles"
+                    "report-level FEC finance is absent for historical cycles: "
+                    + ", ".join(missing_elections)
+                )
+            if not receipt_safe:
+                status = "incomplete_coverage"
+                reasons.append(
+                    "existing finance rows do not uniformly use FEC receipt date as availability"
                 )
         elif name == "approval" and len(frame):
             historical = frame[pd.to_numeric(frame.get("year"), errors="coerce").isin(HISTORICAL_YEARS)]
@@ -335,11 +350,20 @@ def audit_source_readiness(
                     "historical approval archive lacks per-poll publication timestamps "
                     "and sealed retrieval/license lineage"
                 )
-            approval_raw = raw_dir / "external" / "historical_presidential_approval_polls_1937_2024.csv"
-            raw_source_hashes = (
-                {approval_raw.name: _sha(approval_raw)} if approval_raw.is_file() else {}
-            )
-            if approval_raw.is_file():
+            sealed_hashes = (manifest or {}).get("historical_raw_sha256s") or {}
+            if strict_historical and sealed_hashes:
+                raw_source_hashes = {
+                    str(source_name): str(source_hash)
+                    for source_name, source_hash in sorted(sealed_hashes.items())
+                }
+            else:
+                approval_raw = (
+                    raw_dir / "external" / "historical_presidential_approval_polls_1937_2024.csv"
+                )
+                raw_source_hashes = (
+                    {approval_raw.name: _sha(approval_raw)} if approval_raw.is_file() else {}
+                )
+            if not strict_historical and raw_source_hashes:
                 reasons.append(
                     "raw approval polls are parsed at formal cutoffs using poll_end only as an explicit proxy"
                 )

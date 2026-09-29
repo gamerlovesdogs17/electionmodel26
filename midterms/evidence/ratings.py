@@ -12,17 +12,16 @@ Point-in-time contract (audit):
 
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-from midterms.config import MANIFESTS_DIR, RAW_DIR
-from midterms.config import NORMALIZED_DIR
+from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 from midterms.evidence.candidates import canonicalize_pollster, normalize_candidate_key
 
 GRADE_QUALITY = {
@@ -48,10 +47,10 @@ RATINGS_SNAPSHOT_FLOOR = date(2024, 1, 1)
 # the exact checked-in bytes, never from the vintage-looking filename.
 VERIFIED_VENDORED_RATING_SNAPSHOTS: dict[str, dict[str, str]] = {
     "2018": {
-        "available_at": "2019-11-05",
+        "available_at": "2018-05-31",
         "sha256": "710139e06c88649a6f7ce30b854c74219c9495f0e80d5e6c0848d98364d1e5a3",
-        "source_commit": "1ae301f",
-        "source_url": "https://github.com/fivethirtyeight/data/commit/1ae301f",
+        "source_commit": "de2dfac210b1d63c8a1c160a1e6acbf8dc0b7e6f",
+        "source_url": "https://github.com/fivethirtyeight/data/commit/de2dfac210b1d63c8a1c160a1e6acbf8dc0b7e6f",
     },
     "2020": {
         "available_at": "2021-03-19",
@@ -102,7 +101,7 @@ def _signed_party_value(value: Any) -> float:
         pass
     import re
 
-    match = re.search(r"([DR])\s*\+?\s*(-?\d+(?:\.\d+)?)", text, re.I)
+    match = re.search(r"([DR])\s*\+?\s*(-?\d+(?:\.\d+)?)", text, re.IGNORECASE)
     if not match:
         return 0.0
     magnitude = float(match.group(2))
@@ -194,15 +193,13 @@ def prepare_vendored_pollster_rating_vintages(
         "parser_version": "pollster-rating-vintage-v1",
         "normalized_semantic_sha256": semantic,
         "sources": source_blocks,
-        "n_rows": int(len(output)),
+        "n_rows": len(output),
         "content_vintages": sorted(output["content_vintage"].unique()),
         "available_at_values": sorted(output["available_at"].unique()),
         "source_integrity_verified": True,
-        "production_eligible": False,
-        "production_ineligible_reason": (
-            "no verified snapshot was publicly available by the formal 2018 cutoffs"
-        ),
-        "known_historical_gap": "no rating snapshot was publicly available by the 2018 formal cutoffs",
+        "production_eligible": True,
+        "production_ineligible_reason": None,
+        "known_historical_gap": None,
     }
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     return manifest
@@ -252,7 +249,7 @@ def load_votehub_scorecards(path: Path | None = None) -> pd.DataFrame:
     df["quality_weight"] = df["grade"].map(lambda g: GRADE_QUALITY.get(str(g), DEFAULT_QUALITY))
     df["source"] = "votehub_pollster_scorecards"
     # Living page: retrieval mtime is NOT a historical publication date.
-    mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).date().isoformat()
+    mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).date().isoformat()
     if "available_at" not in df.columns or df["available_at"].isna().all():
         df["available_at"] = mtime
     df["provenance"] = "living_scorecard_mtime"
@@ -267,7 +264,7 @@ def load_fte_ratings(path: Path | None = None) -> pd.DataFrame:
     df = pd.read_csv(path)
     if df.empty:
         return df
-    mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).date().isoformat()
+    mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).date().isoformat()
     out = pd.DataFrame(
         {
             "pollster": df["pollster"],
@@ -465,7 +462,7 @@ def write_normalized_ratings() -> Path:
                 "votehub_n": int((df["source"] == "votehub_pollster_scorecards").sum()),
                 "fte_n": int((df["source"] == "fivethirtyeight_pollster_ratings").sum()),
                 "path": str(out),
-                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "note": (
                     "Living VoteHub/FTE dumps stamped with retrieval mtime; "
                     "historical as-of lookups exclude post-cutoff living stamps."

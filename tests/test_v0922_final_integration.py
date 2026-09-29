@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import ast
-from datetime import date
 import hashlib
 import json
+from datetime import date
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -16,7 +16,9 @@ import pytest
 from midterms.config import MODEL_VERSION
 from midterms.evidence.approval import (
     aggregate_historical_approval_cutoffs,
+    aggregate_source_backed_approval_cutoffs,
     parse_historical_approval_archive,
+    parse_source_backed_approval_polls,
 )
 from midterms.evidence.candidate_timeline import apply_candidate_timeline
 from midterms.evidence.demographic_vintages import (
@@ -29,8 +31,8 @@ from midterms.evidence.fec import (
     select_candidate_committee_reports_as_of,
 )
 from midterms.evidence.ratings import VERIFIED_VENDORED_RATING_SNAPSHOTS
-from midterms.model.pymc_model import FitResult
 from midterms.model.poll_structure import PollStructureConfig
+from midterms.model.pymc_model import FitResult
 from midterms.validation import nested_component_loo as nested
 from midterms.validation.validated_model_spec import (
     CANONICAL_OOF_PHASE,
@@ -58,7 +60,7 @@ def test_approval_archive_cutoff_excludes_future_poll(tmp_path: Path):
     )
     assert report.loc[0, "n_polls"] == 1
     assert report.loc[0, "net_approval"] == -5.0
-    assert report.loc[0, "production_eligible"] == False  # noqa: E712
+    assert report.loc[0, "production_eligible"] == False
     assert "publication timestamp" in report.loc[0, "production_ineligible_reason"]
 
 
@@ -66,6 +68,64 @@ def test_checked_in_approval_archive_hash_matches_manifest_bytes():
     raw = Path("data/raw/external/historical_presidential_approval_polls_1937_2024.csv")
     manifest = json.loads(Path("data/manifests/pres_approval.json").read_text())
     assert hashlib.sha256(raw.read_bytes()).hexdigest() == manifest["historical_raw_sha256"]
+
+
+def test_checked_in_source_backed_approval_hashes_match_manifest():
+    manifest = json.loads(Path("data/manifests/pres_approval.json").read_text())
+    assert manifest["historical_production_eligible"] is True
+    assert manifest["historical_availability_basis"] == "fte_poll_record_created_at"
+    for filename, expected in manifest["historical_raw_sha256s"].items():
+        source = Path("data/raw/external") / filename
+        assert hashlib.sha256(source.read_bytes()).hexdigest() == expected
+
+
+def test_source_backed_approval_uses_created_date_without_future_leakage(tmp_path: Path):
+    external = tmp_path / "external"
+    external.mkdir()
+    source = external / "approval.csv"
+    source.write_text(
+        "president,subgroup,startdate,enddate,pollster,samplesize,population,"
+        "approve,disapprove,poll_id,question_id,createddate\n"
+        "Donald Trump,All polls,8/1/2018,8/3/2018,A,1000,rv,45,50,1,11,8/4/2018\n"
+        "Donald Trump,All polls,8/5/2018,8/7/2018,B,1000,rv,70,20,2,12,9/20/2018\n",
+        encoding="utf-8",
+    )
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    sources = ({
+        "source_id": "synthetic-fte",
+        "path": source.name,
+        "provider": "Synthetic FiveThirtyEight fixture",
+        "original_url": "https://example.invalid/original.csv",
+        "archive_url": "https://example.invalid/archive.csv",
+        "archive_captured_at": "2018-10-01T00:00:00Z",
+        "sha256": digest,
+        "license": "synthetic-test",
+        "availability_column": "createddate",
+        "format": "fte_trump_approval_v1",
+    },)
+    (external / "fte_approval_sources_receipt.json").write_text(json.dumps({
+        "schema_version": "fte-approval-source-receipt-v1",
+        "retrieved_at": "2018-10-02T00:00:00Z",
+        "sources": [{
+            key: sources[0][key]
+            for key in (
+                "source_id", "path", "original_url", "archive_url",
+                "archive_captured_at", "sha256",
+            )
+        } | {"bytes": source.stat().st_size}],
+    }), encoding="utf-8")
+    polls, lineage = parse_source_backed_approval_polls(raw_dir=tmp_path, sources=sources)
+    report = aggregate_source_backed_approval_cutoffs(
+        polls,
+        cutoffs={"senate-2018-lead-60": "2018-09-08"},
+        window_days=60,
+    )
+    assert lineage[0]["actual_sha256"] == digest
+    assert report.loc[0, "n_polls"] == 1
+    assert report.loc[0, "net_approval"] == -5.0
+    assert report.loc[0, "max_poll_available_at"] == "2018-08-04"
+    assert report.loc[0, "availability_basis"] == "fte_poll_record_created_at"
+    assert report.loc[0, "production_eligible"] == True
 
 
 def _acs_row() -> pd.DataFrame:
@@ -94,6 +154,20 @@ def test_census_features_and_release_policy_are_cutoff_safe():
     assert census_demographic_policy(2022)["urban_year"] == 2010
     assert census_demographic_policy(2024)["urban_year"] == 2020
     assert census_demographic_policy(2026)["release_date"] == "2026-01-29"
+
+
+def test_checked_in_census_vintages_are_sealed_and_complete():
+    manifest = json.loads(Path("data/manifests/demographic_vintages.json").read_text())
+    vintages = pd.read_parquet("data/normalized/demographic_vintages.parquet")
+    assert manifest["production_eligible"] is True
+    assert len(vintages) == 250
+    assert set(vintages.groupby("election_year").size()) == {50}
+    for source in manifest["sources"]:
+        path = Path("data/raw/external") / source["path"]
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"]
+        if source.get("receipt_path"):
+            receipt = Path("data/raw/external") / source["receipt_path"]
+            assert hashlib.sha256(receipt.read_bytes()).hexdigest() == source["receipt_sha256"]
 
 
 def _reports() -> pd.DataFrame:
@@ -137,7 +211,12 @@ def test_fec_filer_event_cannot_satisfy_ballot_identity():
 
 
 def test_pollster_content_vintage_is_not_availability_date():
-    assert VERIFIED_VENDORED_RATING_SNAPSHOTS["2018"]["available_at"] == "2019-11-05"
+    snapshot = VERIFIED_VENDORED_RATING_SNAPSHOTS["2018"]
+    assert snapshot["available_at"] == "2018-05-31"
+    assert snapshot["source_commit"] == "de2dfac210b1d63c8a1c160a1e6acbf8dc0b7e6f"
+    assert snapshot["sha256"] == (
+        "710139e06c88649a6f7ce30b854c74219c9495f0e80d5e6c0848d98364d1e5a3"
+    )
     assert VERIFIED_VENDORED_RATING_SNAPSHOTS["2020"]["available_at"] == "2021-03-19"
     assert VERIFIED_VENDORED_RATING_SNAPSHOTS["2023"]["available_at"] == "2024-01-25"
 
