@@ -14,7 +14,7 @@ from typing import Any
 import pandas as pd
 
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR
-from midterms.evidence.schema import RACE_COLUMNS
+from midterms.evidence.schema import align_race_frame
 
 PARSER_VERSION = "official-ballot-v1"
 
@@ -401,11 +401,7 @@ def build_official_races_frame(year: int) -> pd.DataFrame:
             }
         )
     rows.extend(build_held_rows_from_expectations(year, exp, election_day=ed))
-    df = pd.DataFrame(rows)
-    for col in RACE_COLUMNS:
-        if col not in df.columns:
-            df[col] = None
-    return df[RACE_COLUMNS]
+    return align_race_frame(rows)
 
 
 def _region(st: str) -> str:
@@ -435,10 +431,7 @@ def write_official_ballot_store(years: tuple[int, ...] | None = None) -> dict[st
     hist = pd.read_parquet(path)
     cur = generate_2026_races()
     races = pd.concat([hist[hist["election_id"] != "senate-2026"], cur], ignore_index=True)
-    for col in RACE_COLUMNS:
-        if col not in races.columns:
-            races[col] = None
-    races = races[RACE_COLUMNS]
+    races = align_race_frame(races)
     races.to_parquet(path, index=False)
     man["years"] = sorted({int(str(e).split("-")[-1]) for e in races["election_id"].unique()})
     man["n_rows"] = int(len(races))

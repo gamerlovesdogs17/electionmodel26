@@ -11,6 +11,18 @@ import pandas as pd
 INDEPENDENT_DEM_CAUCUSES_BASIS = "user_declared_independent_dem_caucus_assumption_2026_09_20"
 
 
+def canonical_ballot_party(value: object) -> str | None:
+    """Map source party labels to the internal D/R/I accounting vocabulary."""
+    if value is None or pd.isna(value) or not str(value).strip():
+        return None
+    label = str(value).strip().upper()
+    return {
+        "D": "D", "DEM": "D", "DEMOCRAT": "D", "DEMOCRATIC": "D",
+        "R": "R", "REP": "R", "REPUBLICAN": "R",
+        "I": "I", "IND": "I", "INDEPENDENT": "I",
+    }.get(label, label)
+
+
 @dataclass(frozen=True)
 class CandidateOutcomeIdentity:
     candidate_id: str
@@ -200,7 +212,8 @@ def require_binary_chamber_compatibility(races: pd.DataFrame) -> None:
         party = row.get("modeled_ballot_party")
         if pd.isna(party):
             party = row.get("dem_party")
-        if pd.isna(party) or str(party) == "D":
+        party = canonical_ballot_party(party)
+        if party is None or party == "D":
             continue
         if (row.get("modeled_caucus") != "D"
                 or row.get("opposing_caucus") != "R"

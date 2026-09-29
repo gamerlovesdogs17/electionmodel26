@@ -10,6 +10,10 @@ from midterms.evidence.candidate_timeline import (
     apply_candidate_state_contract,
     filter_candidate_state_score_exclusions,
 )
+from midterms.evidence.outcome_identity import (
+    canonical_ballot_party,
+    require_binary_chamber_compatibility,
+)
 from midterms.evidence.source_readiness import audit_source_readiness
 from midterms.evidence.warehouse import evidence_snapshot_fingerprint
 
@@ -239,6 +243,23 @@ def test_california_official_timeline_overrides_side_only_and_is_fingerprinted()
     assert after.loc[0, "candidate_identity_resolved"] is True
     assert after_meta["publication_eligible"] is True
     assert before_meta["snapshot_sha256"] != after_meta["snapshot_sha256"]
+
+
+def test_2022_california_official_pair_is_valid_binary_chamber_identity():
+    from midterms.evidence.warehouse import Warehouse
+
+    snapshot = Warehouse(ensure_fixtures=False).build_as_of(
+        "2022-09-09", "senate-2022",
+    )
+    california = snapshot.races[
+        snapshot.races["race_id"].eq("senate-2022-CA")
+    ].copy()
+    assert len(california) == 1
+    row = california.iloc[0]
+    assert canonical_ballot_party(row["modeled_ballot_party"]) == "D"
+    assert canonical_ballot_party(row["opposing_ballot_party"]) == "R"
+    assert bool(row["binary_score_eligible"]) is True
+    require_binary_chamber_compatibility(california)
 
 
 def test_candidate_classification_change_changes_snapshot_hash():

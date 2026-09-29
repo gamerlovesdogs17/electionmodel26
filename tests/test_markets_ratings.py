@@ -35,7 +35,7 @@ def test_forecast_with_real_overlays(tmp_path):
         method="fast",
         draws=300,
         seed=21,
-        ensemble=True,
+        ensemble=False,
         with_ratings=True,
         with_markets=True,
         out_dir=tmp_path,

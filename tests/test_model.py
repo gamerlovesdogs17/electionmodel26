@@ -43,7 +43,9 @@ def test_joint_chamber_not_independent():
 
 
 def test_end_to_end_forecast_artifact(tmp_path):
-    result = run_forecast(method="fast", draws=500, seed=11, out_dir=tmp_path)
+    result = run_forecast(
+        method="fast", draws=500, seed=11, ensemble=False, out_dir=tmp_path,
+    )
     art = result["artifact"]
     assert art["chamber"]["expected_dem_seats"] > 0
     assert len(art["races"]) >= 30

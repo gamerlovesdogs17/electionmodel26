@@ -208,6 +208,19 @@ def align_poll_frame(df: "Any") -> "Any":
     return out[POLL_COLUMNS]
 
 
+def align_race_frame(df: Any) -> Any:
+    """Ensure every race builder emits the complete canonical race schema."""
+    import pandas as pd
+
+    if not isinstance(df, pd.DataFrame):
+        df = pd.DataFrame(df)
+    out = df.copy()
+    for column in RACE_COLUMNS:
+        if column not in out.columns:
+            out[column] = None
+    return out[RACE_COLUMNS]
+
+
 def align_result_frame(df: "Any") -> "Any":
     """Ensure DataFrame has all RESULT_COLUMNS (truth_v1 extras defaulted)."""
     import pandas as pd

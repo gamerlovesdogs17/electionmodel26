@@ -342,7 +342,22 @@ def test_fec_amendment_chain_prefers_latest_coverage():
         assert rid in fit.race_ids
 
 
-def test_forecast_ensemble_artifact(tmp_path):
+def test_forecast_ensemble_artifact(tmp_path, monkeypatch):
+    import importlib
+
+    forecast_module = importlib.import_module("midterms.pipeline.run_forecast")
+    monkeypatch.setattr(
+        forecast_module,
+        "_load_stack_weights",
+        lambda **_kwargs: (
+            {"fast_hierarchical_t": 1.0},
+            {
+                "source": "synthetic_unit_test",
+                "predictive_mixture_validated": False,
+                "no_weight_remapping": True,
+            },
+        ),
+    )
     result = run_forecast(
         method="fast", draws=300, seed=19, ensemble=True, out_dir=tmp_path
     )

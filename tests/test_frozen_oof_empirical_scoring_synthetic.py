@@ -10,11 +10,13 @@ import pandas as pd
 import pytest
 
 from midterms.baselines.score import discrete_crps
+from midterms.model.pymc_model import FitResult
 from midterms.validation.nested_component_loo import (
-    FrozenPrediction, _draws_fingerprint, rescore_frozen_oof_draws,
+    FrozenPrediction,
+    _draws_fingerprint,
+    rescore_frozen_oof_draws,
     score_frozen_predictions,
 )
-from midterms.model.pymc_model import FitResult
 
 
 def test_frozen_prediction_crps_uses_draw_distribution() -> None:
@@ -105,9 +107,14 @@ def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> 
                 "score_eligible": True, "margin_value": 1.0,
             }])
 
-    def synthetic_fit(snap, *, draws, tune, chains, seed, generic_ballot):
+    def synthetic_fit(
+        snap, *, draws, tune, chains, seed, generic_ballot, poll_structure,
+    ):
+        from midterms.model.poll_structure import PollStructureConfig
+
         events.append("fit")
         assert (draws, tune, chains, seed, generic_ballot) == (2000, 2000, 4, 7, 0.0)
+        assert poll_structure == PollStructureConfig()
         return FitResult(
             race_ids=[race_id], states=["AA"], mean_margin=np.array([0.0]),
             sd_margin=np.array([1.0]),

@@ -27,7 +27,11 @@ from midterms.config import (
     RAW_DIR,
     REGIONS,
 )
-from midterms.evidence.schema import RACE_COLUMNS, align_poll_frame, align_result_frame
+from midterms.evidence.schema import (
+    align_poll_frame,
+    align_race_frame,
+    align_result_frame,
+)
 
 PARSER_VERSION = "fixtures-v1"
 
@@ -201,7 +205,7 @@ def _chamber_held(year: int, contested: list[str], rng: np.random.Generator) -> 
                 **struct,
             }
         )
-    return pd.DataFrame(rows).reindex(columns=RACE_COLUMNS)
+    return align_race_frame(rows)
 
 
 def _generate_cycle(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -491,7 +495,7 @@ def generate_2026_races(rng: np.random.Generator | None = None) -> pd.DataFrame:
                 **struct,
             }
         )
-    df = pd.DataFrame(rows)[RACE_COLUMNS]
+    df = align_race_frame(rows)
     assert int((~df["not_up"]).sum()) == 35
     assert int(df["not_up"].sum()) == 65
     assert len(df) == 100

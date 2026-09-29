@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from midterms.ops import reproducibility as repro
 from midterms.ops import shadow_publish as sp
 
 
@@ -18,6 +19,7 @@ def test_write_once_refuses_overwrite(tmp_path: Path):
 
 
 def test_verify_live_shadow_seal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(repro, "ROOT", tmp_path)
     monkeypatch.setattr(sp, "SHADOW_ROOT", tmp_path / "shadow")
     monkeypatch.setattr(sp, "SHADOW_INDEX", tmp_path / "shadow_publications.jsonl")
     monkeypatch.setattr(sp, "ARTIFACTS_DIR", tmp_path / "artifacts")
@@ -40,7 +42,7 @@ def test_verify_live_shadow_seal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
         shadow_root=tmp_path / "shadow",
     )
     assert man["mode"] == "prospective_live"
-    dest = Path(man["path"])
+    dest = tmp_path / man["path"]
     assert (dest / "forecast.json").exists()
     assert (dest / "SHADOW_MANIFEST.json").exists()
     assert (dest / "evaluation.json").exists() is False

@@ -164,7 +164,7 @@ def write_ledger_normalized(*, ledger: dict[str, Any] | None = None) -> dict[str
         build_held_rows_from_expectations,
         election_day,
     )
-    from midterms.evidence.schema import RACE_COLUMNS, RESULT_COLUMNS, align_result_frame
+    from midterms.evidence.schema import align_race_frame, align_result_frame
 
     data = ledger or load_ledger()
     expectations = load_expectations()
@@ -207,12 +207,7 @@ def write_ledger_normalized(*, ledger: dict[str, Any] | None = None) -> dict[str
             )
         race_rows.extend(build_held_rows_from_expectations(year, exp, election_day=ed))
 
-    races = pd.DataFrame(race_rows)
-    # Ensure schema columns exist
-    for col in RACE_COLUMNS:
-        if col not in races.columns:
-            races[col] = None
-    races = races[RACE_COLUMNS]
+    races = align_race_frame(race_rows)
 
     results = align_result_frame(pd.DataFrame(results_rows_from_ledger(ledger=data)))
 
