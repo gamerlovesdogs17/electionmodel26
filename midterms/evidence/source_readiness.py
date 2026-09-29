@@ -19,6 +19,7 @@ from midterms.config import (
     RAW_DIR,
 )
 from midterms.evidence.candidate_timeline import (
+    REQUIRED_CONTESTED_IDENTITY_COLUMNS,
     apply_candidate_timeline,
     audit_candidate_timeline,
 )
@@ -156,22 +157,47 @@ def audit_source_readiness(
             audit = {
                 "status": "missing", "publication_eligible": False,
                 "n_required_races": 0, "n_point_in_time": 0,
+                "missing_race_ids": [],
                 "reasons": ["required race universe is missing"],
             }
         else:
             applied, metadata = apply_candidate_timeline(subset, timeline, as_of=cutoff_value)
             audit = audit_candidate_timeline(applied, metadata)
+            required_applied = applied[
+                ~applied.get(
+                    "not_up", pd.Series(False, index=applied.index),
+                ).fillna(False).astype(bool)
+            ].copy()
+            complete_identity = pd.Series(True, index=required_applied.index)
+            for column in REQUIRED_CONTESTED_IDENTITY_COLUMNS:
+                values = required_applied.get(
+                    column, pd.Series(None, index=required_applied.index, dtype=object),
+                )
+                complete_identity &= values.notna() & values.astype(str).str.strip().ne("")
+            statuses = required_applied.get(
+                "candidate_timeline_status",
+                pd.Series("degraded_missing_status", index=required_applied.index),
+            )
+            missing_mask = (
+                ~statuses.astype(str).eq("point_in_time")
+                | ~complete_identity
+            )
+            audit["missing_race_ids"] = sorted(
+                required_applied.loc[missing_mask, "race_id"].astype(str).unique()
+            )
         timeline_rows[label] = audit
         if not audit.get("publication_eligible"):
-            required_mask = ~subset.get("not_up", pd.Series(False, index=subset.index)).fillna(False).astype(bool)
             missing_timeline.append({
                 "cutoff": label,
                 "as_of": cutoff_value,
-                "race_ids": sorted(subset.loc[required_mask, "race_id"].astype(str).unique()) if len(subset) else [],
+                "race_ids": audit.get("missing_race_ids") or [],
                 "reasons": audit.get("reasons") or [],
             })
     timeline_manifest, timeline_manifest_sha, timeline_manifest_error = _manifest(
         manifests_dir / "candidate_timeline.json"
+    )
+    source_audit, source_audit_sha, source_audit_error = _manifest(
+        manifests_dir / "candidate_timeline_source_audit.json"
     )
     filing_sources = sorted((raw_dir / "external").glob("fec_form2_*.csv"))
     filing_source_hashes = {path.name: _sha(path) for path in filing_sources}
@@ -191,6 +217,12 @@ def audit_source_readiness(
         ),
         "parser_version": (timeline_manifest or {}).get("parser_version") if timeline_manifest else None,
         "raw_filing_source_hashes": filing_source_hashes,
+        "source_gap_audit_sha256": source_audit_sha,
+        "source_gap_audit_status": (
+            (source_audit or {}).get("status") if not source_audit_error else source_audit_error
+        ),
+        "source_gap_coverage": (source_audit or {}).get("coverage") or {},
+        "official_ballot_source_receipts": (source_audit or {}).get("receipts") or {},
         "reasons": [] if timeline_status == "ready" else [
             (
                 "official FEC declaration filings are present but do not establish nomination or ballot identity"

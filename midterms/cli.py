@@ -1062,6 +1062,23 @@ def main(argv: list[str] | None = None) -> None:
         ).ingest_candidate_timeline(a.input), indent=2, default=str))
     )
 
+    p_timeline_sources = sub.add_parser(
+        "prepare-candidate-timeline-sources",
+        help=(
+            "Seal official cycle-wide candidate lists and write a fail-closed cutoff gap audit; "
+            "never backdates late sources"
+        ),
+    )
+    p_timeline_sources.add_argument("--as-of", default="2026-09-27")
+    p_timeline_sources.set_defaults(
+        func=lambda a: print(json.dumps(__import__(
+            "midterms.evidence.candidate_source_audit",
+            fromlist=["prepare_official_candidate_source_audit"],
+        ).prepare_official_candidate_source_audit(
+            current_as_of=a.as_of,
+        ), indent=2, default=str))
+    )
+
     p_demo = sub.add_parser(
         "ingest-demographic-vintages",
         help="Validate and seal state demographic vintages with official release dates",
