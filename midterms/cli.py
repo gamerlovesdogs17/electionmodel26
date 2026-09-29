@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -81,6 +82,20 @@ def main(argv: list[str] | None = None) -> None:
                 indent=2,
             )
         )
+    )
+
+    p_fec_history = sub.add_parser(
+        "prepare-finance-sources",
+        help="Seal receipt-timed official FEC linkages and Form 3 reports for required cycles",
+    )
+    p_fec_history.add_argument("--as-of", default="2026-09-27")
+    p_fec_history.set_defaults(
+        func=lambda a: print(json.dumps(
+            __import__(
+                "midterms.evidence.fec", fromlist=["prepare_official_finance_history"],
+            ).prepare_official_finance_history(current_as_of=a.as_of),
+            indent=2,
+        ))
     )
 
     p_mkt = sub.add_parser("fetch-markets", help="Fetch Kalshi Senate race + control markets")

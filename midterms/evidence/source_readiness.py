@@ -316,14 +316,38 @@ def audit_source_readiness(
                 "availability_basis" in frame.columns
                 and frame["availability_basis"].astype(str).eq("fec_receipt_date").all()
             )
+            manifest_coverage = (manifest or {}).get("coverage") or {}
+            required_cutoff_labels = [*historical_cutoffs, f"{election_id}-current"]
             missing_cutoffs = [
-                label for label in historical_cutoffs
-                if "-".join(label.split("-")[:2]) in missing_elections
+                label for label in required_cutoff_labels
+                if not bool((manifest_coverage.get(label) or {}).get("production_eligible"))
             ]
+            normalized_entry = ((manifest or {}).get("normalized") or {}).get(
+                "fundraising_shares"
+            ) or {}
+            normalized_hash_ok = (
+                bool(normalized_entry.get("sha256"))
+                and normalized_entry.get("sha256") == _sha(data_path)
+            )
+            raw_hash_errors: list[str] = []
+            for source in (manifest or {}).get("sources") or []:
+                for source_type in ("linkage", "form2", "form3"):
+                    item = source.get(source_type) or {}
+                    source_path = raw_dir / "external" / str(
+                        item.get("path") or item.get("archive_path") or ""
+                    )
+                    expected_sha = item.get("sha256") or item.get("archive_sha256")
+                    if not expected_sha or _sha(source_path) != expected_sha:
+                        raw_hash_errors.append(
+                            f"{source.get('cycle')}:{source_type}:{source_path.name}"
+                        )
             domains[name].update({
                 "missing_election_ids": missing_elections,
                 "missing_cutoffs": missing_cutoffs,
                 "receipt_date_safe": receipt_safe,
+                "coverage": manifest_coverage,
+                "normalized_hash_ok": normalized_hash_ok,
+                "raw_hash_errors": raw_hash_errors,
             })
             if missing_elections:
                 status = "incomplete_coverage"
@@ -331,11 +355,26 @@ def audit_source_readiness(
                     "report-level FEC finance is absent for historical cycles: "
                     + ", ".join(missing_elections)
                 )
+            if missing_cutoffs:
+                status = "incomplete_coverage"
+                reasons.append(
+                    "report-level FEC finance is incomplete at required cutoffs: "
+                    + ", ".join(missing_cutoffs)
+                )
             if not receipt_safe:
                 status = "incomplete_coverage"
                 reasons.append(
                     "existing finance rows do not uniformly use FEC receipt date as availability"
                 )
+            if (manifest or {}).get("schema_version") != "fec-report-finance-v1":
+                status = "invalid_schema"
+                reasons.append("finance manifest is not the receipt-safe report-level schema")
+            if not normalized_hash_ok or raw_hash_errors:
+                status = "invalid_hash"
+                reasons.append("finance source or normalized artifact hash mismatch")
+            if not bool((manifest or {}).get("production_eligible")):
+                status = "incomplete_coverage"
+                reasons.append("finance manifest is not production eligible")
         elif name == "approval" and len(frame):
             historical = frame[pd.to_numeric(frame.get("year"), errors="coerce").isin(HISTORICAL_YEARS)]
             strict_historical = bool(

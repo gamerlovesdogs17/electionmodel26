@@ -1,20 +1,1635 @@
 {
-  "generated_at": "2026-09-22T01:15:04.942709+00:00",
-  "election_id": "senate-2026",
-  "cycle": 2026,
-  "n_shares": 51,
-  "source_mix": {
-    "fec_weball": 51
+  "availability_basis": "fec_receipt_date",
+  "coverage": {
+    "senate-2018-lead-30": {
+      "as_of": "2018-10-07",
+      "covered_states": [
+        "AZ",
+        "CA",
+        "CT",
+        "DE",
+        "FL",
+        "HI",
+        "IN",
+        "MA",
+        "MD",
+        "ME",
+        "MI",
+        "MN",
+        "MO",
+        "MS",
+        "MT",
+        "ND",
+        "NE",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "OH",
+        "PA",
+        "RI",
+        "TN",
+        "TX",
+        "UT",
+        "VA",
+        "VT",
+        "WA",
+        "WI",
+        "WV",
+        "WY"
+      ],
+      "missing_states": [],
+      "n_rows": 33,
+      "production_eligible": true,
+      "required_states": [
+        "AZ",
+        "CA",
+        "CT",
+        "DE",
+        "FL",
+        "HI",
+        "IN",
+        "MA",
+        "MD",
+        "ME",
+        "MI",
+        "MN",
+        "MO",
+        "MS",
+        "MT",
+        "ND",
+        "NE",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "OH",
+        "PA",
+        "RI",
+        "TN",
+        "TX",
+        "UT",
+        "VA",
+        "VT",
+        "WA",
+        "WI",
+        "WV",
+        "WY"
+      ]
+    },
+    "senate-2018-lead-60": {
+      "as_of": "2018-09-07",
+      "covered_states": [
+        "AZ",
+        "CA",
+        "CT",
+        "DE",
+        "FL",
+        "HI",
+        "IN",
+        "MA",
+        "MD",
+        "ME",
+        "MI",
+        "MN",
+        "MO",
+        "MS",
+        "MT",
+        "ND",
+        "NE",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "OH",
+        "PA",
+        "RI",
+        "TN",
+        "TX",
+        "UT",
+        "VA",
+        "VT",
+        "WA",
+        "WI",
+        "WV",
+        "WY"
+      ],
+      "missing_states": [],
+      "n_rows": 33,
+      "production_eligible": true,
+      "required_states": [
+        "AZ",
+        "CA",
+        "CT",
+        "DE",
+        "FL",
+        "HI",
+        "IN",
+        "MA",
+        "MD",
+        "ME",
+        "MI",
+        "MN",
+        "MO",
+        "MS",
+        "MT",
+        "ND",
+        "NE",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "OH",
+        "PA",
+        "RI",
+        "TN",
+        "TX",
+        "UT",
+        "VA",
+        "VT",
+        "WA",
+        "WI",
+        "WV",
+        "WY"
+      ]
+    },
+    "senate-2020-lead-30": {
+      "as_of": "2020-10-04",
+      "covered_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "CO",
+        "DE",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "KY",
+        "LA",
+        "MA",
+        "ME",
+        "MI",
+        "MN",
+        "MS",
+        "MT",
+        "NC",
+        "NE",
+        "NH",
+        "NJ",
+        "NM",
+        "OK",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "VA",
+        "WV",
+        "WY"
+      ],
+      "missing_states": [],
+      "n_rows": 34,
+      "production_eligible": true,
+      "required_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "CO",
+        "DE",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "KY",
+        "LA",
+        "MA",
+        "ME",
+        "MI",
+        "MN",
+        "MS",
+        "MT",
+        "NC",
+        "NE",
+        "NH",
+        "NJ",
+        "NM",
+        "OK",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "VA",
+        "WV",
+        "WY"
+      ]
+    },
+    "senate-2020-lead-60": {
+      "as_of": "2020-09-04",
+      "covered_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "CO",
+        "DE",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "KY",
+        "LA",
+        "MA",
+        "ME",
+        "MI",
+        "MN",
+        "MS",
+        "MT",
+        "NC",
+        "NE",
+        "NH",
+        "NJ",
+        "NM",
+        "OK",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "VA",
+        "WV",
+        "WY"
+      ],
+      "missing_states": [],
+      "n_rows": 34,
+      "production_eligible": true,
+      "required_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "CO",
+        "DE",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "KY",
+        "LA",
+        "MA",
+        "ME",
+        "MI",
+        "MN",
+        "MS",
+        "MT",
+        "NC",
+        "NE",
+        "NH",
+        "NJ",
+        "NM",
+        "OK",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "VA",
+        "WV",
+        "WY"
+      ]
+    },
+    "senate-2022-lead-30": {
+      "as_of": "2022-10-09",
+      "covered_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "CA",
+        "CO",
+        "CT",
+        "FL",
+        "GA",
+        "HI",
+        "IA",
+        "ID",
+        "IL",
+        "IN",
+        "KS",
+        "KY",
+        "LA",
+        "MD",
+        "MO",
+        "NC",
+        "ND",
+        "NH",
+        "NV",
+        "NY",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "SC",
+        "SD",
+        "UT",
+        "VT",
+        "WA",
+        "WI"
+      ],
+      "missing_states": [],
+      "n_rows": 34,
+      "production_eligible": true,
+      "required_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "CA",
+        "CO",
+        "CT",
+        "FL",
+        "GA",
+        "HI",
+        "IA",
+        "ID",
+        "IL",
+        "IN",
+        "KS",
+        "KY",
+        "LA",
+        "MD",
+        "MO",
+        "NC",
+        "ND",
+        "NH",
+        "NV",
+        "NY",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "SC",
+        "SD",
+        "UT",
+        "VT",
+        "WA",
+        "WI"
+      ]
+    },
+    "senate-2022-lead-60": {
+      "as_of": "2022-09-09",
+      "covered_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "CA",
+        "CO",
+        "CT",
+        "FL",
+        "GA",
+        "HI",
+        "IA",
+        "ID",
+        "IL",
+        "IN",
+        "KS",
+        "KY",
+        "LA",
+        "MD",
+        "MO",
+        "NC",
+        "ND",
+        "NH",
+        "NV",
+        "NY",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "SC",
+        "SD",
+        "UT",
+        "VT",
+        "WA",
+        "WI"
+      ],
+      "missing_states": [],
+      "n_rows": 34,
+      "production_eligible": true,
+      "required_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "CA",
+        "CO",
+        "CT",
+        "FL",
+        "GA",
+        "HI",
+        "IA",
+        "ID",
+        "IL",
+        "IN",
+        "KS",
+        "KY",
+        "LA",
+        "MD",
+        "MO",
+        "NC",
+        "ND",
+        "NH",
+        "NV",
+        "NY",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "SC",
+        "SD",
+        "UT",
+        "VT",
+        "WA",
+        "WI"
+      ]
+    },
+    "senate-2024-lead-30": {
+      "as_of": "2024-10-06",
+      "covered_states": [
+        "AZ",
+        "CA",
+        "CT",
+        "DE",
+        "FL",
+        "HI",
+        "IN",
+        "MA",
+        "MD",
+        "ME",
+        "MI",
+        "MN",
+        "MO",
+        "MS",
+        "MT",
+        "ND",
+        "NE",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "OH",
+        "PA",
+        "RI",
+        "TN",
+        "TX",
+        "UT",
+        "VA",
+        "VT",
+        "WA",
+        "WI",
+        "WV",
+        "WY"
+      ],
+      "missing_states": [],
+      "n_rows": 33,
+      "production_eligible": true,
+      "required_states": [
+        "AZ",
+        "CA",
+        "CT",
+        "DE",
+        "FL",
+        "HI",
+        "IN",
+        "MA",
+        "MD",
+        "ME",
+        "MI",
+        "MN",
+        "MO",
+        "MS",
+        "MT",
+        "ND",
+        "NE",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "OH",
+        "PA",
+        "RI",
+        "TN",
+        "TX",
+        "UT",
+        "VA",
+        "VT",
+        "WA",
+        "WI",
+        "WV",
+        "WY"
+      ]
+    },
+    "senate-2024-lead-60": {
+      "as_of": "2024-09-06",
+      "covered_states": [
+        "AZ",
+        "CA",
+        "CT",
+        "DE",
+        "FL",
+        "HI",
+        "IN",
+        "MA",
+        "MD",
+        "ME",
+        "MI",
+        "MN",
+        "MO",
+        "MS",
+        "MT",
+        "ND",
+        "NE",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "OH",
+        "PA",
+        "RI",
+        "TN",
+        "TX",
+        "UT",
+        "VA",
+        "VT",
+        "WA",
+        "WI",
+        "WV",
+        "WY"
+      ],
+      "missing_states": [],
+      "n_rows": 33,
+      "production_eligible": true,
+      "required_states": [
+        "AZ",
+        "CA",
+        "CT",
+        "DE",
+        "FL",
+        "HI",
+        "IN",
+        "MA",
+        "MD",
+        "ME",
+        "MI",
+        "MN",
+        "MO",
+        "MS",
+        "MT",
+        "ND",
+        "NE",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "OH",
+        "PA",
+        "RI",
+        "TN",
+        "TX",
+        "UT",
+        "VA",
+        "VT",
+        "WA",
+        "WI",
+        "WV",
+        "WY"
+      ]
+    },
+    "senate-2026-current": {
+      "as_of": "2026-09-27",
+      "covered_states": [
+        "AK",
+        "AL",
+        "AR",
+        "CO",
+        "DE",
+        "FL",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "KY",
+        "LA",
+        "MA",
+        "ME",
+        "MI",
+        "MN",
+        "MS",
+        "MT",
+        "NC",
+        "NE",
+        "NH",
+        "NJ",
+        "NM",
+        "OH",
+        "OK",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "VA",
+        "WV",
+        "WY"
+      ],
+      "missing_states": [],
+      "n_rows": 35,
+      "production_eligible": true,
+      "required_states": [
+        "AK",
+        "AL",
+        "AR",
+        "CO",
+        "DE",
+        "FL",
+        "GA",
+        "IA",
+        "ID",
+        "IL",
+        "KS",
+        "KY",
+        "LA",
+        "MA",
+        "ME",
+        "MI",
+        "MN",
+        "MS",
+        "MT",
+        "NC",
+        "NE",
+        "NH",
+        "NJ",
+        "NM",
+        "OH",
+        "OK",
+        "OR",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "VA",
+        "WV",
+        "WY"
+      ]
+    }
   },
-  "fetch_meta": {
-    "n": 634,
-    "source": "fec_weball",
-    "url": "https://www.fec.gov/files/bulk-downloads/2026/weball26.zip",
-    "bytes": 193500,
-    "openfec_error": "HTTP Error 429: Too Many Requests",
-    "openfec_partial_n": 0
+  "current_as_of": "2026-09-27",
+  "cycles": [
+    2018,
+    2020,
+    2022,
+    2024,
+    2026
+  ],
+  "generated_at": "2026-09-29T13:06:57.420583+00:00",
+  "linkage_availability_basis": "fec_form2_receipt_date",
+  "linkage_policy": "principal_campaign_committee_only",
+  "normalized": {
+    "candidate_committees": {
+      "n_rows": 2024,
+      "path": "fec_candidate_committees.parquet",
+      "semantic_sha256": "0f3671cdaa733bec3812b577c6e72d8ef30fb9e1ab06eead21822de1aa65f341",
+      "sha256": "1b6e37a570748129fc9aab586bd074fbe18e993adfc0dae12830e1620855038c"
+    },
+    "form3_reports": {
+      "n_rows": 7890,
+      "path": "fec_form3_reports.parquet",
+      "semantic_sha256": "7dcb196f0a082c606a5f112d3ea895c40532bea7df6ce2bc634901790d0eb0a8",
+      "sha256": "764da2ef29623a37ed1a01511dd33c074dff5583bbc5b77128470b28e4c0c285"
+    },
+    "fundraising_shares": {
+      "n_rows": 303,
+      "path": "fundraising_shares.parquet",
+      "semantic_sha256": "9100e17539962fbf0d8c717eff8a3c96d0c6b7bb9f2d733a429347ab359eade2",
+      "sha256": "655d4871a3345bd73d58a9ae44ceb54d0e8d453f2daa6185bda93d66590fab88"
+    }
   },
-  "parser_version": "fec-v1",
-  "source_url": "https://www.fec.gov/files/bulk-downloads/2026/weball26.zip",
+  "parser_version": "fec-v2-report-receipt-asof",
+  "production_eligible": true,
+  "reasons": [],
+  "schema_version": "fec-report-finance-v1",
+  "source_provider": "Federal Election Commission",
+  "source_url": "https://api.open.fec.gov/v1/reports/house-senate/",
+  "sources": [
+    {
+      "cycle": 2018,
+      "form2": {
+        "path": "fec_form2_2018.csv",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "role": "receipt clock for principal-committee designation",
+        "sha256": "faf409bbd6c4d1d0a9f6f35df611b65842afaa3137d6d2bb5d04b0fb32c5891a",
+        "url": "https://www.fec.gov/files/bulk-downloads/2018/Form2Filer_2018.csv"
+      },
+      "form3": {
+        "archive_path": "fec_form3_reports_2018.zip",
+        "archive_sha256": "0809785d56ebfc285d87f8ec3ef16de7fb922ea82e3b1640b8ef051ae8c35149",
+        "cycle": 2018,
+        "max_as_of": "2018-10-07",
+        "n_reports": 1302,
+        "path": "fec_form3_reports_2018.zip",
+        "requests": [
+          {
+            "member": "batch-001-page-001.json",
+            "n_results": 100,
+            "response_sha256": "266ed1dc2608d29c8d1c532f8377e0a5fa062e9c42828d84989ac8221695470d",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00104752&committee_id=C00264564&committee_id=C00264697&committee_id=C00277525&committee_id=C00326801&committee_id=C00344051&committee_id=C00344473&committee_id=C00347260&committee_id=C00349217&committee_id=C00349506&committee_id=C00376939&committee_id=C00393652&committee_id=C00410803&committee_id=C00411587&committee_id=C00412304&committee_id=C00413914&committee_id=C00420760&committee_id=C00430462&committee_id=C00431056&committee_id=C00431304&committee_id=C00431353&committee_id=C00434563&committee_id=C00436386&committee_id=C00443218&committee_id=C00445122&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-002.json",
+            "n_results": 100,
+            "response_sha256": "ce15347e27d13bb7a8148114ae244c53f19e4f777f04b43333a2a4ca0cd15d05",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00104752&committee_id=C00264564&committee_id=C00264697&committee_id=C00277525&committee_id=C00326801&committee_id=C00344051&committee_id=C00344473&committee_id=C00347260&committee_id=C00349217&committee_id=C00349506&committee_id=C00376939&committee_id=C00393652&committee_id=C00410803&committee_id=C00411587&committee_id=C00412304&committee_id=C00413914&committee_id=C00420760&committee_id=C00430462&committee_id=C00431056&committee_id=C00431304&committee_id=C00431353&committee_id=C00434563&committee_id=C00436386&committee_id=C00443218&committee_id=C00445122&max_receipt_date=10%2F07%2F2018&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-003.json",
+            "n_results": 50,
+            "response_sha256": "c6263ce0c0df0ce7a0a5ea26ee4b9f9ded1bd83a8fc456fd1c51e76e2f0aac24",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00104752&committee_id=C00264564&committee_id=C00264697&committee_id=C00277525&committee_id=C00326801&committee_id=C00344051&committee_id=C00344473&committee_id=C00347260&committee_id=C00349217&committee_id=C00349506&committee_id=C00376939&committee_id=C00393652&committee_id=C00410803&committee_id=C00411587&committee_id=C00412304&committee_id=C00413914&committee_id=C00420760&committee_id=C00430462&committee_id=C00431056&committee_id=C00431304&committee_id=C00431353&committee_id=C00434563&committee_id=C00436386&committee_id=C00443218&committee_id=C00445122&max_receipt_date=10%2F07%2F2018&per_page=100&page=3&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-001.json",
+            "n_results": 100,
+            "response_sha256": "de86787b33c478d0b8041ba9862a8a4c9b500b9fd1ce6153e86d607800bd5728",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00460667&committee_id=C00466359&committee_id=C00466854&committee_id=C00467134&committee_id=C00471482&committee_id=C00476192&committee_id=C00486563&committee_id=C00492645&committee_id=C00492785&committee_id=C00494229&committee_id=C00495358&committee_id=C00495549&committee_id=C00497925&committee_id=C00498907&committee_id=C00500843&committee_id=C00501197&committee_id=C00502542&committee_id=C00504704&committee_id=C00505552&committee_id=C00508804&committee_id=C00516047&committee_id=C00520502&committee_id=C00539890&committee_id=C00543322&committee_id=C00548271&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-002.json",
+            "n_results": 98,
+            "response_sha256": "fdc4b924f2d1e0a1828a40db35175c2cf5017232ff6ceafcbdda2b7f23810484",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00460667&committee_id=C00466359&committee_id=C00466854&committee_id=C00467134&committee_id=C00471482&committee_id=C00476192&committee_id=C00486563&committee_id=C00492645&committee_id=C00492785&committee_id=C00494229&committee_id=C00495358&committee_id=C00495549&committee_id=C00497925&committee_id=C00498907&committee_id=C00500843&committee_id=C00501197&committee_id=C00502542&committee_id=C00504704&committee_id=C00505552&committee_id=C00508804&committee_id=C00516047&committee_id=C00520502&committee_id=C00539890&committee_id=C00543322&committee_id=C00548271&max_receipt_date=10%2F07%2F2018&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-003-page-001.json",
+            "n_results": 100,
+            "response_sha256": "a442b6b5f9283f28112bf5cb860b7500b50417e4ad50b0bf4b8e59f7b4ecc99a",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00548289&committee_id=C00550657&committee_id=C00552711&committee_id=C00558122&committee_id=C00558346&committee_id=C00558874&committee_id=C00559914&committee_id=C00563874&committee_id=C00578781&committee_id=C00579003&committee_id=C00581843&committee_id=C00602615&committee_id=C00604017&committee_id=C00606939&committee_id=C00608240&committee_id=C00610022&committee_id=C00611756&committee_id=C00617100&committee_id=C00619403&committee_id=C00620690&committee_id=C00624239&committee_id=C00627901&committee_id=C00629451&committee_id=C00630442&committee_id=C00632026&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-003-page-002.json",
+            "n_results": 18,
+            "response_sha256": "399aaf4ab9671f1234c67c06be959bbdf916c0f31af508ca1ba0f7092e0af7a8",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00548289&committee_id=C00550657&committee_id=C00552711&committee_id=C00558122&committee_id=C00558346&committee_id=C00558874&committee_id=C00559914&committee_id=C00563874&committee_id=C00578781&committee_id=C00579003&committee_id=C00581843&committee_id=C00602615&committee_id=C00604017&committee_id=C00606939&committee_id=C00608240&committee_id=C00610022&committee_id=C00611756&committee_id=C00617100&committee_id=C00619403&committee_id=C00620690&committee_id=C00624239&committee_id=C00627901&committee_id=C00629451&committee_id=C00630442&committee_id=C00632026&max_receipt_date=10%2F07%2F2018&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-004-page-001.json",
+            "n_results": 100,
+            "response_sha256": "880f13bce8d14ba6ee6491669192b40b768ef5511d7f824fcf28dba8a0d0a3ac",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00632190&committee_id=C00632208&committee_id=C00632273&committee_id=C00632406&committee_id=C00633255&committee_id=C00633461&committee_id=C00633693&committee_id=C00633701&committee_id=C00633933&committee_id=C00634865&committee_id=C00634972&committee_id=C00635490&committee_id=C00635599&committee_id=C00636647&committee_id=C00636654&committee_id=C00637207&committee_id=C00637355&committee_id=C00637454&committee_id=C00637538&committee_id=C00637611&committee_id=C00637850&committee_id=C00637983&committee_id=C00638148&committee_id=C00638171&committee_id=C00638304&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-004-page-002.json",
+            "n_results": 28,
+            "response_sha256": "1f1127f880b08b88b9dacf33eeb372d844db92c561bd902999f4db59b88f2e25",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00632190&committee_id=C00632208&committee_id=C00632273&committee_id=C00632406&committee_id=C00633255&committee_id=C00633461&committee_id=C00633693&committee_id=C00633701&committee_id=C00633933&committee_id=C00634865&committee_id=C00634972&committee_id=C00635490&committee_id=C00635599&committee_id=C00636647&committee_id=C00636654&committee_id=C00637207&committee_id=C00637355&committee_id=C00637454&committee_id=C00637538&committee_id=C00637611&committee_id=C00637850&committee_id=C00637983&committee_id=C00638148&committee_id=C00638171&committee_id=C00638304&max_receipt_date=10%2F07%2F2018&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-005-page-001.json",
+            "n_results": 100,
+            "response_sha256": "b377b8aa0528a191207efb7c763cfa747ab82c85f05394d22cbe3b8b55895e0d",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00638312&committee_id=C00638452&committee_id=C00638460&committee_id=C00638486&committee_id=C00638668&committee_id=C00638692&committee_id=C00638791&committee_id=C00639161&committee_id=C00639195&committee_id=C00639393&committee_id=C00639401&committee_id=C00639476&committee_id=C00639492&committee_id=C00639724&committee_id=C00640052&committee_id=C00640201&committee_id=C00640219&committee_id=C00640557&committee_id=C00640615&committee_id=C00640623&committee_id=C00640656&committee_id=C00641118&committee_id=C00641316&committee_id=C00641332&committee_id=C00641357&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-005-page-002.json",
+            "n_results": 31,
+            "response_sha256": "9b80fc11f66948c30865abf095fd02585bb0f9ae1c62ae789c279d3948120c13",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00638312&committee_id=C00638452&committee_id=C00638460&committee_id=C00638486&committee_id=C00638668&committee_id=C00638692&committee_id=C00638791&committee_id=C00639161&committee_id=C00639195&committee_id=C00639393&committee_id=C00639401&committee_id=C00639476&committee_id=C00639492&committee_id=C00639724&committee_id=C00640052&committee_id=C00640201&committee_id=C00640219&committee_id=C00640557&committee_id=C00640615&committee_id=C00640623&committee_id=C00640656&committee_id=C00641118&committee_id=C00641316&committee_id=C00641332&committee_id=C00641357&max_receipt_date=10%2F07%2F2018&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-006-page-001.json",
+            "n_results": 96,
+            "response_sha256": "c0036e6af7c7f58bad4b0f0f02a8baf0bc817b106972cb252f12fdddd3195510",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00641506&committee_id=C00641704&committee_id=C00646513&committee_id=C00646638&committee_id=C00646737&committee_id=C00647065&committee_id=C00647263&committee_id=C00647586&committee_id=C00647792&committee_id=C00647800&committee_id=C00648063&committee_id=C00648337&committee_id=C00648642&committee_id=C00648659&committee_id=C00648709&committee_id=C00648824&committee_id=C00650374&committee_id=C00650556&committee_id=C00650820&committee_id=C00651075&committee_id=C00651208&committee_id=C00651455&committee_id=C00651489&committee_id=C00651687&committee_id=C00651737&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-007-page-001.json",
+            "n_results": 98,
+            "response_sha256": "7c3270a3c5d5b8a513b3033be1368cce56bcb6b2864207d2045ad8b5243b3eae",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00651844&committee_id=C00652115&committee_id=C00652123&committee_id=C00652131&committee_id=C00652313&committee_id=C00652727&committee_id=C00653022&committee_id=C00653147&committee_id=C00653600&committee_id=C00653782&committee_id=C00653790&committee_id=C00654137&committee_id=C00654392&committee_id=C00654483&committee_id=C00654822&committee_id=C00654913&committee_id=C00655209&committee_id=C00655217&committee_id=C00655316&committee_id=C00655522&committee_id=C00655878&committee_id=C00656298&committee_id=C00656512&committee_id=C00656520&committee_id=C00656694&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-008-page-001.json",
+            "n_results": 50,
+            "response_sha256": "fa6887e4f62897d62f9f8aa61926b162a5cad2319cb4ffefbda5bdbb32af2a4f",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00657254&committee_id=C00657270&committee_id=C00658765&committee_id=C00658773&committee_id=C00658781&committee_id=C00658856&committee_id=C00658864&committee_id=C00658872&committee_id=C00658989&committee_id=C00659128&committee_id=C00659136&committee_id=C00659961&committee_id=C00659979&committee_id=C00660209&committee_id=C00660480&committee_id=C00660498&committee_id=C00660654&committee_id=C00661298&committee_id=C00661306&committee_id=C00661801&committee_id=C00661819&committee_id=C00661975&committee_id=C00661991&committee_id=C00662098&committee_id=C00662122&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-009-page-001.json",
+            "n_results": 85,
+            "response_sha256": "ab8024a2d2143e9cf1635e80b8a687114884a01af5b07e6b6024fc5f316b24f3",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00662445&committee_id=C00662585&committee_id=C00662783&committee_id=C00663146&committee_id=C00663278&committee_id=C00663658&committee_id=C00663674&committee_id=C00663781&committee_id=C00664219&committee_id=C00664227&committee_id=C00664623&committee_id=C00664631&committee_id=C00664854&committee_id=C00665083&committee_id=C00665406&committee_id=C00665414&committee_id=C00665430&committee_id=C00665554&committee_id=C00665570&committee_id=C00666040&committee_id=C00666172&committee_id=C00666198&committee_id=C00666206&committee_id=C00666214&committee_id=C00666222&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-010-page-001.json",
+            "n_results": 43,
+            "response_sha256": "40a9ebc41332ef03bbc42dd1a7095a1b8185add5cf299d6bd6cfccdc90e6af58",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00666552&committee_id=C00666909&committee_id=C00667204&committee_id=C00667261&committee_id=C00667477&committee_id=C00667717&committee_id=C00667725&committee_id=C00668418&committee_id=C00668616&committee_id=C00668624&committee_id=C00669093&committee_id=C00669101&committee_id=C00669416&committee_id=C00669424&committee_id=C00669440&committee_id=C00669887&committee_id=C00669895&committee_id=C00669903&committee_id=C00670083&committee_id=C00670091&committee_id=C00670240&committee_id=C00670695&committee_id=C00671073&committee_id=C00671297&committee_id=C00671305&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-011-page-001.json",
+            "n_results": 48,
+            "response_sha256": "0f142924b1be575a01dab93a4db841af0a6f43fca9d96899b351c25d03d22074",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00671461&committee_id=C00671594&committee_id=C00671750&committee_id=C00671776&committee_id=C00672501&committee_id=C00672659&committee_id=C00672832&committee_id=C00673152&committee_id=C00673160&committee_id=C00673285&committee_id=C00673459&committee_id=C00673657&committee_id=C00673863&committee_id=C00674051&committee_id=C00674069&committee_id=C00674077&committee_id=C00674085&committee_id=C00674358&committee_id=C00674556&committee_id=C00674564&committee_id=C00674754&committee_id=C00674762&committee_id=C00675231&committee_id=C00675249&committee_id=C00675256&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-012-page-001.json",
+            "n_results": 31,
+            "response_sha256": "a56f3bd9ff02fb5a0b3f6bd910c295d39071bcd885ed0c932236fcb447638caa",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00675264&committee_id=C00675348&committee_id=C00675884&committee_id=C00675983&committee_id=C00675991&committee_id=C00676007&committee_id=C00676106&committee_id=C00676411&committee_id=C00676767&committee_id=C00676791&committee_id=C00676866&committee_id=C00676924&committee_id=C00676932&committee_id=C00676965&committee_id=C00677070&committee_id=C00677088&committee_id=C00677211&committee_id=C00677336&committee_id=C00677385&committee_id=C00677658&committee_id=C00677682&committee_id=C00677864&committee_id=C00677872&committee_id=C00677989&committee_id=C00678300&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-013-page-001.json",
+            "n_results": 23,
+            "response_sha256": "538de83f295d2696ffbd9a347380e22f3ca5ff3058fb84e3b15f23b6fa626190",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00678441&committee_id=C00678490&committee_id=C00678508&committee_id=C00678573&committee_id=C00678896&committee_id=C00678979&committee_id=C00679456&committee_id=C00679464&committee_id=C00679480&committee_id=C00679597&committee_id=C00679738&committee_id=C00679803&committee_id=C00680751&committee_id=C00680843&committee_id=C00680959&committee_id=C00681312&committee_id=C00681551&committee_id=C00681569&committee_id=C00681809&committee_id=C00681940&committee_id=C00682245&committee_id=C00682856&committee_id=C00683342&committee_id=C00683425&committee_id=C00683946&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-014-page-001.json",
+            "n_results": 3,
+            "response_sha256": "ec2841db94de70f4cbb1db356e025e2304f3f08bf0ab2bda547017dce2a92e70",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2018&committee_id=C00684241&committee_id=C00684795&committee_id=C00685248&committee_id=C00685610&committee_id=C00686097&committee_id=C00686428&committee_id=C00686725&committee_id=C00686931&committee_id=C00687285&committee_id=C00687707&committee_id=C00688465&max_receipt_date=10%2F07%2F2018&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          }
+        ],
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "reused_sealed_archive": true,
+        "sha256": "0809785d56ebfc285d87f8ec3ef16de7fb922ea82e3b1640b8ef051ae8c35149",
+        "url": "https://api.open.fec.gov/v1/reports/house-senate/"
+      },
+      "linkage": {
+        "path": "fec_candidate_committee_linkage_2018.zip",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "sha256": "6704d162d288a003fd2264a20dd5e65f120c74093e5ccfbb27b078c5c3b010ec",
+        "url": "https://www.fec.gov/files/bulk-downloads/2018/ccl18.zip"
+      }
+    },
+    {
+      "cycle": 2020,
+      "form2": {
+        "path": "fec_form2_2020.csv",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "role": "receipt clock for principal-committee designation",
+        "sha256": "8548e8db9fe27dcbece9b1ed2850b50bce1165ca7b731c79aaa0069c9de3bf4d",
+        "url": "https://www.fec.gov/files/bulk-downloads/2020/Form2Filer_2020.csv"
+      },
+      "form3": {
+        "archive_path": "fec_form3_reports_2020.zip",
+        "archive_sha256": "89c3e217bb79b9ee0077ad601addb6607bbfd3d6a2674844a02d98d760245a5e",
+        "cycle": 2020,
+        "max_as_of": "2020-10-04",
+        "n_reports": 1527,
+        "path": "fec_form3_reports_2020.zip",
+        "requests": [
+          {
+            "member": "batch-001-page-001.json",
+            "n_results": 100,
+            "response_sha256": "2ce5e615f7b2cb2f998edc8a989b789669883b5325b4d5e631c5f5b0d8113619",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00128876&committee_id=C00148999&committee_id=C00193342&committee_id=C00196774&committee_id=C00207993&committee_id=C00238907&committee_id=C00277525&committee_id=C00306704&committee_id=C00314575&committee_id=C00317503&committee_id=C00329896&committee_id=C00369033&committee_id=C00383745&committee_id=C00437277&committee_id=C00437889&committee_id=C00438713&committee_id=C00440362&committee_id=C00443580&committee_id=C00443689&committee_id=C00457325&committee_id=C00458828&committee_id=C00475392&committee_id=C00491357&committee_id=C00492454&committee_id=C00499988&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-002.json",
+            "n_results": 100,
+            "response_sha256": "20a0cdbb6973e6d74e4ef0d5bd164738d84ac91c582604c4d131f8fdb535e9f0",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00128876&committee_id=C00148999&committee_id=C00193342&committee_id=C00196774&committee_id=C00207993&committee_id=C00238907&committee_id=C00277525&committee_id=C00306704&committee_id=C00314575&committee_id=C00317503&committee_id=C00329896&committee_id=C00369033&committee_id=C00383745&committee_id=C00437277&committee_id=C00437889&committee_id=C00438713&committee_id=C00440362&committee_id=C00443580&committee_id=C00443689&committee_id=C00457325&committee_id=C00458828&committee_id=C00475392&committee_id=C00491357&committee_id=C00492454&committee_id=C00499988&max_receipt_date=10%2F04%2F2020&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-003.json",
+            "n_results": 15,
+            "response_sha256": "f245d5bbc06ff0d5c022db9496791e41ae7c545b1b0dd1172f28412b1f425051",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00128876&committee_id=C00148999&committee_id=C00193342&committee_id=C00196774&committee_id=C00207993&committee_id=C00238907&committee_id=C00277525&committee_id=C00306704&committee_id=C00314575&committee_id=C00317503&committee_id=C00329896&committee_id=C00369033&committee_id=C00383745&committee_id=C00437277&committee_id=C00437889&committee_id=C00438713&committee_id=C00440362&committee_id=C00443580&committee_id=C00443689&committee_id=C00457325&committee_id=C00458828&committee_id=C00475392&committee_id=C00491357&committee_id=C00492454&committee_id=C00499988&max_receipt_date=10%2F04%2F2020&per_page=100&page=3&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-001.json",
+            "n_results": 100,
+            "response_sha256": "26ded65bcdf21ad33a7452c28e89e7ea862612bd58a6a002373cd99f1369416f",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00512970&committee_id=C00532465&committee_id=C00539825&committee_id=C00540500&committee_id=C00543983&committee_id=C00545772&committee_id=C00546788&committee_id=C00547570&committee_id=C00547976&committee_id=C00548727&committee_id=C00550830&committee_id=C00564245&committee_id=C00567370&committee_id=C00570960&committee_id=C00570994&committee_id=C00576173&committee_id=C00582635&committee_id=C00627901&committee_id=C00629048&committee_id=C00634345&committee_id=C00637850&committee_id=C00638148&committee_id=C00640623&committee_id=C00647842&committee_id=C00648659&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-002.json",
+            "n_results": 75,
+            "response_sha256": "607ef6c53e9bd995f1d9dd64a4dd02fb04277bcd7304ce552aee41c34a165eeb",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00512970&committee_id=C00532465&committee_id=C00539825&committee_id=C00540500&committee_id=C00543983&committee_id=C00545772&committee_id=C00546788&committee_id=C00547570&committee_id=C00547976&committee_id=C00548727&committee_id=C00550830&committee_id=C00564245&committee_id=C00567370&committee_id=C00570960&committee_id=C00570994&committee_id=C00576173&committee_id=C00582635&committee_id=C00627901&committee_id=C00629048&committee_id=C00634345&committee_id=C00637850&committee_id=C00638148&committee_id=C00640623&committee_id=C00647842&committee_id=C00648659&max_receipt_date=10%2F04%2F2020&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-003-page-001.json",
+            "n_results": 85,
+            "response_sha256": "02006a06e95e2b2e39092560d4f8cf8f6f7559d071eeb2c35fbc0190630588ca",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00649350&committee_id=C00651208&committee_id=C00651836&committee_id=C00654657&committee_id=C00655217&committee_id=C00656298&committee_id=C00662106&committee_id=C00663781&committee_id=C00664573&committee_id=C00665414&committee_id=C00666040&committee_id=C00674564&committee_id=C00675348&committee_id=C00675546&committee_id=C00675884&committee_id=C00676775&committee_id=C00677088&committee_id=C00678805&committee_id=C00679597&committee_id=C00683193&committee_id=C00683870&committee_id=C00688184&committee_id=C00689042&committee_id=C00689596&committee_id=C00689885&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-004-page-001.json",
+            "n_results": 100,
+            "response_sha256": "7c23a7f568432c8ca9f411af9844b3312c3586afec1bccf3fba1e540ef0d4974",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00689927&committee_id=C00690974&committee_id=C00691089&committee_id=C00692160&committee_id=C00692269&committee_id=C00693457&committee_id=C00693572&committee_id=C00693705&committee_id=C00694364&committee_id=C00694463&committee_id=C00694729&committee_id=C00694844&committee_id=C00695007&committee_id=C00695411&committee_id=C00696104&committee_id=C00696153&committee_id=C00696526&committee_id=C00696575&committee_id=C00696682&committee_id=C00696724&committee_id=C00696815&committee_id=C00696997&committee_id=C00697045&committee_id=C00697235&committee_id=C00697268&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-004-page-002.json",
+            "n_results": 21,
+            "response_sha256": "7c7ae302031b20893338bf5ccbad8ba6eaaa0d2ed1f742d3ca2a3368e20830ed",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00689927&committee_id=C00690974&committee_id=C00691089&committee_id=C00692160&committee_id=C00692269&committee_id=C00693457&committee_id=C00693572&committee_id=C00693705&committee_id=C00694364&committee_id=C00694463&committee_id=C00694729&committee_id=C00694844&committee_id=C00695007&committee_id=C00695411&committee_id=C00696104&committee_id=C00696153&committee_id=C00696526&committee_id=C00696575&committee_id=C00696682&committee_id=C00696724&committee_id=C00696815&committee_id=C00696997&committee_id=C00697045&committee_id=C00697235&committee_id=C00697268&max_receipt_date=10%2F04%2F2020&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-005-page-001.json",
+            "n_results": 100,
+            "response_sha256": "14e929895e02d2368098c67b2a2ecf51b33d55eb64d728916da47ecbfddaa3ee",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00697417&committee_id=C00697870&committee_id=C00698183&committee_id=C00698811&committee_id=C00699231&committee_id=C00699975&committee_id=C00700054&committee_id=C00700708&committee_id=C00700856&committee_id=C00700948&committee_id=C00700989&committee_id=C00701094&committee_id=C00701383&committee_id=C00701524&committee_id=C00701672&committee_id=C00702118&committee_id=C00702183&committee_id=C00702381&committee_id=C00702407&committee_id=C00702985&committee_id=C00703033&committee_id=C00703041&committee_id=C00703074&committee_id=C00703108&committee_id=C00703256&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-005-page-002.json",
+            "n_results": 28,
+            "response_sha256": "5d6548ff40d3abcd81840092f09ae09ed074c1a063f804c15e6ced045d7f67ae",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00697417&committee_id=C00697870&committee_id=C00698183&committee_id=C00698811&committee_id=C00699231&committee_id=C00699975&committee_id=C00700054&committee_id=C00700708&committee_id=C00700856&committee_id=C00700948&committee_id=C00700989&committee_id=C00701094&committee_id=C00701383&committee_id=C00701524&committee_id=C00701672&committee_id=C00702118&committee_id=C00702183&committee_id=C00702381&committee_id=C00702407&committee_id=C00702985&committee_id=C00703033&committee_id=C00703041&committee_id=C00703074&committee_id=C00703108&committee_id=C00703256&max_receipt_date=10%2F04%2F2020&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-006-page-001.json",
+            "n_results": 100,
+            "response_sha256": "d4d897925b73ea0d72d61ef55232f21121d8eda115dd4069e8c96dd414413186",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00703314&committee_id=C00703413&committee_id=C00704098&committee_id=C00705228&committee_id=C00705269&committee_id=C00705293&committee_id=C00706044&committee_id=C00706317&committee_id=C00706648&committee_id=C00706739&committee_id=C00706762&committee_id=C00706853&committee_id=C00707224&committee_id=C00708065&committee_id=C00708164&committee_id=C00708628&committee_id=C00708735&committee_id=C00708776&committee_id=C00708818&committee_id=C00708891&committee_id=C00708982&committee_id=C00709105&committee_id=C00709279&committee_id=C00709337&committee_id=C00709410&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-006-page-002.json",
+            "n_results": 45,
+            "response_sha256": "73aa31743f2f6ab8f2d67ce0516e49e5a002c84f9b698e5fdde856d63c614537",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00703314&committee_id=C00703413&committee_id=C00704098&committee_id=C00705228&committee_id=C00705269&committee_id=C00705293&committee_id=C00706044&committee_id=C00706317&committee_id=C00706648&committee_id=C00706739&committee_id=C00706762&committee_id=C00706853&committee_id=C00707224&committee_id=C00708065&committee_id=C00708164&committee_id=C00708628&committee_id=C00708735&committee_id=C00708776&committee_id=C00708818&committee_id=C00708891&committee_id=C00708982&committee_id=C00709105&committee_id=C00709279&committee_id=C00709337&committee_id=C00709410&max_receipt_date=10%2F04%2F2020&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-007-page-001.json",
+            "n_results": 100,
+            "response_sha256": "462cbed228b9c1d7153bac1b444f501e90df5ab196709abfd4b082f6343d4524",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00709477&committee_id=C00709675&committee_id=C00709899&committee_id=C00709907&committee_id=C00710087&committee_id=C00710293&committee_id=C00710368&committee_id=C00710384&committee_id=C00710392&committee_id=C00710434&committee_id=C00710780&committee_id=C00710822&committee_id=C00710871&committee_id=C00710939&committee_id=C00711010&committee_id=C00711028&committee_id=C00711085&committee_id=C00711242&committee_id=C00711325&committee_id=C00711341&committee_id=C00711408&committee_id=C00711549&committee_id=C00711556&committee_id=C00711804&committee_id=C00711978&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-007-page-002.json",
+            "n_results": 27,
+            "response_sha256": "a2e0e52792dd5e44847c985145d4ddd5eb0ad48141f9e60ba3599f47f64faaa0",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00709477&committee_id=C00709675&committee_id=C00709899&committee_id=C00709907&committee_id=C00710087&committee_id=C00710293&committee_id=C00710368&committee_id=C00710384&committee_id=C00710392&committee_id=C00710434&committee_id=C00710780&committee_id=C00710822&committee_id=C00710871&committee_id=C00710939&committee_id=C00711010&committee_id=C00711028&committee_id=C00711085&committee_id=C00711242&committee_id=C00711325&committee_id=C00711341&committee_id=C00711408&committee_id=C00711549&committee_id=C00711556&committee_id=C00711804&committee_id=C00711978&max_receipt_date=10%2F04%2F2020&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-008-page-001.json",
+            "n_results": 100,
+            "response_sha256": "a16408de970e3ddfa69cac5f50ed5493a231f6ebaf83887bb3ccccfc4ab618ce",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00712083&committee_id=C00712091&committee_id=C00712133&committee_id=C00712323&committee_id=C00712349&committee_id=C00712455&committee_id=C00712737&committee_id=C00712836&committee_id=C00712968&committee_id=C00713107&committee_id=C00713131&committee_id=C00713206&committee_id=C00713248&committee_id=C00713396&committee_id=C00713412&committee_id=C00713503&committee_id=C00713529&committee_id=C00713750&committee_id=C00714055&committee_id=C00714246&committee_id=C00714295&committee_id=C00714345&committee_id=C00714477&committee_id=C00714634&committee_id=C00714832&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-008-page-002.json",
+            "n_results": 2,
+            "response_sha256": "a1fcda494ed4c8c4abf2f063a364d72eadad587a5dd59a83a087fd9d84091c61",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00712083&committee_id=C00712091&committee_id=C00712133&committee_id=C00712323&committee_id=C00712349&committee_id=C00712455&committee_id=C00712737&committee_id=C00712836&committee_id=C00712968&committee_id=C00713107&committee_id=C00713131&committee_id=C00713206&committee_id=C00713248&committee_id=C00713396&committee_id=C00713412&committee_id=C00713503&committee_id=C00713529&committee_id=C00713750&committee_id=C00714055&committee_id=C00714246&committee_id=C00714295&committee_id=C00714345&committee_id=C00714477&committee_id=C00714634&committee_id=C00714832&max_receipt_date=10%2F04%2F2020&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-009-page-001.json",
+            "n_results": 100,
+            "response_sha256": "2e940962812511443cf43955fafce41b5176cc55ecf32177569c4254b5e64734",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00714980&committee_id=C00714998&committee_id=C00715409&committee_id=C00715516&committee_id=C00715581&committee_id=C00715599&committee_id=C00716340&committee_id=C00716407&committee_id=C00716571&committee_id=C00716720&committee_id=C00716795&committee_id=C00716860&committee_id=C00716878&committee_id=C00716977&committee_id=C00717090&committee_id=C00717157&committee_id=C00717280&committee_id=C00717546&committee_id=C00717827&committee_id=C00717991&committee_id=C00718064&committee_id=C00718627&committee_id=C00718809&committee_id=C00718833&committee_id=C00718866&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-009-page-002.json",
+            "n_results": 15,
+            "response_sha256": "08172a0d45a22e553b6ddfa04f2fbf7e50630c2ef4b794002ed64af8f96c7579",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00714980&committee_id=C00714998&committee_id=C00715409&committee_id=C00715516&committee_id=C00715581&committee_id=C00715599&committee_id=C00716340&committee_id=C00716407&committee_id=C00716571&committee_id=C00716720&committee_id=C00716795&committee_id=C00716860&committee_id=C00716878&committee_id=C00716977&committee_id=C00717090&committee_id=C00717157&committee_id=C00717280&committee_id=C00717546&committee_id=C00717827&committee_id=C00717991&committee_id=C00718064&committee_id=C00718627&committee_id=C00718809&committee_id=C00718833&committee_id=C00718866&max_receipt_date=10%2F04%2F2020&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-010-page-001.json",
+            "n_results": 58,
+            "response_sha256": "4054e61ae0ee42a41003957bbd0a915d11f3ae8b18b51f35069d24a2d98eca4b",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00718908&committee_id=C00718924&committee_id=C00719591&committee_id=C00719690&committee_id=C00719732&committee_id=C00719757&committee_id=C00719963&committee_id=C00720094&committee_id=C00720219&committee_id=C00720508&committee_id=C00720573&committee_id=C00720623&committee_id=C00720672&committee_id=C00720805&committee_id=C00721019&committee_id=C00721480&committee_id=C00721589&committee_id=C00722397&committee_id=C00722470&committee_id=C00722645&committee_id=C00723007&committee_id=C00723122&committee_id=C00723270&committee_id=C00723320&committee_id=C00723411&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-011-page-001.json",
+            "n_results": 67,
+            "response_sha256": "1fecb26671849c10236ddb54880204dc7bd90b67da34610e85f2f2262b40baef",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00723494&committee_id=C00723502&committee_id=C00723882&committee_id=C00723924&committee_id=C00724856&committee_id=C00725523&committee_id=C00725762&committee_id=C00725846&committee_id=C00725986&committee_id=C00726075&committee_id=C00726083&committee_id=C00726182&committee_id=C00726257&committee_id=C00726422&committee_id=C00726505&committee_id=C00726570&committee_id=C00726638&committee_id=C00726695&committee_id=C00726877&committee_id=C00727263&committee_id=C00727966&committee_id=C00728097&committee_id=C00728204&committee_id=C00728477&committee_id=C00728592&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-012-page-001.json",
+            "n_results": 59,
+            "response_sha256": "2130f1a88074ed7322d5ed6db5a3d4e6d0bbadf825cd3cd5a4acf170087f3e95",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00728733&committee_id=C00728782&committee_id=C00729285&committee_id=C00729475&committee_id=C00729608&committee_id=C00730200&committee_id=C00730416&committee_id=C00730473&committee_id=C00730663&committee_id=C00730689&committee_id=C00730929&committee_id=C00731349&committee_id=C00731877&committee_id=C00731950&committee_id=C00732156&committee_id=C00732594&committee_id=C00732693&committee_id=C00732743&committee_id=C00732982&committee_id=C00733030&committee_id=C00733469&committee_id=C00733634&committee_id=C00734152&committee_id=C00734269&committee_id=C00734384&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-013-page-001.json",
+            "n_results": 46,
+            "response_sha256": "ed4eea1541a24cacac10d9814e794c8d7f7d4633adcf07b82ae478ee8bcb3790",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00735043&committee_id=C00735076&committee_id=C00735274&committee_id=C00735464&committee_id=C00735860&committee_id=C00736207&committee_id=C00736306&committee_id=C00736876&committee_id=C00736983&committee_id=C00737122&committee_id=C00737619&committee_id=C00737700&committee_id=C00737916&committee_id=C00737973&committee_id=C00738203&committee_id=C00738419&committee_id=C00738625&committee_id=C00738716&committee_id=C00738757&committee_id=C00739177&committee_id=C00739227&committee_id=C00739334&committee_id=C00739383&committee_id=C00739417&committee_id=C00739706&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-014-page-001.json",
+            "n_results": 60,
+            "response_sha256": "b7a853bea97ed8ec6eb592b54372af67f349c2f1b7088f37db0af3211d8536fe",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00739870&committee_id=C00740183&committee_id=C00740266&committee_id=C00740670&committee_id=C00740837&committee_id=C00741058&committee_id=C00741124&committee_id=C00741215&committee_id=C00741405&committee_id=C00741504&committee_id=C00741611&committee_id=C00741660&committee_id=C00741777&committee_id=C00741843&committee_id=C00742098&committee_id=C00742353&committee_id=C00742569&committee_id=C00742577&committee_id=C00742726&committee_id=C00743047&committee_id=C00743088&committee_id=C00743153&committee_id=C00743179&committee_id=C00743211&committee_id=C00743450&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-015-page-001.json",
+            "n_results": 27,
+            "response_sha256": "26a2148dfb8d0b6c3424f14917c19f881f7829e7d71b51576c5cfe0e371610fc",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00743674&committee_id=C00743716&committee_id=C00744227&committee_id=C00744243&committee_id=C00744276&committee_id=C00744318&committee_id=C00744730&committee_id=C00744854&committee_id=C00744904&committee_id=C00745067&committee_id=C00745141&committee_id=C00745935&committee_id=C00746016&committee_id=C00746123&committee_id=C00746131&committee_id=C00746198&committee_id=C00746933&committee_id=C00747261&committee_id=C00747303&committee_id=C00747337&committee_id=C00747519&committee_id=C00747527&committee_id=C00748004&committee_id=C00748293&committee_id=C00748350&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-016-page-001.json",
+            "n_results": 3,
+            "response_sha256": "4ce45e7a85ce3c35c704eaf2620951ec2a5b3e8f37bebc7a58c86a556d37afe3",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2020&committee_id=C00749226&committee_id=C00749408&committee_id=C00749564&committee_id=C00750091&committee_id=C00750133&committee_id=C00750240&committee_id=C00751719&committee_id=C00752139&committee_id=C00752535&committee_id=C00753590&committee_id=C00753657&committee_id=C00753954&committee_id=C00754226&committee_id=C00754770&committee_id=C00754929&committee_id=C00755447&committee_id=C00756247&committee_id=C00757534&max_receipt_date=10%2F04%2F2020&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          }
+        ],
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "reused_sealed_archive": true,
+        "sha256": "89c3e217bb79b9ee0077ad601addb6607bbfd3d6a2674844a02d98d760245a5e",
+        "url": "https://api.open.fec.gov/v1/reports/house-senate/"
+      },
+      "linkage": {
+        "path": "fec_candidate_committee_linkage_2020.zip",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "sha256": "24368dbc335b551d3b836c401b8765825209d8f5c7c2ff047f9f8f3585433039",
+        "url": "https://www.fec.gov/files/bulk-downloads/2020/ccl20.zip"
+      }
+    },
+    {
+      "cycle": 2022,
+      "form2": {
+        "path": "fec_form2_2022.csv",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "role": "receipt clock for principal-committee designation",
+        "sha256": "708b2844a41edc3f7b0a59a5b6187b6057d821809d448504835553f88f24ea47",
+        "url": "https://www.fec.gov/files/bulk-downloads/2022/Form2Filer_2022.csv"
+      },
+      "form3": {
+        "archive_path": "fec_form3_reports_2022.zip",
+        "archive_sha256": "2b44d87b47edfb9ae1756836e5ee7bcee569d3a25d7fd5086e69407ab33f26a9",
+        "cycle": 2022,
+        "max_as_of": "2022-10-09",
+        "n_reports": 1932,
+        "path": "fec_form3_reports_2022.zip",
+        "requests": [
+          {
+            "member": "batch-001-page-001.json",
+            "n_results": 100,
+            "response_sha256": "a3951bf584e200ec08ab4fdd6a638ef7aa615e52d74a6778b30bfd25452e9d02",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00068353&committee_id=C00230482&committee_id=C00257642&committee_id=C00304758&committee_id=C00308676&committee_id=C00330886&committee_id=C00346312&committee_id=C00384529&committee_id=C00384693&committee_id=C00385526&committee_id=C00409581&committee_id=C00458315&committee_id=C00458398&committee_id=C00458463&committee_id=C00459255&committee_id=C00460063&committee_id=C00461046&committee_id=C00464149&committee_id=C00464602&committee_id=C00466482&committee_id=C00467134&committee_id=C00473371&committee_id=C00473827&committee_id=C00476317&committee_id=C00482984&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-002.json",
+            "n_results": 100,
+            "response_sha256": "c1cb7a718d4379cacfdc81110c21e9b513dc70a2d94cd063555506f5c605698b",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00068353&committee_id=C00230482&committee_id=C00257642&committee_id=C00304758&committee_id=C00308676&committee_id=C00330886&committee_id=C00346312&committee_id=C00384529&committee_id=C00384693&committee_id=C00385526&committee_id=C00409581&committee_id=C00458315&committee_id=C00458398&committee_id=C00458463&committee_id=C00459255&committee_id=C00460063&committee_id=C00461046&committee_id=C00464149&committee_id=C00464602&committee_id=C00466482&committee_id=C00467134&committee_id=C00473371&committee_id=C00473827&committee_id=C00476317&committee_id=C00482984&max_receipt_date=10%2F09%2F2022&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-003.json",
+            "n_results": 43,
+            "response_sha256": "e08cf070e65124ad93f0eef258d4cd45ac35281fd36f5e7968c9b2e6414ce784",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00068353&committee_id=C00230482&committee_id=C00257642&committee_id=C00304758&committee_id=C00308676&committee_id=C00330886&committee_id=C00346312&committee_id=C00384529&committee_id=C00384693&committee_id=C00385526&committee_id=C00409581&committee_id=C00458315&committee_id=C00458398&committee_id=C00458463&committee_id=C00459255&committee_id=C00460063&committee_id=C00461046&committee_id=C00464149&committee_id=C00464602&committee_id=C00466482&committee_id=C00467134&committee_id=C00473371&committee_id=C00473827&committee_id=C00476317&committee_id=C00482984&max_receipt_date=10%2F09%2F2022&per_page=100&page=3&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-001.json",
+            "n_results": 100,
+            "response_sha256": "8d185dc149e895a881e1bdaa56d5b77bffb52f69b4ffe9ca597b70391028d08c",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00492991&committee_id=C00494930&committee_id=C00496075&committee_id=C00498345&committee_id=C00540302&committee_id=C00540732&committee_id=C00543231&committee_id=C00547570&committee_id=C00563577&committee_id=C00571919&committee_id=C00573758&committee_id=C00574889&committee_id=C00575548&committee_id=C00582635&committee_id=C00588772&committee_id=C00590489&committee_id=C00608398&committee_id=C00614115&committee_id=C00614776&committee_id=C00620518&committee_id=C00629048&committee_id=C00647065&committee_id=C00648915&committee_id=C00657411&committee_id=C00674085&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-002.json",
+            "n_results": 100,
+            "response_sha256": "c64e2eb262075b65a8fbc123108ee3eb8d35a0b9593c102e18936f7935a6cc18",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00492991&committee_id=C00494930&committee_id=C00496075&committee_id=C00498345&committee_id=C00540302&committee_id=C00540732&committee_id=C00543231&committee_id=C00547570&committee_id=C00563577&committee_id=C00571919&committee_id=C00573758&committee_id=C00574889&committee_id=C00575548&committee_id=C00582635&committee_id=C00588772&committee_id=C00590489&committee_id=C00608398&committee_id=C00614115&committee_id=C00614776&committee_id=C00620518&committee_id=C00629048&committee_id=C00647065&committee_id=C00648915&committee_id=C00657411&committee_id=C00674085&max_receipt_date=10%2F09%2F2022&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-003.json",
+            "n_results": 44,
+            "response_sha256": "267d53e8c4e31520ce5734366b33641106c1d2fbda5768ab0148ba12e030794c",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00492991&committee_id=C00494930&committee_id=C00496075&committee_id=C00498345&committee_id=C00540302&committee_id=C00540732&committee_id=C00543231&committee_id=C00547570&committee_id=C00563577&committee_id=C00571919&committee_id=C00573758&committee_id=C00574889&committee_id=C00575548&committee_id=C00582635&committee_id=C00588772&committee_id=C00590489&committee_id=C00608398&committee_id=C00614115&committee_id=C00614776&committee_id=C00620518&committee_id=C00629048&committee_id=C00647065&committee_id=C00648915&committee_id=C00657411&committee_id=C00674085&max_receipt_date=10%2F09%2F2022&per_page=100&page=3&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-003-page-001.json",
+            "n_results": 100,
+            "response_sha256": "5947f97a16ec0f94ecbeb84199d097f1c6c0a726564100dae7c9b56efa9c3816",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00688465&committee_id=C00689885&committee_id=C00690586&committee_id=C00690974&committee_id=C00694737&committee_id=C00696526&committee_id=C00696815&committee_id=C00697615&committee_id=C00698282&committee_id=C00705012&committee_id=C00707414&committee_id=C00709964&committee_id=C00711010&committee_id=C00715896&committee_id=C00717090&committee_id=C00721589&committee_id=C00722207&committee_id=C00724328&committee_id=C00724914&committee_id=C00726018&committee_id=C00726075&committee_id=C00726125&committee_id=C00726422&committee_id=C00726547&committee_id=C00726877&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-003-page-002.json",
+            "n_results": 20,
+            "response_sha256": "f70c5704d0d2cab835fe64b99bceb492b6a22b45fc18f0abdd432f0ab33d8c15",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00688465&committee_id=C00689885&committee_id=C00690586&committee_id=C00690974&committee_id=C00694737&committee_id=C00696526&committee_id=C00696815&committee_id=C00697615&committee_id=C00698282&committee_id=C00705012&committee_id=C00707414&committee_id=C00709964&committee_id=C00711010&committee_id=C00715896&committee_id=C00717090&committee_id=C00721589&committee_id=C00722207&committee_id=C00724328&committee_id=C00724914&committee_id=C00726018&committee_id=C00726075&committee_id=C00726125&committee_id=C00726422&committee_id=C00726547&committee_id=C00726877&max_receipt_date=10%2F09%2F2022&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-004-page-001.json",
+            "n_results": 100,
+            "response_sha256": "0b0ccf135c16d4a92c7a8b558cb7e5cf9241c112b4f0488d1b825128208db16c",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00730820&committee_id=C00734731&committee_id=C00736876&committee_id=C00736942&committee_id=C00739979&committee_id=C00740563&committee_id=C00742098&committee_id=C00743609&committee_id=C00744516&committee_id=C00744870&committee_id=C00746842&committee_id=C00747790&committee_id=C00748293&committee_id=C00748749&committee_id=C00749226&committee_id=C00750737&committee_id=C00751156&committee_id=C00751826&committee_id=C00752139&committee_id=C00753616&committee_id=C00754796&committee_id=C00756007&committee_id=C00756023&committee_id=C00762088&committee_id=C00762179&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-004-page-002.json",
+            "n_results": 4,
+            "response_sha256": "33ac95218331f84ac76a67482b727f5b63676e6fc4c3b6c07fc61dddf837ed9f",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00730820&committee_id=C00734731&committee_id=C00736876&committee_id=C00736942&committee_id=C00739979&committee_id=C00740563&committee_id=C00742098&committee_id=C00743609&committee_id=C00744516&committee_id=C00744870&committee_id=C00746842&committee_id=C00747790&committee_id=C00748293&committee_id=C00748749&committee_id=C00749226&committee_id=C00750737&committee_id=C00751156&committee_id=C00751826&committee_id=C00752139&committee_id=C00753616&committee_id=C00754796&committee_id=C00756007&committee_id=C00756023&committee_id=C00762088&committee_id=C00762179&max_receipt_date=10%2F09%2F2022&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-005-page-001.json",
+            "n_results": 87,
+            "response_sha256": "a2f92032d295fc5eba68c705bd99bb7ecea4a5fd2c65f08dc46267f3cf42c5b2",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00762559&committee_id=C00763086&committee_id=C00763565&committee_id=C00763771&committee_id=C00764076&committee_id=C00764266&committee_id=C00764449&committee_id=C00765131&committee_id=C00765164&committee_id=C00765750&committee_id=C00765800&committee_id=C00765933&committee_id=C00765941&committee_id=C00766105&committee_id=C00766279&committee_id=C00766311&committee_id=C00766436&committee_id=C00766535&committee_id=C00766683&committee_id=C00766873&committee_id=C00767020&committee_id=C00767103&committee_id=C00767517&committee_id=C00767582&committee_id=C00767756&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-006-page-001.json",
+            "n_results": 100,
+            "response_sha256": "936270deaab3fe0b36512c8128f635cc8632bc1067774ab2738a42b88fe68b75",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00768002&committee_id=C00768119&committee_id=C00768226&committee_id=C00768465&committee_id=C00768556&committee_id=C00768630&committee_id=C00768671&committee_id=C00768820&committee_id=C00768978&committee_id=C00769042&committee_id=C00769075&committee_id=C00769208&committee_id=C00769240&committee_id=C00769315&committee_id=C00769364&committee_id=C00769448&committee_id=C00769471&committee_id=C00769554&committee_id=C00769604&committee_id=C00769679&committee_id=C00769737&committee_id=C00769745&committee_id=C00769901&committee_id=C00770172&committee_id=C00770271&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-006-page-002.json",
+            "n_results": 19,
+            "response_sha256": "d18aad91e4059005f1e9fc1c9620188ad86870136a0e1c11de451ca62158bf6d",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00768002&committee_id=C00768119&committee_id=C00768226&committee_id=C00768465&committee_id=C00768556&committee_id=C00768630&committee_id=C00768671&committee_id=C00768820&committee_id=C00768978&committee_id=C00769042&committee_id=C00769075&committee_id=C00769208&committee_id=C00769240&committee_id=C00769315&committee_id=C00769364&committee_id=C00769448&committee_id=C00769471&committee_id=C00769554&committee_id=C00769604&committee_id=C00769679&committee_id=C00769737&committee_id=C00769745&committee_id=C00769901&committee_id=C00770172&committee_id=C00770271&max_receipt_date=10%2F09%2F2022&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-007-page-001.json",
+            "n_results": 94,
+            "response_sha256": "654e1f9f7706d8358d2297a1766cdefff099b38b64bb1061868a20a9927a5641",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00770313&committee_id=C00770479&committee_id=C00770529&committee_id=C00770727&committee_id=C00770859&committee_id=C00770925&committee_id=C00771105&committee_id=C00771170&committee_id=C00771220&committee_id=C00771261&committee_id=C00771634&committee_id=C00771873&committee_id=C00771972&committee_id=C00772111&committee_id=C00772277&committee_id=C00772384&committee_id=C00772475&committee_id=C00772558&committee_id=C00772665&committee_id=C00772707&committee_id=C00773978&committee_id=C00774018&committee_id=C00774034&committee_id=C00774059&committee_id=C00774133&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-008-page-001.json",
+            "n_results": 100,
+            "response_sha256": "7f8f5b5a382b8f3fb63e49f23b83e65fa39d1cc899e8351976d8723adf1d7d36",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00774265&committee_id=C00774398&committee_id=C00774570&committee_id=C00774844&committee_id=C00775015&committee_id=C00775197&committee_id=C00775247&committee_id=C00775510&committee_id=C00775924&committee_id=C00776245&committee_id=C00776328&committee_id=C00776468&committee_id=C00776476&committee_id=C00776500&committee_id=C00776625&committee_id=C00776633&committee_id=C00776757&committee_id=C00776765&committee_id=C00776807&committee_id=C00777177&committee_id=C00777227&committee_id=C00777771&committee_id=C00777805&committee_id=C00777839&committee_id=C00777904&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-008-page-002.json",
+            "n_results": 47,
+            "response_sha256": "6d335d0068bcb936dee1bebe69b0185b533b8281a0970358cc7a7b5d8fddbe52",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00774265&committee_id=C00774398&committee_id=C00774570&committee_id=C00774844&committee_id=C00775015&committee_id=C00775197&committee_id=C00775247&committee_id=C00775510&committee_id=C00775924&committee_id=C00776245&committee_id=C00776328&committee_id=C00776468&committee_id=C00776476&committee_id=C00776500&committee_id=C00776625&committee_id=C00776633&committee_id=C00776757&committee_id=C00776765&committee_id=C00776807&committee_id=C00777177&committee_id=C00777227&committee_id=C00777771&committee_id=C00777805&committee_id=C00777839&committee_id=C00777904&max_receipt_date=10%2F09%2F2022&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-009-page-001.json",
+            "n_results": 100,
+            "response_sha256": "d5d1f80546a707144803c004fd1a60bda064eec276d7f560e0e4b64bb135f831",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00778407&committee_id=C00778522&committee_id=C00778993&committee_id=C00779017&committee_id=C00779389&committee_id=C00779611&committee_id=C00779793&committee_id=C00779967&committee_id=C00779975&committee_id=C00780221&committee_id=C00780361&committee_id=C00780460&committee_id=C00780643&committee_id=C00780791&committee_id=C00781021&committee_id=C00781377&committee_id=C00781393&committee_id=C00781427&committee_id=C00781443&committee_id=C00781872&committee_id=C00781898&committee_id=C00782110&committee_id=C00782276&committee_id=C00782300&committee_id=C00782409&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-009-page-002.json",
+            "n_results": 17,
+            "response_sha256": "f2d39ff881a1d1436f3100ba304bd706c7dd525279e609fc2c44256f83279f47",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00778407&committee_id=C00778522&committee_id=C00778993&committee_id=C00779017&committee_id=C00779389&committee_id=C00779611&committee_id=C00779793&committee_id=C00779967&committee_id=C00779975&committee_id=C00780221&committee_id=C00780361&committee_id=C00780460&committee_id=C00780643&committee_id=C00780791&committee_id=C00781021&committee_id=C00781377&committee_id=C00781393&committee_id=C00781427&committee_id=C00781443&committee_id=C00781872&committee_id=C00781898&committee_id=C00782110&committee_id=C00782276&committee_id=C00782300&committee_id=C00782409&max_receipt_date=10%2F09%2F2022&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-010-page-001.json",
+            "n_results": 100,
+            "response_sha256": "9945f0a36acb7a9a2ea582b0dda33a38c21698d96525d9c86ba57681eb1a3259",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00782714&committee_id=C00782839&committee_id=C00782938&committee_id=C00782961&committee_id=C00783142&committee_id=C00783209&committee_id=C00783274&committee_id=C00783340&committee_id=C00783365&committee_id=C00783472&committee_id=C00783506&committee_id=C00783530&committee_id=C00783845&committee_id=C00784066&committee_id=C00784116&committee_id=C00784165&committee_id=C00784272&committee_id=C00784314&committee_id=C00784538&committee_id=C00784611&committee_id=C00784751&committee_id=C00784777&committee_id=C00784850&committee_id=C00784892&committee_id=C00784959&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-010-page-002.json",
+            "n_results": 20,
+            "response_sha256": "1a5dc14a158441628c3ac8b83ca705cad15b061d24ba5e8eb4850e3b1dbdb513",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00782714&committee_id=C00782839&committee_id=C00782938&committee_id=C00782961&committee_id=C00783142&committee_id=C00783209&committee_id=C00783274&committee_id=C00783340&committee_id=C00783365&committee_id=C00783472&committee_id=C00783506&committee_id=C00783530&committee_id=C00783845&committee_id=C00784066&committee_id=C00784116&committee_id=C00784165&committee_id=C00784272&committee_id=C00784314&committee_id=C00784538&committee_id=C00784611&committee_id=C00784751&committee_id=C00784777&committee_id=C00784850&committee_id=C00784892&committee_id=C00784959&max_receipt_date=10%2F09%2F2022&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-011-page-001.json",
+            "n_results": 100,
+            "response_sha256": "eb563de7287fed9cffa65733a7b0c02b1e21e76a102b2511ac8df6ebbf1d2a82",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00785063&committee_id=C00785204&committee_id=C00785279&committee_id=C00785451&committee_id=C00785527&committee_id=C00785733&committee_id=C00785931&committee_id=C00786046&committee_id=C00786053&committee_id=C00786467&committee_id=C00786558&committee_id=C00786723&committee_id=C00786921&committee_id=C00787093&committee_id=C00787135&committee_id=C00787226&committee_id=C00787341&committee_id=C00787556&committee_id=C00787689&committee_id=C00787796&committee_id=C00787853&committee_id=C00788000&committee_id=C00788026&committee_id=C00788034&committee_id=C00788208&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-011-page-002.json",
+            "n_results": 9,
+            "response_sha256": "62719b121f87b9e39a47f0b0068ff6c658b41f8ca0bffa854833b8205c546ee9",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00785063&committee_id=C00785204&committee_id=C00785279&committee_id=C00785451&committee_id=C00785527&committee_id=C00785733&committee_id=C00785931&committee_id=C00786046&committee_id=C00786053&committee_id=C00786467&committee_id=C00786558&committee_id=C00786723&committee_id=C00786921&committee_id=C00787093&committee_id=C00787135&committee_id=C00787226&committee_id=C00787341&committee_id=C00787556&committee_id=C00787689&committee_id=C00787796&committee_id=C00787853&committee_id=C00788000&committee_id=C00788026&committee_id=C00788034&committee_id=C00788208&max_receipt_date=10%2F09%2F2022&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-012-page-001.json",
+            "n_results": 72,
+            "response_sha256": "74cd56ee068de402b3863ca50ce47703de684e6c1f916faf8dd1d7ae82f37326",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00788372&committee_id=C00788463&committee_id=C00788901&committee_id=C00788950&committee_id=C00788984&committee_id=C00789123&committee_id=C00789255&committee_id=C00789453&committee_id=C00789479&committee_id=C00789594&committee_id=C00789628&committee_id=C00789651&committee_id=C00789842&committee_id=C00789925&committee_id=C00790030&committee_id=C00790063&committee_id=C00790113&committee_id=C00790162&committee_id=C00790279&committee_id=C00790386&committee_id=C00790402&committee_id=C00790469&committee_id=C00790501&committee_id=C00790550&committee_id=C00790667&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-013-page-001.json",
+            "n_results": 83,
+            "response_sha256": "e6300b28dd52d8b841f087c550e60a84e473752240f5a2bf6810cbe2371f74f3",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00790733&committee_id=C00790758&committee_id=C00790873&committee_id=C00791129&committee_id=C00791186&committee_id=C00791319&committee_id=C00791418&committee_id=C00791467&committee_id=C00791509&committee_id=C00791525&committee_id=C00791533&committee_id=C00791566&committee_id=C00791723&committee_id=C00791913&committee_id=C00791988&committee_id=C00792176&committee_id=C00792184&committee_id=C00792267&committee_id=C00792424&committee_id=C00792820&committee_id=C00793265&committee_id=C00793844&committee_id=C00794073&committee_id=C00794164&committee_id=C00794214&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-014-page-001.json",
+            "n_results": 80,
+            "response_sha256": "57c9eea8a2038f503282d2cea7ddccf125997a34e283df053094fe1713879655",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00794370&committee_id=C00794388&committee_id=C00794552&committee_id=C00794800&committee_id=C00794875&committee_id=C00795039&committee_id=C00795096&committee_id=C00795112&committee_id=C00795179&committee_id=C00795252&committee_id=C00795559&committee_id=C00795567&committee_id=C00795807&committee_id=C00795930&committee_id=C00796425&committee_id=C00797621&committee_id=C00797779&committee_id=C00797910&committee_id=C00798181&committee_id=C00798827&committee_id=C00799056&committee_id=C00799155&committee_id=C00799338&committee_id=C00799668&committee_id=C00800094&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-015-page-001.json",
+            "n_results": 61,
+            "response_sha256": "3c34288e9654259e9a01f76d6ddf3c8203f80f0695e2d809be907908e6355fa4",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00800268&committee_id=C00800326&committee_id=C00800375&committee_id=C00800441&committee_id=C00800466&committee_id=C00800532&committee_id=C00800623&committee_id=C00800656&committee_id=C00800847&committee_id=C00801399&committee_id=C00801654&committee_id=C00801860&committee_id=C00802108&committee_id=C00802710&committee_id=C00802959&committee_id=C00803130&committee_id=C00803213&committee_id=C00803254&committee_id=C00803601&committee_id=C00803841&committee_id=C00803908&committee_id=C00804054&committee_id=C00804062&committee_id=C00804120&committee_id=C00804377&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-016-page-001.json",
+            "n_results": 61,
+            "response_sha256": "db350f187df7acb7b72388b5d352f6e7f1256e771d079fc5683491a7aab44f24",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00804468&committee_id=C00804765&committee_id=C00805499&committee_id=C00805663&committee_id=C00805689&committee_id=C00805721&committee_id=C00805887&committee_id=C00805994&committee_id=C00806026&committee_id=C00806414&committee_id=C00806497&committee_id=C00806786&committee_id=C00806810&committee_id=C00806828&committee_id=C00806919&committee_id=C00806935&committee_id=C00807156&committee_id=C00807222&committee_id=C00807461&committee_id=C00807677&committee_id=C00808162&committee_id=C00808295&committee_id=C00808360&committee_id=C00808477&committee_id=C00808618&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-017-page-001.json",
+            "n_results": 27,
+            "response_sha256": "f259a548142c5240e455f15d3941ad20f906d1178cfcf7f69ff017d1fef8aec3",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00808881&committee_id=C00808956&committee_id=C00809269&committee_id=C00809665&committee_id=C00809699&committee_id=C00809764&committee_id=C00810226&committee_id=C00810697&committee_id=C00810713&committee_id=C00810739&committee_id=C00810754&committee_id=C00810937&committee_id=C00811075&committee_id=C00811125&committee_id=C00811182&committee_id=C00811208&committee_id=C00811422&committee_id=C00811505&committee_id=C00811596&committee_id=C00811828&committee_id=C00811919&committee_id=C00812552&committee_id=C00812834&committee_id=C00813022&committee_id=C00813261&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-018-page-001.json",
+            "n_results": 31,
+            "response_sha256": "619314976c59292f51c7865c221f389ff70922933a022b0ca875c4e98697f781",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00813279&committee_id=C00813295&committee_id=C00813352&committee_id=C00813469&committee_id=C00813600&committee_id=C00813774&committee_id=C00813840&committee_id=C00814442&committee_id=C00814558&committee_id=C00814566&committee_id=C00814764&committee_id=C00815001&committee_id=C00815019&committee_id=C00815225&committee_id=C00815241&committee_id=C00815308&committee_id=C00815522&committee_id=C00815654&committee_id=C00815662&committee_id=C00815860&committee_id=C00816207&committee_id=C00816348&committee_id=C00816462&committee_id=C00816488&committee_id=C00816702&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-019-page-001.json",
+            "n_results": 14,
+            "response_sha256": "5b711b058c68f075c4420c30d94ce6c4499f2669a5248c252cdc8feb11855518",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2022&committee_id=C00816967&committee_id=C00817262&committee_id=C00817304&committee_id=C00817429&committee_id=C00817494&committee_id=C00817957&committee_id=C00818419&committee_id=C00819466&committee_id=C00819946&committee_id=C00819953&committee_id=C00820407&committee_id=C00820449&committee_id=C00820795&committee_id=C00821520&committee_id=C00822619&committee_id=C00823443&committee_id=C00824078&committee_id=C00824433&committee_id=C00829648&max_receipt_date=10%2F09%2F2022&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          }
+        ],
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "reused_sealed_archive": true,
+        "sha256": "2b44d87b47edfb9ae1756836e5ee7bcee569d3a25d7fd5086e69407ab33f26a9",
+        "url": "https://api.open.fec.gov/v1/reports/house-senate/"
+      },
+      "linkage": {
+        "path": "fec_candidate_committee_linkage_2022.zip",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "sha256": "214772084ad45e8613fccc886668f5c777fab8867d26d5bae21aa2a4b78be2db",
+        "url": "https://www.fec.gov/files/bulk-downloads/2022/ccl22.zip"
+      }
+    },
+    {
+      "cycle": 2024,
+      "form2": {
+        "path": "fec_form2_2024.csv",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "role": "receipt clock for principal-committee designation",
+        "sha256": "904d93f8b5a9f51a82033e0369a2ae4b88b6ee3cfb2578f68ed09434cfe5c23b",
+        "url": "https://www.fec.gov/files/bulk-downloads/2024/Form2Filer_2024.csv"
+      },
+      "form3": {
+        "archive_path": "fec_form3_reports_2024.zip",
+        "archive_sha256": "ad5d8b4cc7b1f3f2f6183685abded822de7fc6924641d48385156860287a3921",
+        "cycle": 2024,
+        "max_as_of": "2024-10-06",
+        "n_reports": 1454,
+        "path": "fec_form3_reports_2024.zip",
+        "requests": [
+          {
+            "member": "batch-001-page-001.json",
+            "n_results": 100,
+            "response_sha256": "cdb0bd6d2a622c415a5205a1852a5e4704bb6fffaa0016b9f054e922f44360ed",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00264564&committee_id=C00264697&committee_id=C00326801&committee_id=C00343871&committee_id=C00344473&committee_id=C00349217&committee_id=C00349506&committee_id=C00376939&committee_id=C00410803&committee_id=C00411330&committee_id=C00411587&committee_id=C00412304&committee_id=C00413914&committee_id=C00420760&committee_id=C00424713&committee_id=C00431056&committee_id=C00431353&committee_id=C00434563&committee_id=C00436386&committee_id=C00443218&committee_id=C00467134&committee_id=C00476291&committee_id=C00486563&committee_id=C00492645&committee_id=C00492785&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-002.json",
+            "n_results": 100,
+            "response_sha256": "8bebc45b2f2b5cc6356cc17e9044f2d68bb92db4012b2de7da725342a6178538",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00264564&committee_id=C00264697&committee_id=C00326801&committee_id=C00343871&committee_id=C00344473&committee_id=C00349217&committee_id=C00349506&committee_id=C00376939&committee_id=C00410803&committee_id=C00411330&committee_id=C00411587&committee_id=C00412304&committee_id=C00413914&committee_id=C00420760&committee_id=C00424713&committee_id=C00431056&committee_id=C00431353&committee_id=C00434563&committee_id=C00436386&committee_id=C00443218&committee_id=C00467134&committee_id=C00476291&committee_id=C00486563&committee_id=C00492645&committee_id=C00492785&max_receipt_date=10%2F06%2F2024&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-003.json",
+            "n_results": 27,
+            "response_sha256": "8d90445ea9414758e8263741fc22092033fa5af18f5d5ac8a8317aec39efee60",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00264564&committee_id=C00264697&committee_id=C00326801&committee_id=C00343871&committee_id=C00344473&committee_id=C00349217&committee_id=C00349506&committee_id=C00376939&committee_id=C00410803&committee_id=C00411330&committee_id=C00411587&committee_id=C00412304&committee_id=C00413914&committee_id=C00420760&committee_id=C00424713&committee_id=C00431056&committee_id=C00431353&committee_id=C00434563&committee_id=C00436386&committee_id=C00443218&committee_id=C00467134&committee_id=C00476291&committee_id=C00486563&committee_id=C00492645&committee_id=C00492785&max_receipt_date=10%2F06%2F2024&per_page=100&page=3&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-001.json",
+            "n_results": 100,
+            "response_sha256": "668f46a1eb0523c089860a37144ea8c682f0ec99e18074b58ceafcb8da76eb15",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00495358&committee_id=C00498907&committee_id=C00500843&committee_id=C00504704&committee_id=C00508804&committee_id=C00516047&committee_id=C00539890&committee_id=C00558627&committee_id=C00577999&committee_id=C00606939&committee_id=C00619718&committee_id=C00647339&committee_id=C00648220&committee_id=C00652727&committee_id=C00653147&committee_id=C00653196&committee_id=C00670695&committee_id=C00674085&committee_id=C00675256&committee_id=C00676965&committee_id=C00688465&committee_id=C00697615&committee_id=C00698282&committee_id=C00704874&committee_id=C00721787&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-002.json",
+            "n_results": 90,
+            "response_sha256": "bef49b833fde3e41d9e0dd1e82f48a73b5db82af2c69cef0a8c8a6d32cc5aea6",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00495358&committee_id=C00498907&committee_id=C00500843&committee_id=C00504704&committee_id=C00508804&committee_id=C00516047&committee_id=C00539890&committee_id=C00558627&committee_id=C00577999&committee_id=C00606939&committee_id=C00619718&committee_id=C00647339&committee_id=C00648220&committee_id=C00652727&committee_id=C00653147&committee_id=C00653196&committee_id=C00670695&committee_id=C00674085&committee_id=C00675256&committee_id=C00676965&committee_id=C00688465&committee_id=C00697615&committee_id=C00698282&committee_id=C00704874&committee_id=C00721787&max_receipt_date=10%2F06%2F2024&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-003-page-001.json",
+            "n_results": 68,
+            "response_sha256": "771c4aa8adfa4700af7342e87a9b55eb4016578c793b78d2d744c7778eb16623",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00749226&committee_id=C00751826&committee_id=C00762179&committee_id=C00762559&committee_id=C00765248&committee_id=C00765362&committee_id=C00767517&committee_id=C00769174&committee_id=C00770883&committee_id=C00772772&committee_id=C00774265&committee_id=C00776468&committee_id=C00776807&committee_id=C00788224&committee_id=C00789594&committee_id=C00789776&committee_id=C00790667&committee_id=C00792820&committee_id=C00794032&committee_id=C00794974&committee_id=C00802108&committee_id=C00802488&committee_id=C00803080&committee_id=C00808436&committee_id=C00809384&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-004-page-001.json",
+            "n_results": 77,
+            "response_sha256": "25bd4eea6c757a3a106e86eb68fadb76654bc819966ae42cdb7bc02d3a0edc4f",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00809699&committee_id=C00810077&committee_id=C00813261&committee_id=C00814442&committee_id=C00815860&committee_id=C00815886&committee_id=C00816520&committee_id=C00816645&committee_id=C00817247&committee_id=C00817692&committee_id=C00817973&committee_id=C00818476&committee_id=C00818757&committee_id=C00819714&committee_id=C00824706&committee_id=C00825604&committee_id=C00827071&committee_id=C00827162&committee_id=C00827691&committee_id=C00827733&committee_id=C00827964&committee_id=C00828046&committee_id=C00828103&committee_id=C00828392&committee_id=C00828475&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-005-page-001.json",
+            "n_results": 100,
+            "response_sha256": "e853143a102f0486cf0479b9213ce3852d8746ee537a0ec859f3b32f23682780",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00828640&committee_id=C00828988&committee_id=C00829135&committee_id=C00829697&committee_id=C00830026&committee_id=C00830315&committee_id=C00830554&committee_id=C00830794&committee_id=C00830877&committee_id=C00831107&committee_id=C00831636&committee_id=C00831875&committee_id=C00832022&committee_id=C00832071&committee_id=C00832253&committee_id=C00832436&committee_id=C00832618&committee_id=C00832733&committee_id=C00832915&committee_id=C00833053&committee_id=C00833327&committee_id=C00833426&committee_id=C00833608&committee_id=C00834127&committee_id=C00834218&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-005-page-002.json",
+            "n_results": 60,
+            "response_sha256": "a4c7a7f5bf159a49543e2d861769ae16b336afbaf4f8e502a59639c73657fb31",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00828640&committee_id=C00828988&committee_id=C00829135&committee_id=C00829697&committee_id=C00830026&committee_id=C00830315&committee_id=C00830554&committee_id=C00830794&committee_id=C00830877&committee_id=C00831107&committee_id=C00831636&committee_id=C00831875&committee_id=C00832022&committee_id=C00832071&committee_id=C00832253&committee_id=C00832436&committee_id=C00832618&committee_id=C00832733&committee_id=C00832915&committee_id=C00833053&committee_id=C00833327&committee_id=C00833426&committee_id=C00833608&committee_id=C00834127&committee_id=C00834218&max_receipt_date=10%2F06%2F2024&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-006-page-001.json",
+            "n_results": 100,
+            "response_sha256": "194d0b099725266f594b58d6232067b9373d177ae7d3a63fafed310668e579ac",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00834721&committee_id=C00834903&committee_id=C00835074&committee_id=C00835140&committee_id=C00835199&committee_id=C00835355&committee_id=C00835538&committee_id=C00835660&committee_id=C00835678&committee_id=C00835801&committee_id=C00836262&committee_id=C00836452&committee_id=C00836569&committee_id=C00836700&committee_id=C00836999&committee_id=C00837112&committee_id=C00837278&committee_id=C00837344&committee_id=C00837476&committee_id=C00837484&committee_id=C00837526&committee_id=C00837609&committee_id=C00837781&committee_id=C00837799&committee_id=C00837807&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-006-page-002.json",
+            "n_results": 3,
+            "response_sha256": "462120cdb22418585e3c9212cf3614733e6645db5fc730353ced24287fbfc4c0",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00834721&committee_id=C00834903&committee_id=C00835074&committee_id=C00835140&committee_id=C00835199&committee_id=C00835355&committee_id=C00835538&committee_id=C00835660&committee_id=C00835678&committee_id=C00835801&committee_id=C00836262&committee_id=C00836452&committee_id=C00836569&committee_id=C00836700&committee_id=C00836999&committee_id=C00837112&committee_id=C00837278&committee_id=C00837344&committee_id=C00837476&committee_id=C00837484&committee_id=C00837526&committee_id=C00837609&committee_id=C00837781&committee_id=C00837799&committee_id=C00837807&max_receipt_date=10%2F06%2F2024&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-007-page-001.json",
+            "n_results": 100,
+            "response_sha256": "a86b4b6a377c4f84f9fc7b7bcedcbeda26871a238348e732ca2269f04c5e234c",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00837856&committee_id=C00838607&committee_id=C00839100&committee_id=C00839175&committee_id=C00839183&committee_id=C00839449&committee_id=C00839563&committee_id=C00839597&committee_id=C00839878&committee_id=C00839951&committee_id=C00840017&committee_id=C00840140&committee_id=C00840207&committee_id=C00840314&committee_id=C00840793&committee_id=C00840843&committee_id=C00840934&committee_id=C00841080&committee_id=C00841692&committee_id=C00842385&committee_id=C00842518&committee_id=C00842716&committee_id=C00843391&committee_id=C00843524&committee_id=C00843565&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-007-page-002.json",
+            "n_results": 16,
+            "response_sha256": "a98043a284884f810fc631923fb0eceee1b2f48e89c1e42268419dfce36f7c92",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00837856&committee_id=C00838607&committee_id=C00839100&committee_id=C00839175&committee_id=C00839183&committee_id=C00839449&committee_id=C00839563&committee_id=C00839597&committee_id=C00839878&committee_id=C00839951&committee_id=C00840017&committee_id=C00840140&committee_id=C00840207&committee_id=C00840314&committee_id=C00840793&committee_id=C00840843&committee_id=C00840934&committee_id=C00841080&committee_id=C00841692&committee_id=C00842385&committee_id=C00842518&committee_id=C00842716&committee_id=C00843391&committee_id=C00843524&committee_id=C00843565&max_receipt_date=10%2F06%2F2024&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-008-page-001.json",
+            "n_results": 100,
+            "response_sha256": "2fe55d47bff9a831fe1d9825b20da9a0463ee9558d3a1343c6738997d776b7f8",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00843722&committee_id=C00844050&committee_id=C00844159&committee_id=C00844183&committee_id=C00844340&committee_id=C00844654&committee_id=C00844688&committee_id=C00844753&committee_id=C00844977&committee_id=C00844985&committee_id=C00845032&committee_id=C00845735&committee_id=C00845800&committee_id=C00845859&committee_id=C00846014&committee_id=C00846048&committee_id=C00846121&committee_id=C00846394&committee_id=C00846451&committee_id=C00846519&committee_id=C00846915&committee_id=C00847129&committee_id=C00847400&committee_id=C00847418&committee_id=C00847517&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-008-page-002.json",
+            "n_results": 34,
+            "response_sha256": "d777fce4cddf72d39a512df568444f146bcb5119f624d2a30f055c45a6f38169",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00843722&committee_id=C00844050&committee_id=C00844159&committee_id=C00844183&committee_id=C00844340&committee_id=C00844654&committee_id=C00844688&committee_id=C00844753&committee_id=C00844977&committee_id=C00844985&committee_id=C00845032&committee_id=C00845735&committee_id=C00845800&committee_id=C00845859&committee_id=C00846014&committee_id=C00846048&committee_id=C00846121&committee_id=C00846394&committee_id=C00846451&committee_id=C00846519&committee_id=C00846915&committee_id=C00847129&committee_id=C00847400&committee_id=C00847418&committee_id=C00847517&max_receipt_date=10%2F06%2F2024&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-009-page-001.json",
+            "n_results": 97,
+            "response_sha256": "5d92cf747f5855e9e6ab16b0f0499778f93325eefa791805747443e07f38c17d",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00847582&committee_id=C00847657&committee_id=C00847665&committee_id=C00847970&committee_id=C00848002&committee_id=C00848069&committee_id=C00848234&committee_id=C00848622&committee_id=C00848648&committee_id=C00848879&committee_id=C00848986&committee_id=C00849349&committee_id=C00849505&committee_id=C00849620&committee_id=C00849661&committee_id=C00849737&committee_id=C00849810&committee_id=C00849984&committee_id=C00850131&committee_id=C00850461&committee_id=C00850537&committee_id=C00850677&committee_id=C00850743&committee_id=C00851352&committee_id=C00851725&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-010-page-001.json",
+            "n_results": 83,
+            "response_sha256": "4167ae6a497a3bb0543002e200411fad4243dd2875c0620f11aff38322624410",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00851899&committee_id=C00851907&committee_id=C00851964&committee_id=C00851980&committee_id=C00852038&committee_id=C00852186&committee_id=C00852343&committee_id=C00852467&committee_id=C00852483&committee_id=C00852517&committee_id=C00852624&committee_id=C00852897&committee_id=C00853036&committee_id=C00853242&committee_id=C00853747&committee_id=C00853754&committee_id=C00853788&committee_id=C00853895&committee_id=C00854109&committee_id=C00854125&committee_id=C00854224&committee_id=C00854505&committee_id=C00854547&committee_id=C00854802&committee_id=C00854968&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-011-page-001.json",
+            "n_results": 53,
+            "response_sha256": "8b2f121c8d14bfb6030fbc1de211fc1eea86ac63ebaa1dedd4cca4537614e50d",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00855015&committee_id=C00855304&committee_id=C00855429&committee_id=C00855668&committee_id=C00855726&committee_id=C00855734&committee_id=C00856245&committee_id=C00856765&committee_id=C00857268&committee_id=C00857623&committee_id=C00857755&committee_id=C00858274&committee_id=C00858662&committee_id=C00858696&committee_id=C00858761&committee_id=C00858803&committee_id=C00859124&committee_id=C00859785&committee_id=C00860197&committee_id=C00861450&committee_id=C00863753&committee_id=C00863787&committee_id=C00863894&committee_id=C00863977&committee_id=C00864157&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-012-page-001.json",
+            "n_results": 68,
+            "response_sha256": "6520a7a4d3f6a911200166e7c95c3b3fa263a64ece55837a04cb6a6e8e7eff8c",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00864462&committee_id=C00864496&committee_id=C00864603&committee_id=C00864629&committee_id=C00864678&committee_id=C00864819&committee_id=C00865063&committee_id=C00865253&committee_id=C00865451&committee_id=C00865493&committee_id=C00865808&committee_id=C00865956&committee_id=C00866020&committee_id=C00866053&committee_id=C00866152&committee_id=C00866442&committee_id=C00866962&committee_id=C00866988&committee_id=C00867002&committee_id=C00867069&committee_id=C00867507&committee_id=C00867580&committee_id=C00867622&committee_id=C00867705&committee_id=C00867804&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-013-page-001.json",
+            "n_results": 43,
+            "response_sha256": "8c6a3f549fc87a442e77223feacdba129687d5d2854f7602e6753e677f45d7bd",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00868356&committee_id=C00868521&committee_id=C00868596&committee_id=C00868760&committee_id=C00868869&committee_id=C00868919&committee_id=C00868943&committee_id=C00869016&committee_id=C00869099&committee_id=C00869412&committee_id=C00869545&committee_id=C00870121&committee_id=C00870139&committee_id=C00870337&committee_id=C00870394&committee_id=C00871269&committee_id=C00871277&committee_id=C00871293&committee_id=C00871335&committee_id=C00871434&committee_id=C00871491&committee_id=C00872747&committee_id=C00872861&committee_id=C00872895&committee_id=C00872937&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-014-page-001.json",
+            "n_results": 27,
+            "response_sha256": "bf7b8ebdcb06cd064c5ed8f3a5c7135531398918dd44e665777bc488d6c8eebc",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00872994&committee_id=C00873166&committee_id=C00873521&committee_id=C00873653&committee_id=C00873851&committee_id=C00874263&committee_id=C00874271&committee_id=C00874743&committee_id=C00875021&committee_id=C00875302&committee_id=C00875757&committee_id=C00875971&committee_id=C00876151&committee_id=C00876268&committee_id=C00876441&committee_id=C00876532&committee_id=C00876789&committee_id=C00877308&committee_id=C00877563&committee_id=C00877589&committee_id=C00877688&committee_id=C00877944&committee_id=C00878561&committee_id=C00878736&committee_id=C00878835&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-015-page-001.json",
+            "n_results": 9,
+            "response_sha256": "d7b16ccd5c23f233b0d37ffea48cae2c449484efd71fd61b6d2bf04b01561660",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2024&committee_id=C00879809&committee_id=C00880005&committee_id=C00880104&committee_id=C00880278&committee_id=C00880575&committee_id=C00881300&committee_id=C00881581&committee_id=C00882654&committee_id=C00883611&committee_id=C00885996&committee_id=C00888610&committee_id=C00888826&committee_id=C00889030&committee_id=C00889816&committee_id=C00890921&committee_id=C00892695&max_receipt_date=10%2F06%2F2024&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          }
+        ],
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "reused_sealed_archive": true,
+        "sha256": "ad5d8b4cc7b1f3f2f6183685abded822de7fc6924641d48385156860287a3921",
+        "url": "https://api.open.fec.gov/v1/reports/house-senate/"
+      },
+      "linkage": {
+        "path": "fec_candidate_committee_linkage_2024.zip",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "sha256": "35b17af9e254f3ac860d55d125b65ed21084335bfeccab83cef05d8d3d767d4c",
+        "url": "https://www.fec.gov/files/bulk-downloads/2024/ccl24.zip"
+      }
+    },
+    {
+      "cycle": 2026,
+      "form2": {
+        "path": "fec_form2_2026.csv",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "role": "receipt clock for principal-committee designation",
+        "sha256": "479d6d3e4ec2951b058a334a59ca88cf23398e90681f5f34380f3bf484a6eddd",
+        "url": "https://www.fec.gov/files/bulk-downloads/2026/Form2Filer_2026.csv"
+      },
+      "form3": {
+        "archive_path": "fec_form3_reports_2026.zip",
+        "archive_sha256": "bcffe765af9300f20164e01be747db241f8e9dd57868cb626584305e4dd7caa6",
+        "cycle": 2026,
+        "max_as_of": "2026-09-27",
+        "n_reports": 1675,
+        "path": "fec_form3_reports_2026.zip",
+        "requests": [
+          {
+            "member": "batch-001-page-001.json",
+            "n_results": 100,
+            "response_sha256": "53f1d0cd7033b3e5abc590ad0c6c84526ac39ad2dc54d499c30ccf53e6c07a34",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00148999&committee_id=C00193342&committee_id=C00196774&committee_id=C00238907&committee_id=C00285254&committee_id=C00314575&committee_id=C00369033&committee_id=C00437277&committee_id=C00437889&committee_id=C00438713&committee_id=C00440362&committee_id=C00443580&committee_id=C00443689&committee_id=C00449397&committee_id=C00457325&committee_id=C00458828&committee_id=C00467571&committee_id=C00475392&committee_id=C00491357&committee_id=C00498345&committee_id=C00499988&committee_id=C00532465&committee_id=C00539825&committee_id=C00540500&committee_id=C00543967&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-002.json",
+            "n_results": 100,
+            "response_sha256": "d38daf7a26cf37e12187186bf36a5050c00fda1ebd1491f22a41a9c1670c479f",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00148999&committee_id=C00193342&committee_id=C00196774&committee_id=C00238907&committee_id=C00285254&committee_id=C00314575&committee_id=C00369033&committee_id=C00437277&committee_id=C00437889&committee_id=C00438713&committee_id=C00440362&committee_id=C00443580&committee_id=C00443689&committee_id=C00449397&committee_id=C00457325&committee_id=C00458828&committee_id=C00467571&committee_id=C00475392&committee_id=C00491357&committee_id=C00498345&committee_id=C00499988&committee_id=C00532465&committee_id=C00539825&committee_id=C00540500&committee_id=C00543967&max_receipt_date=09%2F27%2F2026&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-001-page-003.json",
+            "n_results": 18,
+            "response_sha256": "90705fb07ec74a00ee635eec497e819264697f7c39217a9a940113984253c635",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00148999&committee_id=C00193342&committee_id=C00196774&committee_id=C00238907&committee_id=C00285254&committee_id=C00314575&committee_id=C00369033&committee_id=C00437277&committee_id=C00437889&committee_id=C00438713&committee_id=C00440362&committee_id=C00443580&committee_id=C00443689&committee_id=C00449397&committee_id=C00457325&committee_id=C00458828&committee_id=C00467571&committee_id=C00475392&committee_id=C00491357&committee_id=C00498345&committee_id=C00499988&committee_id=C00532465&committee_id=C00539825&committee_id=C00540500&committee_id=C00543967&max_receipt_date=09%2F27%2F2026&per_page=100&page=3&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-001.json",
+            "n_results": 100,
+            "response_sha256": "55e2c68435f972b07ada5934d3f1503652749f9c00f47020b2805b335f337b1a",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00543983&committee_id=C00544684&committee_id=C00545772&committee_id=C00546788&committee_id=C00547240&committee_id=C00547976&committee_id=C00570994&committee_id=C00576173&committee_id=C00588541&committee_id=C00597013&committee_id=C00634808&committee_id=C00660464&committee_id=C00663781&committee_id=C00675256&committee_id=C00675348&committee_id=C00688465&committee_id=C00701003&committee_id=C00701672&committee_id=C00706267&committee_id=C00716720&committee_id=C00718627&committee_id=C00718866&committee_id=C00722272&committee_id=C00725788&committee_id=C00726422&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-002-page-002.json",
+            "n_results": 73,
+            "response_sha256": "bb34e2bfd789ed46f6ceed5c7e1ad64e373143c8c485cd5f80138ef17416c0b9",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00543983&committee_id=C00544684&committee_id=C00545772&committee_id=C00546788&committee_id=C00547240&committee_id=C00547976&committee_id=C00570994&committee_id=C00576173&committee_id=C00588541&committee_id=C00597013&committee_id=C00634808&committee_id=C00660464&committee_id=C00663781&committee_id=C00675256&committee_id=C00675348&committee_id=C00688465&committee_id=C00701003&committee_id=C00701672&committee_id=C00706267&committee_id=C00716720&committee_id=C00718627&committee_id=C00718866&committee_id=C00722272&committee_id=C00725788&committee_id=C00726422&max_receipt_date=09%2F27%2F2026&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-003-page-001.json",
+            "n_results": 100,
+            "response_sha256": "6db89c84483ff616bf3d08c8dc19b5e5572416118569831ab8ada783a0425e54",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00745356&committee_id=C00763045&committee_id=C00776807&committee_id=C00785451&committee_id=C00788943&committee_id=C00792002&committee_id=C00798827&committee_id=C00805721&committee_id=C00816520&committee_id=C00818757&committee_id=C00819672&committee_id=C00821595&committee_id=C00827964&committee_id=C00830554&committee_id=C00830661&committee_id=C00832436&committee_id=C00839720&committee_id=C00846048&committee_id=C00849588&committee_id=C00849810&committee_id=C00850743&committee_id=C00853242&committee_id=C00855734&committee_id=C00857110&committee_id=C00857128&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-003-page-002.json",
+            "n_results": 34,
+            "response_sha256": "86a1679d7656a467adc0ed6ddf6c98b35df6e16e3ec5938d8df1e32396c3360a",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00745356&committee_id=C00763045&committee_id=C00776807&committee_id=C00785451&committee_id=C00788943&committee_id=C00792002&committee_id=C00798827&committee_id=C00805721&committee_id=C00816520&committee_id=C00818757&committee_id=C00819672&committee_id=C00821595&committee_id=C00827964&committee_id=C00830554&committee_id=C00830661&committee_id=C00832436&committee_id=C00839720&committee_id=C00846048&committee_id=C00849588&committee_id=C00849810&committee_id=C00850743&committee_id=C00853242&committee_id=C00855734&committee_id=C00857110&committee_id=C00857128&max_receipt_date=09%2F27%2F2026&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-004-page-001.json",
+            "n_results": 100,
+            "response_sha256": "8dedaf0beaa675bd06aa6c5cf58ff32d42e6f84855aa8be09230a9f2153a8190",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00857623&committee_id=C00859579&committee_id=C00865618&committee_id=C00865642&committee_id=C00865808&committee_id=C00866962&committee_id=C00867523&committee_id=C00869545&committee_id=C00870352&committee_id=C00872903&committee_id=C00873166&committee_id=C00875971&committee_id=C00880005&committee_id=C00885343&committee_id=C00885459&committee_id=C00888479&committee_id=C00892505&committee_id=C00892695&committee_id=C00892828&committee_id=C00893099&committee_id=C00893297&committee_id=C00894113&committee_id=C00894816&committee_id=C00894907&committee_id=C00894972&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-004-page-002.json",
+            "n_results": 9,
+            "response_sha256": "db7f93d9a38cf2cfc0e864127c9824ceda4a76084853b5de9702b58dc8922243",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00857623&committee_id=C00859579&committee_id=C00865618&committee_id=C00865642&committee_id=C00865808&committee_id=C00866962&committee_id=C00867523&committee_id=C00869545&committee_id=C00870352&committee_id=C00872903&committee_id=C00873166&committee_id=C00875971&committee_id=C00880005&committee_id=C00885343&committee_id=C00885459&committee_id=C00888479&committee_id=C00892505&committee_id=C00892695&committee_id=C00892828&committee_id=C00893099&committee_id=C00893297&committee_id=C00894113&committee_id=C00894816&committee_id=C00894907&committee_id=C00894972&max_receipt_date=09%2F27%2F2026&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-005-page-001.json",
+            "n_results": 100,
+            "response_sha256": "61f83c7034f4b453f211c44b041a8e7af91550dbb7b3a6564a2637ac7428fb92",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00895599&committee_id=C00895615&committee_id=C00895763&committee_id=C00895789&committee_id=C00895904&committee_id=C00896019&committee_id=C00897058&committee_id=C00897140&committee_id=C00897330&committee_id=C00897488&committee_id=C00897611&committee_id=C00897652&committee_id=C00897660&committee_id=C00897736&committee_id=C00897751&committee_id=C00897827&committee_id=C00898080&committee_id=C00898148&committee_id=C00898189&committee_id=C00898817&committee_id=C00899021&committee_id=C00899294&committee_id=C00899310&committee_id=C00899559&committee_id=C00899583&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-005-page-002.json",
+            "n_results": 20,
+            "response_sha256": "70819fa7fe5520c4bbb6153ad5466ca4fea498465e2f0b99715149018d28b276",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00895599&committee_id=C00895615&committee_id=C00895763&committee_id=C00895789&committee_id=C00895904&committee_id=C00896019&committee_id=C00897058&committee_id=C00897140&committee_id=C00897330&committee_id=C00897488&committee_id=C00897611&committee_id=C00897652&committee_id=C00897660&committee_id=C00897736&committee_id=C00897751&committee_id=C00897827&committee_id=C00898080&committee_id=C00898148&committee_id=C00898189&committee_id=C00898817&committee_id=C00899021&committee_id=C00899294&committee_id=C00899310&committee_id=C00899559&committee_id=C00899583&max_receipt_date=09%2F27%2F2026&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-006-page-001.json",
+            "n_results": 100,
+            "response_sha256": "332ced55ab945ed2359fe4261408cd87b63fdc6cb987ae30a96ac130fd22bea6",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00899609&committee_id=C00899799&committee_id=C00900522&committee_id=C00900944&committee_id=C00901017&committee_id=C00901058&committee_id=C00901173&committee_id=C00901355&committee_id=C00901694&committee_id=C00901728&committee_id=C00901777&committee_id=C00901918&committee_id=C00902494&committee_id=C00902551&committee_id=C00902601&committee_id=C00902668&committee_id=C00902759&committee_id=C00902791&committee_id=C00902981&committee_id=C00903039&committee_id=C00903138&committee_id=C00903179&committee_id=C00903187&committee_id=C00903252&committee_id=C00903369&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-006-page-002.json",
+            "n_results": 34,
+            "response_sha256": "b22e2beb1b98db8b2a5afc1dba8cc8d1060f16ecb2bf11e448b2ba4f1e532a38",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00899609&committee_id=C00899799&committee_id=C00900522&committee_id=C00900944&committee_id=C00901017&committee_id=C00901058&committee_id=C00901173&committee_id=C00901355&committee_id=C00901694&committee_id=C00901728&committee_id=C00901777&committee_id=C00901918&committee_id=C00902494&committee_id=C00902551&committee_id=C00902601&committee_id=C00902668&committee_id=C00902759&committee_id=C00902791&committee_id=C00902981&committee_id=C00903039&committee_id=C00903138&committee_id=C00903179&committee_id=C00903187&committee_id=C00903252&committee_id=C00903369&max_receipt_date=09%2F27%2F2026&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-007-page-001.json",
+            "n_results": 100,
+            "response_sha256": "370cc2f07ca337f6f2bd1a9cba43868b6f6042315100e9b9565f6115bc79bbd8",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00903427&committee_id=C00903443&committee_id=C00903575&committee_id=C00903641&committee_id=C00903690&committee_id=C00903781&committee_id=C00903823&committee_id=C00903872&committee_id=C00903930&committee_id=C00904300&committee_id=C00904359&committee_id=C00904466&committee_id=C00904516&committee_id=C00904862&committee_id=C00904870&committee_id=C00904912&committee_id=C00905471&committee_id=C00905851&committee_id=C00906024&committee_id=C00906255&committee_id=C00906297&committee_id=C00906396&committee_id=C00906453&committee_id=C00906545&committee_id=C00906784&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-007-page-002.json",
+            "n_results": 26,
+            "response_sha256": "3197517395238c5b2a516bd71adb2027aafc873cb691f304c74e52dec5d417e7",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00903427&committee_id=C00903443&committee_id=C00903575&committee_id=C00903641&committee_id=C00903690&committee_id=C00903781&committee_id=C00903823&committee_id=C00903872&committee_id=C00903930&committee_id=C00904300&committee_id=C00904359&committee_id=C00904466&committee_id=C00904516&committee_id=C00904862&committee_id=C00904870&committee_id=C00904912&committee_id=C00905471&committee_id=C00905851&committee_id=C00906024&committee_id=C00906255&committee_id=C00906297&committee_id=C00906396&committee_id=C00906453&committee_id=C00906545&committee_id=C00906784&max_receipt_date=09%2F27%2F2026&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-008-page-001.json",
+            "n_results": 99,
+            "response_sha256": "a2e0b560920d7343ae7ebcaeee66d82aac0d46bdfbcfc406aefb7901081ebd1c",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00906867&committee_id=C00907071&committee_id=C00907170&committee_id=C00907261&committee_id=C00907303&committee_id=C00907360&committee_id=C00907709&committee_id=C00907774&committee_id=C00907873&committee_id=C00907881&committee_id=C00907931&committee_id=C00907998&committee_id=C00908046&committee_id=C00908087&committee_id=C00908665&committee_id=C00908962&committee_id=C00909234&committee_id=C00909309&committee_id=C00909572&committee_id=C00909622&committee_id=C00909663&committee_id=C00909705&committee_id=C00909929&committee_id=C00910794&committee_id=C00911149&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-009-page-001.json",
+            "n_results": 96,
+            "response_sha256": "fc9ae2a1442640ddd08a0697545294fdd221d9b3c98a4e5b8216492174da25f5",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00911628&committee_id=C00911917&committee_id=C00912097&committee_id=C00912402&committee_id=C00913038&committee_id=C00913228&committee_id=C00913293&committee_id=C00913442&committee_id=C00913566&committee_id=C00913624&committee_id=C00913996&committee_id=C00914218&committee_id=C00914390&committee_id=C00914416&committee_id=C00914747&committee_id=C00914903&committee_id=C00915033&committee_id=C00915041&committee_id=C00915157&committee_id=C00915280&committee_id=C00915314&committee_id=C00915645&committee_id=C00915934&committee_id=C00916122&committee_id=C00916189&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-010-page-001.json",
+            "n_results": 100,
+            "response_sha256": "fb5c190066ff0e7efbdbd6076f0ee37c289e031ab7f7db041255d9fc978f20be",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00916288&committee_id=C00916403&committee_id=C00916437&committee_id=C00916502&committee_id=C00916668&committee_id=C00917120&committee_id=C00917146&committee_id=C00917260&committee_id=C00918136&committee_id=C00918300&committee_id=C00918359&committee_id=C00918466&committee_id=C00918607&committee_id=C00918839&committee_id=C00919084&committee_id=C00919803&committee_id=C00919811&committee_id=C00919936&committee_id=C00920009&committee_id=C00920223&committee_id=C00920348&committee_id=C00920793&committee_id=C00921106&committee_id=C00921445&committee_id=C00921536&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-010-page-002.json",
+            "n_results": 17,
+            "response_sha256": "3f322c6fd812bb3f0f440abc0957324044bd94bd6a459848b0068f4411a9302d",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00916288&committee_id=C00916403&committee_id=C00916437&committee_id=C00916502&committee_id=C00916668&committee_id=C00917120&committee_id=C00917146&committee_id=C00917260&committee_id=C00918136&committee_id=C00918300&committee_id=C00918359&committee_id=C00918466&committee_id=C00918607&committee_id=C00918839&committee_id=C00919084&committee_id=C00919803&committee_id=C00919811&committee_id=C00919936&committee_id=C00920009&committee_id=C00920223&committee_id=C00920348&committee_id=C00920793&committee_id=C00921106&committee_id=C00921445&committee_id=C00921536&max_receipt_date=09%2F27%2F2026&per_page=100&page=2&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-011-page-001.json",
+            "n_results": 58,
+            "response_sha256": "3612db4e7f5b3360949af6af87868d74826eefe19d29462c2cd976532d33506e",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00921593&committee_id=C00921718&committee_id=C00921759&committee_id=C00921767&committee_id=C00922302&committee_id=C00922476&committee_id=C00923003&committee_id=C00923144&committee_id=C00923201&committee_id=C00923219&committee_id=C00923342&committee_id=C00923359&committee_id=C00923474&committee_id=C00923631&committee_id=C00923698&committee_id=C00924092&committee_id=C00924514&committee_id=C00924522&committee_id=C00924811&committee_id=C00925453&committee_id=C00925578&committee_id=C00925610&committee_id=C00925925&committee_id=C00926139&committee_id=C00926279&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-012-page-001.json",
+            "n_results": 64,
+            "response_sha256": "8f83282fb30c9ae8f29dc74a60b2183b32d8a1056687e0fd80d58fe9de2c445e",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00926378&committee_id=C00926568&committee_id=C00927178&committee_id=C00927285&committee_id=C00927418&committee_id=C00927665&committee_id=C00927756&committee_id=C00928424&committee_id=C00928598&committee_id=C00929117&committee_id=C00929133&committee_id=C00929208&committee_id=C00929232&committee_id=C00929240&committee_id=C00929273&committee_id=C00929406&committee_id=C00929794&committee_id=C00929901&committee_id=C00930131&committee_id=C00930354&committee_id=C00930677&committee_id=C00930891&committee_id=C00931063&committee_id=C00931352&committee_id=C00931428&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-013-page-001.json",
+            "n_results": 65,
+            "response_sha256": "af72ad27eb07a860a09e0e4858faff5c33aee416c1a4865f9a0d15370929024f",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00931584&committee_id=C00931659&committee_id=C00931956&committee_id=C00932202&committee_id=C00932459&committee_id=C00932558&committee_id=C00932848&committee_id=C00932863&committee_id=C00932954&committee_id=C00932962&committee_id=C00933051&committee_id=C00933143&committee_id=C00933259&committee_id=C00933440&committee_id=C00933457&committee_id=C00933663&committee_id=C00933697&committee_id=C00933754&committee_id=C00933978&committee_id=C00934158&committee_id=C00934265&committee_id=C00935106&committee_id=C00935163&committee_id=C00935403&committee_id=C00935411&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-014-page-001.json",
+            "n_results": 66,
+            "response_sha256": "44b968b7458a2d2c715efc066a35e47c018bf18261a78320cab12a9965018682",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00935528&committee_id=C00935619&committee_id=C00935718&committee_id=C00935783&committee_id=C00935791&committee_id=C00936278&committee_id=C00936500&committee_id=C00936534&committee_id=C00936542&committee_id=C00936559&committee_id=C00937045&committee_id=C00937201&committee_id=C00937300&committee_id=C00937409&committee_id=C00937599&committee_id=C00937904&committee_id=C00938738&committee_id=C00938944&committee_id=C00939058&committee_id=C00939132&committee_id=C00939967&committee_id=C00940213&committee_id=C00940239&committee_id=C00940569&committee_id=C00940619&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-015-page-001.json",
+            "n_results": 59,
+            "response_sha256": "b3c2e430c55d4a2909f6c52bd9ccdce2898f3ff6412457e9a1f69bf06e81a8d9",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00940643&committee_id=C00940783&committee_id=C00940833&committee_id=C00941070&committee_id=C00941286&committee_id=C00941534&committee_id=C00941559&committee_id=C00941641&committee_id=C00941708&committee_id=C00941880&committee_id=C00941971&committee_id=C00942060&committee_id=C00942078&committee_id=C00942128&committee_id=C00942391&committee_id=C00942805&committee_id=C00943142&committee_id=C00943399&committee_id=C00943530&committee_id=C00943720&committee_id=C00943738&committee_id=C00943746&committee_id=C00943779&committee_id=C00943803&committee_id=C00943969&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-016-page-001.json",
+            "n_results": 25,
+            "response_sha256": "3714fbe0977a895bd83eacd657c1322d5e8676d67c2caba5e7c08f7701498e9b",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00944199&committee_id=C00944215&committee_id=C00944298&committee_id=C00944504&committee_id=C00944744&committee_id=C00944967&committee_id=C00945121&committee_id=C00946269&committee_id=C00946293&committee_id=C00946475&committee_id=C00946566&committee_id=C00946939&committee_id=C00947192&committee_id=C00947424&committee_id=C00947523&committee_id=C00947622&committee_id=C00947754&committee_id=C00947994&committee_id=C00948091&committee_id=C00948760&committee_id=C00948901&committee_id=C00949891&committee_id=C00949982&committee_id=C00950014&committee_id=C00950493&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-017-page-001.json",
+            "n_results": 9,
+            "response_sha256": "c1737fdae28a7c00bea2df94f42bf846eb9c2ea098887b66212f420cf7160900",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00950634&committee_id=C00950949&committee_id=C00952119&committee_id=C00952135&committee_id=C00952457&committee_id=C00953216&committee_id=C00953703&committee_id=C00953778&committee_id=C00953950&committee_id=C00954123&committee_id=C00954131&committee_id=C00954263&committee_id=C00954362&committee_id=C00954487&committee_id=C00954610&committee_id=C00954750&committee_id=C00954883&committee_id=C00954974&committee_id=C00955344&committee_id=C00955427&committee_id=C00955609&committee_id=C00955773&committee_id=C00955815&committee_id=C00956326&committee_id=C00956417&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          },
+          {
+            "member": "batch-018-page-001.json",
+            "n_results": 6,
+            "response_sha256": "2e3be8513fa772aeea7c310c14d45cc6cd45bf5366e1afee74f0ec3ca662d99d",
+            "url": "https://api.open.fec.gov/v1/reports/house-senate/?cycle=2026&committee_id=C00956466&committee_id=C00956912&committee_id=C00956987&committee_id=C00957035&committee_id=C00957084&committee_id=C00957126&committee_id=C00957167&committee_id=C00957308&committee_id=C00957514&committee_id=C00957639&committee_id=C00959197&committee_id=C00960955&max_receipt_date=09%2F27%2F2026&per_page=100&page=1&sort=receipt_date&api_key=REDACTED"
+          }
+        ],
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "reused_sealed_archive": true,
+        "sha256": "bcffe765af9300f20164e01be747db241f8e9dd57868cb626584305e4dd7caa6",
+        "url": "https://api.open.fec.gov/v1/reports/house-senate/"
+      },
+      "linkage": {
+        "path": "fec_candidate_committee_linkage_2026.zip",
+        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
+        "sha256": "04ff78ae073926eda0c1cdec3a8101006b3e17a6023d86163b714b24161ed51c",
+        "url": "https://www.fec.gov/files/bulk-downloads/2026/ccl26.zip"
+      }
+    }
+  ],
   "tier": "first_party"
 }
