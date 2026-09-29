@@ -233,7 +233,8 @@ def test_candidate_timeline_requires_both_contested_identities():
 
 def test_candidate_timeline_history_audit_is_point_in_time_and_fail_closed():
     races = pd.DataFrame([{
-        "election_id": "synthetic-2020", "race_id": "r1", "not_up": False,
+        "election_id": "synthetic-2020", "race_id": "r1", "state": "CA",
+        "not_up": False,
     }])
     common = {
         "race_id": "r1", "event_type": "qualification",
@@ -243,11 +244,11 @@ def test_candidate_timeline_history_audit_is_point_in_time_and_fail_closed():
     }
     timeline = pd.DataFrame([
         {**common, "event_id": "modeled", "candidate_id": "c1",
-         "modeled_side": "modeled", "ballot_party": "A"},
+         "modeled_side": "modeled", "ballot_party": "DEM"},
         {**common, "event_id": "opposing", "candidate_id": "c2",
-         "modeled_side": "opposing", "ballot_party": "B"},
+         "modeled_side": "opposing", "ballot_party": "REP"},
         {**common, "event_id": "future", "candidate_id": "future-candidate",
-         "modeled_side": "modeled", "ballot_party": "A",
+         "modeled_side": "modeled", "ballot_party": "DEM",
          "effective_at": "2020-03-01", "available_at": "2020-03-02"},
     ])
     audit = audit_candidate_timeline_history(

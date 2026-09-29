@@ -18,6 +18,7 @@ from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, ROOT
 
 TIMELINE_SCHEMA_VERSION = "candidate-timeline-v2"
 TIMELINE_PARSER_VERSION = "candidate-timeline-ingest-v1"
+CANDIDATE_STATE_SCHEMA_VERSION = "candidate-state-eligibility-v1"
 TIMELINE_COLUMNS = (
     "election_id", "event_id", "race_id", "candidate_id", "modeled_side", "event_type",
     "effective_at", "available_at", "retrieved_at", "candidate_name",
@@ -35,12 +36,26 @@ REQUIRED_SOURCE_COLUMNS = (
 ALLOWED_EVENT_TYPES = frozenset({
     "declared", "entered", "nomination", "nominated", "ballot_qualification",
     "qualified", "qualification", "withdrawal", "withdrawn", "replacement", "party_change",
-    "status_change", "vacancy", "runoff_advancement", "special_election_phase",
+    "status_change", "vacancy", "death", "runoff_advancement", "special_election_phase",
 })
 BALLOT_IDENTITY_EVENT_TYPES = frozenset({
     "nomination", "nominated", "ballot_qualification", "qualified", "qualification",
     "replacement", "runoff_advancement",
 })
+IDENTITY_SENSITIVE_EVENT_TYPES = frozenset({
+    "withdrawal", "withdrawn", "replacement", "party_change", "status_change",
+    "vacancy", "death", "runoff_advancement", "special_election_phase",
+})
+
+CANDIDATE_STATE_COLUMNS = (
+    "candidate_state",
+    "candidate_state_reason",
+    "candidate_state_eligible",
+    "candidate_identity_required",
+    "candidate_identity_resolved",
+    "binary_score_eligible",
+    "binary_score_exclusion_reason",
+)
 
 REQUIRED_CONTESTED_IDENTITY_COLUMNS = (
     "modeled_candidate_id",
@@ -48,6 +63,452 @@ REQUIRED_CONTESTED_IDENTITY_COLUMNS = (
     "opposing_candidate_id",
     "opposing_ballot_party",
 )
+
+
+def _canonical_sha256(payload: Any) -> str:
+    def normalize(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {str(key): normalize(item) for key, item in sorted(value.items())}
+        if isinstance(value, (list, tuple)):
+            return [normalize(item) for item in value]
+        if isinstance(value, (pd.Timestamp, date)):
+            return pd.Timestamp(value).isoformat()
+        if hasattr(value, "item") and not isinstance(value, (str, bytes)):
+            try:
+                value = value.item()
+            except (TypeError, ValueError):
+                pass
+        try:
+            if pd.isna(value):
+                return None
+        except (TypeError, ValueError):
+            pass
+        return value
+
+    canonical = json.dumps(
+        normalize(payload), sort_keys=True, separators=(",", ":"), allow_nan=False,
+        default=str,
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _present(value: Any) -> bool:
+    return value is not None and not pd.isna(value) and bool(str(value).strip())
+
+
+def _normalized_name(value: Any) -> str:
+    return "".join(character for character in str(value or "").lower() if character.isalnum())
+
+
+def _identity_complete(row: pd.Series) -> bool:
+    return all(_present(row.get(column)) for column in REQUIRED_CONTESTED_IDENTITY_COLUMNS)
+
+
+def _usable_events_as_of(timeline: pd.DataFrame, cutoff: date) -> pd.DataFrame:
+    events = align_candidate_timeline(timeline)
+    if events.empty:
+        return events
+    effective = pd.to_datetime(events["effective_at"], errors="coerce", utc=True)
+    available = pd.to_datetime(events["available_at"], errors="coerce", utc=True)
+    if effective.isna().any() or available.isna().any():
+        raise ValueError("candidate timeline has missing/invalid effective_at or available_at")
+    cutoff_ts = pd.Timestamp(cutoff, tz="UTC")
+    usable = events[(effective <= cutoff_ts) & (available <= cutoff_ts)].copy()
+    valid_from = pd.to_datetime(usable["valid_from"], errors="coerce", utc=True)
+    valid_to = pd.to_datetime(usable["valid_to"], errors="coerce", utc=True)
+    usable = usable[
+        (valid_from.isna() | (valid_from <= cutoff_ts))
+        & (valid_to.isna() | (valid_to > cutoff_ts))
+    ]
+    return usable.sort_values(
+        ["race_id", "modeled_side", "effective_at", "available_at", "event_id"],
+        kind="stable",
+    ).reset_index(drop=True)
+
+
+def _poll_matchup_key(row: pd.Series) -> str | None:
+    dem = str(row.get("dem_candidate_id") or "").strip() or _normalized_name(
+        row.get("dem_candidate_name")
+    )
+    rep = str(row.get("rep_candidate_id") or "").strip() or _normalized_name(
+        row.get("rep_candidate_name")
+    )
+    if dem or rep:
+        return f"{dem}|{rep}"
+    matchup = str(row.get("matchup_id") or "").strip()
+    return matchup or None
+
+
+def _poll_matches_resolved_identity(row: pd.Series, race: pd.Series) -> bool:
+    """Match separate poll/timeline identifier namespaces by ID or normalized name."""
+    checks: list[bool] = []
+    for poll_id, poll_name, race_id, race_name in (
+        ("dem_candidate_id", "dem_candidate_name", "modeled_candidate_id", "modeled_candidate_name"),
+        ("rep_candidate_id", "rep_candidate_name", "opposing_candidate_id", "opposing_candidate_name"),
+    ):
+        pid, rid = row.get(poll_id), race.get(race_id)
+        pname, rname = row.get(poll_name), race.get(race_name)
+        if _present(pid) and _present(rid) and str(pid) == str(rid):
+            checks.append(True)
+        elif _present(pname) and _present(rname):
+            checks.append(_normalized_name(pname) == _normalized_name(rname))
+        else:
+            checks.append(False)
+    return all(checks)
+
+
+def candidate_structural_gaps_for_cutoff(
+    source_audit: dict[str, Any] | None,
+    *,
+    election_id: str,
+    as_of: str | date,
+) -> list[dict[str, Any]]:
+    """Return only predeclared structural gaps for the exact replay cutoff."""
+    cutoff = pd.Timestamp(as_of).date().isoformat()
+    for block in (source_audit or {}).get("coverage", {}).values():
+        if str(block.get("as_of")) != cutoff:
+            continue
+        required = {str(value) for value in block.get("required_race_ids") or []}
+        if required and not any(value.startswith(f"{election_id}-") for value in required):
+            continue
+        return [dict(value) for value in block.get("structurally_unavailable") or []]
+    return []
+
+
+def filter_candidate_state_score_exclusions(
+    results: pd.DataFrame,
+    metadata: dict[str, Any] | None,
+) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
+    """Remove only predeclared race/cutoff binary-score exclusions."""
+    exclusions = [dict(value) for value in (metadata or {}).get("score_exclusions") or []]
+    excluded = {str(value.get("race_id")) for value in exclusions if value.get("race_id")}
+    if results is None or results.empty or not excluded:
+        return results, exclusions
+    return results[~results["race_id"].astype(str).isin(excluded)].copy(), exclusions
+
+
+def apply_candidate_state_contract(
+    races: pd.DataFrame,
+    timeline: pd.DataFrame,
+    polls: pd.DataFrame | None = None,
+    *,
+    as_of: str | date,
+    structural_gaps: list[dict[str, Any]] | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
+    """Apply the conditional candidate-identity and binary-score contract.
+
+    Candidate identity is required only when it changes included evidence or
+    the definition of the modeled D-vs-R target.  Ordinary races can remain
+    side-only.  Pre-primary candidate polls and unresolved incompatible
+    matchups are removed without consulting eventual nominees.  The exclusions
+    and classifications remain in metadata and therefore in snapshot lineage.
+    """
+    cutoff = pd.Timestamp(as_of).date()
+    out, timeline_meta = apply_candidate_timeline(races, timeline, as_of=cutoff)
+    for column in (
+        "modeled_candidate_id", "modeled_candidate_name", "modeled_ballot_party",
+        "modeled_caucus", "modeled_caucus_basis", "opposing_candidate_id",
+        "opposing_candidate_name", "opposing_ballot_party", "opposing_caucus",
+        "opposing_caucus_basis",
+    ):
+        if column not in out.columns:
+            out[column] = None
+    poll_frame = pd.DataFrame() if polls is None else polls.copy()
+    if len(poll_frame):
+        available = pd.to_datetime(poll_frame.get("available_at"), errors="coerce").dt.date
+        poll_frame = poll_frame[available.notna() & (available <= cutoff)].copy()
+        if "exclusion_status" in poll_frame.columns:
+            poll_frame = poll_frame[
+                poll_frame["exclusion_status"].fillna("include").astype(str).eq("include")
+            ].copy()
+    usable = _usable_events_as_of(timeline, cutoff)
+    gaps_by_race = {
+        str(gap.get("race_id")): dict(gap)
+        for gap in (structural_gaps or []) if gap.get("race_id")
+    }
+    for column in CANDIDATE_STATE_COLUMNS:
+        if column not in out.columns:
+            out[column] = None
+
+    future_or_hypothetical: list[dict[str, Any]] = []
+    poll_exclusions: list[dict[str, Any]] = []
+    if len(poll_frame) and "hypothetical" in poll_frame.columns:
+        hypothetical = poll_frame["hypothetical"].map(
+            lambda value: bool(value) if pd.notna(value) else False
+        )
+        for _, row in poll_frame[hypothetical].iterrows():
+            future_or_hypothetical.append({
+                "poll_id": str(row.get("poll_id") or ""),
+                "race_id": str(row.get("race_id") or ""),
+                "reason": "hypothetical_matchup_excluded",
+            })
+        poll_frame = poll_frame[~hypothetical].copy()
+
+    records: list[dict[str, Any]] = []
+    safe_indices = set(poll_frame.index)
+    identity_missing: list[str] = []
+    ambiguous_cases: list[dict[str, Any]] = []
+    score_exclusions: list[dict[str, Any]] = []
+    contested = ~out.get("not_up", pd.Series(False, index=out.index)).map(
+        lambda value: bool(value) if pd.notna(value) else False
+    )
+
+    for index, race in out.iterrows():
+        race_id = str(race.get("race_id") or "")
+        election_id = str(race.get("election_id") or "")
+        year_text = election_id.rsplit("-", 1)[-1]
+        year = int(year_text) if year_text.isdigit() else 0
+        race_polls = poll_frame[poll_frame.get(
+            "race_id", pd.Series("", index=poll_frame.index),
+        ).astype(str).eq(race_id)]
+        candidate_fields = [
+            column for column in (
+                "dem_candidate_id", "dem_candidate_name", "rep_candidate_id",
+                "rep_candidate_name", "matchup_id",
+            ) if column in race_polls.columns
+        ]
+        candidate_specific = (
+            race_polls[candidate_fields].notna().any(axis=1)
+            if candidate_fields else pd.Series(False, index=race_polls.index)
+        )
+        candidate_polls = race_polls[candidate_specific].copy()
+        matchup_keys = sorted({
+            key for _, row in candidate_polls.iterrows()
+            if (key := _poll_matchup_key(row)) is not None
+        })
+        exact_identity = _identity_complete(race)
+        gap = gaps_by_race.get(race_id)
+        race_events = usable[usable["race_id"].astype(str).eq(race_id)]
+        race_events_traceable = bool(len(race_events)) and all(
+            race_events[column].notna().all()
+            and race_events[column].astype(str).str.strip().ne("").all()
+            for column in ("retrieved_at", "source_url", "source_hash", "parser_version")
+        )
+        sensitive_events = race_events[
+            race_events["event_type"].astype(str).str.lower().isin(IDENTITY_SENSITIVE_EVENT_TYPES)
+        ]
+        latest_by_side = (
+            race_events.groupby("modeled_side", sort=False).tail(1)
+            if len(race_events) else race_events
+        )
+        has_unresolved_identity_status = bool(len(latest_by_side)) and latest_by_side[
+            "event_type"
+        ].astype(str).str.lower().isin({
+            "withdrawal", "withdrawn", "vacancy", "death", "status_change",
+        }).any()
+
+        state = "side_only_stable"
+        reason = "ordinary_binary_party_sides_stable"
+        eligible = True
+        identity_required = False
+        identity_resolved = False
+        score_eligible = bool(contested.loc[index])
+        score_reason = None
+        if len(matchup_keys) > 1:
+            ambiguous_cases.append({
+                "race_id": race_id,
+                "matchup_ids": matchup_keys,
+                "poll_ids": sorted(candidate_polls["poll_id"].astype(str).unique()),
+            })
+
+        if not bool(contested.loc[index]):
+            state = "not_applicable_held_seat"
+            reason = "held_seat_candidate_identity_not_required"
+            score_eligible = False
+            score_reason = "held_seat_not_contested"
+        elif gap and str(gap.get("gap_type")) == "special_election_finalists_not_yet_determined":
+            state = "ineligible_for_binary_scoring"
+            reason = str(gap.get("gap_type"))
+            score_eligible = False
+            score_reason = "final_binary_pairing_not_yet_determined"
+        elif str(race.get("state") or "") == "AK" and year >= 2022:
+            state = "ineligible_for_binary_scoring"
+            reason = "ranked_choice_multi_candidate_structure"
+            score_eligible = False
+            score_reason = "no_single_predeclared_dem_vs_rep_final_pair"
+        elif gap and str(gap.get("gap_type")) == "nomination_not_yet_determined":
+            state = "structurally_unresolved"
+            reason = "pre_nomination_side_only"
+            # A poll naming an eventual nominee before the primary cannot enter
+            # the replay merely because that person later won the nomination.
+            for poll_index in candidate_polls.index:
+                safe_indices.discard(poll_index)
+                poll_exclusions.append({
+                    "poll_id": str(poll_frame.at[poll_index, "poll_id"]),
+                    "race_id": race_id,
+                    "reason": "candidate_specific_poll_before_nomination_excluded",
+                })
+        elif str(race.get("state") or "") == "CA":
+            identity_required = True
+            identity_resolved = exact_identity and race_events_traceable
+            if not identity_resolved:
+                state = "identity_required"
+                reason = "top_two_pairing_requires_point_in_time_identity"
+                eligible = False
+                identity_missing.append(race_id)
+            else:
+                modeled_party = str(race.get("modeled_ballot_party") or "").upper()
+                opposing_party = str(race.get("opposing_ballot_party") or "").upper()
+                if modeled_party == opposing_party or {modeled_party, opposing_party} != {"DEM", "REP"}:
+                    state = "ineligible_for_binary_scoring"
+                    reason = "top_two_pairing_is_not_dem_vs_rep"
+                    score_eligible = False
+                    score_reason = "non_dem_vs_rep_top_two_pairing"
+                else:
+                    state = "identity_required"
+                    reason = "top_two_pairing_resolved_by_official_timeline"
+        elif len(sensitive_events):
+            identity_required = True
+            identity_resolved = (
+                exact_identity and race_events_traceable and not has_unresolved_identity_status
+            )
+            state = "identity_required"
+            reason = "candidate_transition_requires_point_in_time_identity"
+            eligible = identity_resolved
+            if not identity_resolved:
+                identity_missing.append(race_id)
+        elif len(matchup_keys) > 1:
+            if exact_identity and race_events_traceable:
+                identity_required = True
+                identity_resolved = True
+                state = "identity_required"
+                reason = "multiple_matchups_resolved_by_point_in_time_identity"
+                for poll_index, poll in candidate_polls.iterrows():
+                    if not _poll_matches_resolved_identity(poll, race):
+                        safe_indices.discard(poll_index)
+                        poll_exclusions.append({
+                            "poll_id": str(poll.get("poll_id") or ""),
+                            "race_id": race_id,
+                            "reason": "matchup_not_selected_by_point_in_time_identity",
+                        })
+            else:
+                # Remove every incompatible candidate-specific row.  With no
+                # identity-dependent input left, the party-side race may remain
+                # usable; the exclusion itself is fingerprinted and reported.
+                state = "structurally_unresolved"
+                reason = "ambiguous_candidate_matchups_excluded"
+                for poll_index in candidate_polls.index:
+                    safe_indices.discard(poll_index)
+                    poll_exclusions.append({
+                        "poll_id": str(poll_frame.at[poll_index, "poll_id"]),
+                        "race_id": race_id,
+                        "reason": "ambiguous_candidate_matchup_excluded",
+                    })
+
+        # Non-binary race states never contribute candidate-specific polling to
+        # the binary margin fit, but remain explicit in snapshot diagnostics.
+        if state == "ineligible_for_binary_scoring":
+            for poll_index in candidate_polls.index:
+                safe_indices.discard(poll_index)
+                poll_exclusions.append({
+                    "poll_id": str(poll_frame.at[poll_index, "poll_id"]),
+                    "race_id": race_id,
+                    "reason": "race_ineligible_for_binary_scoring",
+                })
+            score_exclusions.append({"race_id": race_id, "reason": score_reason})
+
+        values = {
+            "candidate_state": state,
+            "candidate_state_reason": reason,
+            "candidate_state_eligible": bool(eligible),
+            "candidate_identity_required": bool(identity_required),
+            "candidate_identity_resolved": bool(identity_resolved),
+            "binary_score_eligible": bool(score_eligible),
+            "binary_score_exclusion_reason": score_reason,
+        }
+        for column, value in values.items():
+            out.at[index, column] = value
+        race_evidence = {
+            key: race.get(key) for key in (
+                "election_id", "race_id", "state", "not_up", "election_phase",
+                "runoff_of", "vacancy_reason", "ballot_status",
+            )
+        }
+        if bool(contested.loc[index]):
+            records.append({
+                "race_id": race_id,
+                **values,
+                "modeled_side": "D",
+                "opposing_side": "R",
+                "timeline_status": race.get("candidate_timeline_status"),
+                "modeled_candidate_id": (
+                    race.get("modeled_candidate_id") if identity_resolved else None
+                ),
+                "opposing_candidate_id": (
+                    race.get("opposing_candidate_id") if identity_resolved else None
+                ),
+                "matchup_ids_seen": matchup_keys,
+                "structural_gap": gap,
+                "race_evidence_sha256": _canonical_sha256(race_evidence),
+            })
+
+    safe_polls = poll_frame.loc[sorted(safe_indices)].copy() if len(poll_frame) else poll_frame
+    counts = {
+        state: int(sum(record["candidate_state"] == state for record in records))
+        for state in (
+            "side_only_stable", "identity_required", "structurally_unresolved",
+            "ineligible_for_binary_scoring", "not_applicable_held_seat",
+        )
+    }
+    identity_resolved_count = sum(
+        record["candidate_identity_required"] and record["candidate_identity_resolved"]
+        for record in records
+    )
+    identity_missing = sorted(set(identity_missing))
+    semantic = {
+        "schema_version": CANDIDATE_STATE_SCHEMA_VERSION,
+        "as_of": cutoff.isoformat(),
+        "candidate_timeline_snapshot_sha256": timeline_meta.get("snapshot_sha256"),
+        "classification_records": sorted(records, key=lambda value: value["race_id"]),
+        "poll_exclusions": sorted(
+            {json.dumps(value, sort_keys=True) for value in poll_exclusions}
+        ),
+        "ambiguous_poll_matchups": ambiguous_cases,
+    }
+    candidate_state_sha = _canonical_sha256(semantic)
+    traceable_required = all(
+        record["candidate_identity_resolved"]
+        for record in records if record["candidate_identity_required"]
+    )
+    publication_eligible = not identity_missing and traceable_required
+    reasons = [] if publication_eligible else [
+        f"{len(identity_missing)} identity-sensitive races lack point-in-time resolution"
+    ]
+    metadata = {
+        **timeline_meta,
+        "schema_version": CANDIDATE_STATE_SCHEMA_VERSION,
+        "status": "ready" if publication_eligible else "identity_sensitive_unresolved",
+        "production_eligible": publication_eligible,
+        "publication_eligible": publication_eligible,
+        "traceable": bool(traceable_required),
+        "candidate_timeline_snapshot_sha256": timeline_meta.get("snapshot_sha256"),
+        "snapshot_sha256": candidate_state_sha,
+        "candidate_state_snapshot_sha256": candidate_state_sha,
+        "classification_records": sorted(records, key=lambda value: value["race_id"]),
+        "counts": {
+            **counts,
+            "identity_required_and_resolved": int(identity_resolved_count),
+            "identity_required_and_missing": len(identity_missing),
+            "excluded_from_binary_scoring": len(score_exclusions),
+            "held_seats_not_applicable": int((~contested).sum()),
+        },
+        "identity_required_and_missing_race_ids": identity_missing,
+        "ambiguous_poll_matchups": ambiguous_cases,
+        "poll_exclusions": sorted(
+            [dict(value) for value in {tuple(sorted(item.items())) for item in poll_exclusions}],
+            key=lambda value: (value.get("race_id", ""), value.get("poll_id", ""), value.get("reason", "")),
+        ),
+        "score_exclusions": sorted(score_exclusions, key=lambda value: value["race_id"]),
+        "n_candidate_polls_excluded": len({
+            (item.get("poll_id"), item.get("race_id"), item.get("reason"))
+            for item in poll_exclusions
+        }),
+        "n_hypothetical_polls_excluded": len(future_or_hypothetical),
+        "reasons": reasons,
+        "held_seats_excluded": True,
+        "conditional_identity_contract": True,
+    }
+    return out, safe_polls.reset_index(drop=True), metadata
 
 
 def align_candidate_timeline(frame: pd.DataFrame | list[dict[str, Any]]) -> pd.DataFrame:
@@ -366,6 +827,63 @@ def audit_candidate_timeline(
 ) -> dict[str, Any]:
     """Return the publication gate for candidate identity at an as-of snapshot."""
     meta = dict(metadata or {})
+    if "candidate_state" in races.columns or meta.get("conditional_identity_contract"):
+        required = (
+            races[~races["not_up"].map(lambda value: bool(value) if pd.notna(value) else False)]
+            if "not_up" in races.columns else races
+        )
+        counts = dict(meta.get("counts") or {})
+        missing = sorted(meta.get("identity_required_and_missing_race_ids") or [])
+        row_ineligible = (
+            ~required.get(
+                "candidate_state_eligible", pd.Series(False, index=required.index),
+            ).map(lambda value: bool(value) if pd.notna(value) else False)
+        )
+        missing = sorted(set(missing) | set(
+            required.loc[row_ineligible, "race_id"].astype(str)
+        ))
+        snapshot_hash = meta.get("candidate_state_snapshot_sha256") or meta.get("snapshot_sha256")
+        eligible = not missing and bool(snapshot_hash)
+        reasons = list(meta.get("reasons") or [])
+        if missing:
+            reasons.append(
+                f"{len(missing)} identity-sensitive races lack point-in-time resolution"
+            )
+        if not snapshot_hash:
+            reasons.append("candidate-state snapshot hash is missing")
+        return {
+            "status": "ready" if eligible else "identity_sensitive_unresolved",
+            "n_required_races": len(required),
+            "n_point_in_time": int(counts.get("identity_required_and_resolved", 0)),
+            "n_degraded": int(counts.get("identity_required_and_missing", 0)),
+            "n_incomplete_identity": len(missing),
+            "n_side_only_stable": int(counts.get("side_only_stable", 0)),
+            "n_structurally_unresolved": int(counts.get("structurally_unresolved", 0)),
+            "n_identity_required_and_resolved": int(
+                counts.get("identity_required_and_resolved", 0)
+            ),
+            "n_identity_required_and_missing": len(missing),
+            "n_excluded_from_binary_scoring": int(
+                counts.get("excluded_from_binary_scoring", 0)
+            ),
+            "required_identity_columns": list(REQUIRED_CONTESTED_IDENTITY_COLUMNS),
+            "identity_required_and_missing_race_ids": missing,
+            "classification_records": meta.get("classification_records") or [],
+            "ambiguous_poll_matchups": meta.get("ambiguous_poll_matchups") or [],
+            "poll_exclusions": meta.get("poll_exclusions") or [],
+            "score_exclusions": meta.get("score_exclusions") or [],
+            "traceable": bool(meta.get("traceable")),
+            "snapshot_sha256": snapshot_hash,
+            "candidate_timeline_snapshot_sha256": meta.get(
+                "candidate_timeline_snapshot_sha256"
+            ),
+            "reasons": sorted(set(reasons)),
+            "eligible": eligible,
+            "publication_eligible": eligible,
+            "held_seats_excluded": True,
+            "conditional_identity_contract": True,
+            "schema_version": CANDIDATE_STATE_SCHEMA_VERSION,
+        }
     required = (
         races[~races["not_up"].fillna(False).astype(bool)]
         if "not_up" in races.columns else races
@@ -421,8 +939,10 @@ def audit_candidate_timeline_history(
     timeline: pd.DataFrame,
     *,
     cutoffs: dict[str, str | date],
+    polls: pd.DataFrame | None = None,
+    source_audit: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Audit point-in-time identity coverage at predeclared historical cutoffs."""
+    """Audit conditional point-in-time candidate state at historical cutoffs."""
     rows: list[dict[str, Any]] = []
     for election_id, cutoff in sorted(cutoffs.items()):
         subset = races[
@@ -443,7 +963,21 @@ def audit_candidate_timeline_history(
                 "publication_eligible": False,
             })
             continue
-        applied, metadata = apply_candidate_timeline(subset, timeline, as_of=cutoff)
+        cutoff_polls = pd.DataFrame() if polls is None else polls[
+            polls.get("election_id", pd.Series("", index=polls.index)).astype(str).eq(
+                str(election_id)
+            )
+        ].copy()
+        gaps = candidate_structural_gaps_for_cutoff(
+            source_audit, election_id=str(election_id), as_of=cutoff,
+        )
+        applied, _safe_polls, metadata = apply_candidate_state_contract(
+            subset,
+            timeline,
+            cutoff_polls,
+            as_of=cutoff,
+            structural_gaps=gaps,
+        )
         audit = audit_candidate_timeline(applied, metadata)
         rows.append({
             "election_id": str(election_id),

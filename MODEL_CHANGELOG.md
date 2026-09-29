@@ -4,6 +4,29 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-09-29 — conditional candidate-state source contract
+
+- Replaced the universal exact-candidate requirement with a per-race,
+  per-cutoff contract: `side_only_stable`, `identity_required`,
+  `structurally_unresolved`, or `ineligible_for_binary_scoring`.
+- Ordinary D-vs-R races can replay without exact candidate IDs when no model
+  input depends on identity. Candidate replacement, withdrawal, top-two pairing,
+  or incompatible matchup evidence still requires traceable point-in-time
+  resolution.
+- Candidate-named polls before an unresolved primary and every poll in an
+  unresolved incompatible matchup set are excluded without consulting the
+  eventual nominee. Hypothetical and future-available rows remain excluded.
+- Historical nonbinary cases now carry predeclared race/cutoff score exclusions:
+  California's 2018 same-party top-two contest, the unresolved 2018 Mississippi
+  and 2020 Georgia special-election pairings, and Alaska's 2022 ranked-choice
+  contest. Future nested OOF artifacts record these exclusions by lead.
+- Candidate-state classifications, poll exclusions, structural gaps, and exact
+  timeline events are bound into the evidence snapshot fingerprint.
+- The corrected source audit is green with no unresolved identity-sensitive
+  races. Evidence bundle `eb-7d4691b12b12db1e` was sealed for 2026-09-27.
+- No PyMC fit, historical OOF run, stack fit, forecast, simulation, or expensive
+  rebuild was executed.
+
 ## 2026-09-27 — v0.9.22 final source/selection integration (rebuild still blocked)
 
 - Cheap Python CI now runs both v0.9.22 source-preparation and poll-structure

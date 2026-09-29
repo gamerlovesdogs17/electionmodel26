@@ -26,12 +26,12 @@ from pypdf import PdfReader
 
 from midterms.config import ARTIFACTS_DIR, MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 from midterms.evidence.candidate_timeline import (
-    apply_candidate_timeline,
+    apply_candidate_state_contract,
     candidate_timeline_fingerprint,
     validate_candidate_timeline_source,
 )
 
-SOURCE_AUDIT_SCHEMA_VERSION = "candidate-source-gap-audit-v1"
+SOURCE_AUDIT_SCHEMA_VERSION = "candidate-source-gap-audit-v3"
 SOURCE_PARSER_VERSION = "fec-congressional-ballot-workbook-v1"
 OFFICIAL_DOCUMENT_PARSER_VERSION = "official-candidate-document-v1"
 OFFICIAL_DOCUMENT_SCHEMA_VERSION = "candidate-official-sources-v1"
@@ -160,22 +160,32 @@ def prepare_sealed_candidate_timeline_sources(
             )
             cutoff_map[label] = cutoff
     structural_by_label = receipt.get("structural_unavailability") or {}
+    polls_path = timeline_path.with_name("polls.parquet")
+    polls = pd.read_parquet(polls_path) if polls_path.is_file() else pd.DataFrame()
     coverage: dict[str, Any] = {}
     for label, cutoff in cutoff_map.items():
         election_id = "-".join(label.split("-")[:2])
         subset = races[races["election_id"].astype(str).eq(election_id)].copy()
-        applied, metadata = apply_candidate_timeline(subset, timeline, as_of=cutoff)
+        cutoff_polls = polls[
+            polls.get("election_id", pd.Series("", index=polls.index)).astype(str).eq(election_id)
+        ].copy() if len(polls) else polls
+        structural = [dict(gap) for gap in structural_by_label.get(label, [])]
+        applied, _safe_polls, metadata = apply_candidate_state_contract(
+            subset,
+            timeline,
+            cutoff_polls,
+            as_of=cutoff,
+            structural_gaps=structural,
+        )
         required = applied[~applied["not_up"].fillna(False).astype(bool)].copy()
         covered = sorted(required.loc[
-            required["candidate_timeline_status"].astype(str).eq("point_in_time"),
+            required["candidate_state_eligible"].map(
+                lambda value: bool(value) if pd.notna(value) else False
+            ),
             "race_id",
         ].astype(str).unique())
         required_ids = sorted(required["race_id"].astype(str).unique())
-        missing = sorted(set(required_ids) - set(covered))
-        structural = [
-            gap for gap in structural_by_label.get(label, [])
-            if str(gap.get("race_id")) in missing
-        ]
+        missing = sorted(metadata.get("identity_required_and_missing_race_ids") or [])
         structural_ids = {str(gap["race_id"]) for gap in structural}
         coverage[label] = {
             "as_of": cutoff,
@@ -188,6 +198,14 @@ def prepare_sealed_candidate_timeline_sources(
             "n_covered": len(covered),
             "n_missing": len(missing),
             "snapshot_sha256": metadata.get("snapshot_sha256"),
+            "candidate_timeline_snapshot_sha256": metadata.get(
+                "candidate_timeline_snapshot_sha256"
+            ),
+            "candidate_state_counts": metadata.get("counts") or {},
+            "classification_records": metadata.get("classification_records") or [],
+            "ambiguous_poll_matchups": metadata.get("ambiguous_poll_matchups") or [],
+            "poll_exclusions": metadata.get("poll_exclusions") or [],
+            "score_exclusions": metadata.get("score_exclusions") or [],
             "status": "ready" if not missing else "incomplete_coverage",
             "publication_eligible": not missing,
         }
@@ -204,6 +222,7 @@ def prepare_sealed_candidate_timeline_sources(
         "election_ids": sorted(timeline["election_id"].astype(str).unique()),
         "source_objects": document_receipts,
         "source_traceability_required": True,
+        "candidate_identity_requirement": "conditional_on_model_input_or_score_semantics",
         "production_eligible": production_eligible,
         "status": "ready" if production_eligible else "partial_official_coverage",
     }
@@ -218,7 +237,7 @@ def prepare_sealed_candidate_timeline_sources(
         except json.JSONDecodeError:
             previous = {}
     report = {
-        "schema_version": "candidate-source-gap-audit-v2",
+        "schema_version": SOURCE_AUDIT_SCHEMA_VERSION,
         "parser_version": OFFICIAL_DOCUMENT_PARSER_VERSION,
         "generated_at": receipt.get("generated_at"),
         "current_as_of": REQUIRED_CUTOFFS[2026][0],
@@ -239,7 +258,9 @@ def prepare_sealed_candidate_timeline_sources(
         "production_eligible": production_eligible,
         "status": "ready" if production_eligible else "incomplete_coverage",
         "note": (
-            "Only source-verified, pre-cutoff official candidate documents create events. "
+            "Exact identities come only from source-verified pre-cutoff official documents. "
+            "Ordinary binary races may use the fingerprinted conditional side-only contract; "
+            "identity-sensitive transitions fail closed and nonbinary cutoffs are score-excluded. "
             "Late FEC ballot workbooks and final results remain archival evidence only."
         ),
     }

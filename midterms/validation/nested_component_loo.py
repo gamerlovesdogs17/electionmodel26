@@ -959,6 +959,7 @@ def run_nested_component_loo(
     frozen_archive: list[dict[str, Any]] = []
     prior_snapshot_sha256_by_fold_lead: dict[str, dict[str, str | None]] = {}
     source_set_sha256_by_fold_lead: dict[str, dict[str, str | None]] = {}
+    candidate_score_exclusions_by_fold_lead: dict[str, dict[str, list[dict[str, Any]]]] = {}
 
     for year in years:
         election_id = f"senate-{year}"
@@ -972,6 +973,7 @@ def run_nested_component_loo(
         lead_frozen: dict[str, dict[str, FrozenPrediction]] = {}
         prior_snapshot_sha256_by_fold_lead[str(year)] = {}
         source_set_sha256_by_fold_lead[str(year)] = {}
+        candidate_score_exclusions_by_fold_lead[str(year)] = {}
         for lead in lead_days:
             as_of = ed - timedelta(days=lead)
             snap = wh.build_as_of(as_of, election_id)
@@ -985,6 +987,9 @@ def run_nested_component_loo(
                     )
             prior_snapshot_sha256_by_fold_lead[str(year)][str(lead)] = snap.prior_snapshot_sha256
             source_set_sha256_by_fold_lead[str(year)][str(lead)] = snap.presidential_source_sha256
+            candidate_score_exclusions_by_fold_lead[str(year)][str(lead)] = list(
+                (snap.candidate_timeline or {}).get("score_exclusions") or []
+            )
             frozen = freeze_component_predictions(
                 snap,
                 election_id=election_id,
@@ -1014,14 +1019,28 @@ def run_nested_component_loo(
         results = all_results[all_results["election_id"] == election_id]
         from midterms.evidence.score_targets import truth_margin_map
 
-        truth_by_id = truth_margin_map(results)
         fold_scores_acc: dict[str, list[float]] = {}
         lead_blocks: dict[str, Any] = {}
         oof_means_fold: dict[str, dict[str, float]] = {}
         oof_sds_fold: dict[str, dict[str, float]] = {}
         oof_draws_fold: dict[str, dict[str, list[float]]] = {}
+        truths_fold: dict[str, float] = {}
+        scored_race_ids: set[str] = set()
         for lead, frozen in lead_frozen.items():
-            scored = score_frozen_predictions(frozen, results)
+            candidate_exclusions = candidate_score_exclusions_by_fold_lead[
+                str(year)
+            ].get(str(lead), [])
+            from midterms.evidence.candidate_timeline import (
+                filter_candidate_state_score_exclusions,
+            )
+
+            results_for_lead, _ = filter_candidate_state_score_exclusions(
+                results,
+                {"score_exclusions": candidate_exclusions},
+            )
+            truth_by_id = truth_margin_map(results_for_lead)
+            scored_race_ids.update(truth_by_id)
+            scored = score_frozen_predictions(frozen, results_for_lead)
             lead_blocks[lead] = scored
             for name, sc in scored.items():
                 if sc.get("status") == "ok" and sc.get("n") and np.isfinite(sc.get(G8_METRIC, np.nan)):
@@ -1041,24 +1060,26 @@ def run_nested_component_loo(
                         sblock[case_id] = float(max(sd, 0.5))
                         if fp.draws_by_race and rid in fp.draws_by_race:
                             dblock[case_id] = fp.draws_by_race[rid]
+            for rid, y in truth_by_id.items():
+                truths_fold[f"{lead}:{rid}"] = float(y)
 
         fold_mean = {k: float(np.mean(v)) for k, v in fold_scores_acc.items() if v}
         crps_by_fold[str(year)] = fold_mean
         oof_means_by_fold[str(year)] = oof_means_fold
         oof_sds_by_fold[str(year)] = oof_sds_fold
         oof_draws_by_fold[str(year)] = oof_draws_fold
-        truths_by_fold[str(year)] = {
-            f"{lead}:{rid}": float(y)
-            for lead in lead_frozen for rid, y in truth_by_id.items()
-        }
+        truths_by_fold[str(year)] = truths_fold
         by_fold[str(year)] = {
             "election_id": election_id,
             "spine": spine,
             "leads": lead_blocks,
             "mean_crps": fold_mean,
             "freeze_before_truth": True,
-            "n_oof_races": len(truth_by_id),
-            "n_oof_cases": len(truth_by_id) * len(lead_frozen),
+            "n_oof_races": len(scored_race_ids),
+            "n_oof_cases": len(truths_fold),
+            "candidate_state_score_exclusions_by_lead": (
+                candidate_score_exclusions_by_fold_lead[str(year)]
+            ),
         }
         print(f"[nested-loo] year={year} components={len(fold_mean)}", flush=True)
 
@@ -1126,6 +1147,9 @@ def run_nested_component_loo(
         },
         "prior_snapshot_sha256_by_fold_lead": prior_snapshot_sha256_by_fold_lead,
         "presidential_source_sha256_by_fold_lead": source_set_sha256_by_fold_lead,
+        "candidate_state_score_exclusions_by_fold_lead": (
+            candidate_score_exclusions_by_fold_lead
+        ),
         "spine_label": spine,
         "n_draws": n_draws,
         "freeze_before_truth": True,

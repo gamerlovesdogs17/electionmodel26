@@ -181,7 +181,7 @@ def test_disabled_optional_domain_does_not_block_but_required_core_does():
     assert optional == ["markets"]
 
 
-def test_missing_timeline_readiness_lists_exact_race_and_cutoff(tmp_path: Path):
+def test_missing_timeline_is_nonblocking_for_ordinary_side_only_race(tmp_path: Path):
     normalized = tmp_path / "normalized"
     manifests = tmp_path / "manifests"
     raw = tmp_path / "raw"
@@ -194,9 +194,9 @@ def test_missing_timeline_readiness_lists_exact_race_and_cutoff(tmp_path: Path):
         normalized_dir=normalized, manifests_dir=manifests, raw_dir=raw, environ={},
     )
     timeline = report["domains"]["candidate_timeline"]
-    assert timeline["status"] == "missing"
-    current = next(row for row in timeline["missing_coverage"] if row["cutoff"] == "senate-2026-current")
-    assert current["race_ids"] == ["synthetic-race"]
+    current = timeline["cutoffs"]["senate-2026-current"]
+    assert current["publication_eligible"] is True
+    assert current["n_side_only_stable"] == 1
 
 
 def _bundle(domains: dict) -> dict:

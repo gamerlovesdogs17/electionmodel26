@@ -236,6 +236,15 @@ class Warehouse:
         self.candidate_timeline = (
             pd.read_parquet(timeline_path) if timeline_path.exists() else pd.DataFrame()
         )
+        candidate_audit_path = (
+            self.normalized_dir.parent / "manifests" / "candidate_timeline_source_audit.json"
+        )
+        try:
+            self.candidate_source_audit = json.loads(
+                candidate_audit_path.read_text(encoding="utf-8")
+            ) if candidate_audit_path.is_file() else {}
+        except (OSError, json.JSONDecodeError):
+            self.candidate_source_audit = {}
         try:
             from midterms.evidence.official_ballot import merge_official_into_races
 
@@ -342,10 +351,22 @@ class Warehouse:
             results_known = results
 
         # Resolve candidate/race state before filtering inactive ballot rows.
-        from midterms.evidence.candidate_timeline import apply_candidate_timeline
+        from midterms.evidence.candidate_timeline import (
+            apply_candidate_state_contract,
+            candidate_structural_gaps_for_cutoff,
+        )
 
-        races, candidate_timeline_meta = apply_candidate_timeline(
-            races, getattr(self, "candidate_timeline", pd.DataFrame()), as_of=as_of_d
+        structural_gaps = candidate_structural_gaps_for_cutoff(
+            getattr(self, "candidate_source_audit", {}),
+            election_id=election_id,
+            as_of=as_of_d,
+        )
+        races, polls, candidate_timeline_meta = apply_candidate_state_contract(
+            races,
+            getattr(self, "candidate_timeline", pd.DataFrame()),
+            polls,
+            as_of=as_of_d,
+            structural_gaps=structural_gaps,
         )
 
         # Drop inactive ballot rows from contested forecast universe (keep held)

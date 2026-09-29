@@ -26,9 +26,20 @@ model stage checks out the exact evidence commit, verifies the bundle ID, and
 must not refresh evidence while fitting. Cache hits are performance aids only;
 restored artifacts still have to pass their own semantic lineage checks.
 
-The current source audit is allowed to remain red. Missing real evidence must
-be ingested or refreshed; fixtures, current registries, and degraded substitutes
-cannot be relabeled to clear a historical source gate.
+The 2026-09-27 source audit is green and evidence bundle
+`eb-7d4691b12b12db1e` is sealed. This permits the expensive v0.9.22 validation
+run; it does not establish empirical validity or permit live publication.
+Missing real evidence in a future bundle must be ingested or refreshed;
+fixtures, current registries, and degraded substitutes cannot be relabeled to
+clear a historical source gate.
+
+Candidate identity is conditionally required as a leakage-control domain.
+Ordinary races may use a fingerprinted D-vs-R side-only state when exact
+identity does not select any input. Candidate transitions, top-two pairings,
+and ambiguous matchups remain fail-closed. Before a primary, future nominee
+identity may not be backfilled and candidate-named polls are excluded.
+Structurally nonbinary race/cutoffs stay in evidence diagnostics but are
+excluded from binary proper scoring with a machine-readable reason.
 
 Poll-structure selection and production validation use separate expensive
 passes. The first pass evaluates only same-family one-term structural changes

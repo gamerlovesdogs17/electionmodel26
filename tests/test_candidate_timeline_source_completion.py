@@ -113,7 +113,7 @@ def test_missing_official_cycle_source_remains_an_explicit_gap(tmp_path: Path):
     assert "no traceable official" in gap["reason"]
 
 
-def test_readiness_reports_only_the_candidate_races_still_missing(tmp_path: Path):
+def test_readiness_allows_ordinary_side_only_races_without_exact_identity(tmp_path: Path):
     normalized = tmp_path / "normalized"
     manifests = tmp_path / "manifests"
     raw = tmp_path / "raw"
@@ -144,10 +144,11 @@ def test_readiness_reports_only_the_candidate_races_still_missing(tmp_path: Path
         normalized_dir=normalized, manifests_dir=manifests, raw_dir=raw,
     )
     current = report["domains"]["candidate_timeline"]["cutoffs"]["senate-2026-current"]
-    assert current["missing_race_ids"] == ["missing"]
+    assert current["missing_race_ids"] == []
+    assert current["n_side_only_stable"] == 2
 
 
-def test_readiness_with_no_timeline_reports_every_contested_race(tmp_path: Path):
+def test_readiness_with_no_timeline_accepts_ordinary_side_only_contest(tmp_path: Path):
     normalized = tmp_path / "normalized"
     manifests = tmp_path / "manifests"
     raw = tmp_path / "raw"
@@ -163,7 +164,8 @@ def test_readiness_with_no_timeline_reports_every_contested_race(tmp_path: Path)
         normalized_dir=normalized, manifests_dir=manifests, raw_dir=raw,
     )
     current = report["domains"]["candidate_timeline"]["cutoffs"]["senate-2026-current"]
-    assert current["missing_race_ids"] == ["r1"]
+    assert current["missing_race_ids"] == []
+    assert current["n_side_only_stable"] == 1
 
 
 def test_candidate_mapping_must_be_visible_with_party_near_name():

@@ -19,9 +19,9 @@ from midterms.config import (
     RAW_DIR,
 )
 from midterms.evidence.candidate_timeline import (
-    REQUIRED_CONTESTED_IDENTITY_COLUMNS,
-    apply_candidate_timeline,
+    apply_candidate_state_contract,
     audit_candidate_timeline,
+    candidate_structural_gaps_for_cutoff,
 )
 from midterms.evidence.demographic_vintages import select_demographic_vintage
 from midterms.evidence.economics import audit_realtime_economic_coverage
@@ -114,6 +114,7 @@ def audit_source_readiness(
     }
 
     polls_path = normalized_dir / "polls.parquet"
+    polls = pd.DataFrame()
     if polls_path.is_file():
         polls = pd.read_parquet(polls_path)
         counts = _cutoff_counts(polls, date_column="available_at")
@@ -147,6 +148,12 @@ def audit_source_readiness(
 
     timeline_path = normalized_dir / "candidate_timeline.parquet"
     timeline = pd.read_parquet(timeline_path) if timeline_path.is_file() else pd.DataFrame()
+    timeline_manifest, timeline_manifest_sha, timeline_manifest_error = _manifest(
+        manifests_dir / "candidate_timeline.json"
+    )
+    source_audit, source_audit_sha, source_audit_error = _manifest(
+        manifests_dir / "candidate_timeline_source_audit.json"
+    )
     timeline_cutoffs = {**historical_cutoffs, f"{election_id}-current": cutoff.isoformat()}
     timeline_rows: dict[str, Any] = {}
     missing_timeline: list[dict[str, Any]] = []
@@ -161,29 +168,26 @@ def audit_source_readiness(
                 "reasons": ["required race universe is missing"],
             }
         else:
-            applied, metadata = apply_candidate_timeline(subset, timeline, as_of=cutoff_value)
+            cutoff_polls = polls[
+                polls.get(
+                    "election_id", pd.Series("", index=polls.index),
+                ).astype(str).eq(target_election)
+            ].copy() if len(polls) else polls
+            gaps = candidate_structural_gaps_for_cutoff(
+                source_audit,
+                election_id=target_election,
+                as_of=cutoff_value,
+            )
+            applied, _safe_polls, metadata = apply_candidate_state_contract(
+                subset,
+                timeline,
+                cutoff_polls,
+                as_of=cutoff_value,
+                structural_gaps=gaps,
+            )
             audit = audit_candidate_timeline(applied, metadata)
-            required_applied = applied[
-                ~applied.get(
-                    "not_up", pd.Series(False, index=applied.index),
-                ).fillna(False).astype(bool)
-            ].copy()
-            complete_identity = pd.Series(True, index=required_applied.index)
-            for column in REQUIRED_CONTESTED_IDENTITY_COLUMNS:
-                values = required_applied.get(
-                    column, pd.Series(None, index=required_applied.index, dtype=object),
-                )
-                complete_identity &= values.notna() & values.astype(str).str.strip().ne("")
-            statuses = required_applied.get(
-                "candidate_timeline_status",
-                pd.Series("degraded_missing_status", index=required_applied.index),
-            )
-            missing_mask = (
-                ~statuses.astype(str).eq("point_in_time")
-                | ~complete_identity
-            )
-            audit["missing_race_ids"] = sorted(
-                required_applied.loc[missing_mask, "race_id"].astype(str).unique()
+            audit["missing_race_ids"] = audit.get(
+                "identity_required_and_missing_race_ids", []
             )
         timeline_rows[label] = audit
         if not audit.get("publication_eligible"):
@@ -193,12 +197,6 @@ def audit_source_readiness(
                 "race_ids": audit.get("missing_race_ids") or [],
                 "reasons": audit.get("reasons") or [],
             })
-    timeline_manifest, timeline_manifest_sha, timeline_manifest_error = _manifest(
-        manifests_dir / "candidate_timeline.json"
-    )
-    source_audit, source_audit_sha, source_audit_error = _manifest(
-        manifests_dir / "candidate_timeline_source_audit.json"
-    )
     filing_sources = sorted((raw_dir / "external").glob("fec_form2_*.csv"))
     filing_source_hashes = {path.name: _sha(path) for path in filing_sources}
     timeline_status = "ready" if timeline_rows and not missing_timeline else (
@@ -221,14 +219,20 @@ def audit_source_readiness(
         "source_gap_audit_status": (
             (source_audit or {}).get("status") if not source_audit_error else source_audit_error
         ),
-        "source_gap_coverage": (source_audit or {}).get("coverage") or {},
+        "source_gap_coverage": {
+            label: {
+                key: block.get(key)
+                for key in (
+                    "as_of", "status", "publication_eligible",
+                    "structurally_unavailable", "snapshot_sha256",
+                )
+            }
+            for label, block in ((source_audit or {}).get("coverage") or {}).items()
+        },
         "official_ballot_source_receipts": (source_audit or {}).get("receipts") or {},
+        "conditional_identity_contract": True,
         "reasons": [] if timeline_status == "ready" else [
-            (
-                "official FEC declaration filings are present but do not establish nomination or ballot identity"
-                if filing_sources and not timeline_path.is_file()
-                else "source-backed candidate identity is incomplete at required cutoffs"
-            )
+            "identity-sensitive candidate state remains unresolved at a required cutoff"
         ],
     })
 

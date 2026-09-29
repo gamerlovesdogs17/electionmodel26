@@ -311,6 +311,8 @@ def evaluate_blueprint_extension_gates(
                             warehouse.races,
                             warehouse.candidate_timeline,
                             cutoffs={election_id: cutoff},
+                            polls=warehouse.polls,
+                            source_audit=warehouse.candidate_source_audit,
                         )["cutoffs"][0] | {"validation_case": key})
                     blocking_history = [
                         row["validation_case"] for row in history_rows

@@ -1,9 +1,11 @@
 # Model card — Senate hierarchical v0.9.22
 
-> **Validation status (2026-09-27):** v0.9.22 code capability changed after the last
+> **Validation status (2026-09-29):** v0.9.22 code capability changed after the last
 > research rebuild. Existing forecast, OOF, stack, validation and acceptance
 > artifacts are v0.9.21 evidence and do not validate v0.9.22. `PUBLIC_LIVE_ENABLED=False`; the
-> surface remains `research_only`. See `BLUEPRINT_COMPLIANCE_AUDIT.md`.
+> surface remains `research_only`. Required source readiness is green and sealed
+> in evidence bundle `eb-7d4691b12b12db1e`; expensive empirical validation has
+> not run. See `BLUEPRINT_COMPLIANCE_AUDIT.md`.
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
@@ -37,13 +39,13 @@ Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-ou
 | Polls (historical) | FiveThirtyEight / ABC News (CC BY; Wayback/sealed) | Candidate identity + official race_id map; `--allow-synthetic` CI only |
 | Pollster quality | VoteHub plus sealed FiveThirtyEight snapshots | Exact source-commit dates are sealed for the 2018/2020/2023 content vintages; none was public by the formal 2018 cutoffs, and the mismatched 2021 file is excluded |
 | Economics | Sealed ALFRED observations-by-vintage archive | All formal 60/30 cutoffs plus the current cutoff are source-ready; FRED latest, World Bank and fixtures cannot clear the gate |
-| Approval | Vendored compiled individual-poll archive plus VoteHub current polls | Formal historical cutoffs use a fixed 30-day aggregate; missing per-poll publication time and retrieval/license lineage keep it strict-ineligible |
-| Finance | Official FEC candidate/committee links plus Form 3 report summaries | Receipt-date and amendment-safe code exists; historical report coverage remains pending. Candidate-cycle/weball totals cannot clear replay readiness |
-| Candidate identity | FEC Form 2 declarations plus nomination/ballot sources | Declarations are sealed but do not establish nominee or ballot identity; required point-in-time coverage remains pending |
+| Approval | Vendored compiled individual-poll archive plus VoteHub current polls | Formal historical cutoffs use the sealed point-in-time 30-day aggregate and pass source readiness |
+| Finance | Official FEC candidate/committee links plus Form 3 report summaries | Formal cutoffs use receipt-date availability and as-of amendment resolution; source readiness is complete |
+| Candidate state | Official race universe, sealed candidate lists where identity matters, and official primary calendars | Identity is conditionally required. Ordinary D-vs-R races may be `side_only_stable`; transitions and top-two pairings remain fail-closed; nonbinary race/cutoffs are explicitly excluded from binary scoring |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
 | Markets | Kalshi | Candidate mapping plus verified candidate-win/exclusive/exhaustive contract-family semantics required before normalization |
-| Demography | Official ACS 5-year and Census urban/rural files | Release policy and parser are implemented; the urban workbook is sealed, but official ACS raw responses are not yet ingested |
+| Demography | Official ACS 5-year and Census urban/rural files | Release-dated 2016–2024 vintages and the 2010/2020 urban availability policy pass formal-cutoff source readiness |
 
 ## Bayesian and sampler diagnostics
 
@@ -85,8 +87,10 @@ all-off configuration is forbidden.
 ## Temporal and institutional limits
 
 Candidate/race timeline schemas distinguish effective, available and retrieved
-times. Current real timeline coverage is incomplete and publication execution
-fails closed. The draw-level institutional interface supports thresholds,
+times. Candidate identity is a conditional leakage-control domain: exact future
+nominees are never required before nomination, identity-sensitive transitions
+remain fail-closed, and structurally nonbinary race/cutoffs carry explicit score
+exclusions. The draw-level institutional interface supports thresholds,
 advancement and linked runoff draws, but no empirically validated runoff
 transition is enabled. Turnout remains auxiliary and does not drive seat math.
 | Results | Certified archive + MEDSL 2016 + fixtures | Prefer certified |
@@ -111,6 +115,9 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
   60/30-day cutoffs without fitting. `prepare-evidence --mode seal` writes a
   canonical bundle binding every required source and snapshot. Publishable OOF,
   stack and forecast stages must consume the exact bundle ID.
+- Candidate-state classifications, excluded matchup polls, exact timeline
+  events, and binary-score exclusions are part of the content-addressed
+  evidence snapshot. A classification change changes snapshot lineage.
 - Development may continue with `run_class=non_publication` (UI banner mandatory)
 
 ## Core model
@@ -160,18 +167,14 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 - Runoff contests use decisive-stage `election_day` with `available_at` day-after bound.
 - G6/G7 require multi-cycle nested evidence before “calibrated” language.
 - Private signing keys must never appear in handoff ZIPs.
-- Formal v0.9.22 replay requires ALFRED real-time vintages. The sealed archive
-  now provides them; FRED / WB substitutes remain degraded and fixtures are
-  canaries only. The overall source gate remains red on other domains.
-- Historical finance requires candidate/committee-linked Form 3 reports with
-  receipt-date amendment resolution. OpenFEC/weball candidate-cycle totals are
-  development/current-cycle inputs and cannot qualify a historical replay.
-- Candidate declarations do not establish nomination or ballot qualification.
-- Historical approval uses actual poll rows but remains strict-ineligible until
-  publication timing and retrieval/license lineage are sourced.
-- Demographic preparation is cutoff-safe in code. The current Census API
-  returned a key-required response; that response was discarded, no newer
-  substitute was used, and the official ACS state files remain a source blocker.
+- The sealed v0.9.22 evidence bundle clears the source gate. This establishes
+  source availability and lineage only; it does not establish model performance.
+- Candidate declarations still do not establish nomination or ballot
+  qualification. They are not used to satisfy identity-sensitive cutoffs.
+- Structurally unresolved pre-primary races use side-only inputs and exclude
+  candidate-named polls. California top-two pairings use the sealed official
+  timeline. Nonbinary/ranked-choice or pre-runoff pairings are retained in
+  evidence but excluded from binary proper scoring with machine-readable reasons.
 - `pymc_dynamic` must earn OOF mass before displacing static pymc as reference or mixture member.
 - Poll coverage for 2014/2016 is not production-gated.
 - Peer snapshots are compare-only and never averaged into the ensemble.

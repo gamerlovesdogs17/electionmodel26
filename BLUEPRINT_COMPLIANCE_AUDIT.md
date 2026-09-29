@@ -1,6 +1,6 @@
 # Blueprint compliance audit
 
-**Audit date:** 2026-09-27
+**Audit date:** 2026-09-29
 
 **Scope:** code and statistical infrastructure only
 
@@ -18,13 +18,13 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 
 | Area | Classification | Publication implication |
 |---|---|---|
-| Warehouse/as-of polls and truth | Implemented with variation | Canonical content identity is complete; real timeline coverage remains a blocker |
+| Warehouse/as-of polls and truth | Implemented with variation | Canonical content identity includes the conditional candidate-state contract and poll exclusions |
 | Raw immutability and hashes | Implemented | New ingests must use the same contracts |
 | Poll measurement, pollster, mode/pop, ENOP | Implemented | Optional metadata terms still require OOS testing |
 | Sponsor/questionnaire/study terms | Capability implemented; empirical rebuild required | Base and three single-addition challengers are off by default |
 | Fundamentals and structural priors | Implemented with variation | Challenger features remain off |
 | Static/dynamic PyMC and terminal layers | Implemented | Same-family OOF must be regenerated |
-| Similarity | Adapter implemented; source ingest pending | Point-in-time demographic provenance is incomplete |
+| Similarity | Adapter and point-in-time source implemented | Demographic source readiness is complete; OOS ablation remains pending |
 | Joint simulation | Implemented | No new run was executed |
 | Institutional rules | Partial | Transition model remains disabled |
 | Turnout | Intentionally deferred | Auxiliary only |
@@ -36,7 +36,7 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 | Prior predictive/PPC/SBC | Capability implemented | Model-specific artifacts still pending |
 | Sampler health | Capability implemented | Current reference fit must be rerun |
 | Reproducibility/lineage/MCSE | Implemented with variation | Legacy absolute paths remain historical records |
-| Source readiness and sealing | Implemented | Current audit is red on five required domains; no model fit may begin |
+| Source readiness and sealing | Implemented | Required domains are green and evidence bundle `eb-7d4691b12b12db1e` is sealed; empirical rebuild remains pending |
 | Domain freshness | Implemented with variation | Retrieval and observation age are enforced only for enabled layers; source adapters must retain their timestamps |
 | Acceptance gates | Implemented with variation | Machine-readable v0.9.22 empirical gates remain pending/requires rebuild |
 
@@ -67,28 +67,26 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
   Only the canonical OOF may feed the stack, and the finalized validated model
   spec must bind the bundle, source-readiness report, selected structure,
   canonical OOF, stack and calibration artifact before publication fitting.
+- Candidate identity is conditionally required. Ordinary binary races may use
+  a content-addressed side-only state, while replacements, withdrawals,
+  top-two pairings, and incompatible matchup evidence require point-in-time
+  resolution. Pre-primary candidate polls are excluded without using eventual
+  nominees. Structurally nonbinary race/cutoffs remain visible but are excluded
+  from binary scoring with a recorded reason.
 
-## Current source blockers
+## Current source status
 
-The sealed local ALFRED observations-by-vintage archive now clears all formal
-60/30 economic cutoffs plus the current cutoff without network access or a
-weaker substitute. The 2026-09-27 audit nevertheless remains correctly red:
+The 2026-09-27 strict source audit is green for every required current and
+historical domain. Candidate state is complete under the conditional contract:
+there are no unresolved identity-sensitive race/cutoffs, official California
+top-two identities override side-only mode, pre-primary candidate polls are
+excluded, and nonbinary race/cutoffs carry explicit score exclusions. Markets
+and expert ratings remain disabled optional domains.
 
-- candidate timeline: sealed FEC declarations do not establish nomination or
-  ballot identity at the formal 60/30 historical cutoffs or current cutoff;
-- pollster ratings: verified source-commit dates exist for the 2018, 2020 and
-  2023 content vintages, but none was public by the formal 2018 cutoffs;
-- demographics: no sealed release-dated point-in-time vintage store;
-- finance: report-level, receipt-date and amendment-safe code exists, but the
-  historical Form 3 report/committee store has not been ingested;
-- presidential approval: the vendored poll rows now drive formal-cutoff
-  aggregates, but the archive lacks per-poll publication timestamps plus sealed
-  retrieval/license lineage, so `poll_end` remains an ineligible proxy.
-
-Markets and expert ratings are disabled optional domains and do not block the
-core rebuild. After these five source blockers are cleared, the expensive action
-must run the selection OOF, freeze the selected poll structure, regenerate the
-canonical OOF under that structure, and then regenerate joint scores, stack
-evidence, reliability calibration, Bayesian diagnostics and sampler health
-before strict acceptance can be reconsidered. The finalized
-`validated_model_spec_latest.json` is itself a required empirical gate.
+Evidence bundle `eb-7d4691b12b12db1e` binds the ready source report and the
+current/historical snapshot identities. The expensive action must still run the
+selection OOF, freeze the selected poll structure, regenerate canonical OOF,
+then regenerate joint scores, stack evidence, reliability calibration,
+Bayesian diagnostics and sampler health before strict acceptance can be
+reconsidered. The finalized `validated_model_spec_latest.json` remains a
+required empirical gate.

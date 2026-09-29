@@ -1,6 +1,6 @@
 {
   "schema_version": "blueprint-compliance-audit-v2",
-  "generated_at": "2026-09-27",
+  "generated_at": "2026-09-29",
   "scope": "code_and_statistical_infrastructure_only",
   "public_live_enabled": false,
   "publication_surface": "research_only",
@@ -56,8 +56,8 @@
     "sampler_health_current_reference": "requires_rebuild",
     "poll_structure_nested_oos": "requires_rebuild",
     "same_family_ablation_oos": "requires_rebuild",
-    "candidate_timeline_real_data": "pending_source_ingest",
-    "demographic_point_in_time_snapshots": "pending_source_ingest",
+    "candidate_timeline_real_data": "source_ready",
+    "demographic_point_in_time_snapshots": "source_ready",
     "economic_realtime_history": "source_ready",
     "overlay_incremental_value": "requires_rebuild",
     "market_contract_semantics_refresh": "requires_refresh",
@@ -65,9 +65,9 @@
     "joint_scores_historical": "requires_rebuild",
     "freshness_current_domains": "requires_refresh",
     "poll_structure_positive_crossfit": "requires_rebuild",
-    "pollster_ratings_point_in_time": "pending_source_ingest",
-    "finance_report_level_history": "pending_source_ingest",
-    "approval_poll_timing_lineage": "pending_source_ingest",
+    "pollster_ratings_point_in_time": "source_ready",
+    "finance_report_level_history": "source_ready",
+    "approval_poll_timing_lineage": "source_ready",
     "validated_model_spec_lineage": "requires_rebuild"
   },
   "requirements": [
@@ -80,7 +80,7 @@
         "midterms/evidence/point_in_time.py"
       ],
       "current_implementation": "As-of filtering plus evidence-snapshot-fingerprint-v2 hashes selected poll rows, race rows, candidate timeline, rating snapshot, structural-prior lineage and the selected point-in-time demographic source.",
-      "remaining_issue": "Candidate timeline coverage is incomplete and explicitly degraded.",
+      "remaining_issue": "Source readiness is complete; v0.9.22 historical OOF and model diagnostics still require regeneration.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,
@@ -248,7 +248,7 @@
         "midterms/evidence/demography.py"
       ],
       "current_implementation": "National/regional/local factors plus continuous demographic-similarity shocks.",
-      "remaining_issue": "Demographic point-in-time provenance is incomplete, so historical similarity claims are degraded.",
+      "remaining_issue": "Point-in-time demographic provenance is ready; historical similarity value still requires the v0.9.22 OOS ablation.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -535,12 +535,12 @@
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
     "candidate_timeline_real_data": {
-      "declared_status": "pending_source_ingest",
+      "declared_status": "source_ready",
       "required_artifact": "data/manifests/candidate_timeline.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
     "demographic_point_in_time_snapshots": {
-      "declared_status": "pending_source_ingest",
+      "declared_status": "source_ready",
       "required_artifact": "data/manifests/demographic_vintages.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
@@ -565,17 +565,17 @@
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
     "pollster_ratings_point_in_time": {
-      "declared_status": "pending_source_ingest",
+      "declared_status": "source_ready",
       "required_artifact": "data/manifests/pollster_ratings.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
     "finance_report_level_history": {
-      "declared_status": "pending_source_ingest",
+      "declared_status": "source_ready",
       "required_artifact": "data/manifests/fundraising_shares.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
     "approval_poll_timing_lineage": {
-      "declared_status": "pending_source_ingest",
+      "declared_status": "source_ready",
       "required_artifact": "data/manifests/pres_approval.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
     },
@@ -592,26 +592,27 @@
   },
   "source_readiness_status": {
     "as_of": "2026-09-27",
-    "ready_for_expensive_rebuild": false,
+    "ready_for_expensive_rebuild": true,
     "ready_domains": [
       "polls",
       "races",
+      "candidate_timeline",
+      "pollster_ratings",
       "presidential_prior",
+      "demographics",
       "economics",
+      "finance",
+      "approval",
       "generic_ballot",
       "official_results"
     ],
-    "blocking_domains": {
-      "candidate_timeline": "incomplete_coverage",
-      "pollster_ratings": "incomplete_coverage",
-      "demographics": "missing",
-      "finance": "incomplete_coverage",
-      "approval": "untraceable"
-    },
+    "blocking_domains": {},
     "optional_disabled_domains": [
       "expert_ratings",
       "markets"
     ],
-    "artifact": "data/artifacts/source_readiness_latest.json"
+    "artifact": "data/artifacts/source_readiness_latest.json",
+    "evidence_bundle_id": "eb-7d4691b12b12db1e",
+    "evidence_bundle_sha256": "7d4691b12b12db1e91f03038cda6fae28192a58c5a16f03330499a30726e3fc8"
   }
 }
