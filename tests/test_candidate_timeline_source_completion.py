@@ -3,13 +3,22 @@
 from __future__ import annotations
 
 import io
+import json
+import shutil
 from pathlib import Path
 
 import pandas as pd
 
 from midterms.evidence.candidate_source_audit import (
+    SEALED_SOURCE_RECEIPTS,
+    _event_is_visible_in_document,
     parse_fec_congressional_ballot_workbook,
     prepare_official_candidate_source_audit,
+    prepare_sealed_candidate_timeline_sources,
+)
+from midterms.evidence.candidate_timeline import (
+    apply_candidate_timeline,
+    candidate_timeline_fingerprint,
 )
 from midterms.evidence.source_readiness import audit_source_readiness
 
@@ -155,3 +164,111 @@ def test_readiness_with_no_timeline_reports_every_contested_race(tmp_path: Path)
     )
     current = report["domains"]["candidate_timeline"]["cutoffs"]["senate-2026-current"]
     assert current["missing_race_ids"] == ["r1"]
+
+
+def test_candidate_mapping_must_be_visible_with_party_near_name():
+    event = {"candidate_name": "Example Person", "ballot_party": "DEM"}
+    assert _event_is_visible_in_document(
+        event, "UNITED STATES SENATOR EXAMPLE PERSON DEMOCRATIC RETIRED TEACHER",
+    )
+    assert not _event_is_visible_in_document(
+        event, "EXAMPLE PERSON UNAFFILIATED " + ("X " * 80) + "DEMOCRATIC",
+    )
+
+
+def test_sealed_california_sources_are_deterministic_and_keep_unexpired_distinct(
+    tmp_path: Path,
+):
+    races_path = Path("data/normalized/races_official.parquet")
+    first_timeline = tmp_path / "first.parquet"
+    first = prepare_sealed_candidate_timeline_sources(
+        receipt_path=SEALED_SOURCE_RECEIPTS,
+        races_path=races_path,
+        timeline_path=first_timeline,
+        timeline_manifest_path=tmp_path / "first-manifest.json",
+        source_audit_path=tmp_path / "first-audit.json",
+        gaps_path=tmp_path / "first-gaps.json",
+    )
+    second_timeline = tmp_path / "second.parquet"
+    second = prepare_sealed_candidate_timeline_sources(
+        receipt_path=SEALED_SOURCE_RECEIPTS,
+        races_path=races_path,
+        timeline_path=second_timeline,
+        timeline_manifest_path=tmp_path / "second-manifest.json",
+        source_audit_path=tmp_path / "second-audit.json",
+        gaps_path=tmp_path / "second-gaps.json",
+    )
+    first_frame = pd.read_parquet(first_timeline)
+    second_frame = pd.read_parquet(second_timeline)
+    assert candidate_timeline_fingerprint(first_frame) == candidate_timeline_fingerprint(second_frame)
+    assert first["timeline"]["semantic_sha256"] == second["timeline"]["semantic_sha256"]
+    assert set(first_frame.loc[
+        first_frame["election_id"].eq("senate-2022"), "race_id",
+    ]) == {"senate-2022-CA", "senate-2022-CA-unexpired"}
+    assert set(first_frame.loc[
+        first_frame["election_id"].eq("senate-2024"), "race_id",
+    ]) == {"senate-2024-CA", "senate-2024-CA-unexpired"}
+
+
+def test_late_primary_and_special_finalist_gaps_are_explicit(tmp_path: Path):
+    report = prepare_sealed_candidate_timeline_sources(
+        receipt_path=SEALED_SOURCE_RECEIPTS,
+        races_path=Path("data/normalized/races_official.parquet"),
+        timeline_path=tmp_path / "timeline.parquet",
+        timeline_manifest_path=tmp_path / "manifest.json",
+        source_audit_path=tmp_path / "audit.json",
+        gaps_path=tmp_path / "gaps.json",
+    )
+    late = report["coverage"]["senate-2020-lead-60"]["structurally_unavailable"]
+    assert {row["race_id"] for row in late} >= {
+        "senate-2020-DE", "senate-2020-NH", "senate-2020-RI",
+        "senate-2020-GA-special",
+    }
+    assert report["coverage"]["senate-2020-lead-30"]["structurally_unavailable"] == [
+        {
+            "race_id": "senate-2020-GA-special",
+            "gap_type": "special_election_finalists_not_yet_determined",
+            "event_date": "2020-11-03",
+            "reason": "the nonpartisan special-election runoff pairing was determined after the replay cutoff",
+        }
+    ]
+
+
+def test_sealed_source_hash_change_fails_closed(tmp_path: Path):
+    receipt = json.loads(SEALED_SOURCE_RECEIPTS.read_text(encoding="utf-8"))
+    source = receipt["sources"][0]
+    shutil.copy2(SEALED_SOURCE_RECEIPTS.parent / source["raw_path"], tmp_path / source["raw_path"])
+    source["raw_sha256"] = "0" * 64
+    receipt["sources"] = [source]
+    receipt["structural_unavailability"] = {}
+    receipt_path = tmp_path / "source_receipts.json"
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    races_path = tmp_path / "races.parquet"
+    pd.DataFrame([{
+        "election_id": "senate-2018", "race_id": "senate-2018-CA",
+        "state": "CA", "not_up": False,
+    }]).to_parquet(races_path, index=False)
+    import pytest
+    with pytest.raises(ValueError, match="source hash changed"):
+        prepare_sealed_candidate_timeline_sources(
+            receipt_path=receipt_path,
+            races_path=races_path,
+            timeline_path=tmp_path / "timeline.parquet",
+            timeline_manifest_path=tmp_path / "manifest.json",
+            source_audit_path=tmp_path / "audit.json",
+            gaps_path=tmp_path / "gaps.json",
+        )
+
+
+def test_official_candidate_event_obeys_available_at():
+    timeline = pd.read_parquet("data/normalized/candidate_timeline.parquet")
+    races = pd.DataFrame([{
+        "election_id": "senate-2024", "race_id": "senate-2024-CA",
+        "state": "CA", "not_up": False,
+    }])
+    before, _ = apply_candidate_timeline(races, timeline, as_of="2024-08-28")
+    after, _ = apply_candidate_timeline(races, timeline, as_of="2024-08-29")
+    assert before.loc[0, "candidate_timeline_status"] != "point_in_time"
+    assert after.loc[0, "candidate_timeline_status"] == "point_in_time"
+    assert after.loc[0, "modeled_candidate_name"] == "Adam B. Schiff"
+    assert after.loc[0, "opposing_candidate_name"] == "Steve Garvey"

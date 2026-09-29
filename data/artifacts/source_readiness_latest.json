@@ -296,29 +296,27 @@
       "adapter": "midterms.evidence.candidate_timeline",
       "status": "incomplete_coverage",
       "reasons": [
-        "official FEC declaration filings are present but do not establish nomination or ballot identity"
+        "source-backed candidate identity is incomplete at required cutoffs"
       ],
       "cutoffs": {
         "senate-2018-lead-60": {
-          "status": "degraded_missing_timeline",
+          "status": "partial",
           "n_required_races": 35,
-          "n_point_in_time": 0,
-          "n_degraded": 35,
-          "n_incomplete_identity": 35,
+          "n_point_in_time": 1,
+          "n_degraded": 34,
+          "n_incomplete_identity": 34,
           "required_identity_columns": [
             "modeled_candidate_id",
             "modeled_ballot_party",
             "opposing_candidate_id",
             "opposing_ballot_party"
           ],
-          "traceable": false,
-          "snapshot_sha256": null,
+          "traceable": true,
+          "snapshot_sha256": "45e7ad8a250bded8e061ad6260eeec2a37345d243690ed398cce60c030470d32",
           "reasons": [
-            "35 required contested races lack complete modeled/opposing identity",
-            "35 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "34 required contested races lack a complete as-of identity",
+            "34 required contested races lack complete modeled/opposing identity",
+            "34 required contested races use degraded identity"
           ],
           "eligible": false,
           "publication_eligible": false,
@@ -326,7 +324,6 @@
           "schema_version": "candidate-timeline-v2",
           "missing_race_ids": [
             "senate-2018-AZ",
-            "senate-2018-CA",
             "senate-2018-CT",
             "senate-2018-DE",
             "senate-2018-FL",
@@ -363,25 +360,23 @@
           ]
         },
         "senate-2018-lead-30": {
-          "status": "degraded_missing_timeline",
+          "status": "partial",
           "n_required_races": 35,
-          "n_point_in_time": 0,
-          "n_degraded": 35,
-          "n_incomplete_identity": 35,
+          "n_point_in_time": 1,
+          "n_degraded": 34,
+          "n_incomplete_identity": 34,
           "required_identity_columns": [
             "modeled_candidate_id",
             "modeled_ballot_party",
             "opposing_candidate_id",
             "opposing_ballot_party"
           ],
-          "traceable": false,
-          "snapshot_sha256": null,
+          "traceable": true,
+          "snapshot_sha256": "45e7ad8a250bded8e061ad6260eeec2a37345d243690ed398cce60c030470d32",
           "reasons": [
-            "35 required contested races lack complete modeled/opposing identity",
-            "35 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "34 required contested races lack a complete as-of identity",
+            "34 required contested races lack complete modeled/opposing identity",
+            "34 required contested races use degraded identity"
           ],
           "eligible": false,
           "publication_eligible": false,
@@ -389,7 +384,6 @@
           "schema_version": "candidate-timeline-v2",
           "missing_race_ids": [
             "senate-2018-AZ",
-            "senate-2018-CA",
             "senate-2018-CT",
             "senate-2018-DE",
             "senate-2018-FL",
@@ -426,7 +420,7 @@
           ]
         },
         "senate-2020-lead-60": {
-          "status": "degraded_missing_timeline",
+          "status": "partial",
           "n_required_races": 35,
           "n_point_in_time": 0,
           "n_degraded": 35,
@@ -438,13 +432,13 @@
             "opposing_ballot_party"
           ],
           "traceable": false,
-          "snapshot_sha256": null,
+          "snapshot_sha256": "45e7ad8a250bded8e061ad6260eeec2a37345d243690ed398cce60c030470d32",
           "reasons": [
+            "35 required contested races lack a complete as-of identity",
             "35 required contested races lack complete modeled/opposing identity",
             "35 required contested races use degraded identity",
             "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "required timeline events lack complete source traceability"
           ],
           "eligible": false,
           "publication_eligible": false,
@@ -489,7 +483,7 @@
           ]
         },
         "senate-2020-lead-30": {
-          "status": "degraded_missing_timeline",
+          "status": "partial",
           "n_required_races": 35,
           "n_point_in_time": 0,
           "n_degraded": 35,
@@ -501,13 +495,13 @@
             "opposing_ballot_party"
           ],
           "traceable": false,
-          "snapshot_sha256": null,
+          "snapshot_sha256": "45e7ad8a250bded8e061ad6260eeec2a37345d243690ed398cce60c030470d32",
           "reasons": [
+            "35 required contested races lack a complete as-of identity",
             "35 required contested races lack complete modeled/opposing identity",
             "35 required contested races use degraded identity",
             "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "required timeline events lack complete source traceability"
           ],
           "eligible": false,
           "publication_eligible": false,
@@ -552,25 +546,23 @@
           ]
         },
         "senate-2022-lead-60": {
-          "status": "degraded_missing_timeline",
+          "status": "partial",
           "n_required_races": 36,
-          "n_point_in_time": 0,
-          "n_degraded": 36,
-          "n_incomplete_identity": 36,
+          "n_point_in_time": 2,
+          "n_degraded": 34,
+          "n_incomplete_identity": 34,
           "required_identity_columns": [
             "modeled_candidate_id",
             "modeled_ballot_party",
             "opposing_candidate_id",
             "opposing_ballot_party"
           ],
-          "traceable": false,
-          "snapshot_sha256": null,
+          "traceable": true,
+          "snapshot_sha256": "52e367213e2e2f8948e8bcbeb2228162b53b6381bb8728da001817bd891a7b4d",
           "reasons": [
-            "36 required contested races lack complete modeled/opposing identity",
-            "36 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "34 required contested races lack a complete as-of identity",
+            "34 required contested races lack complete modeled/opposing identity",
+            "34 required contested races use degraded identity"
           ],
           "eligible": false,
           "publication_eligible": false,
@@ -581,8 +573,6 @@
             "senate-2022-AL",
             "senate-2022-AR",
             "senate-2022-AZ",
-            "senate-2022-CA",
-            "senate-2022-CA-unexpired",
             "senate-2022-CO",
             "senate-2022-CT",
             "senate-2022-FL",
@@ -616,25 +606,23 @@
           ]
         },
         "senate-2022-lead-30": {
-          "status": "degraded_missing_timeline",
+          "status": "partial",
           "n_required_races": 36,
-          "n_point_in_time": 0,
-          "n_degraded": 36,
-          "n_incomplete_identity": 36,
+          "n_point_in_time": 2,
+          "n_degraded": 34,
+          "n_incomplete_identity": 34,
           "required_identity_columns": [
             "modeled_candidate_id",
             "modeled_ballot_party",
             "opposing_candidate_id",
             "opposing_ballot_party"
           ],
-          "traceable": false,
-          "snapshot_sha256": null,
+          "traceable": true,
+          "snapshot_sha256": "52e367213e2e2f8948e8bcbeb2228162b53b6381bb8728da001817bd891a7b4d",
           "reasons": [
-            "36 required contested races lack complete modeled/opposing identity",
-            "36 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "34 required contested races lack a complete as-of identity",
+            "34 required contested races lack complete modeled/opposing identity",
+            "34 required contested races use degraded identity"
           ],
           "eligible": false,
           "publication_eligible": false,
@@ -645,8 +633,6 @@
             "senate-2022-AL",
             "senate-2022-AR",
             "senate-2022-AZ",
-            "senate-2022-CA",
-            "senate-2022-CA-unexpired",
             "senate-2022-CO",
             "senate-2022-CT",
             "senate-2022-FL",
@@ -680,25 +666,23 @@
           ]
         },
         "senate-2024-lead-60": {
-          "status": "degraded_missing_timeline",
+          "status": "partial",
           "n_required_races": 35,
-          "n_point_in_time": 0,
-          "n_degraded": 35,
-          "n_incomplete_identity": 35,
+          "n_point_in_time": 2,
+          "n_degraded": 33,
+          "n_incomplete_identity": 33,
           "required_identity_columns": [
             "modeled_candidate_id",
             "modeled_ballot_party",
             "opposing_candidate_id",
             "opposing_ballot_party"
           ],
-          "traceable": false,
-          "snapshot_sha256": null,
+          "traceable": true,
+          "snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
           "reasons": [
-            "35 required contested races lack complete modeled/opposing identity",
-            "35 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "33 required contested races lack a complete as-of identity",
+            "33 required contested races lack complete modeled/opposing identity",
+            "33 required contested races use degraded identity"
           ],
           "eligible": false,
           "publication_eligible": false,
@@ -706,8 +690,6 @@
           "schema_version": "candidate-timeline-v2",
           "missing_race_ids": [
             "senate-2024-AZ",
-            "senate-2024-CA",
-            "senate-2024-CA-unexpired",
             "senate-2024-CT",
             "senate-2024-DE",
             "senate-2024-FL",
@@ -743,25 +725,23 @@
           ]
         },
         "senate-2024-lead-30": {
-          "status": "degraded_missing_timeline",
+          "status": "partial",
           "n_required_races": 35,
-          "n_point_in_time": 0,
-          "n_degraded": 35,
-          "n_incomplete_identity": 35,
+          "n_point_in_time": 2,
+          "n_degraded": 33,
+          "n_incomplete_identity": 33,
           "required_identity_columns": [
             "modeled_candidate_id",
             "modeled_ballot_party",
             "opposing_candidate_id",
             "opposing_ballot_party"
           ],
-          "traceable": false,
-          "snapshot_sha256": null,
+          "traceable": true,
+          "snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
           "reasons": [
-            "35 required contested races lack complete modeled/opposing identity",
-            "35 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "33 required contested races lack a complete as-of identity",
+            "33 required contested races lack complete modeled/opposing identity",
+            "33 required contested races use degraded identity"
           ],
           "eligible": false,
           "publication_eligible": false,
@@ -769,8 +749,6 @@
           "schema_version": "candidate-timeline-v2",
           "missing_race_ids": [
             "senate-2024-AZ",
-            "senate-2024-CA",
-            "senate-2024-CA-unexpired",
             "senate-2024-CT",
             "senate-2024-DE",
             "senate-2024-FL",
@@ -806,7 +784,7 @@
           ]
         },
         "senate-2026-current": {
-          "status": "degraded_missing_timeline",
+          "status": "partial",
           "n_required_races": 35,
           "n_point_in_time": 0,
           "n_degraded": 35,
@@ -818,13 +796,13 @@
             "opposing_ballot_party"
           ],
           "traceable": false,
-          "snapshot_sha256": null,
+          "snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
           "reasons": [
+            "35 required contested races lack a complete as-of identity",
             "35 required contested races lack complete modeled/opposing identity",
             "35 required contested races use degraded identity",
             "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "required timeline events lack complete source traceability"
           ],
           "eligible": false,
           "publication_eligible": false,
@@ -875,7 +853,6 @@
           "as_of": "2018-09-07",
           "race_ids": [
             "senate-2018-AZ",
-            "senate-2018-CA",
             "senate-2018-CT",
             "senate-2018-DE",
             "senate-2018-FL",
@@ -911,11 +888,9 @@
             "senate-2018-WY"
           ],
           "reasons": [
-            "35 required contested races lack complete modeled/opposing identity",
-            "35 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "34 required contested races lack a complete as-of identity",
+            "34 required contested races lack complete modeled/opposing identity",
+            "34 required contested races use degraded identity"
           ]
         },
         {
@@ -923,7 +898,6 @@
           "as_of": "2018-10-07",
           "race_ids": [
             "senate-2018-AZ",
-            "senate-2018-CA",
             "senate-2018-CT",
             "senate-2018-DE",
             "senate-2018-FL",
@@ -959,11 +933,9 @@
             "senate-2018-WY"
           ],
           "reasons": [
-            "35 required contested races lack complete modeled/opposing identity",
-            "35 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "34 required contested races lack a complete as-of identity",
+            "34 required contested races lack complete modeled/opposing identity",
+            "34 required contested races use degraded identity"
           ]
         },
         {
@@ -1007,11 +979,11 @@
             "senate-2020-WY"
           ],
           "reasons": [
+            "35 required contested races lack a complete as-of identity",
             "35 required contested races lack complete modeled/opposing identity",
             "35 required contested races use degraded identity",
             "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "required timeline events lack complete source traceability"
           ]
         },
         {
@@ -1055,11 +1027,11 @@
             "senate-2020-WY"
           ],
           "reasons": [
+            "35 required contested races lack a complete as-of identity",
             "35 required contested races lack complete modeled/opposing identity",
             "35 required contested races use degraded identity",
             "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "required timeline events lack complete source traceability"
           ]
         },
         {
@@ -1070,8 +1042,6 @@
             "senate-2022-AL",
             "senate-2022-AR",
             "senate-2022-AZ",
-            "senate-2022-CA",
-            "senate-2022-CA-unexpired",
             "senate-2022-CO",
             "senate-2022-CT",
             "senate-2022-FL",
@@ -1104,11 +1074,9 @@
             "senate-2022-WI"
           ],
           "reasons": [
-            "36 required contested races lack complete modeled/opposing identity",
-            "36 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "34 required contested races lack a complete as-of identity",
+            "34 required contested races lack complete modeled/opposing identity",
+            "34 required contested races use degraded identity"
           ]
         },
         {
@@ -1119,8 +1087,6 @@
             "senate-2022-AL",
             "senate-2022-AR",
             "senate-2022-AZ",
-            "senate-2022-CA",
-            "senate-2022-CA-unexpired",
             "senate-2022-CO",
             "senate-2022-CT",
             "senate-2022-FL",
@@ -1153,11 +1119,9 @@
             "senate-2022-WI"
           ],
           "reasons": [
-            "36 required contested races lack complete modeled/opposing identity",
-            "36 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "34 required contested races lack a complete as-of identity",
+            "34 required contested races lack complete modeled/opposing identity",
+            "34 required contested races use degraded identity"
           ]
         },
         {
@@ -1165,8 +1129,6 @@
           "as_of": "2024-09-06",
           "race_ids": [
             "senate-2024-AZ",
-            "senate-2024-CA",
-            "senate-2024-CA-unexpired",
             "senate-2024-CT",
             "senate-2024-DE",
             "senate-2024-FL",
@@ -1201,11 +1163,9 @@
             "senate-2024-WY"
           ],
           "reasons": [
-            "35 required contested races lack complete modeled/opposing identity",
-            "35 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "33 required contested races lack a complete as-of identity",
+            "33 required contested races lack complete modeled/opposing identity",
+            "33 required contested races use degraded identity"
           ]
         },
         {
@@ -1213,8 +1173,6 @@
           "as_of": "2024-10-06",
           "race_ids": [
             "senate-2024-AZ",
-            "senate-2024-CA",
-            "senate-2024-CA-unexpired",
             "senate-2024-CT",
             "senate-2024-DE",
             "senate-2024-FL",
@@ -1249,11 +1207,9 @@
             "senate-2024-WY"
           ],
           "reasons": [
-            "35 required contested races lack complete modeled/opposing identity",
-            "35 required contested races use degraded identity",
-            "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "33 required contested races lack a complete as-of identity",
+            "33 required contested races lack complete modeled/opposing identity",
+            "33 required contested races use degraded identity"
           ]
         },
         {
@@ -1297,17 +1253,17 @@
             "senate-2026-WY"
           ],
           "reasons": [
+            "35 required contested races lack a complete as-of identity",
             "35 required contested races lack complete modeled/opposing identity",
             "35 required contested races use degraded identity",
             "candidate timeline is not source-traceable",
-            "candidate timeline snapshot hash is missing",
-            "candidate timeline source is missing"
+            "required timeline events lack complete source traceability"
           ]
         }
       ],
-      "manifest_sha256": null,
-      "semantic_sha256": null,
-      "parser_version": null,
+      "manifest_sha256": "066f1b0825c106d08ca9ba4dd088bb074a584bf73b26ab17c83c6fcc8d0b3a51",
+      "semantic_sha256": "df8e8df9c1c1f2a2539e059c9d465309b5d0f30a7a0626014e905d12c2d06794",
+      "parser_version": "official-candidate-document-v1",
       "raw_filing_source_hashes": {
         "fec_form2_2018.csv": "faf409bbd6c4d1d0a9f6f35df611b65842afaa3137d6d2bb5d04b0fb32c5891a",
         "fec_form2_2020.csv": "8548e8db9fe27dcbece9b1ed2850b50bce1165ca7b731c79aaa0069c9de3bf4d",
@@ -1315,13 +1271,11 @@
         "fec_form2_2024.csv": "904d93f8b5a9f51a82033e0369a2ae4b88b6ee3cfb2578f68ed09434cfe5c23b",
         "fec_form2_2026.csv": "479d6d3e4ec2951b058a334a59ca88cf23398e90681f5f34380f3bf484a6eddd"
       },
-      "source_gap_audit_sha256": "f6f30d6edfb83f6aaa79554405ddebc19f32b507a6714810df1304fcfb1ce290",
+      "source_gap_audit_sha256": "f79500b6dc32be82419ffc567f7fbc988d5c79986013bcb61333605955c31ea0",
       "source_gap_audit_status": "incomplete_coverage",
       "source_gap_coverage": {
         "senate-2018-lead-60": {
           "as_of": "2018-09-07",
-          "source_available_at": null,
-          "source_available_by_cutoff": false,
           "required_race_ids": [
             "senate-2018-AZ",
             "senate-2018-CA",
@@ -1359,10 +1313,11 @@
             "senate-2018-WV",
             "senate-2018-WY"
           ],
-          "covered_race_ids": [],
+          "covered_race_ids": [
+            "senate-2018-CA"
+          ],
           "missing_race_ids": [
             "senate-2018-AZ",
-            "senate-2018-CA",
             "senate-2018-CT",
             "senate-2018-DE",
             "senate-2018-FL",
@@ -1397,14 +1352,63 @@
             "senate-2018-WV",
             "senate-2018-WY"
           ],
+          "missing_source_race_ids": [
+            "senate-2018-AZ",
+            "senate-2018-CT",
+            "senate-2018-DE",
+            "senate-2018-FL",
+            "senate-2018-HI",
+            "senate-2018-IN",
+            "senate-2018-MA",
+            "senate-2018-MD",
+            "senate-2018-ME",
+            "senate-2018-MI",
+            "senate-2018-MN",
+            "senate-2018-MN-special",
+            "senate-2018-MO",
+            "senate-2018-MS",
+            "senate-2018-MT",
+            "senate-2018-ND",
+            "senate-2018-NE",
+            "senate-2018-NJ",
+            "senate-2018-NM",
+            "senate-2018-NV",
+            "senate-2018-NY",
+            "senate-2018-OH",
+            "senate-2018-PA",
+            "senate-2018-TN",
+            "senate-2018-TX",
+            "senate-2018-UT",
+            "senate-2018-VA",
+            "senate-2018-VT",
+            "senate-2018-WA",
+            "senate-2018-WI",
+            "senate-2018-WV",
+            "senate-2018-WY"
+          ],
+          "structurally_unavailable": [
+            {
+              "race_id": "senate-2018-RI",
+              "gap_type": "nomination_not_yet_determined",
+              "event_date": "2018-09-12",
+              "reason": "Rhode Island's congressional primary occurred after the 2018-09-07 replay cutoff"
+            },
+            {
+              "race_id": "senate-2018-MS-special",
+              "gap_type": "special_election_finalists_not_yet_determined",
+              "event_date": "2018-11-06",
+              "reason": "the nonpartisan special-election runoff pairing was determined after the replay cutoff"
+            }
+          ],
+          "n_required": 35,
+          "n_covered": 1,
+          "n_missing": 34,
+          "snapshot_sha256": "45e7ad8a250bded8e061ad6260eeec2a37345d243690ed398cce60c030470d32",
           "status": "incomplete_coverage",
-          "reason": "no traceable official cycle-wide ballot source was established",
           "publication_eligible": false
         },
         "senate-2018-lead-30": {
           "as_of": "2018-10-07",
-          "source_available_at": null,
-          "source_available_by_cutoff": false,
           "required_race_ids": [
             "senate-2018-AZ",
             "senate-2018-CA",
@@ -1442,10 +1446,11 @@
             "senate-2018-WV",
             "senate-2018-WY"
           ],
-          "covered_race_ids": [],
+          "covered_race_ids": [
+            "senate-2018-CA"
+          ],
           "missing_race_ids": [
             "senate-2018-AZ",
-            "senate-2018-CA",
             "senate-2018-CT",
             "senate-2018-DE",
             "senate-2018-FL",
@@ -1480,14 +1485,58 @@
             "senate-2018-WV",
             "senate-2018-WY"
           ],
+          "missing_source_race_ids": [
+            "senate-2018-AZ",
+            "senate-2018-CT",
+            "senate-2018-DE",
+            "senate-2018-FL",
+            "senate-2018-HI",
+            "senate-2018-IN",
+            "senate-2018-MA",
+            "senate-2018-MD",
+            "senate-2018-ME",
+            "senate-2018-MI",
+            "senate-2018-MN",
+            "senate-2018-MN-special",
+            "senate-2018-MO",
+            "senate-2018-MS",
+            "senate-2018-MT",
+            "senate-2018-ND",
+            "senate-2018-NE",
+            "senate-2018-NJ",
+            "senate-2018-NM",
+            "senate-2018-NV",
+            "senate-2018-NY",
+            "senate-2018-OH",
+            "senate-2018-PA",
+            "senate-2018-RI",
+            "senate-2018-TN",
+            "senate-2018-TX",
+            "senate-2018-UT",
+            "senate-2018-VA",
+            "senate-2018-VT",
+            "senate-2018-WA",
+            "senate-2018-WI",
+            "senate-2018-WV",
+            "senate-2018-WY"
+          ],
+          "structurally_unavailable": [
+            {
+              "race_id": "senate-2018-MS-special",
+              "gap_type": "special_election_finalists_not_yet_determined",
+              "event_date": "2018-11-06",
+              "reason": "the nonpartisan special-election runoff pairing was determined after the replay cutoff"
+            }
+          ],
+          "n_required": 35,
+          "n_covered": 1,
+          "n_missing": 34,
+          "snapshot_sha256": "45e7ad8a250bded8e061ad6260eeec2a37345d243690ed398cce60c030470d32",
           "status": "incomplete_coverage",
-          "reason": "no traceable official cycle-wide ballot source was established",
           "publication_eligible": false
         },
         "senate-2020-lead-60": {
           "as_of": "2020-09-04",
-          "source_available_at": null,
-          "source_available_by_cutoff": false,
           "required_race_ids": [
             "senate-2020-AK",
             "senate-2020-AL",
@@ -1563,14 +1612,74 @@
             "senate-2020-WV",
             "senate-2020-WY"
           ],
+          "missing_source_race_ids": [
+            "senate-2020-AK",
+            "senate-2020-AL",
+            "senate-2020-AR",
+            "senate-2020-AZ-special",
+            "senate-2020-CO",
+            "senate-2020-GA",
+            "senate-2020-IA",
+            "senate-2020-ID",
+            "senate-2020-IL",
+            "senate-2020-KS",
+            "senate-2020-KY",
+            "senate-2020-LA",
+            "senate-2020-MA",
+            "senate-2020-ME",
+            "senate-2020-MI",
+            "senate-2020-MN",
+            "senate-2020-MS",
+            "senate-2020-MT",
+            "senate-2020-NC",
+            "senate-2020-NE",
+            "senate-2020-NJ",
+            "senate-2020-NM",
+            "senate-2020-OK",
+            "senate-2020-OR",
+            "senate-2020-SC",
+            "senate-2020-SD",
+            "senate-2020-TN",
+            "senate-2020-TX",
+            "senate-2020-VA",
+            "senate-2020-WV",
+            "senate-2020-WY"
+          ],
+          "structurally_unavailable": [
+            {
+              "race_id": "senate-2020-DE",
+              "gap_type": "nomination_not_yet_determined",
+              "event_date": "2020-09-15",
+              "reason": "Delaware's congressional primary occurred after the 2020-09-04 replay cutoff"
+            },
+            {
+              "race_id": "senate-2020-NH",
+              "gap_type": "nomination_not_yet_determined",
+              "event_date": "2020-09-08",
+              "reason": "New Hampshire's congressional primary occurred after the 2020-09-04 replay cutoff"
+            },
+            {
+              "race_id": "senate-2020-RI",
+              "gap_type": "nomination_not_yet_determined",
+              "event_date": "2020-09-08",
+              "reason": "Rhode Island's congressional primary occurred after the 2020-09-04 replay cutoff"
+            },
+            {
+              "race_id": "senate-2020-GA-special",
+              "gap_type": "special_election_finalists_not_yet_determined",
+              "event_date": "2020-11-03",
+              "reason": "the nonpartisan special-election runoff pairing was determined after the replay cutoff"
+            }
+          ],
+          "n_required": 35,
+          "n_covered": 0,
+          "n_missing": 35,
+          "snapshot_sha256": "45e7ad8a250bded8e061ad6260eeec2a37345d243690ed398cce60c030470d32",
           "status": "incomplete_coverage",
-          "reason": "no traceable official cycle-wide ballot source was established",
           "publication_eligible": false
         },
         "senate-2020-lead-30": {
           "as_of": "2020-10-04",
-          "source_available_at": null,
-          "source_available_by_cutoff": false,
           "required_race_ids": [
             "senate-2020-AK",
             "senate-2020-AL",
@@ -1646,14 +1755,59 @@
             "senate-2020-WV",
             "senate-2020-WY"
           ],
+          "missing_source_race_ids": [
+            "senate-2020-AK",
+            "senate-2020-AL",
+            "senate-2020-AR",
+            "senate-2020-AZ-special",
+            "senate-2020-CO",
+            "senate-2020-DE",
+            "senate-2020-GA",
+            "senate-2020-IA",
+            "senate-2020-ID",
+            "senate-2020-IL",
+            "senate-2020-KS",
+            "senate-2020-KY",
+            "senate-2020-LA",
+            "senate-2020-MA",
+            "senate-2020-ME",
+            "senate-2020-MI",
+            "senate-2020-MN",
+            "senate-2020-MS",
+            "senate-2020-MT",
+            "senate-2020-NC",
+            "senate-2020-NE",
+            "senate-2020-NH",
+            "senate-2020-NJ",
+            "senate-2020-NM",
+            "senate-2020-OK",
+            "senate-2020-OR",
+            "senate-2020-RI",
+            "senate-2020-SC",
+            "senate-2020-SD",
+            "senate-2020-TN",
+            "senate-2020-TX",
+            "senate-2020-VA",
+            "senate-2020-WV",
+            "senate-2020-WY"
+          ],
+          "structurally_unavailable": [
+            {
+              "race_id": "senate-2020-GA-special",
+              "gap_type": "special_election_finalists_not_yet_determined",
+              "event_date": "2020-11-03",
+              "reason": "the nonpartisan special-election runoff pairing was determined after the replay cutoff"
+            }
+          ],
+          "n_required": 35,
+          "n_covered": 0,
+          "n_missing": 35,
+          "snapshot_sha256": "45e7ad8a250bded8e061ad6260eeec2a37345d243690ed398cce60c030470d32",
           "status": "incomplete_coverage",
-          "reason": "no traceable official cycle-wide ballot source was established",
           "publication_eligible": false
         },
         "senate-2022-lead-60": {
           "as_of": "2022-09-09",
-          "source_available_at": "2022-10-28T16:00:02+00:00",
-          "source_available_by_cutoff": false,
           "required_race_ids": [
             "senate-2022-AK",
             "senate-2022-AL",
@@ -1692,14 +1846,15 @@
             "senate-2022-WA",
             "senate-2022-WI"
           ],
-          "covered_race_ids": [],
+          "covered_race_ids": [
+            "senate-2022-CA",
+            "senate-2022-CA-unexpired"
+          ],
           "missing_race_ids": [
             "senate-2022-AK",
             "senate-2022-AL",
             "senate-2022-AR",
             "senate-2022-AZ",
-            "senate-2022-CA",
-            "senate-2022-CA-unexpired",
             "senate-2022-CO",
             "senate-2022-CT",
             "senate-2022-FL",
@@ -1731,14 +1886,58 @@
             "senate-2022-WA",
             "senate-2022-WI"
           ],
+          "missing_source_race_ids": [
+            "senate-2022-AK",
+            "senate-2022-AL",
+            "senate-2022-AR",
+            "senate-2022-AZ",
+            "senate-2022-CO",
+            "senate-2022-CT",
+            "senate-2022-FL",
+            "senate-2022-GA",
+            "senate-2022-HI",
+            "senate-2022-IA",
+            "senate-2022-ID",
+            "senate-2022-IL",
+            "senate-2022-IN",
+            "senate-2022-KS",
+            "senate-2022-KY",
+            "senate-2022-LA",
+            "senate-2022-MD",
+            "senate-2022-MO",
+            "senate-2022-NC",
+            "senate-2022-ND",
+            "senate-2022-NV",
+            "senate-2022-NY",
+            "senate-2022-OH",
+            "senate-2022-OK",
+            "senate-2022-OK-special",
+            "senate-2022-OR",
+            "senate-2022-PA",
+            "senate-2022-SC",
+            "senate-2022-SD",
+            "senate-2022-UT",
+            "senate-2022-VT",
+            "senate-2022-WA",
+            "senate-2022-WI"
+          ],
+          "structurally_unavailable": [
+            {
+              "race_id": "senate-2022-NH",
+              "gap_type": "nomination_not_yet_determined",
+              "event_date": "2022-09-13",
+              "reason": "New Hampshire's congressional primary occurred after the 2022-09-09 replay cutoff"
+            }
+          ],
+          "n_required": 36,
+          "n_covered": 2,
+          "n_missing": 34,
+          "snapshot_sha256": "52e367213e2e2f8948e8bcbeb2228162b53b6381bb8728da001817bd891a7b4d",
           "status": "incomplete_coverage",
-          "reason": "official cycle-wide ballot source was published after this cutoff",
           "publication_eligible": false
         },
         "senate-2022-lead-30": {
           "as_of": "2022-10-09",
-          "source_available_at": "2022-10-28T16:00:02+00:00",
-          "source_available_by_cutoff": false,
           "required_race_ids": [
             "senate-2022-AK",
             "senate-2022-AL",
@@ -1777,14 +1976,15 @@
             "senate-2022-WA",
             "senate-2022-WI"
           ],
-          "covered_race_ids": [],
+          "covered_race_ids": [
+            "senate-2022-CA",
+            "senate-2022-CA-unexpired"
+          ],
           "missing_race_ids": [
             "senate-2022-AK",
             "senate-2022-AL",
             "senate-2022-AR",
             "senate-2022-AZ",
-            "senate-2022-CA",
-            "senate-2022-CA-unexpired",
             "senate-2022-CO",
             "senate-2022-CT",
             "senate-2022-FL",
@@ -1816,14 +2016,52 @@
             "senate-2022-WA",
             "senate-2022-WI"
           ],
+          "missing_source_race_ids": [
+            "senate-2022-AK",
+            "senate-2022-AL",
+            "senate-2022-AR",
+            "senate-2022-AZ",
+            "senate-2022-CO",
+            "senate-2022-CT",
+            "senate-2022-FL",
+            "senate-2022-GA",
+            "senate-2022-HI",
+            "senate-2022-IA",
+            "senate-2022-ID",
+            "senate-2022-IL",
+            "senate-2022-IN",
+            "senate-2022-KS",
+            "senate-2022-KY",
+            "senate-2022-LA",
+            "senate-2022-MD",
+            "senate-2022-MO",
+            "senate-2022-NC",
+            "senate-2022-ND",
+            "senate-2022-NH",
+            "senate-2022-NV",
+            "senate-2022-NY",
+            "senate-2022-OH",
+            "senate-2022-OK",
+            "senate-2022-OK-special",
+            "senate-2022-OR",
+            "senate-2022-PA",
+            "senate-2022-SC",
+            "senate-2022-SD",
+            "senate-2022-UT",
+            "senate-2022-VT",
+            "senate-2022-WA",
+            "senate-2022-WI"
+          ],
+          "structurally_unavailable": [],
+          "n_required": 36,
+          "n_covered": 2,
+          "n_missing": 34,
+          "snapshot_sha256": "52e367213e2e2f8948e8bcbeb2228162b53b6381bb8728da001817bd891a7b4d",
           "status": "incomplete_coverage",
-          "reason": "official cycle-wide ballot source was published after this cutoff",
           "publication_eligible": false
         },
         "senate-2024-lead-60": {
           "as_of": "2024-09-06",
-          "source_available_at": "2024-10-25T20:52:50+00:00",
-          "source_available_by_cutoff": false,
           "required_race_ids": [
             "senate-2024-AZ",
             "senate-2024-CA",
@@ -1861,11 +2099,12 @@
             "senate-2024-WV",
             "senate-2024-WY"
           ],
-          "covered_race_ids": [],
+          "covered_race_ids": [
+            "senate-2024-CA",
+            "senate-2024-CA-unexpired"
+          ],
           "missing_race_ids": [
             "senate-2024-AZ",
-            "senate-2024-CA",
-            "senate-2024-CA-unexpired",
             "senate-2024-CT",
             "senate-2024-DE",
             "senate-2024-FL",
@@ -1899,14 +2138,62 @@
             "senate-2024-WV",
             "senate-2024-WY"
           ],
+          "missing_source_race_ids": [
+            "senate-2024-AZ",
+            "senate-2024-CT",
+            "senate-2024-FL",
+            "senate-2024-HI",
+            "senate-2024-IN",
+            "senate-2024-MA",
+            "senate-2024-MD",
+            "senate-2024-ME",
+            "senate-2024-MI",
+            "senate-2024-MN",
+            "senate-2024-MO",
+            "senate-2024-MS",
+            "senate-2024-MT",
+            "senate-2024-ND",
+            "senate-2024-NE",
+            "senate-2024-NE-unexpired",
+            "senate-2024-NJ",
+            "senate-2024-NM",
+            "senate-2024-NV",
+            "senate-2024-NY",
+            "senate-2024-OH",
+            "senate-2024-PA",
+            "senate-2024-TN",
+            "senate-2024-TX",
+            "senate-2024-UT",
+            "senate-2024-VA",
+            "senate-2024-VT",
+            "senate-2024-WA",
+            "senate-2024-WI",
+            "senate-2024-WV",
+            "senate-2024-WY"
+          ],
+          "structurally_unavailable": [
+            {
+              "race_id": "senate-2024-DE",
+              "gap_type": "nomination_not_yet_determined",
+              "event_date": "2024-09-10",
+              "reason": "Delaware's congressional primary occurred after the 2024-09-06 replay cutoff"
+            },
+            {
+              "race_id": "senate-2024-RI",
+              "gap_type": "nomination_not_yet_determined",
+              "event_date": "2024-09-10",
+              "reason": "Rhode Island's congressional primary occurred after the 2024-09-06 replay cutoff"
+            }
+          ],
+          "n_required": 35,
+          "n_covered": 2,
+          "n_missing": 33,
+          "snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
           "status": "incomplete_coverage",
-          "reason": "official cycle-wide ballot source was published after this cutoff",
           "publication_eligible": false
         },
         "senate-2024-lead-30": {
           "as_of": "2024-10-06",
-          "source_available_at": "2024-10-25T20:52:50+00:00",
-          "source_available_by_cutoff": false,
           "required_race_ids": [
             "senate-2024-AZ",
             "senate-2024-CA",
@@ -1944,11 +2231,12 @@
             "senate-2024-WV",
             "senate-2024-WY"
           ],
-          "covered_race_ids": [],
+          "covered_race_ids": [
+            "senate-2024-CA",
+            "senate-2024-CA-unexpired"
+          ],
           "missing_race_ids": [
             "senate-2024-AZ",
-            "senate-2024-CA",
-            "senate-2024-CA-unexpired",
             "senate-2024-CT",
             "senate-2024-DE",
             "senate-2024-FL",
@@ -1982,14 +2270,51 @@
             "senate-2024-WV",
             "senate-2024-WY"
           ],
+          "missing_source_race_ids": [
+            "senate-2024-AZ",
+            "senate-2024-CT",
+            "senate-2024-DE",
+            "senate-2024-FL",
+            "senate-2024-HI",
+            "senate-2024-IN",
+            "senate-2024-MA",
+            "senate-2024-MD",
+            "senate-2024-ME",
+            "senate-2024-MI",
+            "senate-2024-MN",
+            "senate-2024-MO",
+            "senate-2024-MS",
+            "senate-2024-MT",
+            "senate-2024-ND",
+            "senate-2024-NE",
+            "senate-2024-NE-unexpired",
+            "senate-2024-NJ",
+            "senate-2024-NM",
+            "senate-2024-NV",
+            "senate-2024-NY",
+            "senate-2024-OH",
+            "senate-2024-PA",
+            "senate-2024-RI",
+            "senate-2024-TN",
+            "senate-2024-TX",
+            "senate-2024-UT",
+            "senate-2024-VA",
+            "senate-2024-VT",
+            "senate-2024-WA",
+            "senate-2024-WI",
+            "senate-2024-WV",
+            "senate-2024-WY"
+          ],
+          "structurally_unavailable": [],
+          "n_required": 35,
+          "n_covered": 2,
+          "n_missing": 33,
+          "snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
           "status": "incomplete_coverage",
-          "reason": "official cycle-wide ballot source was published after this cutoff",
           "publication_eligible": false
         },
         "senate-2026-current": {
           "as_of": "2026-09-27",
-          "source_available_at": null,
-          "source_available_by_cutoff": false,
           "required_race_ids": [
             "senate-2026-AK",
             "senate-2026-AL",
@@ -2065,35 +2390,176 @@
             "senate-2026-WV",
             "senate-2026-WY"
           ],
+          "missing_source_race_ids": [
+            "senate-2026-AK",
+            "senate-2026-AL",
+            "senate-2026-AR",
+            "senate-2026-CO",
+            "senate-2026-DE",
+            "senate-2026-FL",
+            "senate-2026-GA",
+            "senate-2026-IA",
+            "senate-2026-ID",
+            "senate-2026-IL",
+            "senate-2026-KS",
+            "senate-2026-KY",
+            "senate-2026-LA",
+            "senate-2026-MA",
+            "senate-2026-ME",
+            "senate-2026-MI",
+            "senate-2026-MN",
+            "senate-2026-MS",
+            "senate-2026-MT",
+            "senate-2026-NC",
+            "senate-2026-NE",
+            "senate-2026-NH",
+            "senate-2026-NJ",
+            "senate-2026-NM",
+            "senate-2026-OH",
+            "senate-2026-OK",
+            "senate-2026-OR",
+            "senate-2026-RI",
+            "senate-2026-SC",
+            "senate-2026-SD",
+            "senate-2026-TN",
+            "senate-2026-TX",
+            "senate-2026-VA",
+            "senate-2026-WV",
+            "senate-2026-WY"
+          ],
+          "structurally_unavailable": [],
+          "n_required": 35,
+          "n_covered": 0,
+          "n_missing": 35,
+          "snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
           "status": "incomplete_coverage",
-          "reason": "no traceable official cycle-wide ballot source was established",
           "publication_eligible": false
         }
       },
       "official_ballot_source_receipts": {
-        "2022": {
-          "cycle": 2022,
-          "source_url": "https://www.fec.gov/resources/cms-content/documents/2022congressgecands.xlsx",
-          "raw_path": "fec_congressional_ballot_candidates_2022.xlsx",
-          "raw_sha256": "cc64c5f5a2f6d99264da5257ec5dfe5899d784a4dae9aaa13aa909c0583f3493",
-          "retrieved_at": "2026-09-29T13:18:37.067295+00:00",
-          "official_last_modified": "2022-10-28T16:00:02+00:00",
-          "availability_basis": "official_http_last_modified",
-          "parser_version": "fec-congressional-ballot-workbook-v1",
-          "status": "sealed_late_or_available",
-          "n_senate_candidates": 171
+        "official_candidate_documents": {
+          "ca_2018_general_certified_candidates.pdf": {
+            "source_url": "https://elections.cdn.sos.ca.gov/statewide-elections/2018-general/cert-list-candidates.pdf",
+            "source_title": "California General Election - November 6, 2018 Official Certified List of Candidates",
+            "raw_path": "ca_2018_general_certified_candidates.pdf",
+            "raw_sha256": "3183e1de3f5e2e7d46090a4cb741fd0ba20369ee3b711d5795bd5038fc714d63",
+            "retrieved_at": "2026-09-29T13:35:03.044709Z",
+            "available_at": "2018-08-30T00:00:00Z",
+            "availability_basis": "official_certified_list_date_printed_in_document",
+            "source_type": "official_candidate_list",
+            "n_verified_events": 2
+          },
+          "ca_2022_general_us_senator_full.pdf": {
+            "source_url": "https://elections.cdn.sos.ca.gov/statewide-elections/2022-general/us-senator-full.pdf",
+            "source_title": "California Notice to Candidates - November 8, 2022 General Election - United States Senator Full Term",
+            "raw_path": "ca_2022_general_us_senator_full.pdf",
+            "raw_sha256": "e932f5c943288f4f70e06494df7f2be162bf8404ee705ada38f67f9026f052fa",
+            "retrieved_at": "2026-09-29T13:35:03.044709Z",
+            "available_at": "2022-08-26T00:00:00Z",
+            "availability_basis": "official_notice_date_printed_in_document",
+            "source_type": "official_candidate_list",
+            "n_verified_events": 2
+          },
+          "ca_2022_general_us_senator_partial.pdf": {
+            "source_url": "https://elections.cdn.sos.ca.gov/statewide-elections/2022-general/us-senator-partial.pdf",
+            "source_title": "California Notice to Candidates - November 8, 2022 General Election - United States Senator Partial/Unexpired Term",
+            "raw_path": "ca_2022_general_us_senator_partial.pdf",
+            "raw_sha256": "132d95f1a13cb25a1eca0dd2be2c8fbdec3466b40091412560ba39ca0ba19fd8",
+            "retrieved_at": "2026-09-29T13:35:03.044709Z",
+            "available_at": "2022-08-26T00:00:00Z",
+            "availability_basis": "official_notice_date_printed_in_document",
+            "source_type": "official_candidate_list",
+            "n_verified_events": 2
+          },
+          "ca_2024_general_certified_candidates.pdf": {
+            "source_url": "https://elections.cdn.sos.ca.gov/statewide-elections/2024-general/cert-list-candidates.pdf",
+            "source_title": "California General Election - November 5, 2024 Official Certified List of Candidates",
+            "raw_path": "ca_2024_general_certified_candidates.pdf",
+            "raw_sha256": "07a2dd2362b2d7e43ef3bbb9e6e559c2c4d5a498e42885030c45ec4b3abd7a7c",
+            "retrieved_at": "2026-09-29T13:35:03.044709Z",
+            "available_at": "2024-08-29T00:00:00Z",
+            "availability_basis": "official_certified_list_date_printed_in_document",
+            "source_type": "official_candidate_list",
+            "n_verified_events": 4
+          }
         },
-        "2024": {
-          "cycle": 2024,
-          "source_url": "https://www.fec.gov/resources/cms-content/documents/2024congressgecands.xlsx",
-          "raw_path": "fec_congressional_ballot_candidates_2024.xlsx",
-          "raw_sha256": "b142427552dd9f5b7ce1a72393d9ad5ac3d58773c9c53202759e04c8835103b3",
-          "retrieved_at": "2026-09-29T13:18:37.067295+00:00",
-          "official_last_modified": "2024-10-25T20:52:50+00:00",
-          "availability_basis": "official_http_last_modified",
-          "parser_version": "fec-congressional-ballot-workbook-v1",
-          "status": "sealed_late_or_available",
-          "n_senate_candidates": 138
+        "official_primary_calendars": {
+          "2018": {
+            "source_url": "https://www.fec.gov/resources/cms-content/documents/2018pdates.pdf",
+            "source_title": "2018 Congressional Primary Dates and Candidate Filing Deadlines for Ballot Access",
+            "raw_path": "fec_2018_congressional_primary_dates.pdf",
+            "raw_sha256": "d0e28ee13be6f4730fdf54a291c38eff7b4555a41194b15ca5e8a581cd4e97fa",
+            "retrieved_at": "2026-09-29T13:35:03.044709Z",
+            "availability_basis": "retrospective_official_calendar_for_gap_classification_only",
+            "document_data_as_of": "2018-08-17",
+            "source_type": "primary_calendar"
+          },
+          "2020": {
+            "source_url": "https://www.fec.gov/resources/cms-content/documents/2020pdates.pdf",
+            "source_title": "2020 Presidential and Congressional Primary Dates and Candidate Filing Deadlines for Ballot Access",
+            "raw_path": "fec_2020_congressional_primary_dates.pdf",
+            "raw_sha256": "bc48acc63feb35392c081bd55f2f997a762afbaba045b183603907f3ee7e1def",
+            "retrieved_at": "2026-09-29T13:35:03.044709Z",
+            "availability_basis": "retrospective_official_calendar_for_gap_classification_only",
+            "document_data_as_of": "2020-07-17",
+            "source_type": "primary_calendar"
+          },
+          "2022": {
+            "source_url": "https://www.fec.gov/resources/cms-content/documents/2022pdates.pdf",
+            "source_title": "2022 Congressional Primary Dates and Candidate Filing Deadlines for Ballot Access",
+            "raw_path": "fec_2022_congressional_primary_dates.pdf",
+            "raw_sha256": "c5698b3ec92d753126d3e58895312d44b2971159948b61dbf9289747b555347a",
+            "retrieved_at": "2026-09-29T13:35:03.044709Z",
+            "availability_basis": "retrospective_official_calendar_for_gap_classification_only",
+            "document_data_as_of": "2022-05-19",
+            "source_type": "primary_calendar"
+          },
+          "2024": {
+            "source_url": "https://www.fec.gov/resources/cms-content/documents/2024pdates.pdf",
+            "source_title": "2024 Presidential and Congressional Primary Dates and Candidate Filing Deadlines for Ballot Access",
+            "raw_path": "fec_2024_congressional_primary_dates.pdf",
+            "raw_sha256": "cc8bff9d78ea96cb24c37e7f42c899842221696791794c7d0e2100fce00c84ae",
+            "retrieved_at": "2026-09-29T13:35:03.044709Z",
+            "availability_basis": "retrospective_official_calendar_for_gap_classification_only",
+            "document_data_as_of": "2024-04-25",
+            "source_type": "primary_calendar"
+          },
+          "2026": {
+            "source_url": "https://www.fec.gov/resources/cms-content/documents/2026pdates.pdf",
+            "source_title": "2026 Congressional Primary Dates and Candidate Filing Deadlines for Ballot Access",
+            "raw_path": "fec_2026_congressional_primary_dates.pdf",
+            "raw_sha256": "9a5d4ec0ba2b69daf2f510ef79bca0ca381ab699255ac5adb971b9672d517251",
+            "retrieved_at": "2026-09-29T13:35:03.044709Z",
+            "availability_basis": "official_calendar_for_gap_classification_only",
+            "document_data_as_of": "2026-05-18",
+            "source_type": "primary_calendar"
+          }
+        },
+        "late_fec_candidate_workbooks": {
+          "2022": {
+            "cycle": 2022,
+            "source_url": "https://www.fec.gov/resources/cms-content/documents/2022congressgecands.xlsx",
+            "raw_path": "fec_congressional_ballot_candidates_2022.xlsx",
+            "raw_sha256": "cc64c5f5a2f6d99264da5257ec5dfe5899d784a4dae9aaa13aa909c0583f3493",
+            "retrieved_at": "2026-09-29T13:18:37.067295+00:00",
+            "official_last_modified": "2022-10-28T16:00:02+00:00",
+            "availability_basis": "official_http_last_modified",
+            "parser_version": "fec-congressional-ballot-workbook-v1",
+            "status": "sealed_late_or_available",
+            "n_senate_candidates": 171
+          },
+          "2024": {
+            "cycle": 2024,
+            "source_url": "https://www.fec.gov/resources/cms-content/documents/2024congressgecands.xlsx",
+            "raw_path": "fec_congressional_ballot_candidates_2024.xlsx",
+            "raw_sha256": "b142427552dd9f5b7ce1a72393d9ad5ac3d58773c9c53202759e04c8835103b3",
+            "retrieved_at": "2026-09-29T13:18:37.067295+00:00",
+            "official_last_modified": "2024-10-25T20:52:50+00:00",
+            "availability_basis": "official_http_last_modified",
+            "parser_version": "fec-congressional-ballot-workbook-v1",
+            "status": "sealed_late_or_available",
+            "n_senate_candidates": 138
+          }
         }
       }
     },
@@ -4075,7 +4541,7 @@
       "domain": "candidate_timeline",
       "status": "incomplete_coverage",
       "reasons": [
-        "official FEC declaration filings are present but do not establish nomination or ballot identity"
+        "source-backed candidate identity is incomplete at required cutoffs"
       ]
     }
   ],

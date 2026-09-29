@@ -1,0 +1,63 @@
+{
+  "schema_version": "candidate-timeline-v2",
+  "parser_version": "official-candidate-document-v1",
+  "source_receipt_sha256": "94b65ae9ace61b52b5b86a8eae1e859bd4b808f722a7cdc19b53666c04a3d071",
+  "normalized_semantic_sha256": "df8e8df9c1c1f2a2539e059c9d465309b5d0f30a7a0626014e905d12c2d06794",
+  "normalized_byte_sha256": "279a857e472b152728f535964ab10f72a7d9422191dee9fb92fcd84924fa5075",
+  "normalized_path": "data/normalized/candidate_timeline.parquet",
+  "n_events": 10,
+  "election_ids": [
+    "senate-2018",
+    "senate-2022",
+    "senate-2024"
+  ],
+  "source_objects": {
+    "ca_2018_general_certified_candidates.pdf": {
+      "source_url": "https://elections.cdn.sos.ca.gov/statewide-elections/2018-general/cert-list-candidates.pdf",
+      "source_title": "California General Election - November 6, 2018 Official Certified List of Candidates",
+      "raw_path": "ca_2018_general_certified_candidates.pdf",
+      "raw_sha256": "3183e1de3f5e2e7d46090a4cb741fd0ba20369ee3b711d5795bd5038fc714d63",
+      "retrieved_at": "2026-09-29T13:35:03.044709Z",
+      "available_at": "2018-08-30T00:00:00Z",
+      "availability_basis": "official_certified_list_date_printed_in_document",
+      "source_type": "official_candidate_list",
+      "n_verified_events": 2
+    },
+    "ca_2022_general_us_senator_full.pdf": {
+      "source_url": "https://elections.cdn.sos.ca.gov/statewide-elections/2022-general/us-senator-full.pdf",
+      "source_title": "California Notice to Candidates - November 8, 2022 General Election - United States Senator Full Term",
+      "raw_path": "ca_2022_general_us_senator_full.pdf",
+      "raw_sha256": "e932f5c943288f4f70e06494df7f2be162bf8404ee705ada38f67f9026f052fa",
+      "retrieved_at": "2026-09-29T13:35:03.044709Z",
+      "available_at": "2022-08-26T00:00:00Z",
+      "availability_basis": "official_notice_date_printed_in_document",
+      "source_type": "official_candidate_list",
+      "n_verified_events": 2
+    },
+    "ca_2022_general_us_senator_partial.pdf": {
+      "source_url": "https://elections.cdn.sos.ca.gov/statewide-elections/2022-general/us-senator-partial.pdf",
+      "source_title": "California Notice to Candidates - November 8, 2022 General Election - United States Senator Partial/Unexpired Term",
+      "raw_path": "ca_2022_general_us_senator_partial.pdf",
+      "raw_sha256": "132d95f1a13cb25a1eca0dd2be2c8fbdec3466b40091412560ba39ca0ba19fd8",
+      "retrieved_at": "2026-09-29T13:35:03.044709Z",
+      "available_at": "2022-08-26T00:00:00Z",
+      "availability_basis": "official_notice_date_printed_in_document",
+      "source_type": "official_candidate_list",
+      "n_verified_events": 2
+    },
+    "ca_2024_general_certified_candidates.pdf": {
+      "source_url": "https://elections.cdn.sos.ca.gov/statewide-elections/2024-general/cert-list-candidates.pdf",
+      "source_title": "California General Election - November 5, 2024 Official Certified List of Candidates",
+      "raw_path": "ca_2024_general_certified_candidates.pdf",
+      "raw_sha256": "07a2dd2362b2d7e43ef3bbb9e6e559c2c4d5a498e42885030c45ec4b3abd7a7c",
+      "retrieved_at": "2026-09-29T13:35:03.044709Z",
+      "available_at": "2024-08-29T00:00:00Z",
+      "availability_basis": "official_certified_list_date_printed_in_document",
+      "source_type": "official_candidate_list",
+      "n_verified_events": 4
+    }
+  },
+  "source_traceability_required": true,
+  "production_eligible": false,
+  "status": "partial_official_coverage"
+}

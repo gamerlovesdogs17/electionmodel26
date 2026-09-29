@@ -1079,6 +1079,20 @@ def main(argv: list[str] | None = None) -> None:
         ), indent=2, default=str))
     )
 
+    p_timeline_sealed = sub.add_parser(
+        "prepare-sealed-candidate-timeline",
+        help=(
+            "Build candidate timeline events only from locally sealed official documents; "
+            "performs no network access"
+        ),
+    )
+    p_timeline_sealed.set_defaults(
+        func=lambda a: print(json.dumps(__import__(
+            "midterms.evidence.candidate_source_audit",
+            fromlist=["prepare_sealed_candidate_timeline_sources"],
+        ).prepare_sealed_candidate_timeline_sources(), indent=2, default=str))
+    )
+
     p_demo = sub.add_parser(
         "ingest-demographic-vintages",
         help="Validate and seal state demographic vintages with official release dates",

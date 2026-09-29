@@ -144,7 +144,7 @@ def ingest_candidate_timeline(
         "parser_version": TIMELINE_PARSER_VERSION,
         "raw_input_sha256": raw_sha256,
         "normalized_semantic_sha256": semantic_sha256,
-        "n_events": int(len(normalized)),
+        "n_events": len(normalized),
         "election_ids": elections,
         "normalized_path": (
             normalized_path.resolve().relative_to(ROOT.resolve()).as_posix()
@@ -246,14 +246,16 @@ def apply_candidate_timeline(
     )
     mapping = {
         "candidate_id": "{side}_candidate_id",
+        "candidate_name": "{side}_candidate_name",
         "ballot_party": "{side}_ballot_party",
         "caucus_affiliation": "{side}_caucus",
         "caucus_basis": "{side}_caucus_basis",
     }
     for column in (
-        "modeled_candidate_id", "modeled_ballot_party", "modeled_caucus",
+        "modeled_candidate_id", "modeled_candidate_name", "modeled_ballot_party", "modeled_caucus",
         "modeled_caucus_basis", "opposing_candidate_id", "opposing_ballot_party",
-        "opposing_caucus", "opposing_caucus_basis", "candidate_timeline_status",
+        "opposing_candidate_name", "opposing_caucus", "opposing_caucus_basis",
+        "candidate_timeline_status",
     ):
         if column not in out.columns:
             out[column] = None
@@ -262,9 +264,9 @@ def apply_candidate_timeline(
     governed = set(events["race_id"].astype(str))
     governed_mask = out["race_id"].astype(str).isin(governed)
     for column in (
-        "modeled_candidate_id", "modeled_ballot_party", "modeled_caucus",
+        "modeled_candidate_id", "modeled_candidate_name", "modeled_ballot_party", "modeled_caucus",
         "modeled_caucus_basis", "opposing_candidate_id", "opposing_ballot_party",
-        "opposing_caucus", "opposing_caucus_basis",
+        "opposing_candidate_name", "opposing_caucus", "opposing_caucus_basis",
     ):
         out.loc[governed_mask, column] = None
     out.loc[governed_mask, "ballot_status"] = "not_yet_known"
@@ -339,7 +341,7 @@ def apply_candidate_timeline(
         "production_eligible": status == "point_in_time",
         "traceable": traceable,
         "snapshot_sha256": candidate_timeline_fingerprint(usable),
-        "n_events_applied": int(len(usable)),
+        "n_events_applied": len(usable),
         "as_of": cutoff.isoformat(),
         "n_required_races": len(required_race_ids),
         "n_point_in_time": n_point_in_time,
@@ -374,7 +376,7 @@ def audit_candidate_timeline(
         pd.Series(["degraded_missing_status"] * len(required), dtype=str)
     )
     n_point = int(statuses.eq("point_in_time").sum())
-    n_required = int(len(required))
+    n_required = len(required)
     reasons = list(meta.get("reasons") or [])
     if n_point != n_required:
         reasons.append(f"{n_required - n_point} required contested races use degraded identity")
