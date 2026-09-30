@@ -6,7 +6,7 @@ from datetime import date
 
 import numpy as np
 
-from midterms.evidence.approval import approval_as_of, write_approval_store
+from midterms.evidence.approval import aggregate_votehub_approval_vintages, approval_as_of
 from midterms.evidence.historical_polls import freeze_historical_polls_from_warehouse
 from midterms.model.state_space import fit_state_space
 from midterms.model.scenarios import run_scenarios
@@ -15,8 +15,21 @@ from midterms.simulate.institutional import georgia_needs_runoff, louisiana_need
 from midterms.validation.metrics import energy_score, interval_score_gaussian, reliability_bins
 
 
-def test_approval_vintage_as_of():
-    write_approval_store()
+def test_approval_vintage_as_of(tmp_path, monkeypatch):
+    from midterms.evidence import approval
+
+    monkeypatch.setattr(approval, "NORMALIZED_DIR", tmp_path)
+    rows = aggregate_votehub_approval_vintages(polls=[{
+        "id": "synthetic-approval-1",
+        "end_date": "2026-08-29",
+        "created_at": "2026-08-30",
+        "sample_size": 1000,
+        "answers": [
+            {"choice": "Approve", "pct": 45},
+            {"choice": "Disapprove", "pct": 50},
+        ],
+    }])
+    rows.to_parquet(tmp_path / "pres_approval.parquet", index=False)
     a = approval_as_of("2026-09-01", election_year=2026)
     assert a["white_house_party"] in {"D", "R"}
     assert isinstance(a["net_approval"], float)

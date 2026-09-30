@@ -169,14 +169,14 @@
         "required_for_historical_validation": true,
         "optional_feature_dependency": null,
         "adapter": "midterms.evidence.approval",
-        "refresh_supported": false,
+        "refresh_supported": true,
         "historical_backfill_supported": true,
         "secrets_required": [],
         "normalized_output": "data/normalized/pres_approval.parquet",
         "manifest_output": "data/manifests/pres_approval.json",
         "freshness_policy": "approval-observation-v1",
         "eligibility_checker": "midterms.evidence.eligibility.audit_evidence",
-        "refresh_class": "manual",
+        "refresh_class": "safe_network",
         "secrets_required_if_no_sealed_source": [],
         "enabled": true,
         "hard_for_current_run": true,
@@ -267,7 +267,7 @@
       "adapter": "midterms.evidence.ingest",
       "status": "ready",
       "reasons": [],
-      "n_current_rows": 320,
+      "n_current_rows": 354,
       "historical_cutoff_counts": {
         "senate-2018-lead-60": 289,
         "senate-2018-lead-30": 435,
@@ -279,7 +279,17 @@
         "senate-2024-lead-30": 567
       },
       "missing_cutoffs": [],
-      "semantic_sha256": "10c68ad57d5c1137a0f052254d47c7f1223486cfe47771df7623d8cdc7fd8911"
+      "semantic_sha256": "b303c2be564228943e0f9e108fa46fff98a61c44c9dd3875cf7d16fddff3b497",
+      "canonical_source_contract": {
+        "schema_version": "canonical-domain-contract-v1",
+        "domain": "polls",
+        "normalized_output": "data/normalized/polls.parquet",
+        "manifest_output": "data/manifests/historical_poll_cycles.json",
+        "normalized_name": "polls.parquet",
+        "manifest_name": "historical_poll_cycles.json",
+        "availability_clock": "available_at",
+        "operational_freshness_clock": "retrieved_at + field_end"
+      }
     },
     "races": {
       "required_for_core": true,
@@ -288,7 +298,17 @@
       "status": "ready",
       "reasons": [],
       "missing_election_ids": [],
-      "semantic_sha256": "4f4727db74732187dafadef6c09a7af8cb70a3f7c63809304853b2e8dba9b736"
+      "semantic_sha256": "4f4727db74732187dafadef6c09a7af8cb70a3f7c63809304853b2e8dba9b736",
+      "canonical_source_contract": {
+        "schema_version": "canonical-domain-contract-v1",
+        "domain": "races",
+        "normalized_output": "data/normalized/races_official.parquet",
+        "manifest_output": "data/manifests/official_senate_ballots.json",
+        "normalized_name": "races_official.parquet",
+        "manifest_name": "official_senate_ballots.json",
+        "availability_clock": "official ballot source available_at",
+        "operational_freshness_clock": "official ballot source retrieval"
+      }
     },
     "candidate_timeline": {
       "required_for_core": true,
@@ -7044,7 +7064,7 @@
         }
       },
       "missing_coverage": [],
-      "manifest_sha256": "22eceda5c4dbba75e448439b1b7cfb6b1523b60c69edcf8d1dac006160732d91",
+      "manifest_sha256": "a85b697d6b52b07d6ff437663b621984c724394490cc7e426aa2acf993c6aece",
       "semantic_sha256": "df8e8df9c1c1f2a2539e059c9d465309b5d0f30a7a0626014e905d12c2d06794",
       "parser_version": "official-candidate-document-v1",
       "raw_filing_source_hashes": {
@@ -7054,7 +7074,7 @@
         "fec_form2_2024.csv": "904d93f8b5a9f51a82033e0369a2ae4b88b6ee3cfb2578f68ed09434cfe5c23b",
         "fec_form2_2026.csv": "479d6d3e4ec2951b058a334a59ca88cf23398e90681f5f34380f3bf484a6eddd"
       },
-      "source_gap_audit_sha256": "48c70f2ff10d616397c9a14e8aca9c22149d43498671d366ddf7210cdaf82d2c",
+      "source_gap_audit_sha256": "49788cfec5acd6c4e043c44fc9e45c0d6e15b31209942472fe2ba805c1957a47",
       "source_gap_audit_status": "ready",
       "source_gap_coverage": {
         "senate-2018-lead-60": {
@@ -7319,7 +7339,17 @@
           }
         }
       },
-      "conditional_identity_contract": true
+      "conditional_identity_contract": true,
+      "canonical_source_contract": {
+        "schema_version": "canonical-domain-contract-v1",
+        "domain": "candidate_timeline",
+        "normalized_output": "data/normalized/candidate_timeline.parquet",
+        "manifest_output": "data/manifests/candidate_timeline.json",
+        "normalized_name": "candidate_timeline.parquet",
+        "manifest_name": "candidate_timeline.json",
+        "availability_clock": "event available_at",
+        "operational_freshness_clock": "required identity event retrieved_at"
+      }
     },
     "pollster_ratings": {
       "required_for_core": true,
@@ -7327,7 +7357,7 @@
       "adapter": "midterms.evidence.ratings",
       "status": "ready",
       "reasons": [],
-      "manifest_sha256": "a756cac76b8de263229a26f656eaa1548b87d573293f348bd7665f7830fcaf34",
+      "manifest_sha256": "94b399f7bff02f3b722c573b8258fd8aa7087731906559b668c982fb2b8ae7c5",
       "semantic_sha256": "863ab2d96a7f055dca7197287736c0504b83604e63eda7bd39851247a6820ec6",
       "parser_version": "pollster-rating-vintage-v1",
       "raw_source_hashes": {
@@ -7343,10 +7373,20 @@
       "adapter": "midterms.evidence.presidential_results",
       "status": "ready",
       "reasons": [],
-      "manifest_sha256": "09798a5aa0a0a388357bf7e102ae69056a0d567ef5d23532114cefef3b8ca337",
+      "manifest_sha256": "6a9a0e4815e7fc3a99f827c44f40d3f6a55ad8a54163bb104ff13273229baa24",
       "semantic_sha256": "50be4766ead46d24274347a4bc9fb54219d73b4b6c803f228c73c4371b43b5dd",
       "parser_version": "fec-presidential-vote-counts-v1",
-      "raw_source_hashes": {}
+      "raw_source_hashes": {},
+      "canonical_source_contract": {
+        "schema_version": "canonical-domain-contract-v1",
+        "domain": "presidential_prior",
+        "normalized_output": "data/normalized/presidential_vote_counts.parquet",
+        "manifest_output": "data/manifests/presidential_vote_sources.json",
+        "normalized_name": "presidential_vote_counts.parquet",
+        "manifest_name": "presidential_vote_sources.json",
+        "availability_clock": "presidential source available_at",
+        "operational_freshness_clock": "immutable certified-result source"
+      }
     },
     "demographics": {
       "required_for_core": true,
@@ -8401,9 +8441,19 @@
         }
       },
       "missing_cutoffs": [],
-      "manifest_sha256": "e8be3309a8ed8626010b81cc1ce646d950ccaf32b3ad662a964d0fe086d53690",
+      "manifest_sha256": "ee932a1b8ebb9f37a65aed6e6c24ffd58ff8fa049932e31807b18514bdcb1627",
       "semantic_sha256": "46c9719fc80a6bef9709673ae124dc3081f769e3c111174b26d911e7a233a99b",
-      "parser_version": "census-acs-urban-v1"
+      "parser_version": "census-acs-urban-v1",
+      "canonical_source_contract": {
+        "schema_version": "canonical-domain-contract-v1",
+        "domain": "demographics",
+        "normalized_output": "data/normalized/demographic_vintages.parquet",
+        "manifest_output": "data/manifests/demographic_vintages.json",
+        "normalized_name": "demographic_vintages.parquet",
+        "manifest_name": "demographic_vintages.json",
+        "availability_clock": "official_release_date",
+        "operational_freshness_clock": "retrieved_at + official_release_date"
+      }
     },
     "economics": {
       "required_for_core": true,
@@ -8513,9 +8563,19 @@
         "substitutes_present": [],
         "note": "FRED-latest, World Bank, and fixture rows cannot clear the historical real-time gate."
       },
-      "manifest_sha256": "565f2a4b280d9d80f4ebed0efeecef8a1b49a362e6381a2afb2cc7441c51ecca",
+      "manifest_sha256": "bb169dcc52230b30fe38e25e2c081b20ae713784a910fac0d243894593742217",
       "semantic_sha256": "4b58f1c8aff34b8147e36347feeee1ca95b02abd8cbc7f1a9dd19291135e47ed",
-      "parser_version": "alfred-v2"
+      "parser_version": "alfred-v2",
+      "canonical_source_contract": {
+        "schema_version": "canonical-domain-contract-v1",
+        "domain": "economics",
+        "normalized_output": "data/normalized/economics_vintages.parquet",
+        "manifest_output": "data/manifests/economics_vintages.json",
+        "normalized_name": "economics_vintages.parquet",
+        "manifest_name": "economics_vintages.json",
+        "availability_clock": "ALFRED realtime_start",
+        "operational_freshness_clock": "source retrieved_at + observation_date"
+      }
     },
     "finance": {
       "required_for_core": true,
@@ -9226,10 +9286,20 @@
       },
       "normalized_hash_ok": true,
       "raw_hash_errors": [],
-      "manifest_sha256": "402cec51d741875fe238d02039760c62f2c611848d5fe31edb3f1fba2a181905",
+      "manifest_sha256": "87f4a508b6fc7f3926a692251043e1b221c1f12570c889b7463dd4e37f781bc0",
       "semantic_sha256": "37e1b0fdb135c0f3689bbf379e2b0b3444535d07c5e3b44458bed964c3d847ee",
       "parser_version": "fec-v2-report-receipt-asof",
-      "raw_source_hashes": {}
+      "raw_source_hashes": {},
+      "canonical_source_contract": {
+        "schema_version": "canonical-domain-contract-v1",
+        "domain": "finance",
+        "normalized_output": "data/normalized/fundraising_shares.parquet",
+        "manifest_output": "data/manifests/fundraising_shares.json",
+        "normalized_name": "fundraising_shares.parquet",
+        "manifest_name": "fundraising_shares.json",
+        "availability_clock": "FEC receipt date",
+        "operational_freshness_clock": "source retrieved_at + latest receipt date"
+      }
     },
     "approval": {
       "required_for_core": true,
@@ -9237,12 +9307,25 @@
       "adapter": "midterms.evidence.approval",
       "status": "ready",
       "reasons": [],
-      "manifest_sha256": "b20c9390f2a4bed993b56a62c90454dcad16e04d64172233bc9c166a7001d218",
-      "semantic_sha256": "7a24159bf867dfa5ebcdf8a73af7ed2b9c5362fa24a6fc48412181d88bced31d",
+      "historical_production_eligible": true,
+      "current_production_eligible": true,
+      "current_rows": 14,
+      "manifest_sha256": "f7af9ba6ad575d74d94be88bc2e58ab8a582a2a359c4593d088d6767609a76d2",
+      "semantic_sha256": "9986ae2e2fe30759f720ec02783257e71942197fbb8f3a78370eefe1db201c02",
       "parser_version": "approval-v4-fte-created-at",
       "raw_source_hashes": {
         "fte_biden_approval_polls_20241129.csv": "e16909073b63bbbc7f1fcddfc276cd5606ad5c4c5adcdb86f9baf4c86991ec2c",
         "fte_trump_approval_polls_20210414.csv": "6f116dae09aaf042d42b123c11284ae918b6bd14849e61b7282504037c8a15f3"
+      },
+      "canonical_source_contract": {
+        "schema_version": "canonical-domain-contract-v1",
+        "domain": "approval",
+        "normalized_output": "data/normalized/pres_approval.parquet",
+        "manifest_output": "data/manifests/pres_approval.json",
+        "normalized_name": "pres_approval.parquet",
+        "manifest_name": "pres_approval.json",
+        "availability_clock": "poll record available_at",
+        "operational_freshness_clock": "source retrieved_at + poll observation date"
       }
     },
     "generic_ballot": {
@@ -9251,7 +9334,7 @@
       "adapter": "midterms.evidence.ingest",
       "status": "ready",
       "reasons": [],
-      "semantic_sha256": "eec4436c0dd0061791be6c55c32c5462bcdd4c7af87b589f19de4d4df423ebe3",
+      "semantic_sha256": "1e1614fcd974480cbbc590b5d33bdafa96a4e343e4fdef694c5c04a1743b3f0c",
       "historical_method": "derived_from_frozen_senate_poll_deviation"
     },
     "expert_ratings": {
@@ -9278,7 +9361,7 @@
       "adapter": "midterms.evidence.official_ledger",
       "status": "ready",
       "reasons": [],
-      "manifest_sha256": "060db09678108eda582bbb660a0a31e996dacf9c9b6cf87352fead1f37d61972",
+      "manifest_sha256": "f346b87bd04cd0c2f907488bf1ed84a64283d29f3d2fb2f389aed3e5804d71e8",
       "semantic_sha256": "714391ef5d6e6452633278cfb9e6386771a5fa02f75fbea31cabb71cf06c708c",
       "parser_version": "official-ledger-v2",
       "raw_source_hashes": {}

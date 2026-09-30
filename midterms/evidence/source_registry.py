@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any
 
 SOURCE_PREPARATION_REGISTRY_VERSION = "source-preparation-registry-v1"
+CANONICAL_DOMAIN_CONTRACT_VERSION = "canonical-domain-contract-v1"
 
 
 @dataclass(frozen=True)
@@ -55,9 +57,9 @@ SOURCE_DOMAINS: tuple[SourceDomain, ...] = (
     SourceDomain("finance", True, True, None, "midterms.evidence.fec", True, True, (),
                  "data/normalized/fundraising_shares.parquet", "data/manifests/fundraising_shares.json",
                  "fec-filing-availability-v1", "midterms.evidence.eligibility.audit_evidence", "safe_network"),
-    SourceDomain("approval", True, True, None, "midterms.evidence.approval", False, True, (),
+    SourceDomain("approval", True, True, None, "midterms.evidence.approval", True, True, (),
                  "data/normalized/pres_approval.parquet", "data/manifests/pres_approval.json",
-                 "approval-observation-v1", "midterms.evidence.eligibility.audit_evidence", "manual"),
+                 "approval-observation-v1", "midterms.evidence.eligibility.audit_evidence", "safe_network"),
     SourceDomain("generic_ballot", True, True, None, "midterms.evidence.ingest", True, True, (),
                  "data/normalized/polls.parquet", "data/manifests/merge_live_polls.json",
                  "generic-ballot-observation-v1", "midterms.evidence.ingest.generic_ballot_aggregate", "safe_network"),
@@ -71,6 +73,63 @@ SOURCE_DOMAINS: tuple[SourceDomain, ...] = (
                  "data/normalized/results_certified.parquet", "data/manifests/official_senate_ballots.json",
                  "certification-availability-v1", "midterms.evidence.truth_contract.validate_truth_contract", "safe_offline"),
 )
+
+
+DOMAIN_CLOCKS: dict[str, dict[str, str]] = {
+    "polls": {
+        "availability_clock": "available_at",
+        "operational_freshness_clock": "retrieved_at + field_end",
+    },
+    "races": {
+        "availability_clock": "official ballot source available_at",
+        "operational_freshness_clock": "official ballot source retrieval",
+    },
+    "presidential_prior": {
+        "availability_clock": "presidential source available_at",
+        "operational_freshness_clock": "immutable certified-result source",
+    },
+    "candidate_timeline": {
+        "availability_clock": "event available_at",
+        "operational_freshness_clock": "required identity event retrieved_at",
+    },
+    "finance": {
+        "availability_clock": "FEC receipt date",
+        "operational_freshness_clock": "source retrieved_at + latest receipt date",
+    },
+    "economics": {
+        "availability_clock": "ALFRED realtime_start",
+        "operational_freshness_clock": "source retrieved_at + observation_date",
+    },
+    "approval": {
+        "availability_clock": "poll record available_at",
+        "operational_freshness_clock": "source retrieved_at + poll observation date",
+    },
+    "demographics": {
+        "availability_clock": "official_release_date",
+        "operational_freshness_clock": "retrieved_at + official_release_date",
+    },
+}
+
+
+def canonical_domain_contract(name: str) -> dict[str, Any]:
+    """Return the single registered store, manifest, and clock contract for a domain."""
+    entry = next((item for item in SOURCE_DOMAINS if item.name == name), None)
+    if entry is None:
+        raise KeyError(f"unknown source domain: {name}")
+    clocks = DOMAIN_CLOCKS.get(name, {})
+    return {
+        "schema_version": CANONICAL_DOMAIN_CONTRACT_VERSION,
+        "domain": name,
+        "normalized_output": entry.normalized_output,
+        "manifest_output": entry.manifest_output,
+        "normalized_name": (
+            Path(entry.normalized_output).name if entry.normalized_output else None
+        ),
+        "manifest_name": (
+            Path(entry.manifest_output).name if entry.manifest_output else None
+        ),
+        **clocks,
+    }
 
 
 def source_preparation_registry(

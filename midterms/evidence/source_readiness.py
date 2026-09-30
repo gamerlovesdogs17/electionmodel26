@@ -26,7 +26,10 @@ from midterms.evidence.candidate_timeline import (
 from midterms.evidence.demographic_vintages import select_demographic_vintage
 from midterms.evidence.economics import audit_realtime_economic_coverage
 from midterms.evidence.official_ballot import election_day
-from midterms.evidence.source_registry import source_preparation_registry
+from midterms.evidence.source_registry import (
+    canonical_domain_contract,
+    source_preparation_registry,
+)
 from midterms.evidence.warehouse import dataframe_semantic_sha256
 
 SOURCE_READINESS_SCHEMA_VERSION = "source-readiness-v1"
@@ -236,9 +239,10 @@ def audit_source_readiness(
         ],
     })
 
-    demo_path = normalized_dir / "demographic_vintages.parquet"
+    demo_contract = canonical_domain_contract("demographics")
+    demo_path = normalized_dir / str(demo_contract["normalized_name"])
     demo_manifest, demo_manifest_sha, demo_manifest_error = _manifest(
-        manifests_dir / "demographic_vintages.json"
+        manifests_dir / str(demo_contract["manifest_name"])
     )
     demo_cutoffs: dict[str, Any] = {}
     if demo_path.is_file() and not demo_manifest_error:
@@ -278,6 +282,7 @@ def audit_source_readiness(
         "manifest_sha256": demo_manifest_sha,
         "semantic_sha256": (demo_manifest or {}).get("normalized_semantic_sha256") if demo_manifest else None,
         "parser_version": (demo_manifest or {}).get("parser_version") if demo_manifest else None,
+        "canonical_source_contract": demo_contract,
         "reasons": [] if demo_status == "ready" else [
             "cycle-aware demographic vintages lack verified official release dates/coverage"
         ],
@@ -312,10 +317,14 @@ def audit_source_readiness(
 
     # Remaining declared domains: record verifiable stores and explicitly call
     # out historical gaps instead of upgrading existence to full readiness.
+    finance_contract = canonical_domain_contract("finance")
     simple = {
         "pollster_ratings": ("pollster_ratings.parquet", "pollster_ratings.json"),
         "presidential_prior": ("presidential_vote_counts.parquet", "presidential_vote_sources.json"),
-        "finance": ("fundraising_shares.parquet", "fundraising_shares.json"),
+        "finance": (
+            str(finance_contract["normalized_name"]),
+            str(finance_contract["manifest_name"]),
+        ),
         "approval": ("pres_approval.parquet", "pres_approval.json"),
         "official_results": ("results_certified.parquet", "official_senate_ballots.json"),
     }
@@ -419,12 +428,39 @@ def audit_source_readiness(
                 and historical["production_eligible"].fillna(False).astype(bool).all()
                 and bool((manifest or {}).get("historical_production_eligible"))
             )
+            required_current_columns = {
+                "year", "available_at", "source", "production_eligible",
+            }
+            if required_current_columns.issubset(frame.columns):
+                available = pd.to_datetime(frame["available_at"], errors="coerce").dt.date
+                current = frame[
+                    (pd.to_numeric(frame["year"], errors="coerce") == int(election_id.rsplit("-", 1)[-1]))
+                    & available.notna()
+                    & (available <= cutoff)
+                ]
+            else:
+                current = frame.iloc[0:0]
+            strict_current = bool(
+                len(current)
+                and current["production_eligible"].fillna(False).astype(bool).all()
+                and current["source"].astype(str).eq("votehub_approval_aggregate").all()
+            )
             if not strict_historical:
                 status = "untraceable"
                 reasons.append(
                     "historical approval archive lacks per-poll publication timestamps "
                     "and sealed retrieval/license lineage"
                 )
+            if not strict_current:
+                status = "incomplete_coverage"
+                reasons.append(
+                    "no source-backed current-cycle approval observation is available at the cutoff"
+                )
+            domains[name].update({
+                "historical_production_eligible": strict_historical,
+                "current_production_eligible": strict_current,
+                "current_rows": int(len(current)),
+            })
             sealed_hashes = (manifest or {}).get("historical_raw_sha256s") or {}
             if strict_historical and sealed_hashes:
                 raw_source_hashes = {
@@ -448,8 +484,20 @@ def audit_source_readiness(
             "semantic_sha256": semantic,
             "parser_version": (manifest or {}).get("parser_version") if manifest else None,
             "raw_source_hashes": raw_source_hashes,
+            **({"canonical_source_contract": finance_contract} if name == "finance" else {}),
             "reasons": reasons or ([] if status == "ready" else [f"{name} store or manifest is unavailable"]),
         })
+
+    for domain_name, block in domains.items():
+        if domain_name in {
+            "polls", "races", "candidate_timeline", "finance", "economics",
+            "approval", "demographics", "presidential_prior",
+        }:
+            registry_name = domain_name
+            block.setdefault(
+                "canonical_source_contract",
+                canonical_domain_contract(registry_name),
+            )
 
     generic_path = raw_dir / "external" / "votehub_generic_ballot_2026.json"
     domains["generic_ballot"].update({

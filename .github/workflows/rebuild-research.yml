@@ -94,8 +94,27 @@ jobs:
           fi
           echo "evidence_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-  rebuild:
+  tests:
     needs: prepare_evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact evidence commit for tests
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare_evidence.outputs.evidence_commit_sha }}
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Run full test suite in isolated checkout
+        run: pytest -q
+
+  rebuild:
+    needs: [prepare_evidence, tests]
     runs-on: ubuntu-latest
     timeout-minutes: 360
     permissions:
@@ -119,8 +138,6 @@ jobs:
           cache: pip
       - name: Install
         run: pip install -e ".[dev]"
-      - name: Run full test suite
-        run: pytest -q
       - name: Verify exact sealed evidence bundle
         shell: bash
         run: |

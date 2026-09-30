@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from midterms.evidence.economics import write_economic_store, yoy_growth_as_of
-from midterms.evidence.fec import fixture_fundraising_shares, write_finance_store
+from midterms.evidence.fec import fixture_fundraising_shares
 from midterms.evidence.warehouse import Warehouse
 from midterms.model.overlays import apply_rating_overlay, rating_from_probability
 from midterms.model.pymc_model import FitResult, fit_fast_approximation
@@ -94,11 +94,38 @@ def test_alfred_multi_vintage_no_revision_leak(tmp_path, monkeypatch):
     assert econ.yoy_growth_as_of("2022-09-01", election_year=2022, allow_fixture_canary=False) is None
 
 
-def test_fec_fixture_shares():
+def test_fec_fixture_shares(tmp_path, monkeypatch):
+    import pandas as pd
+
+    from midterms.evidence import fec
+
     df = fixture_fundraising_shares()
     assert len(df) >= 30
     assert df["fundraising_share"].between(0.05, 0.95).all()
-    summary = write_finance_store()
+    monkeypatch.setattr(fec, "RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(fec, "NORMALIZED_DIR", tmp_path / "normalized")
+    monkeypatch.setattr(fec, "MANIFESTS_DIR", tmp_path / "manifests")
+    totals = pd.DataFrame([
+        {
+            "candidate_id": "D1", "party": "DEM", "state": "AA",
+            "receipts": 60.0, "disbursements": 10.0,
+            "cash_on_hand_end_period": 20.0,
+            "coverage_end_date": "2026-08-31", "available_at": "2026-09-01",
+            "source": "openfec",
+        },
+        {
+            "candidate_id": "R1", "party": "REP", "state": "AA",
+            "receipts": 40.0, "disbursements": 10.0,
+            "cash_on_hand_end_period": 20.0,
+            "coverage_end_date": "2026-08-31", "available_at": "2026-09-01",
+            "source": "openfec",
+        },
+    ])
+    monkeypatch.setattr(
+        fec, "fetch_senate_candidate_totals",
+        lambda _cycle: (totals, {"source": "synthetic_unit_test"}),
+    )
+    summary = fec.write_finance_store()
     assert summary["n_shares"] >= 1
 
 

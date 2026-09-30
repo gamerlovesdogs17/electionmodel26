@@ -60,9 +60,20 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
         }
 
     try:
-        from midterms.evidence.ingest import try_fetch_preferred
+        from midterms.evidence.ingest import fetch_votehub_polls
 
-        fetched = try_fetch_preferred()
+        # Refresh only the two current polling products consumed by the
+        # production snapshot. Historical MEDSL/FTE archives and rating
+        # vintages have separate sealed preparation paths.
+        fetched: list[dict[str, Any]] = []
+        for poll_type, subject in (("us-senator", None), ("generic-ballot", "2026")):
+            try:
+                fetched.append(fetch_votehub_polls(poll_type=poll_type, subject=subject))
+            except Exception as exc:  # noqa: BLE001
+                fetched.append({
+                    "name": f"votehub_{poll_type.replace('-', '_')}",
+                    "error": str(exc),
+                })
         results["poll_sources"] = fetched
         senator = next(
             (row for row in fetched if row.get("name") == "votehub_us_senator"), None
@@ -85,7 +96,11 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
     try:
         from midterms.evidence.approval import write_approval_store
 
-        results["approval"] = write_approval_store(prefer_votehub=False)
+        # Current approval is a hard production input.  A clean rebuild must
+        # obtain it here rather than relying on a later test or forecast call
+        # to mutate the sealed store.  The adapter records a fetch error and
+        # readiness remains red when VoteHub is unavailable.
+        results["approval"] = write_approval_store(prefer_votehub=True)
     except Exception as exc:  # noqa: BLE001
         results["approval"] = {"status": "refresh_failed", "error": str(exc)}
     try:

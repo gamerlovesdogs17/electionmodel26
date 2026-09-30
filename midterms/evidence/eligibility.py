@@ -7,14 +7,17 @@ fallbacks are allowed only when the run is labeled ``non_publication``.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
 from midterms.config import ARTIFACTS_DIR, MANIFESTS_DIR, MODEL_VERSION, NORMALIZED_DIR
-from midterms.evidence.freshness import classify_freshness
+from midterms.evidence.freshness import FRESHNESS_POLICY_VERSION, classify_freshness
+from midterms.evidence.source_registry import canonical_domain_contract
 
 DOMAIN_CONTRACT_VERSION = "production-domain-contract-v1"
 ROLE_HARD = "required_core"
@@ -63,7 +66,14 @@ def apply_domain_contract(
         block["production_role"] = role
         hard = role in {ROLE_HARD, ROLE_CONDITIONAL}
         fresh = block.get("freshness")
-        freshness_ok = fresh is None or fresh.get("status") == "fresh"
+        freshness_required = bool(
+            fresh is not None and fresh.get("required_for_effective_input", True)
+        )
+        freshness_ok = (
+            fresh is None
+            or not freshness_required
+            or fresh.get("status") == "fresh"
+        )
         domain_ok = bool(block.get("eligible", True)) and freshness_ok
         block["hard_dependency"] = hard
         block["effective_eligible"] = domain_ok if hard else None
@@ -101,6 +111,244 @@ def _manifest_time(manifest: dict[str, Any] | None, *keys: str) -> str | None:
     return None
 
 
+def _load_manifest(path: Path) -> tuple[dict[str, Any] | None, str | None]:
+    if not path.is_file():
+        return None, "manifest is missing"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, f"manifest is invalid: {exc}"
+    if not isinstance(payload, dict):
+        return None, "manifest root must be an object"
+    return payload, None
+
+
+def _file_sha256(path: Path) -> str | None:
+    if not path.is_file():
+        return None
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _latest_nested_timestamp(payload: Any, key: str) -> str | None:
+    """Find the latest declared source timestamp without consulting file mtimes."""
+    values: list[pd.Timestamp] = []
+
+    def visit(value: Any) -> None:
+        if isinstance(value, dict):
+            for child_key, child in value.items():
+                if child_key == key and child:
+                    parsed = pd.to_datetime(child, errors="coerce", utc=True)
+                    if pd.notna(parsed):
+                        values.append(parsed)
+                else:
+                    visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+
+    visit(payload)
+    return max(values).isoformat() if values else None
+
+
+def audit_canonical_finance(
+    *,
+    election_id: str,
+    as_of: str,
+    normalized_dir: Path = NORMALIZED_DIR,
+    manifests_dir: Path = MANIFESTS_DIR,
+) -> dict[str, Any]:
+    """Validate the receipt-safe FEC store registered for v0.9.22."""
+    contract = canonical_domain_contract("finance")
+    data_path = normalized_dir / str(contract["normalized_name"])
+    manifest_path = manifests_dir / str(contract["manifest_name"])
+    manifest, manifest_error = _load_manifest(manifest_path)
+    reasons: list[str] = []
+    if manifest_error:
+        reasons.append(manifest_error)
+    if not data_path.is_file():
+        reasons.append("canonical finance store is missing")
+        frame = pd.DataFrame()
+    else:
+        frame = pd.read_parquet(data_path)
+    cutoff = pd.Timestamp(as_of).date()
+    selected = frame.copy()
+    if len(selected) and "election_id" in selected.columns:
+        selected = selected[selected["election_id"].astype(str).eq(election_id)]
+    for column in ("feature_as_of", "available_at"):
+        if len(selected) and column in selected.columns:
+            values = pd.to_datetime(selected[column], errors="coerce").dt.date
+            selected = selected[values.notna() & (values <= cutoff)]
+    if len(selected) and "feature_as_of" in selected.columns:
+        latest_cutoff = pd.to_datetime(selected["feature_as_of"], errors="coerce").max()
+        selected = selected[
+            pd.to_datetime(selected["feature_as_of"], errors="coerce").eq(latest_cutoff)
+        ]
+    if not len(selected):
+        reasons.append("canonical finance store has no rows available at the cutoff")
+    receipt_safe = bool(
+        len(frame)
+        and "availability_basis" in frame.columns
+        and frame["availability_basis"].astype(str).eq("fec_receipt_date").all()
+    )
+    if not receipt_safe:
+        reasons.append("finance availability is not uniformly based on FEC receipt date")
+    if manifest and manifest.get("schema_version") != "fec-report-finance-v1":
+        reasons.append("finance manifest is not the receipt-safe report-level schema")
+    if manifest and not bool(manifest.get("production_eligible")):
+        reasons.append("finance manifest is not production eligible")
+    normalized = ((manifest or {}).get("normalized") or {}).get("fundraising_shares") or {}
+    expected_hash = normalized.get("sha256")
+    if not expected_hash or expected_hash != _file_sha256(data_path):
+        reasons.append("finance normalized artifact hash mismatch")
+    retrieved_at = _latest_nested_timestamp((manifest or {}).get("sources") or [], "retrieved_at")
+    observed_at = _latest_value(selected, "available_at")
+    return {
+        "tier": str((manifest or {}).get("tier") or "first_party"),
+        "eligible": not reasons,
+        "n": len(selected),
+        "source_url": (manifest or {}).get("source_url"),
+        "source_mix": (
+            selected["source"].astype(str).value_counts().to_dict()
+            if len(selected) and "source" in selected.columns else {}
+        ),
+        "receipt_date_safe": receipt_safe,
+        "blocked_reason": "; ".join(reasons) if reasons else None,
+        "canonical_source_contract": contract,
+        "freshness_provenance": {
+            "retrieved_at": retrieved_at,
+            "observed_at": observed_at,
+            "source_available": bool(manifest and len(selected)),
+        },
+    }
+
+
+def audit_canonical_demographics(
+    *,
+    as_of: str,
+    normalized_dir: Path = NORMALIZED_DIR,
+    manifests_dir: Path = MANIFESTS_DIR,
+) -> dict[str, Any]:
+    """Validate and select the official Census vintage registered for v0.9.22."""
+    from midterms.evidence.demographic_vintages import (
+        demographic_semantic_sha256,
+        select_demographic_vintage,
+    )
+
+    contract = canonical_domain_contract("demographics")
+    data_path = normalized_dir / str(contract["normalized_name"])
+    manifest_path = manifests_dir / str(contract["manifest_name"])
+    manifest, manifest_error = _load_manifest(manifest_path)
+    reasons: list[str] = []
+    selected = pd.DataFrame()
+    selection: dict[str, Any] = {}
+    frame = pd.DataFrame()
+    if manifest_error:
+        reasons.append(manifest_error)
+    if not data_path.is_file():
+        reasons.append("canonical demographic-vintage store is missing")
+    else:
+        frame = pd.read_parquet(data_path)
+        try:
+            selected, selection = select_demographic_vintage(frame, as_of=as_of)
+        except (KeyError, TypeError, ValueError) as exc:
+            reasons.append(f"demographic vintage validation failed: {exc}")
+    if manifest and not bool(manifest.get("production_eligible")):
+        reasons.append("demographic-vintage manifest is not production eligible")
+    if manifest and len(frame):
+        expected = manifest.get("normalized_semantic_sha256")
+        if not expected or expected != demographic_semantic_sha256(frame):
+            reasons.append("demographic-vintage semantic hash mismatch")
+    if not selection.get("production_eligible") or selected.empty:
+        reasons.append(
+            str(selection.get("reason") or "no official demographic vintage is available at cutoff")
+        )
+    retrieved_at = _latest_value(selected, "retrieved_at")
+    observed_at = _latest_value(selected, "official_release_date")
+    source_urls = (
+        sorted(selected["source_url"].dropna().astype(str).unique())
+        if len(selected) and "source_url" in selected.columns else []
+    )
+    return {
+        "tier": "official",
+        "eligible": not reasons,
+        "n": len(selected),
+        "source_url": source_urls,
+        "selected_vintages": selection.get("selected_vintages") or [],
+        "selected_release_date": selection.get("selected_release_date"),
+        "blocked_reason": "; ".join(dict.fromkeys(reasons)) if reasons else None,
+        "canonical_source_contract": contract,
+        "freshness_provenance": {
+            "retrieved_at": retrieved_at,
+            "observed_at": observed_at,
+            "source_available": bool(manifest and len(selected)),
+        },
+    }
+
+
+def audit_canonical_approval(
+    *,
+    election_id: str,
+    as_of: str,
+    normalized_dir: Path = NORMALIZED_DIR,
+    manifests_dir: Path = MANIFESTS_DIR,
+) -> dict[str, Any]:
+    """Validate the current-cycle approval input and its point-in-time clock."""
+    contract = canonical_domain_contract("approval")
+    data_path = normalized_dir / str(contract["normalized_name"])
+    manifest_path = manifests_dir / str(contract["manifest_name"])
+    manifest, manifest_error = _load_manifest(manifest_path)
+    reasons: list[str] = []
+    if manifest_error:
+        reasons.append(manifest_error)
+    frame = pd.read_parquet(data_path) if data_path.is_file() else pd.DataFrame()
+    if frame.empty:
+        reasons.append("canonical approval store is missing or empty")
+    year = int(str(election_id).rsplit("-", 1)[-1])
+    selected = frame.copy()
+    required_columns = {"year", "available_at", "source", "production_eligible"}
+    missing_columns = sorted(required_columns - set(selected.columns))
+    if len(selected) and missing_columns:
+        reasons.append("approval store missing columns: " + ", ".join(missing_columns))
+        selected = selected.iloc[0:0]
+    elif len(selected):
+        years = pd.to_numeric(selected["year"], errors="coerce")
+        available = pd.to_datetime(selected["available_at"], errors="coerce").dt.date
+        selected = selected[
+            (years == year)
+            & available.notna()
+            & (available <= pd.Timestamp(as_of).date())
+        ]
+    if selected.empty:
+        reasons.append("approval store has no source-backed current-cycle row at the cutoff")
+    elif (
+        "production_eligible" not in selected.columns
+        or not selected["production_eligible"].fillna(False).astype(bool).all()
+    ):
+        reasons.append("current-cycle approval rows are not production eligible")
+    expected_hash = (manifest or {}).get("normalized_sha256")
+    if not expected_hash or expected_hash != _file_sha256(data_path):
+        reasons.append("approval normalized artifact hash mismatch")
+    retrieved_at = _latest_value(selected, "retrieved_at") or _manifest_time(
+        manifest, "generated_at", "retrieved_at"
+    )
+    observed_at = _latest_value(selected, "max_poll_end") or _latest_value(
+        selected, "available_at"
+    )
+    return {
+        "tier": str((manifest or {}).get("tier") or "untraceable"),
+        "eligible": not reasons,
+        "n": len(selected),
+        "source_url": (manifest or {}).get("source_url"),
+        "blocked_reason": "; ".join(dict.fromkeys(reasons)) if reasons else None,
+        "canonical_source_contract": contract,
+        "freshness_provenance": {
+            "retrieved_at": retrieved_at,
+            "observed_at": observed_at,
+            "source_available": bool(manifest and len(selected)),
+        },
+    }
+
+
 def domain_freshness_from_provenance(
     domain: str,
     *,
@@ -134,6 +382,42 @@ def domain_freshness_from_provenance(
         parser_status=parser_status,
         schema_status=schema_status,
     )
+
+
+def candidate_timeline_freshness(
+    audit: dict[str, Any],
+    metadata: dict[str, Any] | None,
+    *,
+    checked_at: str,
+) -> dict[str, Any]:
+    """Require operational freshness only when candidate identity is an input."""
+    identity_required = int(audit.get("n_identity_required_and_resolved") or 0) + int(
+        audit.get("n_identity_required_and_missing") or 0
+    )
+    if audit.get("conditional_identity_contract") and identity_required == 0:
+        return {
+            "policy_version": FRESHNESS_POLICY_VERSION,
+            "domain": "candidate_ballot",
+            "status": "not_applicable",
+            "source_available": True,
+            "reasons": [
+                "no current race requires candidate identity under the conditional contract"
+            ],
+            "retrieval_age_days": None,
+            "observation_age_days": None,
+            "required_for_effective_input": False,
+        }
+    meta = metadata or {}
+    result = domain_freshness_from_provenance(
+        "candidate_ballot",
+        checked_at=checked_at,
+        retrieved_at=meta.get("latest_retrieved_at"),
+        observed_at=meta.get("latest_effective_at"),
+        source_available=bool(identity_required),
+    )
+    result["required_for_effective_input"] = True
+    result["identity_required_races"] = identity_required
+    return result
 
 # Ordered from strongest to weakest
 TIERS = (
@@ -311,7 +595,9 @@ def _classify_manifest_domain(
     return out
 
 
-def _audit_configured_domains(*, as_of: str | None = None) -> dict[str, Any]:
+def _audit_configured_domains(
+    *, as_of: str | None = None, election_id: str = "senate-2026",
+) -> dict[str, Any]:
     """All-domain evidence registry (fresh audit R-04)."""
     domains: dict[str, Any] = {}
 
@@ -324,20 +610,13 @@ def _audit_configured_domains(*, as_of: str | None = None) -> dict[str, Any]:
         except Exception:  # noqa: BLE001
             return None
 
-    fund = _load("fundraising_shares.json")
-    if fund and str(fund.get("tier") or "") in PUBLICATION_ELIGIBLE:
-        mix = fund.get("source_mix") or {}
-        if int(mix.get("fixture_hash") or 0) == 0:
-            domains["finance"] = {
-                "tier": str(fund.get("tier")),
-                "eligible": True,
-                "n": int(fund.get("n_shares") or 0),
-                "source_url": fund.get("source_url"),
-                "source_mix": mix,
-            }
-        else:
-            domains["finance"] = _classify_manifest_domain(name="finance", manifest=fund)
+    if as_of:
+        domains["finance"] = audit_canonical_finance(
+            election_id=election_id,
+            as_of=as_of,
+        )
     else:
+        fund = _load("fundraising_shares.json")
         domains["finance"] = _classify_manifest_domain(name="finance", manifest=fund)
 
     # Quarantine: Wikipedia scrape must never appear as canonical results truth.
@@ -367,58 +646,26 @@ def _audit_configured_domains(*, as_of: str | None = None) -> dict[str, Any]:
     else:
         domains["economics"] = _classify_manifest_domain(name="economics", manifest=econ)
 
-    approval = _load("pres_approval.json")
-    if approval is None and (NORMALIZED_DIR / "pres_approval.parquet").exists():
-        approval = {
-            "n_rows": int(len(pd.read_parquet(NORMALIZED_DIR / "pres_approval.parquet"))),
-            "source_url": None,
-            "note": "parquet present without source URL",
-        }
-        domains["approval"] = {
+    if as_of:
+        domains["approval"] = audit_canonical_approval(
+            election_id=election_id,
+            as_of=as_of,
+        )
+    else:
+        approval = _load("pres_approval.json")
+        domains["approval"] = _classify_manifest_domain(name="approval", manifest=approval)
+
+    # v0.9.22 uses the cycle-aware official Census vintage store. The legacy
+    # demography store remains readable for development but is never canonical.
+    if as_of:
+        domains["demographics"] = audit_canonical_demographics(as_of=as_of)
+    else:
+        domains["demographics"] = {
             "tier": "untraceable",
             "eligible": False,
-            "n": approval["n_rows"],
-            "blocked_reason": "approval manifest lacks source URL/tier",
-        }
-    else:
-        domains["approval"] = _classify_manifest_domain(name="approval", manifest=approval)
-        if domains["approval"]["tier"] == "curated" and not (
-            approval and (approval.get("source_url") or approval.get("url"))
-        ):
-            domains["approval"] = {
-                "tier": "untraceable",
-                "eligible": False,
-                "n": domains["approval"].get("n") or 0,
-                "blocked_reason": "approval manifest lacks source URL/tier",
-            }
-
-    # Demographics: sealed MEDSL/Census store preferred over embedded snapshot
-    demo_man = _load("demography.json")
-    demo_path = NORMALIZED_DIR / "demography.parquet"
-    if demo_man and str(demo_man.get("tier") or "") in PUBLICATION_ELIGIBLE:
-        domains["demographics"] = {
-            "tier": str(demo_man.get("tier")),
-            "eligible": True,
-            "n": int(demo_man.get("n") or 0),
-            "source_url": demo_man.get("source_url"),
-            "note": demo_man.get("note"),
-        }
-    elif demo_path.exists() and demo_man:
-        domains["demographics"] = _classify_manifest_domain(name="demographics", manifest=demo_man)
-    elif not demo_path.exists():
-        domains["demographics"] = {
-            "tier": "curated",
-            "eligible": False,
             "n": 0,
-            "blocked_reason": "demography features curated/embedded; not publication-eligible",
-            "note": "demography features embedded in model; research-only without sealed store",
-        }
-    else:
-        domains["demographics"] = {
-            "tier": "curated",
-            "eligible": False,
-            "n": 1,
-            "blocked_reason": "demography.parquet present but tier=curated",
+            "blocked_reason": "demographic eligibility requires an explicit as_of cutoff",
+            "canonical_source_contract": canonical_domain_contract("demographics"),
         }
 
     ratings = _load("expert_ratings.json") or _load("wiki_ratings.json") or _load("peer_snapshots.json")
@@ -567,8 +814,26 @@ def audit_evidence(
     )
 
     # Fresh audit R-04: every configured live domain
-    extra = _audit_configured_domains(as_of=as_of)
+    extra = _audit_configured_domains(as_of=as_of, election_id=election_id)
     domains.update(extra)
+    canonical_contract_names = {
+        "polls": "polls",
+        "races": "races",
+        "structural_prior": "presidential_prior",
+        "candidate_timeline": "candidate_timeline",
+        "finance": "finance",
+        "economics": "economics",
+        "approval": "approval",
+        "demographics": "demographics",
+    }
+    for domain_name, registry_name in canonical_contract_names.items():
+        if domain_name in domains:
+            contract_block = canonical_domain_contract(registry_name)
+            if domain_name == "structural_prior":
+                contract_block = {**contract_block, "domain": "structural_prior"}
+            domains[domain_name].setdefault(
+                "canonical_source_contract", contract_block,
+            )
 
     # Poll eligibility: target election must not be majority synthetic/untraceable
     n_polls = int(len(polls_e))
@@ -617,18 +882,17 @@ def audit_evidence(
             source_available=bool(n_polls),
         )
         timeline_meta = candidate_timeline or {}
-        domains["candidate_timeline"]["freshness"] = domain_freshness_from_provenance(
-            "candidate_ballot", checked_at=freshness_checked_at,
-            retrieved_at=timeline_meta.get("latest_retrieved_at"),
-            observed_at=timeline_meta.get("latest_effective_at"),
-            source_available=bool(timeline_meta.get("n_events_applied")),
+        domains["candidate_timeline"]["freshness"] = candidate_timeline_freshness(
+            domains["candidate_timeline"],
+            timeline_meta,
+            checked_at=freshness_checked_at,
         )
 
         manifest_names = {
             "finance": "fundraising_shares.json",
             "economics": "economics_vintages.json",
             "approval": "pres_approval.json",
-            "demographics": "demography.json",
+            "demographics": canonical_domain_contract("demographics")["manifest_name"],
             "ratings": "expert_ratings.json",
             "markets": "markets_kalshi.json",
         }
@@ -638,9 +902,7 @@ def audit_evidence(
             "ratings": "ratings", "markets": "markets",
         }
         observation_sources = {
-            "finance": ("fundraising_shares.parquet", "available_at"),
             "economics": ("economics_vintages.parquet", "observation_date"),
-            "approval": ("pres_approval.parquet", "available_at"),
             "ratings": ("expert_ratings.parquet", "available_at"),
         }
         for name, filename in manifest_names.items():
@@ -658,10 +920,14 @@ def audit_evidence(
                     NORMALIZED_DIR / source[0], columns=[source[1]],
                 )
                 observed_at = _latest_value(observed_frame, source[1])
+            provenance = domains[name].get("freshness_provenance") or {}
             domains[name]["freshness"] = domain_freshness_from_provenance(
                 freshness_names[name], checked_at=freshness_checked_at, manifest=manifest,
-                observed_at=observed_at,
-                source_available=manifest is not None,
+                retrieved_at=provenance.get("retrieved_at"),
+                observed_at=provenance.get("observed_at") or observed_at,
+                source_available=bool(
+                    provenance.get("source_available", manifest is not None)
+                ),
             )
 
     contract = domain_contract or effective_production_domain_contract()

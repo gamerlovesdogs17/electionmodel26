@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-09-28T23:59:20.001832+00:00",
-  "n": 8,
-  "n_votehub": 0,
+  "generated_at": "2026-09-30T00:28:17.364700+00:00",
+  "n": 44,
+  "n_votehub": 36,
   "n_historical_archive_cutoffs": 8,
   "parser_version": "approval-v4-fte-created-at",
   "historical_sources": [
@@ -56,10 +56,7 @@
   "historical_availability_basis": "fte_poll_record_created_at",
   "historical_production_eligible": true,
   "historical_ineligible_reason": null,
-  "source_url": [
-    "https://web.archive.org/web/20210414015923id_/https://projects.fivethirtyeight.com/trump-approval-data/approval_polllist.csv",
-    "https://web.archive.org/web/20241129175748id_/https://projects.fivethirtyeight.com/polls-page/data/president_approval_polls.csv"
-  ],
+  "source_url": "https://api.votehub.com/polls?subject=donald-trump&poll_type=approval",
   "tier": "aggregator",
   "license": "CC BY 4.0",
   "attribution": "Historical polling data from FiveThirtyEight; archived by the Internet Archive",
@@ -70,5 +67,6 @@
   "paths": {
     "raw": "data/raw/external/pres_approval_vintages.json",
     "normalized": "data/normalized/pres_approval.parquet"
-  }
+  },
+  "normalized_sha256": "0ff12e6bf4020e746745d20093f1ebd9faaa30d0dccb61a4f39abbf627cc0520"
 }

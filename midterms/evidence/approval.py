@@ -426,8 +426,9 @@ def aggregate_votehub_approval_vintages(
     polls = polls if polls is not None else fetch_votehub_trump_approval_polls()
     rows = []
     for p in polls:
-        end = str(p.get("end_date") or p.get("created_at") or "")[:10]
-        if len(end) < 10:
+        end = str(p.get("end_date") or "")[:10]
+        available = str(p.get("created_at") or "")[:10]
+        if len(end) < 10 or len(available) < 10:
             continue
         net = _net_from_answers(p.get("answers"))
         if net is None:
@@ -440,6 +441,7 @@ def aggregate_votehub_approval_vintages(
         rows.append(
             {
                 "end_date": end,
+                "available_at": available,
                 "net": net,
                 "n": max(100.0, n_f),
                 "pollster": p.get("pollster"),
@@ -450,9 +452,10 @@ def aggregate_votehub_approval_vintages(
         return pd.DataFrame()
     df = pd.DataFrame(rows)
     df["end_date"] = pd.to_datetime(df["end_date"]).dt.date
+    df["available_at"] = pd.to_datetime(df["available_at"]).dt.date
     # Monthly vintages from first poll month through latest.
-    start = df["end_date"].min()
-    end = df["end_date"].max()
+    start = min(df["end_date"].min(), df["available_at"].min())
+    end = max(df["end_date"].max(), df["available_at"].max())
     # Also stamp mid-month and month-end markers commonly used as as-of dates.
     stamps: list[date] = []
     y, m = start.year, start.month
@@ -477,6 +480,7 @@ def aggregate_votehub_approval_vintages(
         window = df[
             (df["end_date"].map(lambda d: d.toordinal()) >= lo)
             & (df["end_date"] <= as_of)
+            & (df["available_at"] <= as_of)
         ]
         if window.empty:
             continue
@@ -493,6 +497,11 @@ def aggregate_votehub_approval_vintages(
                 "source": "votehub_approval_aggregate",
                 "retrieved_at": retrieved,
                 "parser_version": PARSER_VERSION,
+                "max_poll_available_at": max(window["available_at"]).isoformat(),
+                "max_poll_end": max(window["end_date"]).isoformat(),
+                "availability_basis": "votehub_poll_created_at",
+                "production_eligible": True,
+                "production_ineligible_reason": None,
             }
         )
     return pd.DataFrame(out_rows)
@@ -585,6 +594,7 @@ def write_approval_store(*, prefer_votehub: bool = True) -> dict[str, Any]:
     )
     out = NORMALIZED_DIR / "pres_approval.parquet"
     df.to_parquet(out, index=False)
+    normalized_sha256 = hashlib.sha256(out.read_bytes()).hexdigest()
 
     live_n = int((df["source"] == "votehub_approval_aggregate").sum())
     historical_eligible = bool(len(hist)) and bool(hist["production_eligible"].fillna(False).all())
@@ -649,6 +659,7 @@ def write_approval_store(*, prefer_votehub: bool = True) -> dict[str, Any]:
             "raw": raw.relative_to(ROOT).as_posix(),
             "normalized": out.relative_to(ROOT).as_posix(),
         },
+        "normalized_sha256": normalized_sha256,
     }
     (MANIFESTS_DIR / "pres_approval.json").write_text(json.dumps(man, indent=2))
     return man
