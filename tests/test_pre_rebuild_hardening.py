@@ -426,6 +426,15 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert text.index("blueprint-extension-gates --source-only --strict") < text.index("nested-component-loo")
     assert "--publication-config" in text
     assert text.index("nested-component-loo") < text.index("fit-stack-weights")
+    repair = text.index("Recover convergence-failed canonical PyMC folds")
+    cache = text.index("Save canonical OOF cache")
+    stack = text.index("Fit predictive-mixture stack from canonical OOF only")
+    assert text.index("Canonical OOF using the frozen selected poll structure") < repair
+    assert repair < cache < stack
+    assert "repair-failed-oof-inference" in text
+    assert '"--draws-per-chain", "2000"' in text
+    assert '"--tune-per-chain", "2000"' in text
+    assert '"--chains", "4"' in text
     assert text.index("fit-stack-weights") < text.index("crossfit-stack-reliability")
     assert text.index("joint-oof-scores --strict") < text.index("--require-publishable")
     assert text.index("--require-publishable") < text.index("verify-rebuild --independent")

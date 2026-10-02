@@ -225,12 +225,60 @@ jobs:
             --model-spec-candidate data/artifacts/validated_model_spec_candidate.json \
             --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
             --out data/artifacts/nested_component_loo_canonical.json
-      - name: Fit predictive-mixture stack from canonical OOF only
+      - name: Recover convergence-failed canonical PyMC folds
+        shell: bash
         run: |
-          python -m midterms.cli fit-stack-weights \
-            --nested-path data/artifacts/nested_component_loo_canonical.json \
-            --out data/artifacts/stack_weights_oof.json \
-            --require-canonical
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          report_path = Path("data/artifacts/nested_component_loo_canonical.json")
+          index_path = report_path.with_name(f"{report_path.stem}_frozen.json")
+          index = json.loads(index_path.read_text(encoding="utf-8"))
+          failures = sorted(
+              (entry for entry in index.get("entries", []) if entry.get("status") == "failed"),
+              key=lambda entry: (
+                  int(entry.get("holdout_year", 0)),
+                  int(entry.get("lead_days", 0)),
+                  str(entry.get("component", "")),
+              ),
+          )
+          unsupported = [
+              entry for entry in failures
+              if entry.get("component") not in {"pymc", "pymc_dynamic"}
+          ]
+          if unsupported:
+              raise SystemExit(
+                  "canonical OOF contains non-PyMC failures that cannot be repaired: "
+                  + json.dumps(unsupported, sort_keys=True)
+              )
+          if not failures:
+              print("Canonical OOF has no convergence-failed PyMC folds.")
+          for entry in failures:
+              command = [
+                  sys.executable, "-m", "midterms.cli", "repair-failed-oof-inference",
+                  "--year", str(entry["holdout_year"]),
+                  "--lead", str(entry["lead_days"]),
+                  "--component", str(entry["component"]),
+                  "--nested-path", str(report_path),
+                  "--draws-per-chain", "2000",
+                  "--tune-per-chain", "2000",
+                  "--chains", "4",
+              ]
+              print("Recovering", entry["component"], entry["holdout_year"], entry["lead_days"])
+              subprocess.run(command, check=True)
+
+          # Each repair subprocess fits from the truth-free index before it opens the
+          # scored report. This final check runs only after every repair subprocess exits.
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          if report.get("failures"):
+              raise SystemExit(
+                  "canonical OOF still contains failures after convergence recovery: "
+                  + json.dumps(report["failures"], sort_keys=True)
+              )
+          PY
       - name: Save canonical OOF cache
         if: steps.canonical-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -240,6 +288,12 @@ jobs:
             data/artifacts/nested_component_loo_canonical_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
           key: canonical-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json') }}-2018-2024-60-30-pymc1600-seed-v2
+      - name: Fit predictive-mixture stack from canonical OOF only
+        run: |
+          python -m midterms.cli fit-stack-weights \
+            --nested-path data/artifacts/nested_component_loo_canonical.json \
+            --out data/artifacts/stack_weights_oof.json \
+            --require-canonical
       - name: Cross-fitted production-stack reliability
         run: |
           python -m midterms.cli crossfit-stack-reliability \

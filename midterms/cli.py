@@ -907,6 +907,43 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
+    p_repair_oof = sub.add_parser(
+        "repair-failed-oof-inference",
+        help=(
+            "Refit one convergence-failed PyMC OOF prediction from its truth-free "
+            "freeze index using the mandatory recovery sampling floor"
+        ),
+    )
+    p_repair_oof.add_argument("--year", type=int, required=True)
+    p_repair_oof.add_argument("--lead", type=int, required=True)
+    p_repair_oof.add_argument(
+        "--component", required=True, choices=("pymc", "pymc_dynamic")
+    )
+    p_repair_oof.add_argument("--nested-path", required=True)
+    p_repair_oof.add_argument("--draws-per-chain", type=int, default=2000)
+    p_repair_oof.add_argument("--tune-per-chain", type=int, default=2000)
+    p_repair_oof.add_argument("--chains", type=int, default=4)
+    p_repair_oof.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.nested_component_loo",
+                    fromlist=["repair_failed_oof_inference"],
+                ).repair_failed_oof_inference(
+                    year=a.year,
+                    lead_days=a.lead,
+                    component=a.component,
+                    out_path=Path(a.nested_path),
+                    draws_per_chain=a.draws_per_chain,
+                    tune_per_chain=a.tune_per_chain,
+                    chains=a.chains,
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
     p_sw = sub.add_parser(
         "fit-stack-weights",
         help="Fit reproducible OOF ensemble weights from nested LOO matrix (audit P2.2)",
