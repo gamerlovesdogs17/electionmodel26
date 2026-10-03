@@ -61,6 +61,7 @@ def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> 
 
     events: list[str] = []
     race_id = "synthetic-2000-AA"
+    excluded_race_id = "synthetic-2000-BB"
     index_path = tmp_path / "nested_frozen.json"
     index = {"entries": [{
         "component": "pymc_dynamic", "holdout_year": 2000, "lead_days": 30,
@@ -78,9 +79,14 @@ def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> 
         "prior_snapshot_sha256_by_fold_lead": {"2000": {"30": "prior-sha"}},
         "presidential_source_sha256_by_fold_lead": {"2000": {"30": "source-sha"}},
         "failures": [{"year": 2000, "lead": 30, "component": "pymc_dynamic"}],
-        "by_fold": {"2000": {"leads": {"30": {
-            "pymc_dynamic": {"status": "failed", "n": 0},
-        }}}},
+        "by_fold": {"2000": {
+            "leads": {"30": {
+                "pymc_dynamic": {"status": "failed", "n": 0},
+            }},
+            "candidate_state_score_exclusions_by_lead": {
+                "30": [{"race_id": excluded_race_id, "reason": "synthetic nonbinary"}],
+            },
+        }},
     }
     report_path.write_text(json.dumps(report))
 
@@ -102,10 +108,16 @@ def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> 
         @property
         def results(self):
             events.append("truth_read")
-            return pd.DataFrame([{
-                "election_id": "senate-2000", "race_id": race_id,
-                "score_eligible": True, "margin_value": 1.0,
-            }])
+            return pd.DataFrame([
+                {
+                    "election_id": "senate-2000", "race_id": race_id,
+                    "score_eligible": True, "margin_value": 1.0,
+                },
+                {
+                    "election_id": "senate-2000", "race_id": excluded_race_id,
+                    "score_eligible": True, "margin_value": -1.0,
+                },
+            ])
 
     def synthetic_fit(
         snap, *, draws, tune, chains, seed, generic_ballot, poll_structure, target_accept,
@@ -117,9 +129,11 @@ def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> 
         assert target_accept == 0.99
         assert poll_structure == PollStructureConfig()
         return FitResult(
-            race_ids=[race_id], states=["AA"], mean_margin=np.array([0.0]),
-            sd_margin=np.array([1.0]),
-            draws_margin=np.array([[-1.0], [0.0], [1.0], [2.0]]),
+            race_ids=[race_id, excluded_race_id], states=["AA", "BB"],
+            mean_margin=np.array([0.0, 0.0]), sd_margin=np.array([1.0, 1.0]),
+            draws_margin=np.array([
+                [-1.0, -2.0], [0.0, -1.0], [1.0, 1.0], [2.0, 2.0],
+            ]),
             house_effects={}, method="pymc_dynamic",
             diagnostics={"draws": 2000, "tune": 4000, "chains": 4,
                          "target_accept": 0.99,
@@ -145,6 +159,8 @@ def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> 
     assert result["remaining_failures"] == 0
     repaired = json.loads(report_path.read_text())
     assert repaired["oof_crps_method"] == "exact_empirical_predictive_draws"
+    assert repaired["by_fold"]["2000"]["leads"]["30"]["pymc_dynamic"]["n"] == 1
+    assert f"2000:30:{excluded_race_id}" not in repaired["oof_draws"]["pymc_dynamic"]
     assert repaired["inference_repairs"][0]["target_accept"] == 0.99
     assert repaired["inference_repairs"][0]["parameterization"] == (
         "noncentered_scale_mixtures_v1"

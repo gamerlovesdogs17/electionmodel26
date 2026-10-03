@@ -884,7 +884,25 @@ def repair_failed_oof_inference(
         raise ValueError("scored report has no corresponding failed candidate")
     all_results = wh.results
     results = all_results[all_results["election_id"] == election_id]
-    scored = score_frozen_predictions({component: replacement}, results)[component]
+    # Reuse the exact score-eligibility contract frozen for this lead. Some
+    # historical contests are deliberately excluded from binary D-v-R margin
+    # scoring. Scoring a repair against the unfiltered results changes `n` and
+    # makes an otherwise complete replacement look incomplete during rescore.
+    lead_metadata = report["by_fold"][str(year)].get(
+        "candidate_state_score_exclusions_by_lead", {}
+    )
+    candidate_exclusions = lead_metadata.get(str(lead_days), [])
+    from midterms.evidence.candidate_timeline import (
+        filter_candidate_state_score_exclusions,
+    )
+
+    results_for_lead, _ = filter_candidate_state_score_exclusions(
+        results,
+        {"score_exclusions": candidate_exclusions},
+    )
+    scored = score_frozen_predictions(
+        {component: replacement}, results_for_lead,
+    )[component]
     if scored.get("status") != "ok":
         raise ValueError("replacement prediction could not be scored")
     prefix = f"{year}:{lead_days}:"
