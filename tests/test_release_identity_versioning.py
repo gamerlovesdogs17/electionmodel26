@@ -122,6 +122,7 @@ def test_current_identity_round_trip_is_semantic_and_deterministic(
         expected_lineage=lineage,
     )
     assert report["ok"] is True, report
+    assert report["lineage"] == lineage
 
     # JSON ordering and whitespace are not changes to the sealed evidence.
     payload = json.loads(truth["official_senate_ledger.json"].read_text())

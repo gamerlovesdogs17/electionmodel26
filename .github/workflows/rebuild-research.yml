@@ -387,6 +387,8 @@ jobs:
           PY
       - name: G1-G11 and blueprint extension gates
         run: python -m midterms.cli acceptance-gates --strict
+      - name: Refresh final validation report status
+        run: python -m midterms.cli validation-report --refresh-status-only
       - name: Upload generated model artifacts
         if: always()
         uses: actions/upload-artifact@v4

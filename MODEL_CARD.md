@@ -1,11 +1,10 @@
 # Model card — Senate hierarchical v0.9.22
 
-> **Validation status (2026-09-29):** v0.9.22 code capability changed after the last
-> research rebuild. Existing forecast, OOF, stack, validation and acceptance
-> artifacts are v0.9.21 evidence and do not validate v0.9.22. `PUBLIC_LIVE_ENABLED=False`; the
-> surface remains `research_only`. Required source readiness is green and sealed
-> in evidence bundle `eb-7d4691b12b12db1e`; expensive empirical validation has
-> not run. See `BLUEPRINT_COMPLIANCE_AUDIT.md`.
+> **Validation status (2026-10-03):** v0.9.22 completed its sealed research
+> rebuild against evidence bundle `eb-3e91ca3a90628d69`. G1–G11 and run
+> coherence pass, and release identity
+> `truth_v1_v0.9.22_eb-3e91ca3a90628d69` verifies. The validated specification
+> remains `research_only` with `PUBLIC_LIVE_ENABLED=False`.
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
@@ -19,8 +18,8 @@
 
 ## Architecture (five layers — do not conflate)
 1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
-2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural challengers are diagnostics and are excluded from the production simplex. Three positive same-family challengers each enable exactly one of study, sponsor, or questionnaire relative to the all-off reference. No-op challengers are ineligible. They are pending a new run.
-3. **Distributional mixture code** — nonnegative weights from empirical predictive-mixture CRPS over frozen draws. Mean-score softmax is diagnostic only. The last four-cycle 60/30-day OOF archive and stack are v0.9.21 records and do not validate v0.9.22.
+2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural challengers are diagnostics and are excluded from the production simplex. The validated structure is the all-off `pymc` reference; sponsor, questionnaire, and study effects remain disabled, with heuristic study downweighting enabled.
+3. **Distributional mixture code** — nonnegative weights from empirical predictive-mixture CRPS over frozen draws. Mean-score softmax is diagnostic only. The validated v0.9.22 stack assigns approximately 21.9% to `pymc` and 78.1% to `state_space`; other candidates receive zero production mass.
 4. **Overlays** — expert ratings + Kalshi race/control soft pulls are optional. Publication use requires an exact-weight timestamp-pure nested-OOS validation contract; otherwise the publication fit runs core-only and records the layers as compare-only.
 5. **Final correlated chamber simulator** — joint margin draws → seats → control. Simulation count is separate from posterior sample count (`n_joint_sims` vs `n_posterior_samples`). Independent Bernoulli foil is diagnostic only.
 
@@ -31,6 +30,20 @@ Acceptance gates (Milestone-0): `acceptance-gates` → `data/artifacts/acceptanc
 Run coherence: `run_coherence_latest.json` ties forecast ↔ eligibility ↔ rebuild fingerprints.
 Public live: `publish-live` → stamps `public_release` on forecast + `publication_latest.json` (requires green gates).
 Governance: `GOVERNANCE.md`. Validation: `validation-report`, `leave-pollster-out`, `verify-rebuild`, `replay-cycle`, `shadow-verify`.
+
+## v0.9.22 production research freeze
+
+`senate-hierarchical-v0.9.22` is frozen as the completed validated production
+research specification identified by `validated_model_spec_latest.json` and
+release identity `truth_v1_v0.9.22_eb-3e91ca3a90628d69`. Changes to model
+formulas, poll structure, stack membership or weights, calibration, uncertainty,
+turnout propagation, institutional transitions, fundamentals, historical
+training scope, source semantics, or probability generation require a new
+research version and complete-cycle OOS validation. Compatible ingestion,
+operations, reporting, and documentation repairs may retain v0.9.22 only when
+they leave the validated statistical specification and forecast probabilities
+unchanged. Turnout propagation and fuller runoff/transition modeling remain
+future-version research candidates.
 
 ## Sources
 | Domain | Source | Notes |
@@ -135,9 +148,9 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 - **Non-production:** `fast` hierarchical-t approximation (CI / `--allow-fast-fallback` only)
 - Generic ballot: VoteHub **21-day trailing weighted average** (Winsorized headline D−R)
 - **Morris §7.2:** current opinion ≠ future movement ≠ Election-Day terminal polling error
-- The retained 264-case OOF and its prior stack result are v0.9.21 historical
-  evidence. No v0.9.22 structural challenger, OOF, selection, or stack result
-  exists until the next sealed-evidence rebuild.
+- The validated v0.9.22 formal OOF uses four historical cycles at 60/30-day
+  leads. Cycle-cross-fitted production-stack reliability contains 260 cases;
+  the selected stack and calibration artifacts are bound by the validated spec.
 - Fundamentals prior; ENOP / caps / study clustering; hierarchical mode/pop; named **error_budget**
 - Ratings / markets overlays with ablation
 - Fold-pure stack weights (`stack_provenance`); never manually assign positive weight
@@ -146,11 +159,9 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 ## Validation / ops
 - Complete-cycle replay; nested LOO; lead-time grid; component ablations
 - Generic grouped model registry, point-in-time prior provenance, decomposition
-  hook, and artifact lineage checks are connected. The 2026-09-20 market refresh
-  records enabled and disabled candidate mappings. The prior source and current
-  snapshots, formal OOF, and stack are rebuilt. The Independent caucus policy
-  changed in code afterward; the forecast and dependent acceptance artifacts
-  remain stale until a separately requested run.
+  hook, and artifact lineage checks are connected. The prior source, current
+  snapshots, formal OOF, stack, forecast, independent rebuild, and acceptance
+  artifacts are mutually bound for the v0.9.22 release identity.
 - Dynamic OOS grid artifact: `dynamic_core_oos_grid.json` (freeze-before-truth)
 - Monitor alerts; Ed25519 signing; environment lock; `verify-rebuild`; correction registry
 - **Pre-P0 cycle_replay artifacts are non-comparable** — not validated backtests (`VALIDATION_ARCHIVE_NOTICE.md`)
@@ -160,10 +171,9 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 - Independent modeled candidates count toward the Democratic caucus **by a
   declared modeling assumption**, not by ballot party or a verified individual
   caucus pledge. The ballot party and display identity remain Independent.
-  This changed policy has not been evaluated by a new current forecast.
 - Static PyMC is the reference spine. Current historical OOF stack weights
   give zero production mass to `pymc_dynamic`; this is an OOF selection result,
-  not a manual adjustment. It is not current-run forecast validation.
+  not a manual adjustment.
 - Wikipedia `certified_vote_counts.json` is **quarantined** (parser-development only).
 - Canonical outcomes use **truth_v1** (`official_senate_ledger.json` + independent expectations).
 - Margin scoring uses `score_eligible` / `margin_definition`.

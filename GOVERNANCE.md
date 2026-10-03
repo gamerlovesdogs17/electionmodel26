@@ -3,10 +3,12 @@
 Blueprint §§11–12 roles and change control (Senate research production).
 
 ## Public live probabilities
-**HOLD (27 Sep 2026 pre-rebuild boundary / v0.9.22):** `PUBLIC_LIVE_ENABLED=False`.
+**HOLD (3 Oct 2026 validated research boundary / v0.9.22):** `PUBLIC_LIVE_ENABLED=False`.
 Truth_v1 ledger/expectations are unified; Wikipedia vote scrape remains quarantined.
-`publish-live` fail-closes until multi-cycle nested validation and fold-pure evidence
-clear a fresh review. Thin/single-cycle calibration claims are blocked by G6/G7.
+The sealed multi-cycle research rebuild, independent rebuild, G1–G11, extension
+gates, and run coherence pass. This establishes a validated production research
+specification; it does not authorize live publication. `publish-live` remains
+separately locked pending an explicit future review.
 New blueprint extensions separate code capability from empirical proof. A
 capability marked implemented in `BLUEPRINT_COMPLIANCE_AUDIT.json` does not
 permit publication while its empirical gate is pending, stale, requires a
@@ -17,6 +19,18 @@ artifacts remain historical records and cannot be relabeled as current.
 
 Current surface: `research_only`. Do not label research runs as live.
 
+## Frozen v0.9.22 specification
+
+The frozen statistical specification is bound by
+`validated_model_spec_latest.json`, evidence bundle `eb-3e91ca3a90628d69`, and
+release identity `truth_v1_v0.9.22_eb-3e91ca3a90628d69`. Substantive changes to
+poll structure, formulas, stack candidates or weights, calibration, uncertainty,
+turnout propagation, institutional transitions, fundamentals, historical
+training scope, source semantics, or probability generation require a new
+research version and appropriate OOS validation. Compatible operational,
+reporting, documentation, and ingestion repairs may retain v0.9.22 only when
+they do not redefine the validated specification or forecast probabilities.
+
 ## Evidence preparation boundary
 
 Expensive validation must consume a sealed, content-addressed evidence bundle.
@@ -26,9 +40,9 @@ model stage checks out the exact evidence commit, verifies the bundle ID, and
 must not refresh evidence while fitting. Cache hits are performance aids only;
 restored artifacts still have to pass their own semantic lineage checks.
 
-The 2026-09-27 source audit is green and evidence bundle
-`eb-7d4691b12b12db1e` is sealed. This permits the expensive v0.9.22 validation
-run; it does not establish empirical validity or permit live publication.
+The current source audit is green and evidence bundle
+`eb-3e91ca3a90628d69` is sealed. It is the evidence boundary used by the
+completed v0.9.22 research validation; it does not permit live publication.
 Missing real evidence in a future bundle must be ingested or refreshed;
 fixtures, current registries, and degraded substitutes cannot be relabeled to
 clear a historical source gate.

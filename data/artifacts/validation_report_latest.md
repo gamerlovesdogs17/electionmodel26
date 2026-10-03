@@ -1,7 +1,29 @@
 # Validation report — senate-hierarchical-v0.9.22
 
 Generated: 2026-10-03T20:30:34.584941+00:00
+Current status refreshed: 2026-10-03T23:11:15.493486+00:00
 Primary holdout: 2022
+
+## Current authoritative status
+
+- Evidence bundle: eb-3e91ca3a90628d69
+- Validated model spec: 4a1ee9f7baef14626dccc0cb5eadedafbeb6dc31878a956bb20cfe4fa9868323
+- Release identity: truth_v1_v0.9.22_eb-3e91ca3a90628d69
+- Release identity verified: True
+- Run coherence: True
+- Research acceptance: True
+- Promotion eligible: True
+- Forecast publishable: True
+- PUBLIC_LIVE_ENABLED: False
+- Publication surface: research_only
+
+## Cycle-cross-fitted production-stack reliability
+
+- n: 260
+- Brier: 0.04780733512393962
+- Calibration slope: 1.0277592451274935
+- Calibration intercept: -0.012766053411955226
+- Flagged overconfident bins: 0
 
 ## Stack weights
 
@@ -12,7 +34,7 @@ Primary holdout: 2022
 }
 ```
 
-## Calibration (60-day lead)
+## Exploratory legacy primary-holdout diagnostic
 
 - n: 34
 - Brier: 0.06143148553447393
@@ -78,8 +100,8 @@ Primary holdout: 2022
 ## Acceptance gates (Milestone-0 / G1–G11)
 
 - ok: True
-- pass/partial/fail: 10/0/1
-- failures: ['G10', 'COHERENCE']
+- pass/partial/fail: 11/0/0
+- failures: []
 
 ## Limitations
 
@@ -87,8 +109,8 @@ Primary holdout: 2022
 - Licensed Cook/IE feeds are not redistributed; Wikipedia multi-rater is production ratings.
 - House / Electoral College intentionally out of scope.
 - fast hierarchical-t is a non-production approximation; production prefers pymc / ensemble_stack.
-- Peer Brier/CRPS is a release gate only — peers are never averaged into the ensemble.
+- Peer Brier/CRPS is an integrity diagnostic only — peers are never averaged into the ensemble.
 - Pre-P0.3 cycle_replay artifacts may be non-comparable (wrong historical race universe / synthetic polls).
-- Chamber reconcile + poll coverage gates (2018–2024) are required before treating holdout scores as validated.
-- P2.1 nested-component-loo: freeze-before-truth; no fast→pymc weight remapping.
-- Milestone-0 archive scope is 2018–2024; 2014/2016 provisional. Public live probabilities wait on gate green + pymc shadow.
+- Chamber reconcile uses the 2014–2024 official-ballot/certified-margin archive; the poll-coverage production gate remains 2018–2024.
+- P2.1 nested-component-loo freezes before truth and prohibits model-identity weight remapping.
+- PUBLIC_LIVE_ENABLED remains false; live publication requires a separate explicit future review.

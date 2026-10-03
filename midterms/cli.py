@@ -638,24 +638,36 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     p_val = sub.add_parser("validation-report", help="Build lead-time + ablation + nested-df report")
-    p_val.add_argument("--full", action="store_true", help="More draws (slower)")
+    p_val_mode = p_val.add_mutually_exclusive_group()
+    p_val_mode.add_argument("--full", action="store_true", help="More draws (slower)")
+    p_val_mode.add_argument(
+        "--refresh-status-only",
+        action="store_true",
+        help=(
+            "Refresh final gates, coherence, release identity, and lineage in the "
+            "existing report without fitting models"
+        ),
+    )
     p_val.add_argument(
         "--allow-synthetic",
         action="store_true",
         help="Allow synthetic historical polls in cycle gate",
     )
-    p_val.set_defaults(
-        func=lambda a: print(
-            json.dumps(
-                __import__("midterms.validation.report", fromlist=["build_validation_report"]).build_validation_report(
-                    quick=not a.full,
-                    allow_synthetic=a.allow_synthetic,
-                ),
-                indent=2,
-                default=str,
-            )
+    def _validation_report(a: argparse.Namespace) -> None:
+        module = __import__(
+            "midterms.validation.report",
+            fromlist=["build_validation_report", "refresh_validation_report_status"],
         )
-    )
+        if a.refresh_status_only:
+            result = module.refresh_validation_report_status()
+        else:
+            result = module.build_validation_report(
+                quick=not a.full,
+                allow_synthetic=a.allow_synthetic,
+            )
+        print(json.dumps(result, indent=2, default=str))
+
+    p_val.set_defaults(func=_validation_report)
 
     p_lead = sub.add_parser("lead-time-grid", help="Replay LEAD_DAYS grid for one cycle")
     p_lead.add_argument("--year", type=int, default=2022)

@@ -2,14 +2,29 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, PRIMARY_HOLDOUT
+
+STATUS_SCHEMA_VERSION = "validation-report-current-status-v1"
+CANONICAL_JSON_HASH_MODE = "canonical_json_sha256_v1"
+CURRENT_REPORT_LIMITATIONS = [
+    "VoteHub documents no /polls/archive — historical polls prefer FTE CC BY (Wayback/sealed polls-page).",
+    "Licensed Cook/IE feeds are not redistributed; Wikipedia multi-rater is production ratings.",
+    "House / Electoral College intentionally out of scope.",
+    "fast hierarchical-t is a non-production approximation; production prefers pymc / ensemble_stack.",
+    "Peer Brier/CRPS is an integrity diagnostic only — peers are never averaged into the ensemble.",
+    "Pre-P0.3 cycle_replay artifacts may be non-comparable (wrong historical race universe / synthetic polls).",
+    "Chamber reconcile uses the 2014–2024 official-ballot/certified-margin archive; the poll-coverage production gate remains 2018–2024.",
+    "P2.1 nested-component-loo freezes before truth and prohibits model-identity weight remapping.",
+    "PUBLIC_LIVE_ENABLED remains false; live publication requires a separate explicit future review.",
+]
 
 
 def build_validation_report(
@@ -21,12 +36,17 @@ def build_validation_report(
     Assemble lead-time grid + component ablation + nested df/era + calibration
     into one published report. `quick=True` uses fewer draws for CI friendliness.
     """
-    from midterms.baselines.score import score_forecasts  # noqa: F401 — reserved for future
+    from midterms.baselines.score import (
+        score_forecasts,  # noqa: F401 — reserved for future
+    )
     from midterms.evidence.warehouse import Warehouse
     from midterms.model.pymc_model import fit_fast_approximation
     from midterms.validation.ablations import run_component_ablations
     from midterms.validation.cycle_replay import replay_cycle
-    from midterms.validation.lead_time_grid import nested_df_era_search, replay_lead_time_grid
+    from midterms.validation.lead_time_grid import (
+        nested_df_era_search,
+        replay_lead_time_grid,
+    )
     from midterms.validation.metrics import (
         interval_score_gaussian,
         reliability_bins,
@@ -34,9 +54,13 @@ def build_validation_report(
     )
 
     draws = 150 if quick else 400
-    lead = replay_lead_time_grid(year=PRIMARY_HOLDOUT, lead_days=(90, 60, 30, 7), draws=draws)
+    lead = replay_lead_time_grid(
+        year=PRIMARY_HOLDOUT, lead_days=(90, 60, 30, 7), draws=draws
+    )
     abl = run_component_ablations(year=PRIMARY_HOLDOUT, lead_days=60, draws=draws)
-    nested = nested_df_era_search(holdout_year=PRIMARY_HOLDOUT, draws=max(100, draws // 2))
+    nested = nested_df_era_search(
+        holdout_year=PRIMARY_HOLDOUT, draws=max(100, draws // 2)
+    )
 
     cycle = None
     try:
@@ -70,7 +94,9 @@ def build_validation_report(
         from midterms.evidence.score_targets import truth_margin_map
 
         truth_map = truth_margin_map(results)
-        fit = fit_fast_approximation(snap, n_draws=max(300, draws), seed=PRIMARY_HOLDOUT)
+        fit = fit_fast_approximation(
+            snap, n_draws=max(300, draws), seed=PRIMARY_HOLDOUT
+        )
         probs = []
         outcomes = []
         interval_scores = []
@@ -170,7 +196,7 @@ def build_validation_report(
             nested_loo = {"ok": False, "error": str(exc)}
 
     report = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "model_version": MODEL_VERSION,
         "primary_holdout": PRIMARY_HOLDOUT,
         "quick": quick,
@@ -203,17 +229,7 @@ def build_validation_report(
         "poll_coverage": poll_coverage,
         "peer_gate": None,
         "acceptance_gates": None,
-        "limitations": [
-            "VoteHub documents no /polls/archive — historical polls prefer FTE CC BY (Wayback/sealed polls-page).",
-            "Licensed Cook/IE feeds are not redistributed; Wikipedia multi-rater is production ratings.",
-            "House / Electoral College intentionally out of scope.",
-            "fast hierarchical-t is a non-production approximation; production prefers pymc / ensemble_stack.",
-            "Peer Brier/CRPS is a release gate only — peers are never averaged into the ensemble.",
-            "Pre-P0.3 cycle_replay artifacts may be non-comparable (wrong historical race universe / synthetic polls).",
-            "Chamber reconcile + poll coverage gates (2018–2024) are required before treating holdout scores as validated.",
-            "P2.1 nested-component-loo: freeze-before-truth; no fast→pymc weight remapping.",
-            "Milestone-0 archive scope is 2018–2024; 2014/2016 provisional. Public live probabilities wait on gate green + pymc shadow.",
-        ],
+        "limitations": list(CURRENT_REPORT_LIMITATIONS),
     }
     try:
         from midterms.validation.leave_pollster_out import leave_pollster_out
@@ -245,20 +261,255 @@ def build_validation_report(
     return report
 
 
+def _read_required_json(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        raise ValueError(f"missing required current artifact: {path.name}")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"invalid current artifact {path.name}: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise TypeError(f"current artifact {path.name} is not a JSON object")
+    return payload
+
+
+def _canonical_json_sha256(payload: dict[str, Any]) -> str:
+    data = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+        default=str,
+    ).encode("utf-8")
+    return hashlib.sha256(data).hexdigest()
+
+
+def refresh_validation_report_status(
+    *,
+    artifacts_dir: str | Path = ARTIFACTS_DIR,
+    release_identity_report: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Refresh current status/lineage without recomputing statistical diagnostics.
+
+    The expensive validation sections are retained byte-for-byte as parsed JSON.
+    Only the embedded acceptance result and an explicit current-status block are
+    replaced from the final authoritative artifacts produced later in the
+    rebuild workflow.
+    """
+    art_dir = Path(artifacts_dir)
+    report_path = art_dir / "validation_report_latest.json"
+    report = _read_required_json(report_path)
+    sources = {
+        "acceptance_gates": _read_required_json(
+            art_dir / "acceptance_gates_latest.json"
+        ),
+        "run_coherence": _read_required_json(art_dir / "run_coherence_latest.json"),
+        "forecast": _read_required_json(art_dir / "forecast_latest.json"),
+        "evidence_eligibility": _read_required_json(
+            art_dir / "evidence_eligibility_latest.json"
+        ),
+        "validated_model_spec": _read_required_json(
+            art_dir / "validated_model_spec_latest.json"
+        ),
+        "stack_weights": _read_required_json(art_dir / "stack_weights_oof.json"),
+        "stack_reliability": _read_required_json(
+            art_dir / "stack_reliability_crossfit_latest.json"
+        ),
+    }
+    acceptance = sources["acceptance_gates"]
+    coherence = sources["run_coherence"]
+    forecast = sources["forecast"]
+    eligibility = sources["evidence_eligibility"]
+    spec = sources["validated_model_spec"]
+    stack = sources["stack_weights"]
+    reliability = sources["stack_reliability"]
+
+    if release_identity_report is None:
+        from midterms.ops.release_identity import verify_release_identity
+
+        release_identity_report = verify_release_identity(
+            expected_model_version=str(forecast.get("model_version") or MODEL_VERSION),
+            artifacts_dir=art_dir,
+        )
+    release_identity = dict(release_identity_report)
+    release_lineage = release_identity.get("lineage") or {}
+
+    problems: list[str] = []
+    model_versions = {
+        str(value)
+        for value in (
+            report.get("model_version"),
+            acceptance.get("model_version"),
+            coherence.get("model_version"),
+            forecast.get("model_version"),
+            eligibility.get("model_version"),
+            spec.get("model_version"),
+            stack.get("model_version") or stack.get("source_model_version"),
+            reliability.get("model_version"),
+            release_identity.get("model_version"),
+        )
+        if value
+    }
+    if model_versions != {MODEL_VERSION}:
+        problems.append(f"model version disagreement: {sorted(model_versions)}")
+
+    bundle_id = spec.get("evidence_bundle_id")
+    bundle_sha = spec.get("evidence_bundle_sha256")
+    if not bundle_id or forecast.get("evidence_bundle_id") != bundle_id:
+        problems.append("forecast and validated spec evidence bundle IDs differ")
+    if forecast.get("evidence_bundle_sha256") != bundle_sha:
+        problems.append("forecast and validated spec evidence bundle hashes differ")
+    if release_lineage.get("evidence_bundle_id") != bundle_id:
+        problems.append("release identity and validated spec evidence bundles differ")
+    if release_lineage.get("evidence_bundle_sha256") != bundle_sha:
+        problems.append("release identity and validated spec bundle hashes differ")
+
+    spec_sha = spec.get("spec_sha256")
+    if not spec_sha or forecast.get("validated_model_spec_sha256") != spec_sha:
+        problems.append("forecast and validated model spec hashes differ")
+    if release_lineage.get("validated_model_spec_sha256") != spec_sha:
+        problems.append("release identity and validated model spec hashes differ")
+
+    forecast_run_id = forecast.get("run_id")
+    if coherence.get("forecast_run_id") != forecast_run_id:
+        problems.append("run coherence is not bound to the current forecast run")
+    if eligibility.get("forecast_run_id") != forecast_run_id:
+        problems.append("evidence eligibility is not bound to the current forecast run")
+    if coherence.get("forecast_publishable") != forecast.get("publishable"):
+        problems.append("forecast and coherence publication eligibility differ")
+    if eligibility.get("publishable") != forecast.get("publishable"):
+        problems.append("forecast and evidence publication eligibility differ")
+
+    embedded_release = (
+        ((acceptance.get("gates") or {}).get("G10") or {}).get("detail") or {}
+    ).get("release_identity") or {}
+    if embedded_release.get("release_id") != release_identity.get("release_id"):
+        problems.append("acceptance and current release identities differ")
+    if bool(embedded_release.get("ok")) != bool(release_identity.get("ok")):
+        problems.append("acceptance and current release verification differ")
+    if not release_identity.get("ok"):
+        problems.append("current release identity does not verify")
+
+    public_live = coherence.get("PUBLIC_LIVE_ENABLED")
+    if (
+        public_live is not False
+        or release_identity.get("PUBLIC_LIVE_ENABLED") is not False
+    ):
+        problems.append("PUBLIC_LIVE_ENABLED must remain false")
+    surface = forecast.get("publication_surface")
+    if (
+        surface != "research_only"
+        or release_identity.get("publication_surface") != surface
+    ):
+        problems.append("publication surface is not consistently research_only")
+    if problems:
+        raise ValueError(
+            "validation report status refresh refused: " + "; ".join(problems)
+        )
+
+    source_hashes = {
+        name: _canonical_json_sha256(payload) for name, payload in sources.items()
+    }
+    source_hashes["release_identity"] = _canonical_json_sha256(release_identity)
+    gate_statuses = {
+        gate_id: gate.get("status")
+        for gate_id, gate in (acceptance.get("gates") or {}).items()
+    }
+    raw_reliability = reliability.get("raw_production_stack") or {}
+    calibration = raw_reliability.get("calibration_slope_intercept") or {}
+    reliability_gate = raw_reliability.get("reliability_overconfidence") or {}
+    current_status = {
+        "schema_version": STATUS_SCHEMA_VERSION,
+        "refreshed_at": datetime.now(UTC).isoformat(),
+        "source_hash_mode": CANONICAL_JSON_HASH_MODE,
+        "source_artifact_sha256": source_hashes,
+        "model_version": MODEL_VERSION,
+        "forecast_run_id": forecast_run_id,
+        "evidence_bundle_id": bundle_id,
+        "evidence_bundle_sha256": bundle_sha,
+        "validated_model_spec_sha256": spec_sha,
+        "selected_structure_id": spec.get("selected_structure_id"),
+        "selected_poll_structure_id": spec.get("selected_poll_structure_id"),
+        "release_id": release_identity.get("release_id"),
+        "release_identity_verified": True,
+        "gates": gate_statuses,
+        "n_pass": acceptance.get("n_pass"),
+        "n_partial": acceptance.get("n_partial"),
+        "n_fail": acceptance.get("n_fail"),
+        "run_coherence_ok": bool(coherence.get("ok")),
+        "forecast_publishable": bool(forecast.get("publishable")),
+        "research_acceptance_ok": bool(acceptance.get("ok")),
+        "promotion_eligible": bool(acceptance.get("promotion_ok")),
+        "cycle_crossfit_reliability": {
+            "n": raw_reliability.get("n"),
+            "brier": raw_reliability.get("brier"),
+            "calibration_slope": calibration.get("slope"),
+            "calibration_intercept": calibration.get("intercept"),
+            "n_overconfident_bins": reliability_gate.get("n_overconfident"),
+        },
+        "PUBLIC_LIVE_ENABLED": False,
+        "publication_surface": surface,
+    }
+    report["acceptance_gates"] = acceptance
+    report["stack_weights_artifact"] = stack.get("stack_weights") or stack.get(
+        "stack_weights_production"
+    )
+    report["limitations"] = list(CURRENT_REPORT_LIMITATIONS)
+    report["current_status"] = current_status
+    report["model_version"] = MODEL_VERSION
+    report_path.write_text(
+        json.dumps(report, indent=2, default=str) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    md_path = art_dir / "validation_report_latest.md"
+    md_path.write_text(_to_markdown(report), encoding="utf-8", newline="\n")
+    return {**current_status, "path": str(report_path), "md_path": str(md_path)}
+
+
 def _to_markdown(report: dict[str, Any]) -> str:
+    status = report.get("current_status") or {}
+    acceptance = report.get("acceptance_gates") or {}
+    reliability = status.get("cycle_crossfit_reliability") or {}
     lines = [
         f"# Validation report — {report.get('model_version')}",
         "",
         f"Generated: {report.get('generated_at')}",
+        f"Current status refreshed: {status.get('refreshed_at')}",
         f"Primary holdout: {report.get('primary_holdout')}",
+        "",
+        "## Current authoritative status",
+        "",
+        f"- Evidence bundle: {status.get('evidence_bundle_id')}",
+        f"- Validated model spec: {status.get('validated_model_spec_sha256')}",
+        f"- Release identity: {status.get('release_id')}",
+        f"- Release identity verified: {status.get('release_identity_verified')}",
+        f"- Run coherence: {status.get('run_coherence_ok')}",
+        f"- Research acceptance: {status.get('research_acceptance_ok')}",
+        f"- Promotion eligible: {status.get('promotion_eligible')}",
+        f"- Forecast publishable: {status.get('forecast_publishable')}",
+        f"- PUBLIC_LIVE_ENABLED: {status.get('PUBLIC_LIVE_ENABLED')}",
+        f"- Publication surface: {status.get('publication_surface')}",
+        "",
+        "## Cycle-cross-fitted production-stack reliability",
+        "",
+        f"- n: {reliability.get('n')}",
+        f"- Brier: {reliability.get('brier')}",
+        f"- Calibration slope: {reliability.get('calibration_slope')}",
+        f"- Calibration intercept: {reliability.get('calibration_intercept')}",
+        f"- Flagged overconfident bins: {reliability.get('n_overconfident_bins')}",
         "",
         "## Stack weights",
         "",
         "```json",
-        json.dumps(report.get("stack_weights_artifact") or report.get("cycle_replay", {}).get("stack_weights"), indent=2),
+        json.dumps(
+            report.get("stack_weights_artifact")
+            or report.get("cycle_replay", {}).get("stack_weights"),
+            indent=2,
+        ),
         "```",
         "",
-        "## Calibration (60-day lead)",
+        "## Exploratory legacy primary-holdout diagnostic",
         "",
         f"- n: {(report.get('calibration') or {}).get('n')}",
         f"- Brier: {(report.get('calibration') or {}).get('brier')}",
@@ -282,11 +533,12 @@ def _to_markdown(report: dict[str, Any]) -> str:
         "",
         "## Acceptance gates (Milestone-0 / G1–G11)",
         "",
-        f"- ok: {(report.get('acceptance_gates') or {}).get('ok')}",
-        f"- pass/partial/fail: {(report.get('acceptance_gates') or {}).get('n_pass')}/"
-        f"{(report.get('acceptance_gates') or {}).get('n_partial')}/"
-        f"{(report.get('acceptance_gates') or {}).get('n_fail')}",
-        f"- failures: {(report.get('acceptance_gates') or {}).get('failures')}",
+        f"- ok: {acceptance.get('ok')}",
+        (
+            f"- pass/partial/fail: {acceptance.get('n_pass')}/"
+            f"{acceptance.get('n_partial')}/{acceptance.get('n_fail')}"
+        ),
+        f"- failures: {acceptance.get('failures')}",
         "",
         "## Limitations",
         "",

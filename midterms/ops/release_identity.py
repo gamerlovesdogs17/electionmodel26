@@ -387,6 +387,7 @@ def verify_release_identity(
         "identity_schema_version": sealed.get("identity_schema_version"),
         "expected_model_version": expected_model_version,
         "model_version": sealed.get("model_version"),
+        "lineage": sealed_lineage,
         "problems": problems,
         "mismatches": mismatches,
         "lineage_mismatches": lineage_mismatches,

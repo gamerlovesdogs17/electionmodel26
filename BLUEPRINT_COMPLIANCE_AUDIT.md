@@ -1,12 +1,12 @@
 # Blueprint compliance audit
 
-**Audit date:** 2026-09-29
+**Audit date:** 2026-10-03
 
-**Scope:** code and statistical infrastructure only
+**Scope:** code capability and current empirical status
 
 **Model boundary:** `senate-hierarchical-v0.9.22`
 
-**Current artifacts:** v0.9.21 empirical artifacts are stale for this code
+**Current artifacts:** v0.9.22 research rebuild validated against evidence bundle `eb-3e91ca3a90628d69`
 
 **Public live:** disabled
 
@@ -21,24 +21,24 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 | Warehouse/as-of polls and truth | Implemented with variation | Canonical content identity includes the conditional candidate-state contract and poll exclusions |
 | Raw immutability and hashes | Implemented | New ingests must use the same contracts |
 | Poll measurement, pollster, mode/pop, ENOP | Implemented | Optional metadata terms still require OOS testing |
-| Sponsor/questionnaire/study terms | Capability implemented; empirical rebuild required | Base and three single-addition challengers are off by default |
+| Sponsor/questionnaire/study terms | Implemented and evaluated | Cross-fitted selection retained the all-off base; optional effects remain disabled |
 | Fundamentals and structural priors | Implemented with variation | Challenger features remain off |
-| Static/dynamic PyMC and terminal layers | Implemented | Same-family OOF must be regenerated |
-| Similarity | Adapter and point-in-time source implemented | Demographic source readiness is complete; OOS ablation remains pending |
-| Joint simulation | Implemented | No new run was executed |
+| Static/dynamic PyMC and terminal layers | Implemented and evaluated | Canonical OOF is bound to the validated model spec; dynamic PyMC earned zero stack mass |
+| Similarity | Implemented and evaluated | Point-in-time source and same-family ablation evidence pass |
+| Joint simulation | Implemented and evaluated | Current research forecast retained 50,000 correlated draws |
 | Institutional rules | Partial | Transition model remains disabled |
 | Turnout | Intentionally deferred | Auxiliary only |
-| Predictive-mixture stack | Implemented | Stored weights are stale after code changes |
-| Expert/market overlays | Blocked by real-data validation | Publication policy runs unvalidated layers as compare-only/core-only |
-| Market contract semantics | Blocked by refresh | Parser v4 requires verified contract-family semantics |
-| Whole-cycle/nested validation | Blocked by real-data validation | Full outer-cycle regeneration required |
-| Joint proper scores | Capability implemented | Historical joint scoring requires rebuild |
-| Prior predictive/PPC/SBC | Capability implemented | Model-specific artifacts still pending |
-| Sampler health | Capability implemented | Current reference fit must be rerun |
+| Predictive-mixture stack | Implemented and evaluated | Validated weights are approximately 21.9% PyMC and 78.1% state-space |
+| Expert/market overlays | Intentionally deferred | Disabled/compare-only layers do not enter the production research forecast |
+| Market contract semantics | Intentionally deferred | Market layer is disabled in the effective production configuration |
+| Whole-cycle/nested validation | Implemented and evaluated | Four-cycle 60/30-day canonical OOF is frozen and lineage-bound |
+| Joint proper scores | Implemented and evaluated | Historical joint score artifact passes its current lineage gate |
+| Prior predictive/PPC/SBC | Implemented with variation | Prior/PPC gates pass; full-model SBC remains a nonblocking future diagnostic |
+| Sampler health | Implemented and evaluated | Current reference fit passes numerical-quality requirements |
 | Reproducibility/lineage/MCSE | Implemented with variation | Legacy absolute paths remain historical records |
-| Source readiness and sealing | Implemented | Required domains are green and evidence bundle `eb-7d4691b12b12db1e` is sealed; empirical rebuild remains pending |
+| Source readiness and sealing | Implemented | Required domains are green and evidence bundle `eb-3e91ca3a90628d69` is sealed and validated |
 | Domain freshness | Implemented with variation | Retrieval and observation age are enforced only for enabled layers; source adapters must retain their timestamps |
-| Acceptance gates | Implemented with variation | Machine-readable v0.9.22 empirical gates remain pending/requires rebuild |
+| Acceptance gates | Implemented and passing | G1–G11: 11 pass / 0 partial / 0 fail; extension gates and run coherence pass |
 
 ## Important deviations and decisions
 
@@ -53,8 +53,8 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 - A 2018 demographic table is labeled as a reuse approximation. No earlier historical snapshot is fabricated.
 - Ordinary FRED latest/revised data and World Bank annual data are degraded substitutes for historical replay; only traceable ALFRED real-time vintages qualify.
 - Single-holdout calibration in the legacy validation report is exploratory and cannot satisfy formal reliability acceptance.
-- Stored v0.9.21 OOF, stack, forecast, and diagnostic artifacts cannot satisfy a
-  v0.9.22 extension gate. Metadata is not rewritten across the version boundary.
+- Historical v0.9.21 OOF, stack, forecast, and diagnostic artifacts remain
+  historical records and cannot substitute for the lineage-bound v0.9.22 set.
 - Same-family ablations freeze reference and challenger configurations and must
   show exactly one changed feature. No-op ablations are ineligible.
 - `source-readiness` is the pre-fit authority. `prepare-evidence --mode seal`
@@ -74,19 +74,19 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
   nominees. Structurally nonbinary race/cutoffs remain visible but are excluded
   from binary scoring with a recorded reason.
 
-## Current source status
+## Current source and validation status
 
-The 2026-09-27 strict source audit is green for every required current and
+The 2026-10-03 strict source audit is green for every required current and
 historical domain. Candidate state is complete under the conditional contract:
 there are no unresolved identity-sensitive race/cutoffs, official California
 top-two identities override side-only mode, pre-primary candidate polls are
 excluded, and nonbinary race/cutoffs carry explicit score exclusions. Markets
 and expert ratings remain disabled optional domains.
 
-Evidence bundle `eb-7d4691b12b12db1e` binds the ready source report and the
-current/historical snapshot identities. The expensive action must still run the
-selection OOF, freeze the selected poll structure, regenerate canonical OOF,
-then regenerate joint scores, stack evidence, reliability calibration,
-Bayesian diagnostics and sampler health before strict acceptance can be
-reconsidered. The finalized `validated_model_spec_latest.json` remains a
-required empirical gate.
+Evidence bundle `eb-3e91ca3a90628d69` binds the ready source report and the
+current/historical snapshot identities. The completed rebuild selected the
+all-off PyMC poll structure, regenerated canonical OOF, stack, reliability,
+joint scores and Bayesian diagnostics, then passed the independent rebuild,
+run coherence, G1–G11, and required extension gates. Release identity
+`truth_v1_v0.9.22_eb-3e91ca3a90628d69` binds the finalized model spec. Public
+live remains disabled and the surface remains `research_only`.

@@ -4,6 +4,20 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-10-03 — v0.9.22 validated production research freeze
+
+- Completed the sealed v0.9.22 research rebuild against evidence bundle
+  `eb-3e91ca3a90628d69` and release identity
+  `truth_v1_v0.9.22_eb-3e91ca3a90628d69`; G1–G11 and run coherence pass.
+- Froze the validated statistical specification. Substantive model, stack,
+  calibration, uncertainty, source-semantics, or probability-generation changes
+  require a new model version and appropriate complete-cycle OOS validation.
+- Added a cheap final-status refresh so the top-level validation report is
+  synchronized after independent rebuild, release/shadow sealing, coherence,
+  and strict acceptance. No statistical artifact or forecast probability was
+  changed by this reporting repair.
+- `PUBLIC_LIVE_ENABLED=False`; the release remains `research_only`.
+
 ## 2026-10-03 — publication sampler convergence repair
 
 - The sealed-evidence v0.9.22 production attempt completed four chains with
