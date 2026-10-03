@@ -2,7 +2,7 @@
   "schema_version": "source-readiness-v1",
   "model_version": "senate-hierarchical-v0.9.22",
   "election_id": "senate-2026",
-  "as_of": "2026-09-27",
+  "as_of": "2026-10-03",
   "ready_for_expensive_rebuild": true,
   "source_preparation_registry_version": "source-preparation-registry-v1",
   "effective_registry": {
@@ -267,7 +267,7 @@
       "adapter": "midterms.evidence.ingest",
       "status": "ready",
       "reasons": [],
-      "n_current_rows": 354,
+      "n_current_rows": 372,
       "historical_cutoff_counts": {
         "senate-2018-lead-60": 289,
         "senate-2018-lead-30": 435,
@@ -279,7 +279,7 @@
         "senate-2024-lead-30": 567
       },
       "missing_cutoffs": [],
-      "semantic_sha256": "b303c2be564228943e0f9e108fa46fff98a61c44c9dd3875cf7d16fddff3b497",
+      "semantic_sha256": "36b96318246e552d88bc505ef8441322e610258bbbede476508d9defa07cda70",
       "canonical_source_contract": {
         "schema_version": "canonical-domain-contract-v1",
         "domain": "polls",
@@ -7052,7 +7052,7 @@
             }
           ],
           "traceable": true,
-          "snapshot_sha256": "a11540410bb98404fb048eb51b52d7a688dbbf138461b9846c3eeaa0d8e785c0",
+          "snapshot_sha256": "cfbb399720565171cc9d65642fc07e78d044721e4bf88bbf1bad7bca5d03e74f",
           "candidate_timeline_snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
           "reasons": [],
           "eligible": true,
@@ -7373,7 +7373,7 @@
       "adapter": "midterms.evidence.presidential_results",
       "status": "ready",
       "reasons": [],
-      "manifest_sha256": "09798a5aa0a0a388357bf7e102ae69056a0d567ef5d23532114cefef3b8ca337",
+      "manifest_sha256": "79acc42079a2e43b2c8c063235a3180113ecf9bc3ea9c56e2027e9fb3d49d2e4",
       "semantic_sha256": "50be4766ead46d24274347a4bc9fb54219d73b4b6c803f228c73c4371b43b5dd",
       "parser_version": "fec-presidential-vote-counts-v1",
       "raw_source_hashes": {},
@@ -8325,7 +8325,7 @@
         },
         "current": {
           "status": "ready",
-          "as_of": "2026-09-27",
+          "as_of": "2026-10-03",
           "selected_release_date": "2026-01-29T00:00:00+00:00",
           "selected_vintages": [
             "2020-2024"
@@ -8469,7 +8469,7 @@
         "secret_available": false,
         "cutoffs": {
           "current": {
-            "as_of": "2026-09-27",
+            "as_of": "2026-10-03",
             "status": "ready",
             "n_rows": 820,
             "series_ids": [
@@ -9310,8 +9310,8 @@
       "historical_production_eligible": true,
       "current_production_eligible": true,
       "current_rows": 14,
-      "manifest_sha256": "e77f0554d02725137e9a8e8efe310ec715f344f955422e9225717bc3a3b15e6e",
-      "semantic_sha256": "9986ae2e2fe30759f720ec02783257e71942197fbb8f3a78370eefe1db201c02",
+      "manifest_sha256": "093fe1f1a0f4ed79ad5371864fdbb600d5220d753a90e1f049a8376305795e72",
+      "semantic_sha256": "6c10786c918631a859e5e15d0d2c345ef2845d3594cbff8fec77e72c7971c9b3",
       "parser_version": "approval-v4-fte-created-at",
       "raw_source_hashes": {
         "fte_biden_approval_polls_20241129.csv": "e16909073b63bbbc7f1fcddfc276cd5606ad5c4c5adcdb86f9baf4c86991ec2c",
@@ -9334,7 +9334,7 @@
       "adapter": "midterms.evidence.ingest",
       "status": "ready",
       "reasons": [],
-      "semantic_sha256": "4976ce740ac8129f5ec81e7c735a079ee5ac6d99f50cbc255eef5176022d1572",
+      "semantic_sha256": "ae1d7ebf4495aa5a4942ef43086079f5b4cccb68abce53c12eea41535de25e95",
       "historical_method": "derived_from_frozen_senate_poll_deviation"
     },
     "expert_ratings": {
