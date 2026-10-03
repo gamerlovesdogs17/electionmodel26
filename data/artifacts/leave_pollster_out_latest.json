@@ -5,37 +5,37 @@
   "method": "fast_hierarchical_t",
   "baseline": {
     "n": 34,
-    "crps": 4.65509332979345,
-    "log_score": -3.586285551871498,
-    "brier": 0.048675167301290685,
-    "mae": 6.370200065005676
+    "crps": 4.910536042707065,
+    "log_score": -3.6466682695448744,
+    "brier": 0.05749914304262473,
+    "mae": 6.62739464177108
   },
   "drops": [
     {
       "pollster_id": "Center Street PAC",
       "n_polls": 25,
-      "crps": 4.799244893360748,
-      "brier": 0.05000046916648859,
-      "delta_crps": 0.14415156356729764,
-      "delta_brier": 0.0013253018651979073
+      "crps": 4.983020029034764,
+      "brier": 0.05802027983765515,
+      "delta_crps": 0.0724839863276987,
+      "delta_brier": 0.0005211367950304149
     },
     {
       "pollster_id": "Trafalgar Group",
-      "n_polls": 14,
-      "crps": 4.236931087447823,
-      "brier": 0.05761498791570294,
-      "delta_crps": -0.4181622423456268,
-      "delta_brier": 0.008939820614412251
+      "n_polls": 13,
+      "crps": 4.405286537753498,
+      "brier": 0.06256258349534423,
+      "delta_crps": -0.505249504953567,
+      "delta_brier": 0.005063440452719496
     },
     {
       "pollster_id": "Emerson",
       "n_polls": 11,
-      "crps": 4.676029830141558,
-      "brier": 0.0532122461876355,
-      "delta_crps": 0.02093650034810768,
-      "delta_brier": 0.004537078886344817
+      "crps": 5.031088043648266,
+      "brier": 0.06391823181868099,
+      "delta_crps": 0.12055200094120089,
+      "delta_brier": 0.006419088776056257
     }
   ],
-  "mean_abs_delta_crps": 0.1944167687536774,
+  "mean_abs_delta_crps": 0.2327618307408222,
   "note": "Leave-pollster-out: large positive delta_crps means that pollster was important; stable scores imply robustness to single-house dominance."
 }

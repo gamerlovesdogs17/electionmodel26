@@ -3,33 +3,33 @@
   "control_ok": true,
   "control_soft": true,
   "control_gaps": {
-    "ddhq": 0.28342,
-    "kalshi": 0.15842
+    "ddhq": 0.29198,
+    "kalshi": 0.18287108910891092
   },
-  "primary_control_gap": 0.15842,
-  "max_abs_control_gap": 0.28342,
+  "primary_control_gap": 0.18287108910891092,
+  "max_abs_control_gap": 0.29198,
   "race_scores": {
     "ddhq": {
       "n": 10,
-      "brier_vs_peer_favorite": 0.24501868219999995,
-      "mae": 0.172282,
-      "crps_proxy": 0.172282,
+      "brier_vs_peer_favorite": 0.23285469428,
+      "mae": 0.167166,
+      "crps_proxy": 0.167166,
       "ok": false
     },
     "kalshi": {
-      "n": 10,
-      "brier_vs_peer_favorite": 0.0941426822,
-      "mae": 0.0756177349461474,
-      "crps_proxy": 0.0756177349461474,
+      "n": 8,
+      "brier_vs_peer_favorite": 0.11604938660000001,
+      "mae": 0.11614837920546375,
+      "crps_proxy": 0.11614837920546375,
       "ok": true
     }
   },
   "race_ok": true,
-  "mean_peer_disagreement": 0.17306066125195163,
+  "mean_peer_disagreement": 0.10895576394019407,
   "null_margin_races": [],
-  "method": "ensemble_stack+overlays",
+  "method": "ensemble_stack",
   "core_method": "pymc",
-  "generic_ballot": 5.745942212482818,
+  "generic_ballot": 5.7459422124828174,
   "reasons": [],
   "thresholds": {
     "max_abs_control_gap": 0.25,

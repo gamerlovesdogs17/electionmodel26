@@ -1,0 +1,165 @@
+{
+  "run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
+  "generated_at": "2026-10-03T16:54:40.087166+00:00",
+  "forecast_as_of": "2026-09-27",
+  "election_id": "senate-2026",
+  "model_version": "senate-hierarchical-v0.9.22",
+  "code_commit": "1046391bf086a3be9e9057ee4b4ac7d13cc2dea0",
+  "configuration": {
+    "method": "pymc",
+    "fit_method": "pymc",
+    "draws": 2000,
+    "tune": 4000,
+    "chains": 4,
+    "seed": 20260901,
+    "generic_ballot": 5.7459422124828174,
+    "ensemble": true,
+    "stack_weights": {
+      "pymc": 0.2100265751884933,
+      "state_space": 0.7899734248115066
+    },
+    "with_ratings": false,
+    "with_markets": false,
+    "rating_weight": 0.15,
+    "market_weight": 0.12,
+    "control_weight": 0.15,
+    "control_calibrate": false,
+    "allow_fast_fallback": false,
+    "independent_caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+    "effective_domain_contract": {
+      "schema_version": "production-domain-contract-v1",
+      "roles": {
+        "races": "required_core",
+        "polls": "required_core",
+        "structural_prior": "required_core",
+        "candidate_timeline": "required_core",
+        "finance": "required_core",
+        "economics": "required_core",
+        "approval": "required_core",
+        "demographics": "required_core",
+        "results": "compare_only",
+        "ratings": "disabled",
+        "markets": "disabled",
+        "wiki_vote_scrape": "quarantine_only"
+      },
+      "use_ratings": false,
+      "use_markets": false
+    },
+    "poll_structure": {
+      "version": "poll-structure-v2",
+      "sponsor_effect": false,
+      "questionnaire_effect": false,
+      "study_effect": true,
+      "heuristic_study_downweight": null,
+      "sponsor_scale": 0.75,
+      "questionnaire_scale": 0.75,
+      "study_scale": 1.25,
+      "effective_heuristic_study_downweight": false
+    },
+    "validated_model_spec_sha256": "4729c20eb27dc2df786eae8d0c1b8f25b4c4777bd061708bc0c1c42834845ca4"
+  },
+  "configuration_hash": "b6e7bf5866de181e3a4c9d0db228e02faf2c6d408f223aed68c3a8ded347d8fb",
+  "snapshot_ids": {
+    "evidence": "63b2a387123d35cdbd2c6ed1d99e4d963214b7d81c8c1cc0a28d62a689bc49b6"
+  },
+  "presidential_source_sha256": "fa2602dedb4d49d65ee1b8ea0eeb0c9d232442dec727cedab75286c057d0772b",
+  "presidential_source_years": [
+    2024,
+    2020
+  ],
+  "prior_store_sha256": "d53336bcdcc6e1fa2a764198011bc719b19789d2e300aab524e35866e05991c6",
+  "market_store_sha256": null,
+  "market_audit_sha256": null,
+  "stack_artifact_sha256": "8dc28551eb7106e53a1faf27c2cf4116c32bf5cc8f453b9cab92658e29a1498f",
+  "validated_model_spec_sha256": "4729c20eb27dc2df786eae8d0c1b8f25b4c4777bd061708bc0c1c42834845ca4",
+  "selected_poll_structure_id": "psc-f275da54de178986",
+  "effective_domain_contract": {
+    "schema_version": "production-domain-contract-v1",
+    "roles": {
+      "races": "required_core",
+      "polls": "required_core",
+      "structural_prior": "required_core",
+      "candidate_timeline": "required_core",
+      "finance": "required_core",
+      "economics": "required_core",
+      "approval": "required_core",
+      "demographics": "required_core",
+      "results": "compare_only",
+      "ratings": "disabled",
+      "markets": "disabled",
+      "wiki_vote_scrape": "quarantine_only"
+    },
+    "use_ratings": false,
+    "use_markets": false
+  },
+  "domain_hashes": {
+    "candidate_ballot_source_inventory.parquet": "4977656eba24c1fecc4e50f2fbf5307af8b99ac41e6e10623038700a16790d3f",
+    "candidate_timeline.parquet": "279a857e472b152728f535964ab10f72a7d9422191dee9fb92fcd84924fa5075",
+    "demographic_vintages.parquet": "563cba0013170f094c624bb0637344f78f02565efe9844ae248feba4303a6e3c",
+    "demography.parquet": "31c1431bb96d87e3ff9b20ab894f4c9399b111ae667560edf642b827e50153fa",
+    "economics_vintages.parquet": "c357bc7a900b1b547444268b44c2ff646088f88b4185c70a7fa524afa225818b",
+    "expert_ratings.parquet": "552c2e9e20cbd3cc2365aaef0f93d916f1469513287212b5f2316d91d02eb3a7",
+    "fec_candidate_committees.parquet": "1b6e37a570748129fc9aab586bd074fbe18e993adfc0dae12830e1620855038c",
+    "fec_form3_reports.parquet": "764da2ef29623a37ed1a01511dd33c074dff5583bbc5b77128470b28e4c0c285",
+    "fundraising_shares.parquet": "655d4871a3345bd73d58a9ae44ceb54d0e8d453f2daa6185bda93d66590fab88",
+    "markets.parquet": "88333a7e079b2b9daf5c209129d04ce6ee30d6bd2e286c30e7d7e95ec6e4f8e9",
+    "markets_control.json": "b516514faf66e06e8009bf1b7c6489b09835eb6871cb3757f73eb33cbeefa1dc",
+    "markets_mapping_audit.json": "3c2dddabd016acdf763cec52068c524073f57bb7422e3f09644c04fe07caab02",
+    "peer_snapshots.json": "0efc062e7d43be3924786fcc2d5ea3d0f82437597266d2fb5368506163f09b22",
+    "polls.parquet": "b64e792b6c01760e012a527f95f81d605940a854762c05c03c1a9ff0369b37b4",
+    "polls_fte_historical.parquet": "c3458f7630a4b6942b28dfa824f8a9e320984992f4a348df54391bd13f0a82b6",
+    "polls_historical.parquet": "c6093d35903af0b88ccf73199f7173f67c2a017817dbd1791120c714343b0942",
+    "polls_live_votehub.parquet": "92fe091d6d7c02ba0e81dd11d67dc992eff8d14ac3debffa910f3c56d57e4358",
+    "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
+    "pollster_ratings.parquet": "51c5fb370e8480d60518007c9cdf72094e0689a4217e17dd0af8a8ae3396acf4",
+    "pres_approval.parquet": "0ff12e6bf4020e746745d20093f1ebd9faaa30d0dccb61a4f39abbf627cc0520",
+    "presidential_vote_counts.parquet": "fdbe33a9bca1f7be4ddc1d6fcee6daa29fe30df0023cbd4134596bb7bad032fe",
+    "races.parquet": "8c87381e6136bc52ead02b3d4ef77c585a5290fc3412b4432d6fbac93356ce82",
+    "races_official.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
+    "results.parquet": "825d8325b945a1f7514e2bfa6834142618e4ef51916280387700209d7717a9cb",
+    "results_certified.parquet": "5c6941809c6ecb8ae5374202d3a8af819d64e494f8b613a249b8b879cc67a5dc"
+  },
+  "environment_lock": {
+    "schema_version": "environment-lock-v2",
+    "python": "3.11.16 (main, Aug 13 2026, 02:46:14) [GCC 13.3.0]",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "packages": {
+      "numpy": "1.26.4",
+      "pandas": "2.3.3",
+      "scipy": "1.13.1",
+      "pymc": "5.25.1",
+      "pytensor": "2.31.7",
+      "arviz": "0.19.0",
+      "matplotlib": "3.10.9",
+      "pyarrow": "16.1.0"
+    },
+    "numerical_backend": "Build Dependencies:\n  blas:\n    detection method: pkgconfig\n    found: true\n    include directory: /usr/local/include\n    lib directory: /usr/local/lib\n    name: openblas64\n    openblas configuration: USE_64BITINT=1 DYNAMIC_ARCH=1 DYNAMIC_OLDER= NO_CBLAS=\n      NO_LAPACK= NO_LAPACKE= NO_AFFINITY=1 USE_OPENMP= HASWELL MAX_THREADS=2\n    pc file directory: /usr/local/lib/pkgconfig\n    version: 0.3.23.dev\n  lapack:\n    detection method: internal\n    found: true\n    include directory: unknown\n    lib directory: unknown\n    name: dep140213194937296\n    openblas configuration: unknown\n    pc file directory: unknown\n    version: 1.26.4\nCompilers:\n  c:\n    args: -fno-strict-aliasing\n    commands: cc\n    linker: ld.bfd\n    linker args: -Wl,--strip-debug, -fno-strict-aliasing\n    name: gcc\n    version: 10.2.1\n  c++:\n    commands: c++\n    linker: ld.bfd\n    linker args: -Wl,--strip-debug\n    name: gcc\n    version: 10.2.1\n  cython:\n    commands: cython\n    linker: cython\n    name: cython\n    version: 3.0.8\nMachine Information:\n  build:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: linux\n  host:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: linux\nPython Information:\n  path: /opt/python/cp311-cp311/bin/python\n  version: '3.11'\nSIMD Extensions:\n  baseline:\n  - SSE\n  - SSE2\n  - SSE3\n  found:\n  - SSSE3\n  - SSE41\n  - POPCNT\n  - SSE42\n  - AVX\n  - F16C\n  - FMA3\n  - AVX2\n  - AVX512F\n  - AVX512CD\n  - AVX512_SKX\n  - AVX512_CLX\n  - AVX512_CNL\n  - AVX512_ICL\n  not found:\n  - AVX512_KNL\n  - AVX512_KNM",
+    "dependency_lock_sha256": "45eb394ea80dd96ec9101a1ca40ad28822d7d6442f515bad7ed2e9c9a11ac34f",
+    "dependency_files": [
+      "pyproject.toml"
+    ],
+    "locked_at": "2026-10-03T16:54:41.018572+00:00"
+  },
+  "freshness_policy_version": "domain-freshness-v2",
+  "seed": 20260901,
+  "draws": 2000,
+  "tune": 4000,
+  "chains": 4,
+  "output_hashes": {
+    "forecast_json": "311757883afe7018c4fd29ef03cea9f406c4b39be4eba29bf37136cc78f54e64",
+    "draws": "5efd45894d0c53ca2124acdc51969ddebfe4a7f69227d2b1f2e05a2b65e201d7"
+  },
+  "paths": {
+    "forecast": "data/artifacts/forecast_senate-2026_2026-09-27_ensemble_stack_20260901.json",
+    "forecast_latest": "data/artifacts/forecast_latest.json",
+    "draws": "data/artifacts/draws_senate-2026_2026-09-27_ensemble_stack_20260901.npz"
+  },
+  "rebuild_mode": false,
+  "signature": {
+    "alg": "HMAC-SHA256",
+    "sha256": "75d9b35ce5770be04fe46b4cbd08d6703988c2e857bf384a28e52fa4d75d32e0",
+    "signature": "60f6e04846e64975a6629aa4e3e55f175b74039899e2bf14b6277568c2e60074",
+    "key_id": "dev-default",
+    "warning": "HMAC legacy \u2014 not a public trust root; configure Ed25519 for production"
+  }
+}

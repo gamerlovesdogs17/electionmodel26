@@ -1,0 +1,62 @@
+{
+  "schema_version": "validated-model-spec-v1",
+  "model_version": "senate-hierarchical-v0.9.22",
+  "status": "validated_research_model",
+  "evidence_bundle_id": "eb-48703d0742f4c8ec",
+  "evidence_bundle_sha256": "48703d0742f4c8ec561ef97968cfe65e061a001b75944ef2787ecf03e715547c",
+  "source_readiness_sha256": "18c467daa2a601d45220f0d4fdd3c84143393b5d642598302944a909ab3ab569",
+  "candidate_spec_sha256": "0d0a8e03233b3a44c7065b859ec8c4d7892cea035d16e45c8fc5a3af89132c1b",
+  "poll_structure_selection_sha256": "9d3de2fab95eb02478eaa531022a3dee836f78168e5942b16863da1a93bca923",
+  "selected_structure_id": "hier_plus_study_effect",
+  "selected_poll_structure": {
+    "version": "poll-structure-v2",
+    "sponsor_effect": false,
+    "questionnaire_effect": false,
+    "study_effect": true,
+    "heuristic_study_downweight": null,
+    "sponsor_scale": 0.75,
+    "questionnaire_scale": 0.75,
+    "study_scale": 1.25,
+    "effective_heuristic_study_downweight": false
+  },
+  "selected_poll_structure_id": "psc-f275da54de178986",
+  "canonical_oof_sha256": "53efe05ebe1be391952eb84c3c6133d83f06d714ebf978e1db02e00de1b6ad0e",
+  "canonical_frozen_draws_sha256": "1f0c465cd3184aa7724280fc1adee2d8989575fefea9a7f44465f9aa9fcb0666",
+  "stack_weights_sha256": "8dc28551eb7106e53a1faf27c2cf4116c32bf5cc8f453b9cab92658e29a1498f",
+  "stack_candidate_identities": [
+    "pymc",
+    "state_space"
+  ],
+  "uncertainty_calibration_sha256": "3136cbb069fae27d3c2e4723116b4d5e9b20a8bbb371088f99633910f547ecf4",
+  "historical_cycles": [
+    2018,
+    2020,
+    2022,
+    2024
+  ],
+  "lead_cutoffs_days": [
+    60,
+    30
+  ],
+  "code_commit_sha": "1046391bf086a3be9e9057ee4b4ac7d13cc2dea0",
+  "lineage_checks": {
+    "canonical_model_version": true,
+    "canonical_phase": true,
+    "canonical_poll_structure": true,
+    "canonical_candidate_spec": true,
+    "canonical_bundle": true,
+    "canonical_bundle_hash": true,
+    "canonical_complete": true,
+    "stack_model_version": true,
+    "stack_uses_canonical_oof": true,
+    "stack_poll_structure": true,
+    "stack_candidate_spec": true,
+    "stack_bundle": true,
+    "stack_bundle_hash": true,
+    "stack_reproduced": true,
+    "calibration_model_version": true,
+    "calibration_uses_canonical_draws": true
+  },
+  "production_research_eligible": true,
+  "spec_sha256": "4729c20eb27dc2df786eae8d0c1b8f25b4c4777bd061708bc0c1c42834845ca4"
+}

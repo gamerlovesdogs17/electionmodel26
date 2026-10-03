@@ -1,27 +1,22 @@
-# Validation report — senate-hierarchical-v0.9.21
+# Validation report — senate-hierarchical-v0.9.22
 
-Generated: 2026-09-22T01:18:26.251876+00:00
+Generated: 2026-10-03T18:34:41.301495+00:00
 Primary holdout: 2022
 
 ## Stack weights
 
 ```json
 {
-  "last_election_swing": 0.19466485083338164,
-  "equal_weight_polls": 0.032613878705476926,
-  "shrinkage_polls": 0.01333823271636273,
-  "pymc": 0.10682012920103916,
-  "state_space": 0.2103163494311376,
-  "poll_only_state_space": 7.018999103367987e-05,
-  "ridge_fundamentals": 0.44217636912156827
+  "pymc": 0.2100265751884933,
+  "state_space": 0.7899734248115066
 }
 ```
 
 ## Calibration (60-day lead)
 
 - n: 34
-- Brier: 0.05452155071603785
-- Mean 90% interval score: 43.789193914642226
+- Brier: 0.06143148553447393
+- Mean 90% interval score: 46.08168227764366
 
 ## Peer release gate
 
@@ -31,33 +26,33 @@ Primary holdout: 2022
   "control_ok": true,
   "control_soft": true,
   "control_gaps": {
-    "ddhq": 0.28342,
-    "kalshi": 0.15842
+    "ddhq": 0.29198,
+    "kalshi": 0.18287108910891092
   },
-  "primary_control_gap": 0.15842,
-  "max_abs_control_gap": 0.28342,
+  "primary_control_gap": 0.18287108910891092,
+  "max_abs_control_gap": 0.29198,
   "race_scores": {
     "ddhq": {
       "n": 10,
-      "brier_vs_peer_favorite": 0.24501868219999995,
-      "mae": 0.172282,
-      "crps_proxy": 0.172282,
+      "brier_vs_peer_favorite": 0.23285469428,
+      "mae": 0.167166,
+      "crps_proxy": 0.167166,
       "ok": false
     },
     "kalshi": {
-      "n": 10,
-      "brier_vs_peer_favorite": 0.0941426822,
-      "mae": 0.0756177349461474,
-      "crps_proxy": 0.0756177349461474,
+      "n": 8,
+      "brier_vs_peer_favorite": 0.11604938660000001,
+      "mae": 0.11614837920546375,
+      "crps_proxy": 0.11614837920546375,
       "ok": true
     }
   },
   "race_ok": true,
-  "mean_peer_disagreement": 0.17306066125195163,
+  "mean_peer_disagreement": 0.10895576394019407,
   "null_margin_races": [],
-  "method": "ensemble_stack+overlays",
+  "method": "ensemble_stack",
   "core_method": "pymc",
-  "generic_ballot": 5.745942212482818,
+  "generic_ballot": 5.7459422124828174,
   "reasons": [],
   "thresholds": {
     "max_abs_control_gap": 0.25,
@@ -82,9 +77,9 @@ Primary holdout: 2022
 
 ## Acceptance gates (Milestone-0 / G1–G11)
 
-- ok: False
-- pass/partial/fail: 9/0/2
-- failures: ['G7', 'G10', 'COHERENCE']
+- ok: True
+- pass/partial/fail: 10/0/1
+- failures: ['G10']
 
 ## Limitations
 

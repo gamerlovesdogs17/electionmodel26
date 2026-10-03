@@ -3,8 +3,14 @@
   "temperature": 0.75,
   "stacking_mode": "empirical_predictive_mixture_crps_v1",
   "excluded_structural": [
+    "hier_no_questionnaire_effect",
     "hier_no_similarity",
-    "hier_no_terminal_race"
+    "hier_no_sponsor_effect",
+    "hier_no_study_effect",
+    "hier_no_terminal_race",
+    "hier_plus_questionnaire_effect",
+    "hier_plus_sponsor_effect",
+    "hier_plus_study_effect"
   ],
   "excluded_g8_disable": [
     "equal_weight_polls",
@@ -18,66 +24,66 @@
   "excluded_missing_predictions": {},
   "filtered_crps_by_fold": {
     "2018": {
-      "pymc": 2.828323771410247,
-      "state_space": 2.7140120302079627
+      "pymc": 2.792998382155774,
+      "state_space": 2.7347701893800416
     },
     "2020": {
-      "pymc": 4.570267590939882,
-      "state_space": 3.2904990922133903
+      "pymc": 4.632176807234169,
+      "state_space": 3.48717143240291
     },
     "2022": {
-      "pymc": 4.36192868645043,
-      "state_space": 4.166160252776146
+      "pymc": 4.329105215636089,
+      "state_space": 3.9294786590658752
     },
     "2024": {
-      "pymc": 3.0169460091562486,
-      "state_space": 2.676291355162989
+      "pymc": 3.0421599896641904,
+      "state_space": 2.6623095049386407
     }
   },
   "diagnostic_mean_crps_by_candidate": {
-    "state_space": 3.2117406825901225,
-    "pymc": 3.6943665144892015
+    "pymc": 3.6991100986725556,
+    "state_space": 3.203432446446867
   },
   "stack_weights": {
-    "pymc": 0.12478137058685498,
-    "state_space": 0.875218629413145
+    "pymc": 0.2100265751884933,
+    "state_space": 0.7899734248115066
   },
   "stack_weights_production": {
-    "pymc": 0.12478137058685498,
-    "state_space": 0.875218629413145
+    "pymc": 0.2100265751884933,
+    "state_space": 0.7899734248115066
   },
   "diagnostic_score_softmax_loo": {
     "2018": {
-      "pymc": 0.3084882771533456,
-      "state_space": 0.6915117228466544
+      "pymc": 0.2983169031466201,
+      "state_space": 0.7016830968533799
     },
     "2020": {
-      "pymc": 0.4281959415156094,
-      "state_space": 0.5718040584843905
+      "pymc": 0.4079821320406557,
+      "state_space": 0.5920178679593443
     },
     "2022": {
-      "pymc": 0.3162642776930727,
-      "state_space": 0.6837357223069274
+      "pymc": 0.3310161148907005,
+      "state_space": 0.6689838851092995
     },
     "2024": {
-      "pymc": 0.3303506811038551,
-      "state_space": 0.6696493188961449
+      "pymc": 0.3290726578166549,
+      "state_space": 0.6709273421833452
     }
   },
-  "matrix_sha256": "3b7c9259e61e2d2ecc96de7f29bb912989baba532c35d3d54c098c44ea3cfbc1",
-  "prediction_sha256": "20988b3eab9f138862383d2a82350332ae854b2c905890a0e75c58682a34c3af",
+  "matrix_sha256": "1fd71a19ed54a0b8c8a8302c491e21758f0b28e0341a57e8f6e6d3bd2b74efe0",
+  "prediction_sha256": "8b3413c6398c211ba76ee7740386c90b8da1c983eaebb18407a727cee55cc2f7",
   "mixture_diagnostics": {
     "method": "empirical_predictive_mixture_crps_v1",
     "weights": {
-      "pymc": 0.12478137058685498,
-      "state_space": 0.875218629413145
+      "pymc": 0.2100265751884933,
+      "state_space": 0.7899734248115066
     },
-    "objective_crps": 3.2196265797338723,
+    "objective_crps": 3.175042586990025,
     "individual_crps": {
-      "pymc": 3.717379090385154,
-      "state_space": 3.229744234490261
+      "pymc": 3.726231045872246,
+      "state_space": 3.2140030090912406
     },
-    "n_complete_cases": 264,
+    "n_complete_cases": 260,
     "case_ids": [
       "2018:30:senate-2018-AZ",
       "2018:30:senate-2018-CT",
@@ -92,7 +98,6 @@
       "2018:30:senate-2018-MN-special",
       "2018:30:senate-2018-MO",
       "2018:30:senate-2018-MS",
-      "2018:30:senate-2018-MS-special",
       "2018:30:senate-2018-MT",
       "2018:30:senate-2018-ND",
       "2018:30:senate-2018-NE",
@@ -124,7 +129,6 @@
       "2018:60:senate-2018-MN-special",
       "2018:60:senate-2018-MO",
       "2018:60:senate-2018-MS",
-      "2018:60:senate-2018-MS-special",
       "2018:60:senate-2018-MT",
       "2018:60:senate-2018-ND",
       "2018:60:senate-2018-NE",
@@ -149,7 +153,6 @@
       "2020:30:senate-2020-CO",
       "2020:30:senate-2020-DE",
       "2020:30:senate-2020-GA",
-      "2020:30:senate-2020-GA-special",
       "2020:30:senate-2020-IA",
       "2020:30:senate-2020-ID",
       "2020:30:senate-2020-IL",
@@ -183,7 +186,6 @@
       "2020:60:senate-2020-CO",
       "2020:60:senate-2020-DE",
       "2020:60:senate-2020-GA",
-      "2020:60:senate-2020-GA-special",
       "2020:60:senate-2020-IA",
       "2020:60:senate-2020-ID",
       "2020:60:senate-2020-IL",
@@ -363,7 +365,6 @@
         "2018:30:senate-2018-MN-special": 128,
         "2018:30:senate-2018-MO": 128,
         "2018:30:senate-2018-MS": 128,
-        "2018:30:senate-2018-MS-special": 128,
         "2018:30:senate-2018-MT": 128,
         "2018:30:senate-2018-ND": 128,
         "2018:30:senate-2018-NE": 128,
@@ -395,7 +396,6 @@
         "2018:60:senate-2018-MN-special": 128,
         "2018:60:senate-2018-MO": 128,
         "2018:60:senate-2018-MS": 128,
-        "2018:60:senate-2018-MS-special": 128,
         "2018:60:senate-2018-MT": 128,
         "2018:60:senate-2018-ND": 128,
         "2018:60:senate-2018-NE": 128,
@@ -420,7 +420,6 @@
         "2020:30:senate-2020-CO": 128,
         "2020:30:senate-2020-DE": 128,
         "2020:30:senate-2020-GA": 128,
-        "2020:30:senate-2020-GA-special": 128,
         "2020:30:senate-2020-IA": 128,
         "2020:30:senate-2020-ID": 128,
         "2020:30:senate-2020-IL": 128,
@@ -454,7 +453,6 @@
         "2020:60:senate-2020-CO": 128,
         "2020:60:senate-2020-DE": 128,
         "2020:60:senate-2020-GA": 128,
-        "2020:60:senate-2020-GA-special": 128,
         "2020:60:senate-2020-IA": 128,
         "2020:60:senate-2020-ID": 128,
         "2020:60:senate-2020-IL": 128,
@@ -629,7 +627,6 @@
         "2018:30:senate-2018-MN-special": 128,
         "2018:30:senate-2018-MO": 128,
         "2018:30:senate-2018-MS": 128,
-        "2018:30:senate-2018-MS-special": 128,
         "2018:30:senate-2018-MT": 128,
         "2018:30:senate-2018-ND": 128,
         "2018:30:senate-2018-NE": 128,
@@ -661,7 +658,6 @@
         "2018:60:senate-2018-MN-special": 128,
         "2018:60:senate-2018-MO": 128,
         "2018:60:senate-2018-MS": 128,
-        "2018:60:senate-2018-MS-special": 128,
         "2018:60:senate-2018-MT": 128,
         "2018:60:senate-2018-ND": 128,
         "2018:60:senate-2018-NE": 128,
@@ -686,7 +682,6 @@
         "2020:30:senate-2020-CO": 128,
         "2020:30:senate-2020-DE": 128,
         "2020:30:senate-2020-GA": 128,
-        "2020:30:senate-2020-GA-special": 128,
         "2020:30:senate-2020-IA": 128,
         "2020:30:senate-2020-ID": 128,
         "2020:30:senate-2020-IL": 128,
@@ -720,7 +715,6 @@
         "2020:60:senate-2020-CO": 128,
         "2020:60:senate-2020-DE": 128,
         "2020:60:senate-2020-GA": 128,
-        "2020:60:senate-2020-GA-special": 128,
         "2020:60:senate-2020-IA": 128,
         "2020:60:senate-2020-ID": 128,
         "2020:60:senate-2020-IL": 128,
@@ -884,15 +878,15 @@
     },
     "seed": 21,
     "max_draws": 128,
-    "prediction_sha256": "20988b3eab9f138862383d2a82350332ae854b2c905890a0e75c58682a34c3af"
+    "prediction_sha256": "8b3413c6398c211ba76ee7740386c90b8da1c983eaebb18407a727cee55cc2f7"
   },
   "optimizer_seed": 21,
   "optimizer_max_draws": 128,
   "no_weight_remapping": true,
   "predictive_stack_fn": "midterms.model.empirical_mixture.fit_predictive_mixture",
   "note": "Production weights use frozen empirical draws; score softmax is diagnostic only.",
-  "source_nested_loo": "data/artifacts/nested_component_loo.json",
-  "source_nested_sha256": "f6a806ef07591866bb54b00ad6de6e726904a312e1acdd02056c389d86e7f9de",
+  "source_nested_loo": "data/artifacts/nested_component_loo_canonical.json",
+  "source_nested_sha256": "53efe05ebe1be391952eb84c3c6133d83f06d714ebf978e1db02e00de1b6ad0e",
   "source_spine_label": "pymc",
   "source_hierarchical_method": "pymc",
   "source_years": [
@@ -937,9 +931,27 @@
       "30": "fa2602dedb4d49d65ee1b8ea0eeb0c9d232442dec727cedab75286c057d0772b"
     }
   },
-  "source_frozen_index_sha256": "4fd6e43c97f63d94c48293db1f14995cfcfa1890467985205b7b70f1e77ebe62",
-  "source_model_version": "senate-hierarchical-v0.9.21",
+  "source_frozen_index_sha256": "2ce48f4f44d981aa7d06d6c8c7aa1ec84fe1df6c870a583f1687c8fe4472c549",
+  "source_frozen_index_hash_mode": "frozen_prediction_index_semantic_v1",
+  "source_frozen_index_semantic_sha256": "0c13a4454792858e3116401879ff28f470eb2d78e24b19f5987dc63cdb9d5f09",
+  "source_model_version": "senate-hierarchical-v0.9.22",
+  "source_evidence_bundle_id": "eb-48703d0742f4c8ec",
+  "source_evidence_bundle_sha256": "48703d0742f4c8ec561ef97968cfe65e061a001b75944ef2787ecf03e715547c",
   "source_stack_training_protocol": "formal_60_30_v1",
+  "source_validation_phase": "canonical_poll_structure",
+  "source_poll_structure_config": {
+    "version": "poll-structure-v2",
+    "sponsor_effect": false,
+    "questionnaire_effect": false,
+    "study_effect": true,
+    "heuristic_study_downweight": null,
+    "sponsor_scale": 0.75,
+    "questionnaire_scale": 0.75,
+    "study_scale": 1.25,
+    "effective_heuristic_study_downweight": false
+  },
+  "source_poll_structure_config_id": "psc-f275da54de178986",
+  "source_model_spec_candidate_sha256": "0d0a8e03233b3a44c7065b859ec8c4d7892cea035d16e45c8fc5a3af89132c1b",
   "reproduction": {
     "ok": true,
     "max_abs_weight_delta": 0.0,
@@ -947,15 +959,13 @@
     "prediction_fingerprint_ok": true,
     "prediction_error": null,
     "recomputed": {
-      "pymc": 0.12478137058685498,
-      "state_space": 0.875218629413145
+      "pymc": 0.2100265751884933,
+      "state_space": 0.7899734248115066
     },
     "stored": {
-      "pymc": 0.12478137058685498,
-      "state_space": 0.875218629413145
+      "pymc": 0.2100265751884933,
+      "state_space": 0.7899734248115066
     }
   },
-  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\stack_weights_oof.json",
-  "source_frozen_index_hash_mode": "frozen_prediction_index_semantic_v1",
-  "source_frozen_index_semantic_sha256": "23b8d6d2528918cc29bea7dc2e865993db1e43eb653a3e321b14ab12de85dacd"
+  "path": "data/artifacts/stack_weights_oof.json"
 }

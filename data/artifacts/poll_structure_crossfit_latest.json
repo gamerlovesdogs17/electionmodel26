@@ -1,0 +1,693 @@
+{
+  "schema_version": "poll-structure-crossfit-v1",
+  "model_version": "senate-hierarchical-v0.9.22",
+  "source_nested_loo_sha256": "149567c7d2e9c59a0c4300a9cfe216e31e659ebc0666eeac771de87faa84aa0e",
+  "source_frozen_draws_sha256": "f0386a9ac768e048042491c460d06012a17953f7858618f2d76fb37a01a6752b",
+  "candidate_set": [
+    "pymc",
+    "hier_plus_study_effect",
+    "hier_plus_sponsor_effect",
+    "hier_plus_questionnaire_effect"
+  ],
+  "single_term_additions_only": true,
+  "multi_term_interactions": "intentionally_deferred",
+  "selection_rule_version": "single-addition-majority-parsimony-v1",
+  "freeze_before_truth": true,
+  "outer_folds": [
+    {
+      "outer_heldout_cycle": "2018",
+      "training_cycles": [
+        "2020",
+        "2022",
+        "2024"
+      ],
+      "training_scores": {
+        "2020": {
+          "pymc": 4.641358347167051,
+          "hier_no_similarity": 4.680409163058088,
+          "hier_no_terminal_race": 4.730244862704985,
+          "state_space": 3.48717143240291,
+          "poll_only_state_space": 12.215817481787912,
+          "ridge_fundamentals": 4.1403763933205155,
+          "hier_plus_study_effect": 4.522485522613305,
+          "hier_plus_sponsor_effect": 4.659293281823234,
+          "hier_plus_questionnaire_effect": 4.615270274985411,
+          "last_election_swing": 4.8687648175105975,
+          "equal_weight_polls": 5.334866358264633,
+          "shrinkage_polls": 5.366885451310558,
+          "pymc_dynamic": 5.3867928335584025
+        },
+        "2022": {
+          "pymc": 4.35760314175485,
+          "hier_no_similarity": 4.3842277332513255,
+          "hier_no_terminal_race": 4.316262602703437,
+          "state_space": 3.9294786590658752,
+          "poll_only_state_space": 12.6515096906247,
+          "ridge_fundamentals": 4.793881269458492,
+          "pymc_dynamic": 4.760481694381454,
+          "hier_plus_study_effect": 4.329105215636089,
+          "hier_plus_sponsor_effect": 4.398335922339722,
+          "hier_plus_questionnaire_effect": 4.318962900027634,
+          "last_election_swing": 4.661050690324472,
+          "equal_weight_polls": 5.121926142742096,
+          "shrinkage_polls": 5.263473882698751
+        },
+        "2024": {
+          "pymc": 2.983473775125532,
+          "hier_no_similarity": 2.9909799399116763,
+          "hier_no_terminal_race": 3.0514410007895814,
+          "state_space": 2.6623095049386407,
+          "poll_only_state_space": 6.952414042642708,
+          "ridge_fundamentals": 3.7060210886604255,
+          "pymc_dynamic": 3.4608128342456332,
+          "hier_plus_study_effect": 3.0421599896641904,
+          "hier_plus_sponsor_effect": 2.9471305070081497,
+          "hier_plus_questionnaire_effect": 2.9696875220669052,
+          "last_election_swing": 5.027374877159371,
+          "equal_weight_polls": 3.4052332191085513,
+          "shrinkage_polls": 3.6851756391872397
+        }
+      },
+      "selection": {
+        "selection_rule_version": "single-addition-majority-parsimony-v1",
+        "training_cycles": [
+          "2020",
+          "2022",
+          "2024"
+        ],
+        "candidate_set": [
+          "pymc",
+          "hier_plus_study_effect",
+          "hier_plus_sponsor_effect",
+          "hier_plus_questionnaire_effect"
+        ],
+        "candidate_summaries": {
+          "pymc": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 0,
+            "ties_vs_base": 3,
+            "mean_crps": 3.9941450880158107,
+            "mean_base_crps": 3.9941450880158107,
+            "strict_majority": false,
+            "lower_mean_crps": false,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2020": 0.0,
+              "2022": 0.0,
+              "2024": 0.0
+            }
+          },
+          "hier_plus_study_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 2,
+            "ties_vs_base": 0,
+            "mean_crps": 3.964583575971195,
+            "mean_base_crps": 3.9941450880158107,
+            "strict_majority": true,
+            "lower_mean_crps": true,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2020": 0.11887282455374582,
+              "2022": 0.028497926118761008,
+              "2024": -0.05868621453865863
+            }
+          },
+          "hier_plus_sponsor_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 1,
+            "ties_vs_base": 0,
+            "mean_crps": 4.001586570390369,
+            "mean_base_crps": 3.9941450880158107,
+            "strict_majority": false,
+            "lower_mean_crps": false,
+            "eligible": false,
+            "cycle_deltas_base_minus_candidate": {
+              "2020": -0.01793493465618301,
+              "2022": -0.04073278058487251,
+              "2024": 0.03634326811738209
+            }
+          },
+          "hier_plus_questionnaire_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 3,
+            "ties_vs_base": 0,
+            "mean_crps": 3.967973565693317,
+            "mean_base_crps": 3.9941450880158107,
+            "strict_majority": true,
+            "lower_mean_crps": true,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2020": 0.026088072181639888,
+              "2022": 0.03864024172721603,
+              "2024": 0.013786253058626574
+            }
+          }
+        },
+        "selected_structure": "hier_plus_questionnaire_effect",
+        "parsimony_default": "pymc",
+        "tie_policy": "base",
+        "metric": "empirical_predictive_margin_crps"
+      },
+      "selected_structure": "hier_plus_questionnaire_effect",
+      "heldout_score": 2.8578480165814772,
+      "reference_heldout_score": 2.8379546476009656,
+      "delta_reference_minus_selected": -0.01989336898051164,
+      "fold_recommendation": "candidate",
+      "heldout_truth_used_for_selection": false
+    },
+    {
+      "outer_heldout_cycle": "2020",
+      "training_cycles": [
+        "2018",
+        "2022",
+        "2024"
+      ],
+      "training_scores": {
+        "2018": {
+          "pymc": 2.8379546476009656,
+          "hier_no_similarity": 2.8215325526204644,
+          "hier_no_terminal_race": 2.8601137153286986,
+          "state_space": 2.7347701893800416,
+          "poll_only_state_space": 6.0230678811088865,
+          "ridge_fundamentals": 6.063936102157937,
+          "pymc_dynamic": 3.1578873299750674,
+          "hier_plus_study_effect": 2.792998382155774,
+          "hier_plus_sponsor_effect": 2.8340597644378693,
+          "hier_plus_questionnaire_effect": 2.8578480165814772,
+          "last_election_swing": 6.004774774257092,
+          "equal_weight_polls": 5.82877910969953,
+          "shrinkage_polls": 4.062029245719545
+        },
+        "2022": {
+          "pymc": 4.35760314175485,
+          "hier_no_similarity": 4.3842277332513255,
+          "hier_no_terminal_race": 4.316262602703437,
+          "state_space": 3.9294786590658752,
+          "poll_only_state_space": 12.6515096906247,
+          "ridge_fundamentals": 4.793881269458492,
+          "pymc_dynamic": 4.760481694381454,
+          "hier_plus_study_effect": 4.329105215636089,
+          "hier_plus_sponsor_effect": 4.398335922339722,
+          "hier_plus_questionnaire_effect": 4.318962900027634,
+          "last_election_swing": 4.661050690324472,
+          "equal_weight_polls": 5.121926142742096,
+          "shrinkage_polls": 5.263473882698751
+        },
+        "2024": {
+          "pymc": 2.983473775125532,
+          "hier_no_similarity": 2.9909799399116763,
+          "hier_no_terminal_race": 3.0514410007895814,
+          "state_space": 2.6623095049386407,
+          "poll_only_state_space": 6.952414042642708,
+          "ridge_fundamentals": 3.7060210886604255,
+          "pymc_dynamic": 3.4608128342456332,
+          "hier_plus_study_effect": 3.0421599896641904,
+          "hier_plus_sponsor_effect": 2.9471305070081497,
+          "hier_plus_questionnaire_effect": 2.9696875220669052,
+          "last_election_swing": 5.027374877159371,
+          "equal_weight_polls": 3.4052332191085513,
+          "shrinkage_polls": 3.6851756391872397
+        }
+      },
+      "selection": {
+        "selection_rule_version": "single-addition-majority-parsimony-v1",
+        "training_cycles": [
+          "2018",
+          "2022",
+          "2024"
+        ],
+        "candidate_set": [
+          "pymc",
+          "hier_plus_study_effect",
+          "hier_plus_sponsor_effect",
+          "hier_plus_questionnaire_effect"
+        ],
+        "candidate_summaries": {
+          "pymc": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 0,
+            "ties_vs_base": 3,
+            "mean_crps": 3.3930105214937822,
+            "mean_base_crps": 3.3930105214937822,
+            "strict_majority": false,
+            "lower_mean_crps": false,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": 0.0,
+              "2022": 0.0,
+              "2024": 0.0
+            }
+          },
+          "hier_plus_study_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 2,
+            "ties_vs_base": 0,
+            "mean_crps": 3.388087862485351,
+            "mean_base_crps": 3.3930105214937822,
+            "strict_majority": true,
+            "lower_mean_crps": true,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": 0.0449562654451916,
+              "2022": 0.028497926118761008,
+              "2024": -0.05868621453865863
+            }
+          },
+          "hier_plus_sponsor_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 2,
+            "ties_vs_base": 0,
+            "mean_crps": 3.39317539792858,
+            "mean_base_crps": 3.3930105214937822,
+            "strict_majority": true,
+            "lower_mean_crps": false,
+            "eligible": false,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": 0.0038948831630962744,
+              "2022": -0.04073278058487251,
+              "2024": 0.03634326811738209
+            }
+          },
+          "hier_plus_questionnaire_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 2,
+            "ties_vs_base": 0,
+            "mean_crps": 3.3821661462253387,
+            "mean_base_crps": 3.3930105214937822,
+            "strict_majority": true,
+            "lower_mean_crps": true,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": -0.01989336898051164,
+              "2022": 0.03864024172721603,
+              "2024": 0.013786253058626574
+            }
+          }
+        },
+        "selected_structure": "hier_plus_questionnaire_effect",
+        "parsimony_default": "pymc",
+        "tie_policy": "base",
+        "metric": "empirical_predictive_margin_crps"
+      },
+      "selected_structure": "hier_plus_questionnaire_effect",
+      "heldout_score": 4.615270274985411,
+      "reference_heldout_score": 4.641358347167051,
+      "delta_reference_minus_selected": 0.026088072181639888,
+      "fold_recommendation": "candidate",
+      "heldout_truth_used_for_selection": false
+    },
+    {
+      "outer_heldout_cycle": "2022",
+      "training_cycles": [
+        "2018",
+        "2020",
+        "2024"
+      ],
+      "training_scores": {
+        "2018": {
+          "pymc": 2.8379546476009656,
+          "hier_no_similarity": 2.8215325526204644,
+          "hier_no_terminal_race": 2.8601137153286986,
+          "state_space": 2.7347701893800416,
+          "poll_only_state_space": 6.0230678811088865,
+          "ridge_fundamentals": 6.063936102157937,
+          "pymc_dynamic": 3.1578873299750674,
+          "hier_plus_study_effect": 2.792998382155774,
+          "hier_plus_sponsor_effect": 2.8340597644378693,
+          "hier_plus_questionnaire_effect": 2.8578480165814772,
+          "last_election_swing": 6.004774774257092,
+          "equal_weight_polls": 5.82877910969953,
+          "shrinkage_polls": 4.062029245719545
+        },
+        "2020": {
+          "pymc": 4.641358347167051,
+          "hier_no_similarity": 4.680409163058088,
+          "hier_no_terminal_race": 4.730244862704985,
+          "state_space": 3.48717143240291,
+          "poll_only_state_space": 12.215817481787912,
+          "ridge_fundamentals": 4.1403763933205155,
+          "hier_plus_study_effect": 4.522485522613305,
+          "hier_plus_sponsor_effect": 4.659293281823234,
+          "hier_plus_questionnaire_effect": 4.615270274985411,
+          "last_election_swing": 4.8687648175105975,
+          "equal_weight_polls": 5.334866358264633,
+          "shrinkage_polls": 5.366885451310558,
+          "pymc_dynamic": 5.3867928335584025
+        },
+        "2024": {
+          "pymc": 2.983473775125532,
+          "hier_no_similarity": 2.9909799399116763,
+          "hier_no_terminal_race": 3.0514410007895814,
+          "state_space": 2.6623095049386407,
+          "poll_only_state_space": 6.952414042642708,
+          "ridge_fundamentals": 3.7060210886604255,
+          "pymc_dynamic": 3.4608128342456332,
+          "hier_plus_study_effect": 3.0421599896641904,
+          "hier_plus_sponsor_effect": 2.9471305070081497,
+          "hier_plus_questionnaire_effect": 2.9696875220669052,
+          "last_election_swing": 5.027374877159371,
+          "equal_weight_polls": 3.4052332191085513,
+          "shrinkage_polls": 3.6851756391872397
+        }
+      },
+      "selection": {
+        "selection_rule_version": "single-addition-majority-parsimony-v1",
+        "training_cycles": [
+          "2018",
+          "2020",
+          "2024"
+        ],
+        "candidate_set": [
+          "pymc",
+          "hier_plus_study_effect",
+          "hier_plus_sponsor_effect",
+          "hier_plus_questionnaire_effect"
+        ],
+        "candidate_summaries": {
+          "pymc": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 0,
+            "ties_vs_base": 3,
+            "mean_crps": 3.4875955899645157,
+            "mean_base_crps": 3.4875955899645157,
+            "strict_majority": false,
+            "lower_mean_crps": false,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": 0.0,
+              "2020": 0.0,
+              "2024": 0.0
+            }
+          },
+          "hier_plus_study_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 2,
+            "ties_vs_base": 0,
+            "mean_crps": 3.45254796481109,
+            "mean_base_crps": 3.4875955899645157,
+            "strict_majority": true,
+            "lower_mean_crps": true,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": 0.0449562654451916,
+              "2020": 0.11887282455374582,
+              "2024": -0.05868621453865863
+            }
+          },
+          "hier_plus_sponsor_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 2,
+            "ties_vs_base": 0,
+            "mean_crps": 3.480161184423084,
+            "mean_base_crps": 3.4875955899645157,
+            "strict_majority": true,
+            "lower_mean_crps": true,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": 0.0038948831630962744,
+              "2020": -0.01793493465618301,
+              "2024": 0.03634326811738209
+            }
+          },
+          "hier_plus_questionnaire_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 2,
+            "ties_vs_base": 0,
+            "mean_crps": 3.4809352712112642,
+            "mean_base_crps": 3.4875955899645157,
+            "strict_majority": true,
+            "lower_mean_crps": true,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": -0.01989336898051164,
+              "2020": 0.026088072181639888,
+              "2024": 0.013786253058626574
+            }
+          }
+        },
+        "selected_structure": "hier_plus_study_effect",
+        "parsimony_default": "pymc",
+        "tie_policy": "base",
+        "metric": "empirical_predictive_margin_crps"
+      },
+      "selected_structure": "hier_plus_study_effect",
+      "heldout_score": 4.329105215636089,
+      "reference_heldout_score": 4.35760314175485,
+      "delta_reference_minus_selected": 0.028497926118761008,
+      "fold_recommendation": "candidate",
+      "heldout_truth_used_for_selection": false
+    },
+    {
+      "outer_heldout_cycle": "2024",
+      "training_cycles": [
+        "2018",
+        "2020",
+        "2022"
+      ],
+      "training_scores": {
+        "2018": {
+          "pymc": 2.8379546476009656,
+          "hier_no_similarity": 2.8215325526204644,
+          "hier_no_terminal_race": 2.8601137153286986,
+          "state_space": 2.7347701893800416,
+          "poll_only_state_space": 6.0230678811088865,
+          "ridge_fundamentals": 6.063936102157937,
+          "pymc_dynamic": 3.1578873299750674,
+          "hier_plus_study_effect": 2.792998382155774,
+          "hier_plus_sponsor_effect": 2.8340597644378693,
+          "hier_plus_questionnaire_effect": 2.8578480165814772,
+          "last_election_swing": 6.004774774257092,
+          "equal_weight_polls": 5.82877910969953,
+          "shrinkage_polls": 4.062029245719545
+        },
+        "2020": {
+          "pymc": 4.641358347167051,
+          "hier_no_similarity": 4.680409163058088,
+          "hier_no_terminal_race": 4.730244862704985,
+          "state_space": 3.48717143240291,
+          "poll_only_state_space": 12.215817481787912,
+          "ridge_fundamentals": 4.1403763933205155,
+          "hier_plus_study_effect": 4.522485522613305,
+          "hier_plus_sponsor_effect": 4.659293281823234,
+          "hier_plus_questionnaire_effect": 4.615270274985411,
+          "last_election_swing": 4.8687648175105975,
+          "equal_weight_polls": 5.334866358264633,
+          "shrinkage_polls": 5.366885451310558,
+          "pymc_dynamic": 5.3867928335584025
+        },
+        "2022": {
+          "pymc": 4.35760314175485,
+          "hier_no_similarity": 4.3842277332513255,
+          "hier_no_terminal_race": 4.316262602703437,
+          "state_space": 3.9294786590658752,
+          "poll_only_state_space": 12.6515096906247,
+          "ridge_fundamentals": 4.793881269458492,
+          "pymc_dynamic": 4.760481694381454,
+          "hier_plus_study_effect": 4.329105215636089,
+          "hier_plus_sponsor_effect": 4.398335922339722,
+          "hier_plus_questionnaire_effect": 4.318962900027634,
+          "last_election_swing": 4.661050690324472,
+          "equal_weight_polls": 5.121926142742096,
+          "shrinkage_polls": 5.263473882698751
+        }
+      },
+      "selection": {
+        "selection_rule_version": "single-addition-majority-parsimony-v1",
+        "training_cycles": [
+          "2018",
+          "2020",
+          "2022"
+        ],
+        "candidate_set": [
+          "pymc",
+          "hier_plus_study_effect",
+          "hier_plus_sponsor_effect",
+          "hier_plus_questionnaire_effect"
+        ],
+        "candidate_summaries": {
+          "pymc": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 0,
+            "ties_vs_base": 3,
+            "mean_crps": 3.9456387121742886,
+            "mean_base_crps": 3.9456387121742886,
+            "strict_majority": false,
+            "lower_mean_crps": false,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": 0.0,
+              "2020": 0.0,
+              "2022": 0.0
+            }
+          },
+          "hier_plus_study_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 3,
+            "ties_vs_base": 0,
+            "mean_crps": 3.881529706801723,
+            "mean_base_crps": 3.9456387121742886,
+            "strict_majority": true,
+            "lower_mean_crps": true,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": 0.0449562654451916,
+              "2020": 0.11887282455374582,
+              "2022": 0.028497926118761008
+            }
+          },
+          "hier_plus_sponsor_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 1,
+            "ties_vs_base": 0,
+            "mean_crps": 3.9638963228669417,
+            "mean_base_crps": 3.9456387121742886,
+            "strict_majority": false,
+            "lower_mean_crps": false,
+            "eligible": false,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": 0.0038948831630962744,
+              "2020": -0.01793493465618301,
+              "2022": -0.04073278058487251
+            }
+          },
+          "hier_plus_questionnaire_effect": {
+            "n_training_cycles": 3,
+            "wins_vs_base": 2,
+            "ties_vs_base": 0,
+            "mean_crps": 3.9306937305315075,
+            "mean_base_crps": 3.9456387121742886,
+            "strict_majority": true,
+            "lower_mean_crps": true,
+            "eligible": true,
+            "cycle_deltas_base_minus_candidate": {
+              "2018": -0.01989336898051164,
+              "2020": 0.026088072181639888,
+              "2022": 0.03864024172721603
+            }
+          }
+        },
+        "selected_structure": "hier_plus_study_effect",
+        "parsimony_default": "pymc",
+        "tie_policy": "base",
+        "metric": "empirical_predictive_margin_crps"
+      },
+      "selected_structure": "hier_plus_study_effect",
+      "heldout_score": 3.0421599896641904,
+      "reference_heldout_score": 2.983473775125532,
+      "delta_reference_minus_selected": -0.05868621453865863,
+      "fold_recommendation": "candidate",
+      "heldout_truth_used_for_selection": false
+    }
+  ],
+  "cross_fitted_aggregate": {
+    "n_cycles": 4,
+    "selected_procedure_mean_crps": 3.711095874216792,
+    "base_mean_crps": 3.7050974779120995,
+    "delta_base_minus_selected_procedure": -0.005998396304692566
+  },
+  "final_production_candidate_recommendation": {
+    "selection_rule_version": "single-addition-majority-parsimony-v1",
+    "training_cycles": [
+      "2018",
+      "2020",
+      "2022",
+      "2024"
+    ],
+    "candidate_set": [
+      "pymc",
+      "hier_plus_study_effect",
+      "hier_plus_sponsor_effect",
+      "hier_plus_questionnaire_effect"
+    ],
+    "candidate_summaries": {
+      "pymc": {
+        "n_training_cycles": 4,
+        "wins_vs_base": 0,
+        "ties_vs_base": 4,
+        "mean_crps": 3.7050974779120995,
+        "mean_base_crps": 3.7050974779120995,
+        "strict_majority": false,
+        "lower_mean_crps": false,
+        "eligible": true,
+        "cycle_deltas_base_minus_candidate": {
+          "2018": 0.0,
+          "2020": 0.0,
+          "2022": 0.0,
+          "2024": 0.0
+        }
+      },
+      "hier_plus_study_effect": {
+        "n_training_cycles": 4,
+        "wins_vs_base": 3,
+        "ties_vs_base": 0,
+        "mean_crps": 3.6716872775173397,
+        "mean_base_crps": 3.7050974779120995,
+        "strict_majority": true,
+        "lower_mean_crps": true,
+        "eligible": true,
+        "cycle_deltas_base_minus_candidate": {
+          "2018": 0.0449562654451916,
+          "2020": 0.11887282455374582,
+          "2022": 0.028497926118761008,
+          "2024": -0.05868621453865863
+        }
+      },
+      "hier_plus_sponsor_effect": {
+        "n_training_cycles": 4,
+        "wins_vs_base": 2,
+        "ties_vs_base": 0,
+        "mean_crps": 3.709704868902244,
+        "mean_base_crps": 3.7050974779120995,
+        "strict_majority": false,
+        "lower_mean_crps": false,
+        "eligible": false,
+        "cycle_deltas_base_minus_candidate": {
+          "2018": 0.0038948831630962744,
+          "2020": -0.01793493465618301,
+          "2022": -0.04073278058487251,
+          "2024": 0.03634326811738209
+        }
+      },
+      "hier_plus_questionnaire_effect": {
+        "n_training_cycles": 4,
+        "wins_vs_base": 3,
+        "ties_vs_base": 0,
+        "mean_crps": 3.690442178415357,
+        "mean_base_crps": 3.7050974779120995,
+        "strict_majority": true,
+        "lower_mean_crps": true,
+        "eligible": true,
+        "cycle_deltas_base_minus_candidate": {
+          "2018": -0.01989336898051164,
+          "2020": 0.026088072181639888,
+          "2022": 0.03864024172721603,
+          "2024": 0.013786253058626574
+        }
+      }
+    },
+    "selected_structure": "hier_plus_study_effect",
+    "parsimony_default": "pymc",
+    "tie_policy": "base",
+    "metric": "empirical_predictive_margin_crps",
+    "selected_poll_structure": {
+      "version": "poll-structure-v2",
+      "sponsor_effect": false,
+      "questionnaire_effect": false,
+      "study_effect": true,
+      "heuristic_study_downweight": null,
+      "sponsor_scale": 0.75,
+      "questionnaire_scale": 0.75,
+      "study_scale": 1.25,
+      "effective_heuristic_study_downweight": false
+    },
+    "selected_poll_structure_id": "psc-f275da54de178986",
+    "status": "recommendation_pending_adoption",
+    "evidence_scope": "all_available_historical_cycles_after_crossfit_evaluation",
+    "untouched_fifth_cycle": false,
+    "note": "The empirical claim concerns the cross-fitted selection procedure. The all-history recommendation has no untouched fifth cycle."
+  },
+  "source_validation_phase": "poll_structure_selection",
+  "source_evidence_bundle_id": "eb-48703d0742f4c8ec",
+  "source_evidence_bundle_sha256": "48703d0742f4c8ec561ef97968cfe65e061a001b75944ef2787ecf03e715547c",
+  "source_poll_structure_config_id": "psc-7819fcedea982286"
+}

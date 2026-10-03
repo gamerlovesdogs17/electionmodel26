@@ -55,8 +55,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 0.006899926747685185,
-        "observation_age_days": 6.0265437540625
+        "retrieval_age_days": 3.7358893681481478,
+        "observation_age_days": 9.755533195462963
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -816,8 +816,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 0.48004583064814815,
-        "observation_age_days": 3.0265437540625
+        "retrieval_age_days": 4.209035272048611,
+        "observation_age_days": 6.755533195462964
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -828,7 +828,7 @@
       "eligible": false,
       "n": 1,
       "quarantine": "parser_development_only",
-      "path": "C:/Users/zydlo/OneDrive/Desktop/electionmodel26/data/raw/external/certified_vote_counts.json",
+      "path": "/home/runner/work/electionmodel26/electionmodel26/data/raw/external/certified_vote_counts.json",
       "note": "parser_development_only \u2014 not canonical truth (v0.9.21)",
       "production_role": "quarantine_only",
       "hard_dependency": false,
@@ -864,8 +864,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 5.060571531840278,
-        "observation_age_days": 6.0265437540625
+        "retrieval_age_days": 8.789560973240741,
+        "observation_age_days": 9.755533195462963
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -902,8 +902,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 0.006864028379629629,
-        "observation_age_days": 33.0265437540625
+        "retrieval_age_days": 3.7358534697800927,
+        "observation_age_days": 36.75553319546297
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -946,8 +946,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 1.038870142951389,
-        "observation_age_days": 244.0265437540625
+        "retrieval_age_days": 4.767859584351852,
+        "observation_age_days": 247.75553319546296
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -969,8 +969,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 7.974543901712963,
-        "observation_age_days": 17.0265437540625
+        "retrieval_age_days": 11.703533343113426,
+        "observation_age_days": 20.755533195462963
       },
       "production_role": "disabled",
       "hard_dependency": false,
@@ -991,7 +991,7 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 8.0265437540625,
+        "retrieval_age_days": 11.755533195462963,
         "observation_age_days": null
       },
       "production_role": "disabled",
@@ -1041,23 +1041,26 @@
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-09-30T00:38:13.417527+00:00",
+  "checked_at": "2026-10-03T18:07:58.077395+00:00",
   "evidence_fingerprint": {
-    "sha256": "5729fb7a0fd1a102f8517e7ea3989a50e9536baa59e4261d70d136e9e312001b",
+    "sha256": "40053b8cfacbb4b26d58cc20e7bcaaa85f4a0909e6b9ad424062e5e8ce40faf4",
     "manifests": {
-      "fundraising_shares.json": "87f4a508b6fc7f3926a692251043e1b221c1f12570c889b7463dd4e37f781bc0",
-      "economics_vintages.json": "bb169dcc52230b30fe38e25e2c081b20ae713784a910fac0d243894593742217",
-      "pres_approval.json": "f7af9ba6ad575d74d94be88bc2e58ab8a582a2a359c4593d088d6767609a76d2",
-      "demographic_vintages.json": "ee932a1b8ebb9f37a65aed6e6c24ffd58ff8fa049932e31807b18514bdcb1627",
-      "candidate_timeline.json": "a85b697d6b52b07d6ff437663b621984c724394490cc7e426aa2acf993c6aece",
-      "expert_ratings.json": "c201187849558330342ef7d94bcf18f24552e552826d7c4054eb30707d873c65",
-      "markets_kalshi.json": "289c35cfb3e5769f627b13943dd1149ebfa1064dc2e8a71cf99f6d3f19f116dd",
-      "official_senate_ballots.json": "f346b87bd04cd0c2f907488bf1ed84a64283d29f3d2fb2f389aed3e5804d71e8",
-      "presidential_vote_sources.json": "6a9a0e4815e7fc3a99f827c44f40d3f6a55ad8a54163bb104ff13273229baa24",
-      "wiki_ratings.json": "ea1665d48cd739eb396d30f31015516e1db7d02bdc0129441f7b034ff32aaf17"
+      "fundraising_shares.json": "402cec51d741875fe238d02039760c62f2c611848d5fe31edb3f1fba2a181905",
+      "economics_vintages.json": "565f2a4b280d9d80f4ebed0efeecef8a1b49a362e6381a2afb2cc7441c51ecca",
+      "pres_approval.json": "e77f0554d02725137e9a8e8efe310ec715f344f955422e9225717bc3a3b15e6e",
+      "demographic_vintages.json": "e8be3309a8ed8626010b81cc1ce646d950ccaf32b3ad662a964d0fe086d53690",
+      "candidate_timeline.json": "22eceda5c4dbba75e448439b1b7cfb6b1523b60c69edcf8d1dac006160732d91",
+      "expert_ratings.json": "626aba81604531c17b221c41165c3cff6cb35ea4c9fd613672fdfc1da5b08ad6",
+      "markets_kalshi.json": "495734f2f1af917ad001828da3f09d1659944a5f627f5a6499c0009beed4721e",
+      "official_senate_ballots.json": "060db09678108eda582bbb660a0a31e996dacf9c9b6cf87352fead1f37d61972",
+      "presidential_vote_sources.json": "09798a5aa0a0a388357bf7e102ae69056a0d567ef5d23532114cefef3b8ca337",
+      "wiki_ratings.json": "130fec70c426abab9027a85f83c930d796c6a523c6edc9aabe40a3942585c4fd"
     },
-    "generated_at": "2026-09-30T00:38:13.429091+00:00"
+    "generated_at": "2026-10-03T18:07:58.079288+00:00"
   },
   "PUBLIC_LIVE_ENABLED": false,
-  "identity_checked_at": "2026-09-30T00:38:13.429091+00:00"
+  "forecast_run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
+  "snapshot_id": "63b2a387123d35cdbd2c6ed1d99e4d963214b7d81c8c1cc0a28d62a689bc49b6",
+  "forecast_generated_at": "2026-10-03T18:07:57.061720+00:00",
+  "identity_checked_at": "2026-10-03T18:07:58.079296+00:00"
 }
