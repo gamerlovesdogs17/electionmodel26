@@ -242,6 +242,7 @@ def fit_pymc(
     poll_structure: PollStructureConfig | dict | None = None,
     include_similarity: bool = True,
     include_terminal_race: bool = True,
+    target_accept: float = 0.9,
 ) -> FitResult:
     import pymc as pm
 
@@ -346,7 +347,7 @@ def fit_pymc(
             tune=tune,
             chains=chains,
             random_seed=seed,
-            target_accept=0.9,
+            target_accept=target_accept,
             progressbar=False,
             return_inferencedata=True,
             compute_convergence_checks=False,
@@ -436,6 +437,7 @@ def fit_pymc(
             "tune": tune,
             "chains": chains,
             "seed": seed,
+            "target_accept": target_accept,
             "n_posterior_samples": int(draws * chains),
             "latent_path": "static_election_day",
             "measurement_effects": "hierarchical_mode_pop",
@@ -528,6 +530,7 @@ def fit_pymc_dynamic(
     poll_structure: PollStructureConfig | dict | None = None,
     include_similarity: bool = True,
     include_terminal_race: bool = True,
+    target_accept: float = 0.9,
 ) -> FitResult:
     """
     Unified dynamic hierarchical core (blueprint §7.1–7.2 / Finding 3).
@@ -689,7 +692,7 @@ def fit_pymc_dynamic(
             tune=tune,
             chains=chains,
             random_seed=seed,
-            target_accept=0.9,
+            target_accept=target_accept,
             progressbar=False,
             return_inferencedata=True,
             compute_convergence_checks=False,
@@ -782,6 +785,7 @@ def fit_pymc_dynamic(
             "tune": tune,
             "chains": chains,
             "seed": seed,
+            "target_accept": target_accept,
             "n_posterior_samples": int(draws * chains),
             "latent_path": "weekly_random_walk_morris_calibrated",
             "measurement_effects": "hierarchical_mode_pop",

@@ -171,7 +171,7 @@ def _freeze_from_fit(
         fit_settings={
             k: diagnostics.get(k)
             for k in (
-                "draws", "tune", "chains", "seed", "convergence",
+                "draws", "tune", "chains", "seed", "target_accept", "convergence",
                 "prior_predictive", "posterior_predictive",
             )
         },
@@ -759,6 +759,48 @@ def rescore_frozen_oof_draws(report: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
+def _write_posterior_predictive_oof_artifact(
+    *,
+    out_path: Path,
+    report: dict[str, Any],
+    entries: list[dict[str, Any]],
+) -> None:
+    """Bind posterior-predictive diagnostics to the current OOF checkpoint.
+
+    Inference repair changes both the canonical report and its frozen index.
+    Rewriting this small derivative artifact after every successful repair keeps
+    an interrupted run resumable without presenting stale diagnostic lineage.
+    """
+    posterior_entries = [
+        {
+            "component": entry["component"],
+            "holdout_year": entry["holdout_year"],
+            "lead_days": entry["lead_days"],
+            "prediction_sha256": entry.get("prediction_sha256"),
+            "diagnostic": (entry.get("fit_settings") or {}).get("posterior_predictive"),
+        }
+        for entry in entries
+        if entry.get("component") in {"pymc", "pymc_dynamic"}
+        and entry.get("status") == "ok"
+    ]
+    posterior_ok = bool(posterior_entries) and all(
+        bool((entry.get("diagnostic") or {}).get("available"))
+        for entry in posterior_entries
+    )
+    (out_path.parent / "posterior_predictive_oof_latest.json").write_text(
+        json.dumps({
+            "schema_version": "posterior-predictive-oof-v1",
+            "model_version": MODEL_VERSION,
+            "source_nested_sha256": hashlib.sha256(out_path.read_bytes()).hexdigest(),
+            "source_frozen_draws_sha256": report["frozen_draws_sha256"],
+            "freeze_before_truth": True,
+            "entries": posterior_entries,
+            "ok": posterior_ok,
+        }, indent=2, default=str),
+        encoding="utf-8",
+    )
+
+
 def repair_failed_oof_inference(
     *,
     year: int,
@@ -768,6 +810,7 @@ def repair_failed_oof_inference(
     draws_per_chain: int = 2000,
     tune_per_chain: int = 2000,
     chains: int = 4,
+    target_accept: float = 0.95,
 ) -> dict[str, Any]:
     """Refit a failed PyMC freeze using only convergence-driven extra sampling.
 
@@ -779,6 +822,8 @@ def repair_failed_oof_inference(
         raise ValueError("diagnostic inference repair supports PyMC candidates only")
     if draws_per_chain < 2000 or tune_per_chain < 2000 or chains < 4:
         raise ValueError("inference repair must meet the 2000/2000/4 recovery floor")
+    if not 0.9 <= target_accept < 1.0:
+        raise ValueError("inference repair target_accept must be in [0.9, 1.0)")
     out_path = out_path or (ARTIFACTS_DIR / "nested_component_loo.json")
     index_path = out_path.with_name(f"{out_path.stem}_frozen.json")
     index = json.loads(index_path.read_text(encoding="utf-8"))
@@ -808,6 +853,7 @@ def repair_failed_oof_inference(
             snap, draws=draws_per_chain, tune=tune_per_chain, chains=chains,
             seed=int(original["seed"]), generic_ballot=_generic_ballot(snap),
             poll_structure=repair_poll_structure,
+            target_accept=target_accept,
         ),
         component=component, election_id=election_id, holdout_year=year,
         lead_days=lead_days, as_of=as_of, seed=int(original["seed"]),
@@ -860,7 +906,9 @@ def repair_failed_oof_inference(
         "year": year, "lead_days": lead_days, "component": component,
         "reason": "initial freeze failed convergence diagnostics; no truth used in refit",
         "draws_per_chain": draws_per_chain, "tune_per_chain": tune_per_chain,
-        "chains": chains, "seed": int(original["seed"]),
+        "chains": chains, "target_accept": target_accept,
+        "parameterization": "noncentered_optional_poll_effects_v1",
+        "seed": int(original["seed"]),
     })
     original.update({
         "status": "ok", "n_races": len(replacement.race_ids),
@@ -882,6 +930,11 @@ def repair_failed_oof_inference(
     # fingerprint before stack fitting.
     index_tmp.replace(index_path)
     report_tmp.replace(out_path)
+    _write_posterior_predictive_oof_artifact(
+        out_path=out_path,
+        report=report,
+        entries=index["entries"],
+    )
     return {"year": year, "lead_days": lead_days, "component": component,
             "remaining_failures": len(report["failures"]), "n_oof_cases": len(truths)}
 
@@ -1230,32 +1283,9 @@ def run_nested_component_loo(
     # Frozen draws dominate this artifact. Compact encoding keeps the
     # reproducibility record practical to version and transfer.
     out_path.write_text(json.dumps(report, separators=(",", ":"), default=str))
-    posterior_entries = [
-        {
-            "component": entry["component"],
-            "holdout_year": entry["holdout_year"],
-            "lead_days": entry["lead_days"],
-            "prediction_sha256": entry.get("prediction_sha256"),
-            "diagnostic": (entry.get("fit_settings") or {}).get("posterior_predictive"),
-        }
-        for entry in frozen_archive
-        if entry.get("component") in {"pymc", "pymc_dynamic"}
-        and entry.get("status") == "ok"
-    ]
-    posterior_ok = bool(posterior_entries) and all(
-        bool((entry.get("diagnostic") or {}).get("available"))
-        for entry in posterior_entries
-    )
-    (out_path.parent / "posterior_predictive_oof_latest.json").write_text(
-        json.dumps({
-            "schema_version": "posterior-predictive-oof-v1",
-            "model_version": MODEL_VERSION,
-            "source_nested_sha256": hashlib.sha256(out_path.read_bytes()).hexdigest(),
-            "source_frozen_draws_sha256": report["frozen_draws_sha256"],
-            "freeze_before_truth": True,
-            "entries": posterior_entries,
-            "ok": posterior_ok,
-        }, indent=2, default=str),
-        encoding="utf-8",
+    _write_posterior_predictive_oof_artifact(
+        out_path=out_path,
+        report=report,
+        entries=frozen_archive,
     )
     return report

@@ -923,6 +923,7 @@ def main(argv: list[str] | None = None) -> None:
     p_repair_oof.add_argument("--draws-per-chain", type=int, default=2000)
     p_repair_oof.add_argument("--tune-per-chain", type=int, default=2000)
     p_repair_oof.add_argument("--chains", type=int, default=4)
+    p_repair_oof.add_argument("--target-accept", type=float, default=0.95)
     p_repair_oof.set_defaults(
         func=lambda a: print(
             json.dumps(
@@ -937,6 +938,31 @@ def main(argv: list[str] | None = None) -> None:
                     draws_per_chain=a.draws_per_chain,
                     tune_per_chain=a.tune_per_chain,
                     chains=a.chains,
+                    target_accept=a.target_accept,
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
+    p_restore_rebuild = sub.add_parser(
+        "restore-rebuild-checkpoint",
+        help="Verify and restore selection/canonical OOF files from a failed Actions artifact",
+    )
+    p_restore_rebuild.add_argument("--source-root", required=True)
+    p_restore_rebuild.add_argument("--evidence-bundle", required=True)
+    p_restore_rebuild.add_argument("--artifacts-dir", default=None)
+    p_restore_rebuild.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.validation.rebuild_checkpoint",
+                    fromlist=["restore_rebuild_checkpoint"],
+                ).restore_rebuild_checkpoint(
+                    source_root=Path(a.source_root),
+                    evidence_bundle_path=Path(a.evidence_bundle),
+                    artifacts_dir=Path(a.artifacts_dir) if a.artifacts_dir else None,
                 ),
                 indent=2,
                 default=str,

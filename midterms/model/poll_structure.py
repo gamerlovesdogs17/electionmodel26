@@ -158,7 +158,11 @@ def add_optional_poll_effects(pm: Any, prep: dict[str, Any], config: PollStructu
         active["questionnaire"] = "hierarchical_zero_centered"
     if config.study_effect and prep["study_ids"]:
         sigma_study = pm.HalfNormal("sigma_study", config.study_scale)
-        study = pm.Normal("study_eff", 0.0, sigma_study, dims="study")
+        # Non-centered parameterization preserves the same Normal(0, sigma)
+        # prior while avoiding the narrow sigma/effect funnel seen in sparse
+        # historical folds.
+        study_raw = pm.Normal("study_raw", 0.0, 1.0, dims="study")
+        study = pm.Deterministic("study_eff", sigma_study * study_raw, dims="study")
         offset = offset + study[prep["poll_study"]]
-        active["study"] = "shared_latent_deviation"
+        active["study"] = "shared_latent_deviation_noncentered"
     return offset, active

@@ -435,6 +435,11 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert '"--draws-per-chain", "2000"' in text
     assert '"--tune-per-chain", "2000"' in text
     assert '"--chains", "4"' in text
+    assert '"--target-accept", "0.95"' in text
+    assert "resume_run_id:" in text
+    assert "actions/download-artifact@v4" in text
+    assert "restore-rebuild-checkpoint" in text
+    assert "steps.resume.outputs.resumed != 'true'" in text
     assert text.index("fit-stack-weights") < text.index("crossfit-stack-reliability")
     assert text.index("joint-oof-scores --strict") < text.index("--require-publishable")
     assert text.index("--require-publishable") < text.index("verify-rebuild --independent")

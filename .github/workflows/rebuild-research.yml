@@ -13,6 +13,11 @@ on:
         required: true
         type: boolean
         default: true
+      resume_run_id:
+        description: Optional failed rebuild run ID whose lineage-checked OOF checkpoint should be reused.
+        required: false
+        type: string
+        default: ""
 
 concurrency:
   group: research-rebuild
@@ -119,6 +124,7 @@ jobs:
     timeout-minutes: 360
     permissions:
       contents: write
+      actions: read
     outputs:
       commit_created: ${{ steps.commit.outputs.commit_created }}
       commit_sha: ${{ steps.commit.outputs.commit_sha }}
@@ -151,8 +157,28 @@ jobs:
             --as-of "$AS_OF" \
             --publication-config \
             --strict
+      - name: Download prior failed-run checkpoint
+        if: inputs.resume_run_id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: research-rebuild-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}
+          path: .resume-checkpoint
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.resume_run_id }}
+      - name: Verify and restore prior failed-run checkpoint
+        id: resume
+        if: inputs.resume_run_id != ''
+        shell: bash
+        run: |
+          python -m midterms.cli restore-rebuild-checkpoint \
+            --source-root .resume-checkpoint \
+            --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
+            --artifacts-dir data/artifacts
+          echo "resumed=true" >> "$GITHUB_OUTPUT"
       - name: Restore poll-structure selection-pass cache
         id: selection-cache
+        if: steps.resume.outputs.resumed != 'true'
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -162,7 +188,7 @@ jobs:
             data/artifacts/poll_structure_crossfit_latest.json
           key: selection-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
       - name: Selection-pass freeze-before-truth OOF and same-family challengers
-        if: steps.selection-cache.outputs.cache-hit != 'true'
+        if: steps.resume.outputs.resumed != 'true' && steps.selection-cache.outputs.cache-hit != 'true'
         run: |
           python -m midterms.cli nested-component-loo \
             --hierarchical-method pymc \
@@ -173,6 +199,7 @@ jobs:
             --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
             --out data/artifacts/nested_component_loo_selection.json
       - name: Cross-fit single-term poll-structure selection
+        if: steps.resume.outputs.resumed != 'true'
         run: |
           python - <<'PY'
           import json, os
@@ -187,6 +214,7 @@ jobs:
             --out data/artifacts/poll_structure_crossfit_latest.json \
             --strict
       - name: Freeze selected structure and evidence into candidate model spec
+        if: steps.resume.outputs.resumed != 'true'
         run: |
           python -m midterms.cli freeze-model-spec-candidate \
             --selection data/artifacts/poll_structure_crossfit_latest.json \
@@ -195,7 +223,7 @@ jobs:
             --code-commit-sha "$(git rev-parse HEAD)" \
             --out data/artifacts/validated_model_spec_candidate.json
       - name: Save selection-pass validation cache
-        if: steps.selection-cache.outputs.cache-hit != 'true'
+        if: steps.resume.outputs.resumed != 'true' && steps.selection-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: |
@@ -206,6 +234,7 @@ jobs:
           key: selection-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
       - name: Restore canonical selected-structure OOF cache
         id: canonical-cache
+        if: steps.resume.outputs.resumed != 'true'
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -214,7 +243,7 @@ jobs:
             data/artifacts/posterior_predictive_oof_latest.json
           key: canonical-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json') }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Canonical OOF using the frozen selected poll structure
-        if: steps.canonical-cache.outputs.cache-hit != 'true'
+        if: steps.resume.outputs.resumed != 'true' && steps.canonical-cache.outputs.cache-hit != 'true'
         run: |
           python -m midterms.cli nested-component-loo \
             --hierarchical-method pymc \
@@ -266,6 +295,7 @@ jobs:
                   "--draws-per-chain", "2000",
                   "--tune-per-chain", "2000",
                   "--chains", "4",
+                  "--target-accept", "0.95",
               ]
               print("Recovering", entry["component"], entry["holdout_year"], entry["lead_days"])
               subprocess.run(command, check=True)

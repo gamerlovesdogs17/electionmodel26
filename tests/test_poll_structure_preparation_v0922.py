@@ -6,7 +6,7 @@ from copy import deepcopy
 
 import pytest
 
-from midterms.model.poll_structure import PollStructureConfig
+from midterms.model.poll_structure import PollStructureConfig, add_optional_poll_effects
 from midterms.validation.poll_structure_selection import (
     BASE_STRUCTURE,
     POLL_STRUCTURE_CANDIDATES,
@@ -56,6 +56,49 @@ def test_study_addition_only_disables_documented_heuristic_downweight():
 
 def test_positive_challengers_are_never_stack_candidates():
     assert set(POLL_STRUCTURE_CANDIDATES[1:]) <= EXCLUDE_FROM_STACK
+
+
+def test_study_effect_uses_equivalent_noncentered_parameterization():
+    class Symbol:
+        __array_priority__ = 1000
+
+        def __mul__(self, other):
+            return Symbol()
+
+        __rmul__ = __mul__
+
+        def __radd__(self, other):
+            return Symbol()
+
+        def __getitem__(self, item):
+            return Symbol()
+
+    class FakePM:
+        def __init__(self):
+            self.normal_calls = []
+            self.deterministics = []
+
+        def HalfNormal(self, name, scale):
+            return Symbol()
+
+        def Normal(self, name, mu, sigma, dims):
+            self.normal_calls.append((name, mu, sigma, dims))
+            return Symbol()
+
+        def Deterministic(self, name, value, dims):
+            self.deterministics.append((name, dims))
+            return Symbol()
+
+    pm = FakePM()
+    _, active = add_optional_poll_effects(
+        pm,
+        {"poll_y": [0.0, 1.0], "study_ids": ["a", "b"], "poll_study": [0, 1],
+         "sponsor_ids": [], "questionnaire_ids": []},
+        PollStructureConfig(study_effect=True),
+    )
+    assert pm.normal_calls == [("study_raw", 0.0, 1.0, "study")]
+    assert pm.deterministics == [("study_eff", "study")]
+    assert active["study"] == "shared_latent_deviation_noncentered"
 
 
 def _scores() -> dict[str, dict[str, float]]:
