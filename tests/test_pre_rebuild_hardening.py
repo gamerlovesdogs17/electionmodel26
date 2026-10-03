@@ -333,6 +333,34 @@ def test_blueprint_gate_promotes_enabled_optional_domain_to_required(tmp_path: P
     assert gate["status"] == "blocked"
 
 
+def test_freshness_gate_accepts_point_in_time_domain_with_no_age_threshold(tmp_path: Path):
+    compliance = tmp_path / "audit.json"
+    compliance.write_text(json.dumps({"empirical_validation_gates": {
+        "freshness_current_domains": "requires_refresh",
+    }}))
+    artifacts = tmp_path / "artifacts"
+    artifacts.mkdir()
+    (artifacts / "evidence_eligibility_latest.json").write_text(json.dumps({
+        "model_version": MODEL_VERSION,
+        "effective_domain_contract": {
+            "roles": {
+                "polls": "required_core",
+                "candidate_timeline": "required_core",
+            },
+        },
+        "domains": {
+            "polls": {"freshness": {"status": "fresh"}},
+            "candidate_timeline": {"freshness": {"status": "not_applicable"}},
+        },
+    }))
+    report = evaluate_blueprint_extension_gates(
+        compliance_path=compliance, artifacts_dir=artifacts,
+    )
+    gate = report["gates"]["freshness_current_domains"]
+    assert gate["status"] == "pass"
+    assert gate["freshness_statuses"]["candidate_timeline"] == "not_applicable"
+
+
 def test_same_family_gate_rejects_mismatched_frozen_index_lineage(tmp_path: Path):
     compliance = tmp_path / "audit.json"
     compliance.write_text(json.dumps({"empirical_validation_gates": {
@@ -433,6 +461,8 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert repair < cache < stack
     assert "repair-failed-oof-inference" in text
     assert '"--draws-per-chain", "2000"' in text
+    assert "forecast_resumed=" in text
+    assert text.count("if: steps.resume.outputs.forecast_resumed != 'true'") == 5
     assert '"--tune-per-chain", "4000"' in text
     assert '"--chains", "4"' in text
     assert '"--target-accept", "0.99"' in text
@@ -449,3 +479,13 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert text.index("joint-oof-scores --strict") < text.index("--require-publishable")
     assert text.index("--require-publishable") < text.index("verify-rebuild --independent")
     assert "acceptance-gates --strict" in text
+
+
+def test_validation_report_does_not_refit_legacy_hierarchical_spine():
+    import inspect
+
+    from midterms.validation.report import build_validation_report
+
+    source = inspect.getsource(build_validation_report)
+    assert "include_hierarchical=False" in source
+    assert "include_chamber=False" in source

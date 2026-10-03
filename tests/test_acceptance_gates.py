@@ -215,3 +215,32 @@ def test_acceptance_g9_fails_when_numerical_missing(tmp_path: Path):
     report = evaluate_acceptance_gates(artifacts_dir=art, write=False)
     assert report["gates"]["G9"]["status"] == "fail"
     assert report["gates"]["G5"]["status"] == "pass"
+
+
+def test_acceptance_prefers_canonical_oof_over_legacy_archive(tmp_path: Path):
+    art = tmp_path / "artifacts"
+    art.mkdir()
+    (art / "nested_component_loo.json").write_text(json.dumps({
+        "no_weight_remapping": False,
+        "spine_label": "legacy",
+    }), encoding="utf-8")
+    canonical = {
+        "freeze_before_truth": True,
+        "no_weight_remapping": True,
+        "spine_label": "pymc",
+        "hierarchical_method": "pymc",
+        "crps_by_fold": {"2022": {"pymc": 4.0}},
+        "g8_recommendations": {"state_space": {"recommend": "keep"}},
+    }
+    canonical_path = art / "nested_component_loo_canonical.json"
+    canonical_path.write_text(json.dumps(canonical), encoding="utf-8")
+    (art / "stack_weights_oof.json").write_text(json.dumps({
+        "no_weight_remapping": True,
+        "source_spine_label": "pymc",
+        "stack_weights": {"pymc": 1.0},
+        "reproduction": {"ok": True},
+    }), encoding="utf-8")
+
+    report = evaluate_acceptance_gates(artifacts_dir=art, write=False)
+    assert report["gates"]["G5"]["ok"] is True
+    assert str(canonical_path) in report["gates"]["G5"]["evidence"]

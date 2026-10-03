@@ -1,18 +1,29 @@
-"""Restore an expensive rebuild checkpoint without trusting unrelated artifacts.
+"""Restore expensive rebuild work without trusting unrelated artifacts.
 
-Failed research runs upload the whole artifacts directory for diagnosis.  A
-resume operation deliberately imports only the selection/canonical OOF files
-and verifies their semantic lineage before overwriting the working checkout.
+Failed research runs upload their model artifacts for diagnosis.  A resume
+always verifies selection/canonical OOF semantic lineage.  It may also restore
+a completed publication fit, but only after checking its sealed evidence,
+validated model spec, stack/crossfit lineage, numerical floors, output hashes,
+and release archive.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 from pathlib import Path
 from typing import Any
 
-from midterms.config import ARTIFACTS_DIR, MODEL_VERSION
+from midterms.config import (
+    ARTIFACTS_DIR,
+    MODEL_VERSION,
+    PRODUCTION_CHAINS,
+    PRODUCTION_DRAWS,
+    PRODUCTION_JOINT_SIMS,
+    PRODUCTION_TARGET_ACCEPT,
+    PRODUCTION_TUNE,
+)
 from midterms.evidence.evidence_bundle import verify_evidence_bundle
 from midterms.validation.artifact_lineage import frozen_index_semantic_sha256
 from midterms.validation.nested_component_loo import (
@@ -28,6 +39,8 @@ from midterms.validation.validated_model_spec import (
     SELECTION_OOF_PHASE,
     file_sha256,
     load_candidate_model_spec,
+    load_validated_model_spec,
+    verify_validated_spec_artifacts,
 )
 
 CHECKPOINT_FILES = (
@@ -38,6 +51,19 @@ CHECKPOINT_FILES = (
     "nested_component_loo_canonical.json",
     "nested_component_loo_canonical_frozen.json",
 )
+
+COMPLETED_MODEL_ARTIFACTS = (
+    "stack_weights_oof.json",
+    "stack_reliability_crossfit_latest.json",
+    "joint_oof_scores_latest.json",
+    "validated_model_spec_latest.json",
+    "forecast_latest.json",
+    "evidence_eligibility_latest.json",
+    "race_decomposition_latest.json",
+    "prior_predictive_latest.json",
+)
+
+
 def _read(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -45,6 +71,150 @@ def _read(path: Path) -> dict[str, Any]:
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _safe_source_path(source_root: Path, reference: str) -> Path:
+    """Resolve a portable manifest path without allowing archive traversal."""
+    path = Path(str(reference))
+    _require(not path.is_absolute() and ".." not in path.parts, "run manifest path is unsafe")
+    resolved = (source_root / path).resolve()
+    _require(resolved.is_relative_to(source_root.resolve()), "run manifest path escapes checkpoint")
+    return resolved
+
+
+def _verify_completed_model(
+    *, source_root: Path, source: Path, bundle: dict[str, Any]
+) -> dict[str, Any]:
+    """Verify a completed publication fit before allowing it to be resumed."""
+    paths = {name: source / name for name in COMPLETED_MODEL_ARTIFACTS}
+    missing = sorted(name for name, path in paths.items() if not path.is_file())
+    _require(not missing, "completed model checkpoint is incomplete: " + ", ".join(missing))
+
+    forecast = _read(paths["forecast_latest.json"])
+    run_id = str(forecast.get("run_id") or "")
+    _require(bool(run_id), "completed model forecast lacks run_id")
+    _require(forecast.get("model_version") == MODEL_VERSION, "completed forecast model version is stale")
+    _require(
+        forecast.get("forecast_as_of") == bundle.get("as_of"),
+        "completed forecast as-of differs from the current evidence bundle",
+    )
+    _require(
+        forecast.get("evidence_bundle_id") == bundle.get("evidence_bundle_id")
+        and forecast.get("evidence_bundle_sha256") == bundle.get("evidence_bundle_sha256"),
+        "completed forecast evidence bundle differs from the current sealed bundle",
+    )
+    _require(
+        (forecast.get("snapshot_ids") or {}).get("evidence") == bundle.get("current_snapshot_id"),
+        "completed forecast evidence snapshot differs from the current sealed bundle",
+    )
+    _require(
+        forecast.get("publishable") is True
+        and forecast.get("run_class") == "publication"
+        and forecast.get("publication_surface") == "research_only",
+        "completed forecast is not a publication-quality research artifact",
+    )
+
+    diag = forecast.get("diagnostics") or {}
+    _require(int(diag.get("draws") or 0) >= PRODUCTION_DRAWS, "completed forecast draw floor failed")
+    _require(int(diag.get("tune") or 0) >= PRODUCTION_TUNE, "completed forecast tune floor failed")
+    _require(int(diag.get("chains") or 0) >= PRODUCTION_CHAINS, "completed forecast chain floor failed")
+    _require(
+        float(diag.get("target_accept") or 0) >= PRODUCTION_TARGET_ACCEPT,
+        "completed forecast target_accept floor failed",
+    )
+    _require(
+        int(diag.get("n_posterior_samples") or 0) >= PRODUCTION_DRAWS * PRODUCTION_CHAINS,
+        "completed forecast posterior sample floor failed",
+    )
+    _require(
+        int(diag.get("n_joint_sims") or 0) >= PRODUCTION_JOINT_SIMS,
+        "completed forecast joint simulation floor failed",
+    )
+    numerical = forecast.get("numerical_quality") or {}
+    numerical_checks = numerical.get("checks") or []
+    _require(
+        numerical.get("ok") is True
+        and bool(numerical_checks)
+        and all(check.get("ok") is True for check in numerical_checks),
+        "completed forecast numerical-quality checks failed",
+    )
+
+    spec, _ = load_validated_model_spec(
+        path=paths["validated_model_spec_latest.json"],
+        expected_evidence_bundle_id=str(bundle.get("evidence_bundle_id")),
+        expected_evidence_bundle_sha256=str(bundle.get("evidence_bundle_sha256")),
+    )
+    verify_validated_spec_artifacts(spec, artifacts_dir=source)
+    _require(
+        forecast.get("validated_model_spec_sha256") == spec.get("spec_sha256"),
+        "completed forecast validated-model-spec identity changed",
+    )
+    _require(
+        forecast.get("stack_artifact_sha256") == file_sha256(paths["stack_weights_oof.json"]),
+        "completed forecast stack artifact identity changed",
+    )
+    from midterms.validation.stack_reliability_crossfit import validate_crossfit_artifact
+
+    crossfit = _read(paths["stack_reliability_crossfit_latest.json"])
+    crossfit_check = validate_crossfit_artifact(
+        crossfit,
+        nested_path=source / "nested_component_loo_canonical.json",
+        stack_path=paths["stack_weights_oof.json"],
+    )
+    _require(bool(crossfit_check.get("ok")), "completed crossfit lineage changed")
+    _require(_read(paths["joint_oof_scores_latest.json"]).get("ok") is True, "joint OOF scores failed")
+
+    eligibility = _read(paths["evidence_eligibility_latest.json"])
+    _require(
+        eligibility.get("model_version") == MODEL_VERSION
+        and eligibility.get("forecast_run_id") == run_id
+        and eligibility.get("snapshot_id") == bundle.get("current_snapshot_id")
+        and eligibility.get("as_of") == bundle.get("as_of")
+        and eligibility.get("publishable") is True,
+        "completed forecast eligibility lineage changed",
+    )
+
+    manifest_path = source_root / "data" / "manifests" / f"run_{run_id}.json"
+    _require(manifest_path.is_file(), "completed model run manifest is missing")
+    manifest = _read(manifest_path)
+    _require(
+        manifest.get("run_id") == run_id
+        and manifest.get("model_version") == MODEL_VERSION
+        and manifest.get("forecast_as_of") == bundle.get("as_of"),
+        "completed model run manifest lineage changed",
+    )
+    forecast_path = _safe_source_path(source_root, (manifest.get("paths") or {}).get("forecast", ""))
+    draws_path = _safe_source_path(source_root, (manifest.get("paths") or {}).get("draws", ""))
+    _require(forecast_path.is_file() and draws_path.is_file(), "completed forecast outputs are missing")
+    _require(
+        _sha256(forecast_path) == (manifest.get("output_hashes") or {}).get("forecast_json")
+        and _sha256(draws_path) == (manifest.get("output_hashes") or {}).get("draws"),
+        "completed forecast output hashes changed",
+    )
+    _require(
+        forecast_path.read_bytes() == paths["forecast_latest.json"].read_bytes(),
+        "completed forecast latest/run-specific content differs",
+    )
+    release_dir = source_root / "data" / "releases" / run_id
+    _require(
+        (release_dir / "forecast.json").is_file()
+        and (release_dir / "run_manifest.json").is_file()
+        and (release_dir / "forecast.json").read_bytes() == forecast_path.read_bytes()
+        and (release_dir / "run_manifest.json").read_bytes() == manifest_path.read_bytes(),
+        "completed release archive differs from its run artifacts",
+    )
+    return {
+        "run_id": run_id,
+        "manifest_path": manifest_path,
+        "forecast_path": forecast_path,
+        "draws_path": draws_path,
+        "release_dir": release_dir,
+        "source_code_commit": manifest.get("code_commit"),
+    }
 
 
 def _verify_report_pair(
@@ -104,7 +274,7 @@ def restore_rebuild_checkpoint(
     evidence_bundle_path: str | Path,
     artifacts_dir: str | Path | None = None,
 ) -> dict[str, Any]:
-    """Verify and restore selection/canonical OOF files from a failed run."""
+    """Verify and restore reusable OOF and, when complete, publication outputs."""
     source_root = Path(source_root)
     source = source_root / "data" / "artifacts"
     if not source.is_dir():
@@ -209,6 +379,21 @@ def restore_rebuild_checkpoint(
             )
             repair_checkpoints.append(checkpoint_path)
 
+    completed_model: dict[str, Any] | None = None
+    completed_model_reason = "completed publication forecast not present in checkpoint"
+    if (source / "forecast_latest.json").is_file():
+        try:
+            completed_model = _verify_completed_model(
+                source_root=source_root,
+                source=source,
+                bundle=bundle,
+            )
+            completed_model_reason = "verified publication forecast restored"
+        except (ValueError, FileNotFoundError, KeyError, TypeError) as exc:
+            # OOF recovery remains useful.  A partial or stale forecast is never
+            # copied and the workflow will rerun the downstream production steps.
+            completed_model_reason = str(exc)
+
     destination.mkdir(parents=True, exist_ok=True)
     restored = []
     for name in CHECKPOINT_FILES:
@@ -228,12 +413,47 @@ def restore_rebuild_checkpoint(
         entries=canonical_index["entries"],
     )
     restored.append("posterior_predictive_oof_latest.json")
+    if completed_model is not None:
+        for name in COMPLETED_MODEL_ARTIFACTS:
+            shutil.copy2(source / name, destination / name)
+            restored.append(name)
+        for path_key in ("forecast_path", "draws_path"):
+            source_path = Path(completed_model[path_key])
+            shutil.copy2(source_path, destination / source_path.name)
+            restored.append(source_path.name)
+
+        # The real workflow points artifacts_dir at <repo>/data/artifacts.  In
+        # that case restore the manifest/release/web copies needed by numerical,
+        # independent-rebuild, coherence, and deploy steps.  Unit-test scratch
+        # directories remain isolated.
+        if destination.name == "artifacts" and destination.parent.name == "data":
+            target_root = destination.parent.parent
+            manifest_destination = target_root / "data" / "manifests"
+            manifest_destination.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(
+                completed_model["manifest_path"],
+                manifest_destination / Path(completed_model["manifest_path"]).name,
+            )
+            release_destination = target_root / "data" / "releases" / completed_model["run_id"]
+            shutil.copytree(completed_model["release_dir"], release_destination, dirs_exist_ok=True)
+            web_destination = target_root / "web" / "public" / "data" / "forecast_latest.json"
+            web_destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source / "forecast_latest.json", web_destination)
+            restored.extend([
+                f"data/manifests/{Path(completed_model['manifest_path']).name}",
+                f"data/releases/{completed_model['run_id']}/",
+                "web/public/data/forecast_latest.json",
+            ])
     return {
         "ok": True,
-        "schema_version": "rebuild-checkpoint-restore-v1",
+        "schema_version": "rebuild-checkpoint-restore-v2",
         "model_version": MODEL_VERSION,
         "evidence_bundle_id": bundle.get("evidence_bundle_id"),
         "selected_poll_structure_id": candidate.get("selected_poll_structure_id"),
         "canonical_failures_to_repair": canonical.get("failures") or [],
+        "forecast_restored": completed_model is not None,
+        "forecast_restore_reason": completed_model_reason,
+        "forecast_run_id": (completed_model or {}).get("run_id"),
+        "forecast_source_code_commit": (completed_model or {}).get("source_code_commit"),
         "restored_files": restored,
     }

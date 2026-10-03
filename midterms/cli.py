@@ -955,7 +955,10 @@ def main(argv: list[str] | None = None) -> None:
 
     p_restore_rebuild = sub.add_parser(
         "restore-rebuild-checkpoint",
-        help="Verify and restore selection/canonical OOF files from a failed Actions artifact",
+        help=(
+            "Verify and restore reusable OOF files and any fully completed, "
+            "lineage-matching publication fit from a failed Actions artifact"
+        ),
     )
     p_restore_rebuild.add_argument("--source-root", required=True)
     p_restore_rebuild.add_argument("--evidence-bundle", required=True)

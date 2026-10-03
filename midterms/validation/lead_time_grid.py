@@ -56,13 +56,29 @@ def replay_lead_time_grid(
             ext = score_margins_extended(np.array(mus), np.array(sds), np.array(ys)) if ys else {"n": 0}
         else:
             ext = {"n": 0}
-        sim, _ = simulate_chamber(fit, snap.races)
-        realized_seats, realized_ctl = _realized_chamber(snap.races, results)
-        chamber = score_chamber_draws(
-            sim.seat_draws,
-            realized_dem_seats=realized_seats,
-            realized_dem_control=realized_ctl,
-        )
+        try:
+            sim, _ = simulate_chamber(fit, snap.races)
+            realized_seats, realized_ctl = _realized_chamber(snap.races, results)
+            chamber = score_chamber_draws(
+                sim.seat_draws,
+                realized_dem_seats=realized_seats,
+                realized_dem_control=realized_ctl,
+            )
+            chamber["ok"] = True
+        except ValueError as exc:
+            if "Senate seat accounting must total 100" not in str(exc):
+                raise
+            # Broad diagnostic leads can precede a traceable general-election
+            # candidate identity for every seat.  Preserve the race/margin
+            # scores that are valid at that cutoff, but never manufacture the
+            # missing seats or abort the formal 60/30 validation report.
+            chamber = {
+                "ok": False,
+                "status": "incomplete_point_in_time_race_universe",
+                "error": str(exc),
+                "n_snapshot_seats": int(len(snap.races)),
+                "n_fit_races": int(len(fit.race_ids)),
+            }
         # Energy score on realized margins vector
         y_vec = []
         idx = []

@@ -44,7 +44,13 @@ def build_validation_report(
             PRIMARY_HOLDOUT,
             lead_days=(60, 30),
             n_draws=max(200, draws),
-            include_challengers=True,
+            # Canonical hierarchical predictions, chamber scores, and stack
+            # evidence were already frozen by the OOF/joint-score stages.  Do
+            # not launch a second legacy PyMC fit with default poll structure
+            # while merely assembling their validation report.
+            include_hierarchical=False,
+            include_chamber=False,
+            include_challengers=False,
             allow_synthetic=allow_synthetic,
         )
     except ValueError as exc:
@@ -106,17 +112,23 @@ def build_validation_report(
     except Exception as exc:  # noqa: BLE001
         calibration = {"error": str(exc)}
 
-    stack_path = ARTIFACTS_DIR / "cycle_replay_all.json"
+    # Production weights are fitted from the canonical frozen OOF artifact.
+    # ``cycle_replay_all`` is a legacy diagnostic and must not be presented as
+    # the current production-stack source.
+    stack_path = ARTIFACTS_DIR / "stack_weights_oof.json"
     stack_weights = None
     stack_meta: dict[str, Any] = {}
     if stack_path.exists():
         try:
             stack_doc = json.loads(stack_path.read_text())
-            stack_weights = stack_doc.get("stack_weights")
+            stack_weights = stack_doc.get("stack_weights") or stack_doc.get(
+                "stack_weights_production"
+            )
             stack_meta = {
-                "comparable": stack_doc.get("comparable"),
-                "validation_status": stack_doc.get("validation_status"),
-                "archive_note": stack_doc.get("archive_note"),
+                "source_nested_loo": stack_doc.get("source_nested_loo"),
+                "source_nested_loo_sha256": stack_doc.get("source_nested_loo_sha256"),
+                "validation_phase": stack_doc.get("source_validation_phase"),
+                "reproduction_ok": (stack_doc.get("reproduction") or {}).get("ok"),
             }
         except (json.JSONDecodeError, OSError):
             stack_weights = None
@@ -138,7 +150,9 @@ def build_validation_report(
         poll_coverage = {"ok": False, "error": str(exc)}
 
     nested_loo = None
-    nested_loo_path = ARTIFACTS_DIR / "nested_component_loo.json"
+    nested_loo_path = ARTIFACTS_DIR / "nested_component_loo_canonical.json"
+    if not nested_loo_path.exists():
+        nested_loo_path = ARTIFACTS_DIR / "nested_component_loo.json"
     if nested_loo_path.exists():
         try:
             nested_loo = json.loads(nested_loo_path.read_text())
@@ -175,8 +189,8 @@ def build_validation_report(
         },
         "calibration": calibration,
         "joint_proper_scores": (
-            json.loads((ARTIFACTS_DIR / "joint_scores_oof_latest.json").read_text())
-            if (ARTIFACTS_DIR / "joint_scores_oof_latest.json").exists()
+            json.loads((ARTIFACTS_DIR / "joint_oof_scores_latest.json").read_text())
+            if (ARTIFACTS_DIR / "joint_oof_scores_latest.json").exists()
             else {
                 "status": "requires_rebuild",
                 "capability": "joint-proper-scores-v1",

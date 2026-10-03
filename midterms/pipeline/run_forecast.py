@@ -1149,6 +1149,7 @@ def run_forecast(
         "draws": draws,
         "tune": tune,
         "chains": chains,
+        "target_accept": target_accept,
         "seed": seed,
         "generic_ballot": generic_ballot,
         "ensemble": ensemble,

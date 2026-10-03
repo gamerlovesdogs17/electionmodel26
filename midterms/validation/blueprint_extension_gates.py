@@ -348,7 +348,12 @@ def evaluate_blueprint_extension_gates(
                     if roles.get(domain) in {"required_core", "conditionally_required"}
                     and block.get("freshness") is not None
                 }
-                ok = bool(checked) and all(status == "fresh" for status in checked.values())
+                # Some used domains (notably candidate identity) are governed
+                # by point-in-time lineage rather than an observation-age
+                # threshold.  Their freshness status is intentionally N/A;
+                # evidence eligibility still verifies their required lineage.
+                accepted = {"fresh", "not_applicable"}
+                ok = bool(checked) and all(status in accepted for status in checked.values())
                 result.update({
                     "status": "pass" if ok else "blocked", "ok": ok,
                     "freshness_statuses": checked,

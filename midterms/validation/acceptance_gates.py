@@ -77,7 +77,10 @@ def evaluate_acceptance_gates(
     chamber = _load_json(art_dir / "chamber_reconcile_latest.json")
     poll_cov = _load_json(art_dir / "poll_coverage_latest.json")
     eligibility = _load_json(art_dir / "evidence_eligibility_latest.json")
-    nested = _load_json(art_dir / "nested_component_loo.json")
+    nested_path = art_dir / "nested_component_loo_canonical.json"
+    if not nested_path.exists():
+        nested_path = art_dir / "nested_component_loo.json"
+    nested = _load_json(nested_path)
     stack = _load_json(art_dir / "stack_weights_oof.json")
     forecast = _load_json(art_dir / "forecast_latest.json")
     val_report = _load_json(art_dir / "validation_report_latest.json")
@@ -352,7 +355,7 @@ def evaluate_acceptance_gates(
             status=g5_status,
             detail=g5_detail,
             evidence=[
-                str(art_dir / "nested_component_loo.json"),
+                str(nested_path),
                 str(art_dir / "stack_weights_oof.json"),
             ],
             notes=g5_notes,
@@ -439,7 +442,7 @@ def evaluate_acceptance_gates(
             status=g6_status,
             detail=g6_detail,
             evidence=[
-                str(art_dir / "nested_component_loo.json"),
+                str(nested_path),
                 str(art_dir / "validation_report_latest.json"),
             ],
             notes=["Race CRPS/Brier/log + chamber scores required before calibration claims."],
@@ -470,7 +473,7 @@ def evaluate_acceptance_gates(
 
             crossfit_check = validate_crossfit_artifact(
                 crossfit,
-                nested_path=art_dir / "nested_component_loo.json",
+                nested_path=nested_path,
                 stack_path=art_dir / "stack_weights_oof.json",
             )
         except Exception as exc:  # noqa: BLE001
@@ -561,7 +564,7 @@ def evaluate_acceptance_gates(
             detail=g7_detail,
             evidence=[
                 str(art_dir / "validation_report_latest.json"),
-                str(art_dir / "nested_component_loo.json"),
+                str(nested_path),
                 str(crossfit_path),
             ],
             notes=[
@@ -604,7 +607,7 @@ def evaluate_acceptance_gates(
                     "n_components": len(recs),
                     "disabled_still_weighted": leaked,
                 },
-                evidence=[str(art_dir / "nested_component_loo.json")],
+                evidence=[str(nested_path)],
                 notes=["G8-disable recommendations must be absent from production stack weights."],
             )
         )

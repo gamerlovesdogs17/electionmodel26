@@ -100,6 +100,50 @@ def test_conflicting_held_independent_caucus_fails_closed() -> None:
         attach_declared_held_independent_caucus(races)
 
 
+def test_nonbinary_contested_seats_omitted_from_margin_fit_still_count() -> None:
+    rows = [
+        {"race_id": f"held-r-{i}", "not_up": True, "held_by": "R"}
+        for i in range(98)
+    ]
+    rows.extend([
+        {
+            "race_id": "omitted-d", "not_up": False, "held_by": "D",
+            "ballot_status": "withdrawn",
+        },
+        {
+            "race_id": "omitted-r", "not_up": False, "held_by": "R",
+            "ballot_status": "withdrawn",
+        },
+    ])
+    races = pd.DataFrame(rows)
+    fit = FitResult(
+        race_ids=[], states=[], mean_margin=np.array([]), sd_margin=np.array([]),
+        draws_margin=np.empty((2, 0)), house_effects={}, diagnostics={}, method="synthetic",
+    )
+    sim, summaries = simulate_chamber(fit, races)
+    assert summaries == []
+    assert sim.held_dem == 1
+    assert sim.held_rep == 99
+    assert sim.seat_draws.tolist() == [1, 1]
+
+
+def test_omitted_contested_seat_without_declared_holder_fails_closed() -> None:
+    rows = [
+        {"race_id": f"held-r-{i}", "not_up": True, "held_by": "R"}
+        for i in range(99)
+    ]
+    rows.append({
+        "race_id": "omitted-unknown", "not_up": False, "held_by": None,
+        "ballot_status": "withdrawn",
+    })
+    fit = FitResult(
+        race_ids=[], states=[], mean_margin=np.array([]), sd_margin=np.array([]),
+        draws_margin=np.empty((2, 0)), house_effects={}, diagnostics={}, method="synthetic",
+    )
+    with pytest.raises(ValueError, match="explicit held_by"):
+        simulate_chamber(fit, pd.DataFrame(rows))
+
+
 def test_partial_metadata_attachment_does_not_invent_held_by() -> None:
     partial = pd.DataFrame([{"race_id": "synthetic-partial"}])
     attached = attach_declared_held_independent_caucus(partial)

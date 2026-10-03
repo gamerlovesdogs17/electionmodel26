@@ -202,6 +202,11 @@ def recover_run_configuration(
         "draws": int(cfg.get("draws") or manifest.get("draws") or art.get("draws") or 400),
         "tune": int(cfg.get("tune") or manifest.get("tune") or 400),
         "chains": int(cfg.get("chains") or manifest.get("chains") or 2),
+        "target_accept": float(
+            cfg.get("target_accept")
+            or diag.get("target_accept")
+            or (0.99 if art.get("publishable") else 0.90)
+        ),
         "seed": int(cfg.get("seed") or manifest.get("seed") or art.get("seed") or 0),
         "generic_ballot": float(
             cfg["generic_ballot"]
@@ -323,6 +328,7 @@ def independent_rebuild(
             draws=int(cfg["draws"]),
             tune=int(cfg["tune"]),
             chains=int(cfg["chains"]),
+            target_accept=float(cfg["target_accept"]),
             seed=int(cfg["seed"]),
             generic_ballot=float(cfg["generic_ballot"]),
             ensemble=bool(cfg["ensemble"]),
@@ -335,7 +341,8 @@ def independent_rebuild(
             allow_fast_fallback=bool(cfg["allow_fast_fallback"]),
             out_dir=out,
             rebuild_mode=True,
-            allow_non_publication=True,
+            require_publishable=bool(sealed.get("publishable")),
+            allow_non_publication=not bool(sealed.get("publishable")),
         )
         rebuilt = result["artifact"]
         cmp = compare_forecast_artifacts(sealed, rebuilt)

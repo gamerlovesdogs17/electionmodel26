@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import gzip
+import importlib
 import json
 from pathlib import Path
 
@@ -28,6 +29,7 @@ from midterms.validation.validated_model_spec import (
     file_sha256,
     poll_structure_identity,
 )
+from midterms.ops.reproducibility import independent_rebuild
 
 
 def _write(path: Path, payload: dict) -> Path:
@@ -156,6 +158,7 @@ def test_restore_checkpoint_reuses_only_lineage_checked_oof_files(tmp_path: Path
         source_root=source, evidence_bundle_path=bundle, artifacts_dir=destination,
     )
     assert result["ok"] is True
+    assert result["forecast_restored"] is False
     assert result["canonical_failures_to_repair"] == [
         {"year": 2020, "lead": 60, "component": "pymc"}
     ]
@@ -203,3 +206,71 @@ def test_restore_checkpoint_rejects_tampered_repair_draws(tmp_path: Path) -> Non
             source_root=source, evidence_bundle_path=bundle, artifacts_dir=destination,
         )
     assert not destination.exists()
+
+
+def test_restore_checkpoint_refuses_partial_publication_outputs(tmp_path: Path) -> None:
+    source, bundle, destination = _checkpoint(tmp_path)
+    source_artifacts = source / "data" / "artifacts"
+    _write(source_artifacts / "forecast_latest.json", {
+        "model_version": MODEL_VERSION, "publishable": True,
+    })
+    destination.mkdir()
+    marker = _write(destination / "forecast_latest.json", {"keep": True})
+    result = restore_rebuild_checkpoint(
+        source_root=source, evidence_bundle_path=bundle, artifacts_dir=destination,
+    )
+    assert result["forecast_restored"] is False
+    assert "incomplete" in result["forecast_restore_reason"]
+    assert json.loads(marker.read_text()) == {"keep": True}
+
+
+def test_independent_rebuild_replays_publication_configuration(tmp_path: Path, monkeypatch) -> None:
+    release = tmp_path / "release"
+    release.mkdir()
+    sealed = {
+        "run_id": "synthetic-publication-run",
+        "election_id": "synthetic-election",
+        "forecast_as_of": "2026-09-27",
+        "method": "ensemble_stack",
+        "publishable": True,
+        "diagnostics": {
+            "core_method": "pymc", "draws": 2000, "tune": 4000,
+            "chains": 4, "target_accept": 0.99,
+        },
+        "chamber": {"p_dem_majority": 0.5, "expected_dem_seats": 50.0},
+        "races": [],
+    }
+    manifest = {
+        "run_id": sealed["run_id"],
+        "election_id": sealed["election_id"],
+        "forecast_as_of": sealed["forecast_as_of"],
+        "configuration": {
+            "method": "pymc", "ensemble": True, "draws": 2000,
+            "tune": 4000, "chains": 4, "seed": 17,
+        },
+        "domain_hashes": {},
+    }
+    _write(release / "forecast.json", sealed)
+    _write(release / "run_manifest.json", manifest)
+    captured: dict = {}
+
+    def fake_run_forecast(**kwargs):
+        captured.update(kwargs)
+        return {"artifact": sealed}
+
+    monkeypatch.setattr("midterms.ops.reproducibility.verify_rebuild", lambda **_: {
+        "ok": True, "run_id": sealed["run_id"],
+    })
+    monkeypatch.setattr("midterms.ops.reproducibility.snapshot_domain_hashes", lambda: {})
+    run_forecast_module = importlib.import_module("midterms.pipeline.run_forecast")
+    monkeypatch.setattr(run_forecast_module, "run_forecast", fake_run_forecast)
+    result = independent_rebuild(
+        run_id=sealed["run_id"], release_dir=release,
+        out_dir=tmp_path / "rebuilt", write_artifact=False,
+    )
+    assert result["ok"] is True
+    assert captured["require_publishable"] is True
+    assert captured["allow_non_publication"] is False
+    assert captured["target_accept"] == 0.99
+    assert captured["tune"] == 4000
+    assert captured["chains"] == 4

@@ -174,8 +174,15 @@ jobs:
           python -m midterms.cli restore-rebuild-checkpoint \
             --source-root .resume-checkpoint \
             --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
-            --artifacts-dir data/artifacts
+            --artifacts-dir data/artifacts | tee "$RUNNER_TEMP/rebuild-checkpoint.json"
           echo "resumed=true" >> "$GITHUB_OUTPUT"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          from pathlib import Path
+          report = json.loads(Path(os.environ["RUNNER_TEMP"]).joinpath("rebuild-checkpoint.json").read_text())
+          print(f"forecast_resumed={str(bool(report.get('forecast_restored'))).lower()}")
+          print(f"forecast_run_id={report.get('forecast_run_id') or ''}")
+          PY
       - name: Restore poll-structure selection-pass cache
         id: selection-cache
         if: steps.resume.outputs.resumed != 'true'
@@ -319,21 +326,25 @@ jobs:
             data/artifacts/posterior_predictive_oof_latest.json
           key: canonical-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json') }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Fit predictive-mixture stack from canonical OOF only
+        if: steps.resume.outputs.forecast_resumed != 'true'
         run: |
           python -m midterms.cli fit-stack-weights \
             --nested-path data/artifacts/nested_component_loo_canonical.json \
             --out data/artifacts/stack_weights_oof.json \
             --require-canonical
       - name: Cross-fitted production-stack reliability
+        if: steps.resume.outputs.forecast_resumed != 'true'
         run: |
           python -m midterms.cli crossfit-stack-reliability \
             --nested-path data/artifacts/nested_component_loo_canonical.json \
             --stack-path data/artifacts/stack_weights_oof.json
       - name: Joint historical proper scores
+        if: steps.resume.outputs.forecast_resumed != 'true'
         run: |
           python -m midterms.cli joint-oof-scores --strict \
             --nested-path data/artifacts/nested_component_loo_canonical.json
       - name: Finalize validated model spec
+        if: steps.resume.outputs.forecast_resumed != 'true'
         run: |
           python -m midterms.cli finalize-validated-model-spec \
             --candidate data/artifacts/validated_model_spec_candidate.json \
@@ -343,6 +354,7 @@ jobs:
             --code-commit-sha "$(git rev-parse HEAD)" \
             --out data/artifacts/validated_model_spec_latest.json
       - name: Run publication-quality research forecast
+        if: steps.resume.outputs.forecast_resumed != 'true'
         run: |
           python -m midterms.cli forecast \
             --election-id senate-2026 \
