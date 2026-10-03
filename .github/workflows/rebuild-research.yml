@@ -349,6 +349,8 @@ jobs:
             --as-of "$AS_OF" \
             --method pymc \
             --require-publishable \
+            --tune 4000 \
+            --target-accept 0.99 \
             --n-joint-sims 50000
       - name: Numerical quality
         run: python -m midterms.cli numerical-check --publishable

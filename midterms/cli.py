@@ -202,6 +202,12 @@ def main(argv: list[str] | None = None) -> None:
     p_run.add_argument("--draws", type=int, default=None)
     p_run.add_argument("--tune", type=int, default=None)
     p_run.add_argument("--chains", type=int, default=None)
+    p_run.add_argument(
+        "--target-accept",
+        type=float,
+        default=None,
+        help="NUTS target acceptance (default: 0.90 development / 0.99 publication)",
+    )
     p_run.add_argument("--seed", type=int, default=20260901)
     p_run.add_argument(
         "--generic-ballot",
@@ -276,6 +282,7 @@ def main(argv: list[str] | None = None) -> None:
             draws=a.draws,
             tune=a.tune,
             chains=a.chains,
+            target_accept=a.target_accept,
             seed=a.seed,
             generic_ballot=gb,
             generic_ballot_meta=gb_meta,

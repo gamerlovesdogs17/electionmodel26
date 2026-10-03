@@ -5,9 +5,11 @@ from __future__ import annotations
 from midterms.config import (
     DEMO_CHAINS,
     DEMO_DRAWS,
+    DEMO_TARGET_ACCEPT,
     DEMO_TUNE,
     PRODUCTION_CHAINS,
     PRODUCTION_DRAWS,
+    PRODUCTION_TARGET_ACCEPT,
     PRODUCTION_TUNE,
 )
 
@@ -38,3 +40,18 @@ def resolve_inference_settings(
         if require_publishable and value < floor:
             raise ValueError(f"publishable {name}={value} is below the production floor {floor}")
     return values
+
+
+def resolve_target_accept(
+    *, target_accept: float | None, require_publishable: bool,
+) -> float:
+    """Resolve the sampler acceptance target and fail closed for publication."""
+    floor = PRODUCTION_TARGET_ACCEPT if require_publishable else DEMO_TARGET_ACCEPT
+    value = floor if target_accept is None else float(target_accept)
+    if not 0.0 < value < 1.0:
+        raise ValueError("target_accept must be between 0 and 1")
+    if require_publishable and value < floor:
+        raise ValueError(
+            f"publishable target_accept={value} is below the production floor {floor}"
+        )
+    return value

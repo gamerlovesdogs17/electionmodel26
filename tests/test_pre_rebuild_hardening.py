@@ -436,6 +436,11 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert '"--tune-per-chain", "4000"' in text
     assert '"--chains", "4"' in text
     assert '"--target-accept", "0.99"' in text
+    forecast = text.index("Run publication-quality research forecast")
+    numerical = text.index("Numerical quality")
+    publication_block = text[forecast:numerical]
+    assert "--tune 4000" in publication_block
+    assert "--target-accept 0.99" in publication_block
     assert "resume_run_id:" in text
     assert "actions/download-artifact@v4" in text
     assert "restore-rebuild-checkpoint" in text

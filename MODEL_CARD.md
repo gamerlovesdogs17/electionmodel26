@@ -128,7 +128,10 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
   each lead. A broader 90/60/30/14/7-day grid remains diagnostic only.
 - **OOF inference floor:** 800 tune + 800 retained draws per chain, two chains,
   with R-hat/ESS checks per PyMC candidate. Publication inference remains
-  2000 tune + 2000 retained draws per chain, four chains.
+  4000 tune + 2000 retained draws per chain, four chains, with a NUTS target
+  acceptance of 0.99. This longer adaptation policy was adopted after the
+  2026-09-27 production attempt reported 14 divergent transitions at the prior
+  2000-tune / 0.90 target; the zero-divergence publication gate remains intact.
 - **Non-production:** `fast` hierarchical-t approximation (CI / `--allow-fast-fallback` only)
 - Generic ballot: VoteHub **21-day trailing weighted average** (Winsorized headline D−R)
 - **Morris §7.2:** current opinion ≠ future movement ≠ Election-Day terminal polling error

@@ -309,6 +309,7 @@ def test_every_run_forecast_pymc_call_receives_selected_poll_structure():
              and node.func.id in {"fit_pymc", "fit_pymc_dynamic"}]
     assert len(calls) >= 5
     assert all(any(keyword.arg == "poll_structure" for keyword in call.keywords) for call in calls)
+    assert all(any(keyword.arg == "target_accept" for keyword in call.keywords) for call in calls)
 
 
 def test_canonical_oof_passes_poll_structure_to_static_and_dynamic(monkeypatch):

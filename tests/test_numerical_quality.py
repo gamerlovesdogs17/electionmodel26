@@ -42,7 +42,7 @@ def test_evaluate_numerical_quality_passes_with_enough_draws():
         draws_margin=draws,
         n_posterior_samples=8000,
         draws=2000,
-        tune=2000,
+        tune=4000,
         chains=4,
         convergence={
             "available": True,

@@ -42,12 +42,18 @@ DEMO_AS_OF = "2026-09-13"
 DEMO_DRAWS = 800
 DEMO_TUNE = 800
 DEMO_CHAINS = 2
+DEMO_TARGET_ACCEPT = 0.90
 DEMO_SEED = 20260901
 
-# Publishable / research floors (see midterms.validation.numerical_quality)
+# Publishable / research floors (see midterms.validation.numerical_quality).
+# The 2026-09-27 production fit completed at 2k tuning draws and target_accept
+# 0.90 but reported 14 divergences.  Publication sampling therefore uses the
+# already-established convergence-repair policy: longer adaptation and a
+# conservative acceptance target.  Retained draws and chains are unchanged.
 PRODUCTION_DRAWS = 2000
-PRODUCTION_TUNE = 2000
+PRODUCTION_TUNE = 4000
 PRODUCTION_CHAINS = 4
+PRODUCTION_TARGET_ACCEPT = 0.99
 
 # Joint chamber simulations (correlated margin draws → seats). Separate from
 # PyMC retained posterior samples. CI/dev can use the floor; production target

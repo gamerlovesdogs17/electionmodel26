@@ -36,7 +36,10 @@ from midterms.model.pymc_model import (
     fit_pymc,
     fit_pymc_dynamic,
 )
-from midterms.pipeline.inference_settings import resolve_inference_settings
+from midterms.pipeline.inference_settings import (
+    resolve_inference_settings,
+    resolve_target_accept,
+)
 from midterms.simulate.chamber import independent_bernoulli_foil, simulate_chamber
 
 
@@ -147,6 +150,7 @@ def run_forecast(
     draws: int | None = None,
     tune: int | None = None,
     chains: int | None = None,
+    target_accept: float | None = None,
     seed: int = DEMO_SEED,
     generic_ballot: float = -1.0,
     ensemble: bool = True,
@@ -171,6 +175,10 @@ def run_forecast(
         require_publishable=require_publishable,
         method=method,
         allow_fast_fallback=allow_fast_fallback,
+    )
+    target_accept = resolve_target_accept(
+        target_accept=target_accept,
+        require_publishable=require_publishable,
     )
     overlay_validation: dict[str, Any] = {
         "policy": "development_requested_overlays",
@@ -453,6 +461,7 @@ def run_forecast(
             fit = fit_pymc(
                 snap, draws=draws, tune=tune, chains=chains, seed=seed,
                 generic_ballot=generic_ballot, poll_structure=selected_poll_structure,
+                target_accept=target_accept,
             )
         except Exception as exc:  # noqa: BLE001
             if not allow_fast_fallback:
@@ -473,6 +482,7 @@ def run_forecast(
             fit = fit_pymc_dynamic(
                 snap, draws=draws, tune=tune, chains=chains, seed=seed,
                 generic_ballot=generic_ballot, poll_structure=selected_poll_structure,
+                target_accept=target_accept,
             )
         except Exception as exc:  # noqa: BLE001
             if not allow_fast_fallback:
@@ -481,6 +491,7 @@ def run_forecast(
             fit = fit_pymc(
                 snap, draws=draws, tune=tune, chains=chains, seed=seed,
                 generic_ballot=generic_ballot, poll_structure=selected_poll_structure,
+                target_accept=target_accept,
             )
             fit.diagnostics = {
                 **(fit.diagnostics or {}),
@@ -578,6 +589,7 @@ def run_forecast(
                 snap, draws=draws, tune=tune, chains=chains,
                 seed=seed + 29, generic_ballot=generic_ballot,
                 poll_structure=selected_poll_structure,
+                target_accept=target_accept,
             )
             component_draws["pymc"] = separate_static.draws_margin
         if weights.get("pymc_dynamic", 0.0) > 0 and "pymc_dynamic" not in component_draws:
@@ -585,6 +597,7 @@ def run_forecast(
                 snap, draws=draws, tune=tune, chains=chains,
                 seed=seed + 31, generic_ballot=generic_ballot,
                 poll_structure=selected_poll_structure,
+                target_accept=target_accept,
             )
             component_draws["pymc_dynamic"] = separate_dynamic.draws_margin
         try:

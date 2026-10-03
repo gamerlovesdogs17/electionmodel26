@@ -4,6 +4,21 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-10-03 — publication sampler convergence repair
+
+- The sealed-evidence v0.9.22 production attempt completed four chains with
+  2,000 tuning and 2,000 retained draws per chain but correctly failed the
+  numerical gate after reporting 14 divergent transitions.
+- Publication sampling now uses 4,000 tuning draws per chain and
+  `target_accept=0.99`; four chains and 2,000 retained draws per chain remain
+  unchanged. Explicit publication requests below either convergence setting
+  fail closed.
+- The rebuild workflow passes both settings explicitly, and every static or
+  dynamic PyMC fit launched by the forecast pipeline receives the resolved
+  target acceptance value. Development defaults remain lightweight.
+- The divergence gate was not relaxed, and the failed posterior was not
+  promoted or reused. Historical OOF checkpoints remain separately recoverable.
+
 ## 2026-09-29 — conditional candidate-state source contract
 
 - Replaced the universal exact-candidate requirement with a per-race,
