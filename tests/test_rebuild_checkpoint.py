@@ -20,7 +20,10 @@ from midterms.validation.nested_component_loo import (
     read_repair_checkpoint,
     repair_checkpoint_path,
 )
-from midterms.validation.rebuild_checkpoint import restore_rebuild_checkpoint
+from midterms.validation.rebuild_checkpoint import (
+    _verify_independent_rebuild_artifact,
+    restore_rebuild_checkpoint,
+)
 from midterms.validation.validated_model_spec import (
     CANDIDATE_SPEC_SCHEMA,
     CANONICAL_OOF_PHASE,
@@ -158,6 +161,7 @@ def test_restore_checkpoint_reuses_only_lineage_checked_oof_files(tmp_path: Path
         source_root=source, evidence_bundle_path=bundle, artifacts_dir=destination,
     )
     assert result["ok"] is True
+    assert result["schema_version"] == "rebuild-checkpoint-restore-v3"
     assert result["forecast_restored"] is False
     assert result["canonical_failures_to_repair"] == [
         {"year": 2020, "lead": 60, "component": "pymc"}
@@ -222,6 +226,55 @@ def test_restore_checkpoint_refuses_partial_publication_outputs(tmp_path: Path) 
     assert result["forecast_restored"] is False
     assert "incomplete" in result["forecast_restore_reason"]
     assert json.loads(marker.read_text()) == {"keep": True}
+
+
+def test_checkpoint_reuses_only_lineage_checked_independent_rebuild(tmp_path: Path) -> None:
+    source = tmp_path / "data" / "artifacts"
+    source.mkdir(parents=True)
+    run_id = "synthetic-publication-run"
+    forecast_sha = "a" * 64
+    generated_at = "2026-10-03T12:00:00+00:00"
+    _write(source / "forecast_latest.json", {
+        "run_id": run_id, "generated_at": generated_at,
+    })
+    configuration = {
+        "method": "pymc", "draws": 2000, "tune": 4000, "chains": 4,
+        "target_accept": 0.99, "seed": 20260901, "generic_ballot": 1.5,
+        "ensemble": True, "with_ratings": False, "with_markets": False,
+        "rating_weight": 0.15, "market_weight": 0.12, "control_weight": 0.15,
+        "control_calibrate": False, "allow_fast_fallback": False,
+    }
+    manifest_path = _write(tmp_path / "data" / "manifests" / f"run_{run_id}.json", {
+        "run_id": run_id, "election_id": "senate-2026",
+        "forecast_as_of": "2026-09-27", "configuration": configuration,
+        "output_hashes": {"forecast_json": forecast_sha},
+    })
+    independent = {
+        "ok": True, "mode": "independent", "run_id": run_id,
+        "generated_at": "2026-10-03T12:05:00+00:00",
+        "domain_ok": True, "domain_mismatches": [],
+        "configuration": {
+            "election_id": "senate-2026", "as_of": "2026-09-27", **configuration,
+        },
+        "comparison": {"ok": True, "checks": [{"name": "synthetic", "ok": True}]},
+        "lite_hash_seal": {
+            "ok": True, "run_id": run_id, "draws_ok": True,
+            "forecast_hash_expected": forecast_sha,
+            "forecast_hash_actual": forecast_sha,
+        },
+    }
+    independent_path = _write(source / "independent_rebuild_latest.json", independent)
+    completed_model = {"run_id": run_id, "manifest_path": manifest_path}
+    assert _verify_independent_rebuild_artifact(
+        independent_path, completed_model=completed_model, source=source,
+    )["ok"] is True
+
+    independent["configuration"]["with_markets"] = True
+    _write(independent_path, independent)
+    with pytest.raises(ValueError, match="sealed publication configuration"):
+        _verify_independent_rebuild_artifact(
+            independent_path, completed_model=completed_model, source=source,
+        )
 
 
 def test_independent_rebuild_replays_publication_configuration(tmp_path: Path, monkeypatch) -> None:

@@ -117,6 +117,16 @@ def check_run_coherence(
     snapshot_id = str(snap.get("snapshot_id") or (forecast.get("snapshot_ids") or {}).get("evidence") or "")
     emb_elig = forecast.get("evidence_eligibility") or {}
     emb_fp = str((forecast.get("evidence_fingerprint") or {}).get("sha256") or "")
+    raw_domain_contract = emb_elig.get("effective_domain_contract")
+    domain_contract = raw_domain_contract if isinstance(raw_domain_contract, dict) else {}
+    raw_domain_roles = domain_contract.get("roles")
+    domain_roles = raw_domain_roles if isinstance(raw_domain_roles, dict) else {}
+    if forecast.get("publishable"):
+        from midterms.evidence.eligibility import DOMAIN_CONTRACT_VERSION
+
+        if (domain_contract.get("schema_version") != DOMAIN_CONTRACT_VERSION
+                or not isinstance(raw_domain_roles, dict)):
+            mismatches.append("publishable forecast lacks the current effective domain contract")
     source_sha = forecast.get("presidential_source_sha256") or snap.get("presidential_source_sha256")
     if source_sha:
         try:
@@ -160,18 +170,41 @@ def check_run_coherence(
 
     market_sha = forecast.get("market_store_sha256")
     market_audit_sha = forecast.get("market_audit_sha256")
-    if market_sha or market_audit_sha or forecast.get("publishable"):
+    market_role = str(domain_roles.get("markets") or "")
+    market_required = market_role in {"required_core", "conditionally_required"}
+    overlay_block = forecast.get("overlays") or {}
+    market_overlay_enabled = bool((overlay_block.get("markets") or {}).get("enabled"))
+    control_overlay_enabled = bool(
+        (overlay_block.get("control_market") or {}).get("enabled")
+    )
+    if (market_overlay_enabled or control_overlay_enabled) and not market_required:
+        mismatches.append("market overlay is enabled while the market domain is not required")
+    if market_required and (not market_sha or not market_audit_sha):
+        mismatches.append("required market domain lacks store or mapping-audit lineage")
+    if market_required or market_sha or market_audit_sha:
         from midterms.evidence.markets import verify_market_store_integrity
 
         market_check = verify_market_store_integrity(as_of=str(forecast.get("forecast_as_of") or "")[:10])
         if not market_check["ok"]:
-            mismatches.append(f"market store integrity failed: {market_check['reason']}")
+            message = f"market store integrity failed: {market_check['reason']}"
+            if market_required:
+                mismatches.append(message)
+            else:
+                notes.append(message + " (nonblocking because the market domain is disabled)")
         else:
             market_manifest = _load(MANIFESTS_DIR / "markets_kalshi.json") or {}
             if market_manifest.get("normalized_races_sha256") != market_sha:
-                mismatches.append("market store fingerprint differs from forecast")
+                message = "market store fingerprint differs from forecast"
+                (mismatches if market_required else notes).append(message)
             if market_check.get("audit_sha256") != market_audit_sha:
-                mismatches.append("market mapping audit fingerprint differs from forecast")
+                message = "market mapping audit fingerprint differs from forecast"
+                (mismatches if market_required else notes).append(message)
+
+    ratings_role = str(domain_roles.get("ratings") or "")
+    ratings_required = ratings_role in {"required_core", "conditionally_required"}
+    ratings_enabled = bool((overlay_block.get("ratings") or {}).get("enabled"))
+    if ratings_enabled and not ratings_required:
+        mismatches.append("ratings overlay is enabled while the ratings domain is not required")
 
     decomposition_name = forecast.get("decomposition_artifact")
     if decomposition_name:

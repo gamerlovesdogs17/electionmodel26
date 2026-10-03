@@ -181,6 +181,7 @@ jobs:
           from pathlib import Path
           report = json.loads(Path(os.environ["RUNNER_TEMP"]).joinpath("rebuild-checkpoint.json").read_text())
           print(f"forecast_resumed={str(bool(report.get('forecast_restored'))).lower()}")
+          print(f"independent_resumed={str(bool(report.get('independent_rebuild_restored'))).lower()}")
           print(f"forecast_run_id={report.get('forecast_run_id') or ''}")
           PY
       - name: Restore poll-structure selection-pass cache
@@ -369,6 +370,7 @@ jobs:
       - name: Validation report and reused posterior diagnostics
         run: python -m midterms.cli validation-report --full
       - name: Independent rebuild
+        if: steps.resume.outputs.independent_resumed != 'true'
         run: python -m midterms.cli verify-rebuild --independent
       - name: Run coherence check
         run: |

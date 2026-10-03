@@ -74,6 +74,8 @@ def test_rebuild_workflow_has_strict_preflight_current_date_and_pages_deploy():
     assert "evidence-eligibility" in text and "--strict" in text
     assert "--publication-config" in text
     assert "acceptance-gates --strict" in text
+    assert "independent_resumed=" in text
+    assert "steps.resume.outputs.independent_resumed != 'true'" in text
     assert "fetch-markets" not in text
     assert "publish-live" not in text
     assert "deploy_pages:" in text

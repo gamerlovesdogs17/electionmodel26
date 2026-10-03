@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -217,6 +218,84 @@ def _verify_completed_model(
     }
 
 
+def _verify_independent_rebuild_artifact(
+    path: Path, *, completed_model: dict[str, Any], source: Path,
+) -> dict[str, Any]:
+    """Verify a completed independent rebuild before allowing a resume to skip it."""
+    independent = _read(path)
+    forecast = _read(source / "forecast_latest.json")
+    manifest = _read(Path(completed_model["manifest_path"]))
+    run_id = str(completed_model["run_id"])
+    _require(
+        independent.get("ok") is True
+        and independent.get("mode") == "independent"
+        and independent.get("run_id") == run_id,
+        "independent rebuild identity or status changed",
+    )
+    _require(
+        independent.get("domain_ok") is True
+        and not (independent.get("domain_mismatches") or []),
+        "independent rebuild domain comparison failed",
+    )
+    comparison = independent.get("comparison") or {}
+    _require(
+        comparison.get("ok") is True
+        and bool(comparison.get("checks"))
+        and all(check.get("ok") is True for check in comparison.get("checks") or []),
+        "independent rebuild probability comparison failed",
+    )
+    seal = independent.get("lite_hash_seal") or {}
+    expected_forecast_sha = (manifest.get("output_hashes") or {}).get("forecast_json")
+    _require(
+        seal.get("ok") is True
+        and seal.get("run_id") == run_id
+        and seal.get("draws_ok") is True
+        and seal.get("forecast_hash_expected") == expected_forecast_sha
+        and seal.get("forecast_hash_actual") == expected_forecast_sha,
+        "independent rebuild hash seal changed",
+    )
+
+    replay = independent.get("configuration") or {}
+    source_config = manifest.get("configuration") or {}
+    forecast_diagnostics = forecast.get("diagnostics") or {}
+    expected_config = {
+        "election_id": manifest.get("election_id"),
+        "as_of": manifest.get("forecast_as_of"),
+        **{
+            key: source_config.get(key)
+            for key in (
+                "method", "draws", "tune", "chains", "target_accept", "seed",
+                "generic_ballot", "ensemble", "with_ratings", "with_markets",
+                "rating_weight", "market_weight", "control_weight",
+                "control_calibrate", "allow_fast_fallback",
+            )
+        },
+    }
+    # Older sealed v0.9.22 manifests omitted this field even though the
+    # forecast diagnostics recorded it and the independent replay consumed it.
+    expected_config["target_accept"] = source_config.get(
+        "target_accept", forecast_diagnostics.get("target_accept")
+    )
+    _require(
+        all(replay.get(key) == value for key, value in expected_config.items()),
+        "independent rebuild did not replay the sealed publication configuration",
+    )
+    try:
+        forecast_generated = datetime.fromisoformat(
+            str(forecast.get("generated_at") or "").replace("Z", "+00:00")
+        )
+        rebuild_generated = datetime.fromisoformat(
+            str(independent.get("generated_at") or "").replace("Z", "+00:00")
+        )
+    except ValueError as exc:
+        raise ValueError("independent rebuild timestamps are invalid") from exc
+    _require(
+        rebuild_generated >= forecast_generated - timedelta(minutes=5),
+        "independent rebuild predates the forecast it claims to verify",
+    )
+    return independent
+
+
 def _verify_report_pair(
     report_path: Path,
     index_path: Path,
@@ -394,6 +473,18 @@ def restore_rebuild_checkpoint(
             # copied and the workflow will rerun the downstream production steps.
             completed_model_reason = str(exc)
 
+    independent_rebuild: dict[str, Any] | None = None
+    independent_rebuild_reason = "independent rebuild not present in checkpoint"
+    independent_path = source / "independent_rebuild_latest.json"
+    if completed_model is not None and independent_path.is_file():
+        try:
+            independent_rebuild = _verify_independent_rebuild_artifact(
+                independent_path, completed_model=completed_model, source=source,
+            )
+            independent_rebuild_reason = "verified independent rebuild restored"
+        except (ValueError, KeyError, TypeError, OSError) as exc:
+            independent_rebuild_reason = str(exc)
+
     destination.mkdir(parents=True, exist_ok=True)
     restored = []
     for name in CHECKPOINT_FILES:
@@ -444,9 +535,12 @@ def restore_rebuild_checkpoint(
                 f"data/releases/{completed_model['run_id']}/",
                 "web/public/data/forecast_latest.json",
             ])
+        if independent_rebuild is not None:
+            shutil.copy2(independent_path, destination / independent_path.name)
+            restored.append(independent_path.name)
     return {
         "ok": True,
-        "schema_version": "rebuild-checkpoint-restore-v2",
+        "schema_version": "rebuild-checkpoint-restore-v3",
         "model_version": MODEL_VERSION,
         "evidence_bundle_id": bundle.get("evidence_bundle_id"),
         "selected_poll_structure_id": candidate.get("selected_poll_structure_id"),
@@ -455,5 +549,7 @@ def restore_rebuild_checkpoint(
         "forecast_restore_reason": completed_model_reason,
         "forecast_run_id": (completed_model or {}).get("run_id"),
         "forecast_source_code_commit": (completed_model or {}).get("source_code_commit"),
+        "independent_rebuild_restored": independent_rebuild is not None,
+        "independent_rebuild_restore_reason": independent_rebuild_reason,
         "restored_files": restored,
     }

@@ -156,12 +156,79 @@ def test_coherence_rejects_stale_market_store(tmp_path: Path, monkeypatch):
         "forecast_as_of": "2026-01-01", "publishable": False,
         "run_class": "non_publication", "publication_surface": "research_only",
         "market_store_sha256": "a" * 64, "market_audit_sha256": "b" * 64,
+        "evidence_eligibility": {"effective_domain_contract": {
+            "roles": {"markets": "conditionally_required"},
+        }},
         "snapshot": {"snapshot_id": "synthetic-snapshot"},
     }
     (tmp_path / "forecast_latest.json").write_text(json.dumps(forecast), encoding="utf-8")
     report = check_run_coherence(artifacts_dir=tmp_path, require_matching_eligibility=False)
     assert not report["ok"]
     assert any("market store integrity" in item for item in report["mismatches"])
+
+
+def test_coherence_ignores_stale_market_store_when_overlays_are_disabled(
+    tmp_path: Path, monkeypatch,
+):
+    from midterms.config import MODEL_VERSION
+    from midterms.evidence import markets
+    from midterms.evidence.eligibility import DOMAIN_CONTRACT_VERSION
+
+    monkeypatch.setattr(
+        markets, "verify_market_store_integrity",
+        lambda **kwargs: {"ok": False, "reason": "synthetic stale parser"},
+    )
+    forecast = {
+        "run_id": "synthetic-run", "model_version": MODEL_VERSION,
+        "forecast_as_of": "2026-01-01", "publishable": True,
+        "run_class": "publication", "publication_surface": "research_only",
+        "evidence_eligibility": {"effective_domain_contract": {
+            "schema_version": DOMAIN_CONTRACT_VERSION,
+            "roles": {"markets": "disabled", "ratings": "disabled"},
+        }},
+        "overlays": {
+            "markets": {"enabled": False},
+            "control_market": {"enabled": False},
+            "ratings": {"enabled": False},
+        },
+        "snapshot": {"snapshot_id": "synthetic-snapshot"},
+    }
+    (tmp_path / "forecast_latest.json").write_text(json.dumps(forecast), encoding="utf-8")
+    report = check_run_coherence(
+        artifacts_dir=tmp_path, require_matching_eligibility=False,
+    )
+    unrelated = [
+        item for item in report["mismatches"]
+        if "market" in item.lower() or "domain contract" in item.lower()
+    ]
+    assert unrelated == []
+
+
+def test_coherence_rejects_overlay_domain_contract_mismatch(tmp_path: Path):
+    from midterms.config import MODEL_VERSION
+    from midterms.evidence.eligibility import DOMAIN_CONTRACT_VERSION
+
+    forecast = {
+        "run_id": "synthetic-run", "model_version": MODEL_VERSION,
+        "forecast_as_of": "2026-01-01", "publishable": False,
+        "run_class": "non_publication", "publication_surface": "research_only",
+        "evidence_eligibility": {"effective_domain_contract": {
+            "schema_version": DOMAIN_CONTRACT_VERSION,
+            "roles": {"markets": "disabled", "ratings": "disabled"},
+        }},
+        "overlays": {
+            "markets": {"enabled": True},
+            "control_market": {"enabled": False},
+            "ratings": {"enabled": False},
+        },
+        "snapshot": {"snapshot_id": "synthetic-snapshot"},
+    }
+    (tmp_path / "forecast_latest.json").write_text(json.dumps(forecast), encoding="utf-8")
+    report = check_run_coherence(
+        artifacts_dir=tmp_path, require_matching_eligibility=False,
+    )
+    assert not report["ok"]
+    assert any("market overlay is enabled" in item for item in report["mismatches"])
 
 
 def test_coherence_rejects_stale_stack_artifact(tmp_path: Path, monkeypatch):
