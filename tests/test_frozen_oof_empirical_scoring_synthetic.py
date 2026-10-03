@@ -113,16 +113,17 @@ def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> 
         from midterms.model.poll_structure import PollStructureConfig
 
         events.append("fit")
-        assert (draws, tune, chains, seed, generic_ballot) == (2000, 2000, 4, 7, 0.0)
-        assert target_accept == 0.95
+        assert (draws, tune, chains, seed, generic_ballot) == (2000, 4000, 4, 7, 0.0)
+        assert target_accept == 0.99
         assert poll_structure == PollStructureConfig()
         return FitResult(
             race_ids=[race_id], states=["AA"], mean_margin=np.array([0.0]),
             sd_margin=np.array([1.0]),
             draws_margin=np.array([[-1.0], [0.0], [1.0], [2.0]]),
             house_effects={}, method="pymc_dynamic",
-            diagnostics={"draws": 2000, "tune": 2000, "chains": 4,
-                         "target_accept": 0.95,
+            diagnostics={"draws": 2000, "tune": 4000, "chains": 4,
+                         "target_accept": 0.99,
+                         "hierarchical_parameterization": "noncentered_scale_mixtures_v1",
                          "convergence": {"available": True, "r_hat_max": 1.0,
                                          "ess_bulk_min_frac": 0.2}},
         )
@@ -144,7 +145,10 @@ def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> 
     assert result["remaining_failures"] == 0
     repaired = json.loads(report_path.read_text())
     assert repaired["oof_crps_method"] == "exact_empirical_predictive_draws"
-    assert repaired["inference_repairs"][0]["target_accept"] == 0.95
+    assert repaired["inference_repairs"][0]["target_accept"] == 0.99
+    assert repaired["inference_repairs"][0]["parameterization"] == (
+        "noncentered_scale_mixtures_v1"
+    )
     posterior = json.loads(
         (tmp_path / "posterior_predictive_oof_latest.json").read_text()
     )

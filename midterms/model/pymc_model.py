@@ -63,6 +63,27 @@ class FitResult:
     method: str
 
 
+def _noncentered_normal(pm, name: str, *, mu, sigma, dims: str | tuple[str, ...] | None = None):
+    """Normal hierarchy with identical conditional prior and safer geometry."""
+    dims_arg = {} if dims is None else {"dims": dims}
+    raw = pm.Normal(f"{name}_raw", mu=0.0, sigma=1.0, **dims_arg)
+    return pm.Deterministic(name, mu + sigma * raw, **dims_arg)
+
+
+def _noncentered_student_t(
+    pm,
+    name: str,
+    *,
+    nu: float,
+    sigma,
+    dims: str | tuple[str, ...] | None = None,
+):
+    """Student-t hierarchy with identical conditional prior and safer geometry."""
+    dims_arg = {} if dims is None else {"dims": dims}
+    raw = pm.StudentT(f"{name}_raw", nu=nu, mu=0.0, sigma=1.0, **dims_arg)
+    return pm.Deterministic(name, sigma * raw, **dims_arg)
+
+
 def _mode_offset(mode: object) -> float:
     """Prior-mean mode offset for fast/state-space paths (PyMC estimates hierarchically)."""
     return fixed_mode_offset(mode)
@@ -78,13 +99,15 @@ def _measurement_effects(pm, prep: dict):
     coords_extra = {"mode": list(MODE_ORDER), "pop": list(POP_ORDER)}
     sigma_mode = pm.HalfNormal("sigma_mode", 0.6)
     sigma_pop = pm.HalfNormal("sigma_pop", 0.6)
-    mode_eff = pm.Normal(
+    mode_eff = _noncentered_normal(
+        pm,
         "mode_eff",
         mu=prep["mode_prior"],
         sigma=sigma_mode,
         dims="mode",
     )
-    pop_eff = pm.Normal(
+    pop_eff = _noncentered_normal(
+        pm,
         "pop_eff",
         mu=prep["pop_prior"],
         sigma=sigma_pop,
@@ -266,11 +289,17 @@ def fit_pymc(
 
     with pm.Model(coords=coords) as model:  # noqa: F841
         sigma_nat = pm.HalfNormal("sigma_nat", 4.0)
-        national = pm.StudentT("national", nu=4, mu=0.0, sigma=sigma_nat)
+        national = _noncentered_student_t(
+            pm, "national", nu=4, sigma=sigma_nat,
+        )
         sigma_region = pm.HalfNormal("sigma_region", 2.5)
-        region_eff = pm.StudentT("region_eff", nu=5, mu=0.0, sigma=sigma_region, dims="region")
+        region_eff = _noncentered_student_t(
+            pm, "region_eff", nu=5, sigma=sigma_region, dims="region",
+        )
         sigma_local = pm.HalfNormal("sigma_local", 3.5)
-        local = pm.StudentT("local", nu=5, mu=0.0, sigma=sigma_local, dims="race")
+        local = _noncentered_student_t(
+            pm, "local", nu=5, sigma=sigma_local, dims="race",
+        )
 
         mu_ed = pm.Deterministic(
             "mu_ed",
@@ -438,6 +467,7 @@ def fit_pymc(
             "chains": chains,
             "seed": seed,
             "target_accept": target_accept,
+            "hierarchical_parameterization": "noncentered_scale_mixtures_v1",
             "n_posterior_samples": int(draws * chains),
             "latent_path": "static_election_day",
             "measurement_effects": "hierarchical_mode_pop",
@@ -603,9 +633,13 @@ def fit_pymc_dynamic(
     with pm.Model(coords=coords) as model:  # noqa: F841
         # Anchors (partial pooling) — level around fundamentals
         sigma_region = pm.HalfNormal("sigma_region", 2.5)
-        region_eff = pm.StudentT("region_eff", nu=5, mu=0.0, sigma=sigma_region, dims="region")
+        region_eff = _noncentered_student_t(
+            pm, "region_eff", nu=5, sigma=sigma_region, dims="region",
+        )
         sigma_local0 = pm.HalfNormal("sigma_local0", 3.0)
-        local0 = pm.StudentT("local0", nu=5, mu=0.0, sigma=sigma_local0, dims="race")
+        local0 = _noncentered_student_t(
+            pm, "local0", nu=5, sigma=sigma_local0, dims="race",
+        )
 
         # National / race weekly RW with calendar + Morris-calibrated step sds
         nat_innov = pm.Normal("nat_innov", 0.0, 1.0, dims="week")
@@ -786,6 +820,7 @@ def fit_pymc_dynamic(
             "chains": chains,
             "seed": seed,
             "target_accept": target_accept,
+            "hierarchical_parameterization": "noncentered_scale_mixtures_v1",
             "n_posterior_samples": int(draws * chains),
             "latent_path": "weekly_random_walk_morris_calibrated",
             "measurement_effects": "hierarchical_mode_pop",

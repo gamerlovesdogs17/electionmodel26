@@ -7,6 +7,7 @@ from copy import deepcopy
 import pytest
 
 from midterms.model.poll_structure import PollStructureConfig, add_optional_poll_effects
+from midterms.model.pymc_model import _noncentered_normal, _noncentered_student_t
 from midterms.validation.poll_structure_selection import (
     BASE_STRUCTURE,
     POLL_STRUCTURE_CANDIDATES,
@@ -99,6 +100,56 @@ def test_study_effect_uses_equivalent_noncentered_parameterization():
     assert pm.normal_calls == [("study_raw", 0.0, 1.0, "study")]
     assert pm.deterministics == [("study_eff", "study")]
     assert active["study"] == "shared_latent_deviation_noncentered"
+
+
+def test_core_scale_mixtures_use_equivalent_noncentered_parameterization():
+    class Symbol:
+        def __init__(self, value):
+            self.value = value
+
+        def __mul__(self, other):
+            return Symbol(("mul", self.value, getattr(other, "value", other)))
+
+        __rmul__ = __mul__
+
+        def __add__(self, other):
+            return Symbol(("add", self.value, getattr(other, "value", other)))
+
+        def __radd__(self, other):
+            return Symbol(("add", getattr(other, "value", other), self.value))
+
+    class FakePM:
+        def __init__(self):
+            self.calls = []
+            self.deterministics = []
+
+        def Normal(self, name, **kwargs):
+            self.calls.append(("Normal", name, kwargs))
+            return Symbol(name)
+
+        def StudentT(self, name, **kwargs):
+            self.calls.append(("StudentT", name, kwargs))
+            return Symbol(name)
+
+        def Deterministic(self, name, value, **kwargs):
+            self.deterministics.append((name, value.value, kwargs))
+            return Symbol(name)
+
+    pm = FakePM()
+    sigma = Symbol("sigma")
+    _noncentered_student_t(pm, "local", nu=5, sigma=sigma, dims="race")
+    _noncentered_normal(pm, "mode_eff", mu=2.0, sigma=sigma, dims="mode")
+
+    assert pm.calls == [
+        ("StudentT", "local_raw", {"nu": 5, "mu": 0.0, "sigma": 1.0, "dims": "race"}),
+        ("Normal", "mode_eff_raw", {"mu": 0.0, "sigma": 1.0, "dims": "mode"}),
+    ]
+    assert pm.deterministics[0] == (
+        "local", ("mul", "sigma", "local_raw"), {"dims": "race"},
+    )
+    assert pm.deterministics[1] == (
+        "mode_eff", ("add", 2.0, ("mul", "sigma", "mode_eff_raw")), {"dims": "mode"},
+    )
 
 
 def _scores() -> dict[str, dict[str, float]]:

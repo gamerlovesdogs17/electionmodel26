@@ -433,9 +433,9 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert repair < cache < stack
     assert "repair-failed-oof-inference" in text
     assert '"--draws-per-chain", "2000"' in text
-    assert '"--tune-per-chain", "2000"' in text
+    assert '"--tune-per-chain", "4000"' in text
     assert '"--chains", "4"' in text
-    assert '"--target-accept", "0.95"' in text
+    assert '"--target-accept", "0.99"' in text
     assert "resume_run_id:" in text
     assert "actions/download-artifact@v4" in text
     assert "restore-rebuild-checkpoint" in text

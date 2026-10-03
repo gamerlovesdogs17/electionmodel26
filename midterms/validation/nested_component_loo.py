@@ -171,7 +171,8 @@ def _freeze_from_fit(
         fit_settings={
             k: diagnostics.get(k)
             for k in (
-                "draws", "tune", "chains", "seed", "target_accept", "convergence",
+                "draws", "tune", "chains", "seed", "target_accept",
+                "hierarchical_parameterization", "convergence",
                 "prior_predictive", "posterior_predictive",
             )
         },
@@ -808,9 +809,9 @@ def repair_failed_oof_inference(
     component: str,
     out_path: Path | None = None,
     draws_per_chain: int = 2000,
-    tune_per_chain: int = 2000,
+    tune_per_chain: int = 4000,
     chains: int = 4,
-    target_accept: float = 0.95,
+    target_accept: float = 0.99,
 ) -> dict[str, Any]:
     """Refit a failed PyMC freeze using only convergence-driven extra sampling.
 
@@ -907,7 +908,7 @@ def repair_failed_oof_inference(
         "reason": "initial freeze failed convergence diagnostics; no truth used in refit",
         "draws_per_chain": draws_per_chain, "tune_per_chain": tune_per_chain,
         "chains": chains, "target_accept": target_accept,
-        "parameterization": "noncentered_optional_poll_effects_v1",
+        "parameterization": "noncentered_scale_mixtures_v1",
         "seed": int(original["seed"]),
     })
     original.update({

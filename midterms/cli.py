@@ -921,9 +921,9 @@ def main(argv: list[str] | None = None) -> None:
     )
     p_repair_oof.add_argument("--nested-path", required=True)
     p_repair_oof.add_argument("--draws-per-chain", type=int, default=2000)
-    p_repair_oof.add_argument("--tune-per-chain", type=int, default=2000)
+    p_repair_oof.add_argument("--tune-per-chain", type=int, default=4000)
     p_repair_oof.add_argument("--chains", type=int, default=4)
-    p_repair_oof.add_argument("--target-accept", type=float, default=0.95)
+    p_repair_oof.add_argument("--target-accept", type=float, default=0.99)
     p_repair_oof.set_defaults(
         func=lambda a: print(
             json.dumps(
