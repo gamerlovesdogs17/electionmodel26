@@ -14,7 +14,7 @@ on:
         type: boolean
         default: true
       resume_run_id:
-        description: Optional failed rebuild run ID whose lineage-checked OOF checkpoint should be reused.
+        description: Optional failed run ID whose verified OOF and completed model work should be reused.
         required: false
         type: string
         default: ""
