@@ -100,11 +100,11 @@ def simulate_chamber(
     from midterms.evidence.outcome_identity import require_binary_chamber_compatibility
 
     require_binary_chamber_compatibility(races)
-    # ``fit`` can intentionally exclude a contested seat from binary margin
-    # scoring (for example, a non D-v-R general election).  Such a seat still
-    # exists for chamber accounting, so keep the full contested universe
-    # separate from the active binary-scoring rows used for race summaries.
-    all_contested = races[~races["not_up"]] if len(races) else races
+    # ``fit`` can intentionally exclude an active contested seat from binary
+    # margin scoring (for example, a non D-v-R general election). Such a seat
+    # still exists for chamber accounting. Inactive alternate rows (withdrawn
+    # candidates, pending runoffs, etc.) are representations of the same seat,
+    # however, and must never be counted as additional Senate seats.
     contested = races[races.apply(is_active_ballot_row, axis=1)] if len(races) else races
     held = races[races["not_up"]] if len(races) else races
     held_ind = int((held["held_by"] == "I").sum()) if len(held) else 0
@@ -121,8 +121,8 @@ def simulate_chamber(
 
     # Contested seats omitted from the fit stay fixed by held_by — never invent seats.
     fit_ids = set(fit.race_ids)
-    if len(all_contested):
-        omitted = all_contested[~all_contested["race_id"].isin(fit_ids)]
+    if len(contested):
+        omitted = contested[~contested["race_id"].isin(fit_ids)]
         if len(omitted):
             invalid = omitted[~omitted["held_by"].isin(["D", "R", "I"])]
             if len(invalid):

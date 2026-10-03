@@ -108,11 +108,11 @@ def test_nonbinary_contested_seats_omitted_from_margin_fit_still_count() -> None
     rows.extend([
         {
             "race_id": "omitted-d", "not_up": False, "held_by": "D",
-            "ballot_status": "withdrawn",
+            "ballot_status": "nominated", "election_phase": "general",
         },
         {
             "race_id": "omitted-r", "not_up": False, "held_by": "R",
-            "ballot_status": "withdrawn",
+            "ballot_status": "nominated", "election_phase": "general",
         },
     ])
     races = pd.DataFrame(rows)
@@ -134,7 +134,7 @@ def test_omitted_contested_seat_without_declared_holder_fails_closed() -> None:
     ]
     rows.append({
         "race_id": "omitted-unknown", "not_up": False, "held_by": None,
-        "ballot_status": "withdrawn",
+        "ballot_status": "nominated", "election_phase": "general",
     })
     fit = FitResult(
         race_ids=[], states=[], mean_margin=np.array([]), sd_margin=np.array([]),
@@ -142,6 +142,45 @@ def test_omitted_contested_seat_without_declared_holder_fails_closed() -> None:
     )
     with pytest.raises(ValueError, match="explicit held_by"):
         simulate_chamber(fit, pd.DataFrame(rows))
+
+
+def test_inactive_alternate_contest_rows_do_not_create_extra_seats() -> None:
+    rows = [
+        {"race_id": f"held-r-{i}", "not_up": True, "held_by": "R"}
+        for i in range(65)
+    ]
+    rows.extend([
+        {
+            "race_id": f"active-{i}", "not_up": False, "held_by": "D",
+            "ballot_status": "nominated", "election_phase": "general",
+            "state": "ZZ", "prior_lean": 0.0, "incumbent_party": None,
+            "is_open": True, "seat_class": "II",
+        }
+        for i in range(35)
+    ])
+    rows.extend([
+        {
+            "race_id": "alternate-withdrawn", "not_up": False, "held_by": "D",
+            "ballot_status": "withdrawn", "election_phase": "general",
+        },
+        {
+            "race_id": "alternate-runoff", "not_up": False, "held_by": "R",
+            "ballot_status": "nominated", "election_phase": "runoff_pending",
+        },
+    ])
+    fit = FitResult(
+        race_ids=[f"active-{i}" for i in range(35)],
+        states=["ZZ"] * 35,
+        mean_margin=np.zeros(35),
+        sd_margin=np.ones(35),
+        draws_margin=np.ones((2, 35)),
+        house_effects={}, diagnostics={}, method="synthetic",
+    )
+    sim, summaries = simulate_chamber(fit, pd.DataFrame(rows))
+    assert sim.held_dem == 0
+    assert sim.held_rep == 65
+    assert sim.seat_draws.tolist() == [35, 35]
+    assert len(summaries) == 35
 
 
 def test_partial_metadata_attachment_does_not_invent_held_by() -> None:
