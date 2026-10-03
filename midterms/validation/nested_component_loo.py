@@ -10,6 +10,7 @@ Failures are recorded explicitly; unscored components receive no weight credit.
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
 from collections.abc import Callable
@@ -70,6 +71,9 @@ STRUCTURAL_VARIANTS = (
     "hier_plus_questionnaire_effect",
 )
 
+REPAIR_CHECKPOINT_SCHEMA = "oof-inference-repair-checkpoint-v1"
+REPAIR_CHECKPOINT_DIRNAME = "oof_inference_repair_checkpoints"
+
 
 @dataclass
 class FrozenPrediction:
@@ -95,6 +99,109 @@ class FrozenPrediction:
     prior_snapshot_sha256: str | None = None
     presidential_source_sha256: str | None = None
     structural_ablation_lineage: dict[str, Any] | None = None
+
+
+def _canonical_sha256(payload: Any) -> str:
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
+
+
+def repair_checkpoint_path(
+    out_path: Path, *, component: str, year: int, lead_days: int,
+) -> Path:
+    """Return the truth-free recovery checkpoint path for one expensive fold fit."""
+    return out_path.parent / REPAIR_CHECKPOINT_DIRNAME / (
+        f"{out_path.stem}__{component}__{year}__{lead_days}.json.gz"
+    )
+
+
+def _write_repair_checkpoint(
+    path: Path,
+    *,
+    replacement: FrozenPrediction,
+    index: dict[str, Any],
+    original_entry: dict[str, Any],
+    recovery_settings: dict[str, Any],
+) -> None:
+    """Persist a converged truth-free fit before any scored-report contact."""
+    payload = {
+        "schema_version": REPAIR_CHECKPOINT_SCHEMA,
+        "model_version": MODEL_VERSION,
+        "validation_phase": index.get("validation_phase"),
+        "poll_structure_config_id": index.get("poll_structure_config_id"),
+        "source_frozen_index_semantic_sha256": frozen_index_semantic_sha256(index),
+        "source_failed_entry_sha256": _canonical_sha256(original_entry),
+        "recovery_settings": recovery_settings,
+        "frozen_prediction": asdict(replacement),
+    }
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), allow_nan=False,
+    ).encode("utf-8")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_bytes(gzip.compress(encoded, compresslevel=6, mtime=0))
+    temporary.replace(path)
+
+
+def read_repair_checkpoint(path: Path) -> dict[str, Any]:
+    return json.loads(gzip.decompress(path.read_bytes()).decode("utf-8"))
+
+
+def validate_repair_checkpoint(
+    payload: dict[str, Any],
+    *,
+    index: dict[str, Any],
+    original_entry: dict[str, Any],
+    recovery_settings: dict[str, Any],
+    expected_snapshot_id: str,
+    expected_prior_sha256: str | None,
+    expected_presidential_sha256: str | None,
+) -> FrozenPrediction:
+    """Validate and reconstruct a truth-free repair checkpoint."""
+    if payload.get("schema_version") != REPAIR_CHECKPOINT_SCHEMA:
+        raise ValueError("OOF repair checkpoint schema changed")
+    if payload.get("model_version") != MODEL_VERSION:
+        raise ValueError("OOF repair checkpoint model version changed")
+    if payload.get("validation_phase") != index.get("validation_phase"):
+        raise ValueError("OOF repair checkpoint validation phase changed")
+    if payload.get("poll_structure_config_id") != index.get("poll_structure_config_id"):
+        raise ValueError("OOF repair checkpoint poll structure changed")
+    if payload.get("source_frozen_index_semantic_sha256") != frozen_index_semantic_sha256(index):
+        raise ValueError("OOF repair checkpoint freeze index changed")
+    if payload.get("source_failed_entry_sha256") != _canonical_sha256(original_entry):
+        raise ValueError("OOF repair checkpoint failed-entry lineage changed")
+    if payload.get("recovery_settings") != recovery_settings:
+        raise ValueError("OOF repair checkpoint inference settings changed")
+    frozen_payload = payload.get("frozen_prediction") or {}
+    replacement = FrozenPrediction(**frozen_payload)
+    if replacement.status != "ok" or not replacement.draws_by_race:
+        raise ValueError("OOF repair checkpoint has no usable predictive draws")
+    if replacement.prediction_sha256 != _draws_fingerprint(replacement.draws_by_race):
+        raise ValueError("OOF repair checkpoint predictive draws changed")
+    expected_identity = (
+        str(original_entry.get("component")),
+        int(original_entry.get("holdout_year")),
+        int(original_entry.get("lead_days")),
+        str(original_entry.get("as_of")),
+        int(original_entry.get("seed")),
+    )
+    actual_identity = (
+        replacement.component,
+        replacement.holdout_year,
+        replacement.lead_days,
+        replacement.as_of,
+        replacement.seed,
+    )
+    if actual_identity != expected_identity:
+        raise ValueError("OOF repair checkpoint target identity changed")
+    if (
+        replacement.evidence_snapshot_id != expected_snapshot_id
+        or replacement.prior_snapshot_sha256 != expected_prior_sha256
+        or replacement.presidential_source_sha256 != expected_presidential_sha256
+    ):
+        raise ValueError("OOF repair checkpoint evidence snapshot changed")
+    return replacement
 
 
 def _draws_fingerprint(draws: dict[str, Any]) -> str:
@@ -140,9 +247,11 @@ def _freeze_from_fit(
         for i, rid in enumerate(fit.race_ids)
     }
     diagnostics = fit.diagnostics or {}
-    if component in {"pymc", "pymc_dynamic", "state_space", "ridge_fundamentals"}:
-        if str(fit.method) != component:
-            raise ValueError(f"{component} fit returned a different model identity: {fit.method}")
+    if (
+        component in {"pymc", "pymc_dynamic", "state_space", "ridge_fundamentals"}
+        and str(fit.method) != component
+    ):
+        raise ValueError(f"{component} fit returned a different model identity: {fit.method}")
     if component in {"pymc", "pymc_dynamic"}:
         convergence = diagnostics.get("convergence") or {}
         if (not convergence.get("available")
@@ -706,6 +815,47 @@ def _g8_recommendations(
     return recs
 
 
+def validate_frozen_oof_case_coverage(report: dict[str, Any]) -> None:
+    """Fail closed unless every successful block covers the exact truth case set.
+
+    Count-only validation can miss a substituted case, and its old exception did
+    not identify the missing prediction.  The truth keys are already part of the
+    scored report, so this check does not weaken the freeze-before-truth boundary.
+    """
+    draws = report.get("oof_draws") or {}
+    truths = report.get("oof_truths") or {}
+    for year in report.get("years") or []:
+        year_key = str(year)
+        for lead in report.get("lead_days") or []:
+            lead_key = str(lead)
+            prefix = f"{year_key}:{lead_key}:"
+            expected = {case for case in truths if case.startswith(prefix)}
+            lead_scores = report["by_fold"][year_key]["leads"][lead_key]
+            for model, block in lead_scores.items():
+                if block.get("status") != "ok":
+                    continue
+                actual = {
+                    case for case in (draws.get(model) or {})
+                    if case.startswith(prefix) and case in truths
+                }
+                block_n = int(block.get("n", 0))
+                if block_n != len(expected) or actual != expected or not actual:
+                    detail = {
+                        "model": model,
+                        "year": int(year),
+                        "lead_days": int(lead),
+                        "block_n": block_n,
+                        "expected_n": len(expected),
+                        "actual_n": len(actual),
+                        "missing_cases": sorted(expected - actual),
+                        "unexpected_cases": sorted(actual - expected),
+                    }
+                    raise ValueError(
+                        "incomplete frozen draw case lineage: "
+                        + json.dumps(detail, sort_keys=True)
+                    )
+
+
 def rescore_frozen_oof_draws(report: dict[str, Any]) -> dict[str, Any]:
     """Recompute OOF CRPS from sealed predictive draws, without any refit.
 
@@ -718,6 +868,7 @@ def rescore_frozen_oof_draws(report: dict[str, Any]) -> dict[str, Any]:
     truths = report.get("oof_truths") or {}
     if report.get("frozen_draws_sha256") != _draws_fingerprint(draws):
         raise ValueError("frozen OOF draws changed before rescoring")
+    validate_frozen_oof_case_coverage(report)
     crps_by_fold: dict[str, dict[str, float]] = {}
     for year in report.get("years") or []:
         year_key = str(year)
@@ -733,8 +884,6 @@ def rescore_frozen_oof_draws(report: dict[str, Any]) -> dict[str, Any]:
                     case: values for case, values in (draws.get(model) or {}).items()
                     if case.startswith(prefix) and case in truths
                 }
-                if len(cases) != int(block.get("n", 0)) or not cases:
-                    raise ValueError(f"incomplete frozen draw cases for {model}/{year}/{lead}")
                 score = float(np.mean([
                     discrete_crps(np.asarray(values, dtype=float), float(truths[case]))
                     for case, values in sorted(cases.items())
@@ -848,21 +997,58 @@ def repair_failed_oof_inference(
     if original["as_of"] != as_of.isoformat():
         raise ValueError("freeze index date differs from reconstructed as-of")
     snap = wh.build_as_of(as_of, election_id)
-    fit_fn = fit_pymc if component == "pymc" else fit_pymc_dynamic
-    replacement = _freeze_from_fit(
-        fit_fn(
-            snap, draws=draws_per_chain, tune=tune_per_chain, chains=chains,
-            seed=int(original["seed"]), generic_ballot=_generic_ballot(snap),
-            poll_structure=repair_poll_structure,
-            target_accept=target_accept,
-        ),
-        component=component, election_id=election_id, holdout_year=year,
-        lead_days=lead_days, as_of=as_of, seed=int(original["seed"]),
+    recovery_settings = {
+        "draws_per_chain": int(draws_per_chain),
+        "tune_per_chain": int(tune_per_chain),
+        "chains": int(chains),
+        "target_accept": float(target_accept),
+        "parameterization": "noncentered_scale_mixtures_v1",
+    }
+    checkpoint_path = repair_checkpoint_path(
+        out_path, component=component, year=year, lead_days=lead_days,
     )
+    reused_repair_checkpoint = checkpoint_path.is_file()
+    if reused_repair_checkpoint:
+        replacement = validate_repair_checkpoint(
+            read_repair_checkpoint(checkpoint_path),
+            index=index,
+            original_entry=original,
+            recovery_settings=recovery_settings,
+            expected_snapshot_id=snap.snapshot_id,
+            expected_prior_sha256=snap.prior_snapshot_sha256,
+            expected_presidential_sha256=snap.presidential_source_sha256,
+        )
+        print(
+            f"[nested-loo-repair] reusing sealed truth-free fit checkpoint "
+            f"for {component}/{year}/{lead_days}",
+            flush=True,
+        )
+    else:
+        fit_fn = fit_pymc if component == "pymc" else fit_pymc_dynamic
+        replacement = _freeze_from_fit(
+            fit_fn(
+                snap, draws=draws_per_chain, tune=tune_per_chain, chains=chains,
+                seed=int(original["seed"]), generic_ballot=_generic_ballot(snap),
+                poll_structure=repair_poll_structure,
+                target_accept=target_accept,
+            ),
+            component=component, election_id=election_id, holdout_year=year,
+            lead_days=lead_days, as_of=as_of, seed=int(original["seed"]),
+        )
 
-    replacement.evidence_snapshot_id = snap.snapshot_id
-    replacement.prior_snapshot_sha256 = snap.prior_snapshot_sha256
-    replacement.presidential_source_sha256 = snap.presidential_source_sha256
+        replacement.evidence_snapshot_id = snap.snapshot_id
+        replacement.prior_snapshot_sha256 = snap.prior_snapshot_sha256
+        replacement.presidential_source_sha256 = snap.presidential_source_sha256
+        # Persist the expensive fit before the first scored-report/truth access.
+        # If any later lineage or report mutation fails, a resumed run can reuse
+        # these exact draws rather than spending another inference cycle.
+        _write_repair_checkpoint(
+            checkpoint_path,
+            replacement=replacement,
+            index=index,
+            original_entry=original,
+            recovery_settings=recovery_settings,
+        )
 
     # First truth/report contact is after replacement was frozen above.
     report = json.loads(out_path.read_text(encoding="utf-8"))
@@ -907,13 +1093,36 @@ def repair_failed_oof_inference(
         raise ValueError("replacement prediction could not be scored")
     prefix = f"{year}:{lead_days}:"
     truths = report["oof_truths"]
-    for rid, mu, sd in zip(replacement.race_ids, replacement.means, replacement.sds):
-        case = prefix + rid
-        if case not in truths:
-            continue
-        report["oof_means"].setdefault(component, {})[case] = float(mu)
-        report["oof_sds"].setdefault(component, {})[case] = float(sd)
-        report["oof_draws"].setdefault(component, {})[case] = replacement.draws_by_race[rid]
+    expected_cases = {case for case in truths if case.startswith(prefix)}
+    race_positions = {rid: i for i, rid in enumerate(replacement.race_ids)}
+    available_cases = {
+        prefix + rid for rid in replacement.race_ids
+        if replacement.draws_by_race and rid in replacement.draws_by_race
+    }
+    missing_cases = expected_cases - available_cases
+    if int(scored.get("n", 0)) != len(expected_cases) or missing_cases:
+        raise ValueError(
+            "replacement score universe differs from frozen OOF truth lineage: "
+            + json.dumps({
+                "model": component,
+                "year": year,
+                "lead_days": lead_days,
+                "scored_n": int(scored.get("n", 0)),
+                "expected_n": len(expected_cases),
+                "missing_cases": sorted(missing_cases),
+            }, sort_keys=True)
+        )
+    for container_name in ("oof_means", "oof_sds", "oof_draws"):
+        container = report[container_name].setdefault(component, {})
+        for case in [key for key in container if key.startswith(prefix)]:
+            del container[case]
+    for case in sorted(expected_cases):
+        rid = case[len(prefix):]
+        position = race_positions[rid]
+        report["oof_means"][component][case] = float(replacement.means[position])
+        report["oof_sds"][component][case] = float(replacement.sds[position])
+        report["oof_draws"][component][case] = replacement.draws_by_race[rid]
+    scored["scored_case_ids_sha256"] = _canonical_sha256(sorted(expected_cases))
     report["by_fold"][str(year)]["leads"][str(lead_days)][component] = scored
     report["failures"] = [f for f in report["failures"] if not (
         f.get("year") == year and f.get("lead") == lead_days
@@ -949,13 +1158,19 @@ def repair_failed_oof_inference(
     # fingerprint before stack fitting.
     index_tmp.replace(index_path)
     report_tmp.replace(out_path)
+    # The canonical report/index pair now contains the recovered draws. The
+    # truth-free checkpoint is no longer needed and must not look like a
+    # pending failed-fold recovery if a derivative diagnostic write is later
+    # interrupted.
+    checkpoint_path.unlink(missing_ok=True)
     _write_posterior_predictive_oof_artifact(
         out_path=out_path,
         report=report,
         entries=index["entries"],
     )
     return {"year": year, "lead_days": lead_days, "component": component,
-            "remaining_failures": len(report["failures"]), "n_oof_cases": len(truths)}
+            "remaining_failures": len(report["failures"]), "n_oof_cases": len(truths),
+            "reused_repair_checkpoint": reused_repair_checkpoint}
 
 
 def run_nested_component_loo(

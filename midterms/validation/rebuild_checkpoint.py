@@ -8,21 +8,27 @@ and verifies their semantic lineage before overwriting the working checkout.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import shutil
+from pathlib import Path
 from typing import Any
 
 from midterms.config import ARTIFACTS_DIR, MODEL_VERSION
 from midterms.evidence.evidence_bundle import verify_evidence_bundle
 from midterms.validation.artifact_lineage import frozen_index_semantic_sha256
-from midterms.validation.nested_component_loo import _draws_fingerprint
+from midterms.validation.nested_component_loo import (
+    REPAIR_CHECKPOINT_DIRNAME,
+    _draws_fingerprint,
+    _write_posterior_predictive_oof_artifact,
+    read_repair_checkpoint,
+    validate_frozen_oof_case_coverage,
+    validate_repair_checkpoint,
+)
 from midterms.validation.validated_model_spec import (
     CANONICAL_OOF_PHASE,
     SELECTION_OOF_PHASE,
     file_sha256,
     load_candidate_model_spec,
 )
-
 
 CHECKPOINT_FILES = (
     "nested_component_loo_selection.json",
@@ -32,9 +38,6 @@ CHECKPOINT_FILES = (
     "nested_component_loo_canonical.json",
     "nested_component_loo_canonical_frozen.json",
 )
-OPTIONAL_CHECKPOINT_FILES = ("posterior_predictive_oof_latest.json",)
-
-
 def _read(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -75,6 +78,7 @@ def _verify_report_pair(
         report.get("frozen_index_semantic_sha256") == frozen_index_semantic_sha256(index),
         f"{label} freeze index changed",
     )
+    validate_frozen_oof_case_coverage(report)
     entries = list(index.get("entries") or [])
     _require(index.get("n") == len(entries), f"{label} freeze index count changed")
     failed_index = sorted(
@@ -151,7 +155,7 @@ def restore_rebuild_checkpoint(
         "candidate selection OOF changed",
     )
 
-    canonical, _ = _verify_report_pair(
+    canonical, canonical_index = _verify_report_pair(
         paths["nested_component_loo_canonical.json"],
         paths["nested_component_loo_canonical_frozen.json"],
         phase=CANONICAL_OOF_PHASE,
@@ -167,24 +171,63 @@ def restore_rebuild_checkpoint(
         "canonical OOF selected poll structure changed",
     )
 
-    optional = [name for name in OPTIONAL_CHECKPOINT_FILES if (source / name).is_file()]
-    if "posterior_predictive_oof_latest.json" in optional:
-        posterior = _read(source / "posterior_predictive_oof_latest.json")
-        _require(posterior.get("model_version") == MODEL_VERSION, "posterior OOF checkpoint is stale")
-        _require(
-            posterior.get("source_nested_sha256") == file_sha256(paths["nested_component_loo_canonical.json"]),
-            "posterior OOF checkpoint source changed",
-        )
-        _require(
-            posterior.get("source_frozen_draws_sha256") == canonical.get("frozen_draws_sha256"),
-            "posterior OOF checkpoint draw lineage changed",
-        )
+    repair_checkpoints: list[Path] = []
+    repair_source_dir = source / REPAIR_CHECKPOINT_DIRNAME
+    if repair_source_dir.is_dir():
+        for checkpoint_path in sorted(repair_source_dir.glob("*.json.gz")):
+            payload = read_repair_checkpoint(checkpoint_path)
+            frozen = payload.get("frozen_prediction") or {}
+            matching = [entry for entry in canonical_index.get("entries") or [] if (
+                entry.get("status") == "failed"
+                and entry.get("component") == frozen.get("component")
+                and entry.get("holdout_year") == frozen.get("holdout_year")
+                and entry.get("lead_days") == frozen.get("lead_days")
+            )]
+            _require(
+                len(matching) == 1,
+                f"OOF repair checkpoint target is not a current failed fold: {checkpoint_path.name}",
+            )
+            original = matching[0]
+            year_key = str(original["holdout_year"])
+            lead_key = str(original["lead_days"])
+            expected_snapshot = (bundle.get("historical_snapshot_ids") or {}).get(
+                f"senate-{year_key}-lead-{lead_key}"
+            )
+            _require(bool(expected_snapshot), "evidence bundle lacks repair checkpoint snapshot")
+            validate_repair_checkpoint(
+                payload,
+                index=canonical_index,
+                original_entry=original,
+                recovery_settings=payload.get("recovery_settings") or {},
+                expected_snapshot_id=str(expected_snapshot),
+                expected_prior_sha256=(
+                    canonical.get("prior_snapshot_sha256_by_fold_lead") or {}
+                ).get(year_key, {}).get(lead_key),
+                expected_presidential_sha256=(
+                    canonical.get("presidential_source_sha256_by_fold_lead") or {}
+                ).get(year_key, {}).get(lead_key),
+            )
+            repair_checkpoints.append(checkpoint_path)
 
     destination.mkdir(parents=True, exist_ok=True)
     restored = []
-    for name in (*CHECKPOINT_FILES, *optional):
+    for name in CHECKPOINT_FILES:
         shutil.copy2(source / name, destination / name)
         restored.append(name)
+    if repair_checkpoints:
+        repair_destination = destination / REPAIR_CHECKPOINT_DIRNAME
+        repair_destination.mkdir(parents=True, exist_ok=True)
+        for checkpoint_path in repair_checkpoints:
+            shutil.copy2(checkpoint_path, repair_destination / checkpoint_path.name)
+            restored.append(f"{REPAIR_CHECKPOINT_DIRNAME}/{checkpoint_path.name}")
+    # This diagnostic is a deterministic derivative of the canonical pair.
+    # Rebuild it rather than trusting a stale copy left by an interrupted run.
+    _write_posterior_predictive_oof_artifact(
+        out_path=destination / "nested_component_loo_canonical.json",
+        report=canonical,
+        entries=canonical_index["entries"],
+    )
+    restored.append("posterior_predictive_oof_latest.json")
     return {
         "ok": True,
         "schema_version": "rebuild-checkpoint-restore-v1",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import json
 from pathlib import Path
 
@@ -11,11 +12,17 @@ from midterms.config import MODEL_VERSION
 from midterms.evidence.evidence_bundle import build_evidence_bundle
 from midterms.model.poll_structure import PollStructureConfig
 from midterms.validation.artifact_lineage import frozen_index_semantic_sha256
-from midterms.validation.nested_component_loo import _draws_fingerprint
+from midterms.validation.nested_component_loo import (
+    FrozenPrediction,
+    _draws_fingerprint,
+    _write_repair_checkpoint,
+    read_repair_checkpoint,
+    repair_checkpoint_path,
+)
 from midterms.validation.rebuild_checkpoint import restore_rebuild_checkpoint
 from midterms.validation.validated_model_spec import (
-    CANONICAL_OOF_PHASE,
     CANDIDATE_SPEC_SCHEMA,
+    CANONICAL_OOF_PHASE,
     SELECTION_OOF_PHASE,
     canonical_sha256,
     file_sha256,
@@ -36,6 +43,7 @@ def _report_pair(root: Path, stem: str, *, phase: str, bundle: dict, config_id: 
     if failed:
         entries = [{
             "component": "pymc", "holdout_year": 2020, "lead_days": 60,
+            "as_of": "2020-09-04", "seed": 2081,
             "status": "failed", "prediction_sha256": None, "error": "synthetic convergence",
         }]
         failures = [{"year": 2020, "lead": 60, "component": "pymc"}]
@@ -61,6 +69,8 @@ def _report_pair(root: Path, stem: str, *, phase: str, bundle: dict, config_id: 
         "failures": failures,
         "stack_training_protocol": "formal_60_30_v1",
         "model_spec_candidate_sha256": candidate_sha,
+        "prior_snapshot_sha256_by_fold_lead": {"2020": {"60": "prior-sha"}},
+        "presidential_source_sha256_by_fold_lead": {"2020": {"60": "presidential-sha"}},
     }
     report_path = _write(root / f"{stem}.json", report)
     return report_path, index_path
@@ -71,7 +81,7 @@ def _checkpoint(tmp_path: Path) -> tuple[Path, Path, Path]:
     destination = tmp_path / "current"
     bundle = build_evidence_bundle(
         as_of="2026-09-27", current_snapshot_id="snap-current",
-        historical_snapshot_ids={"2020:60": "snap-history"}, domains={},
+        historical_snapshot_ids={"senate-2020-lead-60": "snap-history"}, domains={},
     )
     bundle_path = _write(tmp_path / "bundle.json", bundle)
     base_id = poll_structure_identity(PollStructureConfig())
@@ -102,10 +112,34 @@ def _checkpoint(tmp_path: Path) -> tuple[Path, Path, Path]:
     }
     candidate["spec_sha256"] = canonical_sha256(candidate)
     candidate_path = _write(source / "validated_model_spec_candidate.json", candidate)
-    _report_pair(
+    canonical_path, canonical_index_path = _report_pair(
         source, "nested_component_loo_canonical", phase=CANONICAL_OOF_PHASE,
         bundle=bundle, config_id=poll_structure_identity(selected),
         candidate_sha=file_sha256(candidate_path), failed=True,
+    )
+    canonical_index = json.loads(canonical_index_path.read_text())
+    original = canonical_index["entries"][0]
+    replacement = FrozenPrediction(
+        component="pymc", election_id="senate-2020", holdout_year=2020,
+        lead_days=60, as_of="2020-09-04", race_ids=["synthetic-race"],
+        means=[0.0], sds=[1.0], method="pymc", n_draws=2, seed=2081,
+        status="ok", draws_by_race={"synthetic-race": [-1.0, 1.0]},
+        prediction_sha256=_draws_fingerprint({"synthetic-race": [-1.0, 1.0]}),
+        evidence_snapshot_id="snap-history", prior_snapshot_sha256="prior-sha",
+        presidential_source_sha256="presidential-sha",
+    )
+    _write_repair_checkpoint(
+        repair_checkpoint_path(
+            canonical_path, component="pymc", year=2020, lead_days=60,
+        ),
+        replacement=replacement,
+        index=canonical_index,
+        original_entry=original,
+        recovery_settings={
+            "draws_per_chain": 2000, "tune_per_chain": 4000,
+            "chains": 4, "target_accept": 0.99,
+            "parameterization": "noncentered_scale_mixtures_v1",
+        },
     )
     return tmp_path / "download", bundle_path, destination
 
@@ -113,6 +147,10 @@ def _checkpoint(tmp_path: Path) -> tuple[Path, Path, Path]:
 def test_restore_checkpoint_reuses_only_lineage_checked_oof_files(tmp_path: Path) -> None:
     source, bundle, destination = _checkpoint(tmp_path)
     _write(source / "data" / "artifacts" / "stack_weights_oof.json", {"stale": True})
+    _write(
+        source / "data" / "artifacts" / "posterior_predictive_oof_latest.json",
+        {"source_nested_sha256": "stale"},
+    )
     _write(destination / "stack_weights_oof.json", {"keep": True})
     result = restore_rebuild_checkpoint(
         source_root=source, evidence_bundle_path=bundle, artifacts_dir=destination,
@@ -122,6 +160,16 @@ def test_restore_checkpoint_reuses_only_lineage_checked_oof_files(tmp_path: Path
         {"year": 2020, "lead": 60, "component": "pymc"}
     ]
     assert (destination / "nested_component_loo_canonical.json").is_file()
+    assert (
+        destination / "oof_inference_repair_checkpoints"
+        / "nested_component_loo_canonical__pymc__2020__60.json.gz"
+    ).is_file()
+    posterior = json.loads(
+        (destination / "posterior_predictive_oof_latest.json").read_text()
+    )
+    assert posterior["source_nested_sha256"] == file_sha256(
+        destination / "nested_component_loo_canonical.json"
+    )
     assert json.loads((destination / "stack_weights_oof.json").read_text()) == {"keep": True}
 
 
@@ -138,3 +186,20 @@ def test_restore_checkpoint_rejects_bundle_mismatch_before_copy(tmp_path: Path) 
             source_root=source, evidence_bundle_path=bundle, artifacts_dir=destination,
         )
     assert json.loads(marker.read_text()) == {"keep": True}
+
+
+def test_restore_checkpoint_rejects_tampered_repair_draws(tmp_path: Path) -> None:
+    source, bundle, destination = _checkpoint(tmp_path)
+    checkpoint = next(
+        (source / "data" / "artifacts" / "oof_inference_repair_checkpoints").glob(
+            "*.json.gz"
+        )
+    )
+    payload = read_repair_checkpoint(checkpoint)
+    payload["frozen_prediction"]["draws_by_race"]["synthetic-race"][0] = -9.0
+    checkpoint.write_bytes(gzip.compress(json.dumps(payload).encode("utf-8"), mtime=0))
+    with pytest.raises(ValueError, match="predictive draws changed"):
+        restore_rebuild_checkpoint(
+            source_root=source, evidence_bundle_path=bundle, artifacts_dir=destination,
+        )
+    assert not destination.exists()

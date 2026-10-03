@@ -14,8 +14,10 @@ from midterms.model.pymc_model import FitResult
 from midterms.validation.nested_component_loo import (
     FrozenPrediction,
     _draws_fingerprint,
+    repair_checkpoint_path,
     rescore_frozen_oof_draws,
     score_frozen_predictions,
+    validate_frozen_oof_case_coverage,
 )
 
 
@@ -54,6 +56,20 @@ def test_rescore_requires_unchanged_draw_archive() -> None:
     draws["synthetic_a"]["2000:30:case-1"][0] = -3.0
     with pytest.raises(ValueError, match="changed"):
         rescore_frozen_oof_draws(report)
+
+
+def test_case_coverage_rejects_same_count_substituted_case() -> None:
+    draws = {"synthetic_a": {"2000:30:case-wrong": [-1.0, 1.0]}}
+    report = {
+        "years": [2000], "lead_days": [30],
+        "oof_draws": draws,
+        "oof_truths": {"2000:30:case-right": 0.0},
+        "by_fold": {"2000": {"leads": {"30": {
+            "synthetic_a": {"status": "ok", "n": 1},
+        }}}},
+    }
+    with pytest.raises(ValueError, match="case-right"):
+        validate_frozen_oof_case_coverage(report)
 
 
 def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> None:
@@ -152,11 +168,33 @@ def test_inference_repair_freezes_before_truth_access(tmp_path, monkeypatch) -> 
         return frozen
 
     monkeypatch.setattr(module, "_freeze_from_fit", observed_freeze)
+    original_rescore = module.rescore_frozen_oof_draws
+
+    def fail_after_fit(_report):
+        raise ValueError("synthetic post-fit report failure")
+
+    monkeypatch.setattr(module, "rescore_frozen_oof_draws", fail_after_fit)
+    with pytest.raises(ValueError, match="post-fit"):
+        module.repair_failed_oof_inference(
+            year=2000, lead_days=30, component="pymc_dynamic", out_path=report_path,
+        )
+    checkpoint = repair_checkpoint_path(
+        report_path, component="pymc_dynamic", year=2000, lead_days=30,
+    )
+    assert checkpoint.is_file()
+
+    def refit_must_not_run(*args, **kwargs):
+        raise AssertionError("sealed successful fit should have been reused")
+
+    monkeypatch.setattr(module, "fit_pymc_dynamic", refit_must_not_run)
+    monkeypatch.setattr(module, "rescore_frozen_oof_draws", original_rescore)
     result = module.repair_failed_oof_inference(
         year=2000, lead_days=30, component="pymc_dynamic", out_path=report_path,
     )
-    assert events == ["fit", "freeze", "truth_read"]
+    assert events == ["fit", "freeze", "truth_read", "truth_read"]
     assert result["remaining_failures"] == 0
+    assert result["reused_repair_checkpoint"] is True
+    assert not checkpoint.exists()
     repaired = json.loads(report_path.read_text())
     assert repaired["oof_crps_method"] == "exact_empirical_predictive_draws"
     assert repaired["by_fold"]["2000"]["leads"]["30"]["pymc_dynamic"]["n"] == 1
