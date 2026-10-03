@@ -108,7 +108,7 @@ def test_g10_rejects_stale_independent_rebuild(tmp_path: Path, monkeypatch):
     )
     monkeypatch.setattr(
         "midterms.ops.release_identity.verify_release_identity",
-        lambda: {"ok": True},
+        lambda **_kwargs: {"ok": True},
     )
     monkeypatch.setattr(
         "midterms.ops.shadow_publish.list_shadow_publications",
@@ -154,7 +154,7 @@ def test_g10_rejects_rebuild_for_different_release(tmp_path: Path, monkeypatch):
     )
     monkeypatch.setattr(
         "midterms.ops.release_identity.verify_release_identity",
-        lambda: {"ok": True},
+        lambda **_kwargs: {"ok": True},
     )
     monkeypatch.setattr(
         "midterms.ops.shadow_publish.list_shadow_publications",
@@ -164,6 +164,109 @@ def test_g10_rejects_rebuild_for_different_release(tmp_path: Path, monkeypatch):
     detail = report["gates"]["G10"]["detail"]["independent_rebuild"]
     assert detail["ok"] is False
     assert detail["run_id_match"] is False
+
+
+def test_g10_does_not_use_historical_shadow_for_current_run(tmp_path: Path, monkeypatch):
+    art = tmp_path / "artifacts"
+    forecast = {
+        "run_id": "run-current",
+        "generated_at": "2026-10-03T12:00:00+00:00",
+        "method": "pymc",
+        "run_class": "publication",
+        "publishable": True,
+        "model_version": "senate-hierarchical-v0.9.22",
+        "numerical_quality": {"ok": True, "chamber_mcse": {"mcse_p_dem_control": 0.01}},
+    }
+    _minimal_gate_stubs(art, forecast=forecast)
+    (art / "independent_rebuild_latest.json").write_text(
+        json.dumps({
+            "ok": True,
+            "run_id": "run-current",
+            "generated_at": "2026-10-03T12:05:00+00:00",
+            "comparison": {"ok": True},
+            "domain_ok": True,
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        "midterms.ops.reproducibility.verify_rebuild",
+        lambda: {"ok": True, "run_id": "run-current"},
+    )
+    monkeypatch.setattr(
+        "midterms.ops.release_identity.verify_release_identity",
+        lambda **_kwargs: {"ok": True},
+    )
+    monkeypatch.setattr(
+        "midterms.ops.shadow_publish.list_shadow_publications",
+        lambda: [{
+            "shadow_id": "shadow-old",
+            "run_id": "run-old",
+            "model_version": "senate-hierarchical-v0.9.21",
+            "path": str(tmp_path / "old"),
+        }],
+    )
+    report = evaluate_acceptance_gates(artifacts_dir=art, write=False)
+    g10 = report["gates"]["G10"]
+    assert g10["ok"] is False
+    assert g10["status"] == "partial"
+    assert g10["detail"]["shadow_rows_checked"] == 0
+    assert g10["detail"]["shadow_selection"]["historical_fallback_allowed"] is False
+
+
+def test_g10_accepts_only_exact_current_release_seals(tmp_path: Path, monkeypatch):
+    art = tmp_path / "artifacts"
+    forecast = {
+        "run_id": "run-current",
+        "generated_at": "2026-10-03T12:00:00+00:00",
+        "method": "pymc",
+        "run_class": "publication",
+        "publishable": True,
+        "model_version": "senate-hierarchical-v0.9.22",
+        "numerical_quality": {"ok": True, "chamber_mcse": {"mcse_p_dem_control": 0.01}},
+    }
+    _minimal_gate_stubs(art, forecast=forecast)
+    (art / "independent_rebuild_latest.json").write_text(
+        json.dumps({
+            "ok": True,
+            "run_id": "run-current",
+            "generated_at": "2026-10-03T12:05:00+00:00",
+            "comparison": {"ok": True},
+            "domain_ok": True,
+        }),
+        encoding="utf-8",
+    )
+    current_shadow = {
+        "shadow_id": "shadow-current",
+        "run_id": "run-current",
+        "model_version": "senate-hierarchical-v0.9.22",
+        "path": str(tmp_path / "current"),
+    }
+    monkeypatch.setattr(
+        "midterms.ops.reproducibility.verify_rebuild",
+        lambda: {"ok": True, "run_id": "run-current"},
+    )
+    monkeypatch.setattr(
+        "midterms.ops.release_identity.verify_release_identity",
+        lambda **_kwargs: {"ok": True},
+    )
+    monkeypatch.setattr(
+        "midterms.ops.shadow_publish.list_shadow_publications",
+        lambda: [current_shadow],
+    )
+    monkeypatch.setattr(
+        "midterms.ops.shadow_publish.verify_shadow",
+        lambda **_kwargs: {
+            "ok": True,
+            "hashes_ok": True,
+            "signatures_ok": None,
+            "signature_status": "missing",
+        },
+    )
+    report = evaluate_acceptance_gates(artifacts_dir=art, write=False)
+    g10 = report["gates"]["G10"]
+    assert g10["ok"] is True
+    assert g10["status"] == "pass"
+    assert g10["detail"]["shadow_rows_checked"] == 1
 
 
 def test_verify_shadow_distinguishes_hash_and_signature(tmp_path: Path):

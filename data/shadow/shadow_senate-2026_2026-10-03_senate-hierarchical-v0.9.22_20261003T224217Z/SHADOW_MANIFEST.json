@@ -1,0 +1,76 @@
+{
+  "audit_item": "P3",
+  "shadow_id": "shadow_senate-2026_2026-10-03_senate-hierarchical-v0.9.22_20261003T224217Z",
+  "mode": "prospective_live",
+  "election_id": "senate-2026",
+  "run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
+  "as_of": "2026-10-03",
+  "model_version": "senate-hierarchical-v0.9.22",
+  "code_commit": "37d130c5b457e507f2fda3bf8999b445c84fb3f6",
+  "frozen_at": "2026-10-03T22:42:17.681878+00:00",
+  "evaluation": null,
+  "environment": {
+    "schema_version": "environment-lock-v2",
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "numpy": "1.26.4",
+      "pandas": "2.3.3",
+      "scipy": "1.13.1",
+      "pymc": "5.25.1",
+      "pytensor": "2.31.7",
+      "arviz": "0.19.0",
+      "matplotlib": "3.10.9",
+      "pyarrow": "16.1.0"
+    },
+    "numerical_backend": "Build Dependencies:\n  blas:\n    detection method: pkgconfig\n    found: true\n    include directory: /c/opt/64/include\n    lib directory: /c/opt/64/lib\n    name: openblas64\n    openblas configuration: USE_64BITINT=1 DYNAMIC_ARCH=1 DYNAMIC_OLDER= NO_CBLAS=\n      NO_LAPACK= NO_LAPACKE= NO_AFFINITY=1 USE_OPENMP= SKYLAKEX MAX_THREADS=2\n    pc file directory: C:/opt/64/lib/pkgconfig\n    version: 0.3.23.dev\n  lapack:\n    detection method: internal\n    found: true\n    include directory: unknown\n    lib directory: unknown\n    name: dep3179274605568\n    openblas configuration: unknown\n    pc file directory: unknown\n    version: 1.26.4\nCompilers:\n  c:\n    commands: cl\n    linker: link\n    name: msvc\n    version: 19.29.30153\n  c++:\n    commands: cl\n    linker: link\n    name: msvc\n    version: 19.29.30153\n  cython:\n    commands: cython\n    linker: cython\n    name: cython\n    version: 3.0.8\nMachine Information:\n  build:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: windows\n  host:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: windows\nPython Information:\n  path: C:\\Users\\runneradmin\\AppData\\Local\\Temp\\cibw-run-g7slqwov\\cp312-win_amd64\\build\\venv\\Scripts\\python.exe\n  version: '3.12'\nSIMD Extensions:\n  baseline:\n  - SSE\n  - SSE2\n  - SSE3\n  found:\n  - SSSE3\n  - SSE41\n  - POPCNT\n  - SSE42\n  - AVX\n  - F16C\n  - FMA3\n  - AVX2\n  not found:\n  - AVX512F\n  - AVX512CD\n  - AVX512_SKX\n  - AVX512_CLX\n  - AVX512_CNL\n  - AVX512_ICL",
+    "dependency_lock_sha256": "45eb394ea80dd96ec9101a1ca40ad28822d7d6442f515bad7ed2e9c9a11ac34f",
+    "dependency_files": [
+      "pyproject.toml"
+    ],
+    "locked_at": "2026-10-03T22:42:17.906877+00:00"
+  },
+  "domain_hashes": {
+    "candidate_ballot_source_inventory.parquet": "4977656eba24c1fecc4e50f2fbf5307af8b99ac41e6e10623038700a16790d3f",
+    "candidate_timeline.parquet": "279a857e472b152728f535964ab10f72a7d9422191dee9fb92fcd84924fa5075",
+    "demographic_vintages.parquet": "563cba0013170f094c624bb0637344f78f02565efe9844ae248feba4303a6e3c",
+    "demography.parquet": "31c1431bb96d87e3ff9b20ab894f4c9399b111ae667560edf642b827e50153fa",
+    "economics_vintages.parquet": "73e6335519016209ba39a1e4268113b678b6365f9eef89ace2c6f94e74e342c3",
+    "expert_ratings.parquet": "552c2e9e20cbd3cc2365aaef0f93d916f1469513287212b5f2316d91d02eb3a7",
+    "fec_candidate_committees.parquet": "1b6e37a570748129fc9aab586bd074fbe18e993adfc0dae12830e1620855038c",
+    "fec_form3_reports.parquet": "764da2ef29623a37ed1a01511dd33c074dff5583bbc5b77128470b28e4c0c285",
+    "fundraising_shares.parquet": "655d4871a3345bd73d58a9ae44ceb54d0e8d453f2daa6185bda93d66590fab88",
+    "markets.parquet": "88333a7e079b2b9daf5c209129d04ce6ee30d6bd2e286c30e7d7e95ec6e4f8e9",
+    "markets_control.json": "39bde0c775a19c01e558c38f962beacff219501a9d92106605c64c73814dea21",
+    "markets_mapping_audit.json": "3383c2a8e4b1a6fbf3771be2974d58a9763118278a664254ad21a5cd97c9127a",
+    "peer_snapshots.json": "c3f07e14c13eff91a4dca1e484b04486768697b46a1da5d3559ef96b8b00c80e",
+    "polls.parquet": "6633b5449efbd6dc720c91fec7581b0210f1f6fd59dd71a46000ea2d6f870eda",
+    "polls_fte_historical.parquet": "c3458f7630a4b6942b28dfa824f8a9e320984992f4a348df54391bd13f0a82b6",
+    "polls_historical.parquet": "c6093d35903af0b88ccf73199f7173f67c2a017817dbd1791120c714343b0942",
+    "polls_live_votehub.parquet": "819930bb2e8f35ef836d968d6973160690579f110588b380252dd344738ea8aa",
+    "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
+    "pollster_ratings.parquet": "51c5fb370e8480d60518007c9cdf72094e0689a4217e17dd0af8a8ae3396acf4",
+    "pres_approval.parquet": "86da6590c17e95658f462f1680daf49df8240c1cbecbbcbd86a834243d740b5b",
+    "presidential_vote_counts.parquet": "0cd22c4c5a49b8077af5b5893d5aa63ab46619d380fe835c6852757e6ae14fd7",
+    "races.parquet": "8c87381e6136bc52ead02b3d4ef77c585a5290fc3412b4432d6fbac93356ce82",
+    "races_official.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
+    "results.parquet": "825d8325b945a1f7514e2bfa6834142618e4ef51916280387700209d7717a9cb",
+    "results_certified.parquet": "5c6941809c6ecb8ae5374202d3a8af819d64e494f8b613a249b8b879cc67a5dc"
+  },
+  "file_hashes": {
+    "forecast.json": "fb6e9494a5ad72f5fa72f88f4c9ab3fb272e606e0027c3084a85c25000f1e88e",
+    "validation/stack_weights_oof.json": "ed34419ad4880e8fbc81745e8b3dea69af9768d2915a1a58be0bc4dba38a6844",
+    "validation/nested_component_loo.json": "f6a806ef07591866bb54b00ad6de6e726904a312e1acdd02056c389d86e7f9de",
+    "numerical_quality.json": "a304eac30c82bde23dbd949f2d9fddcd93b348a16115874423488070de8e7a9b",
+    "AUDIT_NOTICE.md": "68814b3a9f460ba34e900efbffa68a014868bb266d2918360e8dbb152440c1a3"
+  },
+  "paths": {
+    "shadow_dir": "data/shadow/shadow_senate-2026_2026-10-03_senate-hierarchical-v0.9.22_20261003T224217Z",
+    "forecast": "data/shadow/shadow_senate-2026_2026-10-03_senate-hierarchical-v0.9.22_20261003T224217Z/forecast.json"
+  },
+  "publishable": true,
+  "publication_surface": "research_only",
+  "run_class": "publication",
+  "exit_condition": "At least one cycle of frozen, timestamped evaluation is retained.",
+  "write_once": true
+}

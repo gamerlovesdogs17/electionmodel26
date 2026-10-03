@@ -576,6 +576,29 @@ def main(argv: list[str] | None = None) -> None:
 
     p_vrb.set_defaults(func=_verify_rebuild)
 
+    p_release_identity = sub.add_parser(
+        "release-identity",
+        help="Seal or verify the exact current-version research release identity",
+    )
+    p_release_identity.add_argument(
+        "--verify",
+        action="store_true",
+        help="Verify the current-version identity without writing it",
+    )
+
+    def _release_identity(a: argparse.Namespace) -> None:
+        from midterms.ops.release_identity import (
+            verify_release_identity,
+            write_release_identity,
+        )
+
+        out = verify_release_identity() if a.verify else write_release_identity()
+        print(json.dumps(out, indent=2, default=str))
+        if a.verify and not out.get("ok"):
+            raise SystemExit(1)
+
+    p_release_identity.set_defaults(func=_release_identity)
+
     p_res = sub.add_parser(
         "write-results-archive",
         help="Build redistributable certified Senate results archive",

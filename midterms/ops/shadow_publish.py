@@ -401,6 +401,7 @@ def publish_live_shadow(
     art = json.loads(forecast_path.read_text(encoding="utf-8"))
     stamped = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     election_id = str(art.get("election_id") or "unknown")
+    run_id = str(art.get("run_id") or "")
     as_of = str(art.get("as_of") or art.get("forecast_as_of") or "unknown")[:10]
     shadow_id = shadow_id or f"shadow_{election_id}_{as_of}_{MODEL_VERSION}_{stamped}"
     root = shadow_root or SHADOW_ROOT
@@ -441,6 +442,7 @@ def publish_live_shadow(
         "shadow_id": shadow_id,
         "mode": "prospective_live",
         "election_id": election_id,
+        "run_id": run_id,
         "as_of": as_of,
         "model_version": MODEL_VERSION,
         "code_commit": _code_commit(),
@@ -454,6 +456,7 @@ def publish_live_shadow(
             "forecast": repository_relative_path(dest / "forecast.json"),
         },
         "publishable": bool(art.get("publishable") or (art.get("diagnostics") or {}).get("publishable")),
+        "publication_surface": art.get("publication_surface"),
         "run_class": art.get("run_class") or (art.get("diagnostics") or {}).get("run_class"),
         "exit_condition": "At least one cycle of frozen, timestamped evaluation is retained.",
         "write_once": True,
@@ -466,6 +469,7 @@ def publish_live_shadow(
             "shadow_id": shadow_id,
             "mode": "prospective_live",
             "election_id": election_id,
+            "run_id": run_id,
             "as_of": as_of,
             "model_version": MODEL_VERSION,
             "frozen_at": manifest["frozen_at"],
@@ -562,7 +566,12 @@ def verify_shadow(shadow_id: str | None = None, *, path: Path | None = None) -> 
         signature_status = "missing"
     elif sig_ok:
         signatures_ok = True
-        signature_status = "verified"
+        signature_status = (
+            "verified"
+            if all(str(item.get("alg") or "").upper().startswith("ED25519")
+                   for item in sig_results)
+            else "legacy_hmac"
+        )
     elif hashes_ok:
         # File integrity holds but Ed25519 does not verify against the resolved
         # public key — typical after in-place key rotation without retaining the
@@ -586,9 +595,10 @@ def verify_shadow(shadow_id: str | None = None, *, path: Path | None = None) -> 
         "has_evaluation": (path / "evaluation.json").exists(),
         "mode": manifest.get("mode"),
         "claim": (
-            "Hashes recomputed; Ed25519 sidecars verified against historical key_id "
-            "when present. missing=no sidecar; unverifiable=hash ok but key does not "
-            "verify (e.g. rotated trust root); failed=integrity or corrupt seal."
+            "Hashes recomputed; verified means Ed25519 passed against historical key_id; "
+            "legacy_hmac is authenticated only by the configured shared secret; "
+            "missing=no sidecar; unverifiable=hash ok but key does not verify; "
+            "failed=integrity or corrupt seal."
         ),
     }
 

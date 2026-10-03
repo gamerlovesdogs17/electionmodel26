@@ -372,6 +372,10 @@ jobs:
       - name: Independent rebuild
         if: steps.resume.outputs.independent_resumed != 'true'
         run: python -m midterms.cli verify-rebuild --independent
+      - name: Seal current version release identity
+        run: python -m midterms.cli release-identity
+      - name: Seal current forecast shadow
+        run: python -m midterms.cli shadow-publish --mode live
       - name: Run coherence check
         run: |
           python - <<'PY'
@@ -392,6 +396,7 @@ jobs:
             data/artifacts/
             data/releases/
             data/manifests/
+            data/shadow/
             web/public/data/forecast_latest.json
       - name: Refuse artifact push if main diverged from evidence commit
         if: success()
@@ -409,7 +414,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/artifacts data/releases data/manifests web/public/data/forecast_latest.json
+          git add data/artifacts data/releases data/manifests data/shadow web/public/data/forecast_latest.json
           if git diff --cached --quiet; then
             echo "commit_created=false" >> "$GITHUB_OUTPUT"
             echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"

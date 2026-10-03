@@ -671,11 +671,14 @@ def rebuild_canonical_truth() -> dict[str, Any]:
         raise ValueError("truth_v1 semantic validation failed:\n" + "\n".join(verrs[:20]))
     exp = write_expectations_from_roster()
     from midterms.evidence.official_ledger import write_ledger_normalized
-    from midterms.ops.release_identity import write_release_identity
+    from midterms.ops.release_identity import current_truth_fingerprints
 
     norm = write_ledger_normalized()
-    identity = write_release_identity()
-    return {**out, **exp, "normalized": norm, "release_identity": identity}
+    # A truth rebuild changes release inputs but does not, by itself, establish
+    # empirical model validity. The versioned release identity is sealed only
+    # after canonical OOF, stack validation, forecast, and independent rebuild.
+    truth_fingerprints = current_truth_fingerprints()
+    return {**out, **exp, "normalized": norm, "truth_fingerprints": truth_fingerprints}
 
 
 def main() -> None:

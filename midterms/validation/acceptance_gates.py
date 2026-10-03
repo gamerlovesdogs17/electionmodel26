@@ -730,16 +730,19 @@ def evaluate_acceptance_gates(
         rows = list_shadow_publications()
         forecast_mv = str((forecast or {}).get("model_version") or MODEL_VERSION)
         forecast_run = str((forecast or {}).get("run_id") or "")
-        # Prefer seals for the current forecast/model; do not let ancient
-        # rotated-key shadows alone veto a fresh seal.
+        # Only a seal for this exact forecast run can satisfy current G10.
+        # Historical rows remain auditable but never substitute for a missing
+        # current release seal.
         relevant = [
             r
             for r in rows
-            if (forecast_run and forecast_run in str(r.get("shadow_id") or ""))
-            or str(r.get("model_version") or "") == forecast_mv
-            or str(r.get("mode") or "") in {"prospective_live", "milestone"}
+            if str(r.get("model_version") or "") == forecast_mv
+            and (
+                str(r.get("run_id") or "") == forecast_run
+                or (forecast_run and forecast_run in str(r.get("shadow_id") or ""))
+            )
         ]
-        check_rows = (relevant or rows)[-5:]
+        check_rows = relevant[-5:]
         shadow_checks = []
         for row in check_rows:
             ver = verify_shadow(path=Path(row["path"]))
@@ -756,6 +759,11 @@ def evaluate_acceptance_gates(
             )
         g10_detail["shadow_verify"] = shadow_checks
         g10_detail["shadow_rows_checked"] = len(shadow_checks)
+        g10_detail["shadow_selection"] = {
+            "required_model_version": forecast_mv,
+            "required_run_id": forecast_run,
+            "historical_fallback_allowed": False,
+        }
 
         def _shadow_acceptable(c: dict[str, Any]) -> bool:
             if not c.get("hashes_ok"):
@@ -769,11 +777,12 @@ def evaluate_acceptance_gates(
                 return False
             # Research / live-locked: hashes + non-failed sig status
             # (missing / unverifiable disclosed, not greenwashed as verified).
-            return status in {"verified", "missing", "unverifiable"}
+            return status in {"verified", "legacy_hmac", "missing", "unverifiable"}
 
         shadow_all_ok = bool(shadow_checks) and all(_shadow_acceptable(c) for c in shadow_checks)
         g10_detail["shadow_signature_note"] = (
             "signature_status=verified → Ed25519 ok against historical key_id; "
+            "legacy_hmac → shared-secret integrity only; "
             "missing → hashes-only; unverifiable → hash ok but key does not verify "
             "(e.g. rotated trust root); failed → integrity/corrupt seal. "
             "PUBLIC_LIVE requires verified; research accepts missing/unverifiable with hashes."
@@ -784,33 +793,41 @@ def evaluate_acceptance_gates(
         "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE "
         "tolerances (verify-rebuild --independent) + write-once shadow seals."
     )
-    if rebuild_ok and independent_ok and shadow_all_ok:
+    # Release-identity hash seal (truth artifacts) — fail closed for promotion.
+    identity_ok = False
+    identity: dict[str, Any] = {}
+    try:
+        from midterms.ops.release_identity import verify_release_identity
+
+        identity = verify_release_identity(
+            expected_model_version=str((forecast or {}).get("model_version") or MODEL_VERSION),
+            artifacts_dir=art_dir,
+        )
+        g10_detail["release_identity"] = identity
+        identity_ok = bool(identity.get("ok"))
+    except Exception as exc:  # noqa: BLE001
+        g10_detail["release_identity_error"] = str(exc)
+    if rebuild_ok and independent_ok and shadow_all_ok and identity_ok:
         g10_ok = True
         g10_status = "pass"
-    elif rebuild_ok and (independent_ok or shadow_all_ok):
+        g10_detail.pop("promotion_block", None)
+    elif rebuild_ok and independent_ok and identity_ok:
         g10_ok = False
         g10_status = "partial"
         g10_detail["promotion_block"] = (
-            "incomplete reproducibility evidence — research partial only"
+            "missing or invalid retained shadow for the current forecast run"
         )
     else:
         g10_ok = False
         g10_status = "fail"
-        g10_detail["promotion_block"] = "reproducibility seals incomplete or hash mismatch"
-    # Release-identity hash seal (truth artifacts) — fail closed for promotion.
-    try:
-        from midterms.ops.release_identity import verify_release_identity
-
-        identity = verify_release_identity()
-        g10_detail["release_identity"] = identity
-        if not identity.get("ok"):
-            g10_ok = False
-            g10_status = "fail"
-            g10_detail["promotion_block"] = "release_identity hash mismatch"
-    except Exception as exc:  # noqa: BLE001
-        g10_detail["release_identity_error"] = str(exc)
-        g10_ok = False
-        g10_status = "fail"
+        if not identity_ok:
+            g10_detail["promotion_block"] = (
+                "current-version release identity missing, stale, or mismatched"
+            )
+        else:
+            g10_detail["promotion_block"] = (
+                "reproducibility seals incomplete or hash mismatch"
+            )
     gates.append(
         _gate(
             "G10",
@@ -818,7 +835,10 @@ def evaluate_acceptance_gates(
             ok=g10_ok,
             status=g10_status,
             detail=g10_detail,
-            evidence=[str(ROOT / "data" / "manifests" / "shadow_publications.jsonl")],
+            evidence=[
+                str(ROOT / "data" / "manifests" / "shadow_publications.jsonl"),
+                str(identity.get("path") or "current release identity missing"),
+            ],
         )
     )
 

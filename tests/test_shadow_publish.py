@@ -27,8 +27,10 @@ def test_verify_live_shadow_seal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     forecast = {
         "election_id": "senate-2026",
         "as_of": "2026-09-13",
+        "run_id": "run-test",
         "run_class": "research",
         "publishable": False,
+        "publication_surface": "research_only",
         "numerical_quality": {"ok": True, "audit_item": "P2.3"},
     }
     (tmp_path / "artifacts" / "forecast_latest.json").write_text(
@@ -42,6 +44,8 @@ def test_verify_live_shadow_seal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
         shadow_root=tmp_path / "shadow",
     )
     assert man["mode"] == "prospective_live"
+    assert man["run_id"] == "run-test"
+    assert man["publication_surface"] == "research_only"
     dest = tmp_path / man["path"]
     assert (dest / "forecast.json").exists()
     assert (dest / "SHADOW_MANIFEST.json").exists()
@@ -50,6 +54,7 @@ def test_verify_live_shadow_seal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ver = sp.verify_shadow(path=dest)
     assert ver["ok"] is True
     assert ver["has_evaluation"] is False
+    assert ver["signature_status"] in {"legacy_hmac", "verified"}
 
     # Tamper → verify fails
     (dest / "forecast.json").write_text('{"tampered": true}', encoding="utf-8")
