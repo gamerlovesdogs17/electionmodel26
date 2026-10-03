@@ -134,6 +134,11 @@ def _available_stack_weights(
             if mass > 0 and name in component_draws}
 
 
+def _evidence_refresh_allowed(*, require_publishable: bool, rebuild_mode: bool) -> bool:
+    """Publication and independent-rebuild fits consume sealed evidence read-only."""
+    return not require_publishable and not rebuild_mode
+
+
 def run_forecast(
     *,
     election_id: str = DEMO_ELECTION_ID,
@@ -257,7 +262,9 @@ def run_forecast(
         else (PRODUCTION_JOINT_SIMS if require_publishable else DEMO_JOINT_SIMS)
     )
 
-    # Ensure economic + finance + ratings + markets stores exist
+    # Development runs may prepare convenience stores. Publication fits consume
+    # the already verified evidence bundle read-only: regenerating a domain here
+    # can replace a sealed point-in-time store after the strict preflight.
     layer_warnings: list[dict[str, str]] = []
     if not eligibility.get("publishable"):
         layer_warnings.append(
@@ -267,7 +274,14 @@ def run_forecast(
                 "run_class": "non_publication",
             }
         )
-    if not rebuild_mode:
+    evidence_store_policy = (
+        "development_refresh_allowed"
+        if _evidence_refresh_allowed(
+            require_publishable=require_publishable, rebuild_mode=rebuild_mode,
+        )
+        else "sealed_read_only"
+    )
+    if evidence_store_policy == "development_refresh_allowed":
         try:
             # Never call write_economic_store() bare — that clobbers FRED with fixtures.
             econ_meta = try_refresh_alfred(as_of=str(as_of)[:10])
@@ -349,8 +363,15 @@ def run_forecast(
                 + "; ".join(eligibility.get("reasons") or [])
             )
     else:
-        ratings_meta = {}
-        markets_meta = {}
+        ratings_meta = {
+            "skipped": True,
+            "reason": "sealed evidence is immutable during publication/rebuild fitting",
+        }
+        markets_meta = {
+            "skipped": True,
+            "reason": "sealed evidence is immutable during publication/rebuild fitting",
+            "n_races": 0,
+        }
 
     wh = Warehouse(ensure_fixtures=False)
     snap = wh.build_as_of(as_of, election_id)
@@ -950,6 +971,7 @@ def run_forecast(
             "run_class": run_class,
             "publishable": run_publishable,
             "publication_inference_requested": bool(require_publishable),
+            "evidence_store_policy": evidence_store_policy,
             "selected_poll_structure": selected_poll_structure.to_dict(),
             "validated_model_spec": (
                 {
