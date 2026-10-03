@@ -24,63 +24,63 @@
   "excluded_missing_predictions": {},
   "filtered_crps_by_fold": {
     "2018": {
-      "pymc": 2.792998382155774,
+      "pymc": 2.838878551917603,
       "state_space": 2.7347701893800416
     },
     "2020": {
-      "pymc": 4.632176807234169,
+      "pymc": 4.594804389163203,
       "state_space": 3.48717143240291
     },
     "2022": {
-      "pymc": 4.329105215636089,
+      "pymc": 4.2956911682931604,
       "state_space": 3.9294786590658752
     },
     "2024": {
-      "pymc": 3.0421599896641904,
+      "pymc": 2.9796516301563196,
       "state_space": 2.6623095049386407
     }
   },
   "diagnostic_mean_crps_by_candidate": {
-    "pymc": 3.6991100986725556,
-    "state_space": 3.203432446446867
+    "state_space": 3.203432446446867,
+    "pymc": 3.6772564348825716
   },
   "stack_weights": {
-    "pymc": 0.2100265751884933,
-    "state_space": 0.7899734248115066
+    "pymc": 0.21914105930674144,
+    "state_space": 0.7808589406932586
   },
   "stack_weights_production": {
-    "pymc": 0.2100265751884933,
-    "state_space": 0.7899734248115066
+    "pymc": 0.21914105930674144,
+    "state_space": 0.7808589406932586
   },
   "diagnostic_score_softmax_loo": {
     "2018": {
-      "pymc": 0.2983169031466201,
-      "state_space": 0.7016830968533799
+      "pymc": 0.31086394594689093,
+      "state_space": 0.6891360540531091
     },
     "2020": {
-      "pymc": 0.4079821320406557,
-      "state_space": 0.5920178679593443
+      "pymc": 0.4133648539290605,
+      "state_space": 0.5866351460709396
     },
     "2022": {
-      "pymc": 0.3310161148907005,
-      "state_space": 0.6689838851092995
+      "pymc": 0.3363522267424666,
+      "state_space": 0.6636477732575334
     },
     "2024": {
-      "pymc": 0.3290726578166549,
-      "state_space": 0.6709273421833452
+      "pymc": 0.331521224655951,
+      "state_space": 0.668478775344049
     }
   },
-  "matrix_sha256": "1fd71a19ed54a0b8c8a8302c491e21758f0b28e0341a57e8f6e6d3bd2b74efe0",
-  "prediction_sha256": "8b3413c6398c211ba76ee7740386c90b8da1c983eaebb18407a727cee55cc2f7",
+  "matrix_sha256": "8272dec9b73749580594c7cd00ee8348c8526ce033764947c436a3bd0ad71ec9",
+  "prediction_sha256": "e0d8bdc6ea9a4ee928ca565be3bffc45112f8506d4335e273f7a21f723712ea3",
   "mixture_diagnostics": {
     "method": "empirical_predictive_mixture_crps_v1",
     "weights": {
-      "pymc": 0.2100265751884933,
-      "state_space": 0.7899734248115066
+      "pymc": 0.21914105930674144,
+      "state_space": 0.7808589406932586
     },
-    "objective_crps": 3.175042586990025,
+    "objective_crps": 3.1715244953445714,
     "individual_crps": {
-      "pymc": 3.726231045872246,
+      "pymc": 3.710869889434,
       "state_space": 3.2140030090912406
     },
     "n_complete_cases": 260,
@@ -878,7 +878,7 @@
     },
     "seed": 21,
     "max_draws": 128,
-    "prediction_sha256": "8b3413c6398c211ba76ee7740386c90b8da1c983eaebb18407a727cee55cc2f7"
+    "prediction_sha256": "e0d8bdc6ea9a4ee928ca565be3bffc45112f8506d4335e273f7a21f723712ea3"
   },
   "optimizer_seed": 21,
   "optimizer_max_draws": 128,
@@ -886,7 +886,7 @@
   "predictive_stack_fn": "midterms.model.empirical_mixture.fit_predictive_mixture",
   "note": "Production weights use frozen empirical draws; score softmax is diagnostic only.",
   "source_nested_loo": "data/artifacts/nested_component_loo_canonical.json",
-  "source_nested_sha256": "53efe05ebe1be391952eb84c3c6133d83f06d714ebf978e1db02e00de1b6ad0e",
+  "source_nested_sha256": "2c5d8c0617aa08a07bba57990302299f78647e307c7e790582614eadfbd3597c",
   "source_spine_label": "pymc",
   "source_hierarchical_method": "pymc",
   "source_years": [
@@ -931,27 +931,27 @@
       "30": "fa2602dedb4d49d65ee1b8ea0eeb0c9d232442dec727cedab75286c057d0772b"
     }
   },
-  "source_frozen_index_sha256": "2ce48f4f44d981aa7d06d6c8c7aa1ec84fe1df6c870a583f1687c8fe4472c549",
+  "source_frozen_index_sha256": "c6000dd86e87543d09ae343e73364da90ddee972e90858176c3f6f0ab066c3ec",
   "source_frozen_index_hash_mode": "frozen_prediction_index_semantic_v1",
-  "source_frozen_index_semantic_sha256": "0c13a4454792858e3116401879ff28f470eb2d78e24b19f5987dc63cdb9d5f09",
+  "source_frozen_index_semantic_sha256": "c6b75e721f5e031aa075ee92469b4a90aa036141d50e884e6c2f270d29b37836",
   "source_model_version": "senate-hierarchical-v0.9.22",
-  "source_evidence_bundle_id": "eb-48703d0742f4c8ec",
-  "source_evidence_bundle_sha256": "48703d0742f4c8ec561ef97968cfe65e061a001b75944ef2787ecf03e715547c",
+  "source_evidence_bundle_id": "eb-3e91ca3a90628d69",
+  "source_evidence_bundle_sha256": "3e91ca3a90628d695b234a4b784a92bff18d78d81d1faa0d75467492cc977e86",
   "source_stack_training_protocol": "formal_60_30_v1",
   "source_validation_phase": "canonical_poll_structure",
   "source_poll_structure_config": {
     "version": "poll-structure-v2",
     "sponsor_effect": false,
     "questionnaire_effect": false,
-    "study_effect": true,
+    "study_effect": false,
     "heuristic_study_downweight": null,
     "sponsor_scale": 0.75,
     "questionnaire_scale": 0.75,
     "study_scale": 1.25,
-    "effective_heuristic_study_downweight": false
+    "effective_heuristic_study_downweight": true
   },
-  "source_poll_structure_config_id": "psc-f275da54de178986",
-  "source_model_spec_candidate_sha256": "0d0a8e03233b3a44c7065b859ec8c4d7892cea035d16e45c8fc5a3af89132c1b",
+  "source_poll_structure_config_id": "psc-7819fcedea982286",
+  "source_model_spec_candidate_sha256": "fa9af80cc8713682a776560ec5070fce5d990ef889258b5389ddf114d1fcb151",
   "reproduction": {
     "ok": true,
     "max_abs_weight_delta": 0.0,
@@ -959,12 +959,12 @@
     "prediction_fingerprint_ok": true,
     "prediction_error": null,
     "recomputed": {
-      "pymc": 0.2100265751884933,
-      "state_space": 0.7899734248115066
+      "pymc": 0.21914105930674144,
+      "state_space": 0.7808589406932586
     },
     "stored": {
-      "pymc": 0.2100265751884933,
-      "state_space": 0.7899734248115066
+      "pymc": 0.21914105930674144,
+      "state_space": 0.7808589406932586
     }
   },
   "path": "data/artifacts/stack_weights_oof.json"

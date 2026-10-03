@@ -4,7 +4,7 @@
   "publishable": true,
   "run_class": "publication",
   "election_id": "senate-2026",
-  "as_of": "2026-09-27",
+  "as_of": "2026-10-03",
   "reasons": [],
   "domains": {
     "races": {
@@ -26,12 +26,12 @@
       "effective_eligible": true
     },
     "polls": {
-      "n": 354,
+      "n": 372,
       "tier_counts": {
-        "aggregator": 354
+        "aggregator": 372
       },
       "blocked_n": 0,
-      "eligible_n": 354,
+      "eligible_n": 372,
       "eligible": true,
       "canonical_source_contract": {
         "schema_version": "canonical-domain-contract-v1",
@@ -44,7 +44,7 @@
         "operational_freshness_clock": "retrieved_at + field_end"
       },
       "stale": false,
-      "latest_age_hours": 72.0,
+      "latest_age_hours": 48.0,
       "freshness": {
         "policy_version": "domain-freshness-v2",
         "domain": "polls",
@@ -55,8 +55,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 3.7358893681481478,
-        "observation_age_days": 9.755533195462963
+        "retrieval_age_days": 0.05049379774305556,
+        "observation_age_days": 2.8594445123032406
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -747,7 +747,7 @@
         }
       ],
       "traceable": true,
-      "snapshot_sha256": "a11540410bb98404fb048eb51b52d7a688dbbf138461b9846c3eeaa0d8e785c0",
+      "snapshot_sha256": "cfbb399720565171cc9d65642fc07e78d044721e4bf88bbf1bad7bca5d03e74f",
       "candidate_timeline_snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
       "reasons": [],
       "eligible": true,
@@ -816,8 +816,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 4.209035272048611,
-        "observation_age_days": 6.755533195462964
+        "retrieval_age_days": 4.312946588888889,
+        "observation_age_days": 6.8594445123032415
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -864,8 +864,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 8.789560973240741,
-        "observation_age_days": 9.755533195462963
+        "retrieval_age_days": 8.89347229008102,
+        "observation_age_days": 9.859444512303241
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -888,7 +888,7 @@
         "operational_freshness_clock": "source retrieved_at + poll observation date"
       },
       "freshness_provenance": {
-        "retrieved_at": "2026-09-30T00:28:20.328299+00:00",
+        "retrieved_at": "2026-10-03T19:24:55.097033+00:00",
         "observed_at": "2026-08-28T00:00:00+00:00",
         "source_available": true
       },
@@ -902,8 +902,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 3.7358534697800927,
-        "observation_age_days": 36.75553319546297
+        "retrieval_age_days": 0.05047348182870371,
+        "observation_age_days": 36.85944451230324
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -946,8 +946,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 4.767859584351852,
-        "observation_age_days": 247.75553319546296
+        "retrieval_age_days": 4.8717709011921295,
+        "observation_age_days": 247.85944451230324
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -969,8 +969,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 11.703533343113426,
-        "observation_age_days": 20.755533195462963
+        "retrieval_age_days": 11.807444659953704,
+        "observation_age_days": 20.85944451230324
       },
       "production_role": "disabled",
       "hard_dependency": false,
@@ -991,7 +991,7 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 11.755533195462963,
+        "retrieval_age_days": 11.859444512303241,
         "observation_age_days": null
       },
       "production_role": "disabled",
@@ -1041,26 +1041,26 @@
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-10-03T18:07:58.077395+00:00",
+  "checked_at": "2026-10-03T20:37:36.013974+00:00",
   "evidence_fingerprint": {
-    "sha256": "40053b8cfacbb4b26d58cc20e7bcaaa85f4a0909e6b9ad424062e5e8ce40faf4",
+    "sha256": "7f3f6e1125b3feb3aaff3d9a344a9b4b36e2ab619e90f0e4250824320b10d1a3",
     "manifests": {
       "fundraising_shares.json": "402cec51d741875fe238d02039760c62f2c611848d5fe31edb3f1fba2a181905",
       "economics_vintages.json": "565f2a4b280d9d80f4ebed0efeecef8a1b49a362e6381a2afb2cc7441c51ecca",
-      "pres_approval.json": "e77f0554d02725137e9a8e8efe310ec715f344f955422e9225717bc3a3b15e6e",
+      "pres_approval.json": "093fe1f1a0f4ed79ad5371864fdbb600d5220d753a90e1f049a8376305795e72",
       "demographic_vintages.json": "e8be3309a8ed8626010b81cc1ce646d950ccaf32b3ad662a964d0fe086d53690",
       "candidate_timeline.json": "22eceda5c4dbba75e448439b1b7cfb6b1523b60c69edcf8d1dac006160732d91",
       "expert_ratings.json": "626aba81604531c17b221c41165c3cff6cb35ea4c9fd613672fdfc1da5b08ad6",
       "markets_kalshi.json": "495734f2f1af917ad001828da3f09d1659944a5f627f5a6499c0009beed4721e",
       "official_senate_ballots.json": "060db09678108eda582bbb660a0a31e996dacf9c9b6cf87352fead1f37d61972",
-      "presidential_vote_sources.json": "09798a5aa0a0a388357bf7e102ae69056a0d567ef5d23532114cefef3b8ca337",
+      "presidential_vote_sources.json": "79acc42079a2e43b2c8c063235a3180113ecf9bc3ea9c56e2027e9fb3d49d2e4",
       "wiki_ratings.json": "130fec70c426abab9027a85f83c930d796c6a523c6edc9aabe40a3942585c4fd"
     },
-    "generated_at": "2026-10-03T18:07:58.079288+00:00"
+    "generated_at": "2026-10-03T20:37:36.016108+00:00"
   },
   "PUBLIC_LIVE_ENABLED": false,
-  "forecast_run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
-  "snapshot_id": "63b2a387123d35cdbd2c6ed1d99e4d963214b7d81c8c1cc0a28d62a689bc49b6",
-  "forecast_generated_at": "2026-10-03T18:07:57.061720+00:00",
-  "identity_checked_at": "2026-10-03T18:07:58.079296+00:00"
+  "forecast_run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
+  "snapshot_id": "9c467c0f9db745091e1d0db6d9ab85de30a46e955191b660fc86c4887c56e9b5",
+  "forecast_generated_at": "2026-10-03T20:37:35.313602+00:00",
+  "identity_checked_at": "2026-10-03T20:37:36.016116+00:00"
 }

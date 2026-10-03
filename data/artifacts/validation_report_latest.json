@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-03T18:34:41.301495+00:00",
+  "generated_at": "2026-10-03T20:30:34.584941+00:00",
   "model_version": "senate-hierarchical-v0.9.22",
   "primary_holdout": 2022,
   "quick": false,
@@ -755,10 +755,10 @@
       {
         "student_t_df": 4.0,
         "era_weight": 0.85,
-        "train_mean_crps": 5.110748089238016,
+        "train_mean_crps": 5.111264521818262,
         "train_scores": [
-          6.368172375251795,
-          8.559234011731283,
+          6.369217589803781,
+          8.560770960080525,
           3.754846991994634,
           4.088829037780676,
           2.7826580294316905
@@ -767,10 +767,10 @@
       {
         "student_t_df": 4.0,
         "era_weight": 1.0,
-        "train_mean_crps": 5.101553851138403,
+        "train_mean_crps": 5.102058783465497,
         "train_scores": [
-          6.333707872752532,
-          8.502931475954057,
+          6.3347132622509,
+          8.504450748091156,
           3.7603168393193513,
           4.100789064497869,
           2.810024003168211
@@ -779,10 +779,10 @@
       {
         "student_t_df": 4.0,
         "era_weight": 1.15,
-        "train_mean_crps": 5.094508032642346,
+        "train_mean_crps": 5.095000679830734,
         "train_scores": [
-          6.299489109796424,
-          8.444971833838828,
+          6.300452307911961,
+          8.44647187166523,
           3.7698222866576208,
           4.115887008533138,
           2.842369924385718
@@ -791,10 +791,10 @@
       {
         "student_t_df": 5.0,
         "era_weight": 0.85,
-        "train_mean_crps": 5.1310333880952,
+        "train_mean_crps": 5.131564933326471,
         "train_scores": [
-          6.418497130335087,
-          8.71500408937309,
+          6.419633112728264,
+          8.71652583313627,
           3.703513759475093,
           4.116381575195572,
           2.7017703860971585
@@ -803,10 +803,10 @@
       {
         "student_t_df": 5.0,
         "era_weight": 1.0,
-        "train_mean_crps": 5.118103117183062,
+        "train_mean_crps": 5.118622835366458,
         "train_scores": [
-          6.384890300554996,
-          8.660533939120034,
+          6.385983895347402,
+          8.662038935244613,
           3.699042653064685,
           4.120916193719219,
           2.725132499456374
@@ -815,10 +815,10 @@
       {
         "student_t_df": 5.0,
         "era_weight": 1.15,
-        "train_mean_crps": 5.1066171266674605,
+        "train_mean_crps": 5.107124148776359,
         "train_scores": [
-          6.351521194415417,
-          8.603553754914152,
+          6.352569856781918,
+          8.605040203092145,
           3.6975965801031765,
           4.127486577249056,
           2.7529275266555
@@ -827,10 +827,10 @@
       {
         "student_t_df": 8.0,
         "era_weight": 0.85,
-        "train_mean_crps": 5.1665632761507405,
+        "train_mean_crps": 5.1671167531891475,
         "train_scores": [
-          6.383488415434011,
-          8.860553779084256,
+          6.384656751633079,
+          8.862152828077223,
           3.841060785565577,
           4.171139091824404,
           2.576574308845456
@@ -839,10 +839,10 @@
       {
         "student_t_df": 8.0,
         "era_weight": 1.0,
-        "train_mean_crps": 5.152304384612432,
+        "train_mean_crps": 5.152848979727358,
         "train_scores": [
-          6.35529322638315,
-          8.804871877321768,
+          6.35643069764201,
+          8.806457381637532,
           3.835041902421771,
           4.172982411636765,
           2.593332505298709
@@ -851,10 +851,10 @@
       {
         "student_t_df": 8.0,
         "era_weight": 1.15,
-        "train_mean_crps": 5.138600311575585,
+        "train_mean_crps": 5.139134844510085,
         "train_scores": [
-          6.3259746211862495,
-          8.746111428987799,
+          6.3270773273733045,
+          8.747681387473241,
           3.830655731753693,
           4.176458288575984,
           2.6138014873742037
@@ -864,10 +864,10 @@
     "selected": {
       "student_t_df": 4.0,
       "era_weight": 1.15,
-      "train_mean_crps": 5.094508032642346,
+      "train_mean_crps": 5.095000679830734,
       "train_scores": [
-        6.299489109796424,
-        8.444971833838828,
+        6.300452307911961,
+        8.44647187166523,
         3.7698222866576208,
         4.115887008533138,
         2.842369924385718
@@ -884,14 +884,14 @@
     "freeze_before_truth": true,
     "no_weight_remapping": true,
     "mean_crps_by_component": {
-      "pymc_dynamic": 4.186618595287797,
       "state_space": 3.203432446446867,
-      "last_election_swing": 5.140491289812883,
-      "pymc": 3.6991100986725556,
-      "ridge_fundamentals": 4.676053713399343,
-      "equal_weight_polls": 4.922701207453702,
+      "pymc": 3.6772564348825716,
       "poll_only_state_space": 9.46070227404105,
-      "shrinkage_polls": 4.594391054729023
+      "shrinkage_polls": 4.594391054729023,
+      "last_election_swing": 5.140491289812883,
+      "ridge_fundamentals": 4.676053713399343,
+      "pymc_dynamic": 4.205024223220684,
+      "equal_weight_polls": 4.922701207453702
     },
     "g8_recommendations": {
       "state_space": {
@@ -899,10 +899,10 @@
         "n_folds": 4,
         "recommend": "keep",
         "deltas_spine_minus_component": {
-          "2018": 0.058228192775732435,
-          "2020": 1.1450053748312587,
-          "2022": 0.3996265565702135,
-          "2024": 0.3798504847255497
+          "2018": 0.1041083625375614,
+          "2020": 1.107632956760293,
+          "2022": 0.3662125092272852,
+          "2024": 0.3173421252176789
         }
       },
       "poll_only_state_space": {
@@ -910,10 +910,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -3.2300694989531125,
-          "2020": -7.5836406745537435,
-          "2022": -8.32240447498861,
-          "2024": -3.9102540529785177
+          "2018": -3.1841893291912835,
+          "2020": -7.621013092624709,
+          "2022": -8.355818522331539,
+          "2024": -3.9727624124863885
         }
       },
       "ridge_fundamentals": {
@@ -921,10 +921,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -3.270937720002163,
-          "2020": 0.49180041391365314,
-          "2022": -0.46477605382240306,
-          "2024": -0.663861098996235
+          "2018": -3.2250575502403342,
+          "2020": 0.45442799584268734,
+          "2022": -0.49819010116533136,
+          "2024": -0.7263694585041058
         }
       },
       "pymc_dynamic": {
@@ -932,10 +932,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -0.33758734130878665,
-          "2020": -0.7543972777052996,
-          "2022": -0.4367628819268523,
-          "2024": -0.42128648552002623
+          "2018": -0.313418633461239,
+          "2020": -0.8469902767601676,
+          "2022": -0.4711596544157839,
+          "2024": -0.47950258871525797
         }
       },
       "last_election_swing": {
@@ -943,10 +943,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -3.2117763921013176,
-          "2020": -0.23658801027642884,
-          "2022": -0.331945474688383,
-          "2024": -1.9852148874951805
+          "2018": -3.1658962223394886,
+          "2020": -0.27396042834739465,
+          "2022": -0.3653595220313113,
+          "2024": -2.0477232470030513
         }
       },
       "equal_weight_polls": {
@@ -954,10 +954,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -3.0357807275437563,
-          "2020": -0.7026895510304643,
-          "2022": -0.7928209271060069,
-          "2024": -0.3630732294443608
+          "2018": -2.9899005577819273,
+          "2020": -0.7400619691014301,
+          "2022": -0.8262349744489352,
+          "2024": -0.42558158895223164
         }
       },
       "shrinkage_polls": {
@@ -965,10 +965,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -1.269030863563771,
-          "2020": -0.734708644076389,
-          "2022": -0.9343686670626621,
-          "2024": -0.6430156495230492
+          "2018": -1.223150693801942,
+          "2020": -0.7720810621473548,
+          "2022": -0.9677827144055904,
+          "2024": -0.70552400903092
         }
       },
       "similarity_terminal": {
@@ -1410,8 +1410,8 @@
   "joint_proper_scores": {
     "schema_version": "joint-oof-scores-v1",
     "model_version": "senate-hierarchical-v0.9.22",
-    "source_nested_sha256": "53efe05ebe1be391952eb84c3c6133d83f06d714ebf978e1db02e00de1b6ad0e",
-    "source_frozen_draws_sha256": "1f0c465cd3184aa7724280fc1adee2d8989575fefea9a7f44465f9aa9fcb0666",
+    "source_nested_sha256": "2c5d8c0617aa08a07bba57990302299f78647e307c7e790582614eadfbd3597c",
+    "source_frozen_draws_sha256": "3d5998dfd9c346cb110972deddbe661029deac2988086f7bacaf0fe596bb449a",
     "draw_alignment_preserved": true,
     "rows": [
       {
@@ -1830,13 +1830,13 @@
         "race_order_sha256": "7336d167ad6be43a987e306092731d906cefecd7f8ce584816e88d00a2ddb063",
         "scores": {
           "protocol_version": "joint-proper-scores-v1",
-          "n_draws": 1600,
+          "n_draws": 8000,
           "n_dimensions": 31,
           "race_order_sha256": "68de2f69cad4b39a4fabfbc635fdafa1c3e017c46ef681ab0ce258546fbe19ec",
           "subsampling_seed": 20260922,
-          "energy_score": 20.94517125766096,
-          "variogram_score_p05": 0.6007444413677347,
-          "seat_count_crps": 0.6306609374999999
+          "energy_score": 21.357896309662202,
+          "variogram_score_p05": 0.6249530556170695,
+          "seat_count_crps": 0.6615018906250001
         }
       },
       {
@@ -1851,9 +1851,9 @@
           "n_dimensions": 31,
           "race_order_sha256": "68de2f69cad4b39a4fabfbc635fdafa1c3e017c46ef681ab0ce258546fbe19ec",
           "subsampling_seed": 20260922,
-          "energy_score": 18.16713721855121,
-          "variogram_score_p05": 0.5928033961119161,
-          "seat_count_crps": 0.54047265625
+          "energy_score": 19.087067447171524,
+          "variogram_score_p05": 0.6225066909955402,
+          "seat_count_crps": 0.5297921875
         }
       },
       {
@@ -1868,9 +1868,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 34.92746153058659,
-          "variogram_score_p05": 1.0184084993401337,
-          "seat_count_crps": 1.4356609375
+          "energy_score": 35.301726513054376,
+          "variogram_score_p05": 1.0238738004915504,
+          "seat_count_crps": 1.4666246093749997
         }
       },
       {
@@ -1881,13 +1881,13 @@
         "race_order_sha256": "9a979b4a711e6a4e93da364e5d78d1cefb1fca5c3c9afde857e80977f87903e7",
         "scores": {
           "protocol_version": "joint-proper-scores-v1",
-          "n_draws": 8000,
+          "n_draws": 1600,
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 33.60336157814775,
-          "variogram_score_p05": 1.0420636628230502,
-          "seat_count_crps": 1.145493875
+          "energy_score": 32.35861084026254,
+          "variogram_score_p05": 1.041112015439041,
+          "seat_count_crps": 1.0924671875
         }
       },
       {
@@ -1902,9 +1902,9 @@
           "n_dimensions": 34,
           "race_order_sha256": "0638065411afb28c12365978b2d5a4e3cc70a8cd576052203279d2b9faf2d0c5",
           "subsampling_seed": 20260922,
-          "energy_score": 33.95986332787578,
-          "variogram_score_p05": 0.9649429852879489,
-          "seat_count_crps": 0.7385300781250002
+          "energy_score": 33.26567323964856,
+          "variogram_score_p05": 0.9729451768295069,
+          "seat_count_crps": 0.6865335937500001
         }
       },
       {
@@ -1919,9 +1919,9 @@
           "n_dimensions": 34,
           "race_order_sha256": "0638065411afb28c12365978b2d5a4e3cc70a8cd576052203279d2b9faf2d0c5",
           "subsampling_seed": 20260922,
-          "energy_score": 30.075428954996063,
-          "variogram_score_p05": 1.0094840775455456,
-          "seat_count_crps": 0.651418359375
+          "energy_score": 30.563145138976303,
+          "variogram_score_p05": 1.0022019952734595,
+          "seat_count_crps": 0.6622921874999999
         }
       },
       {
@@ -1936,9 +1936,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 20.13040717079869,
-          "variogram_score_p05": 0.4937374290152975,
-          "seat_count_crps": 0.93115
+          "energy_score": 19.431008979195223,
+          "variogram_score_p05": 0.4819654993402139,
+          "seat_count_crps": 0.896256640625
         }
       },
       {
@@ -1953,9 +1953,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 21.32474058339211,
-          "variogram_score_p05": 0.759745993501796,
-          "seat_count_crps": 0.7545953125
+          "energy_score": 21.150419788783417,
+          "variogram_score_p05": 0.7535794038592911,
+          "seat_count_crps": 0.7141027343749999
         }
       },
       {
@@ -1970,9 +1970,9 @@
           "n_dimensions": 31,
           "race_order_sha256": "68de2f69cad4b39a4fabfbc635fdafa1c3e017c46ef681ab0ce258546fbe19ec",
           "subsampling_seed": 20260922,
-          "energy_score": 22.92630467343623,
-          "variogram_score_p05": 0.682286929148224,
-          "seat_count_crps": 0.78736328125
+          "energy_score": 22.46086175529814,
+          "variogram_score_p05": 0.6825703862670701,
+          "seat_count_crps": 0.7788890625
         }
       },
       {
@@ -1987,9 +1987,9 @@
           "n_dimensions": 31,
           "race_order_sha256": "68de2f69cad4b39a4fabfbc635fdafa1c3e017c46ef681ab0ce258546fbe19ec",
           "subsampling_seed": 20260922,
-          "energy_score": 19.653626465959547,
-          "variogram_score_p05": 0.6766843173114698,
-          "seat_count_crps": 0.7199960937500001
+          "energy_score": 21.34173372028964,
+          "variogram_score_p05": 0.7233217627900206,
+          "seat_count_crps": 0.7899253906249999
         }
       },
       {
@@ -2004,9 +2004,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 38.39765705903558,
-          "variogram_score_p05": 1.05967381924863,
-          "seat_count_crps": 2.03699609375
+          "energy_score": 38.207545942950595,
+          "variogram_score_p05": 1.05153427178481,
+          "seat_count_crps": 1.9865109374999999
         }
       },
       {
@@ -2021,9 +2021,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 37.75981024633728,
-          "variogram_score_p05": 1.053747633966291,
-          "seat_count_crps": 1.6118519531250002
+          "energy_score": 38.497631450318224,
+          "variogram_score_p05": 1.0489321226474202,
+          "seat_count_crps": 1.7796804687499999
         }
       },
       {
@@ -2038,9 +2038,9 @@
           "n_dimensions": 34,
           "race_order_sha256": "0638065411afb28c12365978b2d5a4e3cc70a8cd576052203279d2b9faf2d0c5",
           "subsampling_seed": 20260922,
-          "energy_score": 36.42504752881944,
-          "variogram_score_p05": 1.0276707316245057,
-          "seat_count_crps": 0.758959375
+          "energy_score": 36.48128569999446,
+          "variogram_score_p05": 1.0424620321129172,
+          "seat_count_crps": 0.749739453125
         }
       },
       {
@@ -2055,9 +2055,9 @@
           "n_dimensions": 34,
           "race_order_sha256": "0638065411afb28c12365978b2d5a4e3cc70a8cd576052203279d2b9faf2d0c5",
           "subsampling_seed": 20260922,
-          "energy_score": 33.668407812382895,
-          "variogram_score_p05": 1.1281198494603952,
-          "seat_count_crps": 1.0330710937499998
+          "energy_score": 33.38334119335447,
+          "variogram_score_p05": 1.1404884029812734,
+          "seat_count_crps": 1.0186187500000001
         }
       },
       {
@@ -2068,13 +2068,13 @@
         "race_order_sha256": "4f4f0dce2d14d4570efefa0d000db753e91220ed83574c613ef2c051627afb2e",
         "scores": {
           "protocol_version": "joint-proper-scores-v1",
-          "n_draws": 8000,
+          "n_draws": 1600,
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 20.877397310323783,
-          "variogram_score_p05": 0.48419127920297356,
-          "seat_count_crps": 1.3997293125
+          "energy_score": 20.91206928473912,
+          "variogram_score_p05": 0.4756542599907142,
+          "seat_count_crps": 1.4056761718750002
         }
       },
       {
@@ -2085,13 +2085,13 @@
         "race_order_sha256": "4f4f0dce2d14d4570efefa0d000db753e91220ed83574c613ef2c051627afb2e",
         "scores": {
           "protocol_version": "joint-proper-scores-v1",
-          "n_draws": 8000,
+          "n_draws": 1600,
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 23.786291977826853,
-          "variogram_score_p05": 0.8293403111165334,
-          "seat_count_crps": 1.2201180468750001
+          "energy_score": 23.67176930388677,
+          "variogram_score_p05": 0.821891262557803,
+          "seat_count_crps": 1.2208015625
         }
       },
       {
@@ -2506,8 +2506,8 @@
     "ok": true
   },
   "stack_weights_artifact": {
-    "pymc": 0.2100265751884933,
-    "state_space": 0.7899734248115066
+    "pymc": 0.21914105930674144,
+    "state_space": 0.7808589406932586
   },
   "stack_weights_meta": {
     "source_nested_loo": "data/artifacts/nested_component_loo_canonical.json",
@@ -3243,24 +3243,24 @@
     "control_ok": true,
     "control_soft": true,
     "control_gaps": {
-      "ddhq": 0.29198,
-      "kalshi": 0.18287108910891092
+      "ddhq": 0.28312000000000004,
+      "kalshi": 0.17401108910891094
     },
-    "primary_control_gap": 0.18287108910891092,
-    "max_abs_control_gap": 0.29198,
+    "primary_control_gap": 0.17401108910891094,
+    "max_abs_control_gap": 0.28312000000000004,
     "race_scores": {
       "ddhq": {
         "n": 10,
-        "brier_vs_peer_favorite": 0.23285469428,
-        "mae": 0.167166,
-        "crps_proxy": 0.167166,
+        "brier_vs_peer_favorite": 0.23011602932000003,
+        "mae": 0.174254,
+        "crps_proxy": 0.174254,
         "ok": false
       },
       "kalshi": {
         "n": 8,
-        "brier_vs_peer_favorite": 0.11604938660000001,
-        "mae": 0.11614837920546375,
-        "crps_proxy": 0.11614837920546375,
+        "brier_vs_peer_favorite": 0.12122831174999998,
+        "mae": 0.12009587920546376,
+        "crps_proxy": 0.12009587920546376,
         "ok": true
       }
     },
@@ -3269,7 +3269,7 @@
     "null_margin_races": [],
     "method": "ensemble_stack",
     "core_method": "pymc",
-    "generic_ballot": 5.7459422124828174,
+    "generic_ballot": 4.413521232216102,
     "reasons": [],
     "thresholds": {
       "max_abs_control_gap": 0.25,
@@ -3283,7 +3283,7 @@
   "acceptance_gates": {
     "audit_item": "Milestone-0",
     "model_version": "senate-hierarchical-v0.9.22",
-    "generated_at": "2026-10-03T18:34:44.429771+00:00",
+    "generated_at": "2026-10-03T20:30:37.732386+00:00",
     "archive_scope": "2014-2024",
     "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
     "gates": {
@@ -3382,8 +3382,8 @@
           ],
           "coherence_ok": true,
           "coherence_notes": [],
-          "forecast_run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
-          "evidence_fingerprint": "40053b8cfacbb4b26d58cc20e7bcaaa85f4a0909e6b9ad424062e5e8ce40faf4"
+          "forecast_run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
+          "evidence_fingerprint": "7f3f6e1125b3feb3aaff3d9a344a9b4b36e2ab619e90f0e4250824320b10d1a3"
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
@@ -3405,7 +3405,7 @@
           "no_weight_remapping": true,
           "stack_source_spine": "pymc",
           "reproduction_ok": true,
-          "matrix_sha256": "1fd71a19ed54a0b8c8a8302c491e21758f0b28e0341a57e8f6e6d3bd2b74efe0",
+          "matrix_sha256": "8272dec9b73749580594c7cd00ee8348c8526ce033764947c436a3bd0ad71ec9",
           "forecast_method": "ensemble_stack",
           "forecast_core": "pymc"
         },
@@ -3425,16 +3425,16 @@
         "status": "pass",
         "detail": {
           "g8_metric": "crps",
-          "mean_crps": 3.6991100986725556,
+          "mean_crps": 3.6772564348825716,
           "mean_crps_by_component": {
-            "pymc_dynamic": 4.186618595287797,
             "state_space": 3.203432446446867,
-            "last_election_swing": 5.140491289812883,
-            "pymc": 3.6991100986725556,
-            "ridge_fundamentals": 4.676053713399343,
-            "equal_weight_polls": 4.922701207453702,
+            "pymc": 3.6772564348825716,
             "poll_only_state_space": 9.46070227404105,
-            "shrinkage_polls": 4.594391054729023
+            "shrinkage_polls": 4.594391054729023,
+            "last_election_swing": 5.140491289812883,
+            "ridge_fundamentals": 4.676053713399343,
+            "pymc_dynamic": 4.205024223220684,
+            "equal_weight_polls": 4.922701207453702
           },
           "n_folds": 4,
           "n_outer_years": 4,
@@ -3447,13 +3447,13 @@
           "spine_label": "pymc",
           "validation_calibration": {
             "n": 34,
-            "brier": 0.05452155071603785,
+            "brier": 0.06143148553447393,
             "has_margin_scores": true,
-            "log_score": -0.19025085137834624,
+            "log_score": -0.20557517879949233,
             "calibration_slope_intercept": {
               "n": 34,
-              "slope": 1.1251958171197205,
-              "intercept": -0.07585784469488333,
+              "slope": 1.1143895445040928,
+              "intercept": -0.05602380767853402,
               "ok": true,
               "ideal": {
                 "slope": 1.0,
@@ -3462,8 +3462,8 @@
             },
             "pit": {
               "n": 34,
-              "mean": 0.4468075181562987,
-              "var": 0.05393895561224451,
+              "mean": 0.4959773473625036,
+              "var": 0.059143651584808214,
               "expected_mean": 0.5,
               "expected_var": 0.08333333333333333,
               "histogram": [
@@ -3475,37 +3475,37 @@
                 {
                   "bin_lo": 0.1,
                   "bin_hi": 0.2,
-                  "n": 3.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.2,
                   "bin_hi": 0.30000000000000004,
-                  "n": 2.0
+                  "n": 1.0
                 },
                 {
                   "bin_lo": 0.30000000000000004,
                   "bin_hi": 0.4,
-                  "n": 11.0
+                  "n": 10.0
                 },
                 {
                   "bin_lo": 0.4,
                   "bin_hi": 0.5,
-                  "n": 3.0
+                  "n": 6.0
                 },
                 {
                   "bin_lo": 0.5,
                   "bin_hi": 0.6000000000000001,
-                  "n": 4.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.6000000000000001,
                   "bin_hi": 0.7000000000000001,
-                  "n": 4.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.7000000000000001,
                   "bin_hi": 0.8,
-                  "n": 2.0
+                  "n": 5.0
                 },
                 {
                   "bin_lo": 0.8,
@@ -3515,7 +3515,7 @@
                 {
                   "bin_lo": 0.9,
                   "bin_hi": 1.0,
-                  "n": 2.0
+                  "n": 3.0
                 }
               ],
               "ok": true
@@ -3555,9 +3555,9 @@
           "crossfit_procedure": "cycle_cross_fitted_production_stack",
           "crossfit_raw_metrics": {
             "n": 260,
-            "empirical_crps": 3.1988639993649692,
-            "brier": 0.04840662948060923,
-            "log_score": -0.15503276360071372
+            "empirical_crps": 3.1896908020237786,
+            "brier": 0.04780733512393962,
+            "log_score": -0.15330576918998257
           },
           "experimental_calibration_not_production": {
             "production_adopted": false,
@@ -3571,9 +3571,9 @@
               "thin_sample": false,
               "calibration_claim_allowed": true
             },
-            "empirical_crps": 3.1988639993649692,
-            "brier": 0.04840662948060923,
-            "log_score": -0.15503276360071372
+            "empirical_crps": 3.1896908020237786,
+            "brier": 0.04780733512393962,
+            "log_score": -0.15330576918998257
           },
           "n_bins": 10,
           "reliability_gate": {
@@ -3634,7 +3634,7 @@
         "status": "pass",
         "detail": {
           "alerts": [],
-          "mcse_control": 0.0018763095672089934
+          "mcse_control": 0.001901409296285258
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
@@ -3651,13 +3651,13 @@
           "mode": "hash_seal_and_independent",
           "verify_rebuild": {
             "ok": true,
-            "run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
+            "run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
             "error": null,
-            "forecast_hash_expected": "311757883afe7018c4fd29ef03cea9f406c4b39be4eba29bf37136cc78f54e64",
-            "forecast_hash_actual": "311757883afe7018c4fd29ef03cea9f406c4b39be4eba29bf37136cc78f54e64"
+            "forecast_hash_expected": "fb6e9494a5ad72f5fa72f88f4c9ab3fb272e606e0027c3084a85c25000f1e88e",
+            "forecast_hash_actual": "fb6e9494a5ad72f5fa72f88f4c9ab3fb272e606e0027c3084a85c25000f1e88e"
           },
           "independent_rebuild": {
-            "ok": true,
+            "ok": false,
             "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/independent_rebuild_latest.json",
             "comparison": {
               "ok": true,
@@ -3686,15 +3686,16 @@
             },
             "domain_ok": true,
             "error": null,
-            "run_id_match": true,
-            "forecast_run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
+            "run_id_match": false,
+            "forecast_run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
             "rebuild_run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
             "freshness": {
-              "forecast_generated_at": "2026-10-03T16:54:40.087166+00:00",
+              "forecast_generated_at": "2026-10-03T20:29:53.506940+00:00",
               "rebuild_generated_at": "2026-10-03T18:07:58.164933+00:00",
-              "rebuild_after_forecast": true
+              "rebuild_after_forecast": false
             },
-            "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact."
+            "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact.",
+            "block": "rebuild generated_at precedes forecast \u2014 cannot prove current release"
           },
           "shadow_verify": [
             {
@@ -3894,8 +3895,8 @@
           ],
           "coherence_ok": true,
           "coherence_notes": [],
-          "forecast_run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
-          "evidence_fingerprint": "40053b8cfacbb4b26d58cc20e7bcaaa85f4a0909e6b9ad424062e5e8ce40faf4"
+          "forecast_run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
+          "evidence_fingerprint": "7f3f6e1125b3feb3aaff3d9a344a9b4b36e2ab619e90f0e4250824320b10d1a3"
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
@@ -3917,7 +3918,7 @@
           "no_weight_remapping": true,
           "stack_source_spine": "pymc",
           "reproduction_ok": true,
-          "matrix_sha256": "1fd71a19ed54a0b8c8a8302c491e21758f0b28e0341a57e8f6e6d3bd2b74efe0",
+          "matrix_sha256": "8272dec9b73749580594c7cd00ee8348c8526ce033764947c436a3bd0ad71ec9",
           "forecast_method": "ensemble_stack",
           "forecast_core": "pymc"
         },
@@ -3937,16 +3938,16 @@
         "status": "pass",
         "detail": {
           "g8_metric": "crps",
-          "mean_crps": 3.6991100986725556,
+          "mean_crps": 3.6772564348825716,
           "mean_crps_by_component": {
-            "pymc_dynamic": 4.186618595287797,
             "state_space": 3.203432446446867,
-            "last_election_swing": 5.140491289812883,
-            "pymc": 3.6991100986725556,
-            "ridge_fundamentals": 4.676053713399343,
-            "equal_weight_polls": 4.922701207453702,
+            "pymc": 3.6772564348825716,
             "poll_only_state_space": 9.46070227404105,
-            "shrinkage_polls": 4.594391054729023
+            "shrinkage_polls": 4.594391054729023,
+            "last_election_swing": 5.140491289812883,
+            "ridge_fundamentals": 4.676053713399343,
+            "pymc_dynamic": 4.205024223220684,
+            "equal_weight_polls": 4.922701207453702
           },
           "n_folds": 4,
           "n_outer_years": 4,
@@ -3959,13 +3960,13 @@
           "spine_label": "pymc",
           "validation_calibration": {
             "n": 34,
-            "brier": 0.05452155071603785,
+            "brier": 0.06143148553447393,
             "has_margin_scores": true,
-            "log_score": -0.19025085137834624,
+            "log_score": -0.20557517879949233,
             "calibration_slope_intercept": {
               "n": 34,
-              "slope": 1.1251958171197205,
-              "intercept": -0.07585784469488333,
+              "slope": 1.1143895445040928,
+              "intercept": -0.05602380767853402,
               "ok": true,
               "ideal": {
                 "slope": 1.0,
@@ -3974,8 +3975,8 @@
             },
             "pit": {
               "n": 34,
-              "mean": 0.4468075181562987,
-              "var": 0.05393895561224451,
+              "mean": 0.4959773473625036,
+              "var": 0.059143651584808214,
               "expected_mean": 0.5,
               "expected_var": 0.08333333333333333,
               "histogram": [
@@ -3987,37 +3988,37 @@
                 {
                   "bin_lo": 0.1,
                   "bin_hi": 0.2,
-                  "n": 3.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.2,
                   "bin_hi": 0.30000000000000004,
-                  "n": 2.0
+                  "n": 1.0
                 },
                 {
                   "bin_lo": 0.30000000000000004,
                   "bin_hi": 0.4,
-                  "n": 11.0
+                  "n": 10.0
                 },
                 {
                   "bin_lo": 0.4,
                   "bin_hi": 0.5,
-                  "n": 3.0
+                  "n": 6.0
                 },
                 {
                   "bin_lo": 0.5,
                   "bin_hi": 0.6000000000000001,
-                  "n": 4.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.6000000000000001,
                   "bin_hi": 0.7000000000000001,
-                  "n": 4.0
+                  "n": 2.0
                 },
                 {
                   "bin_lo": 0.7000000000000001,
                   "bin_hi": 0.8,
-                  "n": 2.0
+                  "n": 5.0
                 },
                 {
                   "bin_lo": 0.8,
@@ -4027,7 +4028,7 @@
                 {
                   "bin_lo": 0.9,
                   "bin_hi": 1.0,
-                  "n": 2.0
+                  "n": 3.0
                 }
               ],
               "ok": true
@@ -4067,9 +4068,9 @@
           "crossfit_procedure": "cycle_cross_fitted_production_stack",
           "crossfit_raw_metrics": {
             "n": 260,
-            "empirical_crps": 3.1988639993649692,
-            "brier": 0.04840662948060923,
-            "log_score": -0.15503276360071372
+            "empirical_crps": 3.1896908020237786,
+            "brier": 0.04780733512393962,
+            "log_score": -0.15330576918998257
           },
           "experimental_calibration_not_production": {
             "production_adopted": false,
@@ -4083,9 +4084,9 @@
               "thin_sample": false,
               "calibration_claim_allowed": true
             },
-            "empirical_crps": 3.1988639993649692,
-            "brier": 0.04840662948060923,
-            "log_score": -0.15503276360071372
+            "empirical_crps": 3.1896908020237786,
+            "brier": 0.04780733512393962,
+            "log_score": -0.15330576918998257
           },
           "n_bins": 10,
           "reliability_gate": {
@@ -4146,7 +4147,7 @@
         "status": "pass",
         "detail": {
           "alerts": [],
-          "mcse_control": 0.0018763095672089934
+          "mcse_control": 0.001901409296285258
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
@@ -4163,13 +4164,13 @@
           "mode": "hash_seal_and_independent",
           "verify_rebuild": {
             "ok": true,
-            "run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
+            "run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
             "error": null,
-            "forecast_hash_expected": "311757883afe7018c4fd29ef03cea9f406c4b39be4eba29bf37136cc78f54e64",
-            "forecast_hash_actual": "311757883afe7018c4fd29ef03cea9f406c4b39be4eba29bf37136cc78f54e64"
+            "forecast_hash_expected": "fb6e9494a5ad72f5fa72f88f4c9ab3fb272e606e0027c3084a85c25000f1e88e",
+            "forecast_hash_actual": "fb6e9494a5ad72f5fa72f88f4c9ab3fb272e606e0027c3084a85c25000f1e88e"
           },
           "independent_rebuild": {
-            "ok": true,
+            "ok": false,
             "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/independent_rebuild_latest.json",
             "comparison": {
               "ok": true,
@@ -4198,15 +4199,16 @@
             },
             "domain_ok": true,
             "error": null,
-            "run_id_match": true,
-            "forecast_run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
+            "run_id_match": false,
+            "forecast_run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
             "rebuild_run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
             "freshness": {
-              "forecast_generated_at": "2026-10-03T16:54:40.087166+00:00",
+              "forecast_generated_at": "2026-10-03T20:29:53.506940+00:00",
               "rebuild_generated_at": "2026-10-03T18:07:58.164933+00:00",
-              "rebuild_after_forecast": true
+              "rebuild_after_forecast": false
             },
-            "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact."
+            "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact.",
+            "block": "rebuild generated_at precedes forecast \u2014 cannot prove current release"
           },
           "shadow_verify": [
             {
@@ -4316,7 +4318,8 @@
     "n_partial": 0,
     "n_fail": 1,
     "failures": [
-      "G10"
+      "G10",
+      "COHERENCE"
     ],
     "research_failures": [],
     "partials": [],
@@ -4415,7 +4418,7 @@
             "required_for_full_validation": true,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "evidence_eligibility_latest.json",
-            "artifact_sha256": "49db7e392df47cb6923f99dc1c941b23c953152b2850e141c8470462476ed2be",
+            "artifact_sha256": "f25b007705f56353e9198361161920bd8e8f16e734f4d1c937bbb2db01da5e12",
             "artifact_model_version": "senate-hierarchical-v0.9.22",
             "status": "pass",
             "ok": true,
@@ -10562,7 +10565,7 @@
             "required_for_full_validation": true,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "evidence_eligibility_latest.json",
-            "artifact_sha256": "49db7e392df47cb6923f99dc1c941b23c953152b2850e141c8470462476ed2be",
+            "artifact_sha256": "f25b007705f56353e9198361161920bd8e8f16e734f4d1c937bbb2db01da5e12",
             "artifact_model_version": "senate-hierarchical-v0.9.22",
             "status": "pass",
             "ok": true,
@@ -10601,12 +10604,12 @@
             "required_for_full_validation": true,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "joint_oof_scores_latest.json",
-            "artifact_sha256": "ba41e3a34aca48ed0a7c1c3d722d1f3f68370d568b362e7056206f921fc339f1",
+            "artifact_sha256": "6b2044a335613845659a1ae75641a3e06f155b2959d8c6dc0380a0bcf90b368d",
             "artifact_model_version": "senate-hierarchical-v0.9.22",
             "status": "pass",
             "ok": true,
-            "required_source_sha256": "53efe05ebe1be391952eb84c3c6133d83f06d714ebf978e1db02e00de1b6ad0e",
-            "artifact_source_sha256": "53efe05ebe1be391952eb84c3c6133d83f06d714ebf978e1db02e00de1b6ad0e",
+            "required_source_sha256": "2c5d8c0617aa08a07bba57990302299f78647e307c7e790582614eadfbd3597c",
+            "artifact_source_sha256": "2c5d8c0617aa08a07bba57990302299f78647e307c7e790582614eadfbd3597c",
             "frozen_draw_fingerprint_matches": true,
             "reason": null
           },
@@ -10632,37 +10635,26 @@
           },
           "poll_structure_nested_oos": {
             "declared_status": "requires_rebuild",
-            "required_for_full_validation": true,
+            "required_for_full_validation": false,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "nested_component_loo_canonical.json",
-            "artifact_sha256": "53efe05ebe1be391952eb84c3c6133d83f06d714ebf978e1db02e00de1b6ad0e",
-            "artifact_model_version": "senate-hierarchical-v0.9.22",
-            "status": "pass",
+            "artifact_sha256": "2c5d8c0617aa08a07bba57990302299f78647e307c7e790582614eadfbd3597c",
+            "status": "intentionally_deferred",
             "ok": true,
-            "reason": null,
-            "enabled_poll_features": [
-              "study_effect"
-            ],
-            "selected_poll_features": [
-              "study_effect"
-            ],
-            "required_ablation_ids": [
-              "hier_no_study_effect"
-            ],
-            "validated_model_spec_sha256": "42b83140a7431e4c2b6b59bad658e0c48260156af138fd93f487401add52c120"
+            "reason": "feature is disabled in the effective production configuration"
           },
           "poll_structure_positive_crossfit": {
             "declared_status": "requires_rebuild",
             "required_for_full_validation": true,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "poll_structure_crossfit_latest.json",
-            "artifact_sha256": "9d3de2fab95eb02478eaa531022a3dee836f78168e5942b16863da1a93bca923",
+            "artifact_sha256": "4137513a172626df35740ab5389a79091e100650a50de8b3ba642538f5873268",
             "artifact_model_version": "senate-hierarchical-v0.9.22",
             "status": "pass",
             "ok": true,
             "reason": null,
-            "required_source_sha256": "149567c7d2e9c59a0c4300a9cfe216e31e659ebc0666eeac771de87faa84aa0e",
-            "artifact_source_sha256": "149567c7d2e9c59a0c4300a9cfe216e31e659ebc0666eeac771de87faa84aa0e",
+            "required_source_sha256": "8dfaa18639b24c9e4d2d59ed2b87f6d813bc2049b0278e22b5d9fe0041fdb7c5",
+            "artifact_source_sha256": "8dfaa18639b24c9e4d2d59ed2b87f6d813bc2049b0278e22b5d9fe0041fdb7c5",
             "n_outer_folds": 4
           },
           "pollster_ratings_point_in_time": {
@@ -10683,12 +10675,12 @@
             "required_for_full_validation": true,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "posterior_predictive_oof_latest.json",
-            "artifact_sha256": "448804a52dfd7514b3272313cd8520f2f59e3c8a8a81c95a58c74538141478f4",
+            "artifact_sha256": "e5a964b278ad8f50455346d1ea307d8530e2018eaacf4a67aaf82e2f4a804961",
             "artifact_model_version": "senate-hierarchical-v0.9.22",
             "status": "pass",
             "ok": true,
-            "required_source_sha256": "53efe05ebe1be391952eb84c3c6133d83f06d714ebf978e1db02e00de1b6ad0e",
-            "artifact_source_sha256": "53efe05ebe1be391952eb84c3c6133d83f06d714ebf978e1db02e00de1b6ad0e",
+            "required_source_sha256": "2c5d8c0617aa08a07bba57990302299f78647e307c7e790582614eadfbd3597c",
+            "artifact_source_sha256": "2c5d8c0617aa08a07bba57990302299f78647e307c7e790582614eadfbd3597c",
             "frozen_draw_fingerprint_matches": true,
             "reason": null
           },
@@ -10697,12 +10689,12 @@
             "required_for_full_validation": true,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "prior_predictive_latest.json",
-            "artifact_sha256": "b0cce16b230ab4567bc37738f030cf07d153028bc242f1587b05842cce25d421",
+            "artifact_sha256": "5023a251417976cc9ace92cfa3465d3106047eb92cf395b6556f357a1cd01b88",
             "artifact_model_version": "senate-hierarchical-v0.9.22",
             "status": "pass",
             "ok": true,
-            "required_source_sha256": "311757883afe7018c4fd29ef03cea9f406c4b39be4eba29bf37136cc78f54e64",
-            "artifact_source_sha256": "311757883afe7018c4fd29ef03cea9f406c4b39be4eba29bf37136cc78f54e64",
+            "required_source_sha256": "fb6e9494a5ad72f5fa72f88f4c9ab3fb272e606e0027c3084a85c25000f1e88e",
+            "artifact_source_sha256": "fb6e9494a5ad72f5fa72f88f4c9ab3fb272e606e0027c3084a85c25000f1e88e",
             "reason": null
           },
           "same_family_ablation_oos": {
@@ -10710,7 +10702,7 @@
             "required_for_full_validation": true,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "nested_component_loo_selection.json",
-            "artifact_sha256": "149567c7d2e9c59a0c4300a9cfe216e31e659ebc0666eeac771de87faa84aa0e",
+            "artifact_sha256": "8dfaa18639b24c9e4d2d59ed2b87f6d813bc2049b0278e22b5d9fe0041fdb7c5",
             "artifact_model_version": "senate-hierarchical-v0.9.22",
             "status": "pass",
             "ok": true,
@@ -10725,15 +10717,15 @@
               "terminal_race": "keep"
             },
             "frozen_index_model_version": "senate-hierarchical-v0.9.22",
-            "required_frozen_index_semantic_sha256": "0097fd4dea920276f0aee2dc93b34c3fe41fd524210651852bb12aad281aea45",
-            "actual_frozen_index_semantic_sha256": "0097fd4dea920276f0aee2dc93b34c3fe41fd524210651852bb12aad281aea45"
+            "required_frozen_index_semantic_sha256": "b2d97a94fb18de1a5f87d4da3ebcd74750a3f9839a3968af18b5483a7db3ad9a",
+            "actual_frozen_index_semantic_sha256": "b2d97a94fb18de1a5f87d4da3ebcd74750a3f9839a3968af18b5483a7db3ad9a"
           },
           "sampler_health_current_reference": {
             "declared_status": "requires_rebuild",
             "required_for_full_validation": true,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "forecast_latest.json",
-            "artifact_sha256": "311757883afe7018c4fd29ef03cea9f406c4b39be4eba29bf37136cc78f54e64",
+            "artifact_sha256": "fb6e9494a5ad72f5fa72f88f4c9ab3fb272e606e0027c3084a85c25000f1e88e",
             "artifact_model_version": "senate-hierarchical-v0.9.22",
             "status": "pass",
             "ok": true,
@@ -10746,7 +10738,7 @@
             "required_for_full_validation": true,
             "required_model_version": "senate-hierarchical-v0.9.22",
             "required_artifact": "validated_model_spec_latest.json",
-            "artifact_sha256": "42b83140a7431e4c2b6b59bad658e0c48260156af138fd93f487401add52c120",
+            "artifact_sha256": "b94306354e1002580f8153e80ad2d60e207983bb6df8337e01b6941b1bedf8e4",
             "artifact_model_version": "senate-hierarchical-v0.9.22",
             "status": "pass",
             "ok": true,
@@ -10767,20 +10759,22 @@
       "note": "Extension gates are reported separately from G1-G11. Code presence does not satisfy empirical validation; pending/stale states require a rebuild."
     },
     "run_coherence": {
-      "ok": true,
-      "mismatches": [],
+      "ok": false,
+      "mismatches": [
+        "independent_rebuild run_id=senate-2026_2026-09-27_ensemble_stack_20260901 != forecast.run_id=senate-2026_2026-10-03_ensemble_stack_20260901"
+      ],
       "notes": [],
-      "forecast_run_id": "senate-2026_2026-09-27_ensemble_stack_20260901",
-      "snapshot_id": "63b2a387123d35cdbd2c6ed1d99e4d963214b7d81c8c1cc0a28d62a689bc49b6",
+      "forecast_run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
+      "snapshot_id": "9c467c0f9db745091e1d0db6d9ab85de30a46e955191b660fc86c4887c56e9b5",
       "model_version": "senate-hierarchical-v0.9.22",
       "forecast_publishable": true,
       "PUBLIC_LIVE_ENABLED": false,
       "live_locked": true,
-      "generated_at": "2026-10-03T18:34:50.017123+00:00",
+      "generated_at": "2026-10-03T20:30:42.931407+00:00",
       "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/run_coherence_latest.json"
     },
     "g1_g11_ok": true,
-    "full_validation_ok": true,
+    "full_validation_ok": false,
     "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/acceptance_gates_latest.json",
     "md_path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/acceptance_gates_latest.md"
   },
@@ -10811,29 +10805,29 @@
       {
         "pollster_id": "Center Street PAC",
         "n_polls": 25,
-        "crps": 4.983020029034764,
-        "brier": 0.05802027983765515,
-        "delta_crps": 0.0724839863276987,
-        "delta_brier": 0.0005211367950304149
+        "crps": 4.9543942450618825,
+        "brier": 0.05936725592055246,
+        "delta_crps": 0.04385820235481752,
+        "delta_brier": 0.0018681128779277287
       },
       {
         "pollster_id": "Trafalgar Group",
         "n_polls": 13,
-        "crps": 4.405286537753498,
-        "brier": 0.06256258349534423,
-        "delta_crps": -0.505249504953567,
-        "delta_brier": 0.005063440452719496
+        "crps": 4.411435158506102,
+        "brier": 0.05950560829614494,
+        "delta_crps": -0.49910088420096343,
+        "delta_brier": 0.0020064652535202107
       },
       {
         "pollster_id": "Emerson",
         "n_polls": 11,
-        "crps": 5.031088043648266,
-        "brier": 0.06391823181868099,
-        "delta_crps": 0.12055200094120089,
-        "delta_brier": 0.006419088776056257
+        "crps": 4.880283504960967,
+        "brier": 0.058115799596896445,
+        "delta_crps": -0.030252537746098263,
+        "delta_brier": 0.000616656554271712
       }
     ],
-    "mean_abs_delta_crps": 0.2327618307408222,
+    "mean_abs_delta_crps": 0.19107054143395974,
     "note": "Leave-pollster-out: large positive delta_crps means that pollster was important; stable scores imply robustness to single-house dominance.",
     "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/leave_pollster_out_latest.json"
   }

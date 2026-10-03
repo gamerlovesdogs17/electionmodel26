@@ -2,24 +2,24 @@
   "schema_version": "validated-model-spec-candidate-v1",
   "model_version": "senate-hierarchical-v0.9.22",
   "status": "candidate_pending_canonical_oof",
-  "evidence_bundle_id": "eb-48703d0742f4c8ec",
-  "evidence_bundle_sha256": "48703d0742f4c8ec561ef97968cfe65e061a001b75944ef2787ecf03e715547c",
-  "source_readiness_sha256": "18c467daa2a601d45220f0d4fdd3c84143393b5d642598302944a909ab3ab569",
-  "poll_structure_selection_sha256": "9d3de2fab95eb02478eaa531022a3dee836f78168e5942b16863da1a93bca923",
-  "poll_structure_selection_source_nested_sha256": "149567c7d2e9c59a0c4300a9cfe216e31e659ebc0666eeac771de87faa84aa0e",
-  "selected_structure_id": "hier_plus_study_effect",
+  "evidence_bundle_id": "eb-3e91ca3a90628d69",
+  "evidence_bundle_sha256": "3e91ca3a90628d695b234a4b784a92bff18d78d81d1faa0d75467492cc977e86",
+  "source_readiness_sha256": "8f11eb9561dcb321fed346ba5a0d96cb7bc6e9ffcc7247fc3fa38a5b38d44aa6",
+  "poll_structure_selection_sha256": "4137513a172626df35740ab5389a79091e100650a50de8b3ba642538f5873268",
+  "poll_structure_selection_source_nested_sha256": "8dfaa18639b24c9e4d2d59ed2b87f6d813bc2049b0278e22b5d9fe0041fdb7c5",
+  "selected_structure_id": "pymc",
   "selected_poll_structure": {
     "version": "poll-structure-v2",
     "sponsor_effect": false,
     "questionnaire_effect": false,
-    "study_effect": true,
+    "study_effect": false,
     "heuristic_study_downweight": null,
     "sponsor_scale": 0.75,
     "questionnaire_scale": 0.75,
     "study_scale": 1.25,
-    "effective_heuristic_study_downweight": false
+    "effective_heuristic_study_downweight": true
   },
-  "selected_poll_structure_id": "psc-f275da54de178986",
+  "selected_poll_structure_id": "psc-7819fcedea982286",
   "historical_cycles": [
     2018,
     2020,
@@ -30,8 +30,8 @@
     60,
     30
   ],
-  "code_commit_sha": "90eb473b9b1915cc1eac1846fcef9b563082e212",
+  "code_commit_sha": "851a69b571a3dbb195df580c2e2f828608e556e3",
   "production_research_eligible": false,
   "next_required_phase": "canonical_poll_structure",
-  "spec_sha256": "aab32af1f13b58ff955bbb532a9fb99ddb220cf8148acaf3952c7e79ae8139f4"
+  "spec_sha256": "2b0fbccc127c0a0a6a92fffecc9c3743901ad0778d657d32f626555c0e060595"
 }

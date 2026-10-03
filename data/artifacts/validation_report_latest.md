@@ -1,14 +1,14 @@
 # Validation report — senate-hierarchical-v0.9.22
 
-Generated: 2026-10-03T18:34:41.301495+00:00
+Generated: 2026-10-03T20:30:34.584941+00:00
 Primary holdout: 2022
 
 ## Stack weights
 
 ```json
 {
-  "pymc": 0.2100265751884933,
-  "state_space": 0.7899734248115066
+  "pymc": 0.21914105930674144,
+  "state_space": 0.7808589406932586
 }
 ```
 
@@ -26,24 +26,24 @@ Primary holdout: 2022
   "control_ok": true,
   "control_soft": true,
   "control_gaps": {
-    "ddhq": 0.29198,
-    "kalshi": 0.18287108910891092
+    "ddhq": 0.28312000000000004,
+    "kalshi": 0.17401108910891094
   },
-  "primary_control_gap": 0.18287108910891092,
-  "max_abs_control_gap": 0.29198,
+  "primary_control_gap": 0.17401108910891094,
+  "max_abs_control_gap": 0.28312000000000004,
   "race_scores": {
     "ddhq": {
       "n": 10,
-      "brier_vs_peer_favorite": 0.23285469428,
-      "mae": 0.167166,
-      "crps_proxy": 0.167166,
+      "brier_vs_peer_favorite": 0.23011602932000003,
+      "mae": 0.174254,
+      "crps_proxy": 0.174254,
       "ok": false
     },
     "kalshi": {
       "n": 8,
-      "brier_vs_peer_favorite": 0.11604938660000001,
-      "mae": 0.11614837920546375,
-      "crps_proxy": 0.11614837920546375,
+      "brier_vs_peer_favorite": 0.12122831174999998,
+      "mae": 0.12009587920546376,
+      "crps_proxy": 0.12009587920546376,
       "ok": true
     }
   },
@@ -52,7 +52,7 @@ Primary holdout: 2022
   "null_margin_races": [],
   "method": "ensemble_stack",
   "core_method": "pymc",
-  "generic_ballot": 5.7459422124828174,
+  "generic_ballot": 4.413521232216102,
   "reasons": [],
   "thresholds": {
     "max_abs_control_gap": 0.25,
@@ -79,7 +79,7 @@ Primary holdout: 2022
 
 - ok: True
 - pass/partial/fail: 10/0/1
-- failures: ['G10']
+- failures: ['G10', 'COHERENCE']
 
 ## Limitations
 
