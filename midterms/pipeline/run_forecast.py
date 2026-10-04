@@ -806,11 +806,16 @@ def run_forecast(
     expert_by_id = expert_tbl.set_index("race_id") if len(expert_tbl) else None
     market_by_id = market_df.set_index("race_id") if len(market_df) else None
     for s in race_summaries:
-        if expert_by_id is not None and s["race_id"] in expert_by_id.index:
+        is_non_major = str(s.get("modeled_ballot_party") or "D") != "D"
+        if not is_non_major and expert_by_id is not None and s["race_id"] in expert_by_id.index:
             s["expert_rating"] = str(expert_by_id.loc[s["race_id"], "rating"])
             s["expert_source"] = str(expert_by_id.loc[s["race_id"], "source"])
         if market_by_id is not None and s["race_id"] in market_by_id.index:
-            s["market_p_dem"] = float(market_by_id.loc[s["race_id"], "p_dem"])
+            market_probability = float(market_by_id.loc[s["race_id"], "p_dem"])
+            if is_non_major:
+                s["market_p_modeled_candidate"] = market_probability
+            else:
+                s["market_p_dem"] = market_probability
             s["market_liquidity"] = float(market_by_id.loc[s["race_id"], "liquidity"])
 
     # Ablation: unadjusted core chamber

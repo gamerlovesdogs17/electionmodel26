@@ -1,7 +1,7 @@
 {
-  "schema_version": "non-major-adapter-validation-v1",
+  "schema_version": "non-major-adapter-validation-v2",
   "model_version": "senate-hierarchical-v0.9.23",
-  "adapter_spec_version": "binary-non-major-adapter-v1",
+  "adapter_spec_version": "binary-non-major-adapter-v2",
   "classification": "limited_validation_exception_model",
   "target": "modeled_candidate_margin",
   "inclusion_rule": "U.S. Senate general election in which the modeled candidate appeared under an Independent/non-major label, the opposing candidate was Republican, no separate Democratic nominee appeared in the general contest, and any other ballot candidates together received less than five percent. The rule is declared before computing adapter scores.",
@@ -59,10 +59,16 @@
     60,
     30
   ],
-  "fixed_prior": {
-    "mean": 0.0,
-    "sd": 20.0,
-    "estimated_from_analog_outcomes": false
+  "selected_prior_spec_id": "state_structural_very_large",
+  "selected_prior": {
+    "id": "state_structural_very_large",
+    "prior_mode": "state_structural",
+    "prior_sd": 30.0,
+    "production_candidate": true,
+    "location_definition": "point_in_time_presidential_relative_state_lean",
+    "interpretation": "weak geographic location anchor; not Independent-equals-Democrat",
+    "estimated_from_analog_outcomes": false,
+    "selection_reason": "predeclared simplest state-anchored conservative specification; the four scored cases are too few for outcome-driven tuning"
   },
   "cases": [
     {
@@ -75,16 +81,25 @@
         "fte-67577-126432"
       ],
       "truth_modeled_candidate_margin": -13.359,
-      "predicted_margin": -9.686573601153155,
-      "margin_error": 3.672426398846845,
-      "absolute_margin_error": 3.672426398846845,
-      "p_modeled_candidate": 0.11875,
-      "brier": 0.0141015625,
-      "crps": 2.5007089621430865,
-      "interval_05": -23.4824223628799,
-      "interval_95": 4.688621778785036,
+      "predicted_margin": -10.309123503652605,
+      "margin_error": 3.0498764963473945,
+      "absolute_margin_error": 3.0498764963473945,
+      "p_modeled_candidate": 0.1055,
+      "brier": 0.01113025,
+      "crps": 2.3090303206293497,
+      "interval_05": -24.142407644918624,
+      "interval_95": 4.105079327316235,
       "interval_90_covered": true,
-      "prior_sd": 20.0
+      "interval_90_width": 28.24748697223486,
+      "prior_spec_id": "state_structural_very_large",
+      "prior_mode": "state_structural",
+      "prior_location": -18.851360011421356,
+      "prior_sd": 30.0,
+      "posterior_location": -10.309123503652604,
+      "poll_weighted_location": -10.133827206962346,
+      "poll_sensitivity": 8.542236507768752,
+      "prior_snapshot_sha256": "2770bb8aabb0a94d479c7fe19f8b34ce439292bbd8f2ecd7d14dd53e6b1b0b20",
+      "exceptional_outcome_used_to_set_prior": false
     },
     {
       "race_id": "senate-2020-AK",
@@ -97,16 +112,25 @@
         "fte-70015-130423"
       ],
       "truth_modeled_candidate_margin": -13.359,
-      "predicted_margin": -4.864514589816179,
-      "margin_error": 8.49448541018382,
-      "absolute_margin_error": 8.49448541018382,
-      "p_modeled_candidate": 0.267,
-      "brier": 0.071289,
-      "crps": 5.224956206986562,
-      "interval_05": -19.038364759819615,
-      "interval_95": 9.011460653860468,
+      "predicted_margin": -5.22215541381723,
+      "margin_error": 8.13684458618277,
+      "absolute_margin_error": 8.13684458618277,
+      "p_modeled_candidate": 0.25275,
+      "brier": 0.06388256249999999,
+      "crps": 4.972495630249465,
+      "interval_05": -19.417007189380165,
+      "interval_95": 8.674380069690212,
       "interval_90_covered": true,
-      "prior_sd": 20.0
+      "interval_90_width": 28.091387259070377,
+      "prior_spec_id": "state_structural_very_large",
+      "prior_mode": "state_structural",
+      "prior_location": -18.851360011421356,
+      "prior_sd": 30.0,
+      "posterior_location": -5.222155413817231,
+      "poll_weighted_location": -5.023803982413718,
+      "poll_sensitivity": 13.629204597604126,
+      "prior_snapshot_sha256": "8cc41e4a43fcd8c37936f6693d755707af4cc28e3568fc51de900ce846928aec",
+      "exceptional_outcome_used_to_set_prior": false
     },
     {
       "race_id": "senate-2024-NE",
@@ -121,16 +145,25 @@
         "fte-raw-88000-207596"
       ],
       "truth_modeled_candidate_margin": -6.6941,
-      "predicted_margin": -1.4376690766321407,
-      "margin_error": 5.2564309233678586,
-      "absolute_margin_error": 5.2564309233678586,
-      "p_modeled_candidate": 0.429,
-      "brier": 0.18404099999999998,
-      "crps": 3.1799247271292588,
-      "interval_05": -14.677900102707307,
-      "interval_95": 11.832224530626268,
+      "predicted_margin": -1.6575173857574996,
+      "margin_error": 5.0365826142425,
+      "absolute_margin_error": 5.0365826142425,
+      "p_modeled_candidate": 0.41625,
+      "brier": 0.1732640625,
+      "crps": 3.0687914978164352,
+      "interval_05": -14.904309466102,
+      "interval_95": 11.618951974743739,
       "interval_90_covered": true,
-      "prior_sd": 20.0
+      "interval_90_width": 26.523261440845737,
+      "prior_spec_id": "state_structural_very_large",
+      "prior_mode": "state_structural",
+      "prior_location": -25.843364149590883,
+      "prior_sd": 30.0,
+      "posterior_location": -1.6575173857574994,
+      "poll_weighted_location": -1.4636041565849105,
+      "poll_sensitivity": 24.185846763833382,
+      "prior_snapshot_sha256": "b5ec2e81047b90cc3479980ad8fb7761a838b0e610f7975119a20a47c381ca4e",
+      "exceptional_outcome_used_to_set_prior": false
     },
     {
       "race_id": "senate-2024-NE",
@@ -149,143 +182,54 @@
         "fte-raw-88490-211445"
       ],
       "truth_modeled_candidate_margin": -6.6941,
-      "predicted_margin": 1.1572180023865142,
-      "margin_error": 7.851318002386514,
-      "absolute_margin_error": 7.851318002386514,
-      "p_modeled_candidate": 0.55775,
-      "brier": 0.31108506249999995,
-      "crps": 4.784855697579591,
-      "interval_05": -11.60925456348906,
-      "interval_95": 13.986279432987036,
+      "predicted_margin": 1.0323371060432969,
+      "margin_error": 7.726437106043297,
+      "absolute_margin_error": 7.726437106043297,
+      "p_modeled_candidate": 0.55225,
+      "brier": 0.30498006250000004,
+      "crps": 4.696977248347405,
+      "interval_05": -11.736861422128804,
+      "interval_95": 13.864137863233776,
       "interval_90_covered": true,
-      "prior_sd": 20.0
+      "interval_90_width": 25.60099928536258,
+      "prior_spec_id": "state_structural_very_large",
+      "prior_mode": "state_structural",
+      "prior_location": -25.843364149590883,
+      "prior_sd": 30.0,
+      "posterior_location": 1.032337106043297,
+      "poll_weighted_location": 1.1706144251766328,
+      "poll_sensitivity": 26.87570125563418,
+      "prior_snapshot_sha256": "f7006ce866529f2a638c8ede4115e39fb7818f455360ae0f4bcf4d412e7e34d8",
+      "exceptional_outcome_used_to_set_prior": false
     }
   ],
   "aggregate": {
     "n": 4,
-    "mean_absolute_margin_error": 6.318665183696259,
-    "brier": 0.14512915625,
-    "empirical_crps": 3.9226113984596243,
+    "mean_absolute_margin_error": 5.98743520070399,
+    "brier": 0.138314234375,
+    "empirical_crps": 3.761823674260664,
     "interval_90_coverage": 1.0,
+    "average_interval_90_width": 27.115783739378386,
+    "average_poll_sensitivity": 18.30824728121011,
     "calibration_claim_allowed": false,
     "limitation": "Too few structurally comparable races for a calibration claim."
   },
-  "prior_sd_sensitivity": {
-    "12.0": {
-      "aggregate": {
-        "n": 4,
-        "mean_absolute_margin_error": 6.564948802287245,
-        "brier": 0.147377984375,
-        "empirical_crps": 4.038327005093643,
-        "interval_90_coverage": 1.0,
-        "calibration_claim_allowed": false,
-        "limitation": "Too few structurally comparable races for a calibration claim."
+  "prior_specification_comparison": {
+    "zero_centered_weak": {
+      "specification": {
+        "id": "zero_centered_weak",
+        "prior_mode": "zero_centered",
+        "prior_sd": 20.0,
+        "production_candidate": false
       },
-      "cases": [
-        {
-          "race_id": "senate-2020-AK",
-          "as_of": "2020-09-04",
-          "lead_days": 60,
-          "n_polls": 2,
-          "poll_ids": [
-            "fte-67028-125246",
-            "fte-67577-126432"
-          ],
-          "truth_modeled_candidate_margin": -13.359,
-          "predicted_margin": -8.981842761681891,
-          "margin_error": 4.377157238318109,
-          "absolute_margin_error": 4.377157238318109,
-          "p_modeled_candidate": 0.13275,
-          "brier": 0.0176225625,
-          "crps": 2.766024962805292,
-          "interval_05": -22.66876014884816,
-          "interval_95": 5.279846749979733,
-          "interval_90_covered": true,
-          "prior_sd": 12.0
-        },
-        {
-          "race_id": "senate-2020-AK",
-          "as_of": "2020-10-04",
-          "lead_days": 30,
-          "n_polls": 3,
-          "poll_ids": [
-            "fte-67028-125246",
-            "fte-67577-126432",
-            "fte-70015-130423"
-          ],
-          "truth_modeled_candidate_margin": -13.359,
-          "predicted_margin": -4.6049437098631625,
-          "margin_error": 8.754056290136838,
-          "absolute_margin_error": 8.754056290136838,
-          "p_modeled_candidate": 0.27775,
-          "brier": 0.0771450625,
-          "crps": 5.416338552004017,
-          "interval_05": -18.716110551044117,
-          "interval_95": 9.209665545849765,
-          "interval_90_covered": true,
-          "prior_sd": 12.0
-        },
-        {
-          "race_id": "senate-2024-NE",
-          "as_of": "2024-09-06",
-          "lead_days": 60,
-          "n_polls": 5,
-          "poll_ids": [
-            "fte-raw-84873-187981",
-            "fte-raw-86852-198507",
-            "fte-raw-87527-203847",
-            "fte-raw-87842-206433",
-            "fte-raw-88000-207596"
-          ],
-          "truth_modeled_candidate_margin": -6.6941,
-          "predicted_margin": -1.3937624383678338,
-          "margin_error": 5.3003375616321655,
-          "absolute_margin_error": 5.3003375616321655,
-          "p_modeled_candidate": 0.4305,
-          "brier": 0.18533025,
-          "crps": 3.2018742591361535,
-          "interval_05": -14.613819305199945,
-          "interval_95": 11.855911812729493,
-          "interval_90_covered": true,
-          "prior_sd": 12.0
-        },
-        {
-          "race_id": "senate-2024-NE",
-          "as_of": "2024-10-06",
-          "lead_days": 30,
-          "n_polls": 9,
-          "poll_ids": [
-            "fte-raw-84873-187981",
-            "fte-raw-86852-198507",
-            "fte-raw-87527-203847",
-            "fte-raw-87842-206433",
-            "fte-raw-88000-207596",
-            "fte-raw-88266-210289",
-            "fte-raw-88334-210606",
-            "fte-raw-88338-210616",
-            "fte-raw-88490-211445"
-          ],
-          "truth_modeled_candidate_margin": -6.6941,
-          "predicted_margin": 1.1341441190618675,
-          "margin_error": 7.828244119061868,
-          "absolute_margin_error": 7.828244119061868,
-          "p_modeled_candidate": 0.55625,
-          "brier": 0.30941406250000003,
-          "crps": 4.769070246429105,
-          "interval_05": -11.623829915404034,
-          "interval_95": 13.954665353381701,
-          "interval_90_covered": true,
-          "prior_sd": 12.0
-        }
-      ]
-    },
-    "20.0": {
       "aggregate": {
         "n": 4,
         "mean_absolute_margin_error": 6.318665183696259,
         "brier": 0.14512915625,
         "empirical_crps": 3.9226113984596243,
         "interval_90_coverage": 1.0,
+        "average_interval_90_width": 27.08163204628867,
+        "average_poll_sensitivity": 4.286493817496997,
         "calibration_claim_allowed": false,
         "limitation": "Too few structurally comparable races for a calibration claim."
       },
@@ -309,7 +253,16 @@
           "interval_05": -23.4824223628799,
           "interval_95": 4.688621778785036,
           "interval_90_covered": true,
-          "prior_sd": 20.0
+          "interval_90_width": 28.171044141664936,
+          "prior_spec_id": "zero_centered_weak",
+          "prior_mode": "zero_centered",
+          "prior_location": 0.0,
+          "prior_sd": 20.0,
+          "posterior_location": -9.686573601153157,
+          "poll_weighted_location": -10.133827206962346,
+          "poll_sensitivity": 9.686573601153157,
+          "prior_snapshot_sha256": "2770bb8aabb0a94d479c7fe19f8b34ce439292bbd8f2ecd7d14dd53e6b1b0b20",
+          "exceptional_outcome_used_to_set_prior": false
         },
         {
           "race_id": "senate-2020-AK",
@@ -331,7 +284,16 @@
           "interval_05": -19.038364759819615,
           "interval_95": 9.011460653860468,
           "interval_90_covered": true,
-          "prior_sd": 20.0
+          "interval_90_width": 28.049825413680082,
+          "prior_spec_id": "zero_centered_weak",
+          "prior_mode": "zero_centered",
+          "prior_location": 0.0,
+          "prior_sd": 20.0,
+          "posterior_location": -4.864514589816179,
+          "poll_weighted_location": -5.023803982413718,
+          "poll_sensitivity": 4.864514589816179,
+          "prior_snapshot_sha256": "8cc41e4a43fcd8c37936f6693d755707af4cc28e3568fc51de900ce846928aec",
+          "exceptional_outcome_used_to_set_prior": false
         },
         {
           "race_id": "senate-2024-NE",
@@ -355,7 +317,16 @@
           "interval_05": -14.677900102707307,
           "interval_95": 11.832224530626268,
           "interval_90_covered": true,
-          "prior_sd": 20.0
+          "interval_90_width": 26.510124633333575,
+          "prior_spec_id": "zero_centered_weak",
+          "prior_mode": "zero_centered",
+          "prior_location": 0.0,
+          "prior_sd": 20.0,
+          "posterior_location": -1.437669076632141,
+          "poll_weighted_location": -1.4636041565849105,
+          "poll_sensitivity": 1.437669076632141,
+          "prior_snapshot_sha256": "b5ec2e81047b90cc3479980ad8fb7761a838b0e610f7975119a20a47c381ca4e",
+          "exceptional_outcome_used_to_set_prior": false
         },
         {
           "race_id": "senate-2024-NE",
@@ -383,17 +354,34 @@
           "interval_05": -11.60925456348906,
           "interval_95": 13.986279432987036,
           "interval_90_covered": true,
-          "prior_sd": 20.0
+          "interval_90_width": 25.595533996476096,
+          "prior_spec_id": "zero_centered_weak",
+          "prior_mode": "zero_centered",
+          "prior_location": 0.0,
+          "prior_sd": 20.0,
+          "posterior_location": 1.1572180023865142,
+          "poll_weighted_location": 1.1706144251766328,
+          "poll_sensitivity": 1.1572180023865142,
+          "prior_snapshot_sha256": "f7006ce866529f2a638c8ede4115e39fb7818f455360ae0f4bcf4d412e7e34d8",
+          "exceptional_outcome_used_to_set_prior": false
         }
       ]
     },
-    "30.0": {
+    "state_structural_very_large": {
+      "specification": {
+        "id": "state_structural_very_large",
+        "prior_mode": "state_structural",
+        "prior_sd": 30.0,
+        "production_candidate": true
+      },
       "aggregate": {
         "n": 4,
-        "mean_absolute_margin_error": 6.234267210693953,
-        "brier": 0.144252171875,
-        "empirical_crps": 3.8868474520422804,
+        "mean_absolute_margin_error": 5.98743520070399,
+        "brier": 0.138314234375,
+        "empirical_crps": 3.761823674260664,
         "interval_90_coverage": 1.0,
+        "average_interval_90_width": 27.115783739378386,
+        "average_poll_sensitivity": 18.30824728121011,
         "calibration_claim_allowed": false,
         "limitation": "Too few structurally comparable races for a calibration claim."
       },
@@ -408,16 +396,25 @@
             "fte-67577-126432"
           ],
           "truth_modeled_candidate_margin": -13.359,
-          "predicted_margin": -9.930051388674531,
-          "margin_error": 3.4289486113254686,
-          "absolute_margin_error": 3.4289486113254686,
-          "p_modeled_candidate": 0.115,
-          "brier": 0.013225,
-          "crps": 2.422685067321323,
-          "interval_05": -23.76333552994055,
-          "interval_95": 4.484151442294306,
+          "predicted_margin": -10.309123503652605,
+          "margin_error": 3.0498764963473945,
+          "absolute_margin_error": 3.0498764963473945,
+          "p_modeled_candidate": 0.1055,
+          "brier": 0.01113025,
+          "crps": 2.3090303206293497,
+          "interval_05": -24.142407644918624,
+          "interval_95": 4.105079327316235,
           "interval_90_covered": true,
-          "prior_sd": 30.0
+          "interval_90_width": 28.24748697223486,
+          "prior_spec_id": "state_structural_very_large",
+          "prior_mode": "state_structural",
+          "prior_location": -18.851360011421356,
+          "prior_sd": 30.0,
+          "posterior_location": -10.309123503652604,
+          "poll_weighted_location": -10.133827206962346,
+          "poll_sensitivity": 8.542236507768752,
+          "prior_snapshot_sha256": "2770bb8aabb0a94d479c7fe19f8b34ce439292bbd8f2ecd7d14dd53e6b1b0b20",
+          "exceptional_outcome_used_to_set_prior": false
         },
         {
           "race_id": "senate-2020-AK",
@@ -430,16 +427,25 @@
             "fte-70015-130423"
           ],
           "truth_modeled_candidate_margin": -13.359,
-          "predicted_margin": -4.951739279952055,
-          "margin_error": 8.407260720047944,
-          "absolute_margin_error": 8.407260720047944,
-          "p_modeled_candidate": 0.26325,
-          "brier": 0.0693005625,
-          "crps": 5.161970386790308,
-          "interval_05": -19.14659105551499,
-          "interval_95": 8.944796203555388,
+          "predicted_margin": -5.22215541381723,
+          "margin_error": 8.13684458618277,
+          "absolute_margin_error": 8.13684458618277,
+          "p_modeled_candidate": 0.25275,
+          "brier": 0.06388256249999999,
+          "crps": 4.972495630249465,
+          "interval_05": -19.417007189380165,
+          "interval_95": 8.674380069690212,
           "interval_90_covered": true,
-          "prior_sd": 30.0
+          "interval_90_width": 28.091387259070377,
+          "prior_spec_id": "state_structural_very_large",
+          "prior_mode": "state_structural",
+          "prior_location": -18.851360011421356,
+          "prior_sd": 30.0,
+          "posterior_location": -5.222155413817231,
+          "poll_weighted_location": -5.023803982413718,
+          "poll_sensitivity": 13.629204597604126,
+          "prior_snapshot_sha256": "8cc41e4a43fcd8c37936f6693d755707af4cc28e3568fc51de900ce846928aec",
+          "exceptional_outcome_used_to_set_prior": false
         },
         {
           "race_id": "senate-2024-NE",
@@ -454,16 +460,25 @@
             "fte-raw-88000-207596"
           ],
           "truth_modeled_candidate_margin": -6.6941,
-          "predicted_margin": -1.4519628521456862,
-          "margin_error": 5.242137147854313,
-          "absolute_margin_error": 5.242137147854313,
-          "p_modeled_candidate": 0.42825,
-          "brier": 0.18339806250000001,
-          "crps": 3.172813066848338,
-          "interval_05": -14.698754932490186,
-          "interval_95": 11.824506508355553,
+          "predicted_margin": -1.6575173857574996,
+          "margin_error": 5.0365826142425,
+          "absolute_margin_error": 5.0365826142425,
+          "p_modeled_candidate": 0.41625,
+          "brier": 0.1732640625,
+          "crps": 3.0687914978164352,
+          "interval_05": -14.904309466102,
+          "interval_95": 11.618951974743739,
           "interval_90_covered": true,
-          "prior_sd": 30.0
+          "interval_90_width": 26.523261440845737,
+          "prior_spec_id": "state_structural_very_large",
+          "prior_mode": "state_structural",
+          "prior_location": -25.843364149590883,
+          "prior_sd": 30.0,
+          "posterior_location": -1.6575173857574994,
+          "poll_weighted_location": -1.4636041565849105,
+          "poll_sensitivity": 24.185846763833382,
+          "prior_snapshot_sha256": "b5ec2e81047b90cc3479980ad8fb7761a838b0e610f7975119a20a47c381ca4e",
+          "exceptional_outcome_used_to_set_prior": false
         },
         {
           "race_id": "senate-2024-NE",
@@ -482,18 +497,372 @@
             "fte-raw-88490-211445"
           ],
           "truth_modeled_candidate_margin": -6.6941,
-          "predicted_margin": 1.1646223635480866,
-          "margin_error": 7.858722363548086,
-          "absolute_margin_error": 7.858722363548086,
-          "p_modeled_candidate": 0.55775,
-          "brier": 0.31108506249999995,
-          "crps": 4.789921287209152,
-          "interval_05": -11.604576164624016,
-          "interval_95": 13.996423120738564,
+          "predicted_margin": 1.0323371060432969,
+          "margin_error": 7.726437106043297,
+          "absolute_margin_error": 7.726437106043297,
+          "p_modeled_candidate": 0.55225,
+          "brier": 0.30498006250000004,
+          "crps": 4.696977248347405,
+          "interval_05": -11.736861422128804,
+          "interval_95": 13.864137863233776,
           "interval_90_covered": true,
-          "prior_sd": 30.0
+          "interval_90_width": 25.60099928536258,
+          "prior_spec_id": "state_structural_very_large",
+          "prior_mode": "state_structural",
+          "prior_location": -25.843364149590883,
+          "prior_sd": 30.0,
+          "posterior_location": 1.032337106043297,
+          "poll_weighted_location": 1.1706144251766328,
+          "poll_sensitivity": 26.87570125563418,
+          "prior_snapshot_sha256": "f7006ce866529f2a638c8ede4115e39fb7818f455360ae0f4bcf4d412e7e34d8",
+          "exceptional_outcome_used_to_set_prior": false
         }
       ]
+    },
+    "state_structural_extra_large": {
+      "specification": {
+        "id": "state_structural_extra_large",
+        "prior_mode": "state_structural",
+        "prior_sd": 40.0,
+        "production_candidate": false
+      },
+      "aggregate": {
+        "n": 4,
+        "mean_absolute_margin_error": 6.064102446956162,
+        "brier": 0.1408211875,
+        "empirical_crps": 3.803610962522063,
+        "interval_90_coverage": 1.0,
+        "average_interval_90_width": 27.128057087071845,
+        "average_poll_sensitivity": 18.384914527462282,
+        "calibration_claim_allowed": false,
+        "limitation": "Too few structurally comparable races for a calibration claim."
+      },
+      "cases": [
+        {
+          "race_id": "senate-2020-AK",
+          "as_of": "2020-09-04",
+          "lead_days": 60,
+          "n_polls": 2,
+          "poll_ids": [
+            "fte-67028-125246",
+            "fte-67577-126432"
+          ],
+          "truth_modeled_candidate_margin": -13.359,
+          "predicted_margin": -10.2333065391095,
+          "margin_error": 3.125693460890499,
+          "absolute_margin_error": 3.125693460890499,
+          "p_modeled_candidate": 0.1085,
+          "brier": 0.01177225,
+          "crps": 2.331920507488748,
+          "interval_05": -24.080116664763587,
+          "interval_95": 4.194990290107851,
+          "interval_90_covered": true,
+          "interval_90_width": 28.27510695487144,
+          "prior_spec_id": "state_structural_extra_large",
+          "prior_mode": "state_structural",
+          "prior_location": -18.851360011421356,
+          "prior_sd": 40.0,
+          "posterior_location": -10.233306539109499,
+          "poll_weighted_location": -10.133827206962346,
+          "poll_sensitivity": 8.618053472311857,
+          "prior_snapshot_sha256": "2770bb8aabb0a94d479c7fe19f8b34ce439292bbd8f2ecd7d14dd53e6b1b0b20",
+          "exceptional_outcome_used_to_set_prior": false
+        },
+        {
+          "race_id": "senate-2020-AK",
+          "as_of": "2020-10-04",
+          "lead_days": 30,
+          "n_polls": 3,
+          "poll_ids": [
+            "fte-67028-125246",
+            "fte-67577-126432",
+            "fte-70015-130423"
+          ],
+          "truth_modeled_candidate_margin": -13.359,
+          "predicted_margin": -5.136081290683384,
+          "margin_error": 8.222918709316616,
+          "absolute_margin_error": 8.222918709316616,
+          "p_modeled_candidate": 0.256,
+          "brier": 0.065536,
+          "crps": 5.03202727392669,
+          "interval_05": -19.33845512083699,
+          "interval_95": 8.767818165353034,
+          "interval_90_covered": true,
+          "interval_90_width": 28.106273286190024,
+          "prior_spec_id": "state_structural_extra_large",
+          "prior_mode": "state_structural",
+          "prior_location": -18.851360011421356,
+          "prior_sd": 40.0,
+          "posterior_location": -5.136081290683384,
+          "poll_weighted_location": -5.023803982413718,
+          "poll_sensitivity": 13.715278720737972,
+          "prior_snapshot_sha256": "8cc41e4a43fcd8c37936f6693d755707af4cc28e3568fc51de900ce846928aec",
+          "exceptional_outcome_used_to_set_prior": false
+        },
+        {
+          "race_id": "senate-2024-NE",
+          "as_of": "2024-09-06",
+          "lead_days": 60,
+          "n_polls": 5,
+          "poll_ids": [
+            "fte-raw-84873-187981",
+            "fte-raw-86852-198507",
+            "fte-raw-87527-203847",
+            "fte-raw-87842-206433",
+            "fte-raw-88000-207596"
+          ],
+          "truth_modeled_candidate_margin": -6.6941,
+          "predicted_margin": -1.573061238314116,
+          "margin_error": 5.121038761685884,
+          "absolute_margin_error": 5.121038761685884,
+          "p_modeled_candidate": 0.4225,
+          "brier": 0.17850624999999998,
+          "crps": 3.11130277278855,
+          "interval_05": -14.822179836821,
+          "interval_95": 11.70573985253453,
+          "interval_90_covered": true,
+          "interval_90_width": 26.527919689355528,
+          "prior_spec_id": "state_structural_extra_large",
+          "prior_mode": "state_structural",
+          "prior_location": -25.843364149590883,
+          "prior_sd": 40.0,
+          "posterior_location": -1.5730612383141158,
+          "poll_weighted_location": -1.4636041565849105,
+          "poll_sensitivity": 24.27030291127677,
+          "prior_snapshot_sha256": "b5ec2e81047b90cc3479980ad8fb7761a838b0e610f7975119a20a47c381ca4e",
+          "exceptional_outcome_used_to_set_prior": false
+        },
+        {
+          "race_id": "senate-2024-NE",
+          "as_of": "2024-10-06",
+          "lead_days": 30,
+          "n_polls": 9,
+          "poll_ids": [
+            "fte-raw-84873-187981",
+            "fte-raw-86852-198507",
+            "fte-raw-87527-203847",
+            "fte-raw-87842-206433",
+            "fte-raw-88000-207596",
+            "fte-raw-88266-210289",
+            "fte-raw-88334-210606",
+            "fte-raw-88338-210616",
+            "fte-raw-88490-211445"
+          ],
+          "truth_modeled_candidate_margin": -6.6941,
+          "predicted_margin": 1.0926588559316486,
+          "margin_error": 7.786758855931648,
+          "absolute_margin_error": 7.786758855931648,
+          "p_modeled_candidate": 0.5545,
+          "brier": 0.30747025,
+          "crps": 4.739193295884264,
+          "interval_05": -11.677501879836521,
+          "interval_95": 13.925426538033866,
+          "interval_90_covered": true,
+          "interval_90_width": 25.602928417870388,
+          "prior_spec_id": "state_structural_extra_large",
+          "prior_mode": "state_structural",
+          "prior_location": -25.843364149590883,
+          "prior_sd": 40.0,
+          "posterior_location": 1.0926588559316486,
+          "poll_weighted_location": 1.1706144251766328,
+          "poll_sensitivity": 26.936023005522532,
+          "prior_snapshot_sha256": "f7006ce866529f2a638c8ede4115e39fb7818f455360ae0f4bcf4d412e7e34d8",
+          "exceptional_outcome_used_to_set_prior": false
+        }
+      ]
+    }
+  },
+  "zero_poll_behavior": {
+    "zero_centered_weak": {
+      "race_id": "senate-2026-SD",
+      "n_compatible_polls": 0,
+      "support_status": "limited_supported_prior_only",
+      "prior_location": 0.0,
+      "predictive_mean": -2.886579864025407e-17,
+      "predictive_sd": 21.57424579615104,
+      "interval_90_width": 68.04200848974273
+    },
+    "state_structural_very_large": {
+      "race_id": "senate-2026-SD",
+      "n_compatible_polls": 0,
+      "support_status": "limited_supported_prior_only",
+      "prior_location": -29.39524036154415,
+      "predictive_mean": -29.395240361544182,
+      "predictive_sd": 31.09676051471839,
+      "interval_90_width": 98.07462392606317
+    },
+    "state_structural_extra_large": {
+      "race_id": "senate-2026-SD",
+      "n_compatible_polls": 0,
+      "support_status": "limited_supported_prior_only",
+      "prior_location": -29.39524036154415,
+      "predictive_mean": -29.395240361544037,
+      "predictive_sd": 40.85575994252902,
+      "interval_90_width": 128.85307746704157
+    }
+  },
+  "selected_current_adapter_records": {
+    "senate-2026-ID": {
+      "race_id": "senate-2026-ID",
+      "state": "ID",
+      "modeled_candidate_id": "senate-2026-ID:todd-achilles",
+      "opposing_candidate_id": "senate-2026-ID:jim-risch",
+      "modeled_ballot_party": "I",
+      "opposing_ballot_party": "R",
+      "modeled_caucus": "D",
+      "opposing_caucus": "R",
+      "support_status": "limited_supported",
+      "support_reason": "limited_validation_exception_model-v1",
+      "n_candidate_compatible_polls": 1,
+      "prior_mode": "state_structural",
+      "prior_location": -36.11124380807507,
+      "prior_sd": 30.0,
+      "prior_only": false,
+      "poll_ids": [
+        "vh-us-202the39a65ca5"
+      ],
+      "enop": 1.0,
+      "posterior_location": -7.564645953814626,
+      "posterior_sd": 6.294651817966897,
+      "predictive_sd": 10.1795206915372,
+      "poll_weighted_location": -6.25,
+      "poll_location_shift": 28.546597854260447,
+      "house_effect_treatment": "not_applied_party_direction_not_portable"
+    },
+    "senate-2026-MT": {
+      "race_id": "senate-2026-MT",
+      "state": "MT",
+      "modeled_candidate_id": "senate-2026-MT:seth-bodnar",
+      "opposing_candidate_id": "senate-2026-MT:kurt-alme",
+      "modeled_ballot_party": "I",
+      "opposing_ballot_party": "R",
+      "modeled_caucus": "D",
+      "opposing_caucus": "R",
+      "support_status": "limited_supported",
+      "support_reason": "limited_validation_exception_model-v1",
+      "n_candidate_compatible_polls": 6,
+      "prior_mode": "state_structural",
+      "prior_location": -19.828772492662317,
+      "prior_sd": 30.0,
+      "prior_only": false,
+      "poll_ids": [
+        "vh-us-202gqr0fc65d4b",
+        "vh-us-202gqrcac76706",
+        "vh-us-202tav507e89fe",
+        "vh-us-202tav913179a0",
+        "vh-us-202tavbdc1a03d",
+        "vh-us-202tavf29ef95a"
+      ],
+      "enop": 4.5258301086386945,
+      "posterior_location": 1.0109613614931015,
+      "posterior_sd": 2.7174028744321914,
+      "predictive_sd": 8.448921728952893,
+      "poll_weighted_location": 1.183360740596967,
+      "poll_location_shift": 20.83973385415542,
+      "house_effect_treatment": "not_applied_party_direction_not_portable"
+    },
+    "senate-2026-NE": {
+      "race_id": "senate-2026-NE",
+      "state": "NE",
+      "modeled_candidate_id": "senate-2026-NE:dan-osborn",
+      "opposing_candidate_id": "senate-2026-NE:pete-ricketts",
+      "modeled_ballot_party": "I",
+      "opposing_ballot_party": "R",
+      "modeled_caucus": "D",
+      "opposing_caucus": "R",
+      "support_status": "limited_supported",
+      "support_reason": "limited_validation_exception_model-v1",
+      "n_candidate_compatible_polls": 1,
+      "prior_mode": "state_structural",
+      "prior_location": -20.92841143818746,
+      "prior_sd": 30.0,
+      "prior_only": false,
+      "poll_ids": [
+        "vh-us-202gba71e992b6"
+      ],
+      "enop": 1.0,
+      "posterior_location": 0.19486354247250154,
+      "posterior_sd": 6.0,
+      "predictive_sd": 10.0,
+      "poll_weighted_location": 1.075,
+      "poll_location_shift": 21.12327498065996,
+      "house_effect_treatment": "not_applied_party_direction_not_portable"
+    },
+    "senate-2026-SD": {
+      "race_id": "senate-2026-SD",
+      "state": "SD",
+      "modeled_candidate_id": "senate-2026-SD:brian-bengs",
+      "opposing_candidate_id": "senate-2026-SD:mike-rounds",
+      "modeled_ballot_party": "I",
+      "opposing_ballot_party": "R",
+      "modeled_caucus": "D",
+      "opposing_caucus": "R",
+      "support_status": "limited_supported_prior_only",
+      "support_reason": "state_structural_prior_only_zero_candidate_compatible_polls",
+      "n_candidate_compatible_polls": 0,
+      "prior_mode": "state_structural",
+      "prior_location": -29.39524036154415,
+      "prior_sd": 30.0,
+      "prior_only": true,
+      "poll_ids": [],
+      "enop": 0.0,
+      "posterior_location": -29.39524036154415,
+      "posterior_sd": 30.0,
+      "predictive_sd": 31.04834939252005,
+      "poll_weighted_location": null,
+      "poll_location_shift": null,
+      "house_effect_treatment": "not_applicable_zero_polls"
+    }
+  },
+  "common_shock_sensitivity": {
+    "retained_share": 0.2,
+    "not_parameter_tuning": true,
+    "results": {
+      "0.0": {
+        "p_modeled_candidate_by_race": {
+          "senate-2026-ID": 0.186125,
+          "senate-2026-MT": 0.562125,
+          "senate-2026-NE": 0.504,
+          "senate-2026-SD": 0.138
+        },
+        "correlation_with_synthetic_ordinary_factor_by_race": {
+          "senate-2026-ID": -0.002973038698824467,
+          "senate-2026-MT": -0.011806580914670857,
+          "senate-2026-NE": -0.006379498848060784,
+          "senate-2026-SD": 0.004065235189075689
+        },
+        "exceptional_seat_count_variance": 0.7824549375000002
+      },
+      "0.2": {
+        "p_modeled_candidate_by_race": {
+          "senate-2026-ID": 0.199875,
+          "senate-2026-MT": 0.555875,
+          "senate-2026-NE": 0.513,
+          "senate-2026-SD": 0.147125
+        },
+        "correlation_with_synthetic_ordinary_factor_by_race": {
+          "senate-2026-ID": 0.4450140478157245,
+          "senate-2026-MT": 0.4386129510829882,
+          "senate-2026-NE": 0.4425386229584073,
+          "senate-2026-SD": 0.4500414253461717
+        },
+        "exceptional_seat_count_variance": 1.0931729843750002
+      },
+      "0.4": {
+        "p_modeled_candidate_by_race": {
+          "senate-2026-ID": 0.211375,
+          "senate-2026-MT": 0.554875,
+          "senate-2026-NE": 0.509125,
+          "senate-2026-SD": 0.157
+        },
+        "correlation_with_synthetic_ordinary_factor_by_race": {
+          "senate-2026-ID": 0.63098534853992,
+          "senate-2026-MT": 0.6267773999877534,
+          "senate-2026-NE": 0.6293453209795289,
+          "senate-2026-SD": 0.6342429339240565
+        },
+        "exceptional_seat_count_variance": 1.389676859375
+      }
     }
   },
   "current_poll_audit": [
@@ -638,6 +1007,10 @@
     }
   ],
   "ordinary_oof_touched": false,
+  "leave_one_race_out_integrity": {
+    "safe": true,
+    "reason": "exceptional outcomes are never used to estimate the structural location or uncertainty; every state anchor is derived only from presidential results available at that cutoff"
+  },
   "calibration_claim_allowed": false,
-  "artifact_sha256": "37fc17977b71c6b314eecba7dd9b733404c098fbc8283642374ca84420d7cd64"
+  "artifact_sha256": "98177c34fbf9c408771b8d8d1163b97f5945cd0ca6e9574a925931b9d6f5f58a"
 }

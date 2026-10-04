@@ -125,7 +125,14 @@ def materialize_prior_snapshot(
     path = out_dir / f"{PRIOR_STORE_VERSION}_{as_of.isoformat()}.json"
     payload = json.dumps(snapshot, indent=2, sort_keys=True, allow_nan=False).encode()
     if path.exists():
-        if path.read_bytes() != payload:
+        try:
+            sealed = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError(f"sealed prior snapshot is unreadable: {path}") from exc
+        # Immutable JSON identity is semantic.  Git may normalize CRLF/LF, but
+        # every field remains protected by snapshot_sha256 and exact object
+        # equality.  A substantive value or lineage change still fails closed.
+        if sealed != snapshot:
             raise ValueError(f"sealed prior snapshot differs from current sources or code: {path}")
     else:
         out_dir.mkdir(parents=True, exist_ok=True)

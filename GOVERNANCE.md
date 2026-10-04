@@ -22,8 +22,8 @@ Current surface: `research_only`. Do not label research runs as live.
 v0.9.23 repairs current candidate/matchup evidence and is not empirically
 validated. A separate limited-validation adapter supports reviewed binary
 Independent-versus-Republican targets with compatible polls while preserving
-Independent ballot identity and explicit caucus accounting. South Dakota
-remains withheld for zero compatible polls, and Alaska RCV/multiway remains
+Independent ballot identity and explicit caucus accounting. South Dakota is
+limited-supported prior-only with zero polls and wide uncertainty; Alaska RCV/multiway remains
 unsupported. No current forecast or chamber probability may be promoted under this boundary. The
 v0.9.22 research freeze below remains immutable and is the last completed
 empirical reference.
@@ -52,16 +52,18 @@ restored artifacts still have to pass their own semantic lineage checks.
 The frozen v0.9.22 source audit is green and evidence bundle
 `eb-3e91ca3a90628d69` is sealed. It is the evidence boundary used by the
 completed v0.9.22 research validation; it does not permit live publication.
-The v0.9.23 source audit is intentionally red pending complete supported contest
-targets. Its historical equivalence report
+The v0.9.23 source audit is green and is reported separately from forecast-model
+coverage. Forecast coverage remains incomplete for Alaska RCV. Its historical equivalence report
 shows no formal 2018/2020/2022/2024 60/30 input change, but that finding does not
 relabel old validation artifacts as v0.9.23 artifacts.
 
 The exceptional adapter is not an ordinary stack candidate. Its predeclared
 historical analog exercise contains four scorable lead-time cases across two
 elections, is classified `limited_validation_exception_model`, and cannot
-support a calibration claim. A zero-poll or nonbinary contest must remain
-withheld rather than receive a fixture, party proxy, or forced probability.
+support a calibration claim. A zero-poll binary I-v-R contest may be prior-only
+only with a verified point-in-time state anchor and explicitly wide uncertainty.
+A nonbinary or otherwise unsupported contest remains withheld. Chamber output
+fails closed instead of substituting the incumbent holder as certainty.
 Missing real evidence in a future bundle must be ingested or refreshed;
 fixtures, current registries, and degraded substitutes cannot be relabeled to
 clear a historical source gate.

@@ -56,6 +56,38 @@ def rating_from_probability(p_dem: float) -> str:
     return "Solid R"
 
 
+def rating_from_modeled_probability(
+    probability: float,
+    *,
+    modeled_ballot_party: str = "D",
+    opposing_ballot_party: str = "R",
+) -> str:
+    """Candidate-neutral rating ladder with explicit ballot-party labels."""
+
+    p = float(probability)
+    modeled = str(modeled_ballot_party or "modeled").upper()
+    opposing = str(opposing_ballot_party or "opposing").upper()
+    if modeled == "D" and opposing == "R":
+        return rating_from_probability(p)
+    if p >= 0.92:
+        return f"Solid {modeled}"
+    if p >= 0.78:
+        return f"Likely {modeled}"
+    if p >= 0.62:
+        return f"Lean {modeled}"
+    if p >= 0.55:
+        return f"Tilt {modeled}"
+    if p >= 0.45:
+        return "Tossup"
+    if p >= 0.38:
+        return f"Tilt {opposing}"
+    if p >= 0.22:
+        return f"Lean {opposing}"
+    if p >= 0.08:
+        return f"Likely {opposing}"
+    return f"Solid {opposing}"
+
+
 def ratings_table_from_forecasts(race_summaries: list[dict]) -> pd.DataFrame:
     rows = []
     for s in race_summaries:
@@ -63,8 +95,10 @@ def ratings_table_from_forecasts(race_summaries: list[dict]) -> pd.DataFrame:
             {
                 "race_id": s["race_id"],
                 "state": s["state"],
-                "rating": s.get("rating") or rating_from_probability(
-                    s.get("p_modeled_candidate", s.get("p_dem", 0.5))
+                "rating": s.get("rating") or rating_from_modeled_probability(
+                    s.get("p_modeled_candidate", s.get("p_dem", 0.5)),
+                    modeled_ballot_party=str(s.get("modeled_ballot_party") or "D"),
+                    opposing_ballot_party=str(s.get("opposing_ballot_party") or "R"),
                 ),
                 "source": "model_derived",
             }

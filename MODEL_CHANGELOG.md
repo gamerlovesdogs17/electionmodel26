@@ -4,6 +4,41 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-10-04 — v0.9.23 exceptional-race hardening (validation limited)
+
+- Replaced the exceptional adapter's production default of a zero-centered
+  20-point prior with the point-in-time presidential-relative state lean as a
+  weak location anchor plus a 30-point exceptional-candidate deviation and an
+  8-point predictive error. The state location is geographic context only; it
+  is not a Democratic ballot identity or an ordinary D-v-R posterior.
+- Compared three predeclared specifications on the same four frozen 60/30
+  historical cases. The selected 30-point state-anchored form produced MAE
+  5.987, empirical CRPS 3.762, Brier 0.138, 90% coverage 4/4, and average 90%
+  width 27.116 points. The zero-centered comparator produced 6.319 / 3.923 /
+  0.145 / 4/4 / 27.082; the 40-point state comparator produced 6.064 / 3.804 /
+  0.141 / 4/4 / 27.128. Four cases remain insufficient for calibration.
+- South Dakota is now explicitly `limited_supported_prior_only`: zero compatible
+  polls, state anchor -29.395, predictive SD 31.097, and a 98.075-point 90%
+  interval width in the diagnostic draw set. Nebraska's one compatible poll has
+  weighted location +1.075 and moves the posterior location from the -20.928
+  anchor to +0.195, confirming that candidate-specific polling dominates.
+- Retained 20% common variance after a predeclared 0/20/40% sensitivity check.
+  Marginal changes were small while exceptional-seat-count variance increased
+  monotonically (0.782 / 1.093 / 1.390), as expected from stronger dependence.
+- Exceptional race JSON no longer emits numerical `p_dem`/`p_rep`, Democratic
+  candidate aliases, or Democratic labels for Independent candidates. Web,
+  monitoring, market comparison, and rating paths consume candidate-neutral
+  fields and explicit ballot-party labels.
+- Chamber simulation now fails closed whenever an active contested race lacks
+  predictive draws. `held_by` is never used as a deterministic replacement for
+  an unsupported election. Alaska remains evidence-ready but forecast-model
+  unsupported until an RCV/multiway model exists.
+- Source readiness and forecast coverage are now separate gates. All source
+  domains are ready at 2026-10-03; forecast coverage remains incomplete only
+  because Alaska is unsupported. Ordinary historical projections remain
+  equivalent at all eight formal cutoffs; ordinary OOF and frozen v0.9.22
+  artifacts were not changed or rerun.
+
 ## 2026-10-04 — v0.9.23 limited non-major-party adapter (validation limited)
 
 - Added a separate candidate-neutral adapter for reviewed binary Independent
@@ -11,7 +46,7 @@ should be preserved alongside newer ones under `data/artifacts/` and
   `modeled_candidate_margin`; it does not relabel an Independent as a Democrat
   and does not enter the ordinary D-v-R PyMC, state-space, stack, calibration,
   or historical OOF machinery.
-- The adapter uses a fixed weak zero-centered 20-point prior, transferable poll
+- The initial adapter used a fixed weak zero-centered 20-point prior, transferable poll
   quality/recency/sample/clustering weights, an 8-point structural predictive
   error, heavy-tailed race noise, and a shared shock derived from the ordinary
   joint draw matrix. Party-direction house effects are excluded because they
@@ -22,10 +57,7 @@ should be preserved alongside newer ones under `data/artifacts/` and
   empirical CRPS 3.923, Brier 0.145, and 90% interval coverage 4/4. This sample
   is too small for a calibration claim; the artifact is explicitly classified
   `limited_validation_exception_model`.
-- Current coverage supports Idaho, Montana, and Nebraska through this limited
-  adapter. South Dakota remains withheld because it has no compatible poll,
-  and Alaska ranked-choice/multiway remains unsupported. The source/readiness
-  gate therefore remains red (20 pass, 13 warning, 2 fail).
+- This initial status was superseded by the hardening entry above.
 - Candidate-neutral race outputs now expose modeled/opposing probabilities,
   shares, identity, ballot party, and caucus separately. D/R aliases remain
   only on actual D-v-R rows. Caucus accounting still applies the declared

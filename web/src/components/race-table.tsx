@@ -92,7 +92,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
           </thead>
           <tbody>
             {rows.map((r) => {
-              const demParty = r.dem_party === "I" ? "I" : "D";
+              const demParty = (r.modeled_ballot_party ?? r.dem_party) === "I" ? "I" : "D";
               const pModeled = modeledProbability(r);
               return (
                 <tr

@@ -1,12 +1,15 @@
 # Blueprint compliance audit
 
-**Audit date:** 2026-10-03
+**Audit date:** 2026-10-04
 
 **Scope:** code capability and current empirical status
 
-**Model boundary:** `senate-hierarchical-v0.9.22`
+**Model boundary:** `senate-hierarchical-v0.9.23` development; empirical
+reference remains `senate-hierarchical-v0.9.22`
 
-**Current artifacts:** v0.9.22 research rebuild validated against evidence bundle `eb-3e91ca3a90628d69`
+**Current artifacts:** v0.9.23 source/coverage and limited adapter diagnostics;
+v0.9.22 remains the last completed research rebuild, validated against evidence
+bundle `eb-3e91ca3a90628d69`
 
 **Public live:** disabled
 
@@ -25,7 +28,7 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 | Fundamentals and structural priors | Implemented with variation | Challenger features remain off |
 | Static/dynamic PyMC and terminal layers | Implemented and evaluated | Canonical OOF is bound to the validated model spec; dynamic PyMC earned zero stack mass |
 | Similarity | Implemented and evaluated | Point-in-time source and same-family ablation evidence pass |
-| Joint simulation | Implemented and evaluated | Current research forecast retained 50,000 correlated draws |
+| Joint simulation | Implemented and evaluated for v0.9.22 | No complete v0.9.23 chamber forecast exists while Alaska is unsupported |
 | Institutional rules | Partial | Transition model remains disabled |
 | Turnout | Intentionally deferred | Auxiliary only |
 | Predictive-mixture stack | Implemented and evaluated | Validated weights are approximately 21.9% PyMC and 78.1% state-space |
@@ -36,9 +39,9 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 | Prior predictive/PPC/SBC | Implemented with variation | Prior/PPC gates pass; full-model SBC remains a nonblocking future diagnostic |
 | Sampler health | Implemented and evaluated | Current reference fit passes numerical-quality requirements |
 | Reproducibility/lineage/MCSE | Implemented with variation | Legacy absolute paths remain historical records |
-| Source readiness and sealing | Implemented | Required domains are green and evidence bundle `eb-3e91ca3a90628d69` is sealed and validated |
+| Source readiness and sealing | Implemented | v0.9.23 source domains are green but forecast coverage is incomplete; bundle `eb-3e91ca3a90628d69` is the sealed v0.9.22 evidence boundary |
 | Domain freshness | Implemented with variation | Retrieval and observation age are enforced only for enabled layers; source adapters must retain their timestamps |
-| Acceptance gates | Implemented and passing | G1–G11: 11 pass / 0 partial / 0 fail; extension gates and run coherence pass |
+| Acceptance gates | Implemented and passing for v0.9.22 | v0.9.23 has not run production acceptance and cannot reuse the old result as current evidence |
 
 ## Important deviations and decisions
 
@@ -77,19 +80,22 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 ## Current source and validation status
 
 The sealed v0.9.22 source audit remains green for its immutable completed
-research release. The current v0.9.23 development audit is red: 20 current
-races pass poll/target coverage, 13 have warnings, and 2 fail. Idaho, Montana,
-and Nebraska use a separately identified limited-validation binary
-non-major-party adapter; South Dakota is withheld because no compatible poll is
-available, and Alaska ranked-choice/multiway is unsupported. Markets and expert
-ratings remain disabled optional domains.
+research release. The current v0.9.23 evidence-source audit is also green.
+Forecast coverage is a separate gate: 20 current races pass, 14 have warnings,
+and one fails. Idaho, Montana, and Nebraska use a separately identified limited-
+validation binary non-major-party adapter; South Dakota is explicitly prior-only
+with zero compatible polls and wide uncertainty. Alaska ranked-choice/multiway
+is evidence-ready but model-unsupported. Markets and expert ratings remain
+disabled optional domains.
 
 The adapter preserves Independent ballot identity and explicit Democratic
 caucus accounting as separate concepts. Its candidate-neutral target and draw
 columns never enter the ordinary D-v-R PyMC, state-space, stack, calibration, or
 OOF machinery. Four historical 60/30 cases across 2020 Alaska and 2024 Nebraska
 provide limited diagnostics only; no calibration or broad empirical-validation
-claim is allowed. All ordinary historical evidence projections remain
+claim is allowed. The selected state-anchored 30-point candidate-deviation prior
+was compared with predeclared zero-centered 20-point and state-anchored 40-point
+forms; it was not tuned over a large grid. All ordinary historical evidence projections remain
 semantically identical to the v0.9.22 inputs.
 
 Evidence bundle `eb-3e91ca3a90628d69` binds the v0.9.22 ready source report and the

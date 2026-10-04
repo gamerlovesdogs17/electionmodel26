@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 from midterms.evidence.eligibility import audit_structural_prior
+from midterms.evidence.presidential_prior import materialize_prior_snapshot
 from midterms.evidence.presidential_results import (
     PARSER_VERSION,
     RAW_SOURCE_DIR,
@@ -111,3 +112,17 @@ def test_warehouse_attaches_identity_and_labels_unverified_prior(tmp_path, monke
     assert row["identity_source"] == "reviewed_current_candidate_registry"
     assert row["prior_source"] == "legacy_unverified_fixture"
     assert snapshot.presidential_source_sha256 is None
+
+
+def test_materialized_prior_snapshot_accepts_semantic_newline_equivalence(tmp_path):
+    snapshot, path = materialize_prior_snapshot(date(2026, 10, 3), out_dir=tmp_path)
+    canonical = json.dumps(snapshot, indent=2, sort_keys=True, allow_nan=False)
+    path.write_text(canonical.replace("\n", "\r\n"), encoding="utf-8", newline="")
+    repeated, repeated_path = materialize_prior_snapshot(date(2026, 10, 3), out_dir=tmp_path)
+    assert repeated == snapshot
+    assert repeated_path == path
+    changed = json.loads(path.read_text(encoding="utf-8"))
+    changed["rows"][0]["prior_lean"] += 0.01
+    path.write_text(json.dumps(changed), encoding="utf-8")
+    with pytest.raises(ValueError, match="sealed prior snapshot differs"):
+        materialize_prior_snapshot(date(2026, 10, 3), out_dir=tmp_path)

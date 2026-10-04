@@ -24,10 +24,11 @@
     "release_identity_exists": false,
     "research_acceptance_ok": false,
     "promotion_eligible": false,
-    "source_readiness_ok": false,
-    "source_blockers": [
-      "senate-2026-AK ranked_choice_multiway_not_supported",
-      "senate-2026-SD zero_candidate_compatible_polls"
+    "source_readiness_ok": true,
+    "source_blockers": [],
+    "forecast_coverage_ok": false,
+    "forecast_coverage_blockers": [
+      "senate-2026-AK ranked_choice_multiway_not_supported"
     ],
     "non_major_adapter_classification": "limited_validation_exception_model",
     "non_major_adapter_calibration_claim_allowed": false,
@@ -113,7 +114,7 @@
         "midterms/evidence/point_in_time.py"
       ],
       "current_implementation": "As-of filtering plus evidence-snapshot-fingerprint-v2 hashes selected poll rows, race rows, candidate timeline, rating snapshot, structural-prior lineage and the selected point-in-time demographic source.",
-      "remaining_issue": "The v0.9.22 lineage is complete. The v0.9.23 current polls domain remains blocked by Alaska RCV and zero-poll South Dakota; ordinary historical projections are unchanged.",
+      "remaining_issue": "The v0.9.22 lineage is complete. The v0.9.23 source domains are ready; forecast coverage remains blocked by Alaska RCV while ordinary historical projections are unchanged.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,
@@ -503,7 +504,7 @@
         "BLUEPRINT_COMPLIANCE_AUDIT.json"
       ],
       "current_implementation": "G1-G11 remain distinct; a machine-readable extension evaluator requires v0.9.22 artifact lineage and strict acceptance requires both layers.",
-      "remaining_issue": "v0.9.23 remains unpromotable because source readiness is red and no current forecast/rebuild exists; the v0.9.22 acceptance record remains immutable.",
+      "remaining_issue": "v0.9.23 remains unpromotable because Alaska RCV lacks forecast-model support and no current forecast/rebuild exists; the v0.9.22 acceptance record remains immutable.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -538,7 +539,7 @@
         ".github/workflows/rebuild-research.yml"
       ],
       "current_implementation": "The workflow enforces a two-pass contract: structural selection freezes a candidate model spec; a separately keyed canonical pass reruns static and dynamic PyMC with that selected PollStructureConfig. Final model-spec lineage binds the bundle, readiness, canonical OOF, stack and calibration artifacts.",
-      "remaining_issue": "The v0.9.23 polls domain remains incomplete because Alaska RCV is unsupported and South Dakota has no compatible I-v-R poll. No new v0.9.23 bundle may be sealed.",
+      "remaining_issue": "The v0.9.23 source audit is ready and separated from forecast coverage. Alaska RCV remains model-unsupported, so no complete chamber forecast may be promoted.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,
@@ -633,8 +634,11 @@
   "source_readiness_status": {
     "as_of": "2026-10-03",
     "model_version": "senate-hierarchical-v0.9.23",
-    "ready_for_expensive_rebuild": false,
+    "ready_for_expensive_rebuild": true,
+    "evidence_source_ready": true,
+    "forecast_coverage_ready": false,
     "ready_domains": [
+      "polls",
       "races",
       "candidate_timeline",
       "pollster_ratings",
@@ -646,16 +650,10 @@
       "generic_ballot",
       "official_results"
     ],
-    "blocking_domains": {
-      "polls": {
-        "status": "incomplete_coverage",
-        "reason": "current race matchup/identity coverage has hard failures",
-        "hard_failures": [
-          "senate-2026-AK ranked_choice_multiway_not_supported",
-          "senate-2026-SD zero_candidate_compatible_polls"
-        ]
-      }
-    },
+    "blocking_domains": {},
+    "forecast_coverage_blockers": [
+      "senate-2026-AK ranked_choice_multiway_not_supported"
+    ],
     "optional_disabled_domains": [
       "expert_ratings",
       "markets"
@@ -663,8 +661,9 @@
     "artifact": "data/artifacts/source_readiness_latest.json",
     "current_race_coverage": {
       "pass": 20,
-      "warning": 13,
-      "fail": 2
+      "warning": 14,
+      "fail": 1,
+      "evidence_fail": 0
     },
     "evidence_bundle_id": null,
     "evidence_bundle_sha256": null,

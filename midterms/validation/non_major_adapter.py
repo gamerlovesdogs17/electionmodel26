@@ -16,11 +16,13 @@ from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
 from midterms.evidence.warehouse import Warehouse
 from midterms.model.non_major_adapter import (
     ADAPTER_SPEC_VERSION,
+    COMMON_VARIANCE_SHARE,
     PRIOR_SD,
+    ZERO_CENTERED_COMPARATOR_SD,
     fit_non_major_adapter,
 )
 
-VALIDATION_SCHEMA_VERSION = "non-major-adapter-validation-v1"
+VALIDATION_SCHEMA_VERSION = "non-major-adapter-validation-v2"
 INCLUSION_RULE = (
     "U.S. Senate general election in which the modeled candidate appeared under "
     "an Independent/non-major label, the opposing candidate was Republican, no "
@@ -61,6 +63,31 @@ ANALOGS = (
         "poll_source_status": "scorable",
     },
 )
+
+# Predeclared before scoring.  The selected state-anchored 30 point deviation
+# is the simplest conservative structural alternative; the 40 point form is a
+# sensitivity comparator, not a parameter search.
+PRIOR_SPECIFICATIONS: tuple[dict[str, Any], ...] = (
+    {
+        "id": "zero_centered_weak",
+        "prior_mode": "zero_centered",
+        "prior_sd": ZERO_CENTERED_COMPARATOR_SD,
+        "production_candidate": False,
+    },
+    {
+        "id": "state_structural_very_large",
+        "prior_mode": "state_structural",
+        "prior_sd": PRIOR_SD,
+        "production_candidate": True,
+    },
+    {
+        "id": "state_structural_extra_large",
+        "prior_mode": "state_structural",
+        "prior_sd": 40.0,
+        "production_candidate": False,
+    },
+)
+SELECTED_PRIOR_SPEC_ID = "state_structural_very_large"
 
 
 def _sha(payload: Any) -> str:
@@ -149,7 +176,33 @@ def _historical_poll_frame(analog: dict[str, Any]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _race_row(analog: dict[str, Any]) -> pd.DataFrame:
+def _prior_snapshot(as_of: str) -> dict[str, Any]:
+    path = (
+        NORMALIZED_DIR / "prior_snapshots"
+        / f"presidential-relative-prior-v1_{pd.Timestamp(as_of).date().isoformat()}.json"
+    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    semantic = {key: value for key, value in payload.items() if key != "snapshot_sha256"}
+    if payload.get("snapshot_sha256") != _sha(semantic):
+        raise ValueError(f"prior snapshot semantic fingerprint changed: {path}")
+    return payload
+
+
+def _state_prior(as_of: str, state: str) -> dict[str, Any]:
+    snapshot = _prior_snapshot(as_of)
+    row = next(item for item in snapshot["rows"] if item["state"] == state)
+    return {
+        "prior_lean": float(row["prior_lean"]),
+        "prior_source": row["prior_source"],
+        "prior_production_eligible": bool(row["prior_production_eligible"]),
+        "prior_provenance_sha256": row["prior_provenance_sha256"],
+        "prior_snapshot_sha256": snapshot["snapshot_sha256"],
+        "prior_source_years": snapshot["source_years_newest_first"],
+    }
+
+
+def _race_row(analog: dict[str, Any], *, as_of: str) -> pd.DataFrame:
+    prior = _state_prior(as_of, analog["state"])
     return pd.DataFrame([{
         "race_id": analog["race_id"],
         "state": analog["state"],
@@ -166,6 +219,7 @@ def _race_row(analog: dict[str, Any]) -> pd.DataFrame:
         "opposing_ballot_party": "R",
         "opposing_caucus": "R",
         "opposing_caucus_basis": "historical_major_party_identity",
+        **prior,
     }])
 
 
@@ -183,7 +237,7 @@ def _score_case(
     *,
     lead_days: int,
     truth: float,
-    prior_sd: float,
+    prior_spec: dict[str, Any],
 ) -> dict[str, Any] | None:
     polls = _historical_poll_frame(analog)
     cutoff = pd.Timestamp(analog["election_day"]).date() - timedelta(days=int(lead_days))
@@ -194,15 +248,17 @@ def _score_case(
     if polls.empty:
         return None
     fit = fit_non_major_adapter(
-        _race_row(analog), polls, as_of=cutoff, n_draws=4000,
+        _race_row(analog, as_of=cutoff.isoformat()), polls, as_of=cutoff, n_draws=4000,
         seed=9200 + int(lead_days) + int(analog["election_day"][:4]),
-        prior_sd=float(prior_sd),
+        prior_sd=float(prior_spec["prior_sd"]),
+        prior_mode=str(prior_spec["prior_mode"]),
     )
     if not fit.race_ids:
         return None
     draws = fit.draws_margin[:, 0]
     probability = float(np.mean(draws > 0.0))
     outcome = float(truth > 0.0)
+    record = fit.diagnostics["records"][0]
     return {
         "race_id": analog["race_id"],
         "as_of": cutoff.isoformat(),
@@ -221,7 +277,20 @@ def _score_case(
         "interval_90_covered": bool(
             np.quantile(draws, 0.05) <= truth <= np.quantile(draws, 0.95)
         ),
-        "prior_sd": float(prior_sd),
+        "interval_90_width": float(np.quantile(draws, 0.95) - np.quantile(draws, 0.05)),
+        "prior_spec_id": prior_spec["id"],
+        "prior_mode": prior_spec["prior_mode"],
+        "prior_location": record["prior_location"],
+        "prior_sd": float(prior_spec["prior_sd"]),
+        "posterior_location": record["posterior_location"],
+        "poll_weighted_location": record["poll_weighted_location"],
+        "poll_sensitivity": float(
+            abs(record["posterior_location"] - record["prior_location"])
+        ),
+        "prior_snapshot_sha256": _race_row(
+            analog, as_of=cutoff.isoformat()
+        ).iloc[0]["prior_snapshot_sha256"],
+        "exceptional_outcome_used_to_set_prior": False,
     }
 
 
@@ -234,6 +303,8 @@ def _aggregate(cases: list[dict[str, Any]]) -> dict[str, Any]:
         "brier": float(np.mean([x["brier"] for x in cases])),
         "empirical_crps": float(np.mean([x["crps"] for x in cases])),
         "interval_90_coverage": float(np.mean([x["interval_90_covered"] for x in cases])),
+        "average_interval_90_width": float(np.mean([x["interval_90_width"] for x in cases])),
+        "average_poll_sensitivity": float(np.mean([x["poll_sensitivity"] for x in cases])),
         "calibration_claim_allowed": False,
         "limitation": "Too few structurally comparable races for a calibration claim.",
     }
@@ -242,19 +313,26 @@ def _aggregate(cases: list[dict[str, Any]]) -> dict[str, Any]:
 def build_non_major_adapter_validation(*, current_as_of: str = "2026-10-03") -> dict[str, Any]:
     truths = _truth_by_race()
     scored: list[dict[str, Any]] = []
-    sensitivity: dict[str, Any] = {}
-    for prior_sd in (12.0, PRIOR_SD, 30.0):
+    prior_comparison: dict[str, Any] = {}
+    for prior_spec in PRIOR_SPECIFICATIONS:
         cases = [
             case
             for analog in ANALOGS
             if analog["poll_source_status"] == "scorable"
             for lead in (60, 30)
             if (case := _score_case(
-                analog, lead_days=lead, truth=truths[analog["race_id"]], prior_sd=prior_sd,
+                analog,
+                lead_days=lead,
+                truth=truths[analog["race_id"]],
+                prior_spec=prior_spec,
             )) is not None
         ]
-        sensitivity[str(prior_sd)] = {"aggregate": _aggregate(cases), "cases": cases}
-        if prior_sd == PRIOR_SD:
+        prior_comparison[str(prior_spec["id"])] = {
+            "specification": dict(prior_spec),
+            "aggregate": _aggregate(cases),
+            "cases": cases,
+        }
+        if prior_spec["id"] == SELECTED_PRIOR_SPEC_ID:
             scored = cases
 
     warehouse = Warehouse(ensure_fixtures=False)
@@ -287,6 +365,24 @@ def build_non_major_adapter_validation(*, current_as_of: str = "2026-10-03") -> 
             as_of=cutoff,
         ),
     )
+    current_prior = _prior_snapshot(current_as_of)
+    current_prior_by_state = {
+        row["state"]: row for row in current_prior["rows"]
+    }
+    current_races = current_races.copy()
+    current_races["prior_lean"] = current_races["state"].map(
+        lambda state: current_prior_by_state[str(state)]["prior_lean"]
+    )
+    current_races["prior_production_eligible"] = current_races["state"].map(
+        lambda state: current_prior_by_state[str(state)]["prior_production_eligible"]
+    )
+    current_races["prior_source"] = current_races["state"].map(
+        lambda state: current_prior_by_state[str(state)]["prior_source"]
+    )
+    current_races["prior_provenance_sha256"] = current_races["state"].map(
+        lambda state: current_prior_by_state[str(state)]["prior_provenance_sha256"]
+    )
+    current_races["prior_snapshot_sha256"] = current_prior["snapshot_sha256"]
     compatible = candidate_meta.get("candidate_compatible_poll_ids_by_race") or {}
     exceptional_ids = {
         str(poll_id)
@@ -322,6 +418,123 @@ def build_non_major_adapter_validation(*, current_as_of: str = "2026-10-03") -> 
             "additional_repository_source_ingested": False,
         })
 
+    selected_spec = next(
+        spec for spec in PRIOR_SPECIFICATIONS if spec["id"] == SELECTED_PRIOR_SPEC_ID
+    )
+    selected_current_fit = fit_non_major_adapter(
+        current_races,
+        exceptional,
+        as_of=current_as_of,
+        n_draws=8000,
+        seed=923001,
+        prior_mode=str(selected_spec["prior_mode"]),
+        prior_sd=float(selected_spec["prior_sd"]),
+    )
+    selected_current_records = {
+        record["race_id"]: record
+        for record in selected_current_fit.diagnostics["records"]
+    }
+    zero_poll_behavior: dict[str, Any] = {}
+    for spec in PRIOR_SPECIFICATIONS:
+        fit = fit_non_major_adapter(
+            current_races,
+            exceptional,
+            as_of=current_as_of,
+            n_draws=8000,
+            seed=923001,
+            prior_mode=str(spec["prior_mode"]),
+            prior_sd=float(spec["prior_sd"]),
+        )
+        by_race = {
+            race_id: index for index, race_id in enumerate(fit.race_ids)
+        }
+        sd_index = by_race.get("senate-2026-SD")
+        zero_poll_behavior[str(spec["id"])] = {
+            "race_id": "senate-2026-SD",
+            "n_compatible_polls": 0,
+            "support_status": next(
+                (
+                    record["support_status"]
+                    for record in fit.diagnostics["records"]
+                    if record["race_id"] == "senate-2026-SD"
+                ),
+                "not_present",
+            ),
+            "prior_location": next(
+                (
+                    record["prior_location"]
+                    for record in fit.diagnostics["records"]
+                    if record["race_id"] == "senate-2026-SD"
+                ),
+                None,
+            ),
+            "predictive_mean": (
+                None if sd_index is None else float(fit.mean_margin[sd_index])
+            ),
+            "predictive_sd": (
+                None if sd_index is None else float(fit.sd_margin[sd_index])
+            ),
+            "interval_90_width": (
+                None
+                if sd_index is None
+                else float(
+                    np.quantile(fit.draws_margin[:, sd_index], 0.95)
+                    - np.quantile(fit.draws_margin[:, sd_index], 0.05)
+                )
+            ),
+        }
+
+    # Common-shock sensitivity uses fixed synthetic ordinary draws and identical
+    # exceptional seeds.  It changes dependence only; it is not scored against
+    # current outcomes and does not tune the retained 20 percent value.
+    rng = np.random.default_rng(923040)
+    common = rng.normal(size=8000)
+    ordinary_draws = np.column_stack([
+        common + rng.normal(scale=0.7, size=8000),
+        0.8 * common + rng.normal(scale=0.8, size=8000),
+    ])
+    from midterms.model.pymc_model import FitResult
+
+    base_fit = FitResult(
+        race_ids=["synthetic-ordinary-a", "synthetic-ordinary-b"],
+        states=["AA", "BB"],
+        mean_margin=ordinary_draws.mean(axis=0),
+        sd_margin=ordinary_draws.std(axis=0),
+        draws_margin=ordinary_draws,
+        house_effects={},
+        diagnostics={"purpose": "common_shock_sensitivity_only"},
+        method="synthetic_common_factor",
+    )
+    common_sensitivity: dict[str, Any] = {}
+    for common_share in (0.0, COMMON_VARIANCE_SHARE, 0.4):
+        fit = fit_non_major_adapter(
+            current_races,
+            exceptional,
+            as_of=current_as_of,
+            n_draws=8000,
+            seed=923041,
+            base_fit=base_fit,
+            prior_mode=str(selected_spec["prior_mode"]),
+            prior_sd=float(selected_spec["prior_sd"]),
+            common_variance_share=common_share,
+        )
+        ordinary_factor = ordinary_draws.mean(axis=1)
+        probs = {
+            race_id: float(np.mean(fit.draws_margin[:, index] > 0))
+            for index, race_id in enumerate(fit.race_ids)
+        }
+        correlations = {
+            race_id: float(np.corrcoef(ordinary_factor, fit.draws_margin[:, index])[0, 1])
+            for index, race_id in enumerate(fit.race_ids)
+        }
+        common_sensitivity[str(common_share)] = {
+            "p_modeled_candidate_by_race": probs,
+            "correlation_with_synthetic_ordinary_factor_by_race": correlations,
+            "exceptional_seat_count_variance": float(
+                np.var((fit.draws_margin >= 0).sum(axis=1))
+            ),
+        }
+
     semantic = {
         "schema_version": VALIDATION_SCHEMA_VERSION,
         "model_version": MODEL_VERSION,
@@ -355,12 +568,37 @@ def build_non_major_adapter_validation(*, current_as_of: str = "2026-10-03") -> 
             },
         },
         "formal_lead_days": [60, 30],
-        "fixed_prior": {"mean": 0.0, "sd": PRIOR_SD, "estimated_from_analog_outcomes": False},
+        "selected_prior_spec_id": SELECTED_PRIOR_SPEC_ID,
+        "selected_prior": {
+            **selected_spec,
+            "location_definition": "point_in_time_presidential_relative_state_lean",
+            "interpretation": "weak geographic location anchor; not Independent-equals-Democrat",
+            "estimated_from_analog_outcomes": False,
+            "selection_reason": (
+                "predeclared simplest state-anchored conservative specification; "
+                "the four scored cases are too few for outcome-driven tuning"
+            ),
+        },
         "cases": scored,
         "aggregate": _aggregate(scored),
-        "prior_sd_sensitivity": sensitivity,
+        "prior_specification_comparison": prior_comparison,
+        "zero_poll_behavior": zero_poll_behavior,
+        "selected_current_adapter_records": selected_current_records,
+        "common_shock_sensitivity": {
+            "retained_share": COMMON_VARIANCE_SHARE,
+            "not_parameter_tuning": True,
+            "results": common_sensitivity,
+        },
         "current_poll_audit": audit,
         "ordinary_oof_touched": False,
+        "leave_one_race_out_integrity": {
+            "safe": True,
+            "reason": (
+                "exceptional outcomes are never used to estimate the structural "
+                "location or uncertainty; every state anchor is derived only from "
+                "presidential results available at that cutoff"
+            ),
+        },
         "calibration_claim_allowed": False,
     }
     return {**semantic, "artifact_sha256": _sha(semantic)}

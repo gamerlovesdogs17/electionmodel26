@@ -173,6 +173,18 @@ def audit_source_readiness(
                 "reasons": ["required race universe is missing"],
             }
         else:
+            if label.endswith("-current") and target_election == "senate-2026":
+                from midterms.evidence.presidential_prior import attach_prior_snapshot
+
+                prior_path = (
+                    normalized_dir / "prior_snapshots"
+                    / f"presidential-relative-prior-v1_{pd.Timestamp(cutoff_value).date().isoformat()}.json"
+                )
+                if prior_path.is_file():
+                    subset = attach_prior_snapshot(
+                        subset,
+                        json.loads(prior_path.read_text(encoding="utf-8")),
+                    )
             cutoff_polls = polls[
                 polls.get(
                     "election_id", pd.Series("", index=polls.index),
@@ -277,11 +289,6 @@ def audit_source_readiness(
     })
     if current_poll_coverage is not None:
         domains["polls"]["current_race_coverage"] = current_poll_coverage
-        if not current_poll_coverage["summary"]["promotion_eligible"]:
-            domains["polls"]["status"] = "incomplete_coverage"
-            domains["polls"].setdefault("reasons", []).append(
-                "current race matchup/identity coverage has hard failures"
-            )
 
     demo_contract = canonical_domain_contract("demographics")
     demo_path = normalized_dir / str(demo_contract["normalized_name"])
@@ -575,12 +582,37 @@ def audit_source_readiness(
             })
 
     blockers, warnings, optional_disabled = evaluate_readiness_gate(domains)
+    if current_poll_coverage is not None:
+        coverage_summary = current_poll_coverage.get("summary") or {}
+        forecast_coverage = {
+            "schema_version": current_poll_coverage.get("schema_version"),
+            "artifact_sha256": current_poll_coverage.get("artifact_sha256"),
+            "summary": coverage_summary,
+            "unsupported_or_withheld_race_ids": sorted(
+                row["race_id"]
+                for row in current_poll_coverage.get("races") or []
+                if row.get("forecast_status") == "fail"
+            ),
+            "artifact_path": "data/artifacts/current_race_poll_coverage_v0923.json",
+        }
+    else:
+        forecast_coverage = {
+            "summary": {
+                "forecast_complete": False,
+                "reasons": ["current race forecast coverage was not evaluated"],
+            }
+        }
     return {
         "schema_version": SOURCE_READINESS_SCHEMA_VERSION,
         "model_version": MODEL_VERSION,
         "election_id": election_id,
         "as_of": cutoff.isoformat(),
         "ready_for_expensive_rebuild": not blockers,
+        "evidence_source_ready": not blockers,
+        "forecast_coverage_ready": bool(
+            (forecast_coverage.get("summary") or {}).get("forecast_complete")
+        ),
+        "forecast_coverage": forecast_coverage,
         "source_preparation_registry_version": registry["registry_version"],
         "effective_registry": registry,
         "domains": domains,

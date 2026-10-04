@@ -315,7 +315,7 @@ export function SenateMap({
 function raceFill(race: RaceForecast | null, mode: MapMode): string {
   if (!race) return "#d5dde2";
   const fav = caucusFavored(race);
-  const indFavored = race.dem_party === "I" && fav === "D";
+  const indFavored = (race.modeled_ballot_party ?? race.dem_party) === "I" && fav === "D";
   const pModeled = modeledProbability(race);
   if (mode === "probability") {
     if (race.is_flip) {
@@ -419,7 +419,7 @@ function MapTooltip({
 }
 
 function RaceTooltipBlock({ race }: { race: RaceForecast }) {
-  const demParty = race.dem_party === "I" ? "I" : "D";
+  const demParty = (race.modeled_ballot_party ?? race.dem_party) === "I" ? "I" : "D";
   const pModeled = modeledProbability(race);
   const pOpposing = opposingProbability(race);
   const favoredIndOrDem = pModeled >= 0.5;
@@ -438,7 +438,9 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
       <div className="flex flex-wrap gap-1.5">
         <span
           className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-            race.rating?.includes("D")
+            race.rating?.includes("I")
+              ? "bg-[#e4dcf2] text-[var(--ind)]"
+              : race.rating?.includes("D")
               ? "bg-[#d7e6f2] text-[var(--dem)]"
               : race.rating?.includes("R")
                 ? "bg-[#f0d8d3] text-[var(--rep)]"

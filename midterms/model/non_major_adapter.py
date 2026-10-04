@@ -28,12 +28,18 @@ from midterms.evidence.warehouse import EvidenceSnapshot
 from midterms.model.poll_weights import attach_poll_weights, race_enop_summary
 from midterms.model.pymc_model import FitResult
 
-PRIOR_MEAN = 0.0
-PRIOR_SD = 20.0
+# The presidential-relative state lean is a location anchor, not a claim that
+# an Independent candidate is a Democrat.  The 30 point candidate deviation is
+# intentionally much wider than an ordinary-race prior and is not estimated
+# from the small exceptional-race outcome sample.
+PRIOR_MEAN = 0.0  # retained only for the zero-centered validation comparator
+PRIOR_SD = 30.0
+ZERO_CENTERED_COMPARATOR_SD = 20.0
 POLL_ERROR_FLOOR = 5.0
 STRUCTURAL_PREDICTIVE_SD = 8.0
 COMMON_VARIANCE_SHARE = 0.20
-ADAPTER_SPEC_VERSION = "binary-non-major-adapter-v1"
+ADAPTER_SPEC_VERSION = "binary-non-major-adapter-v2"
+STRUCTURAL_PRIOR_METHOD = "presidential_relative_state_anchor_plus_exceptional_candidate_deviation"
 
 
 def modeled_candidate_margin(modeled_share: float, opposing_share: float) -> float:
@@ -94,6 +100,20 @@ def _posterior_location(
 ) -> dict[str, Any]:
     """Conjugate weak-prior aggregation using transferable poll weights only."""
 
+    if polls.empty:
+        posterior_sd = float(prior_sd)
+        return {
+            "mean": float(prior_mean),
+            "posterior_sd": posterior_sd,
+            "predictive_sd": float(np.sqrt(posterior_sd**2 + STRUCTURAL_PREDICTIVE_SD**2)),
+            "n_polls": 0,
+            "enop": 0.0,
+            "poll_ids": [],
+            "poll_weighted_location": None,
+            "house_effect_treatment": "not_applicable_zero_polls",
+            "weighted_polls": polls.copy(),
+        }
+
     weighted = attach_poll_weights(polls, as_of=as_of)
     y = _poll_margins(weighted)
     sample = pd.to_numeric(weighted["sample_size"], errors="coerce").fillna(500.0)
@@ -117,6 +137,7 @@ def _posterior_location(
     posterior_sd = float(np.sqrt(1.0 / precision))
     predictive_sd = float(np.sqrt(posterior_sd**2 + STRUCTURAL_PREDICTIVE_SD**2))
     enop = race_enop_summary(weighted)
+    poll_location = float(np.dot(info, y) / info.sum()) if float(info.sum()) > 0 else None
     return {
         "mean": float(mean),
         "posterior_sd": posterior_sd,
@@ -124,6 +145,7 @@ def _posterior_location(
         "n_polls": len(weighted),
         "enop": float(next(iter(enop.values()), 0.0)),
         "poll_ids": sorted(weighted["poll_id"].astype(str).tolist()),
+        "poll_weighted_location": poll_location,
         "house_effect_treatment": "not_applied_party_direction_not_portable",
         "weighted_polls": weighted,
     }
@@ -157,14 +179,19 @@ def fit_non_major_adapter(
     n_draws: int,
     seed: int,
     base_fit: FitResult | None = None,
-    prior_mean: float = PRIOR_MEAN,
+    prior_mean: float | None = None,
     prior_sd: float = PRIOR_SD,
+    prior_mode: str = "state_structural",
+    common_variance_share: float = COMMON_VARIANCE_SHARE,
 ) -> FitResult:
     """Fit supported exceptional races and return candidate-neutral margin draws."""
 
     cutoff = pd.Timestamp(as_of).date()
     rng = np.random.default_rng(int(seed))
     common = _common_shock(base_fit, int(n_draws), rng)
+    common_share = float(common_variance_share)
+    if not 0.0 <= common_share <= 1.0:
+        raise ValueError("common_variance_share must be between zero and one")
     race_ids: list[str] = []
     states: list[str] = []
     columns: list[np.ndarray] = []
@@ -177,9 +204,29 @@ def fit_non_major_adapter(
             "race_id", pd.Series("", index=polls.index),
         ).astype(str).eq(race_id)].copy()
         race_polls = _candidate_compatible_polls(race_polls, race)
+        structural_raw = pd.to_numeric(race.get("prior_lean"), errors="coerce")
+        structural_available = bool(pd.notna(structural_raw))
+        if prior_mode == "state_structural":
+            race_prior_mean = float(structural_raw) if structural_available else np.nan
+        elif prior_mode == "zero_centered":
+            race_prior_mean = float(PRIOR_MEAN if prior_mean is None else prior_mean)
+        elif prior_mode == "fixed":
+            if prior_mean is None or not np.isfinite(float(prior_mean)):
+                raise ValueError("fixed exceptional prior requires a finite prior_mean")
+            race_prior_mean = float(prior_mean)
+        else:
+            raise ValueError(f"unknown exceptional prior_mode: {prior_mode}")
+        support_row = race.copy()
+        if prior_mode != "state_structural":
+            support_row["prior_lean"] = race_prior_mean
+            support_row["prior_production_eligible"] = True
         supported, support_status, support_reason = probability_support_status(
-            race, n_compatible_polls=len(race_polls),
+            support_row, n_compatible_polls=len(race_polls),
         )
+        if prior_mode == "state_structural" and not structural_available:
+            supported = False
+            support_status = "withheld"
+            support_reason = "eligible_state_structural_prior_missing"
         if not non_major_identity_supported(race):
             continue
         record: dict[str, Any] = {
@@ -194,6 +241,10 @@ def fit_non_major_adapter(
             "support_status": support_status,
             "support_reason": support_reason,
             "n_candidate_compatible_polls": len(race_polls),
+            "prior_mode": prior_mode,
+            "prior_location": None if not np.isfinite(race_prior_mean) else race_prior_mean,
+            "prior_sd": float(prior_sd),
+            "prior_only": len(race_polls) == 0,
         }
         if not supported:
             records.append(record)
@@ -201,15 +252,15 @@ def fit_non_major_adapter(
         aggregate = _posterior_location(
             race_polls,
             as_of=cutoff,
-            prior_mean=prior_mean,
+            prior_mean=race_prior_mean,
             prior_sd=prior_sd,
         )
         idiosyncratic = rng.standard_t(5.0, size=int(n_draws)) / np.sqrt(5.0 / 3.0)
         idiosyncratic -= float(idiosyncratic.mean())
         idiosyncratic /= float(idiosyncratic.std())
         shock = (
-            np.sqrt(COMMON_VARIANCE_SHARE) * common
-            + np.sqrt(1.0 - COMMON_VARIANCE_SHARE) * idiosyncratic
+            np.sqrt(common_share) * common
+            + np.sqrt(1.0 - common_share) * idiosyncratic
         )
         draw = float(aggregate["mean"]) + float(aggregate["predictive_sd"]) * shock
         race_ids.append(race_id)
@@ -222,6 +273,11 @@ def fit_non_major_adapter(
             "posterior_location": aggregate["mean"],
             "posterior_sd": aggregate["posterior_sd"],
             "predictive_sd": aggregate["predictive_sd"],
+            "poll_weighted_location": aggregate["poll_weighted_location"],
+            "poll_location_shift": (
+                None if aggregate["poll_weighted_location"] is None
+                else float(aggregate["mean"] - race_prior_mean)
+            ),
             "house_effect_treatment": aggregate["house_effect_treatment"],
         })
 
@@ -237,10 +293,21 @@ def fit_non_major_adapter(
             "adapter_spec_version": ADAPTER_SPEC_VERSION,
             "method": NON_MAJOR_ADAPTER_METHOD,
             "target": NON_MAJOR_TARGET,
-            "prior": {"mean": float(prior_mean), "sd": float(prior_sd), "kind": "fixed_weak_normal"},
+            "prior": {
+                "mode": prior_mode,
+                "mean": None if prior_mode == "state_structural" else float(
+                    PRIOR_MEAN if prior_mean is None else prior_mean
+                ),
+                "sd": float(prior_sd),
+                "kind": (
+                    STRUCTURAL_PRIOR_METHOD
+                    if prior_mode == "state_structural" else "fixed_weak_normal_comparator"
+                ),
+                "estimated_from_exceptional_outcomes": False,
+            },
             "poll_error_floor": POLL_ERROR_FLOOR,
             "structural_predictive_sd": STRUCTURAL_PREDICTIVE_SD,
-            "common_variance_share": COMMON_VARIANCE_SHARE,
+            "common_variance_share": common_share,
             "records": records,
             "validation_class": "limited_validation_exception_model",
         },

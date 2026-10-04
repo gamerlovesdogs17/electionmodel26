@@ -14,7 +14,7 @@ import pandas as pd
 
 from midterms.evidence.schema import is_active_ballot_row
 from midterms.evidence.tickets import ticket_for_state
-from midterms.model.overlays import rating_from_probability
+from midterms.model.overlays import rating_from_modeled_probability
 from midterms.model.pymc_model import FitResult
 
 
@@ -119,20 +119,18 @@ def simulate_chamber(
     n_draws, n_races = margins.shape
     wins = (margins >= 0).astype(int)
 
-    # Contested seats omitted from the fit stay fixed by held_by — never invent seats.
+    # An active contest without predictive draws is an incomplete chamber
+    # forecast.  Incumbent/held_by is historical state, not a deterministic
+    # substitute for the missing election distribution.
     fit_ids = set(fit.race_ids)
     if len(contested):
         omitted = contested[~contested["race_id"].isin(fit_ids)]
         if len(omitted):
-            invalid = omitted[~omitted["held_by"].isin(["D", "R", "I"])]
-            if len(invalid):
-                raise ValueError(
-                    "contested seats omitted from the binary fit require an "
-                    "explicit held_by value for chamber accounting: "
-                    + ", ".join(invalid["race_id"].astype(str).tolist())
-                )
-            held_dem += int(omitted["held_by"].isin(["D", "I"]).sum())
-            held_rep += int((omitted["held_by"] == "R").sum())
+            raise ValueError(
+                "complete chamber forecast requires predictive draws for every "
+                "active contested seat; unsupported/withheld races: "
+                + ", ".join(sorted(omitted["race_id"].astype(str).tolist()))
+            )
 
     dem_seats = held_dem + wins.sum(axis=1)
     total = held_dem + held_rep + n_races
@@ -192,15 +190,16 @@ def simulate_chamber(
         p_modeled = float(wins[:, i].mean())
         state = fit.states[i]
         row = contested_ix.loc[rid] if rid in contested_ix.index else None
-        held_by = None if row is None else str(row["held_by"])
+        held_raw = None if row is None else row.get("held_by")
+        held_by = None if held_raw is None or pd.isna(held_raw) else str(held_raw)
         prior_raw = None if row is None else row.get("prior_lean")
         prior_lean = (
             None if prior_raw is None or pd.isna(prior_raw) else float(prior_raw)
         )
         incumbent = None
-        if row is not None and not pd.isna(row["incumbent_party"]):
-            incumbent = str(row["incumbent_party"])
-        is_open = None if row is None else bool(row["is_open"])
+        if row is not None and not pd.isna(row.get("incumbent_party")):
+            incumbent = str(row.get("incumbent_party"))
+        is_open = None if row is None or pd.isna(row.get("is_open")) else bool(row.get("is_open"))
         seat_class = None if row is None else str(row.get("seat_class", "II"))
         election_phase = None if row is None else str(row.get("election_phase") or "general")
         vacancy_reason = None
@@ -229,7 +228,15 @@ def simulate_chamber(
         mean_m = float(fit.mean_margin[i])
         dem_share = 50.0 + mean_m / 2.0
         rep_share = 100.0 - dem_share
-        rating = rating_from_probability(p_modeled)
+        opposing_party = (
+            "R" if row is None or pd.isna(row.get("opposing_ballot_party"))
+            else str(row.get("opposing_ballot_party"))
+        )
+        rating = rating_from_modeled_probability(
+            p_modeled,
+            modeled_ballot_party=dem_party,
+            opposing_ballot_party=opposing_party,
+        )
         modeled_caucus = None if row is None else row.get("modeled_caucus")
         opposing_caucus = None if row is None else row.get("opposing_caucus")
         favored_caucus = str(
@@ -265,15 +272,12 @@ def simulate_chamber(
                 "held_by": held_by,
                 "election_phase": election_phase,
                 "vacancy_reason": vacancy_reason,
-                "dem_candidate": dem_name,
-                "rep_candidate": rep_name,
                 "modeled_candidate": modeled_name,
                 "opposing_candidate": opposing_name,
-                "dem_party": dem_party,
                 "modeled_candidate_id": None if row is None else row.get("modeled_candidate_id"),
                 "opposing_candidate_id": None if row is None else row.get("opposing_candidate_id"),
                 "modeled_ballot_party": dem_party,
-                "opposing_ballot_party": "R",
+                "opposing_ballot_party": opposing_party,
                 "modeled_caucus": modeled_caucus,
                 "opposing_caucus": opposing_caucus,
                 "modeled_caucus_basis": None if row is None else row.get("modeled_caucus_basis"),
@@ -293,6 +297,9 @@ def simulate_chamber(
                 "p_rep": float(1.0 - p_modeled),
                 "dem_share": round(dem_share, 1),
                 "rep_share": round(rep_share, 1),
+                "dem_candidate": dem_name,
+                "rep_candidate": rep_name,
+                "dem_party": dem_party,
             })
         else:
             adapter_record = adapter_records.get(str(rid), {})

@@ -3,7 +3,28 @@
   "model_version": "senate-hierarchical-v0.9.23",
   "election_id": "senate-2026",
   "as_of": "2026-10-03",
-  "ready_for_expensive_rebuild": false,
+  "ready_for_expensive_rebuild": true,
+  "evidence_source_ready": true,
+  "forecast_coverage_ready": false,
+  "forecast_coverage": {
+    "schema_version": "current-race-poll-coverage-v3",
+    "artifact_sha256": "a893f40d8fdad998532a18e6b831656d4781b3838f0ccebcce0ed9dea723db9e",
+    "summary": {
+      "n_races": 35,
+      "n_pass": 20,
+      "n_warning": 14,
+      "n_fail": 1,
+      "n_evidence_fail": 0,
+      "evidence_ready": true,
+      "forecast_complete": false,
+      "promotion_eligible": false,
+      "source_and_model_coverage_separated": true
+    },
+    "unsupported_or_withheld_race_ids": [
+      "senate-2026-AK"
+    ],
+    "artifact_path": "data/artifacts/current_race_poll_coverage_v0923.json"
+  },
   "source_preparation_registry_version": "source-preparation-registry-v1",
   "effective_registry": {
     "registry_version": "source-preparation-registry-v1",
@@ -265,10 +286,8 @@
       "required_for_core": true,
       "required_for_historical_validation": true,
       "adapter": "midterms.evidence.ingest",
-      "status": "incomplete_coverage",
-      "reasons": [
-        "current race matchup/identity coverage has hard failures"
-      ],
+      "status": "ready",
+      "reasons": [],
       "n_current_rows": 375,
       "historical_cutoff_counts": {
         "senate-2018-lead-60": 289,
@@ -283,10 +302,10 @@
       "missing_cutoffs": [],
       "semantic_sha256": "d3909712deeebe0b3307a5c165292510cc3b5351b2f488a94044af8d81f8b136",
       "current_race_coverage": {
-        "schema_version": "current-race-poll-coverage-v2",
+        "schema_version": "current-race-poll-coverage-v3",
         "model_version": "senate-hierarchical-v0.9.23",
         "as_of": "2026-10-03",
-        "candidate_state_snapshot_sha256": "564c394563e39aa844d0cf763de572756e2b14b668f1cb12b00f1b5dde8937c5",
+        "candidate_state_snapshot_sha256": "f35b435dbb7b1afe18bea39ae71d529a3de0417b7ad296b04b39d6996f298eca",
         "races": [
           {
             "race_id": "senate-2026-AK",
@@ -387,6 +406,9 @@
             "latest_compatible_field_end": "2026-09-30T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
             "status": "fail",
+            "forecast_status": "fail",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry",
               "race_ineligible_for_binary_scoring",
@@ -447,6 +469,9 @@
             "latest_compatible_field_end": "2026-09-25T00:00:00",
             "latest_compatible_available_at": "2026-10-01T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": []
           },
           {
@@ -503,6 +528,9 @@
             "latest_compatible_field_end": "2026-08-18T00:00:00",
             "latest_compatible_available_at": "2026-08-20T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": []
           },
           {
@@ -548,6 +576,9 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
@@ -595,6 +626,9 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
@@ -703,6 +737,9 @@
             "latest_compatible_field_end": "2026-09-27T00:00:00",
             "latest_compatible_available_at": "2026-09-29T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -805,6 +842,9 @@
             "latest_compatible_field_end": "2026-09-23T00:00:00",
             "latest_compatible_available_at": "2026-09-25T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -910,6 +950,9 @@
             "latest_compatible_field_end": "2026-09-28T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -967,6 +1010,9 @@
             "latest_compatible_field_end": "2026-08-07T00:00:00",
             "latest_compatible_available_at": "2026-08-14T00:00:00",
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "limited_validation_exception_model"
             ]
@@ -1014,6 +1060,9 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
@@ -1075,6 +1124,9 @@
             "latest_compatible_field_end": "2026-09-24T00:00:00",
             "latest_compatible_available_at": "2026-09-25T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": []
           },
           {
@@ -1120,6 +1172,9 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
@@ -1167,6 +1222,9 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
@@ -1262,6 +1320,9 @@
             "latest_compatible_field_end": "2026-09-22T00:00:00",
             "latest_compatible_available_at": "2026-09-29T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -1413,6 +1474,9 @@
             "latest_compatible_field_end": "2026-10-01T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -1629,6 +1693,9 @@
             "latest_compatible_field_end": "2026-09-30T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -1706,6 +1773,9 @@
             "latest_compatible_field_end": "2026-09-30T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -1764,6 +1834,9 @@
             "latest_compatible_field_end": "2026-08-15T00:00:00",
             "latest_compatible_available_at": "2026-08-29T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": []
           },
           {
@@ -1877,6 +1950,9 @@
             "latest_compatible_field_end": "2026-07-27T00:00:00",
             "latest_compatible_available_at": "2026-07-28T00:00:00",
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "limited_validation_exception_model",
               "matchup_not_selected_by_reviewed_current_registry"
@@ -2042,6 +2118,9 @@
             "latest_compatible_field_end": "2026-09-29T00:00:00",
             "latest_compatible_available_at": "2026-10-01T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -2099,6 +2178,9 @@
             "latest_compatible_field_end": "2026-09-08T00:00:00",
             "latest_compatible_available_at": "2026-09-25T00:00:00",
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "limited_validation_exception_model"
             ]
@@ -2218,6 +2300,9 @@
             "latest_compatible_field_end": "2026-09-22T00:00:00",
             "latest_compatible_available_at": "2026-09-25T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -2265,6 +2350,9 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
@@ -2320,6 +2408,9 @@
             "latest_compatible_field_end": "2026-08-28T00:00:00",
             "latest_compatible_available_at": "2026-09-01T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": []
           },
           {
@@ -2433,6 +2524,9 @@
             "latest_compatible_field_end": "2026-09-29T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": []
           },
           {
@@ -2478,6 +2572,9 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
@@ -2525,6 +2622,9 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
@@ -2583,6 +2683,9 @@
             "latest_compatible_field_end": "2026-08-24T00:00:00",
             "latest_compatible_available_at": "2026-08-27T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": []
           },
           {
@@ -2639,6 +2742,9 @@
             "latest_compatible_field_end": "2026-09-29T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": []
           },
           {
@@ -2660,11 +2766,11 @@
             "contest_structure": "non_major_party_vs_republican",
             "candidate_identity_resolved": true,
             "polling_available": false,
-            "statistical_target_supported": false,
+            "statistical_target_supported": true,
             "binary_score_eligible": false,
-            "probability_model_supported": false,
-            "probability_model_support_status": "withheld",
-            "probability_model_support_reason": "zero_candidate_compatible_polls",
+            "probability_model_supported": true,
+            "probability_model_support_status": "limited_supported_prior_only",
+            "probability_model_support_reason": "state_structural_prior_only_zero_candidate_compatible_polls",
             "identity_sensitive": true,
             "qa_universe": true,
             "n_raw_current_polls": 0,
@@ -2683,10 +2789,15 @@
             "matchup_ids_seen": [],
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
-            "status": "fail",
+            "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls",
-              "zero_candidate_compatible_polls"
+              "limited_validation_exception_model",
+              "prior_only_zero_candidate_compatible_polls",
+              "wide_exceptional_uncertainty_required"
             ]
           },
           {
@@ -2740,6 +2851,9 @@
             "latest_compatible_field_end": "2026-08-26T00:00:00",
             "latest_compatible_available_at": "2026-09-03T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": []
           },
           {
@@ -2913,6 +3027,9 @@
             "latest_compatible_field_end": "2026-09-28T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -2982,6 +3099,9 @@
             "latest_compatible_field_end": "2026-06-16T00:00:00",
             "latest_compatible_available_at": "2026-06-18T00:00:00",
             "status": "pass",
+            "forecast_status": "pass",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "matchup_not_selected_by_reviewed_current_registry"
             ]
@@ -3029,6 +3149,9 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
@@ -3076,18 +3199,25 @@
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
             "status": "warning",
+            "forecast_status": "warning",
+            "evidence_status": "pass",
+            "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls"
             ]
           }
         ],
-        "artifact_sha256": "2c1b09621d5219d367324f7c17a3f1ea1e7a58a2387b509315f2d78bdb4b1f24",
+        "artifact_sha256": "a893f40d8fdad998532a18e6b831656d4781b3838f0ccebcce0ed9dea723db9e",
         "summary": {
           "n_races": 35,
           "n_pass": 20,
-          "n_warning": 13,
-          "n_fail": 2,
-          "promotion_eligible": false
+          "n_warning": 14,
+          "n_fail": 1,
+          "n_evidence_fail": 0,
+          "evidence_ready": true,
+          "forecast_complete": false,
+          "promotion_eligible": false,
+          "source_and_model_coverage_separated": true
         }
       },
       "canonical_source_contract": {
@@ -10134,9 +10264,9 @@
               "binary_score_eligible": false,
               "binary_score_exclusion_reason": "no_validated_non_major_party_margin_transform",
               "candidate_identity_eligible": true,
-              "probability_model_supported": false,
-              "probability_model_support_status": "withheld",
-              "probability_model_support_reason": "zero_candidate_compatible_polls",
+              "probability_model_supported": true,
+              "probability_model_support_status": "limited_supported_prior_only",
+              "probability_model_support_reason": "state_structural_prior_only_zero_candidate_compatible_polls",
               "modeled_side": "modeled",
               "opposing_side": "opposing",
               "timeline_status": "degraded_no_event_for_race",
@@ -11558,11 +11688,9 @@
             }
           ],
           "traceable": true,
-          "snapshot_sha256": "564c394563e39aa844d0cf763de572756e2b14b668f1cb12b00f1b5dde8937c5",
+          "snapshot_sha256": "f35b435dbb7b1afe18bea39ae71d529a3de0417b7ad296b04b39d6996f298eca",
           "candidate_timeline_snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
-          "reasons": [
-            "2 current races lack a supported probability target"
-          ],
+          "reasons": [],
           "eligible": true,
           "publication_eligible": true,
           "held_seats_excluded": true,
@@ -13892,15 +14020,7 @@
     "senate-2024-lead-60": "2024-09-06",
     "senate-2024-lead-30": "2024-10-06"
   },
-  "blockers": [
-    {
-      "domain": "polls",
-      "status": "incomplete_coverage",
-      "reasons": [
-        "current race matchup/identity coverage has hard failures"
-      ]
-    }
-  ],
+  "blockers": [],
   "warnings": [],
   "optional_disabled_domains": [
     "expert_ratings",

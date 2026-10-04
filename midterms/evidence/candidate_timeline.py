@@ -654,17 +654,14 @@ def apply_candidate_state_contract(
         if str(record.get("race_id") or "").startswith("senate-2026-")
         and not record["probability_model_supported"]
     ]
-    publication_eligible = (
-        not identity_missing and traceable_required and not current_probability_blockers
-    )
+    # Candidate-source readiness and statistical model coverage are separate
+    # contracts.  A fully sourced Alaska ballot may still be unsupported by the
+    # current RCV model, but that does not make its identity evidence unready.
+    publication_eligible = not identity_missing and traceable_required
     reasons = []
     if identity_missing:
         reasons.append(
             f"{len(identity_missing)} identity-sensitive races lack point-in-time resolution"
-        )
-    if current_probability_blockers:
-        reasons.append(
-            f"{len(current_probability_blockers)} current races lack a supported probability target"
         )
     metadata = {
         **timeline_meta,
@@ -701,6 +698,11 @@ def apply_candidate_state_contract(
         "conditional_identity_contract": True,
     }
     if has_current_2026:
+        metadata["forecast_model_coverage"] = {
+            "complete": not current_probability_blockers,
+            "unsupported_race_ids": sorted(current_probability_blockers),
+            "separate_from_candidate_source_readiness": True,
+        }
         metadata["candidate_compatible_poll_ids_by_race"] = {
             race_id: sorted(set(poll_ids))
             for race_id, poll_ids in sorted(candidate_compatible_by_race.items())

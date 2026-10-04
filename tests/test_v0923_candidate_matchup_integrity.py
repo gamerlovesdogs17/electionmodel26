@@ -380,5 +380,14 @@ def test_generic_ballot_readiness_does_not_inherit_matchup_failure():
     report = audit_source_readiness(
         election_id="senate-2026", as_of="2026-10-03", environ={}
     )
-    assert report["domains"]["polls"]["status"] == "incomplete_coverage"
+    assert report["domains"]["polls"]["status"] == "ready"
     assert report["domains"]["generic_ballot"]["status"] == "ready"
+    assert report["evidence_source_ready"] is True
+    assert report["forecast_coverage_ready"] is False
+    assert report["forecast_coverage"]["summary"]["evidence_ready"] is True
+    alaska = next(
+        row for row in report["domains"]["polls"]["current_race_coverage"]["races"]
+        if row["state"] == "AK"
+    )
+    assert alaska["evidence_status"] == "pass"
+    assert alaska["probability_model_support_status"] == "unsupported"

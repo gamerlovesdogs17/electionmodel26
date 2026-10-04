@@ -54,6 +54,7 @@ export type RaceForecast = {
   favored_party?: string;
   favored_caucus?: string;
   market_p_dem?: number;
+  market_p_modeled_candidate?: number;
 };
 
 export type ChamberForecast = {
@@ -301,6 +302,14 @@ export function signedRaceMargin(race: RaceForecast, margin = race.mean_margin):
 
 export function ratingFill(rating: string): string {
   switch (rating) {
+    case "Solid I":
+      return "#3d2a6b";
+    case "Likely I":
+      return "#5b3d8f";
+    case "Lean I":
+      return "#6b4ea0";
+    case "Tilt I":
+      return "#8570b5";
     case "Solid D":
       return "#143f6b";
     case "Likely D":

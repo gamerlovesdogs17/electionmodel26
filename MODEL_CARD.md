@@ -1,7 +1,8 @@
 # Model card — Senate hierarchical v0.9.23 development boundary
 
 > **Validation status (2026-10-04):** v0.9.23 is an unvalidated current-cycle
-> evidence and target repair. Current matchup coverage still fails closed;
+> evidence and target repair. Source readiness is green, while forecast coverage
+> still fails closed on unsupported Alaska RCV/multiway;
 > no v0.9.23 release identity, evidence seal, or forecast exists. v0.9.22 remains
 > the last completed sealed research rebuild against bundle
 > `eb-3e91ca3a90628d69`, with release identity
@@ -19,9 +20,9 @@
   `I` ballot/held labels and use a user-declared Democratic-caucus accounting
   assumption. Ballot party never changes because of that caucus assumption.
   A separate, limited-validation adapter supports reviewed binary I-v-R
-  contests only when at least one candidate-compatible poll exists. Idaho,
-  Montana, and Nebraska meet that narrow contract; South Dakota is withheld for
-  zero compatible polls. Alaska RCV/multi-candidate remains unsupported.
+  contests. Idaho, Montana, and Nebraska use candidate-compatible polls. South
+  Dakota is explicitly prior-only with zero compatible polls and very wide
+  uncertainty. Alaska RCV/multi-candidate remains unsupported.
 
 ## Architecture (five layers — do not conflate)
 1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
@@ -32,21 +33,38 @@
 
 ### Limited non-major-party adapter
 
+The adapter uses the point-in-time presidential-relative state lean only as a
+weak geographic location anchor. It adds a 30-point exceptional-candidate
+deviation and the existing 8-point predictive error; it does not copy the
+ordinary D-v-R posterior or equate an Independent with a Democrat. Candidate-
+specific polling uses transferable quality, recency, sample, clustering, and
+pollster-cap weights and rapidly dominates the weak anchor. Party-direction
+house effects remain excluded.
+
+The predeclared zero-centered 20-point, state-anchored 30-point, and state-
+anchored 40-point specifications are all retained in
+`non_major_adapter_validation_latest.json`. The selected 30-point form is the
+simplest conservative structural option and is not outcome-tuned. Its four-case
+MAE/CRPS/Brier are 5.987/3.762/0.138 with 4/4 90% coverage. No calibration claim
+is allowed. The structural prior uses no exceptional election result, so a
+scored race cannot contribute its own truth to its prior.
+
 The validated ordinary stack remains a D-v-R model. Reviewed binary
 Independent-versus-Republican races are removed before every ordinary model,
 stack candidate, baseline, and overlay fit. A separate adapter estimates the
 normalized `modeled_candidate_margin`, then appends correlated draw columns to
-the ordinary joint matrix. It uses a fixed weak Normal(0, 20) prior, poll
-quality/recency/sample/clustering weights, no party-direction house effect, an
-8-point structural predictive error, Student-t race noise, and a 20% common
-variance share tied to the ordinary joint draws.
+the ordinary joint matrix. It uses the state-anchored structural prior described
+above, poll quality/recency/sample/clustering weights, no party-direction house
+effect, an 8-point structural predictive error, Student-t race noise, and a 20%
+common variance share tied to the ordinary joint draws.
 
 The predeclared analog rule found 2014 Kansas, 2020 Alaska, and 2024 Nebraska;
 only the latter two have compatible archived polls in this repository. Four
-formal 60/30-day cases yield MAE 6.319 points, empirical CRPS 3.923, Brier
-0.145, and 4/4 90% interval coverage. This is sparse evidence and does not
-support a calibration claim. The adapter is not an ensemble member and its
-validation cannot be used to validate or retune the ordinary stack.
+formal 60/30-day cases under the selected specification yield MAE 5.987 points,
+empirical CRPS 3.762, Brier 0.138, and 4/4 90% interval coverage. This is sparse
+evidence and does not support a calibration claim. The adapter is not an
+ensemble member and its validation cannot be used to validate or retune the
+ordinary stack.
 
 ## Update cadence
 `forecast` / `refresh`. Releases: `data/manifests/releases.jsonl` + signed `data/releases/{run_id}/`.
@@ -79,7 +97,7 @@ future-version research candidates.
 | Economics | Sealed ALFRED observations-by-vintage archive | All formal 60/30 cutoffs plus the current cutoff are source-ready; FRED latest, World Bank and fixtures cannot clear the gate |
 | Approval | Vendored compiled individual-poll archive plus VoteHub current polls | Formal historical cutoffs use the sealed point-in-time 30-day aggregate and pass source readiness |
 | Finance | Official FEC candidate/committee links plus Form 3 report summaries | Formal cutoffs use receipt-date availability and as-of amendment resolution; source readiness is complete |
-| Candidate state | Official race universe, bitemporal candidate events, and archived official pages | Historical replay retains the conditional identity contract. Current reviewed identities are explicit; statistical-target coverage remains red for Alaska RCV and zero-poll South Dakota. |
+| Candidate state | Official race universe, bitemporal candidate events, and archived official pages | Historical replay retains the conditional identity contract. Current reviewed identities and evidence sources are ready; forecast-model coverage remains incomplete for Alaska RCV only. |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
 | Markets | Kalshi | Candidate mapping plus verified candidate-win/exclusive/exhaustive contract-family semantics required before normalization |
@@ -197,8 +215,13 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
   declared modeling assumption**, not by ballot party or a verified individual
   caucus pledge. The ballot party and display identity remain Independent.
 - The non-major-party adapter has only four historical lead-time cases across
-  two scorable elections. It is labeled limited validation, makes no calibration
-  claim, and cannot support Alaska RCV/multiway or zero-poll contests.
+  two scorable elections. It is labeled limited validation and makes no
+  calibration claim. Zero-poll South Dakota is explicitly prior-only with a
+  31.097-point predictive SD; Alaska RCV/multiway remains unsupported.
+- Candidate-neutral race output is authoritative for non-major candidates.
+  Numeric `p_dem`/`p_rep` and Democratic candidate aliases exist only for real
+  D-v-R ballots. A complete chamber forecast fails if any active contest lacks
+  predictive draws; `held_by` is never substituted as certainty.
 - Static PyMC is the reference spine. Current historical OOF stack weights
   give zero production mass to `pymc_dynamic`; this is an OOF selection result,
   not a manual adjustment.

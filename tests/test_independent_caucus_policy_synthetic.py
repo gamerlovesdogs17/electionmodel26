@@ -87,7 +87,8 @@ def test_synthetic_held_independent_keeps_i_label_and_counts_in_d_caucus() -> No
     sim, summaries = simulate_chamber(fit, races)
     assert sim.held_ind == 1
     assert sim.seat_draws.tolist() == [2, 1]
-    assert summaries[0]["dem_party"] == "I"
+    assert summaries[0]["modeled_ballot_party"] == "I"
+    assert "dem_party" not in summaries[0]
     assert summaries[0]["modeled_caucus"] == "D"
     assert summaries[0]["favored_party"] == "I"
 
@@ -101,7 +102,7 @@ def test_conflicting_held_independent_caucus_fails_closed() -> None:
         attach_declared_held_independent_caucus(races)
 
 
-def test_nonbinary_contested_seats_omitted_from_margin_fit_still_count() -> None:
+def test_nonbinary_contested_seats_omitted_from_margin_fit_fail_closed() -> None:
     rows = [
         {"race_id": f"held-r-{i}", "not_up": True, "held_by": "R"}
         for i in range(98)
@@ -121,11 +122,8 @@ def test_nonbinary_contested_seats_omitted_from_margin_fit_still_count() -> None
         race_ids=[], states=[], mean_margin=np.array([]), sd_margin=np.array([]),
         draws_margin=np.empty((2, 0)), house_effects={}, diagnostics={}, method="synthetic",
     )
-    sim, summaries = simulate_chamber(fit, races)
-    assert summaries == []
-    assert sim.held_dem == 1
-    assert sim.held_rep == 99
-    assert sim.seat_draws.tolist() == [1, 1]
+    with pytest.raises(ValueError, match="predictive draws for every active contested seat"):
+        simulate_chamber(fit, races)
 
 
 def test_omitted_contested_seat_without_declared_holder_fails_closed() -> None:
@@ -141,7 +139,7 @@ def test_omitted_contested_seat_without_declared_holder_fails_closed() -> None:
         race_ids=[], states=[], mean_margin=np.array([]), sd_margin=np.array([]),
         draws_margin=np.empty((2, 0)), house_effects={}, diagnostics={}, method="synthetic",
     )
-    with pytest.raises(ValueError, match="explicit held_by"):
+    with pytest.raises(ValueError, match="predictive draws for every active contested seat"):
         simulate_chamber(fit, pd.DataFrame(rows))
 
 

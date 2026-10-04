@@ -54,14 +54,16 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
     if art.get("election_id") == "senate-2026":
         states = {r.get("state") for r in races}
         add("has_oh_fl_specials", {"OH", "FL"}.issubset(states), sorted(states & {"OH", "FL"}))
-    from midterms.model.overlays import rating_from_probability
+    from midterms.model.overlays import rating_from_modeled_probability
 
     bad = [
         r["race_id"]
         for r in races
-        if r.get("rating") != rating_from_probability(float(
-            r.get("p_modeled_candidate", r.get("p_dem", 0.5))
-        ))
+        if r.get("rating") != rating_from_modeled_probability(
+            float(r.get("p_modeled_candidate", r.get("p_dem", 0.5))),
+            modeled_ballot_party=str(r.get("modeled_ballot_party") or "D"),
+            opposing_ballot_party=str(r.get("opposing_ballot_party") or "R"),
+        )
     ]
     add(
         "ratings_match_modeled_probability",

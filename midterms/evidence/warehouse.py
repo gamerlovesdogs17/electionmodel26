@@ -363,6 +363,35 @@ class Warehouse:
         # excluded from the ordinary D-v-R model.
         available_polls = polls.copy()
 
+        # Attach the verified point-in-time state prior before candidate-state
+        # classification.  Zero-poll exceptional support must be decided from
+        # the exact sourced prior that the adapter will consume, not from a
+        # legacy race fixture value.
+        source_sha = None
+        source_years: tuple[int, ...] = ()
+        prior_snapshot_sha = None
+        prior_snapshot_path = None
+        if self.normalized_dir.resolve() == NORMALIZED_DIR.resolve():
+            from midterms.evidence.presidential_results import (
+                SOURCE_MANIFEST_PATH,
+                select_source_years,
+                verified_source_set_sha256,
+            )
+
+            if SOURCE_MANIFEST_PATH.exists():
+                source_sha = verified_source_set_sha256()
+                source_years = select_source_years(as_of_d)
+                if source_years:
+                    from midterms.evidence.presidential_prior import (
+                        attach_prior_snapshot,
+                        materialize_prior_snapshot,
+                    )
+
+                    prior_snapshot, prior_path = materialize_prior_snapshot(as_of_d)
+                    races = attach_prior_snapshot(races, prior_snapshot)
+                    prior_snapshot_sha = str(prior_snapshot["snapshot_sha256"])
+                    prior_snapshot_path = prior_path.resolve().relative_to(ROOT.resolve()).as_posix()
+
         # Resolve candidate/race state before filtering inactive ballot rows.
         from midterms.evidence.candidate_timeline import (
             apply_candidate_state_contract,
@@ -419,32 +448,6 @@ class Warehouse:
             # Existing normalized stores may predate the explicit caucus columns.
             # Attach the declared accounting assumption in the model snapshot.
             races = attach_declared_held_independent_caucus(races)
-        # Verify source bytes, then attach one point-in-time derived side table
-        # to all races in this snapshot. Truth/result fields are untouched.
-        source_sha = None
-        source_years: tuple[int, ...] = ()
-        prior_snapshot_sha = None
-        prior_snapshot_path = None
-        if self.normalized_dir.resolve() == NORMALIZED_DIR.resolve():
-            from midterms.evidence.presidential_results import (
-                SOURCE_MANIFEST_PATH,
-                select_source_years,
-                verified_source_set_sha256,
-            )
-
-            if SOURCE_MANIFEST_PATH.exists():
-                source_sha = verified_source_set_sha256()
-                source_years = select_source_years(as_of_d)
-                if source_years:
-                    from midterms.evidence.presidential_prior import (
-                        attach_prior_snapshot,
-                        materialize_prior_snapshot,
-                    )
-
-                    prior_snapshot, prior_path = materialize_prior_snapshot(as_of_d)
-                    races = attach_prior_snapshot(races, prior_snapshot)
-                    prior_snapshot_sha = str(prior_snapshot["snapshot_sha256"])
-                    prior_snapshot_path = prior_path.resolve().relative_to(ROOT.resolve()).as_posix()
         if "prior_source" not in races.columns:
             races["prior_source"] = "legacy_unverified_fixture"
         else:

@@ -13,7 +13,7 @@ import pandas as pd
 from midterms.config import ARTIFACTS_DIR, MODEL_VERSION
 from midterms.evidence.schema import is_active_ballot_row
 
-COVERAGE_SCHEMA_VERSION = "current-race-poll-coverage-v2"
+COVERAGE_SCHEMA_VERSION = "current-race-poll-coverage-v3"
 
 
 def _canonical_sha256(payload: Any) -> str:
@@ -127,9 +127,18 @@ def current_race_poll_coverage(
             hard_reasons.append("identity_sensitive_race_has_zero_compatible_polls")
         elif identity_sensitive and not len(raw):
             warning_reasons.append("identity_sensitive_race_has_zero_raw_polls")
-        if support_status == "limited_supported":
+        if support_status in {"limited_supported", "limited_supported_prior_only"}:
             warning_reasons.append("limited_validation_exception_model")
-        status = "fail" if hard_reasons else "warning" if warning_reasons else "pass"
+        if support_status == "limited_supported_prior_only":
+            warning_reasons.extend([
+                "prior_only_zero_candidate_compatible_polls",
+                "wide_exceptional_uncertainty_required",
+            ])
+        forecast_status = "fail" if hard_reasons else "warning" if warning_reasons else "pass"
+        evidence_reasons: list[str] = []
+        if state.get("candidate_identity_required") and not identity_resolved:
+            evidence_reasons.append("current_candidate_identity_unresolved")
+        evidence_status = "fail" if evidence_reasons else "pass"
 
         def latest(column: str, frame: pd.DataFrame = compatible) -> str | None:
             if column not in frame.columns:
@@ -168,14 +177,22 @@ def current_race_poll_coverage(
             "n_raw_current_polls": len(raw),
             "n_candidate_compatible_polls": len(compatible),
             "n_model_safe_polls": len(model_safe),
-            "n_exception_adapter_polls": len(compatible) if support_status == "limited_supported" else 0,
+            "n_exception_adapter_polls": (
+                len(compatible)
+                if support_status in {"limited_supported", "limited_supported_prior_only"}
+                else 0
+            ),
             "n_excluded_obsolete_or_incompatible": len(candidate_excluded_ids),
             "n_excluded_identity_unresolved": len(unresolved_ids),
             "n_excluded_unsupported_target": (
-                0 if support_status == "limited_supported" else len(unsupported_target_ids)
+                0
+                if support_status in {"limited_supported", "limited_supported_prior_only"}
+                else len(unsupported_target_ids)
             ),
             "ordinary_model_excluded_poll_ids": (
-                unsupported_target_ids if support_status == "limited_supported" else []
+                unsupported_target_ids
+                if support_status in {"limited_supported", "limited_supported_prior_only"}
+                else []
             ),
             "n_excluded_hypothetical_or_pre_nomination": len(hypothetical_ids),
             "raw_poll_ids": sorted(raw.get("poll_id", pd.Series(dtype=str)).astype(str).tolist()),
@@ -189,14 +206,17 @@ def current_race_poll_coverage(
             "matchup_ids_seen": matchups,
             "latest_compatible_field_end": latest("field_end"),
             "latest_compatible_available_at": latest("available_at"),
-            "status": status,
+            "status": forecast_status,
+            "forecast_status": forecast_status,
+            "evidence_status": evidence_status,
+            "evidence_reasons": evidence_reasons,
             "reasons": sorted(set(
                 hard_reasons
                 + warning_reasons
                 + [
                     reason for reason in reasons
                     if not (
-                        support_status == "limited_supported"
+                        support_status in {"limited_supported", "limited_supported_prior_only"}
                         and reason == "race_ineligible_for_binary_scoring"
                     )
                 ]
@@ -216,10 +236,14 @@ def current_race_poll_coverage(
         "artifact_sha256": fingerprint,
         "summary": {
             "n_races": len(records),
-            "n_pass": sum(item["status"] == "pass" for item in records),
-            "n_warning": sum(item["status"] == "warning" for item in records),
-            "n_fail": sum(item["status"] == "fail" for item in records),
-            "promotion_eligible": not any(item["status"] == "fail" for item in records),
+            "n_pass": sum(item["forecast_status"] == "pass" for item in records),
+            "n_warning": sum(item["forecast_status"] == "warning" for item in records),
+            "n_fail": sum(item["forecast_status"] == "fail" for item in records),
+            "n_evidence_fail": sum(item["evidence_status"] == "fail" for item in records),
+            "evidence_ready": not any(item["evidence_status"] == "fail" for item in records),
+            "forecast_complete": not any(item["forecast_status"] == "fail" for item in records),
+            "promotion_eligible": not any(item["forecast_status"] == "fail" for item in records),
+            "source_and_model_coverage_separated": True,
         },
     }
 
