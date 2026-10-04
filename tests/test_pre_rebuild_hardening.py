@@ -467,7 +467,10 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert "validate_forecast_model_paths" in text
     assert "materialize_prior_snapshot" in text
     assert "validate-alaska-rcv --as-of" in text
-    assert "prepare-evidence --election-id senate-2026 --as-of \"$AS_OF\" --mode refresh-safe --strict" in text
+    assert (
+        "prepare-evidence --election-id senate-2026 --as-of \"$AS_OF\" "
+        "--mode refresh-safe --summary --strict"
+    ) in text
     assert text.index("Source readiness audit") < text.index("Refresh safe sources")
     assert text.index("Refresh safe sources") < text.index(
         "Fail-closed source and forecast coverage gate"
@@ -563,3 +566,119 @@ def test_prepare_evidence_strict_treats_missing_forecast_complete_as_failure(mon
     )
     assert report["strict_failure"] is True
     assert "forecast_coverage_incomplete" in report["strict_failure_reasons"]
+
+
+def test_prepare_evidence_strict_allows_live_poll_outage_when_sealed_ready(monkeypatch):
+    """CI often cannot reach VoteHub; sealed green readiness must still pass --strict."""
+    from midterms.evidence import preparation
+
+    monkeypatch.setattr(
+        preparation,
+        "refresh_safe_evidence",
+        lambda *, as_of: {
+            "results": {
+                "polls": {
+                    "status": "refresh_failed",
+                    "error": "simulated VoteHub unreachable",
+                }
+            }
+        },
+    )
+    monkeypatch.setattr(
+        preparation,
+        "write_source_readiness",
+        lambda **kwargs: {
+            "ready_for_expensive_rebuild": True,
+            "blockers": [],
+            "forecast_coverage": {
+                "summary": {"forecast_complete": True, "n_fail": 0},
+            },
+        },
+    )
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-04",
+        mode="refresh-safe",
+        strict=True,
+    )
+    assert report.get("strict_failure") is not True
+    assert "poll_refresh_failed_nonblocking" in (report.get("strict_warnings") or [])
+
+
+def test_prepare_evidence_strict_blocks_when_poll_outage_and_readiness_red(monkeypatch):
+    from midterms.evidence import preparation
+
+    monkeypatch.setattr(
+        preparation,
+        "refresh_safe_evidence",
+        lambda *, as_of: {
+            "results": {
+                "polls": {
+                    "status": "refresh_failed",
+                    "error": "simulated VoteHub unreachable",
+                }
+            }
+        },
+    )
+    monkeypatch.setattr(
+        preparation,
+        "write_source_readiness",
+        lambda **kwargs: {
+            "ready_for_expensive_rebuild": False,
+            "blockers": [{"domain": "polls", "status": "incomplete_coverage"}],
+            "forecast_coverage": {
+                "summary": {"forecast_complete": False, "n_fail": 3},
+            },
+        },
+    )
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-04",
+        mode="refresh-safe",
+        strict=True,
+    )
+    assert report["strict_failure"] is True
+    assert "poll_refresh_failed" in report["strict_failure_reasons"]
+    assert "source_readiness_not_green" in report["strict_failure_reasons"]
+
+
+def test_refresh_safe_falls_back_to_sealed_votehub_when_live_fetch_fails(monkeypatch, tmp_path):
+    from midterms.evidence import preparation
+    import midterms.config as config
+    import midterms.evidence.approval as approval
+    import midterms.evidence.economics as economics
+    import midterms.evidence.ingest as ingest
+    import midterms.evidence.presidential_results as presidential_results
+    import midterms.evidence.ratings as ratings
+
+    external = tmp_path / "external"
+    external.mkdir()
+    sealed_ext = external / "votehub_us_senator.json"
+    sealed_ext.write_text('{"polls": []}', encoding="utf-8")
+    monkeypatch.setattr(config, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(economics, "SEALED_ALFRED_ARCHIVE", tmp_path / "nope.zip")
+    monkeypatch.setattr(
+        presidential_results, "build_vote_count_store", lambda **kwargs: {"status": "ok"}
+    )
+    monkeypatch.setattr(approval, "write_approval_store", lambda **kwargs: {"status": "ok"})
+    monkeypatch.setattr(
+        ratings, "prepare_vendored_pollster_rating_vintages", lambda: {"status": "ok"}
+    )
+
+    def boom(**kwargs):
+        raise RuntimeError("VoteHub unreachable in CI")
+
+    monkeypatch.setattr(ingest, "fetch_votehub_polls", boom)
+    merged: dict = {}
+
+    def fake_merge(**kwargs):
+        merged.update(kwargs)
+        return {"n_live": 0, "warning": "fixture"}
+
+    monkeypatch.setattr(ingest, "merge_live_polls_into_warehouse", fake_merge)
+
+    results = preparation.refresh_safe_evidence(as_of="2026-10-04")
+    polls = results["results"]["polls"]
+    assert polls["status"] == "sealed_fallback"
+    assert "VoteHub unreachable" in polls["live_fetch_error"]
+    assert Path(merged["payload_path"]) == sealed_ext

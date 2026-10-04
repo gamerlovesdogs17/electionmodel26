@@ -60,7 +60,8 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
         }
 
     try:
-        from midterms.evidence.ingest import fetch_votehub_polls
+        from midterms.config import RAW_DIR
+        from midterms.evidence.ingest import fetch_votehub_polls, merge_live_polls_into_warehouse
 
         # Refresh only the two current polling products consumed by the
         # production snapshot. Historical MEDSL/FTE archives and rating
@@ -78,13 +79,26 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
         senator = next(
             (row for row in fetched if row.get("name") == "votehub_us_senator"), None
         )
+        sealed_senator = RAW_DIR / "external" / "votehub_us_senator.json"
         if senator and not senator.get("error"):
-            from midterms.evidence.ingest import merge_live_polls_into_warehouse
-
             results["polls"] = merge_live_polls_into_warehouse(
                 election_id="senate-2026", replace_synthetic_for_election=True,
                 payload_path=Path(str(senator["path"])),
             )
+        elif sealed_senator.is_file():
+            # Live VoteHub can be unreachable in CI. Rematerialize from the
+            # sealed receipt so refresh-safe remains deterministic offline.
+            results["polls"] = merge_live_polls_into_warehouse(
+                election_id="senate-2026", replace_synthetic_for_election=True,
+                payload_path=sealed_senator,
+            )
+            results["polls"] = {
+                **results["polls"],
+                "status": "sealed_fallback",
+                "live_fetch_error": (senator or {}).get("error")
+                or "VoteHub Senate response missing",
+                "sealed_path": sealed_senator.as_posix(),
+            }
         else:
             results["polls"] = {
                 "status": "refresh_failed",
@@ -177,30 +191,46 @@ def prepare_evidence(
     result = {"mode": mode, "refresh": refresh, "readiness": readiness}
     refresh_results = (refresh or {}).get("results") or {}
     polls = refresh_results.get("polls") or {}
-    poll_refresh_failed = bool(
-        polls.get("status") == "refresh_failed" or polls.get("error")
-    )
+    poll_refresh_failed = polls.get("status") == "refresh_failed"
+    poll_used_sealed_fallback = polls.get("status") == "sealed_fallback"
     coverage = readiness.get("forecast_coverage") or {}
     coverage_summary = coverage.get("summary") if isinstance(coverage, dict) else {}
+    if not isinstance(coverage_summary, dict):
+        coverage_summary = {}
     forecast_incomplete = (
         coverage_summary.get("forecast_complete") is not True
         or int(coverage_summary.get("n_fail") or 0) > 0
     )
-    if strict and (
-        not readiness["ready_for_expensive_rebuild"]
-        or poll_refresh_failed
-        or forecast_incomplete
-    ):
+    readiness_red = not readiness["ready_for_expensive_rebuild"]
+    # Live VoteHub outages must not fail a rebuild when sealed sources remain
+    # green. Only a hard refresh miss that leaves coverage/readiness red is fatal.
+    poll_refresh_blocks = poll_refresh_failed and (readiness_red or forecast_incomplete)
+    warnings: list[str] = []
+    if poll_refresh_failed and not poll_refresh_blocks:
+        warnings.append("poll_refresh_failed_nonblocking")
+    if poll_used_sealed_fallback:
+        warnings.append("poll_refresh_used_sealed_fallback")
+    if warnings:
+        result["strict_warnings"] = warnings
+    if strict and (readiness_red or forecast_incomplete or poll_refresh_blocks):
         result["strict_failure"] = True
         result["strict_failure_reasons"] = [
             reason
             for reason, active in (
-                ("source_readiness_not_green", not readiness["ready_for_expensive_rebuild"]),
-                ("poll_refresh_failed", poll_refresh_failed),
+                ("source_readiness_not_green", readiness_red),
+                ("poll_refresh_failed", poll_refresh_blocks),
                 ("forecast_coverage_incomplete", forecast_incomplete),
             )
             if active
         ]
+        result["strict_failure_detail"] = {
+            "blockers": readiness.get("blockers") or [],
+            "forecast_coverage": coverage_summary,
+            "polls_refresh": {
+                "status": polls.get("status"),
+                "error": polls.get("error") or polls.get("live_fetch_error"),
+            },
+        }
     return result
 
 

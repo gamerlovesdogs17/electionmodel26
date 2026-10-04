@@ -1373,6 +1373,11 @@ def main(argv: list[str] | None = None) -> None:
     p_prepare.add_argument("--as-of", required=True)
     p_prepare.add_argument("--mode", choices=("audit", "refresh-safe", "seal"), default="audit")
     p_prepare.add_argument("--strict", action="store_true")
+    p_prepare.add_argument(
+        "--summary",
+        action="store_true",
+        help="Print a compact preparation summary instead of the full nested report",
+    )
 
     def _prepare_evidence(a: argparse.Namespace) -> None:
         try:
@@ -1382,12 +1387,40 @@ def main(argv: list[str] | None = None) -> None:
                 election_id=a.election_id, as_of=a.as_of, mode=a.mode, strict=a.strict,
             )
         except ValueError as exc:
+            message = f"prepare-evidence failed: {exc}"
+            print(f"::error::{message}")
             print(json.dumps({"ok": False, "mode": a.mode, "error": str(exc)}, indent=2))
             if a.strict:
                 raise SystemExit(1) from exc
             return
-        print(json.dumps(report, indent=2, default=str))
+        if a.summary:
+            readiness = report.get("readiness") or {}
+            coverage = ((readiness.get("forecast_coverage") or {}).get("summary") or {})
+            polls = ((report.get("refresh") or {}).get("results") or {}).get("polls") or {}
+            compact = {
+                "mode": report.get("mode"),
+                "ready_for_expensive_rebuild": readiness.get("ready_for_expensive_rebuild"),
+                "forecast_coverage": coverage,
+                "polls_refresh_status": polls.get("status"),
+                "polls_refresh_error": polls.get("error") or polls.get("live_fetch_error"),
+                "strict_failure": report.get("strict_failure"),
+                "strict_failure_reasons": report.get("strict_failure_reasons") or [],
+                "strict_warnings": report.get("strict_warnings") or [],
+            }
+            print(json.dumps(compact, indent=2, default=str))
+        else:
+            print(json.dumps(report, indent=2, default=str))
         if a.strict and report.get("strict_failure"):
+            detail = report.get("strict_failure_detail") or {}
+            for reason in report.get("strict_failure_reasons") or ["strict_failure"]:
+                message = f"prepare-evidence strict failure: {reason}"
+                print(f"::error::{message}")
+                print(message, file=sys.stderr)
+            if detail:
+                print(
+                    "::error::prepare-evidence strict detail: "
+                    + json.dumps(detail, sort_keys=True, default=str)
+                )
             raise SystemExit(1)
 
     p_prepare.set_defaults(func=_prepare_evidence)

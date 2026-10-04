@@ -77,7 +77,7 @@ jobs:
         if: inputs.refresh_safe_sources
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe --strict
+        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe --summary --strict
       - name: Fail-closed source and forecast coverage gate
         run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict
       - name: Verify official Alaska source archive
