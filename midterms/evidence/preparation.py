@@ -183,7 +183,7 @@ def prepare_evidence(
     coverage = readiness.get("forecast_coverage") or {}
     coverage_summary = coverage.get("summary") if isinstance(coverage, dict) else {}
     forecast_incomplete = (
-        coverage_summary.get("forecast_complete") is False
+        coverage_summary.get("forecast_complete") is not True
         or int(coverage_summary.get("n_fail") or 0) > 0
     )
     if strict and (

@@ -468,6 +468,14 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert "materialize_prior_snapshot" in text
     assert "validate-alaska-rcv --as-of" in text
     assert "prepare-evidence --election-id senate-2026 --as-of \"$AS_OF\" --mode refresh-safe --strict" in text
+    assert text.index("Source readiness audit") < text.index("Refresh safe sources")
+    assert text.index("Refresh safe sources") < text.index(
+        "Fail-closed source and forecast coverage gate"
+    )
+    assert (
+        "source-readiness --election-id senate-2026 --as-of \"$AS_OF\" --summary --strict"
+        in text
+    )
     assert "ordinary_statistical_spec_sha256" in text
     assert '"--tune-per-chain", "4000"' in text
     assert '"--chains", "4"' in text
@@ -495,3 +503,63 @@ def test_validation_report_does_not_refit_legacy_hierarchical_spine():
     source = inspect.getsource(build_validation_report)
     assert "include_hierarchical=False" in source
     assert "include_chamber=False" in source
+
+
+def test_source_readiness_strict_checks_forecast_coverage(monkeypatch, capsys):
+    import midterms.cli as cli
+
+    fake = {
+        "as_of": "2026-10-04",
+        "ready_for_expensive_rebuild": True,
+        "forecast_coverage_ready": False,
+        "blockers": [],
+        "domains": {"polls": {"status": "ready"}},
+        "forecast_coverage": {
+            "summary": {"forecast_complete": False, "n_fail": 2},
+        },
+        "path": "data/artifacts/source_readiness_latest.json",
+    }
+    monkeypatch.setattr(
+        "midterms.evidence.source_readiness.write_source_readiness",
+        lambda **kwargs: fake,
+    )
+    with pytest.raises(SystemExit) as exc:
+        cli.main([
+            "source-readiness",
+            "--election-id",
+            "senate-2026",
+            "--as-of",
+            "2026-10-04",
+            "--summary",
+            "--strict",
+        ])
+    assert exc.value.code == 1
+    captured = capsys.readouterr()
+    assert "forecast coverage incomplete" in captured.err
+    assert "::error::forecast coverage incomplete" in captured.out
+
+
+def test_prepare_evidence_strict_treats_missing_forecast_complete_as_failure(monkeypatch):
+    from midterms.evidence import preparation
+
+    monkeypatch.setattr(
+        preparation,
+        "refresh_safe_evidence",
+        lambda *, as_of: {"results": {"polls": {"status": "ok"}}},
+    )
+    monkeypatch.setattr(
+        preparation,
+        "write_source_readiness",
+        lambda **kwargs: {
+            "ready_for_expensive_rebuild": True,
+            "forecast_coverage": {"summary": {}},
+        },
+    )
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-04",
+        mode="refresh-safe",
+        strict=True,
+    )
+    assert report["strict_failure"] is True
+    assert "forecast_coverage_incomplete" in report["strict_failure_reasons"]

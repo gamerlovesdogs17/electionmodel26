@@ -72,46 +72,14 @@ jobs:
           print("snapshot_sha256", snapshot.get("snapshot_sha256"))
           PY
       - name: Source readiness audit
-        run: |
-          python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          readiness = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text(encoding="utf-8"))
-          coverage = json.loads(Path("data/artifacts/current_race_poll_coverage_v0923.json").read_text(encoding="utf-8"))
-          summary = coverage.get("summary") or {}
-          if not readiness.get("ready_for_expensive_rebuild"):
-              raise SystemExit("source readiness is not green: " + json.dumps(readiness.get("blockers") or [], sort_keys=True))
-          if summary.get("forecast_complete") is not True or int(summary.get("n_fail") or 0) != 0:
-              raise SystemExit("forecast coverage incomplete: " + json.dumps(summary, sort_keys=True))
-          print("source_readiness_ok", True)
-          print("forecast_coverage", summary)
-          PY
+        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary
       - name: Refresh safe sources
         if: inputs.refresh_safe_sources
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe --strict
-      - name: Re-audit current source and forecast coverage
-        if: ${{ !inputs.refresh_safe_sources }}
-        run: |
-          python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          readiness = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text(encoding="utf-8"))
-          coverage = json.loads(Path("data/artifacts/current_race_poll_coverage_v0923.json").read_text(encoding="utf-8"))
-          summary = coverage.get("summary") or {}
-          if not readiness.get("ready_for_expensive_rebuild"):
-              raise SystemExit("source readiness is not green: " + json.dumps(readiness.get("blockers") or [], sort_keys=True))
-          if summary.get("forecast_complete") is not True or int(summary.get("n_fail") or 0) != 0:
-              fails = [row for row in coverage.get("races") or [] if row.get("forecast_status") == "fail"]
-              raise SystemExit(
-                  "forecast coverage incomplete: "
-                  + json.dumps({"summary": summary, "fails": fails}, sort_keys=True, default=str)
-              )
-          print("coverage", summary)
-          PY
+      - name: Fail-closed source and forecast coverage gate
+        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict
       - name: Verify official Alaska source archive
         run: python -m midterms.cli prepare-alaska-rcv
       - name: Refresh cheap exceptional validation artifacts

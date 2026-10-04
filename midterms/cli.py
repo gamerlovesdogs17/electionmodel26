@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 
@@ -1237,13 +1238,50 @@ def main(argv: list[str] | None = None) -> None:
     p_ready.add_argument("--election-id", default="senate-2026")
     p_ready.add_argument("--as-of", required=True)
     p_ready.add_argument("--strict", action="store_true")
+    p_ready.add_argument(
+        "--summary",
+        action="store_true",
+        help="Print a compact readiness/coverage summary instead of the full report",
+    )
 
     def _source_readiness(a: argparse.Namespace) -> None:
         report = __import__(
             "midterms.evidence.source_readiness", fromlist=["write_source_readiness"],
         ).write_source_readiness(election_id=a.election_id, as_of=a.as_of)
-        print(json.dumps(report, indent=2, default=str))
-        if a.strict and not report["ready_for_expensive_rebuild"]:
+        coverage = report.get("forecast_coverage") or {}
+        summary = coverage.get("summary") if isinstance(coverage, dict) else {}
+        if not isinstance(summary, dict):
+            summary = {}
+        compact = {
+            "as_of": report.get("as_of"),
+            "ready_for_expensive_rebuild": report.get("ready_for_expensive_rebuild"),
+            "forecast_coverage_ready": report.get("forecast_coverage_ready"),
+            "blockers": report.get("blockers") or [],
+            "forecast_coverage": summary,
+            "domain_status": {
+                name: (block.get("status") if isinstance(block, dict) else block)
+                for name, block in (report.get("domains") or {}).items()
+            },
+            "path": report.get("path"),
+        }
+        print(json.dumps(compact if a.summary else report, indent=2, default=str))
+        if not a.strict:
+            return
+        failures: list[str] = []
+        if not report.get("ready_for_expensive_rebuild"):
+            failures.append(
+                "source readiness is not green: "
+                + json.dumps(report.get("blockers") or [], sort_keys=True, default=str)
+            )
+        if summary.get("forecast_complete") is not True or int(summary.get("n_fail") or 0) != 0:
+            failures.append(
+                "forecast coverage incomplete: "
+                + json.dumps(summary, sort_keys=True, default=str)
+            )
+        for message in failures:
+            print(f"::error::{message}")
+            print(message, file=sys.stderr)
+        if failures:
             raise SystemExit(1)
 
     p_ready.set_defaults(func=_source_readiness)
