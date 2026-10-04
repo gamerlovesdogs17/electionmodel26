@@ -13,7 +13,7 @@ import pandas as pd
 from midterms.config import ARTIFACTS_DIR, MODEL_VERSION
 from midterms.evidence.schema import is_active_ballot_row
 
-COVERAGE_SCHEMA_VERSION = "current-race-poll-coverage-v1"
+COVERAGE_SCHEMA_VERSION = "current-race-poll-coverage-v2"
 
 
 def _canonical_sha256(payload: Any) -> str:
@@ -40,6 +40,12 @@ def current_race_poll_coverage(
         str(item.get("race_id")): dict(item)
         for item in candidate_metadata.get("classification_records") or []
     }
+    compatible_ids_by_race = {
+        str(race_id): {str(poll_id) for poll_id in poll_ids}
+        for race_id, poll_ids in (
+            candidate_metadata.get("candidate_compatible_poll_ids_by_race") or {}
+        ).items()
+    }
 
     records: list[dict[str, Any]] = []
     for _, race in races.iterrows():
@@ -49,8 +55,14 @@ def current_race_poll_coverage(
         if not race_id.startswith("senate-2026-"):
             continue
         raw = raw_polls[raw_polls["race_id"].astype(str).eq(race_id)].copy()
-        compatible = compatible_polls[
+        model_safe = compatible_polls[
             compatible_polls["race_id"].astype(str).eq(race_id)
+        ].copy()
+        candidate_compatible_ids = compatible_ids_by_race.get(race_id, set())
+        compatible = raw[
+            raw.get("poll_id", pd.Series("", index=raw.index)).astype(str).isin(
+                candidate_compatible_ids
+            )
         ].copy()
         excluded = exclusion_by_race.get(race_id, [])
         reasons = [str(item.get("reason") or "") for item in excluded]
@@ -77,12 +89,18 @@ def current_race_poll_coverage(
         })
         state = classification.get(race_id, {})
         modeled_party = str(race.get("modeled_ballot_party") or "").upper()
-        binary_eligible = bool(state.get("binary_score_eligible", True))
-        structure = (
-            "ranked_choice_multiway" if str(race.get("state")) == "AK"
-            else "non_major_party_vs_republican" if modeled_party not in {"D", "DEM", "DEMOCRAT", "DEMOCRATIC"}
-            else "binary_dem_vs_rep"
+        target_supported = bool(state.get("binary_score_eligible", True))
+        structure = str(
+            race.get("contest_structure")
+            or state.get("contest_structure")
+            or (
+                "ranked_choice_multiway" if str(race.get("state")) == "AK"
+                else "non_major_party_vs_republican"
+                if modeled_party not in {"D", "DEM", "DEMOCRAT", "DEMOCRATIC"}
+                else "binary_dem_vs_rep"
+            )
         )
+        identity_resolved = bool(state.get("candidate_identity_resolved"))
         identity_sensitive = bool(
             state.get("candidate_identity_required")
             or len(matchups) > 1
@@ -90,9 +108,9 @@ def current_race_poll_coverage(
         )
         hard_reasons: list[str] = []
         warning_reasons: list[str] = []
-        if not binary_eligible:
+        if not target_supported:
             hard_reasons.append(str(state.get("binary_score_exclusion_reason") or "unsupported_binary_target"))
-        if state.get("candidate_identity_required") and not state.get("candidate_identity_resolved"):
+        if state.get("candidate_identity_required") and not identity_resolved:
             hard_reasons.append("current_candidate_identity_unresolved")
         if identity_sensitive and len(raw) and not len(compatible):
             hard_reasons.append("identity_sensitive_race_has_zero_compatible_polls")
@@ -119,13 +137,19 @@ def current_race_poll_coverage(
                 "opposing_candidate_name": race.get("opposing_candidate_name"),
                 "opposing_ballot_party": race.get("opposing_ballot_party"),
                 "identity_source": race.get("identity_source"),
+                "current_matchup_status": race.get("current_matchup_status"),
+                "reviewed_as_of": race.get("identity_reviewed_as_of"),
             },
             "contest_structure": structure,
-            "binary_score_eligible": binary_eligible,
+            "candidate_identity_resolved": identity_resolved,
+            "polling_available": bool(len(compatible)),
+            "statistical_target_supported": target_supported,
+            "binary_score_eligible": target_supported,
             "identity_sensitive": identity_sensitive,
             "qa_universe": identity_sensitive,
             "n_raw_current_polls": len(raw),
             "n_candidate_compatible_polls": len(compatible),
+            "n_model_safe_polls": len(model_safe),
             "n_excluded_obsolete_or_incompatible": len(candidate_excluded_ids),
             "n_excluded_identity_unresolved": len(unresolved_ids),
             "n_excluded_unsupported_target": len(unsupported_target_ids),
@@ -133,6 +157,9 @@ def current_race_poll_coverage(
             "raw_poll_ids": sorted(raw.get("poll_id", pd.Series(dtype=str)).astype(str).tolist()),
             "compatible_poll_ids": sorted(
                 compatible.get("poll_id", pd.Series(dtype=str)).astype(str).tolist()
+            ),
+            "model_safe_poll_ids": sorted(
+                model_safe.get("poll_id", pd.Series(dtype=str)).astype(str).tolist()
             ),
             "excluded_poll_ids": sorted({str(item.get("poll_id") or "") for item in excluded}),
             "matchup_ids_seen": matchups,

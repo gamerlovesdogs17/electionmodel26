@@ -2,40 +2,45 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
-
 import numpy as np
 import pandas as pd
 import pytest
 
+from midterms.config import ROOT
 from midterms.evidence.candidate_timeline import apply_candidate_timeline
 from midterms.evidence.demography import demographic_snapshot_metadata
 from midterms.evidence.economics import (
-    VINTAGE_CLASS_ALFRED, VINTAGE_CLASS_FRED_LATEST, VINTAGE_CLASS_WORLD_BANK,
+    VINTAGE_CLASS_ALFRED,
+    VINTAGE_CLASS_FRED_LATEST,
+    VINTAGE_CLASS_WORLD_BANK,
     classify_economic_vintages,
 )
 from midterms.evidence.freshness import classify_freshness
 from midterms.evidence.markets import validate_candidate_contract_family
 from midterms.evidence.outcome_identity import attach_2026_ticket_identities
 from midterms.model.fundamentals_challengers import (
-    FundamentalsChallengerConfig, challenger_feature_row,
+    FundamentalsChallengerConfig,
+    challenger_feature_row,
 )
 from midterms.model.poll_structure import PollStructureConfig, encode_poll_structure
 from midterms.model.turnout import TurnoutLayerConfig, run_turnout_interface
+from midterms.ops.reproducibility import environment_lock, repository_relative_path
 from midterms.simulate.institutional import (
-    InstitutionalContestRule, apply_institutional_rules_to_draws,
+    InstitutionalContestRule,
+    apply_institutional_rules_to_draws,
     validate_joint_seat_accounting,
 )
 from midterms.validation.bayesian_diagnostics import (
-    gaussian_location_sbc, posterior_predictive_checks, prior_predictive_diagnostics,
+    gaussian_location_sbc,
+    posterior_predictive_checks,
+    prior_predictive_diagnostics,
 )
 from midterms.validation.metrics import score_joint_draws, seat_count_crps
 from midterms.validation.overlay_validation import publication_overlay_policy
 from midterms.validation.structural_ablations import (
-    ablation_by_id, same_family_fit_spec,
+    ablation_by_id,
+    same_family_fit_spec,
 )
-from midterms.ops.reproducibility import environment_lock, repository_relative_path
-from midterms.config import ROOT
 
 
 def test_prior_ppc_and_sbc_are_deterministic_and_detect_absurd_prior():
@@ -104,7 +109,7 @@ def test_candidate_timeline_hides_future_and_applies_withdrawal_only_when_known(
     assert pd.isna(before.loc[0, "modeled_candidate_id"])
 
 
-def test_current_ticket_fallback_cannot_overwrite_point_in_time_identity():
+def test_current_registry_cannot_overwrite_an_earlier_2026_replay():
     races = pd.DataFrame([{
         "election_id": "senate-2026", "race_id": "senate-2026-NE",
         "state": "NE", "not_up": False,
@@ -112,7 +117,7 @@ def test_current_ticket_fallback_cannot_overwrite_point_in_time_identity():
         "modeled_candidate_id": "historically-known-candidate",
         "modeled_ballot_party": "I",
     }])
-    attached = attach_2026_ticket_identities(races)
+    attached = attach_2026_ticket_identities(races, as_of="2026-09-30")
     assert attached.loc[0, "modeled_candidate_id"] == "historically-known-candidate"
     assert attached.loc[0, "modeled_ballot_party"] == "I"
 

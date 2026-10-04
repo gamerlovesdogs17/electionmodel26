@@ -350,15 +350,6 @@ class Warehouse:
         else:
             results_known = results
 
-        # Current ticket labels are a non-authoritative diagnostic fallback.
-        # Attach them before classification so candidate-specific polls cannot
-        # collapse to anonymous party-side rows.  They never satisfy the
-        # traceable timeline requirement.
-        if election_id == "senate-2026" and len(races):
-            from midterms.evidence.outcome_identity import attach_2026_ticket_identities
-
-            races = attach_2026_ticket_identities(races)
-
         # Resolve candidate/race state before filtering inactive ballot rows.
         from midterms.evidence.candidate_timeline import (
             apply_candidate_state_contract,

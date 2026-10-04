@@ -42,7 +42,8 @@ def test_synthetic_race_snapshot_attaches_candidate_and_held_policy() -> None:
         "state": "ME", "not_up": True, "held_by": "I",
     })
     races = attach_2026_ticket_identities(
-        attach_declared_held_independent_caucus(pd.DataFrame(rows))
+        attach_declared_held_independent_caucus(pd.DataFrame(rows)),
+        as_of="2026-10-03",
     )
     active_ids = [f"senate-2026-{state}" for state in ("ID", "MT", "NE", "SD")]
     require_explicit_caucus(races, active_ids)

@@ -177,6 +177,13 @@ def fetch_votehub_polls(*, poll_type: str = "us-senator", subject: str | None = 
     out = dest / f"{name}.json"
     blob = json.dumps(payload, indent=2).encode()
     out.write_bytes(blob)
+    try:
+        recorded_path = out.resolve().relative_to(RAW_DIR.parent.parent.resolve()).as_posix()
+    except ValueError:
+        # Tests and explicitly redirected stores may live outside the project
+        # root; keep their caller-provided path while production receipts stay
+        # repository-relative and portable.
+        recorded_path = out.as_posix()
     meta = {
         "name": name,
         "url": f"{VOTEHUB_API}/polls",
@@ -185,7 +192,7 @@ def fetch_votehub_polls(*, poll_type: str = "us-senator", subject: str | None = 
         "sha256": _sha256_bytes(blob),
         "bytes": len(blob),
         "n_polls": len(payload.get("polls", [])),
-        "path": str(out),
+        "path": recorded_path,
         "license": "CC BY 4.0",
         "attribution": "Polling data from VoteHub (https://votehub.com)",
     }

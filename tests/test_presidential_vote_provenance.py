@@ -11,8 +11,12 @@ import pytest
 
 from midterms.evidence.eligibility import audit_structural_prior
 from midterms.evidence.presidential_results import (
-    PARSER_VERSION, RAW_SOURCE_DIR, SOURCES, build_vote_count_store,
-    select_source_years, verified_source_set_sha256,
+    PARSER_VERSION,
+    RAW_SOURCE_DIR,
+    SOURCES,
+    build_vote_count_store,
+    select_source_years,
+    verified_source_set_sha256,
 )
 from midterms.evidence.warehouse import Warehouse
 
@@ -88,13 +92,6 @@ def test_fixture_prior_is_not_publication_eligible(source_label):
 
 
 def test_warehouse_attaches_identity_and_labels_unverified_prior(tmp_path, monkeypatch):
-    from midterms.evidence import tickets
-
-    monkeypatch.setattr(tickets, "TICKETS_2026", {"ZZ": {
-        "dem_name": "Avery Cedar", "dem_party": "I", "rep_name": "Blair Birch",
-        "modeled_caucus": None, "modeled_caucus_basis": None,
-        "opposing_caucus": "caucus_b", "opposing_caucus_basis": "declared_assumption",
-    }})
     warehouse = Warehouse.__new__(Warehouse)
     warehouse.normalized_dir = tmp_path
     warehouse.polls = pd.DataFrame([{
@@ -102,15 +99,15 @@ def test_warehouse_attaches_identity_and_labels_unverified_prior(tmp_path, monke
         "available_at": "2026-01-01", "exclusion_status": "include",
     }])
     warehouse.races = pd.DataFrame([{
-        "race_id": "senate-2026-ZZ", "election_id": "senate-2026",
-        "state": "ZZ", "not_up": False,
+        "race_id": "senate-2026-ID", "election_id": "senate-2026",
+        "state": "ID", "not_up": False,
     }])
     warehouse.results = pd.DataFrame()
     monkeypatch.setattr(warehouse, "_attach_poll_priors", lambda polls, as_of: (polls, {}))
-    snapshot = warehouse.build_as_of("2026-02-01", "senate-2026")
+    snapshot = warehouse.build_as_of("2026-10-03", "senate-2026")
     row = snapshot.races.iloc[0]
     assert row["modeled_ballot_party"] == "I"
-    assert pd.isna(row["modeled_caucus"])
-    assert row["opposing_caucus_basis"] == "declared_assumption"
+    assert row["modeled_caucus"] == "D"
+    assert row["identity_source"] == "reviewed_current_candidate_registry"
     assert row["prior_source"] == "legacy_unverified_fixture"
     assert snapshot.presidential_source_sha256 is None

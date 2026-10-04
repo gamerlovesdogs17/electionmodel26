@@ -33,7 +33,7 @@ CANDIDATE_PARTY: dict[str, str] = {
     "buddy carter": "R",
     # Idaho
     "jim risch": "R",
-    "todd achilles": "D",
+    "todd achilles": "I",
     # Iowa
     "ashley hinson": "R",
     "josh turek": "D",
@@ -66,7 +66,7 @@ CANDIDATE_PARTY: dict[str, str] = {
     "scott colom": "D",
     # Montana
     "kurt alme": "R",
-    "seth bodnar": "D",
+    "seth bodnar": "I",
     "reilly neill": "D",
     # New Hampshire
     "chris pappas": "D",
@@ -112,6 +112,7 @@ CANDIDATE_PARTY: dict[str, str] = {
     "david williams": "R",  # VA challenger name collision with ID Dem — prefer R for senate GE
     # South Dakota / others occasionally present
     "mike rounds": "R",
+    "brian bengs": "I",
     "marie gladue": "D",
     # Generic labels sometimes present
     "dem": "D",

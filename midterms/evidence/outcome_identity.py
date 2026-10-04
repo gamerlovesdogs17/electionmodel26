@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import asdict, dataclass
+from datetime import date
 
 import pandas as pd
 
@@ -108,9 +109,24 @@ def identity_from_ticket(race_id: str, ticket: dict[str, str | None]) -> Contest
     )
 
 
-def attach_2026_ticket_identities(races: pd.DataFrame) -> pd.DataFrame:
-    """Join curated ticket identities to active 2026 rows without touching truth."""
-    from midterms.evidence.tickets import TICKET_REGISTRY_VERSION, TICKETS_2026
+def attach_2026_ticket_identities(
+    races: pd.DataFrame,
+    *,
+    as_of: str | date | None = None,
+) -> pd.DataFrame:
+    """Join reviewed identities only at the explicit current 2026 boundary.
+
+    Historical replay never calls through to the current registry: an explicit
+    as-of date on or after the registry review is required.
+    """
+    from midterms.evidence.current_candidates import current_registry_for_as_of
+
+    registry = (
+        current_registry_for_as_of(
+            election_id="senate-2026", as_of=as_of,
+        )
+        if as_of is not None else None
+    )
 
     out = races.copy()
     for col in (
@@ -118,35 +134,44 @@ def attach_2026_ticket_identities(races: pd.DataFrame) -> pd.DataFrame:
         "modeled_caucus_basis", "opposing_candidate_id", "opposing_ballot_party",
         "opposing_candidate_name", "opposing_caucus", "opposing_caucus_basis", "identity_source",
         "identity_available_at", "identity_registry_version",
+        "identity_registry_sha256", "identity_reviewed_as_of",
+        "current_matchup_status", "contest_structure",
+        "statistical_target_supported",
     ):
         if col not in out.columns:
             out[col] = None
+    if registry is None:
+        return out
+    rows = {str(row["state"]): row for row in registry["races"]}
     for index, row in out.iterrows():
         if str(row.get("election_id")) != "senate-2026" or bool(row.get("not_up")):
             continue
-        # A sourced as-of identity always wins.  The undated registry is only
-        # a development fallback for rows whose timeline evidence is missing.
-        if str(row.get("candidate_timeline_status") or "") == "point_in_time":
+        candidate = rows.get(str(row.get("state")))
+        if candidate is None:
             continue
-        ticket = TICKETS_2026.get(str(row.get("state")))
-        if ticket is None:
-            continue
-        contest = identity_from_ticket(str(row["race_id"]), ticket)
-        modeled, opposing = contest.contenders
         updates = {
-            "modeled_candidate_id": modeled.candidate_id,
-            "modeled_candidate_name": str(ticket["dem_name"]),
-            "modeled_ballot_party": modeled.ballot_party,
-            "modeled_caucus": modeled.caucus_affiliation,
-            "modeled_caucus_basis": modeled.caucus_basis,
-            "opposing_candidate_id": opposing.candidate_id,
-            "opposing_candidate_name": str(ticket["rep_name"]),
-            "opposing_ballot_party": opposing.ballot_party,
-            "opposing_caucus": opposing.caucus_affiliation,
-            "opposing_caucus_basis": opposing.caucus_basis,
-            "identity_source": "curated_ticket_registry_non_authoritative",
+            "modeled_candidate_id": candidate["modeled_candidate_id"],
+            "modeled_candidate_name": candidate["modeled_candidate_name"],
+            "modeled_ballot_party": candidate["modeled_ballot_party"],
+            "modeled_caucus": candidate["modeled_caucus"],
+            "modeled_caucus_basis": candidate["modeled_caucus_basis"],
+            "opposing_candidate_id": candidate["opposing_candidate_id"],
+            "opposing_candidate_name": candidate["opposing_candidate_name"],
+            "opposing_ballot_party": candidate["opposing_ballot_party"],
+            "opposing_caucus": candidate["opposing_caucus"],
+            "opposing_caucus_basis": candidate["opposing_caucus_basis"],
+            "identity_source": "reviewed_current_candidate_registry",
+            # This current-review input intentionally has no historical
+            # availability semantics.
             "identity_available_at": None,
-            "identity_registry_version": TICKET_REGISTRY_VERSION,
+            "identity_registry_version": registry["registry_version"],
+            "identity_registry_sha256": registry["registry_sha256"],
+            "identity_reviewed_as_of": registry["reviewed_as_of"],
+            "current_matchup_status": candidate["current_matchup_status"],
+            "contest_structure": candidate["contest_structure"],
+            "statistical_target_supported": bool(
+                candidate["statistical_target_supported"]
+            ),
         }
         for key, value in updates.items():
             out.at[index, key] = value

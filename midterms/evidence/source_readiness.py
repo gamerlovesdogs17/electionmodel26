@@ -183,12 +183,6 @@ def audit_source_readiness(
                 election_id=target_election,
                 as_of=cutoff_value,
             )
-            if label.endswith("-current") and target_election == "senate-2026":
-                from midterms.evidence.outcome_identity import (
-                    attach_2026_ticket_identities,
-                )
-
-                subset = attach_2026_ticket_identities(subset)
             applied, safe_polls, metadata = apply_candidate_state_contract(
                 subset,
                 timeline,
@@ -235,6 +229,11 @@ def audit_source_readiness(
     )
     if timeline_manifest_error and timeline_path.is_file():
         timeline_status = timeline_manifest_error
+    from midterms.evidence.current_candidates import current_registry_for_as_of
+
+    current_registry = current_registry_for_as_of(
+        election_id=election_id, as_of=cutoff,
+    )
     domains["candidate_timeline"].update({
         "status": timeline_status,
         "cutoffs": timeline_rows,
@@ -262,6 +261,16 @@ def audit_source_readiness(
         },
         "official_ballot_source_receipts": (source_audit or {}).get("receipts") or {},
         "conditional_identity_contract": True,
+        "current_candidate_registry": (
+            {
+                "registry_version": current_registry["registry_version"],
+                "reviewed_as_of": current_registry["reviewed_as_of"],
+                "registry_sha256": current_registry["registry_sha256"],
+                "n_reviewed_races": len(current_registry["races"]),
+                "scope": "current_2026_only_historical_use_prohibited",
+            }
+            if current_registry else None
+        ),
         "reasons": [] if timeline_status == "ready" else [
             "identity-sensitive candidate state remains unresolved at a required cutoff"
         ],

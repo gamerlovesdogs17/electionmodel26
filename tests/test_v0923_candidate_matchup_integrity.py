@@ -12,6 +12,10 @@ from midterms.config import MODEL_VERSION
 from midterms.evidence import ingest
 from midterms.evidence.candidate_timeline import apply_candidate_state_contract
 from midterms.evidence.candidates import candidate_party
+from midterms.evidence.current_candidates import (
+    current_registry_for_as_of,
+    load_current_candidate_registry,
+)
 from midterms.evidence.current_poll_coverage import current_race_poll_coverage
 from midterms.evidence.ingest import normalize_votehub_senate_polls
 from midterms.evidence.outcome_identity import require_binary_chamber_compatibility
@@ -133,11 +137,11 @@ def test_resolved_current_nominee_filters_obsolete_matchups():
     assert safe["poll_id"].tolist() == ["vh-1"]
     assert meta["poll_exclusions"] == [{
         "poll_id": "vh-2", "race_id": "senate-2026-TX",
-        "reason": "matchup_not_selected_by_point_in_time_identity",
+        "reason": "matchup_not_selected_by_reviewed_current_registry",
     }]
 
 
-def test_multiple_matchups_without_source_identity_fail_closed():
+def test_reviewed_current_registry_resolves_without_historical_source_receipt():
     polls = normalize_votehub_senate_polls(
         _payload("Texas", [(1, "James Talarico", "Ken Paxton"), (2, "James Talarico", "John Cornyn")]),
         write_manifest=False,
@@ -149,9 +153,10 @@ def test_multiple_matchups_without_source_identity_fail_closed():
     applied, safe, meta = apply_candidate_state_contract(
         races, pd.DataFrame(), polls, as_of="2026-10-03",
     )
-    assert applied.loc[0, "candidate_state_eligible"] is False
-    assert safe.empty
-    assert meta["production_eligible"] is False
+    assert applied.loc[0, "candidate_state_eligible"] is True
+    assert applied.loc[0, "candidate_identity_resolved"] is True
+    assert safe["poll_id"].tolist() == ["vh-1"]
+    assert meta["identity_required_and_missing_race_ids"] == []
 
 
 def test_pre_nomination_poll_does_not_leak_eventual_nominee():
@@ -179,6 +184,9 @@ def test_pre_nomination_poll_does_not_leak_eventual_nominee():
 def test_sc_party_and_independent_semantics():
     assert candidate_party("Darline Graham") == "R"
     assert candidate_party("Dan Osborn") == "I"
+    assert candidate_party("Todd Achilles") == "I"
+    assert candidate_party("Seth Bodnar") == "I"
+    assert candidate_party("Brian Bengs") == "I"
     ne = normalize_votehub_senate_polls(
         _payload("Nebraska", [(1, "Dan Osborn", "Pete Ricketts")]),
         write_manifest=False,
@@ -187,6 +195,57 @@ def test_sc_party_and_independent_semantics():
     assert pd.isna(ne["dem_candidate_id"])
     assert pd.isna(ne["two_party_margin"])
     assert ne["margin_definition"] == "independent_minus_rep_two_candidate"
+
+
+def test_registry_has_reviewed_sc_nh_and_independent_ballot_identity():
+    registry = load_current_candidate_registry()
+    rows = {row["state"]: row for row in registry["races"]}
+    assert len(rows) == 35
+    assert (rows["SC"]["modeled_candidate_name"], rows["SC"]["opposing_candidate_name"]) == (
+        "Annie Andrews", "Darline Graham",
+    )
+    assert rows["SC"]["opposing_ballot_party"] == "R"
+    assert (rows["NH"]["modeled_candidate_name"], rows["NH"]["opposing_candidate_name"]) == (
+        "Chris Pappas", "John Sununu",
+    )
+    assert rows["NE"]["modeled_ballot_party"] == "I"
+    assert rows["NE"]["statistical_target_supported"] is False
+    assert rows["AK"]["contest_structure"] == "ranked_choice_multiway"
+    assert rows["AK"]["statistical_target_supported"] is False
+
+
+def test_current_registry_is_unavailable_to_historical_cycles_and_earlier_as_of(tmp_path: Path):
+    payload = load_current_candidate_registry()
+    payload.pop("registry_sha256")
+    payload.pop("source_path")
+    payload["races"][0]["modeled_candidate_name"] = "Changed Current Candidate"
+    path = tmp_path / "current.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    assert current_registry_for_as_of(
+        election_id="senate-2022", as_of="2022-10-01", path=path,
+    ) is None
+    assert current_registry_for_as_of(
+        election_id="senate-2026", as_of="2026-10-02", path=path,
+    ) is None
+
+
+def test_ne_poll_is_identity_compatible_but_not_binary_model_safe():
+    polls = normalize_votehub_senate_polls(
+        _payload("Nebraska", [(1, "Dan Osborn", "Pete Ricketts")]),
+        write_manifest=False,
+    )
+    races = pd.DataFrame([{
+        "election_id": "senate-2026", "race_id": "senate-2026-NE",
+        "state": "NE", "not_up": False,
+    }])
+    applied, safe, meta = apply_candidate_state_contract(
+        races, pd.DataFrame(), polls, as_of="2026-10-03",
+    )
+    assert applied.loc[0, "modeled_ballot_party"] == "I"
+    assert applied.loc[0, "candidate_identity_resolved"] is True
+    assert applied.loc[0, "binary_score_eligible"] is False
+    assert safe.empty
+    assert meta["candidate_compatible_poll_ids_by_race"]["senate-2026-NE"] == ["vh-1"]
 
 
 def test_binary_ineligible_race_cannot_enter_chamber_forecast():
@@ -223,6 +282,37 @@ def test_identity_sensitive_zero_compatible_polls_is_a_hard_coverage_failure():
     )
     assert report["summary"]["promotion_eligible"] is False
     assert report["races"][0]["status"] == "fail"
+
+
+def test_reviewed_binary_race_without_polls_is_warning_not_identity_failure():
+    races = pd.DataFrame([{
+        "election_id": "senate-2026", "race_id": "senate-2026-OH",
+        "state": "OH", "not_up": False,
+        "modeled_candidate_name": "Sherrod Brown", "opposing_candidate_name": "Jon Husted",
+        "modeled_ballot_party": "D", "opposing_ballot_party": "R",
+        "identity_source": "reviewed_current_candidate_registry",
+        "current_matchup_status": "reviewed_current",
+        "identity_reviewed_as_of": "2026-10-03",
+        "contest_structure": "binary_dem_vs_rep",
+    }])
+    meta = {
+        "snapshot_sha256": "a" * 64,
+        "poll_exclusions": [],
+        "candidate_compatible_poll_ids_by_race": {},
+        "classification_records": [{
+            "race_id": "senate-2026-OH", "candidate_state": "identity_required",
+            "candidate_state_reason": "current_matchup_resolved_by_reviewed_registry",
+            "candidate_identity_required": True, "candidate_identity_resolved": True,
+            "binary_score_eligible": True, "contest_structure": "binary_dem_vs_rep",
+        }],
+    }
+    empty = pd.DataFrame(columns=["race_id", "poll_id", "matchup_id"])
+    report = current_race_poll_coverage(races, empty, empty, meta, as_of="2026-10-03")
+    row = report["races"][0]
+    assert row["candidate_identity_resolved"] is True
+    assert row["polling_available"] is False
+    assert row["statistical_target_supported"] is True
+    assert row["status"] == "warning"
 
 
 def test_votehub_lineage_fails_when_raw_semantics_change(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
