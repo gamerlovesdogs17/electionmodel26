@@ -175,8 +175,32 @@ def prepare_evidence(
         return {"mode": mode, "bundle": seal_evidence(election_id=election_id, as_of=as_of)}
     readiness = write_source_readiness(election_id=election_id, as_of=as_of)
     result = {"mode": mode, "refresh": refresh, "readiness": readiness}
-    if strict and not readiness["ready_for_expensive_rebuild"]:
+    refresh_results = (refresh or {}).get("results") or {}
+    polls = refresh_results.get("polls") or {}
+    poll_refresh_failed = bool(
+        polls.get("status") == "refresh_failed" or polls.get("error")
+    )
+    coverage = readiness.get("forecast_coverage") or {}
+    coverage_summary = coverage.get("summary") if isinstance(coverage, dict) else {}
+    forecast_incomplete = (
+        coverage_summary.get("forecast_complete") is False
+        or int(coverage_summary.get("n_fail") or 0) > 0
+    )
+    if strict and (
+        not readiness["ready_for_expensive_rebuild"]
+        or poll_refresh_failed
+        or forecast_incomplete
+    ):
         result["strict_failure"] = True
+        result["strict_failure_reasons"] = [
+            reason
+            for reason, active in (
+                ("source_readiness_not_green", not readiness["ready_for_expensive_rebuild"]),
+                ("poll_refresh_failed", poll_refresh_failed),
+                ("forecast_coverage_incomplete", forecast_incomplete),
+            )
+            if active
+        ]
     return result
 
 

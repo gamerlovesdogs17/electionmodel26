@@ -92,7 +92,13 @@ SELECTED_PRIOR_SPEC_ID = "state_structural_very_large"
 
 def _sha(payload: Any) -> str:
     return hashlib.sha256(
-        json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode()
+        json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+            default=str,
+        ).encode("utf-8")
     ).hexdigest()
 
 
@@ -608,6 +614,9 @@ def write_non_major_adapter_validation(*, current_as_of: str = "2026-10-03") -> 
     report = build_non_major_adapter_validation(current_as_of=current_as_of)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     path = ARTIFACTS_DIR / "non_major_adapter_validation_latest.json"
-    path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    path.write_text(
+        json.dumps(report, indent=2, default=str, allow_nan=False),
+        encoding="utf-8",
+    )
     report["path"] = str(path)
     return report

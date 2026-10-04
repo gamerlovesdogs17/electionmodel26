@@ -465,6 +465,10 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert text.count("if: steps.resume.outputs.forecast_resumed != 'true'") == 6
     assert "verify-exceptional-models --strict" in text
     assert "validate_forecast_model_paths" in text
+    assert "materialize_prior_snapshot" in text
+    assert "validate-alaska-rcv --as-of" in text
+    assert "prepare-evidence --election-id senate-2026 --as-of \"$AS_OF\" --mode refresh-safe --strict" in text
+    assert "ordinary_statistical_spec_sha256" in text
     assert '"--tune-per-chain", "4000"' in text
     assert '"--chains", "4"' in text
     assert '"--target-accept", "0.99"' in text

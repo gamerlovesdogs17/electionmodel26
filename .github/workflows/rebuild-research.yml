@@ -58,21 +58,66 @@ jobs:
           [[ "$AS_OF" > "$TODAY" ]] && { echo "as_of cannot be later than $TODAY" >&2; exit 1; }
           echo "AS_OF=$AS_OF" >> "$GITHUB_ENV"
           echo "as_of=$AS_OF" >> "$GITHUB_OUTPUT"
+      - name: Materialize presidential prior snapshot for AS_OF
+        run: |
+          python - <<'PY'
+          from datetime import date
+          import os
+          from midterms.evidence.presidential_prior import materialize_prior_snapshot
+          as_of = date.fromisoformat(os.environ["AS_OF"])
+          snapshot, path = materialize_prior_snapshot(as_of)
+          if not snapshot.get("production_eligible"):
+              raise SystemExit(f"prior snapshot is not production eligible: {path}")
+          print(path)
+          print("snapshot_sha256", snapshot.get("snapshot_sha256"))
+          PY
       - name: Source readiness audit
-        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
+        run: |
+          python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          readiness = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text(encoding="utf-8"))
+          coverage = json.loads(Path("data/artifacts/current_race_poll_coverage_v0923.json").read_text(encoding="utf-8"))
+          summary = coverage.get("summary") or {}
+          if not readiness.get("ready_for_expensive_rebuild"):
+              raise SystemExit("source readiness is not green: " + json.dumps(readiness.get("blockers") or [], sort_keys=True))
+          if summary.get("forecast_complete") is not True or int(summary.get("n_fail") or 0) != 0:
+              raise SystemExit("forecast coverage incomplete: " + json.dumps(summary, sort_keys=True))
+          print("source_readiness_ok", True)
+          print("forecast_coverage", summary)
+          PY
       - name: Refresh safe sources
         if: inputs.refresh_safe_sources
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe
+        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe --strict
       - name: Re-audit current source and forecast coverage
-        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
+        if: ${{ !inputs.refresh_safe_sources }}
+        run: |
+          python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          readiness = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text(encoding="utf-8"))
+          coverage = json.loads(Path("data/artifacts/current_race_poll_coverage_v0923.json").read_text(encoding="utf-8"))
+          summary = coverage.get("summary") or {}
+          if not readiness.get("ready_for_expensive_rebuild"):
+              raise SystemExit("source readiness is not green: " + json.dumps(readiness.get("blockers") or [], sort_keys=True))
+          if summary.get("forecast_complete") is not True or int(summary.get("n_fail") or 0) != 0:
+              fails = [row for row in coverage.get("races") or [] if row.get("forecast_status") == "fail"]
+              raise SystemExit(
+                  "forecast coverage incomplete: "
+                  + json.dumps({"summary": summary, "fails": fails}, sort_keys=True, default=str)
+              )
+          print("coverage", summary)
+          PY
       - name: Verify official Alaska source archive
         run: python -m midterms.cli prepare-alaska-rcv
       - name: Refresh cheap exceptional validation artifacts
         run: |
           python -m midterms.cli validate-non-major-adapter --current-as-of "$AS_OF"
-          python -m midterms.cli validate-alaska-rcv
+          python -m midterms.cli validate-alaska-rcv --as-of "$AS_OF"
       - name: Strict exceptional-model and coverage preflight
         run: python -m midterms.cli verify-exceptional-models --strict
       - name: Synchronize compliance readiness metadata
@@ -254,17 +299,19 @@ jobs:
             --strict
       - name: Freeze selected structure and evidence into candidate model spec
         id: candidate_spec
-        if: steps.resume.outputs.resumed != 'true'
         shell: bash
         run: |
-          python -m midterms.cli freeze-model-spec-candidate \
-            --selection data/artifacts/poll_structure_crossfit_latest.json \
-            --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
-            --source-readiness data/artifacts/source_readiness_latest.json \
-            --code-commit-sha "$(git rev-parse HEAD)" \
-            --out data/artifacts/validated_model_spec_candidate.json
+          if [ "${{ steps.resume.outputs.resumed }}" != "true" ]; then
+            python -m midterms.cli freeze-model-spec-candidate \
+              --selection data/artifacts/poll_structure_crossfit_latest.json \
+              --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
+              --source-readiness data/artifacts/source_readiness_latest.json \
+              --code-commit-sha "$(git rev-parse HEAD)" \
+              --out data/artifacts/validated_model_spec_candidate.json
+          fi
           # Ordinary OOF cache key uses ordinary-statistical identity only.
           # Exceptional adapters bind later into the finalized release spec.
+          # Always emit the hash so resumed runs still key canonical OOF correctly.
           ORD_SHA="$(python -c "import json; print(json.load(open('data/artifacts/validated_model_spec_candidate.json'))['ordinary_statistical_spec_sha256'])")"
           echo "ordinary_statistical_spec_sha256=$ORD_SHA" >> "$GITHUB_OUTPUT"
       - name: Save selection-pass validation cache

@@ -463,5 +463,5 @@ def verify_exceptional_promotion_inputs(**kwargs: Any) -> dict[str, Any]:
     try:
         lineage = build_exceptional_model_lineage(**kwargs)
         return {"ok": True, "lineage": lineage, "failures": []}
-    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
-        return {"ok": False, "lineage": None, "failures": [str(exc)]}
+    except Exception as exc:  # noqa: BLE001 — fail closed with the exact gate error
+        return {"ok": False, "lineage": None, "failures": [f"{type(exc).__name__}: {exc}"]}

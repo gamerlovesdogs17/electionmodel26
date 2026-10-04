@@ -22,7 +22,15 @@ from midterms.model.alaska_rcv_adapter import (
 
 
 def _sha(value: Any) -> str:
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode()).hexdigest()
+    return hashlib.sha256(
+        json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+            default=str,
+        ).encode("utf-8")
+    ).hexdigest()
 
 
 def _actual(analog: dict[str, Any]) -> tuple[str, list[str], float, float]:
@@ -42,7 +50,12 @@ def _actual(analog: dict[str, Any]) -> tuple[str, list[str], float, float]:
     return analog["winner"], order, final_margin, 1.0 - final_total / first_total
 
 
-def build_alaska_rcv_validation(*, n_draws: int = 1000, seed: int = 923) -> dict[str, Any]:
+def build_alaska_rcv_validation(
+    *,
+    as_of: str = "2026-10-04",
+    n_draws: int = 1000,
+    seed: int = 923,
+) -> dict[str, Any]:
     evidence = load_alaska_rcv_evidence()
     analog_rows = []
     # Transfer-only leave-one-contest-out check: held-out first choices are
@@ -101,7 +114,13 @@ def build_alaska_rcv_validation(*, n_draws: int = 1000, seed: int = 923) -> dict
     ]
     sensitivity = []
     for offset, spec in enumerate(sensitivity_specs):
-        fit = fit_alaska_rcv_adapter(polls, as_of="2026-10-03", n_draws=2000, seed=seed + 100 + offset, **{key: value for key, value in spec.items() if key != "name"})
+        fit = fit_alaska_rcv_adapter(
+            polls,
+            as_of=as_of,
+            n_draws=2000,
+            seed=seed + 100 + offset,
+            **{key: value for key, value in spec.items() if key != "name"},
+        )
         p_win = {candidate_id: float(np.mean(fit.winner_indices == index)) for index, candidate_id in enumerate(fit.candidate_ids)}
         sensitivity.append({
             "name": spec["name"],
@@ -141,8 +160,8 @@ def build_alaska_rcv_validation(*, n_draws: int = 1000, seed: int = 923) -> dict
     return {**semantic, "artifact_sha256": _sha(semantic)}
 
 
-def write_alaska_rcv_validation() -> dict[str, Any]:
-    report = build_alaska_rcv_validation()
+def write_alaska_rcv_validation(*, as_of: str = "2026-10-04") -> dict[str, Any]:
+    report = build_alaska_rcv_validation(as_of=as_of)
     path = ARTIFACTS_DIR / "alaska_rcv_validation_latest.json"
-    path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    path.write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
     return {**report, "path": str(path)}

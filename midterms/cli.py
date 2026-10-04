@@ -1142,12 +1142,13 @@ def main(argv: list[str] | None = None) -> None:
         "validate-alaska-rcv",
         help="Cheap Alaska RCV diagnostics from sealed official rounds; no PyMC fit",
     )
+    p_alaska.add_argument("--as-of", default="2026-10-04")
     p_alaska.set_defaults(
         func=lambda a: print(json.dumps(
             __import__(
                 "midterms.validation.alaska_rcv",
                 fromlist=["write_alaska_rcv_validation"],
-            ).write_alaska_rcv_validation(),
+            ).write_alaska_rcv_validation(as_of=a.as_of),
             indent=2,
             default=str,
         ))
@@ -1169,6 +1170,8 @@ def main(argv: list[str] | None = None) -> None:
         ).verify_exceptional_promotion_inputs()
         print(json.dumps(report, indent=2, default=str))
         if a.strict and not report.get("ok"):
+            for failure in report.get("failures") or ["exceptional model verification failed"]:
+                print(f"::error::exceptional-model preflight: {failure}")
             raise SystemExit(1)
 
     p_exceptional.set_defaults(func=_verify_exceptional_models)
