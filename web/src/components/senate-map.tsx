@@ -419,6 +419,29 @@ function MapTooltip({
 }
 
 function RaceTooltipBlock({ race }: { race: RaceForecast }) {
+  if (
+    race.contest_structure === "ranked_choice_multiway" &&
+    race.candidate_probabilities?.length
+  ) {
+    return (
+      <div className="border-t border-[var(--line)] pt-2 first:border-0 first:pt-0">
+        <p className="text-xs font-medium text-[var(--ink)]">Ranked-choice contest</p>
+        <div className="mt-1 space-y-1">
+          {[...race.candidate_probabilities]
+            .sort((a, b) => b.p_win - a.p_win)
+            .map((candidate) => (
+              <p key={candidate.candidate_id} className="flex justify-between gap-3 text-xs text-[var(--muted)]">
+                <span>{candidate.candidate_name} ({candidate.ballot_party})</span>
+                <span className="tabular-nums text-[var(--ink)]">{pct(candidate.p_win, 1)}</span>
+              </p>
+            ))}
+        </div>
+        <p className="mt-2 text-[10px] uppercase tracking-wide text-[var(--muted)]">
+          Limited-validation Alaska RCV model
+        </p>
+      </div>
+    );
+  }
   const demParty = (race.modeled_ballot_party ?? race.dem_party) === "I" ? "I" : "D";
   const pModeled = modeledProbability(race);
   const pOpposing = opposingProbability(race);

@@ -784,6 +784,33 @@ def run_forecast(
     core_fit = merge_fit_results(ordinary_core_fit, exceptional_fit)
     fit = merge_fit_results(ordinary_final_fit, exceptional_fit)
 
+    from midterms.model.alaska_rcv_adapter import (
+        as_fit_result as alaska_as_fit_result,
+    )
+    from midterms.model.alaska_rcv_adapter import (
+        fit_alaska_rcv_adapter,
+        merge_alaska_fit,
+    )
+
+    alaska_rows = snap.races[
+        snap.races.get("race_id", pd.Series("", index=snap.races.index)).astype(str).eq(
+            "senate-2026-AK"
+        )
+    ]
+    if len(alaska_rows) and bool(
+        alaska_rows.iloc[0].get("probability_model_supported")
+    ):
+        alaska_result = fit_alaska_rcv_adapter(
+            snap.exceptional_polls if snap.exceptional_polls is not None else pd.DataFrame(),
+            as_of=snap.as_of,
+            n_draws=ordinary_core_fit.draws_margin.shape[0],
+            seed=seed + 307,
+            base_fit=ordinary_core_fit,
+        )
+        alaska_fit = alaska_as_fit_result(alaska_result)
+        core_fit = merge_alaska_fit(core_fit, alaska_fit)
+        fit = merge_alaska_fit(fit, alaska_fit)
+
     sim, race_summaries = simulate_chamber(
         fit,
         snap.races,
@@ -794,7 +821,13 @@ def run_forecast(
     contested_active = snap.races[snap.races["race_id"].isin(fit.race_ids)].copy()
     # Align contested to fit order
     contested_active = contested_active.set_index("race_id").loc[fit.race_ids].reset_index()
-    multiway = undecided_allocation(contested_active, fit.mean_margin)
+    allocation_mask = ~contested_active.get(
+        "contest_structure", pd.Series("", index=contested_active.index),
+    ).astype(str).eq("ranked_choice_multiway")
+    multiway = undecided_allocation(
+        contested_active[allocation_mask].reset_index(drop=True),
+        fit.mean_margin[allocation_mask.to_numpy()],
+    )
     turnout = turnout_layer(contested_active, seed=seed)
     snap.races = maybe_materialize_runoff_rows(
         snap.races,
@@ -806,8 +839,9 @@ def run_forecast(
     expert_by_id = expert_tbl.set_index("race_id") if len(expert_tbl) else None
     market_by_id = market_df.set_index("race_id") if len(market_df) else None
     for s in race_summaries:
-        is_non_major = str(s.get("modeled_ballot_party") or "D") != "D"
-        if not is_non_major and expert_by_id is not None and s["race_id"] in expert_by_id.index:
+        is_multiway = str(s.get("contest_structure") or "") == "ranked_choice_multiway"
+        is_non_major = not is_multiway and str(s.get("modeled_ballot_party") or "D") != "D"
+        if not is_non_major and not is_multiway and expert_by_id is not None and s["race_id"] in expert_by_id.index:
             s["expert_rating"] = str(expert_by_id.loc[s["race_id"], "rating"])
             s["expert_source"] = str(expert_by_id.loc[s["race_id"], "source"])
         if market_by_id is not None and s["race_id"] in market_by_id.index:

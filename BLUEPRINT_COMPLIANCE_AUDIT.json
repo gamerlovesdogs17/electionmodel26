@@ -26,13 +26,18 @@
     "promotion_eligible": false,
     "source_readiness_ok": true,
     "source_blockers": [],
-    "forecast_coverage_ok": false,
-    "forecast_coverage_blockers": [
-      "senate-2026-AK ranked_choice_multiway_not_supported"
-    ],
+    "forecast_coverage_ok": true,
+    "forecast_coverage_blockers": [],
     "non_major_adapter_classification": "limited_validation_exception_model",
     "non_major_adapter_calibration_claim_allowed": false,
-    "ordinary_historical_projection_changed": false
+    "ordinary_historical_projection_changed": false,
+    "forecast_coverage_summary": {
+      "n_pass": 20,
+      "n_warning": 15,
+      "n_fail": 0
+    },
+    "alaska_rcv_adapter_classification": "limited_validation_alaska_rcv_model",
+    "alaska_rcv_calibration_claim_allowed": false
   },
   "allowed_classifications": [
     "implemented",
@@ -42,6 +47,7 @@
     "intentionally_deferred",
     "blocked_by_real_data_validation",
     "limited_validation_exception_model",
+    "limited_validation_alaska_rcv_model",
     "validated"
   ],
   "code_capability_gates": {
@@ -79,7 +85,8 @@
     "verified_pollster_snapshot_availability": "implemented",
     "canonical_poll_structure_oof": "implemented",
     "validated_model_spec_lineage": "implemented",
-    "binary_non_major_party_adapter": "implemented_with_reasonable_variation"
+    "binary_non_major_party_adapter": "implemented_with_reasonable_variation",
+    "alaska_rcv_adapter": "implemented"
   },
   "empirical_validation_gates": {
     "prior_predictive_current_model": "validated",
@@ -101,9 +108,10 @@
     "finance_report_level_history": "source_ready",
     "approval_poll_timing_lineage": "source_ready",
     "validated_model_spec_lineage": "validated",
-    "binary_non_major_party_adapter": "limited_validation_exception_model"
+    "binary_non_major_party_adapter": "limited_validation_exception_model",
+    "alaska_rcv_adapter": "limited_validation_alaska_rcv_model"
   },
-  "empirical_validation_gates_scope": "Validated entries other than binary_non_major_party_adapter describe the immutable v0.9.22 release. They are not relabeled as v0.9.23 artifacts.",
+  "empirical_validation_gates_scope": "Validated entries other than binary_non_major_party_adapter describe the immutable v0.9.22 release. They are not relabeled as v0.9.23 artifacts. The Alaska adapter has separate limited transfer validation and is not part of the ordinary stack.",
   "requirements": [
     {
       "id": "warehouse_as_of",
@@ -114,7 +122,7 @@
         "midterms/evidence/point_in_time.py"
       ],
       "current_implementation": "As-of filtering plus evidence-snapshot-fingerprint-v2 hashes selected poll rows, race rows, candidate timeline, rating snapshot, structural-prior lineage and the selected point-in-time demographic source.",
-      "remaining_issue": "The v0.9.22 lineage is complete. The v0.9.23 source domains are ready; forecast coverage remains blocked by Alaska RCV while ordinary historical projections are unchanged.",
+      "remaining_issue": "The v0.9.22 lineage is complete. The v0.9.23 source domains are ready; forecast coverage is complete; Alaska is a limited-validation exceptional adapter and ordinary historical projections remain unchanged.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,
@@ -504,7 +512,7 @@
         "BLUEPRINT_COMPLIANCE_AUDIT.json"
       ],
       "current_implementation": "G1-G11 remain distinct; a machine-readable extension evaluator requires v0.9.22 artifact lineage and strict acceptance requires both layers.",
-      "remaining_issue": "v0.9.23 remains unpromotable because Alaska RCV lacks forecast-model support and no current forecast/rebuild exists; the v0.9.22 acceptance record remains immutable.",
+      "remaining_issue": "v0.9.23 remains unpromotable because no current full forecast/rebuild or strict acceptance exists; the v0.9.22 acceptance record remains immutable.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -539,7 +547,7 @@
         ".github/workflows/rebuild-research.yml"
       ],
       "current_implementation": "The workflow enforces a two-pass contract: structural selection freezes a candidate model spec; a separately keyed canonical pass reruns static and dynamic PyMC with that selected PollStructureConfig. Final model-spec lineage binds the bundle, readiness, canonical OOF, stack and calibration artifacts.",
-      "remaining_issue": "The v0.9.23 source audit is ready and separated from forecast coverage. Alaska RCV remains model-unsupported, so no complete chamber forecast may be promoted.",
+      "remaining_issue": "The v0.9.23 source audit is ready and separated from forecast coverage. Alaska RCV is limited-supported, but no complete v0.9.23 chamber rebuild may be promoted before strict acceptance.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,

@@ -1,0 +1,54 @@
+{
+  "schema_version": "alaska-rcv-source-manifest-v1",
+  "parser_version": "alaska-rcv-official-v1",
+  "source_provider": "Alaska Division of Elections",
+  "sources": {
+    "2026_general_candidates.html": {
+      "path": "data/raw/external/alaska_rcv/2026_general_candidates.html",
+      "source_url": "https://www.elections.alaska.gov/candidates/?election=26genr",
+      "sha256": "2823ad45bf7dfa66fe4516173204263e8421361464947a07bdaf7b515f683947",
+      "retrieved_at": "2026-10-04T15:17:52.750093Z"
+    },
+    "2026_primary_summary.pdf": {
+      "path": "data/raw/external/alaska_rcv/2026_primary_summary.pdf",
+      "source_url": "https://www.elections.alaska.gov/enr26/results/ElectionSummaryReportRPT.pdf",
+      "sha256": "5d97a98f682a9dfa66eabdf64965e4728feb744c7863682acfeacbeb7241dee9",
+      "retrieved_at": "2026-10-04T15:17:53.043518Z"
+    },
+    "2026_primary_precinct.csv": {
+      "path": "data/raw/external/alaska_rcv/2026_primary_precinct.csv",
+      "source_url": "https://www.elections.alaska.gov/enr26/results/GA_ENR_Precinct_State_of_Alaska.csv",
+      "sha256": "7dde3df0d57b1618143214224bf550ea55e295a6e9960b938e6e92047c1be765",
+      "retrieved_at": "2026-10-04T15:17:53.619650Z"
+    },
+    "2022_general_us_sen_rcv.txt": {
+      "path": "data/raw/external/alaska_rcv/2022_general_us_sen_rcv.txt",
+      "source_url": "https://elections.alaska.gov/results/22GENR/US%20SEN.txt",
+      "sha256": "01ea2bef334a3204fe42d7f0830598c1344dab04fb6f96e416f06202505f9962",
+      "retrieved_at": "2026-10-04T15:17:53.911955Z"
+    },
+    "2022_general_us_house_rcv.txt": {
+      "path": "data/raw/external/alaska_rcv/2022_general_us_house_rcv.txt",
+      "source_url": "https://elections.alaska.gov/results/22GENR/US%20REP.txt",
+      "sha256": "7982b3e82741a304f222852936619e60eb0b1f87ed026cd05738eb3236437f11",
+      "retrieved_at": "2026-10-04T15:17:54.074089Z"
+    },
+    "2022_special_us_house_rcv.txt": {
+      "path": "data/raw/external/alaska_rcv/2022_special_us_house_rcv.txt",
+      "source_url": "https://www.elections.alaska.gov/results/22SSPG/RcvDetailedReport.txt",
+      "sha256": "db5a886678aae4b91fcd93aea5f67e1c22585cdd7409757f366013cc13d56648",
+      "retrieved_at": "2026-10-04T15:17:54.243699Z"
+    },
+    "2024_general_us_house_rcv.pdf": {
+      "path": "data/raw/external/alaska_rcv/2024_general_us_house_rcv.pdf",
+      "source_url": "https://www.elections.alaska.gov/results/24GENR/RCV-USRep.pdf",
+      "sha256": "2880b88fb540f4b6327f686d19c9bd9636ff9c8a4c5301d31361405178ad7f5e",
+      "retrieved_at": "2026-10-04T15:17:54.488954Z"
+    }
+  },
+  "normalized_path": "data/normalized/alaska_rcv_2026.json",
+  "normalized_sha256": "4b780ba5d40356ef376745fe81cf688f6376c5aa7bb4d8ab4e42846caacc4d54",
+  "normalized_semantic_sha256": "8c5fa884fe8e1cbb39c528511d36a1c064b0a8d48f6794b3144dd46b8726cf43",
+  "production_eligible": true,
+  "validation_class": "limited_validation_alaska_rcv_model"
+}

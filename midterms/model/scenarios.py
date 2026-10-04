@@ -28,13 +28,21 @@ def run_scenarios(
             "expected_dem_seats": base_sim.expected_dem_seats,
         },
     }
+    protected = np.zeros(len(fit.race_ids), dtype=bool)
+    alaska_diagnostics = (fit.diagnostics or {}).get("alaska_rcv_adapter") or {}
+    if not alaska_diagnostics and (fit.diagnostics or {}).get("method") == "limited_validation_alaska_rcv_model-v1":
+        alaska_diagnostics = fit.diagnostics or {}
+    alaska_race_id = str(alaska_diagnostics.get("race_id") or "")
+    if alaska_race_id in fit.race_ids:
+        protected[fit.race_ids.index(alaska_race_id)] = True
 
     def _shift(delta: float, mask: np.ndarray | None = None) -> dict[str, float]:
         draws = fit.draws_margin.copy()
         if mask is None:
-            draws = draws + delta
+            draws[:, ~protected] = draws[:, ~protected] + delta
         else:
-            draws[:, mask] = draws[:, mask] + delta
+            effective_mask = np.asarray(mask, dtype=bool) & ~protected
+            draws[:, effective_mask] = draws[:, effective_mask] + delta
         shifted = FitResult(
             race_ids=fit.race_ids,
             states=fit.states,
@@ -56,7 +64,6 @@ def run_scenarios(
     out["national_rep_miss_m3"] = _shift(3.0)
 
     # Regional: South
-    south = np.array([str(s) for s in fit.states])
     # Map via races region if available
     region = None
     if "region" in races.columns:
@@ -68,7 +75,8 @@ def run_scenarios(
 
     # Reduced poll quality → inflate residual sd (approximate via extra noise)
     rng = np.random.default_rng(7)
-    noisy = fit.draws_margin + rng.standard_t(5, size=fit.draws_margin.shape) * 2.0
+    noisy = fit.draws_margin.copy()
+    noisy[:, ~protected] += rng.standard_t(5, size=(len(noisy), int((~protected).sum()))) * 2.0
     noisy_fit = FitResult(
         race_ids=fit.race_ids,
         states=fit.states,

@@ -414,5 +414,6 @@ def test_current_coverage_separates_limited_withheld_and_unsupported() -> None:
     )
     assert by_state["SD"]["probability_model_support_status"] == "limited_supported_prior_only"
     assert by_state["SD"]["n_candidate_compatible_polls"] == 0
-    assert by_state["AK"]["probability_model_support_status"] == "unsupported"
+    assert by_state["AK"]["probability_model_support_status"] == "limited_supported"
+    assert by_state["AK"]["forecast_status"] == "warning"
     assert by_state["AK"]["evidence_status"] == "pass"

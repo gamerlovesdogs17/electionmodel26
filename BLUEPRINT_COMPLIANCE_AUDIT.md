@@ -28,7 +28,7 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 | Fundamentals and structural priors | Implemented with variation | Challenger features remain off |
 | Static/dynamic PyMC and terminal layers | Implemented and evaluated | Canonical OOF is bound to the validated model spec; dynamic PyMC earned zero stack mass |
 | Similarity | Implemented and evaluated | Point-in-time source and same-family ablation evidence pass |
-| Joint simulation | Implemented and evaluated for v0.9.22 | No complete v0.9.23 chamber forecast exists while Alaska is unsupported |
+| Joint simulation | Implemented and evaluated for v0.9.22 | v0.9.23 forecast coverage is complete, but the full chamber rebuild has not run |
 | Institutional rules | Partial | Transition model remains disabled |
 | Turnout | Intentionally deferred | Auxiliary only |
 | Predictive-mixture stack | Implemented and evaluated | Validated weights are approximately 21.9% PyMC and 78.1% state-space |
@@ -39,7 +39,7 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 | Prior predictive/PPC/SBC | Implemented with variation | Prior/PPC gates pass; full-model SBC remains a nonblocking future diagnostic |
 | Sampler health | Implemented and evaluated | Current reference fit passes numerical-quality requirements |
 | Reproducibility/lineage/MCSE | Implemented with variation | Legacy absolute paths remain historical records |
-| Source readiness and sealing | Implemented | v0.9.23 source domains are green but forecast coverage is incomplete; bundle `eb-3e91ca3a90628d69` is the sealed v0.9.22 evidence boundary |
+| Source readiness and sealing | Implemented | v0.9.23 source domains and coverage are ready; bundle `eb-3e91ca3a90628d69` remains the sealed v0.9.22 evidence boundary |
 | Domain freshness | Implemented with variation | Retrieval and observation age are enforced only for enabled layers; source adapters must retain their timestamps |
 | Acceptance gates | Implemented and passing for v0.9.22 | v0.9.23 has not run production acceptance and cannot reuse the old result as current evidence |
 
@@ -81,11 +81,12 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 
 The sealed v0.9.22 source audit remains green for its immutable completed
 research release. The current v0.9.23 evidence-source audit is also green.
-Forecast coverage is a separate gate: 20 current races pass, 14 have warnings,
-and one fails. Idaho, Montana, and Nebraska use a separately identified limited-
+Forecast coverage is a separate gate: 20 current races pass, 15 have warnings,
+and none fail. Idaho, Montana, and Nebraska use a separately identified limited-
 validation binary non-major-party adapter; South Dakota is explicitly prior-only
-with zero compatible polls and wide uncertainty. Alaska ranked-choice/multiway
-is evidence-ready but model-unsupported. Markets and expert ratings remain
+with zero compatible polls and wide uncertainty. Alaska uses a separately
+identified limited-validation IRV adapter built from official Alaska primary
+and round-transition evidence. Markets and expert ratings remain
 disabled optional domains.
 
 The adapter preserves Independent ballot identity and explicit Democratic
@@ -97,6 +98,12 @@ claim is allowed. The selected state-anchored 30-point candidate-deviation prior
 was compared with predeclared zero-centered 20-point and state-anchored 40-point
 forms; it was not tuned over a large grid. All ordinary historical evidence projections remain
 semantically identical to the v0.9.22 inputs.
+
+The Alaska adapter is not an ordinary stack member. Four predeclared official
+Alaska RCV analogs support transfer/tabulation checks only. The small sample,
+including a weak 2022 special-House holdout, prohibits calibration or ordinary
+stack-performance claims. Candidate-level probabilities are authoritative and
+the chamber seat draw follows the simulated winner's explicit caucus.
 
 Evidence bundle `eb-3e91ca3a90628d69` binds the v0.9.22 ready source report and the
 current/historical snapshot identities. The completed rebuild selected the

@@ -1,0 +1,494 @@
+{
+  "schema_version": "alaska-rcv-evidence-v1",
+  "parser_version": "alaska-rcv-official-v1",
+  "race_id": "senate-2026-AK",
+  "election_day": "2026-11-03",
+  "primary_date": "2026-08-18",
+  "primary_certified_report_generated_at": "2026-08-31T12:43:34-08:00",
+  "candidate_field": [
+    {
+      "candidate_id": "senate-2026-AK:gerald-l-heikes",
+      "name": "Gerald L. Heikes",
+      "ballot_party": "R",
+      "caucus": "R",
+      "caucus_basis": "major_party_ballot_affiliation",
+      "write_in": false
+    },
+    {
+      "candidate_id": "senate-2026-AK:mary-peltola",
+      "name": "Mary Peltola",
+      "ballot_party": "D",
+      "caucus": "D",
+      "caucus_basis": "major_party_ballot_affiliation",
+      "write_in": false
+    },
+    {
+      "candidate_id": "senate-2026-AK:dan-s-sullivan",
+      "name": "Dan S. Sullivan",
+      "ballot_party": "R",
+      "caucus": "R",
+      "caucus_basis": "major_party_ballot_affiliation",
+      "write_in": false,
+      "incumbent": true,
+      "poll_aliases": [
+        "Dan Sullivan"
+      ]
+    },
+    {
+      "candidate_id": "senate-2026-AK:daniel-j-sullivan-jr",
+      "name": "Daniel J. Sullivan Jr.",
+      "ballot_party": "R",
+      "caucus": "R",
+      "caucus_basis": "major_party_ballot_affiliation",
+      "write_in": false
+    }
+  ],
+  "certified_write_ins": [
+    {
+      "candidate_id": "senate-2026-AK:sidney-sid-hill",
+      "name": "Sidney \u201cSid\u201d Hill",
+      "ballot_party": "I",
+      "caucus": null,
+      "write_in": true
+    },
+    {
+      "candidate_id": "senate-2026-AK:heather-mcelwain",
+      "name": "Heather McElwain",
+      "ballot_party": "L",
+      "caucus": null,
+      "write_in": true
+    }
+  ],
+  "write_in_treatment": "aggregate_residual_with_unknown_caucus_fail_closed_if_winner",
+  "primary_total_votes": 166004,
+  "primary_results": [
+    {
+      "candidate_id": "senate-2026-AK:gerald-l-heikes",
+      "candidate_name": "Gerald L. Heikes",
+      "votes": 1741,
+      "share": 0.010487699091588155
+    },
+    {
+      "candidate_id": "senate-2026-AK:mary-peltola",
+      "candidate_name": "Mary Peltola",
+      "votes": 82244,
+      "share": 0.49543384496759113
+    },
+    {
+      "candidate_id": "senate-2026-AK:dan-s-sullivan",
+      "candidate_name": "Dan S. Sullivan",
+      "votes": 68726,
+      "share": 0.41400207223922314
+    },
+    {
+      "candidate_id": "senate-2026-AK:daniel-j-sullivan-jr",
+      "candidate_name": "Daniel J. Sullivan Jr.",
+      "votes": 4107,
+      "share": 0.024740367701983085
+    },
+    {
+      "candidate_id": "senate-2026-AK:write-in-aggregate",
+      "candidate_name": "Certified write-in aggregate anchor",
+      "votes": 1494,
+      "share": 0.008999783137755717
+    },
+    {
+      "candidate_id": "senate-2026-AK:other-primary-field",
+      "candidate_name": "Other defeated primary candidates",
+      "votes": 7692,
+      "share": 0.04633623286185875
+    }
+  ],
+  "historical_analogs": [
+    {
+      "analog_id": "2022_general_senate",
+      "office": "US_SENATE",
+      "rounds": [
+        {
+          "round": 1,
+          "votes": {
+            "Chesbro, Patricia R.": 28233,
+            "Kelley, Buzz A.": 8575,
+            "Murkowski, Lisa": 114118,
+            "Tshibaka, Kelly C.": 112101
+          }
+        },
+        {
+          "round": 2,
+          "votes": {
+            "Chesbro, Patricia R.": 29134,
+            "Kelley, Buzz A.": 0,
+            "Murkowski, Lisa": 115759,
+            "Tshibaka, Kelly C.": 115310
+          }
+        },
+        {
+          "round": 3,
+          "votes": {
+            "Chesbro, Patricia R.": 0,
+            "Kelley, Buzz A.": 0,
+            "Murkowski, Lisa": 136330,
+            "Tshibaka, Kelly C.": 117534
+          }
+        }
+      ],
+      "transfers": [
+        {
+          "source": "Kelley, Buzz A.",
+          "source_party": "R",
+          "destination": "Chesbro, Patricia R.",
+          "destination_party": "D",
+          "ballots": 901,
+          "exhausted": false
+        },
+        {
+          "source": "Kelley, Buzz A.",
+          "source_party": "R",
+          "destination": "Murkowski, Lisa",
+          "destination_party": "R",
+          "ballots": 1641,
+          "exhausted": false
+        },
+        {
+          "source": "Kelley, Buzz A.",
+          "source_party": "R",
+          "destination": "Tshibaka, Kelly C.",
+          "destination_party": "R",
+          "ballots": 3209,
+          "exhausted": false
+        },
+        {
+          "source": "Kelley, Buzz A.",
+          "source_party": "R",
+          "destination": "Exhausted",
+          "destination_party": null,
+          "ballots": 2806,
+          "exhausted": true
+        },
+        {
+          "source": "Kelley, Buzz A.",
+          "source_party": "R",
+          "destination": "Overvotes",
+          "destination_party": null,
+          "ballots": 18,
+          "exhausted": true
+        },
+        {
+          "source": "Chesbro, Patricia R.",
+          "source_party": "D",
+          "destination": "Murkowski, Lisa",
+          "destination_party": "R",
+          "ballots": 20571,
+          "exhausted": false
+        },
+        {
+          "source": "Chesbro, Patricia R.",
+          "source_party": "D",
+          "destination": "Tshibaka, Kelly C.",
+          "destination_party": "R",
+          "ballots": 2224,
+          "exhausted": false
+        },
+        {
+          "source": "Chesbro, Patricia R.",
+          "source_party": "D",
+          "destination": "Exhausted",
+          "destination_party": null,
+          "ballots": 6301,
+          "exhausted": true
+        },
+        {
+          "source": "Chesbro, Patricia R.",
+          "source_party": "D",
+          "destination": "Overvotes",
+          "destination_party": null,
+          "ballots": 38,
+          "exhausted": true
+        }
+      ],
+      "winner": "Murkowski, Lisa",
+      "candidate_parties": {
+        "Chesbro, Patricia R.": "D",
+        "Kelley, Buzz A.": "R",
+        "Murkowski, Lisa": "R",
+        "Tshibaka, Kelly C.": "R"
+      }
+    },
+    {
+      "analog_id": "2022_general_house",
+      "office": "US_HOUSE",
+      "rounds": [
+        {
+          "round": 1,
+          "votes": {
+            "Begich, Nick": 62505,
+            "Bye, Chris": 4999,
+            "Palin, Sarah": 68330,
+            "Peltola, Mary S.": 128755
+          }
+        },
+        {
+          "round": 2,
+          "votes": {
+            "Begich, Nick": 64499,
+            "Bye, Chris": 0,
+            "Palin, Sarah": 69399,
+            "Peltola, Mary S.": 129786
+          }
+        },
+        {
+          "round": 3,
+          "votes": {
+            "Begich, Nick": 0,
+            "Bye, Chris": 0,
+            "Palin, Sarah": 112471,
+            "Peltola, Mary S.": 137263
+          }
+        }
+      ],
+      "transfers": [
+        {
+          "source": "Bye, Chris",
+          "source_party": "I",
+          "destination": "Begich, Nick",
+          "destination_party": "R",
+          "ballots": 1994,
+          "exhausted": false
+        },
+        {
+          "source": "Bye, Chris",
+          "source_party": "I",
+          "destination": "Palin, Sarah",
+          "destination_party": "R",
+          "ballots": 1069,
+          "exhausted": false
+        },
+        {
+          "source": "Bye, Chris",
+          "source_party": "I",
+          "destination": "Peltola, Mary S.",
+          "destination_party": "D",
+          "ballots": 1031,
+          "exhausted": false
+        },
+        {
+          "source": "Bye, Chris",
+          "source_party": "I",
+          "destination": "Exhausted",
+          "destination_party": null,
+          "ballots": 902,
+          "exhausted": true
+        },
+        {
+          "source": "Bye, Chris",
+          "source_party": "I",
+          "destination": "Overvotes",
+          "destination_party": null,
+          "ballots": 3,
+          "exhausted": true
+        },
+        {
+          "source": "Begich, Nick",
+          "source_party": "R",
+          "destination": "Palin, Sarah",
+          "destination_party": "R",
+          "ballots": 43072,
+          "exhausted": false
+        },
+        {
+          "source": "Begich, Nick",
+          "source_party": "R",
+          "destination": "Peltola, Mary S.",
+          "destination_party": "D",
+          "ballots": 7477,
+          "exhausted": false
+        },
+        {
+          "source": "Begich, Nick",
+          "source_party": "R",
+          "destination": "Exhausted",
+          "destination_party": null,
+          "ballots": 13894,
+          "exhausted": true
+        },
+        {
+          "source": "Begich, Nick",
+          "source_party": "R",
+          "destination": "Overvotes",
+          "destination_party": null,
+          "ballots": 56,
+          "exhausted": true
+        }
+      ],
+      "winner": "Peltola, Mary S.",
+      "candidate_parties": {
+        "Begich, Nick": "R",
+        "Bye, Chris": "I",
+        "Palin, Sarah": "R",
+        "Peltola, Mary S.": "D"
+      }
+    },
+    {
+      "analog_id": "2022_special_house",
+      "office": "US_HOUSE",
+      "rounds": [
+        {
+          "round": 1,
+          "votes": {
+            "Begich, Nick": 53810,
+            "Palin, Sarah": 58973,
+            "Peltola, Mary S.": 75799
+          }
+        },
+        {
+          "round": 2,
+          "votes": {
+            "Begich, Nick": 0,
+            "Palin, Sarah": 86026,
+            "Peltola, Mary S.": 91266
+          }
+        }
+      ],
+      "transfers": [
+        {
+          "source": "Begich, Nick",
+          "source_party": "R",
+          "destination": "Palin, Sarah",
+          "destination_party": "R",
+          "ballots": 27053,
+          "exhausted": false
+        },
+        {
+          "source": "Begich, Nick",
+          "source_party": "R",
+          "destination": "Peltola, Mary S.",
+          "destination_party": "D",
+          "ballots": 15467,
+          "exhausted": false
+        },
+        {
+          "source": "Begich, Nick",
+          "source_party": "R",
+          "destination": "Exhausted",
+          "destination_party": null,
+          "ballots": 11243,
+          "exhausted": true
+        },
+        {
+          "source": "Begich, Nick",
+          "source_party": "R",
+          "destination": "Overvotes",
+          "destination_party": null,
+          "ballots": 47,
+          "exhausted": true
+        }
+      ],
+      "winner": "Peltola, Mary S.",
+      "candidate_parties": {
+        "Begich, Nick": "R",
+        "Palin, Sarah": "R",
+        "Peltola, Mary S.": "D"
+      }
+    },
+    {
+      "analog_id": "2024_general_house",
+      "office": "US_HOUSE",
+      "rounds": [
+        {
+          "round": 1,
+          "votes": {
+            "Begich, Nick": 159777,
+            "Hafner, Eric": 3558,
+            "Howe, John Wayne": 13210,
+            "Peltola, Mary S.": 152948
+          }
+        },
+        {
+          "round": 2,
+          "votes": {
+            "Begich, Nick": 160044,
+            "Hafner, Eric": 0,
+            "Howe, John Wayne": 13871,
+            "Peltola, Mary S.": 154261
+          }
+        },
+        {
+          "round": 3,
+          "votes": {
+            "Begich, Nick": 164861,
+            "Hafner, Eric": 0,
+            "Howe, John Wayne": 0,
+            "Peltola, Mary S.": 156985
+          }
+        }
+      ],
+      "transfers": [
+        {
+          "source": "Hafner, Eric",
+          "source_party": "D",
+          "destination": "Begich, Nick",
+          "destination_party": "R",
+          "ballots": 267,
+          "exhausted": false
+        },
+        {
+          "source": "Hafner, Eric",
+          "source_party": "D",
+          "destination": "Howe, John Wayne",
+          "destination_party": "I",
+          "ballots": 661,
+          "exhausted": false
+        },
+        {
+          "source": "Hafner, Eric",
+          "source_party": "D",
+          "destination": "Peltola, Mary S.",
+          "destination_party": "D",
+          "ballots": 1313,
+          "exhausted": false
+        },
+        {
+          "source": "Hafner, Eric",
+          "source_party": "D",
+          "destination": "Exhausted",
+          "destination_party": null,
+          "ballots": 1317,
+          "exhausted": true
+        },
+        {
+          "source": "Howe, John Wayne",
+          "source_party": "I",
+          "destination": "Begich, Nick",
+          "destination_party": "R",
+          "ballots": 4817,
+          "exhausted": false
+        },
+        {
+          "source": "Howe, John Wayne",
+          "source_party": "I",
+          "destination": "Peltola, Mary S.",
+          "destination_party": "D",
+          "ballots": 2724,
+          "exhausted": false
+        },
+        {
+          "source": "Howe, John Wayne",
+          "source_party": "I",
+          "destination": "Exhausted",
+          "destination_party": null,
+          "ballots": 6330,
+          "exhausted": true
+        }
+      ],
+      "winner": "Begich, Nick",
+      "candidate_parties": {
+        "Begich, Nick": "R",
+        "Hafner, Eric": "D",
+        "Howe, John Wayne": "I",
+        "Peltola, Mary S.": "D"
+      }
+    }
+  ],
+  "poll_measurement_contract": "normalized_relative_preference_peltola_vs_incumbent_sullivan_only; binary_and_multiway_question_projections; never first_choice",
+  "semantic_sha256": "8c5fa884fe8e1cbb39c528511d36a1c064b0a8d48f6794b3144dd46b8726cf43"
+}

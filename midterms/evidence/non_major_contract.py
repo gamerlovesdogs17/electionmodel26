@@ -52,7 +52,20 @@ def probability_support_status(
 
     structure = str(row.get("contest_structure") or "")
     if structure == "ranked_choice_multiway":
-        return False, "unsupported", "ranked_choice_multiway_not_supported"
+        try:
+            from midterms.evidence.alaska_rcv import RACE_ID, load_alaska_rcv_evidence
+
+            evidence = load_alaska_rcv_evidence()
+            candidate_ids = {str(value.get("candidate_id")) for value in evidence["candidate_field"]}
+            required = {
+                f"{RACE_ID}:gerald-l-heikes", f"{RACE_ID}:mary-peltola",
+                f"{RACE_ID}:dan-s-sullivan", f"{RACE_ID}:daniel-j-sullivan-jr",
+            }
+            if str(row.get("race_id")) == RACE_ID and candidate_ids == required:
+                return True, "limited_supported", "limited_validation_alaska_rcv_model"
+        except (FileNotFoundError, ValueError, KeyError, TypeError):
+            pass
+        return False, "unsupported", "ranked_choice_multiway_evidence_or_adapter_not_ready"
     if structure != NON_MAJOR_CONTEST_STRUCTURE:
         binary_value = row.get("binary_score_eligible")
         binary = (

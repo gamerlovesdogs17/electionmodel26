@@ -26,6 +26,20 @@ export type RaceForecast = {
   p_opposing_candidate?: number;
   p_dem?: number;
   p_rep?: number;
+  p_dem_caucus?: number;
+  p_rep_caucus?: number;
+  contest_structure?: string;
+  candidate_probabilities?: {
+    candidate_id: string;
+    candidate_name: string;
+    ballot_party: string;
+    caucus: string | null;
+    p_win: number;
+    first_choice_estimate?: number;
+    final_support_estimate?: number;
+  }[];
+  exhausted_ballot_share?: number;
+  authoritative_binary_aliases?: boolean;
   mean_margin: number | null;
   sd_margin: number | null;
   ci05: number | null;
@@ -53,6 +67,7 @@ export type RaceForecast = {
   is_flip?: boolean;
   favored_party?: string;
   favored_caucus?: string;
+  favored_candidate?: string;
   market_p_dem?: number;
   market_p_modeled_candidate?: number;
 };
@@ -285,11 +300,11 @@ export function primaryRace(races: RaceForecast[]): RaceForecast | null {
 }
 
 export function modeledProbability(race: RaceForecast): number {
-  return race.p_modeled_candidate ?? race.p_dem ?? 0.5;
+  return race.p_modeled_candidate ?? race.p_dem ?? race.p_dem_caucus ?? 0.5;
 }
 
 export function opposingProbability(race: RaceForecast): number {
-  return race.p_opposing_candidate ?? race.p_rep ?? 1 - modeledProbability(race);
+  return race.p_opposing_candidate ?? race.p_rep ?? race.p_rep_caucus ?? 1 - modeledProbability(race);
 }
 
 export function signedRaceMargin(race: RaceForecast, margin = race.mean_margin): string {

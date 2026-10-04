@@ -4,6 +4,34 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-10-04 — v0.9.23 Alaska ranked-choice adapter (validation limited)
+
+- Added a separate Alaska IRV adapter without changing the ordinary D-v-R
+  PyMC/state-space/stack/calibration paths or the existing binary non-major
+  adapter. The chamber draw is derived from each simulated RCV winner.
+- Sealed the official 2026 Alaska general candidate page, official primary
+  summary/precinct results, and official detailed 2022/2024 Alaska RCV reports.
+  The candidate contract keeps Gerald Heikes, Mary Peltola, incumbent Dan S.
+  Sullivan, and Daniel J. Sullivan Jr. distinct. Certified write-ins are an
+  explicit aggregate and fail closed if that unknown-caucus aggregate wins.
+- Current Alaska polling contains 14 binary normalized Peltola-versus-incumbent
+  Sullivan observations and two normalized projections from multiway questions.
+  Both types inform relative transfer/final-round preference only and never
+  enter the first-choice likelihood or ordinary binary model.
+- The first-choice layer anchors to the certified 2026 primary and allows
+  logistic-normal movement. Transfer rows are uncertain Dirichlet draws based
+  on official Alaska round transitions; the tabulator eliminates one lowest
+  candidate at a time, uses a majority of continuing ballots, and tracks
+  explicit exhaustion.
+- Four predeclared Alaska analogs produced a transfer-only leave-one-contest-out
+  diagnostic: mean final-margin error 5.372 points, mean exhaustion-share error
+  0.0243, and mean actual-winner simulation frequency 0.737. This small,
+  uneven sample supports only `limited_validation_alaska_rcv_model`; no Brier,
+  calibration, or broad performance claim is made.
+- Forecast coverage is now 20 pass / 15 warning / 0 fail. Evidence readiness
+  remains green. v0.9.23 still requires its full research rebuild and strict
+  acceptance before promotion; `PUBLIC_LIVE_ENABLED=False` remains unchanged.
+
 ## 2026-10-04 — v0.9.23 exceptional-race hardening (validation limited)
 
 - Replaced the exceptional adapter's production default of a zero-centered

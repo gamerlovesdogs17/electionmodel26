@@ -1138,6 +1138,36 @@ def main(argv: list[str] | None = None) -> None:
         ))
     )
 
+    p_alaska = sub.add_parser(
+        "validate-alaska-rcv",
+        help="Cheap Alaska RCV diagnostics from sealed official rounds; no PyMC fit",
+    )
+    p_alaska.set_defaults(
+        func=lambda a: print(json.dumps(
+            __import__(
+                "midterms.validation.alaska_rcv",
+                fromlist=["write_alaska_rcv_validation"],
+            ).write_alaska_rcv_validation(),
+            indent=2,
+            default=str,
+        ))
+    )
+
+    p_alaska_sources = sub.add_parser(
+        "prepare-alaska-rcv",
+        help="Verify and normalize already-downloaded official Alaska RCV sources",
+    )
+    p_alaska_sources.set_defaults(
+        func=lambda a: print(json.dumps(
+            __import__(
+                "midterms.evidence.alaska_rcv",
+                fromlist=["prepare_alaska_rcv_evidence"],
+            ).prepare_alaska_rcv_evidence(),
+            indent=2,
+            default=str,
+        ))
+    )
+
     p_joint_oof = sub.add_parser(
         "joint-oof-scores",
         help="Score draw-aligned historical joint distributions from the frozen OOF artifact",

@@ -2,7 +2,7 @@
   "schema_version": "current-race-poll-coverage-v3",
   "model_version": "senate-hierarchical-v0.9.23",
   "as_of": "2026-10-03",
-  "candidate_state_snapshot_sha256": "f35b435dbb7b1afe18bea39ae71d529a3de0417b7ad296b04b39d6996f298eca",
+  "candidate_state_snapshot_sha256": "857d5a557b813286f8e79a4b74e71bf160b750a41a5c34161014fc9f96d04264",
   "races": [
     {
       "race_id": "senate-2026-AK",
@@ -13,7 +13,7 @@
         "modeled_candidate_id": "senate-2026-AK:mary-peltola",
         "modeled_candidate_name": "Mary Peltola",
         "modeled_ballot_party": "D",
-        "opposing_candidate_id": "senate-2026-AK:dan-sullivan",
+        "opposing_candidate_id": "senate-2026-AK:dan-s-sullivan",
         "opposing_candidate_name": "Dan Sullivan",
         "opposing_ballot_party": "R",
         "identity_source": "reviewed_current_candidate_registry",
@@ -23,21 +23,38 @@
       "contest_structure": "ranked_choice_multiway",
       "candidate_identity_resolved": true,
       "polling_available": true,
-      "statistical_target_supported": false,
+      "statistical_target_supported": true,
       "binary_score_eligible": false,
-      "probability_model_supported": false,
-      "probability_model_support_status": "unsupported",
-      "probability_model_support_reason": "ranked_choice_multiway_not_supported",
+      "probability_model_supported": true,
+      "probability_model_support_status": "limited_supported",
+      "probability_model_support_reason": "limited_validation_alaska_rcv_model",
       "identity_sensitive": true,
       "qa_universe": true,
       "n_raw_current_polls": 17,
       "n_candidate_compatible_polls": 16,
       "n_model_safe_polls": 0,
-      "n_exception_adapter_polls": 0,
+      "n_exception_adapter_polls": 16,
       "n_excluded_obsolete_or_incompatible": 1,
       "n_excluded_identity_unresolved": 0,
-      "n_excluded_unsupported_target": 16,
-      "ordinary_model_excluded_poll_ids": [],
+      "n_excluded_unsupported_target": 0,
+      "ordinary_model_excluded_poll_ids": [
+        "vh-us-202ala3352af00",
+        "vh-us-202ala3b65f6ef",
+        "vh-us-202ala6eea5978",
+        "vh-us-202ala6fd3746f",
+        "vh-us-202alaaa70f06a",
+        "vh-us-202alaaac6776a",
+        "vh-us-202alab987738a",
+        "vh-us-202alabbd6655e",
+        "vh-us-202alabcabdd28",
+        "vh-us-202co/0acc5699",
+        "vh-us-202datde291215",
+        "vh-us-202datff65423b",
+        "vh-us-202fabecd2ecd9",
+        "vh-us-202pub023ecafb",
+        "vh-us-202qua198b0338",
+        "vh-us-202the011805d2"
+      ],
       "n_excluded_hypothetical_or_pre_nomination": 0,
       "raw_poll_ids": [
         "vh-us-202ala3352af00",
@@ -102,14 +119,13 @@
       ],
       "latest_compatible_field_end": "2026-09-30T00:00:00",
       "latest_compatible_available_at": "2026-10-02T00:00:00",
-      "status": "fail",
-      "forecast_status": "fail",
+      "status": "warning",
+      "forecast_status": "warning",
       "evidence_status": "pass",
       "evidence_reasons": [],
       "reasons": [
-        "matchup_not_selected_by_reviewed_current_registry",
-        "race_ineligible_for_binary_scoring",
-        "ranked_choice_multiway_not_supported"
+        "limited_validation_exception_model",
+        "matchup_not_selected_by_reviewed_current_registry"
       ]
     },
     {
@@ -2904,16 +2920,16 @@
       ]
     }
   ],
-  "artifact_sha256": "a893f40d8fdad998532a18e6b831656d4781b3838f0ccebcce0ed9dea723db9e",
+  "artifact_sha256": "0012bdc5090eef46c0de5e2e13adbf1796f7290ec3aa41751f70fc4ab1c7480a",
   "summary": {
     "n_races": 35,
     "n_pass": 20,
-    "n_warning": 14,
-    "n_fail": 1,
+    "n_warning": 15,
+    "n_fail": 0,
     "n_evidence_fail": 0,
     "evidence_ready": true,
-    "forecast_complete": false,
-    "promotion_eligible": false,
+    "forecast_complete": true,
+    "promotion_eligible": true,
     "source_and_model_coverage_separated": true
   }
 }

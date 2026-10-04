@@ -175,6 +175,19 @@ def _selected_material_source_hashes(
             "selected_rows_sha256": dataframe_semantic_sha256(frame),
             "source_identity": manifest_identity,
         })
+    if election_id == "senate-2026":
+        alaska_manifest = MANIFESTS_DIR / "alaska_rcv_sources.json"
+        if alaska_manifest.is_file():
+            manifest = json.loads(alaska_manifest.read_text(encoding="utf-8"))
+            hashes["alaska_rcv"] = _semantic_sha256({
+                "normalized_semantic_sha256": manifest.get("normalized_semantic_sha256"),
+                "parser_version": manifest.get("parser_version"),
+                "source_hashes": sorted(
+                    value.get("sha256") for value in (manifest.get("sources") or {}).values()
+                ),
+            })
+        else:
+            hashes["alaska_rcv"] = None
     return hashes
 
 
@@ -414,7 +427,9 @@ class Warehouse:
             races.loc[
                 races.get(
                     "contest_structure", pd.Series("", index=races.index)
-                ).astype(str).eq("non_major_party_vs_republican"),
+                ).astype(str).isin({
+                    "non_major_party_vs_republican", "ranked_choice_multiway",
+                }),
                 "race_id",
             ].astype(str)
         )

@@ -15,7 +15,7 @@
       "modeled_side": "modeled",
       "modeled_caucus": "D",
       "modeled_caucus_basis": "declared_major_party_nominee_assumption",
-      "opposing_candidate_id": "senate-2026-AK:dan-sullivan",
+      "opposing_candidate_id": "senate-2026-AK:dan-s-sullivan",
       "opposing_candidate_name": "Dan Sullivan",
       "opposing_ballot_party": "R",
       "opposing_side": "opposing",
@@ -24,8 +24,16 @@
       "contest_structure": "ranked_choice_multiway",
       "current_matchup_status": "reviewed_current",
       "reviewed_as_of": "2026-10-03",
-      "statistical_target_supported": false,
-      "note": "Current ranked-choice multi-candidate contest; binary probability target remains unsupported."
+      "statistical_target_supported": true,
+      "probability_model_support_status": "limited_supported",
+      "probability_model_support_reason": "limited_validation_alaska_rcv_model",
+      "rcv_candidate_ids": [
+        "senate-2026-AK:gerald-l-heikes",
+        "senate-2026-AK:mary-peltola",
+        "senate-2026-AK:dan-s-sullivan",
+        "senate-2026-AK:daniel-j-sullivan-jr"
+      ],
+      "note": "Official four-candidate general field; candidate-neutral Alaska RCV adapter, with binary polls restricted to Peltola versus incumbent Dan S. Sullivan."
     },
     {
       "race_id": "senate-2026-AL",

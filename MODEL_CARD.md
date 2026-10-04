@@ -1,8 +1,8 @@
 # Model card — Senate hierarchical v0.9.23 development boundary
 
 > **Validation status (2026-10-04):** v0.9.23 is an unvalidated current-cycle
-> evidence and target repair. Source readiness is green, while forecast coverage
-> still fails closed on unsupported Alaska RCV/multiway;
+> evidence and target repair. Source readiness is green and forecast coverage
+> is complete with Alaska classified as limited-validation warning;
 > no v0.9.23 release identity, evidence seal, or forecast exists. v0.9.22 remains
 > the last completed sealed research rebuild against bundle
 > `eb-3e91ca3a90628d69`, with release identity
@@ -22,7 +22,7 @@
   A separate, limited-validation adapter supports reviewed binary I-v-R
   contests. Idaho, Montana, and Nebraska use candidate-compatible polls. South
   Dakota is explicitly prior-only with zero compatible polls and very wide
-  uncertainty. Alaska RCV/multi-candidate remains unsupported.
+  uncertainty. Alaska uses a separate limited-validation RCV/multi-candidate adapter.
 
 ## Architecture (five layers — do not conflate)
 1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
@@ -57,6 +57,29 @@ the ordinary joint matrix. It uses the state-anchored structural prior described
 above, poll quality/recency/sample/clustering weights, no party-direction house
 effect, an 8-point structural predictive error, Student-t race noise, and a 20%
 common variance share tied to the ordinary joint draws.
+
+### Limited Alaska RCV adapter
+
+Alaska remains outside the ordinary binary stack. Its first-choice layer uses
+the certified 18 August 2026 primary as an anchor with uncertain movement. The
+16 compatible stored observations contain 14 binary normalized measurements and
+two normalized projections from multiway questions. All measure Peltola versus
+incumbent Dan S. Sullivan and constrain only their pairwise/final-round
+preference. Gerald Heikes and Daniel J. Sullivan Jr. retain separate first-choice
+distributions and IDs. The two certified write-ins are represented as one
+explicit residual; because their caucus is unknown, any simulated write-in win
+fails chamber accounting rather than guessing.
+
+Transfers are uncertain Dirichlet rows estimated from official 2022 Senate,
+2022 special/general House, and 2024 House Alaska IRV transitions. The adapter
+checks continuing-ballot majorities, removes one lowest candidate each round,
+redistributes only to continuing choices, and records exhaustion. A conservative
+common shock links Alaska to the ordinary national environment without placing
+it in the D-v-R latent-margin equation. The four-contest transfer-only check has
+mean final-margin error 5.372 points and mean exhaustion-share error 0.0243;
+the actual winner's average simulated frequency is 0.737. The sample is too
+small and uneven for calibration. Candidate-level probabilities are authoritative;
+legacy `p_dem`/`p_rep` are null and caucus probability is derived from winners.
 
 The predeclared analog rule found 2014 Kansas, 2020 Alaska, and 2024 Nebraska;
 only the latter two have compatible archived polls in this repository. Four
@@ -97,7 +120,7 @@ future-version research candidates.
 | Economics | Sealed ALFRED observations-by-vintage archive | All formal 60/30 cutoffs plus the current cutoff are source-ready; FRED latest, World Bank and fixtures cannot clear the gate |
 | Approval | Vendored compiled individual-poll archive plus VoteHub current polls | Formal historical cutoffs use the sealed point-in-time 30-day aggregate and pass source readiness |
 | Finance | Official FEC candidate/committee links plus Form 3 report summaries | Formal cutoffs use receipt-date availability and as-of amendment resolution; source readiness is complete |
-| Candidate state | Official race universe, bitemporal candidate events, and archived official pages | Historical replay retains the conditional identity contract. Current reviewed identities and evidence sources are ready; forecast-model coverage remains incomplete for Alaska RCV only. |
+| Candidate state | Official race universe, bitemporal candidate events, and archived official pages | Historical replay retains the conditional identity contract. Current identities and sources are ready; Alaska is covered by a separate limited-validation RCV adapter. |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
 | Markets | Kalshi | Candidate mapping plus verified candidate-win/exclusive/exhaustive contract-family semantics required before normalization |
@@ -217,7 +240,8 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 - The non-major-party adapter has only four historical lead-time cases across
   two scorable elections. It is labeled limited validation and makes no
   calibration claim. Zero-poll South Dakota is explicitly prior-only with a
-  31.097-point predictive SD; Alaska RCV/multiway remains unsupported.
+  31.097-point predictive SD. Alaska RCV has only four transfer analogs and is
+  separately labeled limited validation.
 - Candidate-neutral race output is authoritative for non-major candidates.
   Numeric `p_dem`/`p_rep` and Democratic candidate aliases exist only for real
   D-v-R ballots. A complete chamber forecast fails if any active contest lacks

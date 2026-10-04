@@ -211,7 +211,8 @@ def test_registry_has_reviewed_sc_nh_and_independent_ballot_identity():
     assert rows["NE"]["modeled_ballot_party"] == "I"
     assert rows["NE"]["statistical_target_supported"] is False
     assert rows["AK"]["contest_structure"] == "ranked_choice_multiway"
-    assert rows["AK"]["statistical_target_supported"] is False
+    assert rows["AK"]["statistical_target_supported"] is True
+    assert rows["AK"]["probability_model_support_status"] == "limited_supported"
 
 
 def test_current_registry_is_unavailable_to_historical_cycles_and_earlier_as_of(tmp_path: Path):
@@ -383,11 +384,12 @@ def test_generic_ballot_readiness_does_not_inherit_matchup_failure():
     assert report["domains"]["polls"]["status"] == "ready"
     assert report["domains"]["generic_ballot"]["status"] == "ready"
     assert report["evidence_source_ready"] is True
-    assert report["forecast_coverage_ready"] is False
+    assert report["forecast_coverage_ready"] is True
     assert report["forecast_coverage"]["summary"]["evidence_ready"] is True
     alaska = next(
         row for row in report["domains"]["polls"]["current_race_coverage"]["races"]
         if row["state"] == "AK"
     )
     assert alaska["evidence_status"] == "pass"
-    assert alaska["probability_model_support_status"] == "unsupported"
+    assert alaska["probability_model_support_status"] == "limited_supported"
+    assert alaska["forecast_status"] == "warning"

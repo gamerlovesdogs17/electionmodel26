@@ -119,6 +119,35 @@ def simulate_chamber(
     n_draws, n_races = margins.shape
     wins = (margins >= 0).astype(int)
 
+    # Alaska's adapter retains the multi-candidate winner as the authoritative
+    # draw.  Its signed column exists only to fit the common FitResult shape;
+    # chamber accounting must therefore reconstruct caucus wins from candidate
+    # identity before computing seats.
+    alaska_diagnostics = (fit.diagnostics or {}).get("alaska_rcv_adapter") or {}
+    if not alaska_diagnostics and (fit.diagnostics or {}).get("method") == "limited_validation_alaska_rcv_model-v1":
+        alaska_diagnostics = fit.diagnostics or {}
+    alaska_winners = np.asarray(alaska_diagnostics.get("winner_indices") or [], dtype=int)
+    alaska_race_id = str(alaska_diagnostics.get("race_id") or "")
+    if alaska_race_id and alaska_race_id in fit.race_ids:
+        if alaska_winners.size != n_post:
+            raise ValueError("Alaska RCV candidate-winner draws are not aligned with posterior draws")
+        if n_draws != alaska_winners.size:
+            if n_sims is None or int(n_sims) <= alaska_winners.size:
+                alaska_winners = alaska_winners[:n_draws]
+            else:
+                resample_rng = np.random.default_rng(int(sim_seed if sim_seed is not None else 0))
+                alaska_winners = alaska_winners[
+                    resample_rng.integers(0, alaska_winners.size, size=n_draws)
+                ]
+        caucuses = list(alaska_diagnostics.get("caucuses") or [])
+        if not caucuses or np.any((alaska_winners < 0) | (alaska_winners >= len(caucuses))):
+            raise ValueError("Alaska RCV winner identity cannot be mapped to a caucus")
+        winner_caucuses = np.asarray([caucuses[index] for index in alaska_winners], dtype=object)
+        if not set(winner_caucuses.tolist()).issubset({"D", "R"}):
+            raise ValueError("Alaska RCV winner has no explicit chamber-caucus mapping")
+        alaska_index = fit.race_ids.index(alaska_race_id)
+        wins[:, alaska_index] = (winner_caucuses == "D").astype(int)
+
     # An active contest without predictive draws is an incomplete chamber
     # forecast.  Incumbent/held_by is historical state, not a deterministic
     # substitute for the missing election distribution.
@@ -253,6 +282,39 @@ def simulate_chamber(
         favored_candidate_id = None if row is None else row.get(
             "modeled_candidate_id" if p_modeled >= 0.5 else "opposing_candidate_id"
         )
+        if rid == alaska_diagnostics.get("race_id"):
+            candidate_ids = list(alaska_diagnostics["candidate_ids"])
+            candidate_names = list(alaska_diagnostics["candidate_names"])
+            parties = list(alaska_diagnostics["ballot_parties"])
+            caucuses = list(alaska_diagnostics["caucuses"])
+            probabilities = [float(np.mean(alaska_winners == index)) for index in range(len(candidate_ids))]
+            favored_index = int(np.argmax(probabilities))
+            p_dem_caucus = float(sum(probabilities[index] for index, caucus in enumerate(caucuses) if caucus == "D"))
+            summary = {
+                "race_id": rid, "state": state, "seat_class": seat_class,
+                "contest_structure": "ranked_choice_multiway", "method": alaska_diagnostics.get("method"),
+                "candidate_probabilities": [
+                    {"candidate_id": candidate_ids[index], "candidate_name": candidate_names[index],
+                     "ballot_party": parties[index], "caucus": caucuses[index], "p_win": probabilities[index],
+                     "first_choice_estimate": alaska_diagnostics["first_choice_mean"][index],
+                     "final_support_estimate": alaska_diagnostics["final_support_mean"][index]}
+                    for index in range(len(candidate_ids))
+                ],
+                "favored_candidate_id": candidate_ids[favored_index],
+                "favored_candidate": candidate_names[favored_index],
+                "favored_party": parties[favored_index], "favored_caucus": caucuses[favored_index],
+                "caucus": caucuses[favored_index], "p_dem_caucus": p_dem_caucus,
+                "p_rep_caucus": 1.0 - p_dem_caucus, "p_dem": None, "p_rep": None,
+                "p_modeled_candidate": None, "p_opposing_candidate": None,
+                "mean_margin": None, "sd_margin": None, "ci05": None, "ci95": None,
+                "prior_lean": prior_lean, "incumbent_party": incumbent, "is_open": is_open,
+                "held_by": held_by, "election_phase": election_phase, "vacancy_reason": vacancy_reason,
+                "rating": "RCV · limited validation", "exhausted_ballot_share": alaska_diagnostics["exhausted_mean"],
+                "uncertainty_metadata": alaska_diagnostics.get("uncertainty"),
+                "authoritative_binary_aliases": False,
+            }
+            summaries.append(summary)
+            continue
         summary = {
                 "race_id": rid,
                 "state": state,
@@ -317,7 +379,10 @@ def simulate_chamber(
                 },
             })
         summaries.append(summary)
-    summaries.sort(key=lambda x: abs(x["p_modeled_candidate"] - 0.5))
+    summaries.sort(key=lambda x: abs(float(
+        x.get("p_modeled_candidate")
+        if x.get("p_modeled_candidate") is not None else x.get("p_dem_caucus", 0.5)
+    ) - 0.5))
     return sim, summaries
 
 
@@ -326,6 +391,10 @@ def independent_bernoulli_foil(
 ) -> np.ndarray:
     """Documented foil: independent Bernoulli from marginals (NOT used for production totals)."""
     rng = np.random.default_rng(seed)
-    ps = np.array([s["p_modeled_candidate"] for s in summaries])
+    ps = np.array([
+        s.get("p_modeled_candidate")
+        if s.get("p_modeled_candidate") is not None else s.get("p_dem_caucus")
+        for s in summaries
+    ], dtype=float)
     wins = rng.random((n_draws, len(ps))) < ps
     return held_dem + wins.sum(axis=1)

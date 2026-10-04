@@ -92,6 +92,38 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
           </thead>
           <tbody>
             {rows.map((r) => {
+              if (
+                r.contest_structure === "ranked_choice_multiway" &&
+                r.candidate_probabilities?.length
+              ) {
+                return (
+                  <tr key={r.race_id} className="border-t border-[var(--line)] bg-[var(--panel)]/35 align-top">
+                    <td className="px-3 py-3 font-medium text-[var(--ink)]">
+                      {r.state}
+                      <span className="ml-2 rounded border border-[var(--line)] px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wide text-[var(--muted)]">RCV</span>
+                    </td>
+                    <td className="hidden px-3 py-3 lg:table-cell">
+                      <div className="space-y-1">
+                        {[...r.candidate_probabilities].sort((a, b) => b.p_win - a.p_win).map((candidate) => (
+                          <div key={candidate.candidate_id} className="flex items-center justify-between gap-3 text-xs">
+                            <span>{candidate.candidate_name} <span className="text-[var(--muted)]">({candidate.ballot_party})</span></span>
+                            <span className="tabular-nums">{pct(candidate.p_win, 1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 text-xs font-medium text-[var(--ink)]">RCV · limited</td>
+                    <td className="px-3 py-3 text-xs text-[var(--muted)]">
+                      Candidate probabilities
+                      <span className="mt-1 block">D-caucus seat: {pct(r.p_dem_caucus, 1)}</span>
+                    </td>
+                    <td className="px-3 py-3 text-[var(--muted)]">—</td>
+                    <td className="hidden px-3 py-3 text-xs text-[var(--muted)] sm:table-cell">
+                      Exhaustion: {pct(r.exhausted_ballot_share, 1)}
+                    </td>
+                  </tr>
+                );
+              }
               const demParty = (r.modeled_ballot_party ?? r.dem_party) === "I" ? "I" : "D";
               const pModeled = modeledProbability(r);
               return (
