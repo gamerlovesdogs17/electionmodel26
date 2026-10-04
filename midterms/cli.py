@@ -1119,6 +1119,25 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
+    p_non_major = sub.add_parser(
+        "validate-non-major-adapter",
+        help=(
+            "Cheap separate replay for the limited binary non-major-party adapter; "
+            "uses existing archives and performs no PyMC fit"
+        ),
+    )
+    p_non_major.add_argument("--current-as-of", default="2026-10-03")
+    p_non_major.set_defaults(
+        func=lambda a: print(json.dumps(
+            __import__(
+                "midterms.validation.non_major_adapter",
+                fromlist=["write_non_major_adapter_validation"],
+            ).write_non_major_adapter_validation(current_as_of=a.current_as_of),
+            indent=2,
+            default=str,
+        ))
+    )
+
     p_joint_oof = sub.add_parser(
         "joint-oof-scores",
         help="Score draw-aligned historical joint distributions from the frozen OOF artifact",

@@ -7,7 +7,6 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-
 # Full IE-style ladder. Cook "Safe" maps to Solid; Tilt is first-class (not Lean).
 RATING_ORDER = (
     "Solid D",
@@ -64,7 +63,9 @@ def ratings_table_from_forecasts(race_summaries: list[dict]) -> pd.DataFrame:
             {
                 "race_id": s["race_id"],
                 "state": s["state"],
-                "rating": s.get("rating") or rating_from_probability(s["p_dem"]),
+                "rating": s.get("rating") or rating_from_probability(
+                    s.get("p_modeled_candidate", s.get("p_dem", 0.5))
+                ),
                 "source": "model_derived",
             }
         )

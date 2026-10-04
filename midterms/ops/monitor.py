@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -59,9 +59,16 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
     bad = [
         r["race_id"]
         for r in races
-        if r.get("rating") != rating_from_probability(float(r.get("p_dem") or 0.5))
+        if r.get("rating") != rating_from_probability(float(
+            r.get("p_modeled_candidate", r.get("p_dem", 0.5))
+        ))
     ]
-    add("ratings_match_p_dem", len(bad) == 0, bad[:5], "rating/probability inconsistency")
+    add(
+        "ratings_match_modeled_probability",
+        len(bad) == 0,
+        bad[:5],
+        "rating/probability inconsistency",
+    )
 
     # Duplicate race IDs
     ids = [r.get("race_id") for r in races]
@@ -79,7 +86,7 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
     core = str(diag.get("spine_method") or diag.get("core_method") or "")
     prod_ok = method.startswith("pymc") or (
         method.startswith("ensemble_stack")
-        and (core.startswith("pymc") or core == "" or core.startswith("ensemble"))
+        and (core.startswith(("pymc", "ensemble")) or core == "")
         and not core.startswith("fast")
         and not core.startswith("degraded")
     )
@@ -89,7 +96,7 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
         {"method": method, "core_method": core},
         f"non-production method in artifact: method={method} core={core}",
     )
-    if method.startswith("degraded") or method.startswith("fast") or core.startswith("fast"):
+    if method.startswith(("degraded", "fast")) or core.startswith("fast"):
         alerts.append(f"non-production method in artifact: method={method} core={core}")
 
     null_m = [
@@ -271,7 +278,7 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
 
     stack_path = ARTIFACTS_DIR / "cycle_replay_all.json"
     if stack_path.exists():
-        age_h = (datetime.now(timezone.utc).timestamp() - stack_path.stat().st_mtime) / 3600.0
+        age_h = (datetime.now(UTC).timestamp() - stack_path.stat().st_mtime) / 3600.0
         soft.append({"name": "stack_weights_fresh", "ok": age_h < 24 * 30, "detail": {"age_hours": age_h}})
         if age_h >= 24 * 30:
             alerts.append("stack weights artifact older than 30 days — rerun replay-cycle --all")
@@ -316,7 +323,7 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
 
         frame = pd.read_parquet(polls_path, columns=["available_at"])
         observed = pd.to_datetime(frame["available_at"], errors="coerce").max() if len(frame) else None
-        retrieved = datetime.fromtimestamp(polls_path.stat().st_mtime, tz=timezone.utc)
+        retrieved = datetime.fromtimestamp(polls_path.stat().st_mtime, tz=UTC)
         freshness = classify_freshness(
             "polls", retrieved_at=retrieved,
             observed_at=observed if pd.notna(observed) else None,
@@ -359,7 +366,7 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
     ok = all(c["ok"] for c in checks)
     report = {
         "ok": ok,
-        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "checked_at": datetime.now(UTC).isoformat(),
         "model_version": art.get("model_version") or MODEL_VERSION,
         "run_id": run_id,
         "checks": checks,

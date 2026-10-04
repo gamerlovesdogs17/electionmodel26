@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -65,7 +65,7 @@ def write_peer_snapshots(path: Path | None = None) -> dict[str, Any]:
     MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
 
     payload = json.loads(json.dumps(DEFAULT_PEER_SNAPSHOT))
-    payload["retrieved_at"] = datetime.now(timezone.utc).isoformat()
+    payload["retrieved_at"] = datetime.now(UTC).isoformat()
 
     control = load_control_market()
     races = load_race_markets()
@@ -113,10 +113,15 @@ def compare_to_peers(artifact: dict[str, Any]) -> dict[str, Any]:
     rows = []
     for st in key:
         r = races.get(st)
+        comparable = r is not None and r.get("p_dem") is not None
         row: dict[str, Any] = {
             "state": st,
-            "ours": None if r is None else float(r["p_dem"]),
+            "ours": float(r["p_dem"]) if comparable else None,
             "rating": None if r is None else r.get("rating"),
+            "comparison_status": (
+                "ordinary_dem_vs_rep" if comparable else "not_comparable_non_dem_target"
+                if r is not None else "race_missing"
+            ),
         }
         for src, block in (peers.get("sources") or {}).items():
             race_map = block.get("races") or {}

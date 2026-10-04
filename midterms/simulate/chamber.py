@@ -12,10 +12,10 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from midterms.evidence.tickets import ticket_for_state
 from midterms.evidence.schema import is_active_ballot_row
-from midterms.model.pymc_model import FitResult
+from midterms.evidence.tickets import ticket_for_state
 from midterms.model.overlays import rating_from_probability
+from midterms.model.pymc_model import FitResult
 
 
 def vp_tiebreak_for_election_year(year: int) -> str:
@@ -67,7 +67,7 @@ def expand_joint_draws(
     margins = np.asarray(margins, dtype=float)
     if margins.ndim != 2 or margins.shape[0] == 0:
         raise ValueError("margins must be (n_draws, n_races) with n_draws > 0")
-    n_post, n_races = margins.shape
+    n_post, _n_races = margins.shape
     target = int(n_sims)
     if target <= n_post:
         return margins[:target].copy()
@@ -179,14 +179,24 @@ def simulate_chamber(
     )
 
     contested_ix = contested.set_index("race_id")
+    adapter_diagnostics = (fit.diagnostics or {}).get("exceptional_adapter") or {}
+    if not adapter_diagnostics and (fit.diagnostics or {}).get("target") == "modeled_candidate_margin":
+        adapter_diagnostics = fit.diagnostics or {}
+    adapter_records = {
+        str(record.get("race_id")): record
+        for record in adapter_diagnostics.get("records", [])
+    }
     summaries = []
     for i, rid in enumerate(fit.race_ids):
         draw_i = margins[:, i]
-        p_dem = float(wins[:, i].mean())
+        p_modeled = float(wins[:, i].mean())
         state = fit.states[i]
         row = contested_ix.loc[rid] if rid in contested_ix.index else None
         held_by = None if row is None else str(row["held_by"])
-        prior_lean = None if row is None else float(row["prior_lean"])
+        prior_raw = None if row is None else row.get("prior_lean")
+        prior_lean = (
+            None if prior_raw is None or pd.isna(prior_raw) else float(prior_raw)
+        )
         incumbent = None
         if row is not None and not pd.isna(row["incumbent_party"]):
             incumbent = str(row["incumbent_party"])
@@ -200,6 +210,16 @@ def simulate_chamber(
         ticket = ticket_for_state(state)
         dem_name = str(ticket["dem_name"])
         rep_name = str(ticket["rep_name"])
+        modeled_name = (
+            dem_name
+            if row is None or pd.isna(row.get("modeled_candidate_name"))
+            else str(row.get("modeled_candidate_name"))
+        )
+        opposing_name = (
+            rep_name
+            if row is None or pd.isna(row.get("opposing_candidate_name"))
+            else str(row.get("opposing_candidate_name"))
+        )
         row_ballot_party = None if row is None else row.get("modeled_ballot_party")
         dem_party = str(
             row_ballot_party if pd.notna(row_ballot_party) else ticket.get("dem_party") or "D"
@@ -209,8 +229,14 @@ def simulate_chamber(
         mean_m = float(fit.mean_margin[i])
         dem_share = 50.0 + mean_m / 2.0
         rep_share = 100.0 - dem_share
-        rating = rating_from_probability(p_dem)
-        favored_caucus = "D" if p_dem >= 0.5 else "R"
+        rating = rating_from_probability(p_modeled)
+        modeled_caucus = None if row is None else row.get("modeled_caucus")
+        opposing_caucus = None if row is None else row.get("opposing_caucus")
+        favored_caucus = str(
+            modeled_caucus if p_modeled >= 0.5 else opposing_caucus
+        )
+        if favored_caucus not in {"D", "R"}:
+            favored_caucus = "D" if p_modeled >= 0.5 else "R"
         favored_party = dem_party if favored_caucus == "D" else "R"
         held_caucus = (
             str(row.get("held_caucus")) if held_by == "I" and row is not None
@@ -218,15 +244,17 @@ def simulate_chamber(
         )
         is_flip = None if held_caucus is None else favored_caucus != held_caucus
         favored_candidate_id = None if row is None else row.get(
-            "modeled_candidate_id" if favored_caucus == "D" else "opposing_candidate_id"
+            "modeled_candidate_id" if p_modeled >= 0.5 else "opposing_candidate_id"
         )
-        summaries.append(
-            {
+        summary = {
                 "race_id": rid,
                 "state": state,
                 "seat_class": seat_class,
-                "p_dem": p_dem,
-                "p_rep": float(1.0 - p_dem),
+                "p_modeled_candidate": p_modeled,
+                "p_opposing_candidate": float(1.0 - p_modeled),
+                "modeled_candidate_margin": mean_m,
+                "modeled_candidate_share": round(dem_share, 1),
+                "opposing_candidate_share": round(rep_share, 1),
                 "mean_margin": mean_m,
                 "sd_margin": float(fit.sd_margin[i]),
                 "ci05": float(np.quantile(draw_i, 0.05)),
@@ -239,26 +267,50 @@ def simulate_chamber(
                 "vacancy_reason": vacancy_reason,
                 "dem_candidate": dem_name,
                 "rep_candidate": rep_name,
+                "modeled_candidate": modeled_name,
+                "opposing_candidate": opposing_name,
                 "dem_party": dem_party,
                 "modeled_candidate_id": None if row is None else row.get("modeled_candidate_id"),
                 "opposing_candidate_id": None if row is None else row.get("opposing_candidate_id"),
                 "modeled_ballot_party": dem_party,
                 "opposing_ballot_party": "R",
-                "modeled_caucus": None if row is None else row.get("modeled_caucus"),
-                "opposing_caucus": None if row is None else row.get("opposing_caucus"),
+                "modeled_caucus": modeled_caucus,
+                "opposing_caucus": opposing_caucus,
                 "modeled_caucus_basis": None if row is None else row.get("modeled_caucus_basis"),
                 "opposing_caucus_basis": None if row is None else row.get("opposing_caucus_basis"),
                 "favored_candidate_id": favored_candidate_id,
                 "caucus": favored_caucus,
-                "dem_share": round(dem_share, 1),
-                "rep_share": round(rep_share, 1),
                 "rating": rating,
                 "is_flip": is_flip,
                 "favored_party": favored_party,
                 "favored_caucus": favored_caucus,
             }
-        )
-    summaries.sort(key=lambda x: abs(x["p_dem"] - 0.5))
+        if dem_party == "D":
+            # Backward-compatible aliases are only semantically valid for an
+            # actual Democratic-vs-Republican ballot contest.
+            summary.update({
+                "p_dem": p_modeled,
+                "p_rep": float(1.0 - p_modeled),
+                "dem_share": round(dem_share, 1),
+                "rep_share": round(rep_share, 1),
+            })
+        else:
+            adapter_record = adapter_records.get(str(rid), {})
+            summary.update({
+                "method": adapter_diagnostics.get("method"),
+                "uncertainty_metadata": {
+                    key: adapter_record.get(key)
+                    for key in (
+                        "n_candidate_compatible_polls",
+                        "enop",
+                        "posterior_sd",
+                        "predictive_sd",
+                        "house_effect_treatment",
+                    )
+                },
+            })
+        summaries.append(summary)
+    summaries.sort(key=lambda x: abs(x["p_modeled_candidate"] - 0.5))
     return sim, summaries
 
 
@@ -267,6 +319,6 @@ def independent_bernoulli_foil(
 ) -> np.ndarray:
     """Documented foil: independent Bernoulli from marginals (NOT used for production totals)."""
     rng = np.random.default_rng(seed)
-    ps = np.array([s["p_dem"] for s in summaries])
+    ps = np.array([s["p_modeled_candidate"] for s in summaries])
     wins = rng.random((n_draws, len(ps))) < ps
     return held_dem + wins.sum(axis=1)

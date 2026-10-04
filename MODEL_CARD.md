@@ -1,7 +1,7 @@
 # Model card — Senate hierarchical v0.9.23 development boundary
 
-> **Validation status (2026-10-03):** v0.9.23 is an unvalidated current-cycle
-> evidence repair. Current candidate-source and matchup coverage fail closed;
+> **Validation status (2026-10-04):** v0.9.23 is an unvalidated current-cycle
+> evidence and target repair. Current matchup coverage still fails closed;
 > no v0.9.23 release identity, evidence seal, or forecast exists. v0.9.22 remains
 > the last completed sealed research rebuild against bundle
 > `eb-3e91ca3a90628d69`, with release identity
@@ -18,8 +18,10 @@
   identities. The four modeled Independents and held Independent seats retain
   `I` ballot/held labels and use a user-declared Democratic-caucus accounting
   assumption. Ballot party never changes because of that caucus assumption.
-  Current I-v-R and Alaska RCV/multi-candidate contests are blocked pending
-  separately validated targets, and missing identity metadata blocks accounting.
+  A separate, limited-validation adapter supports reviewed binary I-v-R
+  contests only when at least one candidate-compatible poll exists. Idaho,
+  Montana, and Nebraska meet that narrow contract; South Dakota is withheld for
+  zero compatible polls. Alaska RCV/multi-candidate remains unsupported.
 
 ## Architecture (five layers — do not conflate)
 1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
@@ -27,6 +29,24 @@
 3. **Distributional mixture code** — nonnegative weights from empirical predictive-mixture CRPS over frozen draws. Mean-score softmax is diagnostic only. The validated v0.9.22 stack assigns approximately 21.9% to `pymc` and 78.1% to `state_space`; other candidates receive zero production mass.
 4. **Overlays** — expert ratings + Kalshi race/control soft pulls are optional. Publication use requires an exact-weight timestamp-pure nested-OOS validation contract; otherwise the publication fit runs core-only and records the layers as compare-only.
 5. **Final correlated chamber simulator** — joint margin draws → seats → control. Simulation count is separate from posterior sample count (`n_joint_sims` vs `n_posterior_samples`). Independent Bernoulli foil is diagnostic only.
+
+### Limited non-major-party adapter
+
+The validated ordinary stack remains a D-v-R model. Reviewed binary
+Independent-versus-Republican races are removed before every ordinary model,
+stack candidate, baseline, and overlay fit. A separate adapter estimates the
+normalized `modeled_candidate_margin`, then appends correlated draw columns to
+the ordinary joint matrix. It uses a fixed weak Normal(0, 20) prior, poll
+quality/recency/sample/clustering weights, no party-direction house effect, an
+8-point structural predictive error, Student-t race noise, and a 20% common
+variance share tied to the ordinary joint draws.
+
+The predeclared analog rule found 2014 Kansas, 2020 Alaska, and 2024 Nebraska;
+only the latter two have compatible archived polls in this repository. Four
+formal 60/30-day cases yield MAE 6.319 points, empirical CRPS 3.923, Brier
+0.145, and 4/4 90% interval coverage. This is sparse evidence and does not
+support a calibration claim. The adapter is not an ensemble member and its
+validation cannot be used to validate or retune the ordinary stack.
 
 ## Update cadence
 `forecast` / `refresh`. Releases: `data/manifests/releases.jsonl` + signed `data/releases/{run_id}/`.
@@ -59,7 +79,7 @@ future-version research candidates.
 | Economics | Sealed ALFRED observations-by-vintage archive | All formal 60/30 cutoffs plus the current cutoff are source-ready; FRED latest, World Bank and fixtures cannot clear the gate |
 | Approval | Vendored compiled individual-poll archive plus VoteHub current polls | Formal historical cutoffs use the sealed point-in-time 30-day aggregate and pass source readiness |
 | Finance | Official FEC candidate/committee links plus Form 3 report summaries | Formal cutoffs use receipt-date availability and as-of amendment resolution; source readiness is complete |
-| Candidate state | Official race universe, bitemporal candidate events, and archived official pages | Historical replay retains the conditional identity contract. Current 2026 labels require traceable identity for matchup selection; the curated ticket registry is diagnostic-only and cannot clear publication eligibility. Current source completion remains pending |
+| Candidate state | Official race universe, bitemporal candidate events, and archived official pages | Historical replay retains the conditional identity contract. Current reviewed identities are explicit; statistical-target coverage remains red for Alaska RCV and zero-poll South Dakota. |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
 | Markets | Kalshi | Candidate mapping plus verified candidate-win/exclusive/exhaustive contract-family semantics required before normalization |
@@ -176,6 +196,9 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 - Independent modeled candidates count toward the Democratic caucus **by a
   declared modeling assumption**, not by ballot party or a verified individual
   caucus pledge. The ballot party and display identity remain Independent.
+- The non-major-party adapter has only four historical lead-time cases across
+  two scorable elections. It is labeled limited validation, makes no calibration
+  claim, and cannot support Alaska RCV/multiway or zero-poll contests.
 - Static PyMC is the reference spine. Current historical OOF stack weights
   give zero production mass to `pymc_dynamic`; this is an OOF selection result,
   not a manual adjustment.

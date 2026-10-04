@@ -4,6 +4,38 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-10-04 — v0.9.23 limited non-major-party adapter (validation limited)
+
+- Added a separate candidate-neutral adapter for reviewed binary Independent
+  versus Republican contests. Its estimand is normalized
+  `modeled_candidate_margin`; it does not relabel an Independent as a Democrat
+  and does not enter the ordinary D-v-R PyMC, state-space, stack, calibration,
+  or historical OOF machinery.
+- The adapter uses a fixed weak zero-centered 20-point prior, transferable poll
+  quality/recency/sample/clustering weights, an 8-point structural predictive
+  error, heavy-tailed race noise, and a shared shock derived from the ordinary
+  joint draw matrix. Party-direction house effects are excluded because they
+  are not portable to an Independent target.
+- A predeclared historical rule identified 2014 Kansas, 2020 Alaska, and 2024
+  Nebraska. The repository has compatible frozen polls for the latter two,
+  producing four 60/30-day evaluation cases. Aggregate MAE is 6.319 points,
+  empirical CRPS 3.923, Brier 0.145, and 90% interval coverage 4/4. This sample
+  is too small for a calibration claim; the artifact is explicitly classified
+  `limited_validation_exception_model`.
+- Current coverage supports Idaho, Montana, and Nebraska through this limited
+  adapter. South Dakota remains withheld because it has no compatible poll,
+  and Alaska ranked-choice/multiway remains unsupported. The source/readiness
+  gate therefore remains red (20 pass, 13 warning, 2 fail).
+- Candidate-neutral race outputs now expose modeled/opposing probabilities,
+  shares, identity, ballot party, and caucus separately. D/R aliases remain
+  only on actual D-v-R rows. Caucus accounting still applies the declared
+  Independent-to-Democratic-caucus assumption while display identity remains
+  Independent.
+- Historical ordinary projections are byte-semantically unchanged at every
+  formal 2018/2020/2022/2024 60/30 cutoff, so no ordinary OOF artifact was
+  regenerated. No production forecast, PyMC fit, stack fit, simulation, source
+  refresh, or release was run.
+
 ## 2026-10-03 — v0.9.23 current candidate/matchup evidence repair (validation pending)
 
 - Opened `senate-hierarchical-v0.9.23` because candidate identity, poll-target

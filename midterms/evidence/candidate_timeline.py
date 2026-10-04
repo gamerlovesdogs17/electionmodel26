@@ -524,6 +524,25 @@ def apply_candidate_state_contract(
                     })
             score_exclusions.append({"race_id": race_id, "reason": score_reason})
 
+        probability_supported = bool(score_eligible)
+        probability_support_status_value = (
+            "ordinary_binary_model" if score_eligible else "unsupported"
+        )
+        probability_support_reason = (
+            "ordinary_dem_vs_rep" if score_eligible else score_reason
+        )
+        if year == 2026:
+            from midterms.evidence.non_major_contract import probability_support_status
+
+            probability_supported, probability_support_status_value, probability_support_reason = (
+                probability_support_status(
+                    race,
+                    n_compatible_polls=len(
+                        candidate_compatible_by_race.get(race_id, [])
+                    ),
+                )
+            )
+
         values = {
             "candidate_state": state,
             "candidate_state_reason": reason,
@@ -534,7 +553,12 @@ def apply_candidate_state_contract(
             "binary_score_exclusion_reason": score_reason,
         }
         if year == 2026:
-            values["candidate_identity_eligible"] = bool(eligible)
+            values.update({
+                "candidate_identity_eligible": bool(eligible),
+                "probability_model_supported": bool(probability_supported),
+                "probability_model_support_status": probability_support_status_value,
+                "probability_model_support_reason": probability_support_reason,
+            })
         for column, value in values.items():
             out.at[index, column] = value
         race_evidence = {
@@ -547,8 +571,18 @@ def apply_candidate_state_contract(
             record = {
                 "race_id": race_id,
                 **values,
-                "modeled_side": "D",
-                "opposing_side": "R",
+                "modeled_side": (
+                    "modeled"
+                    if str(race.get("contest_structure") or "")
+                    == "non_major_party_vs_republican"
+                    else "D"
+                ),
+                "opposing_side": (
+                    "opposing"
+                    if str(race.get("contest_structure") or "")
+                    == "non_major_party_vs_republican"
+                    else "R"
+                ),
                 "timeline_status": race.get("candidate_timeline_status"),
                 "modeled_candidate_id": (
                     race.get("modeled_candidate_id") if identity_resolved else None
@@ -615,22 +649,22 @@ def apply_candidate_state_contract(
         record["candidate_identity_resolved"]
         for record in records if record["candidate_identity_required"]
     )
-    current_binary_blockers = [
+    current_probability_blockers = [
         record["race_id"] for record in records
         if str(record.get("race_id") or "").startswith("senate-2026-")
-        and not record["binary_score_eligible"]
+        and not record["probability_model_supported"]
     ]
     publication_eligible = (
-        not identity_missing and traceable_required and not current_binary_blockers
+        not identity_missing and traceable_required and not current_probability_blockers
     )
     reasons = []
     if identity_missing:
         reasons.append(
             f"{len(identity_missing)} identity-sensitive races lack point-in-time resolution"
         )
-    if current_binary_blockers:
+    if current_probability_blockers:
         reasons.append(
-            f"{len(current_binary_blockers)} current races lack a supported binary target"
+            f"{len(current_probability_blockers)} current races lack a supported probability target"
         )
     metadata = {
         **timeline_meta,
@@ -671,7 +705,9 @@ def apply_candidate_state_contract(
             race_id: sorted(set(poll_ids))
             for race_id, poll_ids in sorted(candidate_compatible_by_race.items())
         }
-        metadata["current_binary_target_blocked_race_ids"] = sorted(current_binary_blockers)
+        metadata["current_probability_target_blocked_race_ids"] = sorted(
+            current_probability_blockers
+        )
     return out, safe_polls.reset_index(drop=True), metadata
 
 

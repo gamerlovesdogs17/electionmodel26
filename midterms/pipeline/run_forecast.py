@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -456,19 +456,26 @@ def run_forecast(
     snap.races["pres_approval"] = float(appr["net_approval"])
     snap.races["white_house_party"] = appr["white_house_party"]
 
+    # The validated stack remains an ordinary D-v-R model. Exceptional
+    # candidate-neutral targets are fit separately and appended only after all
+    # ordinary stacking and optional overlays are complete.
+    from midterms.model.non_major_adapter import ordinary_model_snapshot
+
+    model_snap = ordinary_model_snapshot(snap)
+
     if method == "pymc":
         try:
             fit = fit_pymc(
-                snap, draws=draws, tune=tune, chains=chains, seed=seed,
+                model_snap, draws=draws, tune=tune, chains=chains, seed=seed,
                 generic_ballot=generic_ballot, poll_structure=selected_poll_structure,
                 target_accept=target_accept,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             if not allow_fast_fallback:
                 raise
             layer_warnings.append({"layer": "pymc", "error": str(exc), "degraded": "fast"})
             fit = fit_fast_approximation(
-                snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
+                model_snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
             )
             fit.diagnostics = {
                 **(fit.diagnostics or {}),
@@ -480,16 +487,16 @@ def run_forecast(
     elif method == "pymc_dynamic":
         try:
             fit = fit_pymc_dynamic(
-                snap, draws=draws, tune=tune, chains=chains, seed=seed,
+                model_snap, draws=draws, tune=tune, chains=chains, seed=seed,
                 generic_ballot=generic_ballot, poll_structure=selected_poll_structure,
                 target_accept=target_accept,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             if not allow_fast_fallback:
                 raise
             layer_warnings.append({"layer": "pymc_dynamic", "error": str(exc), "degraded": "pymc"})
             fit = fit_pymc(
-                snap, draws=draws, tune=tune, chains=chains, seed=seed,
+                model_snap, draws=draws, tune=tune, chains=chains, seed=seed,
                 generic_ballot=generic_ballot, poll_structure=selected_poll_structure,
                 target_accept=target_accept,
             )
@@ -500,11 +507,11 @@ def run_forecast(
             }
     elif method == "state_space":
         fit = fit_state_space(
-            snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
+            model_snap, n_draws=max(draws * chains, 2000), seed=seed, generic_ballot=generic_ballot
         )
     else:
         fit = fit_fast_approximation(
-            snap, n_draws=max(draws * chains, 2500), seed=seed, generic_ballot=generic_ballot
+            model_snap, n_draws=max(draws * chains, 2500), seed=seed, generic_ballot=generic_ballot
         )
         fit.diagnostics = {
             **(fit.diagnostics or {}),
@@ -586,7 +593,7 @@ def run_forecast(
         # positive OOF weight requires its own predictive distribution.
         if weights.get("pymc", 0.0) > 0 and "pymc" not in component_draws:
             separate_static = fit_pymc(
-                snap, draws=draws, tune=tune, chains=chains,
+                model_snap, draws=draws, tune=tune, chains=chains,
                 seed=seed + 29, generic_ballot=generic_ballot,
                 poll_structure=selected_poll_structure,
                 target_accept=target_accept,
@@ -594,7 +601,7 @@ def run_forecast(
             component_draws["pymc"] = separate_static.draws_margin
         if weights.get("pymc_dynamic", 0.0) > 0 and "pymc_dynamic" not in component_draws:
             separate_dynamic = fit_pymc_dynamic(
-                snap, draws=draws, tune=tune, chains=chains,
+                model_snap, draws=draws, tune=tune, chains=chains,
                 seed=seed + 31, generic_ballot=generic_ballot,
                 poll_structure=selected_poll_structure,
                 target_accept=target_accept,
@@ -602,7 +609,7 @@ def run_forecast(
             component_draws["pymc_dynamic"] = separate_dynamic.draws_margin
         try:
             chall = build_challenger_draws(
-                snap, n_draws=fit.draws_margin.shape[0], seed=seed,
+                model_snap, n_draws=fit.draws_margin.shape[0], seed=seed,
                 generic_ballot=generic_ballot,
                 require_historical_fit=require_publishable,
             )
@@ -613,7 +620,7 @@ def run_forecast(
             layer_warnings.append({"layer": "challengers", "error": str(exc)})
         for name in ("shrinkage_polls", "last_election_swing", "equal_weight_polls"):
             if name in weights and name in BASELINES:
-                bl = BASELINES[name](snap)
+                bl = BASELINES[name](model_snap)
                 component_draws[name] = draws_from_baseline_forecasts(
                     bl,
                     n_draws=fit.draws_margin.shape[0],
@@ -747,13 +754,35 @@ def run_forecast(
                 ),
                 "control_calibration": control_cal_meta,
                 "mean_shift_mae": float(np.nanmean(np.abs(adj - unadjusted_means))),
-                "n_market_races": int(len(market_df)),
+                "n_market_races": len(market_df),
                 "n_expert_ratings": int((expert_tbl["source"] == "expert").sum())
                 if len(expert_tbl)
                 else 0,
             },
             method=fit.method + "+overlays",
         )
+
+    ordinary_core_fit = core_fit
+    ordinary_final_fit = fit
+    from midterms.model.non_major_adapter import (
+        fit_non_major_adapter,
+        merge_fit_results,
+    )
+
+    exceptional_fit = fit_non_major_adapter(
+        snap.races,
+        snap.exceptional_polls
+        if snap.exceptional_polls is not None
+        else pd.DataFrame(),
+        as_of=snap.as_of,
+        n_draws=ordinary_core_fit.draws_margin.shape[0],
+        seed=seed + 211,
+        base_fit=ordinary_core_fit,
+    )
+    # Use the same candidate-neutral exceptional draws in the raw and adjusted
+    # paths. Ratings/markets never directly set an exceptional-race location.
+    core_fit = merge_fit_results(ordinary_core_fit, exceptional_fit)
+    fit = merge_fit_results(ordinary_final_fit, exceptional_fit)
 
     sim, race_summaries = simulate_chamber(
         fit,
@@ -838,7 +867,7 @@ def run_forecast(
     )
     baselines = {}
     for name, fn in BASELINES.items():
-        forecasts = fn(snap)
+        forecasts = fn(model_snap)
         baselines[name] = [f.as_dict() for f in forecasts]
 
     out_dir = out_dir or ARTIFACTS_DIR
@@ -876,9 +905,11 @@ def run_forecast(
         }
     decomposition_rows = build_decomposition_rows(
         races=snap.races, polls=snap.polls, as_of=snap.as_of,
-        race_ids=fit.race_ids,
-        core_means=core_fit.mean_margin, core_sds=core_fit.sd_margin,
-        final_means=fit.mean_margin, final_sds=fit.sd_margin,
+        race_ids=ordinary_final_fit.race_ids,
+        core_means=ordinary_core_fit.mean_margin,
+        core_sds=ordinary_core_fit.sd_margin,
+        final_means=ordinary_final_fit.mean_margin,
+        final_sds=ordinary_final_fit.sd_margin,
         prior_provenance_by_state=prior_by_state,
         generic_ballot=generic_ballot, overlay_shifts=overlay_shifts,
         error_budget=(core_fit.diagnostics or {}).get("error_budget"),
@@ -889,12 +920,12 @@ def run_forecast(
         eligibility,
         run_id=run_id,
         snapshot_id=str(snap.snapshot_id),
-        forecast_generated_at=datetime.now(timezone.utc).isoformat(),
+        forecast_generated_at=datetime.now(UTC).isoformat(),
     )
 
     artifact = {
         "run_id": run_id,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "forecast_as_of": as_of,
         "election_id": election_id,
         "model_version": MODEL_VERSION,
@@ -1020,7 +1051,7 @@ def run_forecast(
                 used_control=used_control,
             ),
             "markets_meta": {
-                "n_races": int(len(market_df)),
+                "n_races": len(market_df),
                 "control_p_dem": control.get("p_dem"),
                 "control_p_rep": control.get("p_rep"),
             },
@@ -1219,7 +1250,7 @@ def run_forecast(
 
             append_release_index(manifest)
             archive_release(manifest, text)
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S110
             pass
     return {"artifact": artifact, "manifest": manifest, "paths": manifest["paths"]}
 

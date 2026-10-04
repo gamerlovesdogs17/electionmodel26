@@ -7,10 +7,12 @@ import {
   STATE_NAME,
   demFill,
   marginFill,
+  modeledProbability,
+  opposingProbability,
   pct,
   primaryRace,
   ratingFill,
-  signedMargin,
+  signedRaceMargin,
 } from "@/lib/utils";
 import { geoAlbersUsa, geoPath, type GeoPermissibleObjects } from "d3-geo";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -314,11 +316,12 @@ function raceFill(race: RaceForecast | null, mode: MapMode): string {
   if (!race) return "#d5dde2";
   const fav = caucusFavored(race);
   const indFavored = race.dem_party === "I" && fav === "D";
+  const pModeled = modeledProbability(race);
   if (mode === "probability") {
     if (race.is_flip) {
       return fav === "D" ? "url(#hatch-dem)" : "url(#hatch-rep)";
     }
-    return indFavored ? indFill(race.p_dem) : demFill(race.p_dem);
+    return indFavored ? indFill(pModeled) : demFill(pModeled);
   }
   if (mode === "margin") {
     if (typeof race.mean_margin !== "number") return "#d5dde2";
@@ -332,7 +335,7 @@ function raceFill(race: RaceForecast | null, mode: MapMode): string {
   if (race.is_flip) {
     return fav === "D" ? "url(#hatch-dem)" : "url(#hatch-rep)";
   }
-  if (indFavored) return indFill(race.p_dem);
+  if (indFavored) return indFill(pModeled);
   return ratingFill(race.rating ?? "Tossup");
 }
 
@@ -417,11 +420,13 @@ function MapTooltip({
 
 function RaceTooltipBlock({ race }: { race: RaceForecast }) {
   const demParty = race.dem_party === "I" ? "I" : "D";
-  const favoredIndOrDem = race.p_dem >= 0.5;
+  const pModeled = modeledProbability(race);
+  const pOpposing = opposingProbability(race);
+  const favoredIndOrDem = pModeled >= 0.5;
   const favoredName = favoredIndOrDem
-    ? (race.dem_candidate ?? (demParty === "I" ? "Independent" : "Democrat"))
-    : (race.rep_candidate ?? "Republican");
-  const favoredP = favoredIndOrDem ? race.p_dem : race.p_rep;
+    ? (race.modeled_candidate ?? race.dem_candidate ?? (demParty === "I" ? "Independent" : "Democrat"))
+    : (race.opposing_candidate ?? race.rep_candidate ?? "Republican");
+  const favoredP = favoredIndOrDem ? pModeled : pOpposing;
   const favoredTone = favoredIndOrDem
     ? demParty === "I"
       ? "text-[var(--ind)]"
@@ -453,18 +458,18 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
       </p>
       <div className="mt-2">
         <CandidateRow
-          name={race.dem_candidate ?? (demParty === "I" ? "Independent" : "Democrat")}
+          name={race.modeled_candidate ?? race.dem_candidate ?? (demParty === "I" ? "Independent" : "Democrat")}
           party={demParty}
           share={
-            race.dem_share ??
+            race.modeled_candidate_share ?? race.dem_share ??
             (typeof race.mean_margin === "number" ? 50 + race.mean_margin / 2 : 50)
           }
         />
         <CandidateRow
-          name={race.rep_candidate ?? "Republican"}
+          name={race.opposing_candidate ?? race.rep_candidate ?? "Republican"}
           party="R"
           share={
-            race.rep_share ??
+            race.opposing_candidate_share ?? race.rep_share ??
             (typeof race.mean_margin === "number" ? 50 - race.mean_margin / 2 : 50)
           }
         />
@@ -478,7 +483,7 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
             }`}
           >
             {typeof race.mean_margin === "number"
-              ? signedMargin(race.mean_margin)
+              ? signedRaceMargin(race)
               : "—"}
           </span>
         </div>

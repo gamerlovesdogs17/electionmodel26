@@ -22,8 +22,10 @@ export type RaceForecast = {
   race_id: string;
   state: string;
   seat_class?: string | null;
-  p_dem: number;
-  p_rep: number;
+  p_modeled_candidate?: number;
+  p_opposing_candidate?: number;
+  p_dem?: number;
+  p_rep?: number;
   mean_margin: number | null;
   sd_margin: number | null;
   ci05: number | null;
@@ -34,6 +36,14 @@ export type RaceForecast = {
   held_by?: string | null;
   dem_candidate?: string;
   rep_candidate?: string;
+  modeled_candidate?: string;
+  opposing_candidate?: string;
+  modeled_candidate_id?: string;
+  opposing_candidate_id?: string;
+  modeled_ballot_party?: string;
+  opposing_ballot_party?: string;
+  modeled_candidate_share?: number;
+  opposing_candidate_share?: number;
   dem_party?: "D" | "I" | string;
   caucus?: string;
   dem_share?: number;
@@ -267,8 +277,26 @@ export function ratingFromProbability(p: number): string {
 export function primaryRace(races: RaceForecast[]): RaceForecast | null {
   if (!races.length) return null;
   return [...races].sort(
-    (a, b) => Math.abs(a.p_dem - 0.5) - Math.abs(b.p_dem - 0.5),
+    (a, b) =>
+      Math.abs(modeledProbability(a) - 0.5) -
+      Math.abs(modeledProbability(b) - 0.5),
   )[0];
+}
+
+export function modeledProbability(race: RaceForecast): number {
+  return race.p_modeled_candidate ?? race.p_dem ?? 0.5;
+}
+
+export function opposingProbability(race: RaceForecast): number {
+  return race.p_opposing_candidate ?? race.p_rep ?? 1 - modeledProbability(race);
+}
+
+export function signedRaceMargin(race: RaceForecast, margin = race.mean_margin): string {
+  if (race.modeled_ballot_party !== "I") return signedMargin(margin);
+  if (typeof margin !== "number" || Number.isNaN(margin)) return "—";
+  if (Math.abs(margin) <= 0.05) return "EVEN";
+  const label = margin > 0 ? "I" : race.opposing_ballot_party ?? "R";
+  return `${label}+${Math.abs(margin).toFixed(1)}`;
 }
 
 export function ratingFill(rating: string): string {

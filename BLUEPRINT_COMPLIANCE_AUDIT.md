@@ -76,14 +76,23 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 
 ## Current source and validation status
 
-The 2026-10-03 strict source audit is green for every required current and
-historical domain. Candidate state is complete under the conditional contract:
-there are no unresolved identity-sensitive race/cutoffs, official California
-top-two identities override side-only mode, pre-primary candidate polls are
-excluded, and nonbinary race/cutoffs carry explicit score exclusions. Markets
-and expert ratings remain disabled optional domains.
+The sealed v0.9.22 source audit remains green for its immutable completed
+research release. The current v0.9.23 development audit is red: 20 current
+races pass poll/target coverage, 13 have warnings, and 2 fail. Idaho, Montana,
+and Nebraska use a separately identified limited-validation binary
+non-major-party adapter; South Dakota is withheld because no compatible poll is
+available, and Alaska ranked-choice/multiway is unsupported. Markets and expert
+ratings remain disabled optional domains.
 
-Evidence bundle `eb-3e91ca3a90628d69` binds the ready source report and the
+The adapter preserves Independent ballot identity and explicit Democratic
+caucus accounting as separate concepts. Its candidate-neutral target and draw
+columns never enter the ordinary D-v-R PyMC, state-space, stack, calibration, or
+OOF machinery. Four historical 60/30 cases across 2020 Alaska and 2024 Nebraska
+provide limited diagnostics only; no calibration or broad empirical-validation
+claim is allowed. All ordinary historical evidence projections remain
+semantically identical to the v0.9.22 inputs.
+
+Evidence bundle `eb-3e91ca3a90628d69` binds the v0.9.22 ready source report and the
 current/historical snapshot identities. The completed rebuild selected the
 all-off PyMC poll structure, regenerated canonical OOF, stack, reliability,
 joint scores and Bayesian diagnostics, then passed the independent rebuild,

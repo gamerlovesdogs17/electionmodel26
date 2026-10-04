@@ -236,9 +236,22 @@ def require_binary_chamber_compatibility(races: pd.DataFrame) -> None:
             ):
                 raise ValueError(f"held Independent lacks supported explicit caucus: {race_id}")
             continue
-        if "binary_score_eligible" in races.columns and row.get("binary_score_eligible") is False:
-            reason = row.get("binary_score_exclusion_reason") or "unsupported_binary_target"
-            raise ValueError(f"race is ineligible for binary chamber forecast: {race_id}: {reason}")
+        binary_eligible = row.get("binary_score_eligible")
+        if (
+            "binary_score_eligible" in races.columns
+            and not pd.isna(binary_eligible)
+            and not bool(binary_eligible)
+        ):
+            probability_supported = row.get("probability_model_supported")
+            if pd.isna(probability_supported) or not bool(probability_supported):
+                reason = (
+                    row.get("probability_model_support_reason")
+                    or row.get("binary_score_exclusion_reason")
+                    or "unsupported_probability_target"
+                )
+                raise ValueError(
+                    f"race is ineligible for binary chamber forecast: {race_id}: {reason}"
+                )
         party = row.get("modeled_ballot_party")
         if pd.isna(party):
             party = row.get("dem_party")

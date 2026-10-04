@@ -89,7 +89,14 @@ def current_race_poll_coverage(
         })
         state = classification.get(race_id, {})
         modeled_party = str(race.get("modeled_ballot_party") or "").upper()
-        target_supported = bool(state.get("binary_score_eligible", True))
+        binary_score_eligible = bool(state.get("binary_score_eligible", True))
+        target_supported = bool(
+            state.get("probability_model_supported", binary_score_eligible)
+        )
+        support_status = str(
+            state.get("probability_model_support_status")
+            or ("ordinary_binary_model" if binary_score_eligible else "unsupported")
+        )
         structure = str(
             race.get("contest_structure")
             or state.get("contest_structure")
@@ -109,13 +116,19 @@ def current_race_poll_coverage(
         hard_reasons: list[str] = []
         warning_reasons: list[str] = []
         if not target_supported:
-            hard_reasons.append(str(state.get("binary_score_exclusion_reason") or "unsupported_binary_target"))
+            hard_reasons.append(str(
+                state.get("probability_model_support_reason")
+                or state.get("binary_score_exclusion_reason")
+                or "unsupported_probability_target"
+            ))
         if state.get("candidate_identity_required") and not identity_resolved:
             hard_reasons.append("current_candidate_identity_unresolved")
         if identity_sensitive and len(raw) and not len(compatible):
             hard_reasons.append("identity_sensitive_race_has_zero_compatible_polls")
         elif identity_sensitive and not len(raw):
             warning_reasons.append("identity_sensitive_race_has_zero_raw_polls")
+        if support_status == "limited_supported":
+            warning_reasons.append("limited_validation_exception_model")
         status = "fail" if hard_reasons else "warning" if warning_reasons else "pass"
 
         def latest(column: str, frame: pd.DataFrame = compatible) -> str | None:
@@ -144,15 +157,26 @@ def current_race_poll_coverage(
             "candidate_identity_resolved": identity_resolved,
             "polling_available": bool(len(compatible)),
             "statistical_target_supported": target_supported,
-            "binary_score_eligible": target_supported,
+            "binary_score_eligible": binary_score_eligible,
+            "probability_model_supported": target_supported,
+            "probability_model_support_status": support_status,
+            "probability_model_support_reason": state.get(
+                "probability_model_support_reason"
+            ),
             "identity_sensitive": identity_sensitive,
             "qa_universe": identity_sensitive,
             "n_raw_current_polls": len(raw),
             "n_candidate_compatible_polls": len(compatible),
             "n_model_safe_polls": len(model_safe),
+            "n_exception_adapter_polls": len(compatible) if support_status == "limited_supported" else 0,
             "n_excluded_obsolete_or_incompatible": len(candidate_excluded_ids),
             "n_excluded_identity_unresolved": len(unresolved_ids),
-            "n_excluded_unsupported_target": len(unsupported_target_ids),
+            "n_excluded_unsupported_target": (
+                0 if support_status == "limited_supported" else len(unsupported_target_ids)
+            ),
+            "ordinary_model_excluded_poll_ids": (
+                unsupported_target_ids if support_status == "limited_supported" else []
+            ),
             "n_excluded_hypothetical_or_pre_nomination": len(hypothetical_ids),
             "raw_poll_ids": sorted(raw.get("poll_id", pd.Series(dtype=str)).astype(str).tolist()),
             "compatible_poll_ids": sorted(
@@ -166,7 +190,17 @@ def current_race_poll_coverage(
             "latest_compatible_field_end": latest("field_end"),
             "latest_compatible_available_at": latest("available_at"),
             "status": status,
-            "reasons": sorted(set(hard_reasons + warning_reasons + reasons)),
+            "reasons": sorted(set(
+                hard_reasons
+                + warning_reasons
+                + [
+                    reason for reason in reasons
+                    if not (
+                        support_status == "limited_supported"
+                        and reason == "race_ineligible_for_binary_scoring"
+                    )
+                ]
+            )),
         })
     records.sort(key=lambda item: item["race_id"])
     semantic = {

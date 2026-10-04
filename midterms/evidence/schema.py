@@ -69,6 +69,7 @@ POLL_COLUMNS = [
     "modeled_share",
     "opposing_share",
     "modeled_margin",
+    "modeled_candidate_margin",  # explicit alias for candidate-neutral estimand
     "margin_definition",
     "contest_kind",  # regular | special
     "seat_name",

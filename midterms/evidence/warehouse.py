@@ -87,6 +87,7 @@ def evidence_snapshot_fingerprint(
     presidential_source_sha256: str | None,
     presidential_source_years: tuple[int, ...] | list[int] = (),
     material_source_hashes: dict[str, str | None] | None = None,
+    exceptional_polls: pd.DataFrame | None = None,
 ) -> tuple[str, dict[str, str | None]]:
     """Create a content-addressed identity from selected, knowable evidence."""
     components: dict[str, str | None] = {
@@ -101,6 +102,10 @@ def evidence_snapshot_fingerprint(
             for name, value in sorted((material_source_hashes or {}).items())
         },
     }
+    if exceptional_polls is not None and len(exceptional_polls):
+        components["exceptional_polls_semantic_sha256"] = dataframe_semantic_sha256(
+            exceptional_polls
+        )
     payload = {
         "schema_version": SNAPSHOT_FINGERPRINT_VERSION,
         "election_id": str(election_id),
@@ -197,6 +202,7 @@ class EvidenceSnapshot:
     candidate_timeline: dict[str, Any] | None = None
     fingerprint_schema: str = SNAPSHOT_FINGERPRINT_VERSION
     component_hashes: dict[str, str | None] | None = None
+    exceptional_polls: pd.DataFrame | None = None
 
     def to_dict(self) -> dict[str, Any]:
         n_contested = (
@@ -209,6 +215,8 @@ class EvidenceSnapshot:
             "n_polls": len(self.polls),
             "n_races_contested": n_contested,
             "n_results_known": len(self.results_known),
+            "n_exceptional_polls": len(self.exceptional_polls)
+            if self.exceptional_polls is not None else 0,
             "n_rated_pollsters": len(self.pollster_ratings or {}),
             "presidential_source_sha256": self.presidential_source_sha256,
             "presidential_source_years": list(self.presidential_source_years),
@@ -350,6 +358,11 @@ class Warehouse:
         else:
             results_known = results
 
+        # Preserve the filtered as-of pool so the candidate-neutral exceptional
+        # adapter can consume reviewed compatible rows that are intentionally
+        # excluded from the ordinary D-v-R model.
+        available_polls = polls.copy()
+
         # Resolve candidate/race state before filtering inactive ballot rows.
         from midterms.evidence.candidate_timeline import (
             apply_candidate_state_contract,
@@ -368,6 +381,28 @@ class Warehouse:
             as_of=as_of_d,
             structural_gaps=structural_gaps,
         )
+        exceptional_race_ids = set(
+            races.loc[
+                races.get(
+                    "contest_structure", pd.Series("", index=races.index)
+                ).astype(str).eq("non_major_party_vs_republican"),
+                "race_id",
+            ].astype(str)
+        )
+        compatible_ids = {
+            str(poll_id)
+            for race_id, poll_ids in (
+                candidate_timeline_meta.get("candidate_compatible_poll_ids_by_race")
+                or {}
+            ).items()
+            if str(race_id) in exceptional_race_ids
+            for poll_id in poll_ids
+        }
+        exceptional_polls = available_polls[
+            available_polls.get(
+                "poll_id", pd.Series("", index=available_polls.index)
+            ).astype(str).isin(compatible_ids)
+        ].copy()
 
         # Drop inactive ballot rows from contested forecast universe (keep held)
         if len(races):
@@ -434,6 +469,9 @@ class Warehouse:
             assert_no_future_rows(polls, as_of_d, column="available_at", label="polls")
 
         polls, rating_meta = self._attach_poll_priors(polls.reset_index(drop=True), as_of_d)
+        exceptional_polls, _ = self._attach_poll_priors(
+            exceptional_polls.reset_index(drop=True), as_of_d,
+        )
 
         races = races.reset_index(drop=True)
         material_source_hashes = _selected_material_source_hashes(
@@ -452,6 +490,7 @@ class Warehouse:
             presidential_source_sha256=source_sha,
             presidential_source_years=source_years,
             material_source_hashes=material_source_hashes,
+            exceptional_polls=exceptional_polls,
         )
         return EvidenceSnapshot(
             as_of=as_of_d,
@@ -469,6 +508,7 @@ class Warehouse:
             prior_snapshot_path=prior_snapshot_path,
             candidate_timeline=candidate_timeline_meta,
             component_hashes=component_hashes,
+            exceptional_polls=exceptional_polls,
         )
 
     def inject_future_poll_for_canary(self, election_id: str, as_of: str | date) -> pd.DataFrame:

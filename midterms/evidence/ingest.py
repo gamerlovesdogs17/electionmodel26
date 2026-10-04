@@ -289,6 +289,7 @@ def _two_party_from_answers(answers: list[dict]) -> dict[str, Any] | None:
         "modeled_share": round(modeled_tw, 3),
         "opposing_share": round(rep_tw, 3),
         "modeled_margin": round(modeled_tw - rep_tw, 3),
+        "modeled_candidate_margin": round(modeled_tw - rep_tw, 3),
         "margin_definition": "dem_minus_rep_two_party" if is_dr else "independent_minus_rep_two_candidate",
         "undecided": round(undecided, 3),
         "other_share": round(other + (independent_pct if is_dr else dem_pct), 3),
@@ -412,6 +413,7 @@ def normalize_votehub_senate_polls(
             modeled_share=tw["modeled_share"],
             opposing_share=tw["opposing_share"],
             modeled_margin=tw["modeled_margin"],
+            modeled_candidate_margin=tw["modeled_candidate_margin"],
             margin_definition=tw["margin_definition"],
             multiway=tw["multiway"],
         )

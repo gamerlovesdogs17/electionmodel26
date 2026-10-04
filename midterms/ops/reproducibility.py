@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
+import io
 import json
 import platform
 import sys
-import contextlib
-import io
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, ROOT, ARTIFACTS_DIR
+from midterms.config import ARTIFACTS_DIR, MANIFESTS_DIR, NORMALIZED_DIR, ROOT
 
 
 def environment_lock() -> dict[str, Any]:
@@ -28,7 +28,7 @@ def environment_lock() -> dict[str, Any]:
                 pkgs[name] = md.version(name)
             except md.PackageNotFoundError:
                 pkgs[name] = None
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001, S110
         pass
     dependency_files = [
         ROOT / name for name in ("pyproject.toml", "uv.lock", "poetry.lock", "requirements.lock")
@@ -55,7 +55,7 @@ def environment_lock() -> dict[str, Any]:
         "numerical_backend": numerical_backend,
         "dependency_lock_sha256": dependency_hash.hexdigest() if dependency_files else None,
         "dependency_files": [path.relative_to(ROOT).as_posix() for path in dependency_files],
-        "locked_at": datetime.now(timezone.utc).isoformat(),
+        "locked_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -245,19 +245,23 @@ def compare_forecast_artifacts(
         rid = str(r.get("race_id"))
         if rid not in sealed_races:
             continue
-        dp = abs(float(r.get("p_dem") or 0) - float(sealed_races[rid].get("p_dem") or 0))
+        rebuilt_p = r.get("p_modeled_candidate", r.get("p_dem"))
+        sealed_p = sealed_races[rid].get(
+            "p_modeled_candidate", sealed_races[rid].get("p_dem")
+        )
+        dp = abs(float(rebuilt_p or 0) - float(sealed_p or 0))
         diffs.append(dp)
     max_race = float(max(diffs)) if diffs else 0.0
     mean_race = float(sum(diffs) / len(diffs)) if diffs else 0.0
     checks = [
         {"name": "p_dem_majority", "ok": d_p <= tol_p_control, "delta": d_p, "tol": tol_p_control},
         {"name": "expected_dem_seats", "ok": d_seats <= tol_seats, "delta": d_seats, "tol": tol_seats},
-        {"name": "max_race_p_dem", "ok": max_race <= tol_race_p, "delta": max_race, "tol": tol_race_p},
+        {"name": "max_race_p_modeled", "ok": max_race <= tol_race_p, "delta": max_race, "tol": tol_race_p},
     ]
     return {
         "ok": all(c["ok"] for c in checks),
         "checks": checks,
-        "mean_abs_race_p_dem": mean_race,
+        "mean_abs_race_p_modeled": mean_race,
         "n_races_compared": len(diffs),
     }
 
@@ -358,7 +362,7 @@ def independent_rebuild(
             "comparison": cmp,
             "lite_hash_seal": lite,
             "rebuild_out_dir": str(out),
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "note": (
                 "G10 hard: re-executes run_forecast under rebuild_mode; compares "
                 "probabilities within MCSE tolerances (not byte-identical JSON)."

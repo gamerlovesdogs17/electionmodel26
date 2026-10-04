@@ -1,10 +1,10 @@
 {
   "schema_version": "blueprint-compliance-audit-v2",
-  "generated_at": "2026-10-03",
+  "generated_at": "2026-10-04",
   "scope": "code_capability_and_current_empirical_status",
   "public_live_enabled": false,
   "publication_surface": "research_only",
-  "current_artifacts_stale_relative_to_code": false,
+  "current_artifacts_stale_relative_to_code": true,
   "validated_release_status": {
     "model_version": "senate-hierarchical-v0.9.22",
     "evidence_bundle_id": "eb-3e91ca3a90628d69",
@@ -19,6 +19,20 @@
     "public_live_enabled": false,
     "publication_surface": "research_only"
   },
+  "development_status": {
+    "model_version": "senate-hierarchical-v0.9.23",
+    "release_identity_exists": false,
+    "research_acceptance_ok": false,
+    "promotion_eligible": false,
+    "source_readiness_ok": false,
+    "source_blockers": [
+      "senate-2026-AK ranked_choice_multiway_not_supported",
+      "senate-2026-SD zero_candidate_compatible_polls"
+    ],
+    "non_major_adapter_classification": "limited_validation_exception_model",
+    "non_major_adapter_calibration_claim_allowed": false,
+    "ordinary_historical_projection_changed": false
+  },
   "allowed_classifications": [
     "implemented",
     "implemented_with_reasonable_variation",
@@ -26,6 +40,7 @@
     "missing",
     "intentionally_deferred",
     "blocked_by_real_data_validation",
+    "limited_validation_exception_model",
     "validated"
   ],
   "code_capability_gates": {
@@ -62,7 +77,8 @@
     "fec_report_receipt_amendment_resolution": "implemented",
     "verified_pollster_snapshot_availability": "implemented",
     "canonical_poll_structure_oof": "implemented",
-    "validated_model_spec_lineage": "implemented"
+    "validated_model_spec_lineage": "implemented",
+    "binary_non_major_party_adapter": "implemented_with_reasonable_variation"
   },
   "empirical_validation_gates": {
     "prior_predictive_current_model": "validated",
@@ -83,8 +99,10 @@
     "pollster_ratings_point_in_time": "source_ready",
     "finance_report_level_history": "source_ready",
     "approval_poll_timing_lineage": "source_ready",
-    "validated_model_spec_lineage": "validated"
+    "validated_model_spec_lineage": "validated",
+    "binary_non_major_party_adapter": "limited_validation_exception_model"
   },
+  "empirical_validation_gates_scope": "Validated entries other than binary_non_major_party_adapter describe the immutable v0.9.22 release. They are not relabeled as v0.9.23 artifacts.",
   "requirements": [
     {
       "id": "warehouse_as_of",
@@ -95,7 +113,7 @@
         "midterms/evidence/point_in_time.py"
       ],
       "current_implementation": "As-of filtering plus evidence-snapshot-fingerprint-v2 hashes selected poll rows, race rows, candidate timeline, rating snapshot, structural-prior lineage and the selected point-in-time demographic source.",
-      "remaining_issue": "Source readiness is complete; v0.9.22 historical OOF and model diagnostics still require regeneration.",
+      "remaining_issue": "The v0.9.22 lineage is complete. The v0.9.23 current polls domain remains blocked by Alaska RCV and zero-poll South Dakota; ordinary historical projections are unchanged.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,
@@ -172,7 +190,7 @@
         "midterms/model/pymc_model.py"
       ],
       "current_implementation": "Sponsor, questionnaire and study effects use shrinkage-safe stable identities. Three positive same-family challengers enable exactly one term relative to the all-off reference; structural diagnostics are excluded from stacking.",
-      "remaining_issue": "The single-addition cycle-cross-fitted selection procedure requires a new v0.9.22 historical OOF rebuild.",
+      "remaining_issue": "The v0.9.22 selection evidence is complete. The exceptional adapter is outside poll-structure selection and does not require an ordinary OOF rerun.",
       "severity": "medium",
       "blocks_publication_quality_research": false,
       "requires_expensive_model_fitting": true,
@@ -217,7 +235,7 @@
         "MODEL_CARD.md"
       ],
       "current_implementation": "Prior means/scales and fixed-vs-shrinkable coefficients are explicit.",
-      "remaining_issue": "Prior predictive artifact must be regenerated.",
+      "remaining_issue": "The ordinary v0.9.22 prior-predictive evidence remains frozen. The adapter's weak prior is covered by its separate sensitivity artifact; no v0.9.23 current forecast diagnostic exists.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,
@@ -232,7 +250,7 @@
         "midterms/validation/nested_component_loo.py"
       ],
       "current_implementation": "Weekly dynamic PyMC exists as an independent candidate beside static PyMC.",
-      "remaining_issue": "New structural changes make retained OOF evidence stale.",
+      "remaining_issue": "No ordinary-model structure changed in v0.9.23. The retained v0.9.22 OOF is not relabeled, and the exceptional adapter is validated separately.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -247,7 +265,7 @@
         "midterms/model/terminal.py"
       ],
       "current_implementation": "Static Morris split and dynamic random-walk budget use separately labeled residual terminal layers.",
-      "remaining_issue": "Same-family no-terminal ablation must be rerun.",
+      "remaining_issue": "The v0.9.22 same-family evidence remains the ordinary-model record; the exceptional adapter uses a separately declared fixed structural predictive error.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -263,7 +281,7 @@
         "midterms/evidence/demography.py"
       ],
       "current_implementation": "National/regional/local factors plus continuous demographic-similarity shocks.",
-      "remaining_issue": "Point-in-time demographic provenance is ready; historical similarity value still requires the v0.9.22 OOS ablation.",
+      "remaining_issue": "The v0.9.22 similarity evidence remains frozen. The exceptional adapter uses only a limited common-shock projection and makes no broader dependence-validation claim.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -336,7 +354,7 @@
         "midterms/validation/stack_weights.py"
       ],
       "current_implementation": "Simplex weights optimize exact empirical predictive-mixture CRPS over frozen component draws.",
-      "remaining_issue": "Weights must be regenerated after the new code/data contracts.",
+      "remaining_issue": "The v0.9.22 weights remain frozen for ordinary D-v-R races. The exceptional adapter is not a stack candidate and cannot inherit or alter those weights.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -380,7 +398,7 @@
         "midterms/validation/stack_reliability_crossfit.py"
       ],
       "current_implementation": "Freeze-before-truth component OOF and cycle-cross-fitted stack reliability exist.",
-      "remaining_issue": "New model structures, evidence contracts and scores invalidate current empirical completeness.",
+      "remaining_issue": "The ordinary v0.9.22 OOF remains valid and its eight formal evidence projections are unchanged. The exceptional adapter has only four separate scorable cases and no broad calibration claim.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -394,7 +412,7 @@
         "midterms/validation/metrics.py"
       ],
       "current_implementation": "CRPS, Brier, log, interval, energy, variogram and empirical seat-count CRPS are available with sealed race ordering.",
-      "remaining_issue": "Historical joint draws have not been rescored under joint-proper-scores-v1.",
+      "remaining_issue": "The ordinary v0.9.22 joint scores remain frozen. The exceptional adapter has univariate replay scores only because the comparable historical sample is too small for a joint-score claim.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,
@@ -410,7 +428,7 @@
         "midterms/validation/report.py"
       ],
       "current_implementation": "Cycle-cross-fitted raw stack reliability is formal; single-holdout report calibration is explicitly exploratory and ineligible for G7.",
-      "remaining_issue": "Must rerun after regenerated OOF draws.",
+      "remaining_issue": "Ordinary v0.9.22 calibration remains frozen. The exceptional adapter is separately limited-validation and explicitly makes no calibration claim.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -439,7 +457,7 @@
         "midterms/validation/numerical_quality.py"
       ],
       "current_implementation": "Publication profile requires explicit zero divergences and retains R-hat/ESS/MCSE floors; tree-depth hits and BFMI fail when available and bad.",
-      "remaining_issue": "Current forecast artifacts predate these diagnostics.",
+      "remaining_issue": "The v0.9.22 sampler-health artifact is complete. No v0.9.23 current fit was run, so there is no new sampler-health claim.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -485,7 +503,7 @@
         "BLUEPRINT_COMPLIANCE_AUDIT.json"
       ],
       "current_implementation": "G1-G11 remain distinct; a machine-readable extension evaluator requires v0.9.22 artifact lineage and strict acceptance requires both layers.",
-      "remaining_issue": "Most new empirical statuses correctly remain pending or require rebuild.",
+      "remaining_issue": "v0.9.23 remains unpromotable because source readiness is red and no current forecast/rebuild exists; the v0.9.22 acceptance record remains immutable.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -501,7 +519,7 @@
         "midterms/validation/structural_ablations.py"
       ],
       "current_implementation": "Each outer cycle selects from base, plus-study, plus-sponsor and plus-questionnaire using only the other cycles. Strict majority plus lower pooled CRPS is required; ties and incomplete evidence choose the base.",
-      "remaining_issue": "No v0.9.22 positive-challenger OOF draws exist yet.",
+      "remaining_issue": "The v0.9.22 crossfit selected the all-off structure. The exceptional adapter is outside structural selection and leaves this evidence unchanged.",
       "severity": "high",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": true,
@@ -520,14 +538,14 @@
         ".github/workflows/rebuild-research.yml"
       ],
       "current_implementation": "The workflow enforces a two-pass contract: structural selection freezes a candidate model spec; a separately keyed canonical pass reruns static and dynamic PyMC with that selected PollStructureConfig. Final model-spec lineage binds the bundle, readiness, canonical OOF, stack and calibration artifacts.",
-      "remaining_issue": "Five required source domains must clear before the selection and canonical OOF passes can run.",
+      "remaining_issue": "The v0.9.23 polls domain remains incomplete because Alaska RCV is unsupported and South Dakota has no compatible I-v-R poll. No new v0.9.23 bundle may be sealed.",
       "severity": "critical",
       "blocks_publication_quality_research": true,
       "requires_expensive_model_fitting": false,
       "proposed_validation_test": "Ingest or refresh each reported blocker, seal the bundle, then require strict source-only extension gates before historical inference."
     }
   ],
-  "model_version": "senate-hierarchical-v0.9.22",
+  "model_version": "senate-hierarchical-v0.9.23",
   "empirical_gate_requirements": {
     "prior_predictive_current_model": {
       "declared_status": "validated",
@@ -603,13 +621,20 @@
       "declared_status": "intentionally_deferred",
       "required_artifact": "data/artifacts/nested_component_loo_canonical.json",
       "required_model_version": "senate-hierarchical-v0.9.22"
+    },
+    "binary_non_major_party_adapter": {
+      "declared_status": "limited_validation_exception_model",
+      "required_artifact": "data/artifacts/non_major_adapter_validation_latest.json",
+      "required_model_version": "senate-hierarchical-v0.9.23",
+      "calibration_claim_allowed": false,
+      "does_not_validate_ordinary_stack": true
     }
   },
   "source_readiness_status": {
     "as_of": "2026-10-03",
-    "ready_for_expensive_rebuild": true,
+    "model_version": "senate-hierarchical-v0.9.23",
+    "ready_for_expensive_rebuild": false,
     "ready_domains": [
-      "polls",
       "races",
       "candidate_timeline",
       "pollster_ratings",
@@ -621,13 +646,29 @@
       "generic_ballot",
       "official_results"
     ],
-    "blocking_domains": {},
+    "blocking_domains": {
+      "polls": {
+        "status": "incomplete_coverage",
+        "reason": "current race matchup/identity coverage has hard failures",
+        "hard_failures": [
+          "senate-2026-AK ranked_choice_multiway_not_supported",
+          "senate-2026-SD zero_candidate_compatible_polls"
+        ]
+      }
+    },
     "optional_disabled_domains": [
       "expert_ratings",
       "markets"
     ],
     "artifact": "data/artifacts/source_readiness_latest.json",
-    "evidence_bundle_id": "eb-3e91ca3a90628d69",
-    "evidence_bundle_sha256": "3e91ca3a90628d695b234a4b784a92bff18d78d81d1faa0d75467492cc977e86"
+    "current_race_coverage": {
+      "pass": 20,
+      "warning": 13,
+      "fail": 2
+    },
+    "evidence_bundle_id": null,
+    "evidence_bundle_sha256": null,
+    "last_validated_evidence_bundle_id": "eb-3e91ca3a90628d69",
+    "last_validated_evidence_bundle_sha256": "3e91ca3a90628d695b234a4b784a92bff18d78d81d1faa0d75467492cc977e86"
   }
 }

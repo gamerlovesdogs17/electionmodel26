@@ -1,6 +1,11 @@
 "use client";
 
-import { RaceForecast, pct, signedMargin } from "@/lib/utils";
+import {
+  RaceForecast,
+  modeledProbability,
+  pct,
+  signedRaceMargin,
+} from "@/lib/utils";
 import { useMemo, useState } from "react";
 
 export function RaceTable({ races }: { races: RaceForecast[] }) {
@@ -15,14 +20,17 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
         (r) =>
           r.state.includes(needle) ||
           r.race_id.toUpperCase().includes(needle) ||
-          (r.dem_candidate ?? "").toUpperCase().includes(needle) ||
-          (r.rep_candidate ?? "").toUpperCase().includes(needle),
+          (r.modeled_candidate ?? r.dem_candidate ?? "").toUpperCase().includes(needle) ||
+          (r.opposing_candidate ?? r.rep_candidate ?? "").toUpperCase().includes(needle),
       );
     }
     list.sort((a, b) => {
       if (sort === "state") return a.state.localeCompare(b.state);
-      if (sort === "dem") return b.p_dem - a.p_dem;
-      return Math.abs(a.p_dem - 0.5) - Math.abs(b.p_dem - 0.5);
+      if (sort === "dem") return modeledProbability(b) - modeledProbability(a);
+      return (
+        Math.abs(modeledProbability(a) - 0.5) -
+        Math.abs(modeledProbability(b) - 0.5)
+      );
     });
     return list;
   }, [races, q, sort]);
@@ -43,8 +51,8 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
             Seat-by-seat probabilities
           </h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Model-derived rating matches P(Dem). Independents without a Dem
-            nominee show as Ind and still count toward Democratic seat totals.
+            Model-derived ratings use each modeled candidate&apos;s probability.
+            Ballot party and chamber caucus accounting remain separate.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -60,7 +68,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
             className="h-9 rounded-md border border-[var(--line)] bg-[var(--paper)] px-3 text-sm"
           >
             <option value="toss">Closest first</option>
-            <option value="dem">Dem probability</option>
+            <option value="dem">Modeled probability</option>
             <option value="state">State</option>
           </select>
         </div>
@@ -75,7 +83,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                 Candidates
               </th>
               <th className="px-3 py-2 font-medium">Rating</th>
-              <th className="px-3 py-2 font-medium">P(Dem)</th>
+              <th className="px-3 py-2 font-medium">P(modeled)</th>
               <th className="px-3 py-2 font-medium">Margin</th>
               <th className="hidden px-3 py-2 font-medium sm:table-cell">
                 90% interval
@@ -85,6 +93,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
           <tbody>
             {rows.map((r) => {
               const demParty = r.dem_party === "I" ? "I" : "D";
+              const pModeled = modeledProbability(r);
               return (
                 <tr
                   key={r.race_id}
@@ -104,11 +113,11 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                   </td>
                   <td className="hidden px-3 py-2.5 text-xs text-[var(--muted)] lg:table-cell">
                     <span className={demParty === "I" ? "text-[var(--ind)]" : ""}>
-                      {r.dem_candidate ?? (demParty === "I" ? "Independent" : "Dem")}
+                      {r.modeled_candidate ?? r.dem_candidate ?? (demParty === "I" ? "Independent" : "Dem")}
                       <span className="ml-1 opacity-70">({demParty})</span>
                     </span>
                     {" / "}
-                    {r.rep_candidate ?? "Rep"}
+                    {r.opposing_candidate ?? r.rep_candidate ?? "Rep"}
                     <span className="ml-1 opacity-70">(R)</span>
                   </td>
                   <td className="px-3 py-2.5 text-xs font-medium text-[var(--ink)]">
@@ -121,19 +130,19 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                           className="h-full bg-[var(--dem)]"
                           style={{
                             width: `${
-                              typeof r.p_dem === "number" && Number.isFinite(r.p_dem)
-                                ? Math.min(100, Math.max(0, r.p_dem * 100))
+                              Number.isFinite(pModeled)
+                                ? Math.min(100, Math.max(0, pModeled * 100))
                                 : 0
                             }%`,
                           }}
                         />
                       </div>
-                      <span className="tabular-nums">{pct(r.p_dem, 0)}</span>
+                      <span className="tabular-nums">{pct(pModeled, 0)}</span>
                     </div>
                   </td>
                   <td className="px-3 py-2.5 tabular-nums text-[var(--ink)]">
                     {typeof r.mean_margin === "number"
-                      ? signedMargin(r.mean_margin)
+                      ? signedRaceMargin(r)
                       : "—"}
                     <span className="ml-1 text-xs text-[var(--muted)]">
                       {typeof r.sd_margin === "number"
@@ -143,7 +152,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                   </td>
                   <td className="hidden px-3 py-2.5 tabular-nums text-[var(--muted)] sm:table-cell">
                     {typeof r.ci05 === "number" && typeof r.ci95 === "number"
-                      ? `${signedMargin(r.ci05)} – ${signedMargin(r.ci95)}`
+                      ? `${signedRaceMargin(r, r.ci05)} – ${signedRaceMargin(r, r.ci95)}`
                       : "—"}
                   </td>
                 </tr>
