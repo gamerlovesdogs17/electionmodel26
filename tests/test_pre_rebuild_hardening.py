@@ -642,6 +642,89 @@ def test_prepare_evidence_strict_blocks_when_poll_outage_and_readiness_red(monke
     assert "source_readiness_not_green" in report["strict_failure_reasons"]
 
 
+def test_prepare_evidence_reverts_live_poll_merge_that_breaks_forecast_coverage(
+    monkeypatch, tmp_path,
+):
+    """Regressive live VoteHub pulls must roll back to the sealed poll snapshot."""
+    from midterms.evidence import preparation
+
+    polls_path = tmp_path / "polls.parquet"
+    polls_path.write_bytes(b"GOOD_POLLS")
+    snapshot_paths = (polls_path,)
+
+    monkeypatch.setattr(
+        preparation, "_poll_snapshot_paths", lambda: snapshot_paths
+    )
+
+    calls = {"n": 0}
+
+    def fake_refresh(*, as_of: str):
+        polls_path.write_bytes(b"BAD_POLLS")
+        return {"results": {"polls": {"n_live": 1, "status": "live_merged"}}}
+
+    def fake_write_source_readiness(**kwargs):
+        calls["n"] += 1
+        # First audit sees the bad live merge; second audit runs after rollback.
+        if polls_path.read_bytes() == b"BAD_POLLS":
+            return {
+                "ready_for_expensive_rebuild": True,
+                "blockers": [],
+                "domains": {
+                    "polls": {
+                        "current_race_coverage": {
+                            "races": [{
+                                "race_id": "senate-2026-XX",
+                                "state": "XX",
+                                "forecast_status": "fail",
+                                "evidence_status": "pass",
+                                "reasons": [
+                                    "identity_sensitive_race_has_zero_compatible_polls"
+                                ],
+                                "contest_structure": "binary_dem_vs_rep",
+                                "n_raw_current_polls": 3,
+                                "n_candidate_compatible_polls": 0,
+                            }],
+                        }
+                    }
+                },
+                "forecast_coverage": {
+                    "summary": {
+                        "forecast_complete": False,
+                        "n_fail": 1,
+                        "n_races": 1,
+                    }
+                },
+            }
+        return {
+            "ready_for_expensive_rebuild": True,
+            "blockers": [],
+            "domains": {"polls": {"current_race_coverage": {"races": []}}},
+            "forecast_coverage": {
+                "summary": {
+                    "forecast_complete": True,
+                    "n_fail": 0,
+                    "n_races": 1,
+                }
+            },
+        }
+
+    monkeypatch.setattr(preparation, "refresh_safe_evidence", fake_refresh)
+    monkeypatch.setattr(preparation, "write_source_readiness", fake_write_source_readiness)
+
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-04",
+        mode="refresh-safe",
+        strict=True,
+    )
+    assert polls_path.read_bytes() == b"GOOD_POLLS"
+    assert report.get("strict_failure") is not True
+    assert "poll_refresh_reverted_coverage_regression" in report["strict_warnings"]
+    assert "poll_refresh_rollback_restored_green_gates" in report["strict_warnings"]
+    assert report["refresh"]["results"]["polls"]["status"] == "reverted_coverage_regression"
+    assert calls["n"] == 2
+
+
 def test_refresh_safe_falls_back_to_sealed_votehub_when_live_fetch_fails(monkeypatch, tmp_path):
     from midterms.evidence import preparation
     import midterms.config as config

@@ -20,6 +20,77 @@ from midterms.evidence.source_readiness import (
 PREPARE_EVIDENCE_VERSION = "prepare-evidence-v1"
 
 
+def _poll_snapshot_paths() -> tuple[Path, ...]:
+    from midterms.config import NORMALIZED_DIR, RAW_DIR
+
+    return (
+        NORMALIZED_DIR / "polls.parquet",
+        NORMALIZED_DIR / "polls_live_votehub.parquet",
+        RAW_DIR / "external" / "votehub_us_senator.json",
+        RAW_DIR / "external" / "votehub_generic_ballot_2026.json",
+        RAW_DIR / "polls_live_votehub.csv",
+    )
+
+
+def _snapshot_poll_artifacts() -> dict[str, bytes | None]:
+    return {
+        str(path): (path.read_bytes() if path.is_file() else None)
+        for path in _poll_snapshot_paths()
+    }
+
+
+def _restore_poll_artifacts(snapshot: dict[str, bytes | None]) -> list[str]:
+    restored: list[str] = []
+    for raw_path, payload in snapshot.items():
+        path = Path(raw_path)
+        if payload is None:
+            if path.is_file():
+                path.unlink()
+                restored.append(f"removed:{path.as_posix()}")
+            continue
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(payload)
+        restored.append(path.as_posix())
+    return restored
+
+
+def _coverage_summary(readiness: dict[str, Any]) -> dict[str, Any]:
+    coverage = readiness.get("forecast_coverage") or {}
+    summary = coverage.get("summary") if isinstance(coverage, dict) else {}
+    return summary if isinstance(summary, dict) else {}
+
+
+def _forecast_incomplete(summary: dict[str, Any]) -> bool:
+    return (
+        summary.get("forecast_complete") is not True
+        or int(summary.get("n_fail") or 0) > 0
+    )
+
+
+def _failing_forecast_races(readiness: dict[str, Any]) -> list[dict[str, Any]]:
+    races = (
+        ((readiness.get("domains") or {}).get("polls") or {}).get("current_race_coverage")
+        or {}
+    ).get("races") or []
+    out: list[dict[str, Any]] = []
+    for row in races:
+        if not isinstance(row, dict):
+            continue
+        if row.get("forecast_status") != "fail":
+            continue
+        out.append({
+            "race_id": row.get("race_id"),
+            "state": row.get("state"),
+            "forecast_status": row.get("forecast_status"),
+            "evidence_status": row.get("evidence_status"),
+            "reasons": row.get("reasons") or [],
+            "contest_structure": row.get("contest_structure"),
+            "n_raw_current_polls": row.get("n_raw_current_polls"),
+            "n_candidate_compatible_polls": row.get("n_candidate_compatible_polls"),
+        })
+    return out
+
+
 def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
     """Run only adapters declared safe for unattended evidence preparation.
 
@@ -184,6 +255,12 @@ def prepare_evidence(
 ) -> dict[str, Any]:
     if mode not in {"audit", "refresh-safe", "seal"}:
         raise ValueError("prepare-evidence mode must be audit, refresh-safe, or seal")
+    poll_snapshot: dict[str, bytes | None] | None = None
+    if mode == "refresh-safe":
+        # Live VoteHub can introduce incompatible current polls that turn an
+        # identity-sensitive warning into a hard forecast coverage failure.
+        # Keep the pre-refresh sealed poll artifacts so we can roll back.
+        poll_snapshot = _snapshot_poll_artifacts()
     refresh = refresh_safe_evidence(as_of=as_of) if mode == "refresh-safe" else None
     if mode == "seal":
         return {"mode": mode, "bundle": seal_evidence(election_id=election_id, as_of=as_of)}
@@ -191,27 +268,58 @@ def prepare_evidence(
     result = {"mode": mode, "refresh": refresh, "readiness": readiness}
     refresh_results = (refresh or {}).get("results") or {}
     polls = refresh_results.get("polls") or {}
+    coverage_summary = _coverage_summary(readiness)
+    forecast_incomplete = _forecast_incomplete(coverage_summary)
+    readiness_red = not readiness["ready_for_expensive_rebuild"]
+    warnings: list[str] = []
+
+    poll_status = polls.get("status")
+    polls_may_have_mutated = poll_status != "refresh_failed"
+    if (
+        mode == "refresh-safe"
+        and poll_snapshot is not None
+        and polls_may_have_mutated
+        and (forecast_incomplete or readiness_red)
+    ):
+        restored = _restore_poll_artifacts(poll_snapshot)
+        readiness = write_source_readiness(election_id=election_id, as_of=as_of)
+        result["readiness"] = readiness
+        coverage_summary = _coverage_summary(readiness)
+        forecast_incomplete = _forecast_incomplete(coverage_summary)
+        readiness_red = not readiness["ready_for_expensive_rebuild"]
+        polls = {
+            **polls,
+            "status": "reverted_coverage_regression",
+            "restored_paths": restored,
+            "live_fetch_status": polls.get("status"),
+            "live_fetch_error": polls.get("error") or polls.get("live_fetch_error"),
+        }
+        if isinstance(refresh, dict):
+            results = dict(refresh.get("results") or {})
+            results["polls"] = polls
+            refresh = {**refresh, "results": results}
+            result["refresh"] = refresh
+            refresh_results = results
+        warnings.append("poll_refresh_reverted_coverage_regression")
+        if not forecast_incomplete and not readiness_red:
+            warnings.append("poll_refresh_rollback_restored_green_gates")
+
     poll_refresh_failed = polls.get("status") == "refresh_failed"
     poll_used_sealed_fallback = polls.get("status") == "sealed_fallback"
-    coverage = readiness.get("forecast_coverage") or {}
-    coverage_summary = coverage.get("summary") if isinstance(coverage, dict) else {}
-    if not isinstance(coverage_summary, dict):
-        coverage_summary = {}
-    forecast_incomplete = (
-        coverage_summary.get("forecast_complete") is not True
-        or int(coverage_summary.get("n_fail") or 0) > 0
-    )
-    readiness_red = not readiness["ready_for_expensive_rebuild"]
-    # Live VoteHub outages must not fail a rebuild when sealed sources remain
-    # green. Only a hard refresh miss that leaves coverage/readiness red is fatal.
+    poll_reverted = polls.get("status") == "reverted_coverage_regression"
+    # Live VoteHub outages / regressive live pulls must not fail a rebuild when
+    # sealed sources remain green after rollback.
     poll_refresh_blocks = poll_refresh_failed and (readiness_red or forecast_incomplete)
-    warnings: list[str] = []
     if poll_refresh_failed and not poll_refresh_blocks:
         warnings.append("poll_refresh_failed_nonblocking")
     if poll_used_sealed_fallback:
         warnings.append("poll_refresh_used_sealed_fallback")
+    if poll_reverted and (forecast_incomplete or readiness_red):
+        # Rollback could not restore green gates; keep the regression visible.
+        warnings.append("poll_refresh_rollback_still_red")
     if warnings:
-        result["strict_warnings"] = warnings
+        result["strict_warnings"] = sorted(set(warnings))
+    failing_races = _failing_forecast_races(readiness)
     if strict and (readiness_red or forecast_incomplete or poll_refresh_blocks):
         result["strict_failure"] = True
         result["strict_failure_reasons"] = [
@@ -226,9 +334,11 @@ def prepare_evidence(
         result["strict_failure_detail"] = {
             "blockers": readiness.get("blockers") or [],
             "forecast_coverage": coverage_summary,
+            "failing_forecast_races": failing_races,
             "polls_refresh": {
                 "status": polls.get("status"),
                 "error": polls.get("error") or polls.get("live_fetch_error"),
+                "restored_paths": polls.get("restored_paths"),
             },
         }
     return result

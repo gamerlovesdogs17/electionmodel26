@@ -1397,10 +1397,12 @@ def main(argv: list[str] | None = None) -> None:
             readiness = report.get("readiness") or {}
             coverage = ((readiness.get("forecast_coverage") or {}).get("summary") or {})
             polls = ((report.get("refresh") or {}).get("results") or {}).get("polls") or {}
+            detail = report.get("strict_failure_detail") or {}
             compact = {
                 "mode": report.get("mode"),
                 "ready_for_expensive_rebuild": readiness.get("ready_for_expensive_rebuild"),
                 "forecast_coverage": coverage,
+                "failing_forecast_races": detail.get("failing_forecast_races") or [],
                 "polls_refresh_status": polls.get("status"),
                 "polls_refresh_error": polls.get("error") or polls.get("live_fetch_error"),
                 "strict_failure": report.get("strict_failure"),
@@ -1410,6 +1412,8 @@ def main(argv: list[str] | None = None) -> None:
             print(json.dumps(compact, indent=2, default=str))
         else:
             print(json.dumps(report, indent=2, default=str))
+        for warning in report.get("strict_warnings") or []:
+            print(f"::warning::prepare-evidence: {warning}")
         if a.strict and report.get("strict_failure"):
             detail = report.get("strict_failure_detail") or {}
             for reason in report.get("strict_failure_reasons") or ["strict_failure"]:
