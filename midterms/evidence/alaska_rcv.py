@@ -210,7 +210,9 @@ def prepare_alaska_rcv_evidence(*, retrieved_at: str | None = None) -> dict[str,
     }
     payload["semantic_sha256"] = _canonical_sha(payload)
     NORMALIZED_PATH.parent.mkdir(parents=True, exist_ok=True)
-    NORMALIZED_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    # write_bytes + explicit LF so Windows CI/dev do not seal CRLF receipts that
+    # break Linux Actions checkouts under Git text normalization.
+    NORMALIZED_PATH.write_bytes((json.dumps(payload, indent=2) + "\n").encode("utf-8"))
     manifest = {
         "schema_version": "alaska-rcv-source-manifest-v1", "parser_version": PARSER_VERSION,
         "source_provider": "Alaska Division of Elections", "sources": receipts,
@@ -218,7 +220,8 @@ def prepare_alaska_rcv_evidence(*, retrieved_at: str | None = None) -> dict[str,
         "normalized_sha256": _sha(NORMALIZED_PATH), "normalized_semantic_sha256": payload["semantic_sha256"],
         "production_eligible": True, "validation_class": "limited_validation_alaska_rcv_model",
     }
-    MANIFEST_PATH.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MANIFEST_PATH.write_bytes((json.dumps(manifest, indent=2) + "\n").encode("utf-8"))
     return payload
 
 
@@ -227,12 +230,12 @@ def load_alaska_rcv_evidence() -> dict[str, Any]:
         raise FileNotFoundError("sealed Alaska RCV evidence is missing")
     payload = json.loads(NORMALIZED_PATH.read_text(encoding="utf-8"))
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-    if _sha(NORMALIZED_PATH) != manifest.get("normalized_sha256"):
-        raise ValueError("Alaska normalized evidence byte hash changed")
     semantic = dict(payload)
     stored = semantic.pop("semantic_sha256", None)
     if _canonical_sha(semantic) != stored or stored != manifest.get("normalized_semantic_sha256"):
         raise ValueError("Alaska normalized evidence semantic hash changed")
+    # Byte hashes are not authoritative across Git text/EOL normalization. The
+    # semantic digest already seals every JSON field.
     return payload
 
 

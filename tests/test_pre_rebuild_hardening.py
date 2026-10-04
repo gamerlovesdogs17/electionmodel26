@@ -475,10 +475,9 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert text.index("Refresh safe sources") < text.index(
         "Fail-closed source and forecast coverage gate"
     )
-    assert (
+    assert text.count(
         "source-readiness --election-id senate-2026 --as-of \"$AS_OF\" --summary --strict"
-        in text
-    )
+    ) >= 2
     assert "ordinary_statistical_spec_sha256" in text
     assert '"--tune-per-chain", "4000"' in text
     assert '"--chains", "4"' in text

@@ -177,10 +177,8 @@ def _validate_alaska_sources(
     stored_semantic = semantic.pop("semantic_sha256", None)
     _require(stored_semantic == canonical_sha256(semantic), "Alaska normalized semantic hash changed")
     _require(manifest.get("normalized_semantic_sha256") == stored_semantic, "Alaska manifest semantic lineage changed")
-    _require(
-        hashlib.sha256(normalized_path.read_bytes()).hexdigest() == manifest.get("normalized_sha256"),
-        "Alaska normalized byte hash changed",
-    )
+    # Do not hard-fail on normalized byte digest: Git text/EOL normalization can
+    # change on-disk bytes across Windows/Linux while leaving semantic JSON intact.
     sources = manifest.get("sources") or {}
     _require(bool(sources), "Alaska official-source lineage is incomplete")
     for name, block in sources.items():

@@ -201,3 +201,36 @@ def test_source_manifest_and_semantic_hash_are_deterministic() -> None:
     assert manifest_path.read_bytes() == manifest_before
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert len(manifest["sources"]) == 7
+
+
+def test_alaska_evidence_loads_when_checkout_uses_lf_bytes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """CI Linux checkouts are LF; Windows may seal CRLF. Semantic hash must still pass."""
+    import midterms.evidence.alaska_rcv as alaska
+    import midterms.evidence.non_major_contract as contract
+
+    src_norm = Path("data/normalized/alaska_rcv_2026.json")
+    src_man = Path("data/manifests/alaska_rcv_sources.json")
+    payload = json.loads(src_norm.read_text(encoding="utf-8"))
+    # Force CRLF on disk while keeping semantic content identical to sealed evidence.
+    crlf_norm = tmp_path / "alaska_rcv_2026.json"
+    crlf_norm.write_bytes(
+        (json.dumps(payload, indent=2) + "\n").replace("\n", "\r\n").encode("utf-8")
+    )
+    man = json.loads(src_man.read_text(encoding="utf-8"))
+    # Manifest still carries the repository LF byte digest.
+    man_path = tmp_path / "alaska_rcv_sources.json"
+    man_path.write_text(json.dumps(man, indent=2) + "\n", encoding="utf-8")
+    monkeypatch.setattr(alaska, "NORMALIZED_PATH", crlf_norm)
+    monkeypatch.setattr(alaska, "MANIFEST_PATH", man_path)
+
+    evidence = alaska.load_alaska_rcv_evidence()
+    assert evidence["semantic_sha256"] == man["normalized_semantic_sha256"]
+    # Byte digest may differ under EOL rewrite; support status must remain green.
+    assert alaska._sha(crlf_norm) != man.get("normalized_sha256")
+    supported, status, reason = contract.probability_support_status(
+        {"race_id": RACE_ID, "contest_structure": "ranked_choice_multiway"},
+        n_compatible_polls=16,
+    )
+    assert supported is True
+    assert status == "limited_supported"
+    assert reason == "limited_validation_alaska_rcv_model"

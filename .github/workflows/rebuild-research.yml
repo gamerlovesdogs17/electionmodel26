@@ -72,7 +72,7 @@ jobs:
           print("snapshot_sha256", snapshot.get("snapshot_sha256"))
           PY
       - name: Source readiness audit
-        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary
+        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict
       - name: Refresh safe sources
         if: inputs.refresh_safe_sources
         env:

@@ -25,3 +25,6 @@ data/raw/external/fte_approval_sources_receipt.json -text
 data/raw/external/certified/fte_senate.csv -text
 # Official Alaska candidate, primary, and RCV reports are exact-byte evidence.
 data/raw/external/alaska_rcv/* -text -whitespace
+# Sealed Alaska normalized evidence/manifest must not be EOL-rewritten in CI.
+data/normalized/alaska_rcv_2026.json -text
+data/manifests/alaska_rcv_sources.json -text
