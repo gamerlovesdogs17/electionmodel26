@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Any
 
 from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, ROOT
-from midterms.validation.exceptional_model_lineage import build_exceptional_model_lineage
+from midterms.validation.exceptional_model_lineage import (
+    build_exceptional_model_lineage,
+)
 
 COMPLIANCE_PATH = ROOT / "BLUEPRINT_COMPLIANCE_AUDIT.json"
 

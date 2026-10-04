@@ -10,7 +10,6 @@ from midterms.config import ARTIFACTS_DIR
 from midterms.ops.release_identity import (
     IDENTITY_SCHEMA_VERSION,
     LEGACY_V0921_RELEASE_IDENTITY_PATH,
-    current_model_lineage,
     release_identity_path,
     validate_release_identity_document,
     verify_release_identity,
@@ -201,8 +200,21 @@ def test_active_version_mismatch_fails_loudly(tmp_path: Path) -> None:
 
 
 def test_repository_current_identity_path_is_not_historical() -> None:
-    lineage = current_model_lineage()
-    path = release_identity_path(V0922, lineage["evidence_bundle_id"])
+    # Path construction must stay version-derived. Until the v0.9.23 rebuild
+    # seals a current validated model spec, resolve the bundle id from the
+    # frozen v0.9.22 release identity rather than current_model_lineage().
+    sealed = json.loads(
+        (
+            ARTIFACTS_DIR / "release_identity_v0922_eb-3e91ca3a90628d69.json"
+        ).read_text(encoding="utf-8")
+    )
+    bundle_id = str((sealed.get("lineage") or {}).get("evidence_bundle_id"))
+    path = release_identity_path(V0922, bundle_id)
     assert path.parent == ARTIFACTS_DIR
-    assert path.name == (f"release_identity_v0922_{lineage['evidence_bundle_id']}.json")
+    assert path.name == f"release_identity_v0922_{bundle_id}.json"
     assert path != LEGACY_V0921_RELEASE_IDENTITY_PATH
+    current_path = release_identity_path(
+        "senate-hierarchical-v0.9.23", bundle_id,
+    )
+    assert "v0923" in current_path.name
+    assert current_path != path

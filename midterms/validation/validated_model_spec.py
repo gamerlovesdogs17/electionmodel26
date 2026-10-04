@@ -8,9 +8,9 @@ to that exact structure and evidence bundle.
 
 from __future__ import annotations
 
-from dataclasses import fields
 import hashlib
 import json
+from dataclasses import fields
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +21,21 @@ CANDIDATE_SPEC_SCHEMA = "validated-model-spec-candidate-v1"
 VALIDATED_SPEC_SCHEMA = "validated-model-spec-v2"
 CANONICAL_OOF_PHASE = "canonical_poll_structure"
 SELECTION_OOF_PHASE = "poll_structure_selection"
+
+# Candidate / selection / canonical OOF identity is ordinary-statistical only.
+# Exceptional adapters bind later into the finalized release model spec and are
+# verified by exceptional_model_lineage — they must not enter ordinary OOF caches.
+ORDINARY_STATISTICAL_SPEC_FIELDS = (
+    "schema_version",
+    "model_version",
+    "evidence_bundle_id",
+    "evidence_bundle_sha256",
+    "selected_structure_id",
+    "selected_poll_structure",
+    "selected_poll_structure_id",
+    "historical_cycles",
+    "lead_cutoffs_days",
+)
 
 STRUCTURE_CONFIGS: dict[str, dict[str, bool]] = {
     "pymc": {},
@@ -55,6 +70,16 @@ def poll_structure_for_selection(identifier: str) -> PollStructureConfig:
 def poll_structure_identity(config: PollStructureConfig | dict[str, Any]) -> str:
     cfg = PollStructureConfig.coerce(config).to_dict()
     return f"psc-{canonical_sha256(cfg)[:16]}"
+
+
+def ordinary_statistical_spec_identity(payload: dict[str, Any]) -> dict[str, Any]:
+    """Subset of a candidate/final spec that determines ordinary OOF reuse."""
+
+    return {key: payload.get(key) for key in ORDINARY_STATISTICAL_SPEC_FIELDS}
+
+
+def ordinary_statistical_spec_sha256(payload: dict[str, Any]) -> str:
+    return canonical_sha256(ordinary_statistical_spec_identity(payload))
 
 
 def write_candidate_model_spec(
@@ -117,7 +142,9 @@ def write_candidate_model_spec(
         "code_commit_sha": code_commit_sha,
         "production_research_eligible": False,
         "next_required_phase": CANONICAL_OOF_PHASE,
+        "ordinary_statistical_only": True,
     }
+    payload["ordinary_statistical_spec_sha256"] = ordinary_statistical_spec_sha256(payload)
     payload["spec_sha256"] = canonical_sha256(payload)
     path = Path(out_path or ARTIFACTS_DIR / "validated_model_spec_candidate.json")
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -194,6 +221,8 @@ def finalize_validated_model_spec(
     exceptional_sha = exceptional_model_lineage.get("lineage_sha256")
     from midterms.validation.exceptional_model_lineage import (
         LINEAGE_SCHEMA_VERSION,
+    )
+    from midterms.validation.exceptional_model_lineage import (
         canonical_sha256 as exceptional_canonical_sha256,
     )
 

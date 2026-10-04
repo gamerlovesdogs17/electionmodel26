@@ -462,7 +462,9 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert "repair-failed-oof-inference" in text
     assert '"--draws-per-chain", "2000"' in text
     assert "forecast_resumed=" in text
-    assert text.count("if: steps.resume.outputs.forecast_resumed != 'true'") == 5
+    assert text.count("if: steps.resume.outputs.forecast_resumed != 'true'") == 6
+    assert "verify-exceptional-models --strict" in text
+    assert "validate_forecast_model_paths" in text
     assert '"--tune-per-chain", "4000"' in text
     assert '"--chains", "4"' in text
     assert '"--target-accept", "0.99"' in text

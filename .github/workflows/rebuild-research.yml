@@ -222,7 +222,10 @@ jobs:
             data/artifacts/nested_component_loo_selection_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
             data/artifacts/poll_structure_crossfit_latest.json
-          key: selection-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/non_major_adapter_validation_latest.json', 'data/artifacts/alaska_rcv_validation_latest.json', 'data/artifacts/current_race_poll_coverage_v0923.json', 'data/artifacts/historical_evidence_equivalence_v0923.json') }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
+          # Ordinary selection OOF keys only on ordinary statistical inputs.
+          # Exceptional adapters are verified separately via verify-exceptional-models
+          # and must not invalidate expensive ordinary PyMC OOF caches.
+          key: selection-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
       - name: Selection-pass freeze-before-truth OOF and same-family challengers
         if: steps.resume.outputs.resumed != 'true' && steps.selection-cache.outputs.cache-hit != 'true'
         run: |
@@ -250,7 +253,9 @@ jobs:
             --out data/artifacts/poll_structure_crossfit_latest.json \
             --strict
       - name: Freeze selected structure and evidence into candidate model spec
+        id: candidate_spec
         if: steps.resume.outputs.resumed != 'true'
+        shell: bash
         run: |
           python -m midterms.cli freeze-model-spec-candidate \
             --selection data/artifacts/poll_structure_crossfit_latest.json \
@@ -258,6 +263,10 @@ jobs:
             --source-readiness data/artifacts/source_readiness_latest.json \
             --code-commit-sha "$(git rev-parse HEAD)" \
             --out data/artifacts/validated_model_spec_candidate.json
+          # Ordinary OOF cache key uses ordinary-statistical identity only.
+          # Exceptional adapters bind later into the finalized release spec.
+          ORD_SHA="$(python -c "import json; print(json.load(open('data/artifacts/validated_model_spec_candidate.json'))['ordinary_statistical_spec_sha256'])")"
+          echo "ordinary_statistical_spec_sha256=$ORD_SHA" >> "$GITHUB_OUTPUT"
       - name: Save selection-pass validation cache
         if: steps.resume.outputs.resumed != 'true' && steps.selection-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -267,7 +276,7 @@ jobs:
             data/artifacts/nested_component_loo_selection_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
             data/artifacts/poll_structure_crossfit_latest.json
-          key: selection-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/non_major_adapter_validation_latest.json', 'data/artifacts/alaska_rcv_validation_latest.json', 'data/artifacts/current_race_poll_coverage_v0923.json', 'data/artifacts/historical_evidence_equivalence_v0923.json') }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
+          key: selection-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
       - name: Restore canonical selected-structure OOF cache
         id: canonical-cache
         if: steps.resume.outputs.resumed != 'true'
@@ -277,7 +286,8 @@ jobs:
             data/artifacts/nested_component_loo_canonical.json
             data/artifacts/nested_component_loo_canonical_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
-          key: canonical-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json', 'data/artifacts/non_major_adapter_validation_latest.json', 'data/artifacts/alaska_rcv_validation_latest.json', 'data/artifacts/current_race_poll_coverage_v0923.json', 'data/artifacts/historical_evidence_equivalence_v0923.json') }}-2018-2024-60-30-pymc1600-seed-v2
+          # Ordinary-statistical identity only — not whole candidate JSON / exceptional lineage.
+          key: canonical-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ steps.candidate_spec.outputs.ordinary_statistical_spec_sha256 }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Canonical OOF using the frozen selected poll structure
         if: steps.resume.outputs.resumed != 'true' && steps.canonical-cache.outputs.cache-hit != 'true'
         run: |
@@ -353,7 +363,7 @@ jobs:
             data/artifacts/nested_component_loo_canonical.json
             data/artifacts/nested_component_loo_canonical_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
-          key: canonical-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json', 'data/artifacts/non_major_adapter_validation_latest.json', 'data/artifacts/alaska_rcv_validation_latest.json', 'data/artifacts/current_race_poll_coverage_v0923.json', 'data/artifacts/historical_evidence_equivalence_v0923.json') }}-2018-2024-60-30-pymc1600-seed-v2
+          key: canonical-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ steps.candidate_spec.outputs.ordinary_statistical_spec_sha256 }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Fit predictive-mixture stack from canonical OOF only
         if: steps.resume.outputs.forecast_resumed != 'true'
         run: |

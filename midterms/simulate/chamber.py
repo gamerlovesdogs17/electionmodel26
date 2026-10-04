@@ -353,7 +353,11 @@ def simulate_chamber(
                 "favored_party": favored_party,
                 "favored_caucus": favored_caucus,
                 "modeling_path": (
-                    "ordinary_stack" if dem_party == "D" else "binary_non_major_adapter"
+                    "binary_non_major_adapter"
+                    if row is not None
+                    and str(row.get("contest_structure") or "")
+                    == "non_major_party_vs_republican"
+                    else "ordinary_stack"
                 ),
             }
         if dem_party == "D":

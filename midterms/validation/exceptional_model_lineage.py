@@ -13,15 +13,28 @@ import json
 from pathlib import Path
 from typing import Any
 
-from midterms.config import ARTIFACTS_DIR, MANIFESTS_DIR, MODEL_VERSION, NORMALIZED_DIR, ROOT
+from midterms.config import (
+    ARTIFACTS_DIR,
+    MANIFESTS_DIR,
+    MODEL_VERSION,
+    NORMALIZED_DIR,
+    ROOT,
+)
 from midterms.evidence.current_candidates import (
     CURRENT_CANDIDATE_REGISTRY_PATH,
     load_current_candidate_registry,
 )
-from midterms.evidence.non_major_contract import NON_MAJOR_ADAPTER_METHOD, NON_MAJOR_TARGET
-from midterms.model.alaska_rcv_adapter import adapter_specification as alaska_specification
+from midterms.evidence.non_major_contract import (
+    NON_MAJOR_ADAPTER_METHOD,
+    NON_MAJOR_TARGET,
+)
+from midterms.model.alaska_rcv_adapter import (
+    adapter_specification as alaska_specification,
+)
 from midterms.model.non_major_adapter import (
     ADAPTER_SPEC_VERSION as NON_MAJOR_SPEC_VERSION,
+)
+from midterms.model.non_major_adapter import (
     COMMON_VARIANCE_SHARE,
     POLL_ERROR_FLOOR,
     PRIOR_SD,
@@ -57,7 +70,7 @@ def _read(path: Path) -> dict[str, Any]:
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError(f"invalid promotion artifact {path.name}: {exc}") from exc
     if not isinstance(payload, dict):
-        raise ValueError(f"promotion artifact is not a JSON object: {path.name}")
+        raise TypeError(f"promotion artifact is not a JSON object: {path.name}")
     return payload
 
 
@@ -202,10 +215,23 @@ def validate_alaska_artifact(
     _require(all(row.get("held_out_from_transfer_fit") is True for row in cases), "Alaska held-out transfer validation is incomplete")
     _require(all(row.get("probability_or_calibration_claim") is False for row in cases), "Alaska historical diagnostics overclaim calibration")
     _require(aggregate.get("mass_conservation_all") is True, "Alaska mass-conservation check failed")
+    # Surface known weak historical diagnostic — never hide low winner frequency.
+    special_house = next(
+        (row for row in cases if str(row.get("analog_id") or "") == "2022_special_house"),
+        None,
+    )
+    _require(special_house is not None, "Alaska 2022 special House historical diagnostic is absent")
+    special_freq = float(special_house.get("simulated_actual_winner_frequency") or -1.0)
+    _require(0.0 <= special_freq <= 1.0, "Alaska 2022 special House winner frequency is malformed")
 
-    manifest, normalized = _validate_alaska_sources(
-        manifest_path=Path(manifest_path), normalized_path=Path(normalized_path),
-    ) if verify_sources else (_read(Path(manifest_path)), _read(Path(normalized_path)))
+    _manifest, normalized = (
+        _validate_alaska_sources(
+            manifest_path=Path(manifest_path),
+            normalized_path=Path(normalized_path),
+        )
+        if verify_sources
+        else (_read(Path(manifest_path)), _read(Path(normalized_path)))
+    )
     _require(payload.get("source_semantic_sha256") == normalized.get("semantic_sha256"), "Alaska validation source lineage changed")
     candidate_field = normalized.get("candidate_field") or []
     field_ids = [str(row.get("candidate_id") or "") for row in candidate_field]
@@ -238,10 +264,18 @@ def validate_alaska_artifact(
         "candidate_registry_sha256": registry["registry_sha256"],
         "candidate_field_ids": sorted(expected_output_ids),
         "candidate_field_sha256": canonical_sha256(sorted(expected_output_ids)),
+        "first_choice_spec_version": expected_spec["first_choice_spec_version"],
+        "transfer_model_spec_version": expected_spec["transfer_model_spec_version"],
+        "tabulation_spec_version": expected_spec["tabulation_spec_version"],
+        "sensitivity_spec_version": expected_spec["sensitivity_spec_version"],
+        "caucus_policy_version": expected_spec["caucus_policy_version"],
         "sullivan_disambiguation": True,
         "mass_conservation": True,
         "calibration_claim_allowed": False,
         "ordinary_oof_validates_adapter": False,
+        # Known weak diagnostic: 2022 special House actual-winner frequency is very low.
+        "special_house_actual_winner_frequency": special_freq,
+        "special_house_weak_diagnostic_visible": True,
     }
 
 
@@ -317,7 +351,9 @@ def validate_historical_equivalence(
     _require(len(rows) == 8, "historical equivalence does not cover all formal cutoffs")
     _require(all(row.get("equivalent") is True and not row.get("changed_sections") for row in rows), "historical equivalence contains changed cutoffs")
     if recompute_current:
-        from midterms.validation.historical_evidence_equivalence import build_historical_projection
+        from midterms.validation.historical_evidence_equivalence import (
+            build_historical_projection,
+        )
 
         current = build_historical_projection()
         actual = {
