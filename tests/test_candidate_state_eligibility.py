@@ -96,14 +96,14 @@ def _poll(
     }
 
 
-def test_ordinary_side_only_race_passes_without_exact_candidate_ids():
+def test_current_race_without_exact_candidate_ids_fails_closed():
     applied, polls, meta = apply_candidate_state_contract(
         _race(), pd.DataFrame(), pd.DataFrame(), as_of="2026-09-27",
     )
-    assert applied.loc[0, "candidate_state"] == "side_only_stable"
+    assert applied.loc[0, "candidate_state"] == "identity_required"
     assert pd.isna(applied.loc[0, "modeled_candidate_id"])
-    assert meta["publication_eligible"] is True
-    assert meta["counts"]["identity_required_and_missing"] == 0
+    assert meta["publication_eligible"] is False
+    assert meta["counts"]["identity_required_and_missing"] == 1
     assert polls.empty
 
 
@@ -195,9 +195,9 @@ def test_ambiguous_matchups_are_removed_without_eventual_nominee_selection():
     applied, safe, meta = apply_candidate_state_contract(
         _race(race_id), pd.DataFrame(), polls, as_of="2026-09-01",
     )
-    assert applied.loc[0, "candidate_state"] == "structurally_unresolved"
+    assert applied.loc[0, "candidate_state"] == "identity_required"
     assert safe.empty
-    assert meta["publication_eligible"] is True
+    assert meta["publication_eligible"] is False
     assert meta["ambiguous_poll_matchups"][0]["race_id"] == race_id
     assert {row["poll_id"] for row in meta["poll_exclusions"]} == {"p1", "p2"}
 
@@ -293,7 +293,7 @@ def test_candidate_classification_change_changes_snapshot_hash():
     assert snapshot_a != snapshot_b
 
 
-def test_source_readiness_candidate_domain_green_for_materially_safe_states(tmp_path: Path):
+def test_source_readiness_candidate_domain_blocks_unverified_current_identity(tmp_path: Path):
     normalized = tmp_path / "normalized"
     manifests = tmp_path / "manifests"
     raw = tmp_path / "raw"
@@ -312,9 +312,5 @@ def test_source_readiness_candidate_domain_green_for_materially_safe_states(tmp_
         environ={},
     )
     candidate = report["domains"]["candidate_timeline"]
-    assert candidate["status"] == "ready"
-    assert candidate["missing_coverage"] == []
-    assert all(
-        cutoff["n_side_only_stable"] == 1
-        for cutoff in candidate["cutoffs"].values()
-    )
+    assert candidate["status"] in {"missing", "incomplete_coverage"}
+    assert candidate["cutoffs"]["senate-2026-current"]["publication_eligible"] is False

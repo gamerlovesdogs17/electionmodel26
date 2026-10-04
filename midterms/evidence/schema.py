@@ -57,6 +57,19 @@ POLL_COLUMNS = [
     "rep_candidate_name",
     "matchup_id",
     "hypothetical",
+    # Candidate-neutral contest identity.  Legacy D/R fields above remain for
+    # compatible historical inputs; non-major-party contests must never be
+    # relabeled Democratic merely to fit that schema.
+    "modeled_candidate_id",
+    "modeled_candidate_name",
+    "modeled_ballot_party",
+    "opposing_candidate_id",
+    "opposing_candidate_name",
+    "opposing_ballot_party",
+    "modeled_share",
+    "opposing_share",
+    "modeled_margin",
+    "margin_definition",
     "contest_kind",  # regular | special
     "seat_name",
     "election_stage",  # general | runoff | ...
@@ -154,9 +167,7 @@ def is_active_ballot_row(row: dict[str, Any] | Any) -> bool:
     }:
         return False
     phase = str(get("election_phase") or "general").lower()
-    if phase in {"runoff_pending"}:
-        return False
-    return True
+    return phase != "runoff_pending"
 
 MANIFEST_FIELDS = [
     "run_id",
@@ -195,7 +206,7 @@ def empty_poll_row(**overrides: Any) -> dict[str, Any]:
     return row
 
 
-def align_poll_frame(df: "Any") -> "Any":
+def align_poll_frame(df: Any) -> Any:
     """Ensure DataFrame has all POLL_COLUMNS (fill missing with None)."""
     import pandas as pd
 
@@ -221,7 +232,7 @@ def align_race_frame(df: Any) -> Any:
     return out[RACE_COLUMNS]
 
 
-def align_result_frame(df: "Any") -> "Any":
+def align_result_frame(df: Any) -> Any:
     """Ensure DataFrame has all RESULT_COLUMNS (truth_v1 extras defaulted)."""
     import pandas as pd
 

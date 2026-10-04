@@ -206,10 +206,10 @@ class EvidenceSnapshot:
             "as_of": self.as_of.isoformat(),
             "election_id": self.election_id,
             "snapshot_id": self.snapshot_id,
-            "n_polls": int(len(self.polls)),
+            "n_polls": len(self.polls),
             "n_races_contested": n_contested,
-            "n_results_known": int(len(self.results_known)),
-            "n_rated_pollsters": int(len(self.pollster_ratings or {})),
+            "n_results_known": len(self.results_known),
+            "n_rated_pollsters": len(self.pollster_ratings or {}),
             "presidential_source_sha256": self.presidential_source_sha256,
             "presidential_source_years": list(self.presidential_source_years),
             "prior_snapshot_sha256": self.prior_snapshot_sha256,
@@ -249,7 +249,7 @@ class Warehouse:
             from midterms.evidence.official_ballot import merge_official_into_races
 
             self.races = merge_official_into_races(self.races)
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001,S110
             pass
         results_path = self.normalized_dir / "results.parquet"
         self.results = (
@@ -258,7 +258,7 @@ class Warehouse:
         # Prefer redistributable certified archive when present
         try:
             self.results = merge_certified_into_results(self.results)
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001,S110
             pass
         ratings_path = self.normalized_dir / "pollster_ratings.parquet"
         self.ratings_df = (
@@ -304,7 +304,7 @@ class Warehouse:
         out["rating_source"] = source
         meta = {
             **lookup_meta,
-            "n_rated": int(len(lookup)),
+            "n_rated": len(lookup),
             "n_prior_default": int(n_default),
             "pollsters": used,
         }
@@ -350,6 +350,15 @@ class Warehouse:
         else:
             results_known = results
 
+        # Current ticket labels are a non-authoritative diagnostic fallback.
+        # Attach them before classification so candidate-specific polls cannot
+        # collapse to anonymous party-side rows.  They never satisfy the
+        # traceable timeline requirement.
+        if election_id == "senate-2026" and len(races):
+            from midterms.evidence.outcome_identity import attach_2026_ticket_identities
+
+            races = attach_2026_ticket_identities(races)
+
         # Resolve candidate/race state before filtering inactive ballot rows.
         from midterms.evidence.candidate_timeline import (
             apply_candidate_state_contract,
@@ -384,13 +393,6 @@ class Warehouse:
             # Existing normalized stores may predate the explicit caucus columns.
             # Attach the declared accounting assumption in the model snapshot.
             races = attach_declared_held_independent_caucus(races)
-        if election_id == "senate-2026" and len(races):
-            from midterms.evidence.outcome_identity import attach_2026_ticket_identities
-
-            # Development fallback only. The snapshot remains explicitly
-            # degraded until a sourced bitemporal candidate timeline exists.
-            races = attach_2026_ticket_identities(races)
-
         # Verify source bytes, then attach one point-in-time derived side table
         # to all races in this snapshot. Truth/result fields are untouched.
         source_sha = None
@@ -424,7 +426,10 @@ class Warehouse:
 
         # Bind the selected point-in-time demographic vintage into the race
         # frame so similarity never consults a process-global/current lookup.
-        from midterms.evidence.demography import attach_demo_features, demographic_snapshot_as_of
+        from midterms.evidence.demography import (
+            attach_demo_features,
+            demographic_snapshot_as_of,
+        )
 
         demo_lookup, _demo_meta = demographic_snapshot_as_of(
             as_of_d, require_point_in_time=False,

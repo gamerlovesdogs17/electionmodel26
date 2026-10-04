@@ -1,0 +1,58 @@
+{
+  "schema_version": "current-candidate-source-inventory-v1",
+  "model_version": "senate-hierarchical-v0.9.23",
+  "generated_at": "2026-10-04T03:34:39.507690+00:00",
+  "parser_version": "current-candidate-source-audit-v1",
+  "sources": [
+    {
+      "source_url": "https://www.fec.gov/data/candidate/S6SC04437/",
+      "raw_path": "data/raw/external/current_candidates_2026/fec_s6sc04437.html",
+      "raw_sha256": "7db8563e31d40c6c66f5fd046c6c4952bcf6c0466090c13e04c0afd9a941261f",
+      "bytes": 63515,
+      "retrieved_at": "2026-10-04T03:33:35.587696+00:00",
+      "effective_at": "2026-07-23T00:00:00+00:00",
+      "source_kind": "ballot_party_support_only",
+      "nominee_resolution_eligible": false
+    },
+    {
+      "source_url": "https://scvotes.gov/elections-statistics/election-results/",
+      "raw_path": "data/raw/external/current_candidates_2026/scvotes_election_results.html",
+      "raw_sha256": "b134438ee8f3563573442bc6fc987b7b096706c0a4a515a7c67864dbfe80014d",
+      "bytes": 91449,
+      "retrieved_at": "2026-10-04T03:33:35.858617+00:00",
+      "effective_at": "2026-08-25T00:00:00+00:00",
+      "source_kind": "official_runoff_index",
+      "nominee_resolution_eligible": false
+    },
+    {
+      "source_url": "https://www.elections.alaska.gov/election-candidates/",
+      "raw_path": "data/raw/external/current_candidates_2026/alaska_election_candidates.html",
+      "raw_sha256": "baee03ea1a29b2e730b30b3a269130cf669cb079908c6e0a66b3833e8b6cbeb4",
+      "bytes": 167150,
+      "retrieved_at": "2026-10-04T03:33:38.827569+00:00",
+      "effective_at": null,
+      "source_kind": "official_multi_candidate_list",
+      "nominee_resolution_eligible": false
+    }
+  ],
+  "findings": {
+    "SC": {
+      "darline_graham_ballot_party": "R",
+      "party_source": "FEC S6SC04437",
+      "nominee_identity_status": "unresolved_official_results_portal_winner_not_archived"
+    },
+    "AK": {
+      "structure": "certified_multi_candidate",
+      "binary_target_supported": false
+    },
+    "NH": {
+      "nominee_identity_status": "unresolved_no_sealed_official_current_nominee_source"
+    }
+  },
+  "production_eligible": false,
+  "reasons": [
+    "official current nominee identity is not sealed for every 2026 race",
+    "SC results index identifies the runoff but the checked-in page does not identify its winner",
+    "AK official list is multi-candidate and requires a separate RCV model"
+  ]
+}

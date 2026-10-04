@@ -1,20 +1,25 @@
-# Model card — Senate hierarchical v0.9.22
+# Model card — Senate hierarchical v0.9.23 development boundary
 
-> **Validation status (2026-10-03):** v0.9.22 completed its sealed research
-> rebuild against evidence bundle `eb-3e91ca3a90628d69`. G1–G11 and run
-> coherence pass, and release identity
-> `truth_v1_v0.9.22_eb-3e91ca3a90628d69` verifies. The validated specification
-> remains `research_only` with `PUBLIC_LIVE_ENABLED=False`.
+> **Validation status (2026-10-03):** v0.9.23 is an unvalidated current-cycle
+> evidence repair. Current candidate-source and matchup coverage fail closed;
+> no v0.9.23 release identity, evidence seal, or forecast exists. v0.9.22 remains
+> the last completed sealed research rebuild against bundle
+> `eb-3e91ca3a90628d69`, with release identity
+> `truth_v1_v0.9.22_eb-3e91ca3a90628d69`. Both surfaces remain `research_only`
+> with `PUBLIC_LIVE_ENABLED=False`.
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
-- **Estimands:** two-party margins; joint Dem seats; chamber control (≥51 Dem; ≤50 → R via VP)
+- **Estimands:** two-party margins for supported D-v-R contests; joint seats and
+  chamber control are withheld when an active contest lacks a supported target
 - **Auxiliary:** multiway shares + turnout foils (do not drive seat math)
 - **Nonstandard candidates:** candidate, ballot party, modeled side, and caucus
   affiliation are distinct fields. Warehouse rows now carry current ticket
   identities. The four modeled Independents and held Independent seats retain
   `I` ballot/held labels and use a user-declared Democratic-caucus accounting
-  assumption. Missing or conflicting metadata still blocks chamber accounting.
+  assumption. Ballot party never changes because of that caucus assumption.
+  Current I-v-R and Alaska RCV/multi-candidate contests are blocked pending
+  separately validated targets, and missing identity metadata blocks accounting.
 
 ## Architecture (five layers — do not conflate)
 1. **Reference / generative spine** — PyMC hierarchical Student-t. Default CLI method `pymc` is the **static** Election-Day latent (`latent_path=static_election_day`). Challenger `pymc_dynamic` is a **weekly random-walk** path with Morris-calibrated future innovations and residual ED terminal only (`latent_path=weekly_random_walk_morris_calibrated`).
@@ -48,13 +53,13 @@ future-version research candidates.
 ## Sources
 | Domain | Source | Notes |
 | --- | --- | --- |
-| Polls (live 2026) | VoteHub CC BY | Required for `run_class=publication`; fixtures are non-publication |
+| Polls (live 2026) | VoteHub CC BY | Exact 3 Oct raw JSON receipt, parser and Parquet lineage are bound; candidate IDs/names and matchup IDs survive canonical ingest; fixtures are non-publication |
 | Polls (historical) | FiveThirtyEight / ABC News (CC BY; Wayback/sealed) | Candidate identity + official race_id map; `--allow-synthetic` CI only |
 | Pollster quality | VoteHub plus sealed FiveThirtyEight snapshots | Exact source-commit dates are sealed for the 2018/2020/2023 content vintages; none was public by the formal 2018 cutoffs, and the mismatched 2021 file is excluded |
 | Economics | Sealed ALFRED observations-by-vintage archive | All formal 60/30 cutoffs plus the current cutoff are source-ready; FRED latest, World Bank and fixtures cannot clear the gate |
 | Approval | Vendored compiled individual-poll archive plus VoteHub current polls | Formal historical cutoffs use the sealed point-in-time 30-day aggregate and pass source readiness |
 | Finance | Official FEC candidate/committee links plus Form 3 report summaries | Formal cutoffs use receipt-date availability and as-of amendment resolution; source readiness is complete |
-| Candidate state | Official race universe, sealed candidate lists where identity matters, and official primary calendars | Identity is conditionally required. Ordinary D-vs-R races may be `side_only_stable`; transitions and top-two pairings remain fail-closed; nonbinary race/cutoffs are explicitly excluded from binary scoring |
+| Candidate state | Official race universe, bitemporal candidate events, and archived official pages | Historical replay retains the conditional identity contract. Current 2026 labels require traceable identity for matchup selection; the curated ticket registry is diagnostic-only and cannot clear publication eligibility. Current source completion remains pending |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |
 | Markets | Kalshi | Candidate mapping plus verified candidate-win/exclusive/exhaustive contract-family semantics required before normalization |

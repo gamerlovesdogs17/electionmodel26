@@ -41,7 +41,7 @@ from midterms.validation.structural_ablations import (
 
 
 def test_model_version_boundary_rejects_old_stack(tmp_path: Path):
-    assert MODEL_VERSION == "senate-hierarchical-v0.9.22"
+    assert MODEL_VERSION == "senate-hierarchical-v0.9.23"
     payload = {"source_model_version": "senate-hierarchical-v0.9.21"}
     with pytest.raises(ValueError, match="stale stack artifact model_version"):
         require_current_model_version(
@@ -69,7 +69,7 @@ def test_poll_ablation_changes_exactly_one_enabled_feature(ablation_id: str, cha
     assert spec["eligible"] is True
     assert spec["changed_features"] == [changed]
     for field in ("sponsor_effect", "questionnaire_effect", "study_effect"):
-        expected = False if field == changed else True
+        expected = field != changed
         assert spec["challenger_config"]["poll_structure"][field] is expected
     for setting in ("draws", "tune", "chains"):
         assert spec["challenger_config"][setting] == spec["reference_config"][setting]

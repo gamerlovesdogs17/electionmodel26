@@ -110,13 +110,13 @@ def identity_from_ticket(race_id: str, ticket: dict[str, str | None]) -> Contest
 
 def attach_2026_ticket_identities(races: pd.DataFrame) -> pd.DataFrame:
     """Join curated ticket identities to active 2026 rows without touching truth."""
-    from midterms.evidence.tickets import TICKETS_2026, TICKET_REGISTRY_VERSION
+    from midterms.evidence.tickets import TICKET_REGISTRY_VERSION, TICKETS_2026
 
     out = races.copy()
     for col in (
-        "modeled_candidate_id", "modeled_ballot_party", "modeled_caucus",
+        "modeled_candidate_id", "modeled_candidate_name", "modeled_ballot_party", "modeled_caucus",
         "modeled_caucus_basis", "opposing_candidate_id", "opposing_ballot_party",
-        "opposing_caucus", "opposing_caucus_basis", "identity_source",
+        "opposing_candidate_name", "opposing_caucus", "opposing_caucus_basis", "identity_source",
         "identity_available_at", "identity_registry_version",
     ):
         if col not in out.columns:
@@ -135,14 +135,16 @@ def attach_2026_ticket_identities(races: pd.DataFrame) -> pd.DataFrame:
         modeled, opposing = contest.contenders
         updates = {
             "modeled_candidate_id": modeled.candidate_id,
+            "modeled_candidate_name": str(ticket["dem_name"]),
             "modeled_ballot_party": modeled.ballot_party,
             "modeled_caucus": modeled.caucus_affiliation,
             "modeled_caucus_basis": modeled.caucus_basis,
             "opposing_candidate_id": opposing.candidate_id,
+            "opposing_candidate_name": str(ticket["rep_name"]),
             "opposing_ballot_party": opposing.ballot_party,
             "opposing_caucus": opposing.caucus_affiliation,
             "opposing_caucus_basis": opposing.caucus_basis,
-            "identity_source": "dated_ticket_registry",
+            "identity_source": "curated_ticket_registry_non_authoritative",
             "identity_available_at": None,
             "identity_registry_version": TICKET_REGISTRY_VERSION,
         }
@@ -209,6 +211,9 @@ def require_binary_chamber_compatibility(races: pd.DataFrame) -> None:
             ):
                 raise ValueError(f"held Independent lacks supported explicit caucus: {race_id}")
             continue
+        if "binary_score_eligible" in races.columns and row.get("binary_score_eligible") is False:
+            reason = row.get("binary_score_exclusion_reason") or "unsupported_binary_target"
+            raise ValueError(f"race is ineligible for binary chamber forecast: {race_id}: {reason}")
         party = row.get("modeled_ballot_party")
         if pd.isna(party):
             party = row.get("dem_party")

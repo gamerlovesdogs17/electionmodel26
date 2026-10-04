@@ -89,7 +89,7 @@ CANDIDATE_PARTY: dict[str, str] = {
     # South Carolina
     "lindsey graham": "R",
     "annie andrews": "D",
-    "darline graham": "D",
+    "darline graham": "R",
     # Tennessee
     "bill hagerty": "R",
     "marquita bradshaw": "D",
@@ -98,6 +98,10 @@ CANDIDATE_PARTY: dict[str, str] = {
     "james talarico": "D",
     "john cornyn": "R",
     "colin allred": "D",
+    # Nebraska's ballot identity is Independent.  Caucus accounting is kept
+    # separately in outcome_identity.py and must never change this label.
+    "dan osborn": "I",
+    "pete ricketts": "R",
     # Virginia
     "mark warner": "D",
     "alexander vindman": "D",
@@ -109,9 +113,6 @@ CANDIDATE_PARTY: dict[str, str] = {
     # South Dakota / others occasionally present
     "mike rounds": "R",
     "marie gladue": "D",
-    # Idaho
-    "jim risch": "R",
-    "todd achilles": "D",
     # Generic labels sometimes present
     "dem": "D",
     "democrat": "D",
@@ -169,6 +170,22 @@ def candidate_party(name: str) -> str | None:
         return CANDIDATE_PARTY[key]
     # last-name fallback when unique enough is dangerous; keep strict.
     return None
+
+
+def stable_candidate_id(name: str, *, namespace: str = "votehub") -> str:
+    """Return a deterministic source-local candidate identifier.
+
+    This is an identity key for matching poll questions, not an assertion that
+    the candidate is a certified nominee.  Certification remains the job of
+    the bitemporal candidate timeline.
+    """
+    import re
+
+    key = normalize_candidate_key(name)
+    slug = "-".join(re.findall(r"[a-z0-9]+", key))
+    if not slug:
+        raise ValueError("candidate name is empty")
+    return f"{namespace}:{slug}"
 
 
 def canonicalize_pollster(name: str) -> str:

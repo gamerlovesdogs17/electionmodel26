@@ -127,6 +127,20 @@ def _usable_events_as_of(timeline: pd.DataFrame, cutoff: date) -> pd.DataFrame:
 
 
 def _poll_matchup_key(row: pd.Series) -> str | None:
+    modeled = (
+        str(row.get("modeled_candidate_id")).strip()
+        if _present(row.get("modeled_candidate_id")) else _normalized_name(
+            row.get("modeled_candidate_name") if _present(row.get("modeled_candidate_name")) else ""
+        )
+    )
+    opposing = (
+        str(row.get("opposing_candidate_id")).strip()
+        if _present(row.get("opposing_candidate_id")) else _normalized_name(
+            row.get("opposing_candidate_name") if _present(row.get("opposing_candidate_name")) else ""
+        )
+    )
+    if modeled or opposing:
+        return f"{modeled}|{opposing}"
     dem = str(row.get("dem_candidate_id") or "").strip() or _normalized_name(
         row.get("dem_candidate_name")
     )
@@ -142,9 +156,20 @@ def _poll_matchup_key(row: pd.Series) -> str | None:
 def _poll_matches_resolved_identity(row: pd.Series, race: pd.Series) -> bool:
     """Match separate poll/timeline identifier namespaces by ID or normalized name."""
     checks: list[bool] = []
+    generic = _present(row.get("modeled_candidate_id")) or _present(
+        row.get("modeled_candidate_name")
+    )
     for poll_id, poll_name, race_id, race_name in (
-        ("dem_candidate_id", "dem_candidate_name", "modeled_candidate_id", "modeled_candidate_name"),
-        ("rep_candidate_id", "rep_candidate_name", "opposing_candidate_id", "opposing_candidate_name"),
+        (
+            "modeled_candidate_id" if generic else "dem_candidate_id",
+            "modeled_candidate_name" if generic else "dem_candidate_name",
+            "modeled_candidate_id", "modeled_candidate_name",
+        ),
+        (
+            "opposing_candidate_id" if generic else "rep_candidate_id",
+            "opposing_candidate_name" if generic else "rep_candidate_name",
+            "opposing_candidate_id", "opposing_candidate_name",
+        ),
     ):
         pid, rid = row.get(poll_id), race.get(race_id)
         pname, rname = row.get(poll_name), race.get(race_name)
@@ -263,6 +288,8 @@ def apply_candidate_state_contract(
         ).astype(str).eq(race_id)]
         candidate_fields = [
             column for column in (
+                "modeled_candidate_id", "modeled_candidate_name",
+                "opposing_candidate_id", "opposing_candidate_name",
                 "dem_candidate_id", "dem_candidate_name", "rep_candidate_id",
                 "rep_candidate_name", "matchup_id",
             ) if column in race_polls.columns
@@ -326,6 +353,50 @@ def apply_candidate_state_contract(
             reason = "ranked_choice_multi_candidate_structure"
             score_eligible = False
             score_reason = "no_single_predeclared_dem_vs_rep_final_pair"
+        elif (
+            year == 2026
+            and _present(race.get("modeled_ballot_party"))
+            and str(race.get("modeled_ballot_party") or "").upper()
+            not in {"D", "DEM", "DEMOCRAT", "DEMOCRATIC"}
+        ):
+            identity_required = True
+            identity_resolved = exact_identity and race_events_traceable
+            state = "ineligible_for_binary_scoring"
+            reason = "non_major_party_contest_requires_separate_statistical_target"
+            eligible = False
+            score_eligible = False
+            score_reason = "no_validated_non_major_party_margin_transform"
+            if not identity_resolved:
+                identity_missing.append(race_id)
+        elif year == 2026:
+            # Current candidate labels and matchup filtering are source claims.
+            # A curated display registry may help diagnostics, but cannot make
+            # those claims publication eligible without a traceable timeline.
+            identity_required = True
+            identity_resolved = (
+                exact_identity and race_events_traceable and not has_unresolved_identity_status
+            )
+            state = "identity_required"
+            reason = (
+                "current_matchup_resolved_by_point_in_time_identity"
+                if identity_resolved
+                else "current_candidate_identity_requires_point_in_time_source"
+            )
+            eligible = identity_resolved
+            if not identity_resolved:
+                identity_missing.append(race_id)
+            for poll_index, poll in candidate_polls.iterrows():
+                if not identity_resolved or not _poll_matches_resolved_identity(poll, race):
+                    safe_indices.discard(poll_index)
+                    poll_exclusions.append({
+                        "poll_id": str(poll.get("poll_id") or ""),
+                        "race_id": race_id,
+                        "reason": (
+                            "current_identity_unresolved_candidate_poll_excluded"
+                            if not identity_resolved
+                            else "matchup_not_selected_by_point_in_time_identity"
+                        ),
+                    })
         elif gap and str(gap.get("gap_type")) == "nomination_not_yet_determined":
             state = "structurally_unresolved"
             reason = "pre_nomination_side_only"
@@ -470,10 +541,23 @@ def apply_candidate_state_contract(
         record["candidate_identity_resolved"]
         for record in records if record["candidate_identity_required"]
     )
-    publication_eligible = not identity_missing and traceable_required
-    reasons = [] if publication_eligible else [
-        f"{len(identity_missing)} identity-sensitive races lack point-in-time resolution"
+    current_binary_blockers = [
+        record["race_id"] for record in records
+        if str(record.get("race_id") or "").startswith("senate-2026-")
+        and not record["binary_score_eligible"]
     ]
+    publication_eligible = (
+        not identity_missing and traceable_required and not current_binary_blockers
+    )
+    reasons = []
+    if identity_missing:
+        reasons.append(
+            f"{len(identity_missing)} identity-sensitive races lack point-in-time resolution"
+        )
+    if current_binary_blockers:
+        reasons.append(
+            f"{len(current_binary_blockers)} current races lack a supported binary target"
+        )
     metadata = {
         **timeline_meta,
         "schema_version": CANDIDATE_STATE_SCHEMA_VERSION,
@@ -508,6 +592,8 @@ def apply_candidate_state_contract(
         "held_seats_excluded": True,
         "conditional_identity_contract": True,
     }
+    if any(str(record.get("race_id") or "").startswith("senate-2026-") for record in records):
+        metadata["current_binary_target_blocked_race_ids"] = sorted(current_binary_blockers)
     return out, safe_polls.reset_index(drop=True), metadata
 
 

@@ -1,6 +1,8 @@
 {
-  "n_live": 372,
-  "n_warehouse_polls": 4529,
+  "schema_version": "votehub-poll-lineage-v2",
+  "parser_version": "votehub-ingest-v2-candidate-identity",
+  "n_live": 375,
+  "n_warehouse_polls": 4532,
   "election_id": "senate-2026",
   "states": [
     "AK",
@@ -18,19 +20,37 @@
     "MS",
     "MT",
     "NC",
+    "NE",
     "NH",
     "NM",
     "OH",
     "RI",
+    "SC",
     "TN",
     "TX",
     "VA"
   ],
   "generic_ballot_dem_margin": 4.910411220302433,
   "paths": {
-    "polls": "/home/runner/work/electionmodel26/electionmodel26/data/normalized/polls.parquet",
-    "live": "/home/runner/work/electionmodel26/electionmodel26/data/normalized/polls_live_votehub.parquet",
-    "ratings": "/home/runner/work/electionmodel26/electionmodel26/data/normalized/pollster_ratings.parquet"
+    "polls": "normalized/polls.parquet",
+    "live": "normalized/polls_live_votehub.parquet",
+    "ratings": "normalized/pollster_ratings.parquet"
   },
+  "source": {
+    "raw_path": "raw/external/votehub_us_senator.json",
+    "raw_byte_sha256": "6d9b6d6ac0c9fc4d506015435d9f2caf43e9e4427d2c7e7157f3cc8f834a22a9",
+    "raw_canonical_json_sha256": "0d8ef370fe1c788cff98c57b29dd5fc7a74717a16be21c8d3521fc5fb8ff291e",
+    "retrieved_at": "2026-10-03T19:24:52.538006+00:00",
+    "fetch_manifest_path": "data/manifests/fetch_votehub_us_senator.json",
+    "fetch_manifest_sha256": "4ec57a09beb9f4fdecaf76d6b23e937e23a792a7c405ada98f32ce7fea27f053",
+    "fetch_manifest_recorded_raw_sha256": "6d9b6d6ac0c9fc4d506015435d9f2caf43e9e4427d2c7e7157f3cc8f834a22a9"
+  },
+  "outputs": {
+    "live_parquet_byte_sha256": "a0768d37bd6d0581f5330bfb0f98e330d259530340251b45a77988992d3562e9",
+    "live_semantic_sha256": "b9714ab781e9a5b0d05746245e02cf635ebebfab13ae6eece2a1786c9663736a",
+    "warehouse_parquet_byte_sha256": "251b1ee11b8bd09e011b99bcb35166ce8d3f6f535b3b25f2a639a0b3b8e6c316",
+    "warehouse_current_semantic_sha256": "b9714ab781e9a5b0d05746245e02cf635ebebfab13ae6eece2a1786c9663736a"
+  },
+  "lineage_verified": true,
   "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0"
 }

@@ -1,0 +1,162 @@
+{
+  "schema_version": "historical-evidence-equivalence-v1",
+  "reference_model_version": "senate-hierarchical-v0.9.22",
+  "candidate_model_version": "senate-hierarchical-v0.9.23",
+  "classification": "historically_equivalent",
+  "formal_cutoffs": [
+    {
+      "cutoff": "senate-2018@2018-09-07",
+      "equivalent": true,
+      "before_semantic_sha256": "394e27d415b440fe6553b672e434b943393b14c008b72d9d3d42931907846ab8",
+      "after_semantic_sha256": "394e27d415b440fe6553b672e434b943393b14c008b72d9d3d42931907846ab8",
+      "changed_sections": [],
+      "before_counts": {
+        "races": 100,
+        "polls": 285
+      },
+      "after_counts": {
+        "races": 100,
+        "polls": 285
+      }
+    },
+    {
+      "cutoff": "senate-2018@2018-10-07",
+      "equivalent": true,
+      "before_semantic_sha256": "608a16a3c8b0cb8a1897a4c6ecf1849e7880d0a2d32d8be91a4557e18cefe0a7",
+      "after_semantic_sha256": "608a16a3c8b0cb8a1897a4c6ecf1849e7880d0a2d32d8be91a4557e18cefe0a7",
+      "changed_sections": [],
+      "before_counts": {
+        "races": 100,
+        "polls": 431
+      },
+      "after_counts": {
+        "races": 100,
+        "polls": 431
+      }
+    },
+    {
+      "cutoff": "senate-2020@2020-09-04",
+      "equivalent": true,
+      "before_semantic_sha256": "2be3ab78048808f290b650032a57b8f63f08cdeceb2ea6876b458f4f1d2d362c",
+      "after_semantic_sha256": "2be3ab78048808f290b650032a57b8f63f08cdeceb2ea6876b458f4f1d2d362c",
+      "changed_sections": [],
+      "before_counts": {
+        "races": 100,
+        "polls": 282
+      },
+      "after_counts": {
+        "races": 100,
+        "polls": 282
+      }
+    },
+    {
+      "cutoff": "senate-2020@2020-10-04",
+      "equivalent": true,
+      "before_semantic_sha256": "3678929cca652399567428064363505f2ff6568314292e971a79f96cae15fa55",
+      "after_semantic_sha256": "3678929cca652399567428064363505f2ff6568314292e971a79f96cae15fa55",
+      "changed_sections": [],
+      "before_counts": {
+        "races": 100,
+        "polls": 442
+      },
+      "after_counts": {
+        "races": 100,
+        "polls": 442
+      }
+    },
+    {
+      "cutoff": "senate-2022@2022-09-09",
+      "equivalent": true,
+      "before_semantic_sha256": "0097fc609f4ff1d8e1b43f7cf2590a6bfe8ad7903961357c20a44aa1e7c8061e",
+      "after_semantic_sha256": "0097fc609f4ff1d8e1b43f7cf2590a6bfe8ad7903961357c20a44aa1e7c8061e",
+      "changed_sections": [],
+      "before_counts": {
+        "races": 100,
+        "polls": 195
+      },
+      "after_counts": {
+        "races": 100,
+        "polls": 195
+      }
+    },
+    {
+      "cutoff": "senate-2022@2022-10-09",
+      "equivalent": true,
+      "before_semantic_sha256": "182836c0189d3c1dfdd357c5e860441d6decea523de7d867e4dd0f3bcb3f4f1c",
+      "after_semantic_sha256": "182836c0189d3c1dfdd357c5e860441d6decea523de7d867e4dd0f3bcb3f4f1c",
+      "changed_sections": [],
+      "before_counts": {
+        "races": 100,
+        "polls": 335
+      },
+      "after_counts": {
+        "races": 100,
+        "polls": 335
+      }
+    },
+    {
+      "cutoff": "senate-2024@2024-09-06",
+      "equivalent": true,
+      "before_semantic_sha256": "b27ed817bbea956a68ffd64227f2965d7057a937c5fe254a24ee4c6c48b54034",
+      "after_semantic_sha256": "b27ed817bbea956a68ffd64227f2965d7057a937c5fe254a24ee4c6c48b54034",
+      "changed_sections": [],
+      "before_counts": {
+        "races": 100,
+        "polls": 376
+      },
+      "after_counts": {
+        "races": 100,
+        "polls": 376
+      }
+    },
+    {
+      "cutoff": "senate-2024@2024-10-06",
+      "equivalent": true,
+      "before_semantic_sha256": "fda5fa97ac535b4c1f53d00a99f274c694bcd81c6ae7c741736775bce807858d",
+      "after_semantic_sha256": "fda5fa97ac535b4c1f53d00a99f274c694bcd81c6ae7c741736775bce807858d",
+      "changed_sections": [],
+      "before_counts": {
+        "races": 100,
+        "polls": 567
+      },
+      "after_counts": {
+        "races": 100,
+        "polls": 567
+      }
+    }
+  ],
+  "comparison_fields": {
+    "races": [
+      "race_id",
+      "state",
+      "not_up",
+      "binary_score_eligible",
+      "candidate_state",
+      "candidate_state_reason",
+      "candidate_timeline_status",
+      "modeled_candidate_id",
+      "modeled_candidate_name",
+      "modeled_ballot_party",
+      "opposing_candidate_id",
+      "opposing_candidate_name",
+      "opposing_ballot_party"
+    ],
+    "polls": [
+      "poll_id",
+      "race_id",
+      "two_party_margin",
+      "available_at",
+      "dem_candidate_id",
+      "dem_candidate_name",
+      "rep_candidate_id",
+      "rep_candidate_name",
+      "matchup_id",
+      "hypothetical",
+      "exclusion_status",
+      "exclusion_reason"
+    ],
+    "candidate_state_metadata": true
+  },
+  "reusable_lineage_claim": "v0.9.22 historical model inputs were not changed by this current-cycle repair; no v0.9.22 artifact is relabeled as v0.9.23",
+  "comparison_sha256": "2a5d316d484ab88e57fada8c0a125b1c99716b4e672ffeaebdc5164bc83254fc"
+}

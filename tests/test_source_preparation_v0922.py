@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from midterms.config import MODEL_VERSION
 from midterms.evidence.candidate_timeline import (
     apply_candidate_timeline,
     validate_candidate_timeline_source,
@@ -181,7 +182,7 @@ def test_disabled_optional_domain_does_not_block_but_required_core_does():
     assert optional == ["markets"]
 
 
-def test_missing_timeline_is_nonblocking_for_ordinary_side_only_race(tmp_path: Path):
+def test_missing_timeline_blocks_current_labeled_race(tmp_path: Path):
     normalized = tmp_path / "normalized"
     manifests = tmp_path / "manifests"
     raw = tmp_path / "raw"
@@ -195,8 +196,8 @@ def test_missing_timeline_is_nonblocking_for_ordinary_side_only_race(tmp_path: P
     )
     timeline = report["domains"]["candidate_timeline"]
     current = timeline["cutoffs"]["senate-2026-current"]
-    assert current["publication_eligible"] is True
-    assert current["n_side_only_stable"] == 1
+    assert current["publication_eligible"] is False
+    assert current["identity_required_and_missing_race_ids"] == ["synthetic-race"]
 
 
 def _bundle(domains: dict) -> dict:
@@ -254,7 +255,7 @@ def test_source_only_extension_gate_reads_sealed_readiness(tmp_path: Path):
         for name in ("candidate_timeline", "demographics", "economics")
     }
     (artifacts / "source_readiness_latest.json").write_text(json.dumps({
-        "model_version": "senate-hierarchical-v0.9.22",
+        "model_version": MODEL_VERSION,
         "ready_for_expensive_rebuild": True,
         "domains": domains,
     }), encoding="utf-8")

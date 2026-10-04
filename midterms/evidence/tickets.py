@@ -6,7 +6,7 @@ from typing import Any
 
 from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
 
-TICKET_REGISTRY_VERSION = "tickets-2026-20260920-v1"
+TICKET_REGISTRY_VERSION = "tickets-2026-20261003-v2-nonauthoritative"
 
 # General-election tickets (Class II + 2026 specials), Sep 2026 research snapshot.
 # Prefer nominated / ballot-qualified major candidates; not an endorsement.
@@ -40,7 +40,7 @@ TICKETS_2026: dict[str, dict[str, Any]] = {
     "OK": {"dem_name": "N'Kiyla Thomas", "rep_name": "Kevin Hern", "dem_party": "D"},
     "OR": {"dem_name": "Jeff Merkley", "rep_name": "David Brock Smith", "dem_party": "D"},
     "RI": {"dem_name": "Jack Reed", "rep_name": "Raymond McKay", "dem_party": "D"},
-    "SC": {"dem_name": "Annie Andrews", "rep_name": "Ralph Norman", "dem_party": "D"},
+    "SC": {"dem_name": "Annie Andrews", "rep_name": "Darline Graham", "dem_party": "D"},
     "SD": {"dem_name": "Brian Bengs", "rep_name": "Mike Rounds", "dem_party": "I"},
     "TN": {"dem_name": "Marquita Bradshaw", "rep_name": "Bill Hagerty", "dem_party": "D"},
     "TX": {"dem_name": "James Talarico", "rep_name": "Ken Paxton", "dem_party": "D"},

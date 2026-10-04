@@ -136,6 +136,7 @@ def audit_source_readiness(
         })
     else:
         domains["polls"].update(status="missing", reasons=["data/normalized/polls.parquet is missing"])
+    poll_rows_ready = domains["polls"]["status"] == "ready"
 
     races_path = normalized_dir / "races_official.parquet"
     races = pd.read_parquet(races_path) if races_path.is_file() else pd.DataFrame()
@@ -160,6 +161,7 @@ def audit_source_readiness(
     timeline_cutoffs = {**historical_cutoffs, f"{election_id}-current": cutoff.isoformat()}
     timeline_rows: dict[str, Any] = {}
     missing_timeline: list[dict[str, Any]] = []
+    current_poll_coverage: dict[str, Any] | None = None
     for label, cutoff_value in timeline_cutoffs.items():
         target_election = election_id if label.endswith("-current") else "-".join(label.split("-")[:2])
         subset = races[races.get("election_id", pd.Series("", index=races.index)).astype(str).eq(target_election)].copy()
@@ -181,7 +183,13 @@ def audit_source_readiness(
                 election_id=target_election,
                 as_of=cutoff_value,
             )
-            applied, _safe_polls, metadata = apply_candidate_state_contract(
+            if label.endswith("-current") and target_election == "senate-2026":
+                from midterms.evidence.outcome_identity import (
+                    attach_2026_ticket_identities,
+                )
+
+                subset = attach_2026_ticket_identities(subset)
+            applied, safe_polls, metadata = apply_candidate_state_contract(
                 subset,
                 timeline,
                 cutoff_polls,
@@ -192,6 +200,26 @@ def audit_source_readiness(
             audit["missing_race_ids"] = audit.get(
                 "identity_required_and_missing_race_ids", []
             )
+            if label.endswith("-current") and target_election == "senate-2026":
+                from midterms.evidence.current_poll_coverage import (
+                    current_race_poll_coverage,
+                )
+
+                if cutoff_polls.empty or "available_at" not in cutoff_polls.columns:
+                    raw_current = pd.DataFrame(columns=["race_id", "poll_id", "matchup_id"])
+                else:
+                    current_dates = pd.to_datetime(
+                        cutoff_polls["available_at"], errors="coerce",
+                    ).dt.date
+                    raw_current = cutoff_polls[
+                        current_dates.notna()
+                        & (current_dates <= pd.Timestamp(cutoff_value).date())
+                    ].copy()
+                if safe_polls.empty and "race_id" not in safe_polls.columns:
+                    safe_polls = pd.DataFrame(columns=["race_id", "poll_id", "matchup_id"])
+                current_poll_coverage = current_race_poll_coverage(
+                    applied, raw_current, safe_polls, metadata, as_of=cutoff_value,
+                )
         timeline_rows[label] = audit
         if not audit.get("publication_eligible"):
             missing_timeline.append({
@@ -238,6 +266,13 @@ def audit_source_readiness(
             "identity-sensitive candidate state remains unresolved at a required cutoff"
         ],
     })
+    if current_poll_coverage is not None:
+        domains["polls"]["current_race_coverage"] = current_poll_coverage
+        if not current_poll_coverage["summary"]["promotion_eligible"]:
+            domains["polls"]["status"] = "incomplete_coverage"
+            domains["polls"].setdefault("reasons", []).append(
+                "current race matchup/identity coverage has hard failures"
+            )
 
     demo_contract = canonical_domain_contract("demographics")
     demo_path = normalized_dir / str(demo_contract["normalized_name"])
@@ -459,7 +494,7 @@ def audit_source_readiness(
             domains[name].update({
                 "historical_production_eligible": strict_historical,
                 "current_production_eligible": strict_current,
-                "current_rows": int(len(current)),
+                "current_rows": len(current),
             })
             sealed_hashes = (manifest or {}).get("historical_raw_sha256s") or {}
             if strict_historical and sealed_hashes:
@@ -501,10 +536,12 @@ def audit_source_readiness(
 
     generic_path = raw_dir / "external" / "votehub_generic_ballot_2026.json"
     domains["generic_ballot"].update({
-        "status": "ready" if generic_path.is_file() and domains["polls"]["status"] == "ready" else "incomplete_coverage",
+        # Candidate/matchup coverage is a Senate race-poll gate.  It must not
+        # make an independently sourced generic-ballot file appear absent.
+        "status": "ready" if generic_path.is_file() and poll_rows_ready else "incomplete_coverage",
         "semantic_sha256": _sha(generic_path),
         "historical_method": "derived_from_frozen_senate_poll_deviation",
-        "reasons": [] if generic_path.is_file() and domains["polls"]["status"] == "ready" else [
+        "reasons": [] if generic_path.is_file() and poll_rows_ready else [
             "current generic-ballot source or historical poll-derived context is unavailable"
         ],
     })
@@ -550,5 +587,14 @@ def write_source_readiness(**kwargs: Any) -> dict[str, Any]:
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     path = ARTIFACTS_DIR / "source_readiness_latest.json"
     path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    coverage = ((report.get("domains") or {}).get("polls") or {}).get(
+        "current_race_coverage"
+    )
+    if coverage:
+        from midterms.evidence.current_poll_coverage import (
+            write_current_race_poll_coverage,
+        )
+
+        write_current_race_poll_coverage(coverage)
     report["path"] = str(path)
     return report

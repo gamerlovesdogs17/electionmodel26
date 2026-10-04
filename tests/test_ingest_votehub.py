@@ -9,11 +9,16 @@ import pandas as pd
 
 from midterms.config import NORMALIZED_DIR, RAW_DIR
 from midterms.evidence.candidates import candidate_party, canonicalize_pollster
-from midterms.evidence.ingest import merge_live_polls_into_warehouse, normalize_votehub_senate_polls
-from midterms.evidence.ratings import build_rating_lookup, rating_for, write_normalized_ratings
+from midterms.evidence.ingest import (
+    merge_live_polls_into_warehouse,
+    normalize_votehub_senate_polls,
+)
+from midterms.evidence.ratings import (
+    build_rating_lookup,
+    rating_for,
+    write_normalized_ratings,
+)
 from midterms.evidence.warehouse import Warehouse
-from midterms.model.pymc_model import fit_fast_approximation
-from midterms.simulate.chamber import simulate_chamber
 
 
 def test_candidate_party_map_covers_major_names():
@@ -49,30 +54,29 @@ def test_normalize_votehub_senate_polls():
     assert raw.exists()
     df = normalize_votehub_senate_polls()
     assert len(df) > 50
-    assert set(["TX", "MI", "GA", "NC"]).issubset(set(df["state"]))
-    assert (df["two_party_margin"].abs() < 80).all()
+    assert {"TX", "MI", "GA", "NC"}.issubset(set(df["state"]))
+    assert (df["two_party_margin"].dropna().abs() < 80).all()
+    assert df.loc[df["modeled_ballot_party"].eq("I"), "two_party_margin"].isna().all()
     assert df["poll_id"].str.startswith("vh-").all()
     assert "quality_weight" in df.columns
     # as-of filterable
     assert df["available_at"].notna().all()
 
 
-def test_merge_live_polls_and_forecast_smoke():
+def test_merge_live_polls_preserves_identity_and_current_snapshot_fails_closed():
     # Prefer live VoteHub polls; do not rebuild synthetic fixtures first
     # (build_fixtures would wipe production/live 2026 rows).
     summary = merge_live_polls_into_warehouse(election_id="senate-2026")
     assert summary["n_live"] > 50
+    live = pd.read_parquet(NORMALIZED_DIR / "polls_live_votehub.parquet")
+    assert live["modeled_candidate_id"].notna().all()
+    assert live["opposing_candidate_id"].notna().all()
+    assert live["matchup_id"].notna().all()
+
     wh = Warehouse(ensure_fixtures=False)
     snap = wh.build_as_of("2026-09-01", "senate-2026")
-    assert len(snap.polls) > 0
-    assert "quality_weight" in snap.polls.columns
-    # Live polls should dominate 2026 after merge
-    assert snap.polls["poll_id"].astype(str).str.startswith("vh-").mean() > 0.5
-    fit = fit_fast_approximation(snap, n_draws=800, seed=42)
-    assert fit.diagnostics["n_polls"] > 0
-    sim, summaries = simulate_chamber(fit, snap.races)
-    assert 0 <= sim.p_dem_majority <= 1
-    assert len(summaries) >= 20
+    assert snap.polls.empty
+    assert snap.candidate_timeline["publication_eligible"] is False
 
 
 def test_unknown_candidates_manifest_written():

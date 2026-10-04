@@ -3,7 +3,7 @@
 Blueprint §§11–12 roles and change control (Senate research production).
 
 ## Public live probabilities
-**HOLD (3 Oct 2026 validated research boundary / v0.9.22):** `PUBLIC_LIVE_ENABLED=False`.
+**HOLD (3 Oct 2026 v0.9.23 development boundary):** `PUBLIC_LIVE_ENABLED=False`.
 Truth_v1 ledger/expectations are unified; Wikipedia vote scrape remains quarantined.
 The sealed multi-cycle research rebuild, independent rebuild, G1–G11, extension
 gates, and run coherence pass. This establishes a validated production research
@@ -18,6 +18,13 @@ separate version-bound blueprint extension evaluation. Old-version empirical
 artifacts remain historical records and cannot be relabeled as current.
 
 Current surface: `research_only`. Do not label research runs as live.
+
+v0.9.23 repairs current candidate/matchup evidence and is not empirically
+validated. Candidate identity is unresolved from a complete bitemporal official
+source, and unsupported non-major-party/RCV targets fail closed. No current
+forecast or chamber probability may be promoted under this boundary. The
+v0.9.22 research freeze below remains immutable and is the last completed
+empirical reference.
 
 ## Frozen v0.9.22 specification
 
@@ -40,9 +47,13 @@ model stage checks out the exact evidence commit, verifies the bundle ID, and
 must not refresh evidence while fitting. Cache hits are performance aids only;
 restored artifacts still have to pass their own semantic lineage checks.
 
-The current source audit is green and evidence bundle
+The frozen v0.9.22 source audit is green and evidence bundle
 `eb-3e91ca3a90628d69` is sealed. It is the evidence boundary used by the
 completed v0.9.22 research validation; it does not permit live publication.
+The v0.9.23 source audit is intentionally red pending current candidate-source
+completion and supported contest targets. Its historical equivalence report
+shows no formal 2018/2020/2022/2024 60/30 input change, but that finding does not
+relabel old validation artifacts as v0.9.23 artifacts.
 Missing real evidence in a future bundle must be ingested or refreshed;
 fixtures, current registries, and degraded substitutes cannot be relabeled to
 clear a historical source gate.

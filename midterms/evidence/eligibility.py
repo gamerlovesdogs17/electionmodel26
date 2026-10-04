@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -489,7 +489,7 @@ def classify_race_election(election_id: str, races: pd.DataFrame | None = None) 
                 man = json.loads(man_path.read_text(encoding="utf-8"))
                 if str(man.get("tier_2026") or "") in {"aggregator", "official"}:
                     return str(man["tier_2026"])
-            except Exception:  # noqa: BLE001
+            except Exception:  # noqa: BLE001,S110
                 pass
         return "curated"
     path = NORMALIZED_DIR / "races_official.parquet"
@@ -510,13 +510,13 @@ def audit_structural_prior(races: pd.DataFrame) -> dict[str, Any]:
     required = ("prior_source", "prior_provenance_sha256", "prior_production_eligible")
     missing = [name for name in required if name not in races.columns]
     if missing:
-        return {"eligible": False, "blocked_n": int(len(races)),
+        return {"eligible": False, "blocked_n": len(races),
                 "reason": f"structural prior metadata missing: {', '.join(missing)}"}
     active = races[~races["not_up"].fillna(False)] if "not_up" in races.columns else races
     valid_sha = active["prior_provenance_sha256"].astype(str).str.fullmatch(r"[0-9a-fA-F]{64}")
     valid = (
         active["prior_source"].eq("observed_presidential_relative_v1")
-        & active["prior_production_eligible"].eq(True)  # noqa: E712
+        & active["prior_production_eligible"].eq(True)
         & valid_sha
     )
     blocked = int((~valid).sum())
@@ -566,11 +566,13 @@ def _classify_manifest_domain(
         if any("FIXTURE" in str(s) for s in series):
             tier = "synthetic"
             blocked_reason = f"{name} series includes *_FIXTURE"
-        if "fixture" in blob.lower() and tier != "synthetic":
-            # soft curated-but-flagged
-            if "RDPI_YOY_FIXTURE" in blob or "fixture_hash" in blob:
-                tier = "synthetic"
-                blocked_reason = blocked_reason or f"{name} fixture markers present"
+        if (
+            "fixture" in blob.lower()
+            and tier != "synthetic"
+            and ("RDPI_YOY_FIXTURE" in blob or "fixture_hash" in blob)
+        ):
+            tier = "synthetic"
+            blocked_reason = blocked_reason or f"{name} fixture markers present"
     n = int(
         manifest.get("n_shares")
         or manifest.get("n_rows")
@@ -685,7 +687,7 @@ def _audit_configured_domains(
         domains["ratings"] = {
             "tier": "curated",
             "eligible": False,
-            "n": int(len(pd.read_parquet(NORMALIZED_DIR / "expert_ratings.parquet"))),
+            "n": len(pd.read_parquet(NORMALIZED_DIR / "expert_ratings.parquet")),
             "blocked_reason": "expert_ratings.parquet tier=curated not publication-eligible",
             "note": "expert_ratings.parquet present",
         }
@@ -765,11 +767,11 @@ def audit_evidence(
     domains: dict[str, Any] = {
         "races": {
             "tier": race_tier,
-            "n": int(len(races_e)),
+            "n": len(races_e),
             "eligible": race_tier in PUBLICATION_ELIGIBLE,
         },
         "polls": {
-            "n": int(len(polls_e)),
+            "n": len(polls_e),
             "tier_counts": _tier_counts(poll_tiers) if len(poll_tiers) else {},
             "blocked_n": int(poll_tiers.isin(list(PUBLICATION_BLOCKED)).sum())
             if len(poll_tiers)
@@ -780,7 +782,7 @@ def audit_evidence(
             "eligible": False,
         },
         "results": {
-            "n": int(len(results_e)),
+            "n": len(results_e),
             "tier_counts": _tier_counts(result_tiers) if len(result_tiers) else {},
             "blocked_n": int(result_tiers.isin(list(PUBLICATION_BLOCKED)).sum())
             if len(result_tiers)
@@ -836,7 +838,7 @@ def audit_evidence(
             )
 
     # Poll eligibility: target election must not be majority synthetic/untraceable
-    n_polls = int(len(polls_e))
+    n_polls = len(polls_e)
     blocked_polls = int(domains["polls"]["blocked_n"])
     if n_polls == 0:
         reasons.append("no polls for election_id")
@@ -850,6 +852,15 @@ def audit_evidence(
     domains["polls"]["eligible"] = n_polls > 0 and blocked_polls < max(
         1, int(0.05 * n_polls)
     )
+    if election_id == "senate-2026":
+        try:
+            from midterms.evidence.ingest import verify_votehub_poll_lineage
+
+            domains["polls"]["source_lineage"] = verify_votehub_poll_lineage()
+        except (FileNotFoundError, KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            domains["polls"]["source_lineage"] = {"ok": False, "error": str(exc)}
+            domains["polls"]["eligible"] = False
+            reasons.append(f"current poll source lineage failed: {exc}")
 
     # Staleness for live cycle
     stale = False
@@ -874,7 +885,7 @@ def audit_evidence(
     # point-in-time availability/vintage gates; old observations are expected
     # and must not be mislabeled as an operational outage.
     if as_of and election_id == "senate-2026":
-        freshness_checked_at = datetime.now(timezone.utc).isoformat()
+        freshness_checked_at = datetime.now(UTC).isoformat()
         domains["polls"]["freshness"] = domain_freshness_from_provenance(
             "polls", checked_at=freshness_checked_at,
             retrieved_at=_latest_value(polls_e, "retrieved_at"),
@@ -985,7 +996,7 @@ def audit_evidence(
             "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable "
             "evidence across races/polls/results/finance/economics/approval/ratings/markets."
         ),
-        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "checked_at": datetime.now(UTC).isoformat(),
     }
     return report
 

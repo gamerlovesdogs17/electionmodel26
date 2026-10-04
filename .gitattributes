@@ -4,6 +4,10 @@
 # Immutable raw API capture: preserve the fetched bytes; semantic JSON hashes
 # separately protect its parsed evidence across platforms.
 data/raw/external/kalshi_senate.json -text
+data/raw/external/votehub_us_senator.json -text
+# Preserve official pages byte-for-byte. Their source whitespace is evidence,
+# not a repository formatting defect.
+data/raw/external/current_candidates_2026/* -text -whitespace
 
 # Immutable historical source captures: keep repository blob bytes identical
 # on Windows and Linux so exact source hashes remain reproducible.

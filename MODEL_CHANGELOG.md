@@ -4,6 +4,36 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-10-03 — v0.9.23 current candidate/matchup evidence repair (validation pending)
+
+- Opened `senate-hierarchical-v0.9.23` because candidate identity, poll-target
+  semantics, and current source lineage materially differ from the frozen
+  v0.9.22 evidence contract. No v0.9.23 release identity or promotion seal was
+  created; v0.9.22 remains the last completed empirical research rebuild.
+- VoteHub normalization now retains source-local candidate IDs, names, ballot
+  parties, and matchup IDs in the canonical poll schema. Candidate-neutral
+  modeled/opposing fields preserve Independent ballot identity; legacy D/R
+  margin fields are populated only for actual D-v-R questions.
+- Rebound the current normalized polls to the checked-in 3 October VoteHub JSON
+  receipt with exact raw-byte, all-fields canonical JSON, parser, normalized
+  semantic, and exact Parquet hashes. The prior discrepancy was Git CRLF/LF
+  conversion; normalized current rows were reproducible from the receipt.
+- Corrected Darline Graham's source-local ballot party to Republican and updated
+  the explicitly non-authoritative display registry. Official FEC, South
+  Carolina election-index, and Alaska candidate pages are archived with exact
+  hashes, but they do not establish complete current nominee history for all
+  races, so current publication eligibility remains red.
+- Current candidate labels now require a traceable bitemporal source. Curated
+  ticket labels can expose mismatches for diagnostics but cannot satisfy the
+  gate. Alaska RCV/multi-candidate and modeled non-major-party contests fail
+  closed until separately validated statistical targets exist.
+- Added a 35-race current poll coverage audit and a machine-readable historical
+  equivalence report. All formal 2018/2020/2022/2024 60/30 evidence projections
+  are semantically unchanged. This does not upgrade or relabel any v0.9.22 OOF,
+  stack, calibration, forecast, or release artifact as v0.9.23 evidence.
+- No forecast, historical fit, stack fit, calibration, simulation, or expensive
+  rebuild was run. `PUBLIC_LIVE_ENABLED=False` and `research_only` remain.
+
 ## 2026-10-03 — v0.9.22 validated production research freeze
 
 - Completed the sealed v0.9.22 research rebuild against evidence bundle
