@@ -18,7 +18,7 @@ from midterms.config import ARTIFACTS_DIR, MODEL_VERSION
 from midterms.model.poll_structure import PollStructureConfig
 
 CANDIDATE_SPEC_SCHEMA = "validated-model-spec-candidate-v1"
-VALIDATED_SPEC_SCHEMA = "validated-model-spec-v1"
+VALIDATED_SPEC_SCHEMA = "validated-model-spec-v2"
 CANONICAL_OOF_PHASE = "canonical_poll_structure"
 SELECTION_OOF_PHASE = "poll_structure_selection"
 
@@ -149,6 +149,7 @@ def finalize_validated_model_spec(
     calibration_path: str | Path,
     out_path: str | Path | None = None,
     code_commit_sha: str | None = None,
+    exceptional_model_lineage: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     candidate_path = Path(candidate_path)
     canonical_oof_path = Path(canonical_oof_path)
@@ -184,6 +185,40 @@ def finalize_validated_model_spec(
     if not all(checks.values()):
         failed = [name for name, ok in checks.items() if not ok]
         raise ValueError("validated model spec lineage failed: " + ", ".join(failed))
+    if exceptional_model_lineage is None:
+        from midterms.validation.exceptional_model_lineage import (
+            build_exceptional_model_lineage,
+        )
+
+        exceptional_model_lineage = build_exceptional_model_lineage()
+    exceptional_sha = exceptional_model_lineage.get("lineage_sha256")
+    from midterms.validation.exceptional_model_lineage import (
+        LINEAGE_SCHEMA_VERSION,
+        canonical_sha256 as exceptional_canonical_sha256,
+    )
+
+    exceptional_semantic = dict(exceptional_model_lineage)
+    exceptional_semantic.pop("lineage_sha256", None)
+    if (
+        exceptional_model_lineage.get("schema_version") != LINEAGE_SCHEMA_VERSION
+        or exceptional_sha != exceptional_canonical_sha256(exceptional_semantic)
+    ):
+        raise ValueError("exceptional model lineage identity is invalid")
+    checks.update({
+        "exceptional_models_semantically_valid": True,
+        "forecast_coverage_complete": bool(
+            (exceptional_model_lineage.get("forecast_coverage") or {})
+            .get("summary", {})
+            .get("forecast_complete")
+        ),
+        "historical_evidence_equivalent": (
+            (exceptional_model_lineage.get("historical_evidence_equivalence") or {})
+            .get("classification") == "historically_equivalent"
+        ),
+    })
+    if not all(checks.values()):
+        failed = [name for name, ok in checks.items() if not ok]
+        raise ValueError("validated model spec lineage failed: " + ", ".join(failed))
     stack_candidates = sorted((stack.get("stack_weights_production") or {}).keys())
     payload = {
         "schema_version": VALIDATED_SPEC_SCHEMA,
@@ -202,6 +237,13 @@ def finalize_validated_model_spec(
         "stack_weights_sha256": file_sha256(stack_path),
         "stack_candidate_identities": stack_candidates,
         "uncertainty_calibration_sha256": file_sha256(calibration_path),
+        "exceptional_model_lineage": exceptional_model_lineage,
+        "exceptional_model_lineage_sha256": exceptional_sha,
+        "exceptional_models": exceptional_model_lineage["exceptional_models"],
+        "forecast_coverage_lineage": exceptional_model_lineage["forecast_coverage"],
+        "historical_evidence_equivalence_lineage": exceptional_model_lineage[
+            "historical_evidence_equivalence"
+        ],
         "historical_cycles": candidate["historical_cycles"],
         "lead_cutoffs_days": candidate["lead_cutoffs_days"],
         "code_commit_sha": code_commit_sha or candidate.get("code_commit_sha"),
@@ -240,6 +282,14 @@ def load_validated_model_spec(
     config = poll_structure_from_dict(payload.get("selected_poll_structure"))
     if payload.get("selected_poll_structure_id") != poll_structure_identity(config):
         raise ValueError("validated model spec poll structure identity changed")
+    exceptional = payload.get("exceptional_model_lineage") or {}
+    if (
+        not exceptional
+        or payload.get("exceptional_model_lineage_sha256")
+        != exceptional.get("lineage_sha256")
+        or payload.get("exceptional_models") != exceptional.get("exceptional_models")
+    ):
+        raise ValueError("validated model spec exceptional model lineage is incomplete")
     return payload, config
 
 
@@ -266,6 +316,18 @@ def verify_validated_spec_artifacts(
         name: bool(expected and path.is_file() and file_sha256(path) == expected)
         for name, (path, expected) in bindings.items()
     }
+    try:
+        from midterms.validation.exceptional_model_lineage import (
+            verify_exceptional_model_lineage,
+        )
+
+        verify_exceptional_model_lineage(
+            payload.get("exceptional_model_lineage") or {},
+            artifacts_dir=root,
+        )
+        checks["exceptional_model_lineage"] = True
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
+        checks["exceptional_model_lineage"] = False
     if not all(checks.values()):
         raise ValueError(
             "validated model spec artifact lineage changed: "

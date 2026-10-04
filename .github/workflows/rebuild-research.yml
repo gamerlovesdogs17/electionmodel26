@@ -65,6 +65,18 @@ jobs:
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe
+      - name: Re-audit current source and forecast coverage
+        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
+      - name: Verify official Alaska source archive
+        run: python -m midterms.cli prepare-alaska-rcv
+      - name: Refresh cheap exceptional validation artifacts
+        run: |
+          python -m midterms.cli validate-non-major-adapter --current-as-of "$AS_OF"
+          python -m midterms.cli validate-alaska-rcv
+      - name: Strict exceptional-model and coverage preflight
+        run: python -m midterms.cli verify-exceptional-models --strict
+      - name: Synchronize compliance readiness metadata
+        run: python -m midterms.cli sync-compliance-status --write
       - name: Seal and strictly verify evidence bundle
         run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode seal --strict
       - name: Strict blueprint source gates
@@ -82,6 +94,11 @@ jobs:
           name: research-evidence-${{ steps.resolve.outputs.as_of }}
           path: |
             data/artifacts/source_readiness_latest.json
+            data/artifacts/current_race_poll_coverage_v0923.json
+            data/artifacts/non_major_adapter_validation_latest.json
+            data/artifacts/alaska_rcv_validation_latest.json
+            data/artifacts/historical_evidence_equivalence_v0923.json
+            BLUEPRINT_COMPLIANCE_AUDIT.json
             data/manifests/
             data/normalized/
             data/raw/external/
@@ -92,7 +109,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/raw/external data/normalized data/manifests data/artifacts/source_readiness_latest.json
+          git add data/raw/external data/normalized data/manifests \
+            data/artifacts/source_readiness_latest.json \
+            data/artifacts/current_race_poll_coverage_v0923.json \
+            data/artifacts/non_major_adapter_validation_latest.json \
+            data/artifacts/alaska_rcv_validation_latest.json \
+            data/artifacts/historical_evidence_equivalence_v0923.json \
+            BLUEPRINT_COMPLIANCE_AUDIT.json
           if ! git diff --cached --quiet; then
             git commit -m "evidence: seal research snapshot ${AS_OF} [no-model-fit]"
             git push origin HEAD:main
@@ -157,6 +180,11 @@ jobs:
             --as-of "$AS_OF" \
             --publication-config \
             --strict
+      - name: Strict exceptional-model, candidate, coverage, and history preflight
+        run: |
+          python -c "from midterms.evidence.current_candidates import load_current_candidate_registry; print(load_current_candidate_registry()['registry_sha256'])"
+          python -m midterms.cli verify-exceptional-models --strict
+          python -m midterms.cli sync-compliance-status
       - name: Download prior failed-run checkpoint
         if: inputs.resume_run_id != ''
         uses: actions/download-artifact@v4
@@ -194,7 +222,7 @@ jobs:
             data/artifacts/nested_component_loo_selection_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
             data/artifacts/poll_structure_crossfit_latest.json
-          key: selection-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
+          key: selection-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/non_major_adapter_validation_latest.json', 'data/artifacts/alaska_rcv_validation_latest.json', 'data/artifacts/current_race_poll_coverage_v0923.json', 'data/artifacts/historical_evidence_equivalence_v0923.json') }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
       - name: Selection-pass freeze-before-truth OOF and same-family challengers
         if: steps.resume.outputs.resumed != 'true' && steps.selection-cache.outputs.cache-hit != 'true'
         run: |
@@ -239,7 +267,7 @@ jobs:
             data/artifacts/nested_component_loo_selection_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
             data/artifacts/poll_structure_crossfit_latest.json
-          key: selection-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
+          key: selection-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/non_major_adapter_validation_latest.json', 'data/artifacts/alaska_rcv_validation_latest.json', 'data/artifacts/current_race_poll_coverage_v0923.json', 'data/artifacts/historical_evidence_equivalence_v0923.json') }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
       - name: Restore canonical selected-structure OOF cache
         id: canonical-cache
         if: steps.resume.outputs.resumed != 'true'
@@ -249,7 +277,7 @@ jobs:
             data/artifacts/nested_component_loo_canonical.json
             data/artifacts/nested_component_loo_canonical_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
-          key: canonical-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json') }}-2018-2024-60-30-pymc1600-seed-v2
+          key: canonical-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json', 'data/artifacts/non_major_adapter_validation_latest.json', 'data/artifacts/alaska_rcv_validation_latest.json', 'data/artifacts/current_race_poll_coverage_v0923.json', 'data/artifacts/historical_evidence_equivalence_v0923.json') }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Canonical OOF using the frozen selected poll structure
         if: steps.resume.outputs.resumed != 'true' && steps.canonical-cache.outputs.cache-hit != 'true'
         run: |
@@ -325,7 +353,7 @@ jobs:
             data/artifacts/nested_component_loo_canonical.json
             data/artifacts/nested_component_loo_canonical_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
-          key: canonical-oof-v0922-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json') }}-2018-2024-60-30-pymc1600-seed-v2
+          key: canonical-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ hashFiles('data/artifacts/validated_model_spec_candidate.json', 'data/artifacts/non_major_adapter_validation_latest.json', 'data/artifacts/alaska_rcv_validation_latest.json', 'data/artifacts/current_race_poll_coverage_v0923.json', 'data/artifacts/historical_evidence_equivalence_v0923.json') }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Fit predictive-mixture stack from canonical OOF only
         if: steps.resume.outputs.forecast_resumed != 'true'
         run: |
@@ -365,6 +393,18 @@ jobs:
             --tune 4000 \
             --target-accept 0.99 \
             --n-joint-sims 50000
+      - name: Verify forecast exceptional-model attribution and lineage
+        if: steps.resume.outputs.forecast_resumed != 'true'
+        run: |
+          python - <<'PY'
+          import json
+          from midterms.validation.exceptional_model_lineage import validate_forecast_model_paths
+          from midterms.validation.validated_model_spec import load_validated_model_spec, verify_validated_spec_artifacts
+          forecast = json.load(open('data/artifacts/forecast_latest.json'))
+          spec, _ = load_validated_model_spec()
+          verify_validated_spec_artifacts(spec)
+          print(validate_forecast_model_paths(forecast, spec))
+          PY
       - name: Numerical quality
         run: python -m midterms.cli numerical-check --publishable
       - name: Validation report and reused posterior diagnostics

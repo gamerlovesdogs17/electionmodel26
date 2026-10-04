@@ -62,6 +62,10 @@ COMPLETED_MODEL_ARTIFACTS = (
     "evidence_eligibility_latest.json",
     "race_decomposition_latest.json",
     "prior_predictive_latest.json",
+    "non_major_adapter_validation_latest.json",
+    "alaska_rcv_validation_latest.json",
+    "current_race_poll_coverage_v0923.json",
+    "historical_evidence_equivalence_v0923.json",
 )
 
 
@@ -155,6 +159,16 @@ def _verify_completed_model(
         "completed forecast validated-model-spec identity changed",
     )
     _require(
+        forecast.get("exceptional_model_lineage_sha256")
+        == spec.get("exceptional_model_lineage_sha256"),
+        "completed forecast exceptional-model lineage changed",
+    )
+    from midterms.validation.exceptional_model_lineage import (
+        validate_forecast_model_paths,
+    )
+
+    validate_forecast_model_paths(forecast, spec)
+    _require(
         forecast.get("stack_artifact_sha256") == file_sha256(paths["stack_weights_oof.json"]),
         "completed forecast stack artifact identity changed",
     )
@@ -231,6 +245,13 @@ def _verify_independent_rebuild_artifact(
         and independent.get("mode") == "independent"
         and independent.get("run_id") == run_id,
         "independent rebuild identity or status changed",
+    )
+    _require(
+        independent.get("validated_model_spec_sha256")
+        == forecast.get("validated_model_spec_sha256")
+        and independent.get("exceptional_model_lineage_sha256")
+        == forecast.get("exceptional_model_lineage_sha256"),
+        "independent rebuild did not verify exceptional model lineage",
     )
     _require(
         independent.get("domain_ok") is True

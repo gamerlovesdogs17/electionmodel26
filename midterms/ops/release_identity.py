@@ -161,6 +161,15 @@ def current_model_lineage(
         "canonical_frozen_draws_sha256": spec.get("canonical_frozen_draws_sha256"),
         "stack_weights_sha256": spec.get("stack_weights_sha256"),
         "uncertainty_calibration_sha256": spec.get("uncertainty_calibration_sha256"),
+        "exceptional_model_lineage_sha256": spec.get(
+            "exceptional_model_lineage_sha256"
+        ),
+        "binary_non_major_validation_sha256": (
+            (spec.get("exceptional_models") or {}).get("binary_non_major") or {}
+        ).get("validation_sha256"),
+        "alaska_rcv_validation_sha256": (
+            (spec.get("exceptional_models") or {}).get("alaska_rcv") or {}
+        ).get("validation_sha256"),
         "validated_code_commit": spec.get("code_commit_sha"),
     }
 
@@ -202,6 +211,15 @@ def validate_release_identity_document(
         != expected_evidence_bundle_id
     ):
         problems.append("release identity evidence bundle mismatch")
+    if version == "v0.9.23":
+        lineage = payload.get("lineage") or {}
+        for field in (
+            "exceptional_model_lineage_sha256",
+            "binary_non_major_validation_sha256",
+            "alaska_rcv_validation_sha256",
+        ):
+            if not lineage.get(field):
+                problems.append(f"release identity lacks {field}")
     return problems
 
 

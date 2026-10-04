@@ -997,6 +997,12 @@ def run_forecast(
         "validated_model_spec_sha256": (
             (validated_model_spec or {}).get("spec_sha256")
         ),
+        "exceptional_model_lineage_sha256": (
+            (validated_model_spec or {}).get("exceptional_model_lineage_sha256")
+        ),
+        "exceptional_models": (
+            (validated_model_spec or {}).get("exceptional_models")
+        ),
         "selected_poll_structure_id": (
             (validated_model_spec or {}).get("selected_poll_structure_id")
         ),
@@ -1065,6 +1071,9 @@ def run_forecast(
                     ),
                     "canonical_oof_sha256": validated_model_spec.get("canonical_oof_sha256"),
                     "stack_weights_sha256": validated_model_spec.get("stack_weights_sha256"),
+                    "exceptional_model_lineage_sha256": validated_model_spec.get(
+                        "exceptional_model_lineage_sha256"
+                    ),
                 }
                 if validated_model_spec else None
             ),
@@ -1237,6 +1246,9 @@ def run_forecast(
         "validated_model_spec_sha256": (
             (validated_model_spec or {}).get("spec_sha256")
         ),
+        "exceptional_model_lineage_sha256": (
+            (validated_model_spec or {}).get("exceptional_model_lineage_sha256")
+        ),
     }
     manifest = {
         "run_id": run_id,
@@ -1256,6 +1268,9 @@ def run_forecast(
         "stack_artifact_sha256": stack_artifact_sha,
         "validated_model_spec_sha256": (
             (validated_model_spec or {}).get("spec_sha256")
+        ),
+        "exceptional_model_lineage_sha256": (
+            (validated_model_spec or {}).get("exceptional_model_lineage_sha256")
         ),
         "selected_poll_structure_id": (
             (validated_model_spec or {}).get("selected_poll_structure_id")

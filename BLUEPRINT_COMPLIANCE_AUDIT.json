@@ -28,16 +28,19 @@
     "source_blockers": [],
     "forecast_coverage_ok": true,
     "forecast_coverage_blockers": [],
-    "non_major_adapter_classification": "limited_validation_exception_model",
-    "non_major_adapter_calibration_claim_allowed": false,
-    "ordinary_historical_projection_changed": false,
     "forecast_coverage_summary": {
       "n_pass": 20,
       "n_warning": 15,
       "n_fail": 0
     },
+    "evidence_and_forecast_coverage_separate": true,
+    "non_major_adapter_classification": "limited_validation_exception_model",
+    "non_major_adapter_calibration_claim_allowed": false,
     "alaska_rcv_adapter_classification": "limited_validation_alaska_rcv_model",
-    "alaska_rcv_calibration_claim_allowed": false
+    "alaska_rcv_calibration_claim_allowed": false,
+    "ordinary_historical_projection_changed": false,
+    "historical_equivalent_cutoffs": 8,
+    "exceptional_model_lineage_sha256": "18b3f581d811009fb343df32f7bbd5fdf80cdaf59f0d3ca003c27e39d2bf8247"
   },
   "allowed_classifications": [
     "implemented",
@@ -109,9 +112,11 @@
     "approval_poll_timing_lineage": "source_ready",
     "validated_model_spec_lineage": "validated",
     "binary_non_major_party_adapter": "limited_validation_exception_model",
-    "alaska_rcv_adapter": "limited_validation_alaska_rcv_model"
+    "alaska_rcv_adapter": "limited_validation_alaska_rcv_model",
+    "forecast_model_coverage": "source_and_model_coverage_ready",
+    "historical_evidence_equivalence": "historically_equivalent"
   },
-  "empirical_validation_gates_scope": "Validated entries other than binary_non_major_party_adapter describe the immutable v0.9.22 release. They are not relabeled as v0.9.23 artifacts. The Alaska adapter has separate limited transfer validation and is not part of the ordinary stack.",
+  "empirical_validation_gates_scope": "v0.9.22 remains the last completed ordinary empirical release. v0.9.23 current source readiness and forecast coverage are green; the binary non-major and Alaska RCV paths retain separate limited validation, and full v0.9.23 promotion requires the rebuild.",
   "requirements": [
     {
       "id": "warehouse_as_of",

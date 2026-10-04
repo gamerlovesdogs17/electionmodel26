@@ -251,12 +251,26 @@ def compare_forecast_artifacts(
         )
         dp = abs(float(rebuilt_p or 0) - float(sealed_p or 0))
         diffs.append(dp)
+    sealed_paths = {
+        str(row.get("race_id")): row.get("modeling_path")
+        for row in sealed.get("races") or []
+    }
+    rebuilt_paths = {
+        str(row.get("race_id")): row.get("modeling_path")
+        for row in rebuilt.get("races") or []
+    }
     max_race = float(max(diffs)) if diffs else 0.0
     mean_race = float(sum(diffs) / len(diffs)) if diffs else 0.0
     checks = [
         {"name": "p_dem_majority", "ok": d_p <= tol_p_control, "delta": d_p, "tol": tol_p_control},
         {"name": "expected_dem_seats", "ok": d_seats <= tol_seats, "delta": d_seats, "tol": tol_seats},
         {"name": "max_race_p_modeled", "ok": max_race <= tol_race_p, "delta": max_race, "tol": tol_race_p},
+        {
+            "name": "modeling_path_identity",
+            "ok": sealed_paths == rebuilt_paths,
+            "expected": sealed_paths,
+            "actual": rebuilt_paths,
+        },
     ]
     return {
         "ok": all(c["ok"] for c in checks),
@@ -351,7 +365,14 @@ def independent_rebuild(
         rebuilt = result["artifact"]
         cmp = compare_forecast_artifacts(sealed, rebuilt)
         report = {
-            "ok": bool(cmp.get("ok")) and (domain_ok or not require_domain_match),
+            "ok": (
+                bool(cmp.get("ok"))
+                and (domain_ok or not require_domain_match)
+                and sealed.get("validated_model_spec_sha256")
+                == rebuilt.get("validated_model_spec_sha256")
+                and sealed.get("exceptional_model_lineage_sha256")
+                == rebuilt.get("exceptional_model_lineage_sha256")
+            ),
             "mode": "independent",
             "run_id": rid,
             "manifest": str(man_path),
@@ -360,6 +381,12 @@ def independent_rebuild(
             "domain_ok": domain_ok,
             "domain_mismatches": domain_mismatches[:20],
             "comparison": cmp,
+            "validated_model_spec_sha256": rebuilt.get(
+                "validated_model_spec_sha256"
+            ),
+            "exceptional_model_lineage_sha256": rebuilt.get(
+                "exceptional_model_lineage_sha256"
+            ),
             "lite_hash_seal": lite,
             "rebuild_out_dir": str(out),
             "generated_at": datetime.now(UTC).isoformat(),

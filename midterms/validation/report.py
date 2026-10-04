@@ -315,6 +315,21 @@ def refresh_validation_report_status(
         "stack_reliability": _read_required_json(
             art_dir / "stack_reliability_crossfit_latest.json"
         ),
+        "source_readiness": _read_required_json(
+            art_dir / "source_readiness_latest.json"
+        ),
+        "forecast_coverage": _read_required_json(
+            art_dir / "current_race_poll_coverage_v0923.json"
+        ),
+        "non_major_adapter_validation": _read_required_json(
+            art_dir / "non_major_adapter_validation_latest.json"
+        ),
+        "alaska_rcv_validation": _read_required_json(
+            art_dir / "alaska_rcv_validation_latest.json"
+        ),
+        "historical_evidence_equivalence": _read_required_json(
+            art_dir / "historical_evidence_equivalence_v0923.json"
+        ),
     }
     acceptance = sources["acceptance_gates"]
     coherence = sources["run_coherence"]
@@ -323,6 +338,8 @@ def refresh_validation_report_status(
     spec = sources["validated_model_spec"]
     stack = sources["stack_weights"]
     reliability = sources["stack_reliability"]
+    source_readiness = sources["source_readiness"]
+    forecast_coverage = sources["forecast_coverage"]
 
     if release_identity_report is None:
         from midterms.ops.release_identity import verify_release_identity
@@ -430,6 +447,38 @@ def refresh_validation_report_status(
         "validated_model_spec_sha256": spec_sha,
         "selected_structure_id": spec.get("selected_structure_id"),
         "selected_poll_structure_id": spec.get("selected_poll_structure_id"),
+        "exceptional_model_lineage_sha256": spec.get(
+            "exceptional_model_lineage_sha256"
+        ),
+        "evidence_source_readiness": {
+            "ready": source_readiness.get("ready_for_expensive_rebuild"),
+            "blockers": source_readiness.get("blockers") or [],
+        },
+        "forecast_model_coverage": {
+            "complete": (forecast_coverage.get("summary") or {}).get(
+                "forecast_complete"
+            ),
+            "summary": forecast_coverage.get("summary") or {},
+        },
+        "exceptional_model_validation": {
+            "binary_non_major": sources["non_major_adapter_validation"].get(
+                "classification"
+            ),
+            "alaska_rcv": sources["alaska_rcv_validation"].get(
+                "validation_class"
+            ),
+            "calibration_claim_allowed": {
+                "binary_non_major": sources["non_major_adapter_validation"].get(
+                    "calibration_claim_allowed"
+                ),
+                "alaska_rcv": sources["alaska_rcv_validation"].get(
+                    "calibration_claim_allowed"
+                ),
+            },
+        },
+        "historical_evidence_equivalence": sources[
+            "historical_evidence_equivalence"
+        ].get("classification"),
         "release_id": release_identity.get("release_id"),
         "release_identity_verified": True,
         "gates": gate_statuses,

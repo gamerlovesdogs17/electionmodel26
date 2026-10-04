@@ -25,6 +25,41 @@ from midterms.model.poll_weights import attach_poll_weights
 from midterms.model.pymc_model import FitResult
 
 WRITE_IN_ID = f"{RACE_ID}:write-in-aggregate"
+ADAPTER_SPEC_VERSION = "alaska-rcv-adapter-v1"
+FIRST_CHOICE_SPEC_VERSION = "official-primary-anchor-v1"
+TRANSFER_MODEL_SPEC_VERSION = "official-rcv-party-transfer-dirichlet-v1"
+TABULATION_SPEC_VERSION = "continuing-ballot-irv-v1"
+SENSITIVITY_SPEC_VERSION = "alaska-rcv-sensitivity-grid-v1"
+CAUCUS_POLICY_VERSION = "explicit-candidate-caucus-v1"
+REFERENCE_TRANSFER_CONCENTRATION = 90.0
+REFERENCE_MOVEMENT_SD = 0.22
+REFERENCE_PAIRWISE_WEIGHT = 0.65
+REFERENCE_COMMON_SHOCK_STRENGTH = 0.10
+
+
+def adapter_specification() -> dict[str, Any]:
+    """Return the deterministic, probability-affecting Alaska adapter contract."""
+
+    return {
+        "adapter_spec_version": ADAPTER_SPEC_VERSION,
+        "method": METHOD,
+        "target": "candidate_win_probability_and_chamber_caucus_probability",
+        "first_choice_spec_version": FIRST_CHOICE_SPEC_VERSION,
+        "transfer_model_spec_version": TRANSFER_MODEL_SPEC_VERSION,
+        "tabulation_spec_version": TABULATION_SPEC_VERSION,
+        "sensitivity_spec_version": SENSITIVITY_SPEC_VERSION,
+        "caucus_policy_version": CAUCUS_POLICY_VERSION,
+        "reference_settings": {
+            "transfer_concentration": REFERENCE_TRANSFER_CONCENTRATION,
+            "movement_sd": REFERENCE_MOVEMENT_SD,
+            "pairwise_weight": REFERENCE_PAIRWISE_WEIGHT,
+            "common_shock_strength": REFERENCE_COMMON_SHOCK_STRENGTH,
+        },
+        "pairwise_poll_contract": (
+            "relative Peltola/incumbent-Sullivan preference; never RCV first choice"
+        ),
+        "write_in_treatment": "aggregate_residual_fail_closed_if_winner",
+    }
 
 
 @dataclass
@@ -155,10 +190,10 @@ def fit_alaska_rcv_adapter(
     n_draws: int,
     seed: int,
     base_fit: FitResult | None = None,
-    transfer_concentration: float = 90.0,
-    movement_sd: float = 0.22,
-    pairwise_weight: float = 0.65,
-    common_shock_strength: float = 0.10,
+    transfer_concentration: float = REFERENCE_TRANSFER_CONCENTRATION,
+    movement_sd: float = REFERENCE_MOVEMENT_SD,
+    pairwise_weight: float = REFERENCE_PAIRWISE_WEIGHT,
+    common_shock_strength: float = REFERENCE_COMMON_SHOCK_STRENGTH,
     analog_exclude: str | None = None,
     first_choice_override: np.ndarray | None = None,
 ) -> AlaskaRCVFit:
@@ -226,6 +261,8 @@ def fit_alaska_rcv_adapter(
         raise ValueError("Alaska simulated a write-in winner without a defensible caucus mapping")
     diagnostics = {
         "method": METHOD, "validation_class": "limited_validation_alaska_rcv_model",
+        "adapter_spec_version": ADAPTER_SPEC_VERSION,
+        "adapter_specification": adapter_specification(),
         "candidate_ids": ids, "pairwise_poll": pairwise,
         "first_choice_anchor": dict(zip(ids, anchor.tolist(), strict=True)),
         "transfer_source": "official Alaska 2022/2024 RCV round transitions",

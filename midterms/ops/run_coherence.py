@@ -38,6 +38,7 @@ def evidence_manifest_fingerprint() -> dict[str, Any]:
         "official_senate_ballots.json",
         "presidential_vote_sources.json",
         "wiki_ratings.json",
+        "alaska_rcv_sources.json",
     ]
     digests: dict[str, str] = {}
     for name in names:
@@ -243,6 +244,34 @@ def check_run_coherence(
             f"forecast model_version={model_version} != config MODEL_VERSION={MODEL_VERSION}"
         )
 
+    if forecast.get("publishable") and model_version == MODEL_VERSION:
+        try:
+            from midterms.validation.exceptional_model_lineage import (
+                validate_forecast_model_paths,
+            )
+            from midterms.validation.validated_model_spec import (
+                load_validated_model_spec,
+                verify_validated_spec_artifacts,
+            )
+
+            spec, _ = load_validated_model_spec(
+                path=art_dir / "validated_model_spec_latest.json",
+                expected_evidence_bundle_id=forecast.get("evidence_bundle_id"),
+                expected_evidence_bundle_sha256=forecast.get(
+                    "evidence_bundle_sha256"
+                ),
+            )
+            verify_validated_spec_artifacts(spec, artifacts_dir=art_dir)
+            if forecast.get("validated_model_spec_sha256") != spec.get("spec_sha256"):
+                mismatches.append("forecast validated-model-spec identity changed")
+            if forecast.get("exceptional_model_lineage_sha256") != spec.get(
+                "exceptional_model_lineage_sha256"
+            ):
+                mismatches.append("forecast exceptional model lineage changed")
+            validate_forecast_model_paths(forecast, spec)
+        except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
+            mismatches.append(f"exceptional model coherence failed: {exc}")
+
     if require_matching_eligibility:
         if eligibility is None:
             mismatches.append("missing evidence_eligibility_latest.json")
@@ -288,6 +317,10 @@ def check_run_coherence(
             )
         if rebuild.get("ok") is False:
             mismatches.append("independent_rebuild_latest.json reports ok=False")
+        if forecast.get("publishable") and rebuild.get(
+            "exceptional_model_lineage_sha256"
+        ) != forecast.get("exceptional_model_lineage_sha256"):
+            mismatches.append("independent rebuild exceptional model lineage differs from forecast")
 
     # Live lock: research_only must stay research_only while PUBLIC_LIVE_ENABLED=False
     surface = str(forecast.get("publication_surface") or "")

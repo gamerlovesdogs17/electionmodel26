@@ -1153,6 +1153,43 @@ def main(argv: list[str] | None = None) -> None:
         ))
     )
 
+    p_exceptional = sub.add_parser(
+        "verify-exceptional-models",
+        help=(
+            "Semantically verify current non-major, Alaska RCV, forecast-coverage, "
+            "and historical-equivalence artifacts without fitting any model"
+        ),
+    )
+    p_exceptional.add_argument("--strict", action="store_true")
+
+    def _verify_exceptional_models(a: argparse.Namespace) -> None:
+        report = __import__(
+            "midterms.validation.exceptional_model_lineage",
+            fromlist=["verify_exceptional_promotion_inputs"],
+        ).verify_exceptional_promotion_inputs()
+        print(json.dumps(report, indent=2, default=str))
+        if a.strict and not report.get("ok"):
+            raise SystemExit(1)
+
+    p_exceptional.set_defaults(func=_verify_exceptional_models)
+
+    p_compliance = sub.add_parser(
+        "sync-compliance-status",
+        help="Check or refresh compliance readiness fields from authoritative artifacts",
+    )
+    p_compliance.add_argument("--write", action="store_true")
+
+    def _sync_compliance(a: argparse.Namespace) -> None:
+        report = __import__(
+            "midterms.validation.compliance_status",
+            fromlist=["sync_compliance_status"],
+        ).sync_compliance_status(write=a.write)
+        print(json.dumps(report, indent=2, default=str))
+        if not report.get("ok"):
+            raise SystemExit(1)
+
+    p_compliance.set_defaults(func=_sync_compliance)
+
     p_alaska_sources = sub.add_parser(
         "prepare-alaska-rcv",
         help="Verify and normalize already-downloaded official Alaska RCV sources",

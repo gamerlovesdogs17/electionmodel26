@@ -28,6 +28,18 @@ GATE_REQUIREMENTS: dict[str, dict[str, Any]] = {
     },
     "same_family_ablation_oos": {"artifact": "nested_component_loo_selection.json", "required": True},
     "validated_model_spec_lineage": {"artifact": "validated_model_spec_latest.json", "required": True},
+    "binary_non_major_party_adapter": {
+        "artifact": "non_major_adapter_validation_latest.json", "required": True,
+    },
+    "alaska_rcv_adapter": {
+        "artifact": "alaska_rcv_validation_latest.json", "required": True,
+    },
+    "forecast_model_coverage": {
+        "artifact": "current_race_poll_coverage_v0923.json", "required": True,
+    },
+    "historical_evidence_equivalence": {
+        "artifact": "historical_evidence_equivalence_v0923.json", "required": True,
+    },
     "candidate_timeline_real_data": {"artifact": "evidence_eligibility_latest.json", "required": True, "source_gate": True},
     "pollster_ratings_point_in_time": {"artifact": None, "required": True, "source_gate": True},
     "demographic_point_in_time_snapshots": {"artifact": None, "required": True, "source_gate": True},
@@ -56,6 +68,7 @@ def _artifact_model_version(payload: dict[str, Any]) -> str | None:
     return str(
         payload.get("model_version")
         or payload.get("source_model_version")
+        or payload.get("candidate_model_version")
         or (payload.get("lineage") or {}).get("model_version")
         or ""
     ) or None
@@ -509,6 +522,41 @@ def evaluate_blueprint_extension_gates(
                         error or "validated model spec lineage is incomplete"
                     ),
                     "artifact_bindings": checks,
+                })
+            elif name in {
+                "binary_non_major_party_adapter", "alaska_rcv_adapter",
+                "forecast_model_coverage", "historical_evidence_equivalence",
+            }:
+                from midterms.validation.exceptional_model_lineage import (
+                    validate_alaska_artifact,
+                    validate_binary_non_major_artifact,
+                    validate_forecast_coverage,
+                    validate_historical_equivalence,
+                )
+
+                try:
+                    if name == "binary_non_major_party_adapter":
+                        detail = validate_binary_non_major_artifact(path)
+                        validate_historical_equivalence(
+                            artifacts_dir / "historical_evidence_equivalence_v0923.json"
+                        )
+                    elif name == "alaska_rcv_adapter":
+                        detail = validate_alaska_artifact(path)
+                        validate_historical_equivalence(
+                            artifacts_dir / "historical_evidence_equivalence_v0923.json"
+                        )
+                    elif name == "forecast_model_coverage":
+                        detail = validate_forecast_coverage(path)
+                    else:
+                        detail = validate_historical_equivalence(path)
+                    ok, error = True, None
+                except Exception as exc:  # noqa: BLE001
+                    ok, detail, error = False, {}, str(exc)
+                result.update({
+                    "status": "pass" if ok else "blocked",
+                    "ok": ok,
+                    "reason": error,
+                    "semantic_validation": detail,
                 })
             elif payload.get("ok") is False or payload.get("publishable") is False:
                 result.update({

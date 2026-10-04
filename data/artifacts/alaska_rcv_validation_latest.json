@@ -1,6 +1,25 @@
 {
   "schema_version": "alaska-rcv-validation-v1",
   "model_version": "senate-hierarchical-v0.9.23",
+  "adapter_spec_version": "alaska-rcv-adapter-v1",
+  "adapter_specification": {
+    "adapter_spec_version": "alaska-rcv-adapter-v1",
+    "method": "limited_validation_alaska_rcv_model-v1",
+    "target": "candidate_win_probability_and_chamber_caucus_probability",
+    "first_choice_spec_version": "official-primary-anchor-v1",
+    "transfer_model_spec_version": "official-rcv-party-transfer-dirichlet-v1",
+    "tabulation_spec_version": "continuing-ballot-irv-v1",
+    "sensitivity_spec_version": "alaska-rcv-sensitivity-grid-v1",
+    "caucus_policy_version": "explicit-candidate-caucus-v1",
+    "reference_settings": {
+      "transfer_concentration": 90.0,
+      "movement_sd": 0.22,
+      "pairwise_weight": 0.65,
+      "common_shock_strength": 0.1
+    },
+    "pairwise_poll_contract": "relative Peltola/incumbent-Sullivan preference; never RCV first choice",
+    "write_in_treatment": "aggregate_residual_fail_closed_if_winner"
+  },
   "race_id": "senate-2026-AK",
   "validation_class": "limited_validation_alaska_rcv_model",
   "historical_design": "leave_one_contest_out_transfer_only_given_official_first_choices",
@@ -357,5 +376,5 @@
   "ordinary_oof_touched": false,
   "note": "Historical check validates tabulation/transfer behavior only; no hindsight-derived pre-election probability or Brier score is claimed.",
   "source_semantic_sha256": "8c5fa884fe8e1cbb39c528511d36a1c064b0a8d48f6794b3144dd46b8726cf43",
-  "artifact_sha256": "a659d8f25085035462f11909a0b050e747445ba83bb84d256daed12cb27b4ed4"
+  "artifact_sha256": "717da5520012d656d3d84fcfa5f7b16bbe034c015515c02c013a7df8ff8d4034"
 }

@@ -292,7 +292,9 @@ def simulate_chamber(
             p_dem_caucus = float(sum(probabilities[index] for index, caucus in enumerate(caucuses) if caucus == "D"))
             summary = {
                 "race_id": rid, "state": state, "seat_class": seat_class,
-                "contest_structure": "ranked_choice_multiway", "method": alaska_diagnostics.get("method"),
+                "contest_structure": "ranked_choice_multiway",
+                "modeling_path": "alaska_rcv_adapter",
+                "method": alaska_diagnostics.get("method"),
                 "candidate_probabilities": [
                     {"candidate_id": candidate_ids[index], "candidate_name": candidate_names[index],
                      "ballot_party": parties[index], "caucus": caucuses[index], "p_win": probabilities[index],
@@ -350,6 +352,9 @@ def simulate_chamber(
                 "is_flip": is_flip,
                 "favored_party": favored_party,
                 "favored_caucus": favored_caucus,
+                "modeling_path": (
+                    "ordinary_stack" if dem_party == "D" else "binary_non_major_adapter"
+                ),
             }
         if dem_party == "D":
             # Backward-compatible aliases are only semantically valid for an

@@ -13,7 +13,9 @@ import pandas as pd
 from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, NORMALIZED_DIR
 from midterms.evidence.alaska_rcv import RACE_ID, load_alaska_rcv_evidence
 from midterms.model.alaska_rcv_adapter import (
+    ADAPTER_SPEC_VERSION,
     _transfer_counts,
+    adapter_specification,
     fit_alaska_rcv_adapter,
     tabulate_irv,
 )
@@ -118,6 +120,8 @@ def build_alaska_rcv_validation(*, n_draws: int = 1000, seed: int = 923) -> dict
     reference = next(row for row in sensitivity if row["name"] == "reference")
     semantic = {
         "schema_version": "alaska-rcv-validation-v1", "model_version": MODEL_VERSION,
+        "adapter_spec_version": ADAPTER_SPEC_VERSION,
+        "adapter_specification": adapter_specification(),
         "race_id": RACE_ID, "validation_class": "limited_validation_alaska_rcv_model",
         "historical_design": "leave_one_contest_out_transfer_only_given_official_first_choices",
         "historical_cases": analog_rows,
