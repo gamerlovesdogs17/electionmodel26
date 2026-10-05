@@ -256,12 +256,34 @@ def calibrate_draws_to_control(
     return out, meta
 
 
-def shift_draws_to_means(draws: np.ndarray, new_means: np.ndarray) -> np.ndarray:
+def shift_draws_to_means(
+    draws: np.ndarray,
+    new_means: np.ndarray,
+    *,
+    allow_neutral_fill: bool = False,
+) -> np.ndarray:
     """Preserve joint shocks while moving location to `new_means`."""
     old = draws.mean(axis=0)
-    # Avoid NaN propagation when a race column is all-NaN
-    old = np.where(np.isfinite(old), old, 0.0)
-    new = np.where(np.isfinite(new_means), new_means, old)
+    if not np.isfinite(old).all():
+        if allow_neutral_fill:
+            old = np.where(np.isfinite(old), old, 0.0)
+        else:
+            bad = np.flatnonzero(~np.isfinite(old)).tolist()
+            raise ValueError(
+                "shift_draws_to_means: nonfinite current means at race indices "
+                f"{bad}; refusing neutral (0.0) fill unless allow_neutral_fill=True"
+            )
+    if not np.isfinite(new_means).all():
+        if allow_neutral_fill:
+            new = np.where(np.isfinite(new_means), new_means, old)
+        else:
+            bad = np.flatnonzero(~np.isfinite(np.asarray(new_means, dtype=float))).tolist()
+            raise ValueError(
+                "shift_draws_to_means: nonfinite target means at race indices "
+                f"{bad}; refusing silent fill unless allow_neutral_fill=True"
+            )
+    else:
+        new = np.asarray(new_means, dtype=float)
     return draws - old + new
 
 

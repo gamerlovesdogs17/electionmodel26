@@ -104,9 +104,11 @@ def test_report_snapshots_keep_later_amendment_out_of_earlier_cutoff():
     }])
     early = fec.report_level_fundraising_shares_as_of(
         reports, links, election_id="senate-2022", as_of="2022-10-09",
+        require_candidate_match=False,
     )
     late = fec.report_level_fundraising_shares_as_of(
         reports, links, election_id="senate-2022", as_of="2022-10-21",
+        require_candidate_match=False,
     )
     assert early.loc[0, "dem_receipts"] == 10.0
     assert late.loc[0, "dem_receipts"] == 20.0

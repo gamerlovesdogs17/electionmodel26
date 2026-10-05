@@ -83,6 +83,202 @@ LINK_REQUIRED_COLUMNS = {
 }
 
 
+def _strip_accents(text: str) -> str:
+    replacements = {
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n",
+        "ü": "u", "ä": "a", "ö": "o",
+    }
+    for src, dst in replacements.items():
+        text = text.replace(src, dst)
+    return text
+
+
+def _normalize_person_name(name: str | None) -> str:
+    if name is None or (isinstance(name, float) and pd.isna(name)):
+        return ""
+    text = _strip_accents(str(name).replace(".", " ").replace(",", " ").lower())
+    # FEC often uses LAST FIRST; registry uses First Last.
+    parts = [
+        p
+        for p in text.replace("-", " ").split()
+        if p and p not in {"jr", "sr", "ii", "iii", "iv"} and len(p) > 1
+    ]
+    return " ".join(sorted(parts))
+
+
+_NICKNAMES = {
+    "chris": "christopher",
+    "christopher": "christopher",
+    "dan": "daniel",
+    "daniel": "daniel",
+    "ed": "edward",
+    "edward": "edward",
+    "jim": "james",
+    "james": "james",
+    "bill": "william",
+    "william": "william",
+    "bob": "robert",
+    "robert": "robert",
+    "tom": "thomas",
+    "thomas": "thomas",
+    "mike": "michael",
+    "michael": "michael",
+    "jon": "jonathan",
+    "jonathan": "jonathan",
+    "john": "john",
+    "ben": "benjamin",
+    "benjamin": "benjamin",
+    "matt": "matthew",
+    "matthew": "matthew",
+    "rick": "richard",
+    "richard": "richard",
+    "deb": "deborah",
+    "deborah": "deborah",
+    "cindy": "cynthia",
+    "cynthia": "cynthia",
+    "joe": "joseph",
+    "joseph": "joseph",
+    "dave": "david",
+    "david": "david",
+}
+
+
+def _canonical_given(token: str) -> str:
+    return _NICKNAMES.get(token, token)
+
+
+def _name_tokens(name: str | None) -> list[str]:
+    if name is None or (isinstance(name, float) and pd.isna(name)):
+        return []
+    text = _strip_accents(str(name).replace(".", " ").replace(",", " ").lower())
+    return [
+        p
+        for p in text.replace("-", " ").split()
+        if p and p not in {"jr", "sr", "ii", "iii", "iv"} and len(p) > 1
+    ]
+
+
+def fec_name_matches(fec_name: str | None, ticket_name: str | None) -> bool:
+    """True when FEC and ticket names refer to the same person (order-insensitive)."""
+    a = _normalize_person_name(fec_name)
+    b = _normalize_person_name(ticket_name)
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    a_tokens = set(a.split())
+    b_tokens = set(b.split())
+    if a_tokens and b_tokens and (a_tokens <= b_tokens or b_tokens <= a_tokens):
+        return True
+    # Last-name + given-name (nickname / Christopher↔Chris) match.
+    fec_tokens = _name_tokens(fec_name)
+    ticket_tokens = _name_tokens(ticket_name)
+    if len(fec_tokens) < 2 or len(ticket_tokens) < 2:
+        return False
+    # FEC bulk names are usually LAST, FIRST ...
+    fec_raw = str(fec_name or "")
+    if "," in fec_raw:
+        fec_last = _name_tokens(fec_raw.split(",", 1)[0])
+        fec_given = _name_tokens(fec_raw.split(",", 1)[1])
+    else:
+        fec_last = fec_tokens[:1]
+        fec_given = fec_tokens[1:]
+    ticket_last = ticket_tokens[-1:]
+    ticket_given = ticket_tokens[:-1]
+    if not fec_last or not ticket_last or fec_last[0] != ticket_last[0]:
+        return False
+    if not fec_given or not ticket_given:
+        return False
+    return _canonical_given(fec_given[0]) == _canonical_given(ticket_given[0])
+
+
+def _party_code(series: pd.Series) -> pd.Series:
+    return series.astype(str).map(_normalize_party)
+
+
+def select_unique_party_candidate(
+    candidates: pd.DataFrame,
+    *,
+    party: str,
+    ticket_name: str | None,
+) -> dict[str, Any] | None:
+    """Return the unique FEC candidate matching the ticket name for one party.
+
+    Fail closed (None) when the name is missing, unmatched, or ambiguous.
+    Never selects 'highest receipts' as a surrogate for identity.
+    """
+    if not ticket_name or candidates is None or candidates.empty:
+        return None
+    work = candidates.copy()
+    if "candidate_name" not in work.columns and "name" in work.columns:
+        work = work.rename(columns={"name": "candidate_name"})
+    party_rows = work[_party_code(work["party"]).eq(party)].copy()
+    if party_rows.empty or "candidate_name" not in party_rows.columns:
+        return None
+    matched = party_rows[
+        party_rows["candidate_name"].map(lambda n: fec_name_matches(n, ticket_name))
+    ]
+    if matched.empty:
+        return None
+    ids = sorted(matched["candidate_id"].astype(str).unique())
+    if len(ids) != 1:
+        return None
+    cid = ids[0]
+    row = matched[matched["candidate_id"].astype(str).eq(cid)].iloc[0]
+    return {
+        "candidate_id": cid,
+        "candidate_name": str(row.get("candidate_name") or ticket_name),
+        "party": party,
+    }
+
+
+def historical_nominee_tickets(election_id: str) -> dict[str, dict[str, str]]:
+    """Map state → dem/rep nominee names from the certified ledger (historical only).
+
+    These are election-day certified nominee identities. They must never be used
+    for current-cycle 2026 forecasting (use the reviewed registry instead).
+    When a nominee is missing, that state is omitted so finance fails closed.
+    """
+    from midterms.evidence.official_ledger import load_ledger
+
+    year = str(election_id).replace("senate-", "")
+    ledger = load_ledger()
+    cycle = (ledger.get("cycles") or {}).get(year) or {}
+    contests = cycle.get("contests") or []
+    out: dict[str, dict[str, str]] = {}
+    for contest in contests:
+        state = str(contest.get("state") or "").upper()
+        dem = contest.get("dem_nominee")
+        rep = contest.get("rep_nominee")
+        if not state or not dem or not rep:
+            continue
+        out[state] = {
+            "dem_name": str(dem),
+            "rep_name": str(rep),
+            "modeled_candidate_name": str(dem),
+            "opposing_candidate_name": str(rep),
+        }
+    return out
+
+
+def current_registry_tickets() -> dict[str, dict[str, str]]:
+    """Current-cycle modeled ticket names from the reviewed registry only."""
+    from midterms.evidence.current_candidates import load_current_candidate_registry
+
+    registry = load_current_candidate_registry()
+    out: dict[str, dict[str, str]] = {}
+    for row in registry["races"]:
+        out[str(row["state"]).upper()] = {
+            "dem_name": str(row["modeled_candidate_name"]),
+            "rep_name": str(row["opposing_candidate_name"]),
+            "modeled_candidate_id": str(row["modeled_candidate_id"]),
+            "opposing_candidate_id": str(row["opposing_candidate_id"]),
+            "modeled_candidate_name": str(row["modeled_candidate_name"]),
+            "opposing_candidate_name": str(row["opposing_candidate_name"]),
+        }
+    return out
+
+
 def resolve_form3_reports_as_of(
     reports: pd.DataFrame, *, as_of: str | date,
 ) -> pd.DataFrame:
@@ -170,14 +366,30 @@ def report_level_fundraising_shares_as_of(
     *,
     election_id: str,
     as_of: str | date,
+    tickets: dict[str, dict[str, Any]] | None = None,
+    require_candidate_match: bool = True,
 ) -> pd.DataFrame:
-    """Derive race finance features from receipt-safe official report summaries."""
+    """Derive race finance features from receipt-safe official report summaries.
+
+    When ``require_candidate_match`` is True (production default), fundraising
+    uses only the modeled Democratic and Republican nominees' authorized
+    committees for that race. Party-wide sums and max-receipt surrogates are
+    refused. Unmatched identities yield a neutral 0.5 share with explicit
+    ``match_status`` provenance rather than silently picking another filer.
+    """
     selected = select_candidate_committee_reports_as_of(
         reports, candidate_committees, as_of=as_of,
     )
     rows: list[dict[str, Any]] = []
     if selected.empty:
         return pd.DataFrame(rows)
+    # Candidate identity comes from committee linkage (has names), not reports.
+    name_lookup = (
+        candidate_committees[["candidate_id", "candidate_name", "state", "party"]]
+        .drop_duplicates(["candidate_id"])
+        if "candidate_name" in candidate_committees.columns
+        else pd.DataFrame(columns=["candidate_id", "candidate_name", "state", "party"])
+    )
     by_candidate = selected.groupby(
         ["candidate_id", "state", "party"], as_index=False, sort=True
     ).agg(
@@ -188,33 +400,120 @@ def report_level_fundraising_shares_as_of(
         filing_ids=("filing_id", lambda values: sorted(map(str, values))),
         committee_ids=("committee_id", lambda values: sorted(map(str, values))),
     )
+    if not name_lookup.empty:
+        by_candidate = by_candidate.merge(
+            name_lookup, on=["candidate_id", "state", "party"], how="left",
+        )
+    else:
+        by_candidate["candidate_name"] = None
+
+    ticket_map = tickets
+    if ticket_map is None and require_candidate_match:
+        if str(election_id) == "senate-2026":
+            ticket_map = current_registry_tickets()
+        else:
+            ticket_map = historical_nominee_tickets(str(election_id))
+
     for state, group in by_candidate.groupby("state", sort=True):
-        dem = group[group["party"].astype(str).map(_normalize_party).eq("DEM")]
-        rep = group[group["party"].astype(str).map(_normalize_party).eq("REP")]
-        dem_receipts = float(dem["receipts"].sum())
-        rep_receipts = float(rep["receipts"].sum())
-        dem_cash = float(dem["cash_on_hand_end_period"].sum())
-        rep_cash = float(rep["cash_on_hand_end_period"].sum())
+        state_key = str(state).upper()
+        ticket = (ticket_map or {}).get(state_key) or {}
+        dem_ticket = ticket.get("dem_name") or ticket.get("modeled_candidate_name")
+        rep_ticket = ticket.get("rep_name") or ticket.get("opposing_candidate_name")
+        dem_sel = select_unique_party_candidate(
+            group, party="DEM", ticket_name=dem_ticket,
+        )
+        rep_sel = select_unique_party_candidate(
+            group, party="REP", ticket_name=rep_ticket,
+        )
+        match_status = "candidate_matched"
+        dem = group.iloc[0:0]
+        rep = group.iloc[0:0]
+        if require_candidate_match:
+            if dem_sel is None or rep_sel is None:
+                match_status = "candidate_unmatched_neutral"
+                dem_receipts = rep_receipts = 0.0
+                dem_cash = rep_cash = 0.0
+                dem_disb = rep_disb = 0.0
+                dem_id = dem_sel["candidate_id"] if dem_sel else None
+                rep_id = rep_sel["candidate_id"] if rep_sel else None
+                dem_committees: list[str] = []
+                rep_committees: list[str] = []
+                filing_ids: list[str] = []
+                committee_ids: list[str] = []
+                available = max(group["available_at"]) if len(group) else None
+            else:
+                dem = group[group["candidate_id"].astype(str).eq(dem_sel["candidate_id"])]
+                rep = group[group["candidate_id"].astype(str).eq(rep_sel["candidate_id"])]
+                dem_receipts = float(dem["receipts"].sum())
+                rep_receipts = float(rep["receipts"].sum())
+                dem_cash = float(dem["cash_on_hand_end_period"].sum())
+                rep_cash = float(rep["cash_on_hand_end_period"].sum())
+                dem_disb = float(dem["disbursements"].sum())
+                rep_disb = float(rep["disbursements"].sum())
+                dem_id = dem_sel["candidate_id"]
+                rep_id = rep_sel["candidate_id"]
+                dem_committees = sorted(sum(dem["committee_ids"].tolist(), []))
+                rep_committees = sorted(sum(rep["committee_ids"].tolist(), []))
+                filing_ids = sorted(
+                    sum(dem["filing_ids"].tolist(), []) + sum(rep["filing_ids"].tolist(), [])
+                )
+                committee_ids = sorted(set(dem_committees + rep_committees))
+                available = max(
+                    list(dem["available_at"]) + list(rep["available_at"])
+                )
+        else:
+            # Legacy diagnostic path only — not production.
+            dem = group[_party_code(group["party"]).eq("DEM")]
+            rep = group[_party_code(group["party"]).eq("REP")]
+            dem_receipts = float(dem["receipts"].sum())
+            rep_receipts = float(rep["receipts"].sum())
+            dem_cash = float(dem["cash_on_hand_end_period"].sum())
+            rep_cash = float(rep["cash_on_hand_end_period"].sum())
+            dem_disb = float(dem["disbursements"].sum())
+            rep_disb = float(rep["disbursements"].sum())
+            dem_id = None
+            rep_id = None
+            dem_committees = sorted(sum(dem["committee_ids"].tolist(), [])) if len(dem) else []
+            rep_committees = sorted(sum(rep["committee_ids"].tolist(), [])) if len(rep) else []
+            filing_ids = sorted(sum(group["filing_ids"].tolist(), []))
+            committee_ids = sorted(sum(group["committee_ids"].tolist(), []))
+            available = max(group["available_at"])
+            match_status = "legacy_party_aggregate"
+
         receipts_total = dem_receipts + rep_receipts
         cash_total = dem_cash + rep_cash
+        if match_status == "candidate_unmatched_neutral":
+            share = 0.5
+            cash_share = 0.5
+        else:
+            share = dem_receipts / receipts_total if receipts_total else 0.5
+            cash_share = dem_cash / cash_total if cash_total else 0.5
         rows.append({
             "election_id": election_id,
             "state": str(state),
             "race_id": f"{election_id}-{state}",
-            "fundraising_share": dem_receipts / receipts_total if receipts_total else 0.5,
-            "cash_share": dem_cash / cash_total if cash_total else 0.5,
+            "fundraising_share": share,
+            "cash_share": cash_share,
             "dem_receipts": dem_receipts,
             "rep_receipts": rep_receipts,
-            "dem_disbursements": float(dem["disbursements"].sum()),
-            "rep_disbursements": float(rep["disbursements"].sum()),
+            "dem_disbursements": dem_disb,
+            "rep_disbursements": rep_disb,
             "dem_cash_on_hand": dem_cash,
             "rep_cash_on_hand": rep_cash,
-            "filing_ids": sorted(sum(group["filing_ids"].tolist(), [])),
-            "committee_ids": sorted(sum(group["committee_ids"].tolist(), [])),
-            "available_at": max(group["available_at"]),
+            "modeled_candidate_name": dem_ticket,
+            "opposing_candidate_name": rep_ticket,
+            "dem_fec_candidate_id": dem_id,
+            "rep_fec_candidate_id": rep_id,
+            "dem_committee_ids": dem_committees,
+            "rep_committee_ids": rep_committees,
+            "match_status": match_status,
+            "filing_ids": filing_ids,
+            "committee_ids": committee_ids,
+            "available_at": available,
             "availability_basis": "fec_receipt_date",
             "source": "fec_form3_report_summaries",
             "parser_version": PARSER_VERSION,
+            "finance_identity_schema": "candidate-specific-ticket-v1",
         })
     return pd.DataFrame(rows)
 
@@ -1011,12 +1310,13 @@ def shares_from_totals(
     cycle: int,
     *,
     as_of: str | None = None,
+    tickets: dict[str, dict[str, Any]] | None = None,
+    require_candidate_match: bool = True,
 ) -> pd.DataFrame:
-    """
-    Build Dem fundraising shares with amendment / coverage discipline.
+    """Build Dem fundraising shares with amendment / coverage discipline.
 
-    When multiple totals rows exist for a candidate, keep the latest
-    coverage_end_date still known by `as_of` (blueprint finance amendment chain).
+    Production default matches modeled ticket candidates only. Legacy
+    highest-receipt party surrogates require require_candidate_match=False.
     """
     if totals.empty:
         return curated_fundraising_shares(election_id)
@@ -1025,7 +1325,6 @@ def shares_from_totals(
         work = work[pd.to_datetime(work["available_at"]).dt.date <= date.fromisoformat(str(as_of)[:10])]
     if work.empty:
         return curated_fundraising_shares(election_id)
-    # Prefer latest coverage window per candidate (amendment / restatement chain)
     chain_by_cand: dict[str, list[str]] = {}
     if "candidate_id" in work.columns and "coverage_end_date" in work.columns:
         for cid, cg in work.groupby("candidate_id"):
@@ -1037,29 +1336,99 @@ def shares_from_totals(
             [c for c in ("coverage_end_date", "last_file_date", "available_at") if c in work.columns]
         )
         work = work.groupby("candidate_id", as_index=False).tail(1)
+
+    ticket_map = tickets
+    if ticket_map is None and require_candidate_match:
+        if str(election_id) == "senate-2026" or int(cycle) == 2026:
+            ticket_map = current_registry_tickets()
+        else:
+            ticket_map = historical_nominee_tickets(str(election_id))
+
     rows = []
     for state, g in work.groupby("state"):
-        dem = g[g["party"].astype(str).str.upper().str.startswith("DEM")]
-        rep = g[g["party"].astype(str).str.upper().str.startswith("REP")]
-        dem_rec = float(dem["receipts"].max()) if len(dem) else 0.0
-        rep_rec = float(rep["receipts"].max()) if len(rep) else 0.0
-        dem_cash = float(dem["cash_on_hand_end_period"].max()) if len(dem) and "cash_on_hand_end_period" in dem else 0.0
-        rep_cash = float(rep["cash_on_hand_end_period"].max()) if len(rep) and "cash_on_hand_end_period" in rep else 0.0
-        dem_disb = float(dem["disbursements"].max()) if len(dem) and "disbursements" in dem else 0.0
-        rep_disb = float(rep["disbursements"].max()) if len(rep) and "disbursements" in rep else 0.0
-        total = dem_rec + rep_rec
-        share = dem_rec / total if total > 0 else 0.5
-        cash_tot = dem_cash + rep_cash
-        cash_share = dem_cash / cash_tot if cash_tot > 0 else 0.5
+        state_key = str(state).upper()
+        ticket = (ticket_map or {}).get(state_key) or {}
+        dem_ticket = ticket.get("dem_name") or ticket.get("modeled_candidate_name")
+        rep_ticket = ticket.get("rep_name") or ticket.get("opposing_candidate_name")
+        dem_sel = select_unique_party_candidate(g, party="DEM", ticket_name=dem_ticket)
+        rep_sel = select_unique_party_candidate(g, party="REP", ticket_name=rep_ticket)
+
+        if require_candidate_match and (dem_sel is None or rep_sel is None):
+            dem_rec = rep_rec = dem_cash = rep_cash = dem_disb = rep_disb = 0.0
+            share = cash_share = 0.5
+            match_status = "candidate_unmatched_neutral"
+            dem_id = dem_sel["candidate_id"] if dem_sel else None
+            rep_id = rep_sel["candidate_id"] if rep_sel else None
+        elif require_candidate_match:
+            dem = g[g["candidate_id"].astype(str).eq(dem_sel["candidate_id"])]
+            rep = g[g["candidate_id"].astype(str).eq(rep_sel["candidate_id"])]
+            dem_rec = float(dem["receipts"].sum()) if len(dem) else 0.0
+            rep_rec = float(rep["receipts"].sum()) if len(rep) else 0.0
+            dem_cash = (
+                float(dem["cash_on_hand_end_period"].sum())
+                if len(dem) and "cash_on_hand_end_period" in dem
+                else 0.0
+            )
+            rep_cash = (
+                float(rep["cash_on_hand_end_period"].sum())
+                if len(rep) and "cash_on_hand_end_period" in rep
+                else 0.0
+            )
+            dem_disb = (
+                float(dem["disbursements"].sum())
+                if len(dem) and "disbursements" in dem
+                else 0.0
+            )
+            rep_disb = (
+                float(rep["disbursements"].sum())
+                if len(rep) and "disbursements" in rep
+                else 0.0
+            )
+            total = dem_rec + rep_rec
+            share = dem_rec / total if total > 0 else 0.5
+            cash_tot = dem_cash + rep_cash
+            cash_share = dem_cash / cash_tot if cash_tot > 0 else 0.5
+            match_status = "candidate_matched"
+            dem_id = dem_sel["candidate_id"]
+            rep_id = rep_sel["candidate_id"]
+        else:
+            dem = g[g["party"].astype(str).str.upper().str.startswith("DEM")]
+            rep = g[g["party"].astype(str).str.upper().str.startswith("REP")]
+            dem_rec = float(dem["receipts"].max()) if len(dem) else 0.0
+            rep_rec = float(rep["receipts"].max()) if len(rep) else 0.0
+            dem_cash = (
+                float(dem["cash_on_hand_end_period"].max())
+                if len(dem) and "cash_on_hand_end_period" in dem
+                else 0.0
+            )
+            rep_cash = (
+                float(rep["cash_on_hand_end_period"].max())
+                if len(rep) and "cash_on_hand_end_period" in rep
+                else 0.0
+            )
+            dem_disb = (
+                float(dem["disbursements"].max())
+                if len(dem) and "disbursements" in dem
+                else 0.0
+            )
+            rep_disb = (
+                float(rep["disbursements"].max())
+                if len(rep) and "disbursements" in rep
+                else 0.0
+            )
+            total = dem_rec + rep_rec
+            share = dem_rec / total if total > 0 else 0.5
+            cash_tot = dem_cash + rep_cash
+            cash_share = dem_cash / cash_tot if cash_tot > 0 else 0.5
+            match_status = "legacy_party_max"
+            dem_id = None
+            rep_id = None
+
         chains = []
         for cid in g.get("candidate_id", pd.Series(dtype=str)).dropna().astype(str).tolist():
             chains.extend(chain_by_cand.get(cid, []))
         cov_dates = sorted(set(chains))
-        src_vals = (
-            set(g["source"].dropna().astype(str))
-            if "source" in g.columns
-            else set()
-        )
+        src_vals = set(g["source"].dropna().astype(str)) if "source" in g.columns else set()
         if "openfec" in src_vals:
             src = "openfec"
         elif "fec_weball" in src_vals:
@@ -1071,23 +1440,30 @@ def shares_from_totals(
                 "election_id": election_id,
                 "state": state,
                 "race_id": f"senate-{cycle}-{state}",
-                "fundraising_share": round(float(share), 3),
-                "cash_share": round(float(cash_share), 3),
+                "fundraising_share": round(float(share), 6),
+                "cash_share": round(float(cash_share), 6),
                 "dem_receipts": dem_rec,
                 "rep_receipts": rep_rec,
                 "dem_cash_on_hand": dem_cash,
                 "rep_cash_on_hand": rep_cash,
                 "dem_disbursements": dem_disb,
                 "rep_disbursements": rep_disb,
+                "modeled_candidate_name": dem_ticket,
+                "opposing_candidate_name": rep_ticket,
+                "dem_fec_candidate_id": dem_id,
+                "rep_fec_candidate_id": rep_id,
+                "match_status": match_status,
                 "matched_window_id": f"cycle-{cycle}-coverage-end-asof",
                 "amendment_chain": ">".join(cov_dates) if cov_dates else "latest_totals_row",
                 "n_filings_in_chain": int(len(cov_dates)),
                 "source": src,
                 "available_at": str(g["available_at"].max()),
                 "parser_version": PARSER_VERSION,
+                "finance_identity_schema": "candidate-specific-ticket-v1",
             }
         )
     return pd.DataFrame(rows)
+
 
 
 def _finance_tier_and_url(shares: pd.DataFrame, meta: dict[str, Any]) -> tuple[str, str]:

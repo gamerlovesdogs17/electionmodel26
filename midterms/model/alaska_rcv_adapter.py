@@ -1,9 +1,9 @@
 """Limited-validation Alaska ranked-choice adapter.
 
 This model is intentionally separate from the ordinary D-v-R stack.  It uses
-official primary first choices, pairwise polls only for Peltola/incumbent
-relative preference, and uncertain transfer flows learned from official Alaska
-RCV round reports.
+official primary first choices, pairwise polls as a directional (vs 50%)
+Peltola/incumbent transfer shift only, and uncertain transfer flows learned
+from official Alaska RCV round reports.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from midterms.model.poll_weights import attach_poll_weights
 from midterms.model.pymc_model import FitResult
 
 WRITE_IN_ID = f"{RACE_ID}:write-in-aggregate"
-ADAPTER_SPEC_VERSION = "alaska-rcv-adapter-v1"
+ADAPTER_SPEC_VERSION = "alaska-rcv-adapter-v2"
 FIRST_CHOICE_SPEC_VERSION = "official-primary-anchor-v1"
 TRANSFER_MODEL_SPEC_VERSION = "official-rcv-party-transfer-dirichlet-v1"
 TABULATION_SPEC_VERSION = "continuing-ballot-irv-v1"
@@ -56,7 +56,8 @@ def adapter_specification() -> dict[str, Any]:
             "common_shock_strength": REFERENCE_COMMON_SHOCK_STRENGTH,
         },
         "pairwise_poll_contract": (
-            "relative Peltola/incumbent-Sullivan preference; never RCV first choice"
+            "directional Peltola/incumbent-Sullivan preference vs 50% "
+            "(logit shift on transfer weights only; never RCV first choice)"
         ),
         "write_in_treatment": "aggregate_residual_fail_closed_if_winner",
     }
@@ -178,7 +179,10 @@ def _poll_pairwise_location(polls: pd.DataFrame, cutoff: date) -> dict[str, Any]
         "n": len(weighted),
         "enop": enop,
         "poll_ids": sorted(weighted["poll_id"].astype(str)),
-        "measurement_contract": "relative Peltola/incumbent-Sullivan preference; never RCV first choice",
+        "measurement_contract": (
+            "directional Peltola/incumbent-Sullivan preference vs 50% "
+            "(logit shift on transfer weights only; never RCV first choice)"
+        ),
         "measurement_type_counts": measurement_counts,
     }
 
@@ -222,7 +226,8 @@ def fit_alaska_rcv_adapter(
     exhausted = np.empty(n_draws)
     orders: list[list[int]] = []
     transfer_samples: list[np.ndarray] = []
-    pairwise_logits = np.log(pairwise["p_peltola"] / (1 - pairwise["p_peltola"]))
+    # Pairwise is directional vs 50% (neutral_logit=0), not a mean-centered
+    # zero-expectation shock — so poll location moves Peltola/Sullivan transfers.
     for draw in range(n_draws):
         noise = rng.normal(0.0, movement_sd, size=len(ids))
         noise[1] += common_shock_strength * common[draw]
@@ -232,7 +237,8 @@ def fit_alaska_rcv_adapter(
         first = rng.dirichlet(np.maximum(probs * 260.0, 0.25))
         matrix = np.zeros((len(ids), len(ids) + 1))
         sampled_pairwise = float(np.clip(rng.normal(pairwise["p_peltola"], pairwise["sd"]), 0.05, 0.95))
-        pair_shift = pairwise_weight * (np.log(sampled_pairwise / (1 - sampled_pairwise)) - pairwise_logits)
+        # logit(p) - logit(0.5) ≡ logit(p); apply to transfer weights only.
+        pair_shift = pairwise_weight * np.log(sampled_pairwise / (1 - sampled_pairwise))
         for source in range(len(ids)):
             source_party = parties[source] if parties[source] in counts else "I"
             base = counts[source_party]

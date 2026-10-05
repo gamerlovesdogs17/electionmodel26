@@ -68,17 +68,13 @@ def feature_row(
     real_income_yoy: float | None = None,
 ) -> dict[str, float]:
     """Design-matrix row matching ``fundamentals_mean`` channels (Dem margin units)."""
+    from midterms.model.personal_incumbency import personal_incumbency_signed
+
     lean = float(row.get("prior_lean") or 0.0)
-    open_mask = bool(row.get("is_open"))
-    inc = str(row.get("incumbent_party") or "")
-    if open_mask:
-        incumbency = 0.0
-    elif inc in {"D", "I"}:
-        incumbency = 1.0
-    elif inc == "R":
-        incumbency = -1.0
-    else:
-        incumbency = 0.0
+    # Personal incumbency only: the sitting senator must themselves be the
+    # modeled general-election candidate. Seat party / is_open alone never
+    # awards a ±1 bonus (e.g. TX held by Cornyn with nominee Paxton → 0).
+    incumbency = float(personal_incumbency_signed(row))
 
     share = float(row["fundraising_share"]) if pd.notna(row.get("fundraising_share")) else 0.5
     fund_logit = float(_logit(share) - _logit(0.5))

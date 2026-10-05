@@ -25,6 +25,13 @@ TICKETS_2026: dict[str, dict[str, Any]] = {
         "opposing_caucus_basis": row["opposing_caucus_basis"],
         "contest_structure": row["contest_structure"],
         "statistical_target_supported": row["statistical_target_supported"],
+        "modeled_candidate_is_incumbent": row.get(
+            "modeled_candidate_is_incumbent", False
+        ),
+        "opposing_candidate_is_incumbent": row.get(
+            "opposing_candidate_is_incumbent", False
+        ),
+        "sitting_senator_name": row.get("sitting_senator_name"),
     }
     for row in _REGISTRY["races"]
 }

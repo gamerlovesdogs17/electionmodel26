@@ -15,6 +15,7 @@ from midterms.evidence.alaska_rcv import (
 )
 from midterms.evidence.non_major_contract import probability_support_status
 from midterms.model.alaska_rcv_adapter import (
+    ADAPTER_SPEC_VERSION,
     as_fit_result,
     fit_alaska_rcv_adapter,
     merge_alaska_fit,
@@ -234,3 +235,66 @@ def test_alaska_evidence_loads_when_checkout_uses_lf_bytes(tmp_path: Path, monke
     assert supported is True
     assert status == "limited_supported"
     assert reason == "limited_validation_alaska_rcv_model"
+
+
+def _pairwise_location_stub(p_peltola: float, sd: float = 0.02) -> dict:
+    return {
+        "p_peltola": float(p_peltola),
+        "sd": float(sd),
+        "n": 1,
+        "enop": 1.0,
+        "poll_ids": ["pairwise-stub"],
+        "measurement_contract": "directional stub",
+        "measurement_type_counts": {"stub": 1},
+    }
+
+
+def _peltola_win_prob(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    p_peltola: float,
+    sd: float = 0.02,
+    n_draws: int = 2500,
+    seed: int = 20261005,
+) -> float:
+    import midterms.model.alaska_rcv_adapter as adapter
+
+    monkeypatch.setattr(
+        adapter,
+        "_poll_pairwise_location",
+        lambda polls, cutoff: _pairwise_location_stub(p_peltola, sd),
+    )
+    fit = fit_alaska_rcv_adapter(
+        pd.DataFrame(),
+        as_of="2026-10-03",
+        n_draws=n_draws,
+        seed=seed,
+        common_shock_strength=0.0,
+    )
+    peltola_idx = fit.candidate_ids.index(f"{RACE_ID}:mary-peltola")
+    return float(np.mean(fit.winner_indices == peltola_idx))
+
+
+def test_pairwise_directional_vs_neutral_moves_peltola_win_prob(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Pairwise mean below/above 50% must move Peltola win probability directionally."""
+    assert ADAPTER_SPEC_VERSION == "alaska-rcv-adapter-v2"
+    p40 = _peltola_win_prob(monkeypatch, p_peltola=0.40)
+    p50 = _peltola_win_prob(monkeypatch, p_peltola=0.50)
+    p60 = _peltola_win_prob(monkeypatch, p_peltola=0.60)
+    assert p40 < p50 < p60
+
+
+def test_pairwise_uncertainty_only_does_not_reverse_ordering(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Same means with larger pairwise SD must not reverse the directional ordering."""
+    tight = {
+        0.40: _peltola_win_prob(monkeypatch, p_peltola=0.40, sd=0.02, seed=11),
+        0.50: _peltola_win_prob(monkeypatch, p_peltola=0.50, sd=0.02, seed=11),
+        0.60: _peltola_win_prob(monkeypatch, p_peltola=0.60, sd=0.02, seed=11),
+    }
+    wide = {
+        0.40: _peltola_win_prob(monkeypatch, p_peltola=0.40, sd=0.12, seed=11),
+        0.50: _peltola_win_prob(monkeypatch, p_peltola=0.50, sd=0.12, seed=11),
+        0.60: _peltola_win_prob(monkeypatch, p_peltola=0.60, sd=0.12, seed=11),
+    }
+    assert tight[0.40] < tight[0.50] < tight[0.60]
+    assert wide[0.40] < wide[0.50] < wide[0.60]

@@ -637,6 +637,7 @@ def run_forecast(
                 component_draws,
                 use_w,
                 rng=np.random.default_rng(seed + 17),
+                allow_neutral_fill=not require_publishable,
             )
             fit = FitResult(
                 race_ids=fit.race_ids,
@@ -713,7 +714,11 @@ def run_forecast(
         )
         overlay_shifts["control_market_national_overlay"] = adj - before
     if used_ratings or used_markets or used_control:
-        shifted = shift_draws_to_means(fit.draws_margin, adj)
+        shifted = shift_draws_to_means(
+            fit.draws_margin,
+            adj,
+            allow_neutral_fill=not require_publishable,
+        )
         # Hard chamber calibration is OFF by default (blueprint §9.4: optional soft overlay).
         if used_control and control_calibrate:
             held = snap.races[snap.races["not_up"]] if len(snap.races) else snap.races

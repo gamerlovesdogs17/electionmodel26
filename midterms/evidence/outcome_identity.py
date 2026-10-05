@@ -172,6 +172,30 @@ def attach_2026_ticket_identities(
             "statistical_target_supported": bool(
                 candidate["statistical_target_supported"]
             ),
+            "modeled_candidate_is_incumbent": bool(
+                candidate.get("modeled_candidate_is_incumbent", False)
+            ),
+            "opposing_candidate_is_incumbent": bool(
+                candidate.get("opposing_candidate_is_incumbent", False)
+            ),
+            "sitting_senator_name": candidate.get("sitting_senator_name"),
+            # Registry claim: ordinary D-v-R statistical target declared.
+            # Distinct from runtime probability_model_supported / adapter status.
+            "ordinary_binary_model_supported": bool(
+                candidate.get(
+                    "ordinary_binary_model_supported",
+                    candidate.get("contest_structure") == "binary_dem_vs_rep"
+                    and candidate.get("statistical_target_supported"),
+                )
+            ),
+            "exception_adapter_supported": bool(
+                candidate.get(
+                    "exception_adapter_supported",
+                    str(candidate.get("probability_model_support_status") or "").startswith(
+                        "limited_supported"
+                    ),
+                )
+            ),
         }
         for key, value in updates.items():
             out.at[index, key] = value

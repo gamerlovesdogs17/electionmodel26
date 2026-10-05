@@ -1,0 +1,185 @@
+{
+  "audit_item": "P2.3",
+  "ok": true,
+  "publishable_gate": true,
+  "thresholds": {
+    "mcse_control_max": 0.01,
+    "mcse_seats_max": 0.15,
+    "rhat_max": 1.05,
+    "ess_bulk_min_frac": 0.1,
+    "divergences_max": 0,
+    "tree_depth_hits_max": 0,
+    "bfmi_min": 0.2,
+    "min_posterior_samples": 8000,
+    "production_draws": 2000,
+    "production_tune": 4000,
+    "production_chains": 4,
+    "min_sim_draws": 2500
+  },
+  "chamber_mcse": {
+    "n_draws": 50000.0,
+    "mcse_p_dem_control": 0.0014645958323032328,
+    "mcse_expected_dem_seats": 0.014824937728286516,
+    "p_dem_control": 0.87782,
+    "expected_dem_seats": 54.25092,
+    "seat_count_mcse": {
+      "p_dem_seats_eq_50": {
+        "p": 0.04594,
+        "mcse": 0.0009362640268642175
+      },
+      "p_dem_seats_eq_51": {
+        "p": 0.07226,
+        "mcse": 0.0011579161662227538
+      },
+      "p_dem_seats_eq_52": {
+        "p": 0.09492,
+        "mcse": 0.0013108027586177869
+      },
+      "p_dem_seats_eq_48": {
+        "p": 0.01918,
+        "mcse": 0.0006133861361328605
+      },
+      "p_dem_seats_eq_49": {
+        "p": 0.03244,
+        "mcse": 0.0007923086065416682
+      }
+    }
+  },
+  "race_mcse": {
+    "n_draws": 8000,
+    "n_races": 35,
+    "max_mcse_p_dem": 0.005590051850162036,
+    "mean_mcse_p_dem": 0.002392487412296755,
+    "p95_mcse_p_dem": 0.005558092378360996
+  },
+  "convergence": {
+    "available": true,
+    "var_name": "mu_final",
+    "n_samples": 8000,
+    "r_hat_max": 1.0,
+    "r_hat_mean": 1.0,
+    "ess_bulk_min": 2615.0,
+    "ess_bulk_median": 7233.5,
+    "ess_tail_min": 1030.0,
+    "ess_bulk_min_frac": 0.326875,
+    "sampler_health": {
+      "available": true,
+      "divergence_available": true,
+      "tree_depth_available": true,
+      "bfmi_available": true,
+      "acceptance_available": true,
+      "n_transitions": 8000,
+      "n_divergent": 0,
+      "divergence_fraction": 0.0,
+      "n_tree_depth_hits": 0,
+      "max_tree_depth_observed": 9,
+      "acceptance_mean": 0.9883656508537135,
+      "acceptance_min": 0.5130662083333914,
+      "acceptance_max": 0.9999999999999998,
+      "bfmi_min": 0.8211848377005712,
+      "bfmi_by_chain": [
+        0.8473223065452262,
+        0.8537305904996847,
+        0.8211848377005712,
+        0.8244994685076144
+      ]
+    }
+  },
+  "deterministic_replay": {
+    "ok": true,
+    "seed": 20260901,
+    "n_probe": 64,
+    "draws_fingerprint": "891098fa490c98ab",
+    "note": "RNG probe identical under fixed seed; draws content fingerprinted"
+  },
+  "checks": [
+    {
+      "name": "mcse_control",
+      "ok": true,
+      "detail": 0.0014645958323032328
+    },
+    {
+      "name": "mcse_seats",
+      "ok": true,
+      "detail": 0.014824937728286516
+    },
+    {
+      "name": "min_sim_draws",
+      "ok": true,
+      "detail": 50000
+    },
+    {
+      "name": "n_joint_sims_reported",
+      "ok": true,
+      "detail": 50000
+    },
+    {
+      "name": "race_win_mcse",
+      "ok": true,
+      "detail": 0.005590051850162036
+    },
+    {
+      "name": "min_posterior_samples",
+      "ok": true,
+      "detail": 8000
+    },
+    {
+      "name": "production_draws",
+      "ok": true,
+      "detail": 2000
+    },
+    {
+      "name": "production_tune",
+      "ok": true,
+      "detail": 4000
+    },
+    {
+      "name": "production_chains",
+      "ok": true,
+      "detail": 4
+    },
+    {
+      "name": "r_hat",
+      "ok": true,
+      "detail": 1.0
+    },
+    {
+      "name": "ess_bulk",
+      "ok": true,
+      "detail": {
+        "ess_bulk_min": 2615.0,
+        "frac": 0.326875
+      }
+    },
+    {
+      "name": "divergences",
+      "ok": true,
+      "detail": {
+        "n": 0,
+        "fraction": 0.0
+      }
+    },
+    {
+      "name": "tree_depth_hits",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "name": "bfmi",
+      "ok": true,
+      "detail": 0.8211848377005712
+    },
+    {
+      "name": "deterministic_replay",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "seed": 20260901,
+        "n_probe": 64,
+        "draws_fingerprint": "891098fa490c98ab",
+        "note": "RNG probe identical under fixed seed; draws content fingerprinted"
+      }
+    }
+  ],
+  "alerts": []
+}

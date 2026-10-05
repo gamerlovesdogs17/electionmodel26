@@ -91,12 +91,16 @@ def stack_margin_draws(
     weights: dict[str, float],
     *,
     rng: np.random.Generator | None = None,
+    allow_neutral_fill: bool = False,
 ) -> np.ndarray:
     """
     Mixture of predictive distributions via discrete component selection per draw.
 
     Each component array is shape (n_draws, n_races). Output uses the minimum
     shared draw count across components.
+
+    Recoverable NaNs are filled from alternate stack components. Remaining holes
+    raise unless ``allow_neutral_fill`` (dev/fixtures only) fills them with 0.0.
     """
     rng = rng or np.random.default_rng(0)
     names = [n for n in component_draws if n in weights and weights[n] > 0]
@@ -117,8 +121,18 @@ def stack_margin_draws(
                 cand = arrays[alt][i % arrays[alt].shape[0]]
                 miss = ~np.isfinite(row)
                 row[miss] = cand[miss]
-            # Any remaining holes → 0 (neutral margin) rather than poisoning means.
-            row = np.where(np.isfinite(row), row, 0.0)
+            still_bad = ~np.isfinite(row)
+            if still_bad.any():
+                if allow_neutral_fill:
+                    # Dev/fixtures only — never a silent production tossup.
+                    row = np.where(np.isfinite(row), row, 0.0)
+                else:
+                    bad_races = np.flatnonzero(still_bad).tolist()
+                    raise ValueError(
+                        "stack_margin_draws: nonfinite margins remain after alternate "
+                        f"component fill at draw {i}, race indices {bad_races}; "
+                        "refusing neutral (0.0) fill unless allow_neutral_fill=True"
+                    )
         out[i] = row
     return out
 

@@ -90,13 +90,41 @@ def current_race_poll_coverage(
         state = classification.get(race_id, {})
         modeled_party = str(race.get("modeled_ballot_party") or "").upper()
         binary_score_eligible = bool(state.get("binary_score_eligible", True))
-        target_supported = bool(
-            state.get("probability_model_supported", binary_score_eligible)
-        )
         support_status = str(
             state.get("probability_model_support_status")
             or ("ordinary_binary_model" if binary_score_eligible else "unsupported")
         )
+        ordinary_binary_model_supported = bool(
+            state.get(
+                "ordinary_binary_model_supported",
+                support_status == "ordinary_binary_model" and binary_score_eligible,
+            )
+        )
+        exception_adapter_supported = bool(
+            state.get(
+                "exception_adapter_supported",
+                support_status in {"limited_supported", "limited_supported_prior_only"},
+            )
+        )
+        # probability_model_supported = ordinary OR exceptional adapter path.
+        # Distinct from registry statistical_target_supported (declared target claim).
+        probability_model_supported = bool(
+            state.get(
+                "probability_model_supported",
+                ordinary_binary_model_supported or exception_adapter_supported,
+            )
+        )
+        registry_statistical_target = race.get("statistical_target_supported")
+        if registry_statistical_target is None or (
+            isinstance(registry_statistical_target, float)
+            and pd.isna(registry_statistical_target)
+        ):
+            statistical_target_supported = bool(
+                state.get("statistical_target_supported", binary_score_eligible)
+            )
+        else:
+            statistical_target_supported = bool(registry_statistical_target)
+        target_supported = probability_model_supported
         structure = str(
             race.get("contest_structure")
             or state.get("contest_structure")
@@ -165,9 +193,11 @@ def current_race_poll_coverage(
             "contest_structure": structure,
             "candidate_identity_resolved": identity_resolved,
             "polling_available": bool(len(compatible)),
-            "statistical_target_supported": target_supported,
+            "statistical_target_supported": statistical_target_supported,
+            "ordinary_binary_model_supported": ordinary_binary_model_supported,
+            "exception_adapter_supported": exception_adapter_supported,
             "binary_score_eligible": binary_score_eligible,
-            "probability_model_supported": target_supported,
+            "probability_model_supported": probability_model_supported,
             "probability_model_support_status": support_status,
             "probability_model_support_reason": state.get(
                 "probability_model_support_reason"

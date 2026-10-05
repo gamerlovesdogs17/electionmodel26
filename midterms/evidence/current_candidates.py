@@ -49,6 +49,7 @@ def load_current_candidate_registry(
         "opposing_ballot_party", "opposing_side", "opposing_caucus",
         "opposing_caucus_basis", "contest_structure", "current_matchup_status",
         "reviewed_as_of", "statistical_target_supported",
+        "modeled_candidate_is_incumbent", "opposing_candidate_is_incumbent",
     }
     seen: set[str] = set()
     for row in races:
@@ -65,6 +66,15 @@ def load_current_candidate_registry(
             raise ValueError(f"current matchup is not reviewed: {race_id}")
         if date.fromisoformat(str(row["reviewed_as_of"])) != reviewed_as_of:
             raise ValueError(f"review date differs within current registry: {race_id}")
+        if not isinstance(row.get("modeled_candidate_is_incumbent"), bool):
+            raise ValueError(f"modeled_candidate_is_incumbent must be bool: {race_id}")
+        if not isinstance(row.get("opposing_candidate_is_incumbent"), bool):
+            raise ValueError(f"opposing_candidate_is_incumbent must be bool: {race_id}")
+        if (
+            row["modeled_candidate_is_incumbent"]
+            and row["opposing_candidate_is_incumbent"]
+        ):
+            raise ValueError(f"both candidates cannot be personal incumbents: {race_id}")
     payload["registry_sha256"] = _canonical_sha256(payload)
     try:
         payload["source_path"] = source.resolve().relative_to(ROOT.resolve()).as_posix()

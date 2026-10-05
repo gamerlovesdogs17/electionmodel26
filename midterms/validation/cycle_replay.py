@@ -520,12 +520,19 @@ def _replay_cycle_body(
         if ab:
             deltas.append(ab)
     if deltas:
+        scored = [d for d in deltas if "delta_control_brier" in d and "delta_seat_crps" in d]
+        skipped = [d for d in deltas if d.get("ok") is False]
         report["overlay_ablation"] = {
             "mean_delta_control_brier": float(
-                np.mean([d["delta_control_brier"] for d in deltas])
-            ),
-            "mean_delta_seat_crps": float(np.mean([d["delta_seat_crps"] for d in deltas])),
-            "n_leads": len(deltas),
+                np.mean([d["delta_control_brier"] for d in scored])
+            )
+            if scored
+            else None,
+            "mean_delta_seat_crps": float(np.mean([d["delta_seat_crps"] for d in scored]))
+            if scored
+            else None,
+            "n_leads": len(scored),
+            "n_skipped_diagnostic_chamber": len(skipped),
             "note": "Positive delta_control_brier means overlay worsened Brier vs unadjusted.",
         }
     report["comparable"] = True

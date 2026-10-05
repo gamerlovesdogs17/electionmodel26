@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from midterms.evidence.warehouse import Warehouse
 from midterms.model.ensemble import softmax_neg_scores, stack_margin_draws
@@ -149,6 +150,74 @@ def test_stack_margin_draws_replaces_nan_components():
     )
     assert np.isfinite(out).all()
     assert np.allclose(out, 3.0)
+
+
+def test_stack_margin_draws_unrecoverable_nan_fails_closed():
+    all_nan = np.full((20, 2), np.nan)
+    with pytest.raises(ValueError, match="nonfinite margins remain"):
+        stack_margin_draws(
+            {"a": all_nan, "b": all_nan},
+            {"a": 0.5, "b": 0.5},
+            rng=np.random.default_rng(0),
+            allow_neutral_fill=False,
+        )
+
+
+def test_stack_margin_draws_allow_neutral_fill_for_fixtures():
+    all_nan = np.full((20, 2), np.nan)
+    out = stack_margin_draws(
+        {"a": all_nan},
+        {"a": 1.0},
+        rng=np.random.default_rng(0),
+        allow_neutral_fill=True,
+    )
+    assert np.isfinite(out).all()
+    assert np.allclose(out, 0.0)
+
+
+def test_shift_draws_to_means_fails_closed_on_nonfinite():
+    from midterms.model.overlays import shift_draws_to_means
+
+    draws = np.ones((10, 2))
+    with pytest.raises(ValueError, match="nonfinite target means"):
+        shift_draws_to_means(draws, np.array([1.0, np.nan]), allow_neutral_fill=False)
+    filled = shift_draws_to_means(draws, np.array([1.0, np.nan]), allow_neutral_fill=True)
+    assert np.isfinite(filled).all()
+
+    poisoned = np.full((10, 2), np.nan)
+    with pytest.raises(ValueError, match="nonfinite current means"):
+        shift_draws_to_means(poisoned, np.array([0.0, 0.0]), allow_neutral_fill=False)
+
+
+def test_state_space_fails_closed_on_nonfinite_means(monkeypatch):
+    from midterms.model import state_space as ss
+
+    snap = Warehouse(ensure_fixtures=False).build_as_of("2026-09-13", "senate-2026")
+    real_asarray = np.asarray
+    poison_next_means = {"armed": True}
+
+    def asarray_hook(a, *args, **kwargs):
+        arr = real_asarray(a, *args, **kwargs)
+        # Poison means_a = np.asarray(means, dtype=float) once per fit call.
+        if (
+            poison_next_means["armed"]
+            and kwargs.get("dtype") is float
+            and isinstance(a, list)
+            and len(a) > 0
+        ):
+            poison_next_means["armed"] = False
+            arr = np.asarray(arr, dtype=float).copy()
+            arr[:] = np.nan
+        return arr
+
+    monkeypatch.setattr(ss.np, "asarray", asarray_hook)
+    with pytest.raises(ValueError, match="nonfinite race means remain"):
+        ss.fit_state_space(snap, n_draws=20, seed=1, allow_neutral_fill=False)
+
+    poison_next_means["armed"] = True
+    fit = ss.fit_state_space(snap, n_draws=20, seed=1, allow_neutral_fill=True)
+    assert np.isfinite(fit.mean_margin).all()
+    assert np.isfinite(fit.draws_margin).all()
 
 
 def test_generic_ballot_aggregate_not_single_poll():
@@ -322,8 +391,12 @@ def test_fec_amendment_chain_prefers_latest_coverage():
             },
         ]
     )
-    mid = shares_from_totals(totals, "senate-2026", 2026, as_of="2026-07-01")
-    late = shares_from_totals(totals, "senate-2026", 2026, as_of="2026-09-13")
+    mid = shares_from_totals(
+        totals, "senate-2026", 2026, as_of="2026-07-01", require_candidate_match=False,
+    )
+    late = shares_from_totals(
+        totals, "senate-2026", 2026, as_of="2026-09-13", require_candidate_match=False,
+    )
     assert float(mid.loc[mid["state"] == "TX", "fundraising_share"].iloc[0]) == 0.5
     assert float(late.loc[late["state"] == "TX", "fundraising_share"].iloc[0]) == 0.9
     assert ">" in str(late.loc[late["state"] == "TX", "amendment_chain"].iloc[0])

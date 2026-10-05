@@ -55,6 +55,7 @@ def fit_state_space(
     future_base: float = 4.5,
     terminal_base: float = 3.5,
     national_path_sd: float | None = None,
+    allow_neutral_fill: bool = False,
 ) -> FitResult:
     """
     Per-race forward filter of poll margins → current latent, then project to ED.
@@ -164,11 +165,19 @@ def fit_state_space(
 
     means_a = np.asarray(means, dtype=float)
     sds_a = np.asarray(sds, dtype=float)
-    # Last-resort fill so a poisoned race cannot emit all-NaN stack columns.
+    # Last-resort: refuse silent tossup unless explicitly allowed (dev/fixtures).
     bad = ~np.isfinite(means_a)
     if bad.any():
-        means_a = means_a.copy()
-        means_a[bad] = 0.0
+        if allow_neutral_fill:
+            means_a = means_a.copy()
+            means_a[bad] = 0.0
+        else:
+            bad_ids = races.loc[bad, "race_id"].astype(str).tolist() if "race_id" in races.columns else np.flatnonzero(bad).tolist()
+            raise ValueError(
+                "fit_state_space: nonfinite race means remain after recovery "
+                f"for races {bad_ids}; refusing neutral (0.0) fill unless "
+                "allow_neutral_fill=True"
+            )
     bad_sd = ~np.isfinite(sds_a) | (sds_a <= 0)
     if bad_sd.any():
         sds_a = sds_a.copy()
