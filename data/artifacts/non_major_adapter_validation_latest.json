@@ -52,7 +52,7 @@
     },
     "current_polls": {
       "path": "data/normalized/polls.parquet",
-      "sha256": "65f5111ac5539bd99a3679cfbd1fafaa3b77b2267c23e9732f807db3fe1919eb"
+      "sha256": "031c4c5f6e255f1169b7e744f4feff301cad00c9542db3cdcd1eeb2772820560"
     }
   },
   "formal_lead_days": [
@@ -86,7 +86,7 @@
       "absolute_margin_error": 3.0498764963473945,
       "p_modeled_candidate": 0.1055,
       "brier": 0.01113025,
-      "crps": 2.3090303206293497,
+      "crps": 2.3090303206293505,
       "interval_05": -24.142407644918624,
       "interval_95": 4.105079327316235,
       "interval_90_covered": true,
@@ -117,7 +117,7 @@
       "absolute_margin_error": 8.13684458618277,
       "p_modeled_candidate": 0.25275,
       "brier": 0.06388256249999999,
-      "crps": 4.972495630249465,
+      "crps": 4.972495630249467,
       "interval_05": -19.417007189380165,
       "interval_95": 8.674380069690212,
       "interval_90_covered": true,
@@ -145,12 +145,12 @@
         "fte-raw-88000-207596"
       ],
       "truth_modeled_candidate_margin": -6.6941,
-      "predicted_margin": -1.6575173857574996,
-      "margin_error": 5.0365826142425,
-      "absolute_margin_error": 5.0365826142425,
+      "predicted_margin": -1.657517385757499,
+      "margin_error": 5.0365826142425005,
+      "absolute_margin_error": 5.0365826142425005,
       "p_modeled_candidate": 0.41625,
       "brier": 0.1732640625,
-      "crps": 3.0687914978164352,
+      "crps": 3.068791497816436,
       "interval_05": -14.904309466102,
       "interval_95": 11.618951974743739,
       "interval_90_covered": true,
@@ -159,9 +159,9 @@
       "prior_mode": "state_structural",
       "prior_location": -25.843364149590883,
       "prior_sd": 30.0,
-      "posterior_location": -1.6575173857574994,
-      "poll_weighted_location": -1.4636041565849105,
-      "poll_sensitivity": 24.185846763833382,
+      "posterior_location": -1.657517385757499,
+      "poll_weighted_location": -1.4636041565849103,
+      "poll_sensitivity": 24.185846763833386,
       "prior_snapshot_sha256": "b5ec2e81047b90cc3479980ad8fb7761a838b0e610f7975119a20a47c381ca4e",
       "exceptional_outcome_used_to_set_prior": false
     },
@@ -196,8 +196,8 @@
       "prior_mode": "state_structural",
       "prior_location": -25.843364149590883,
       "prior_sd": 30.0,
-      "posterior_location": 1.032337106043297,
-      "poll_weighted_location": 1.1706144251766328,
+      "posterior_location": 1.0323371060432966,
+      "poll_weighted_location": 1.1706144251766324,
       "poll_sensitivity": 26.87570125563418,
       "prior_snapshot_sha256": "f7006ce866529f2a638c8ede4115e39fb7818f455360ae0f4bcf4d412e7e34d8",
       "exceptional_outcome_used_to_set_prior": false
@@ -207,7 +207,7 @@
     "n": 4,
     "mean_absolute_margin_error": 5.98743520070399,
     "brier": 0.138314234375,
-    "empirical_crps": 3.761823674260664,
+    "empirical_crps": 3.7618236742606648,
     "interval_90_coverage": 1.0,
     "average_interval_90_width": 27.115783739378386,
     "average_poll_sensitivity": 18.30824728121011,
@@ -226,7 +226,7 @@
         "n": 4,
         "mean_absolute_margin_error": 6.318665183696259,
         "brier": 0.14512915625,
-        "empirical_crps": 3.9226113984596243,
+        "empirical_crps": 3.922611398459624,
         "interval_90_coverage": 1.0,
         "average_interval_90_width": 27.08163204628867,
         "average_poll_sensitivity": 4.286493817496997,
@@ -249,7 +249,7 @@
           "absolute_margin_error": 3.672426398846845,
           "p_modeled_candidate": 0.11875,
           "brier": 0.0141015625,
-          "crps": 2.5007089621430865,
+          "crps": 2.5007089621430847,
           "interval_05": -23.4824223628799,
           "interval_95": 4.688621778785036,
           "interval_90_covered": true,
@@ -322,9 +322,9 @@
           "prior_mode": "zero_centered",
           "prior_location": 0.0,
           "prior_sd": 20.0,
-          "posterior_location": -1.437669076632141,
-          "poll_weighted_location": -1.4636041565849105,
-          "poll_sensitivity": 1.437669076632141,
+          "posterior_location": -1.4376690766321407,
+          "poll_weighted_location": -1.4636041565849103,
+          "poll_sensitivity": 1.4376690766321407,
           "prior_snapshot_sha256": "b5ec2e81047b90cc3479980ad8fb7761a838b0e610f7975119a20a47c381ca4e",
           "exceptional_outcome_used_to_set_prior": false
         },
@@ -345,12 +345,12 @@
             "fte-raw-88490-211445"
           ],
           "truth_modeled_candidate_margin": -6.6941,
-          "predicted_margin": 1.1572180023865142,
-          "margin_error": 7.851318002386514,
-          "absolute_margin_error": 7.851318002386514,
+          "predicted_margin": 1.157218002386514,
+          "margin_error": 7.851318002386513,
+          "absolute_margin_error": 7.851318002386513,
           "p_modeled_candidate": 0.55775,
           "brier": 0.31108506249999995,
-          "crps": 4.784855697579591,
+          "crps": 4.784855697579589,
           "interval_05": -11.60925456348906,
           "interval_95": 13.986279432987036,
           "interval_90_covered": true,
@@ -359,9 +359,9 @@
           "prior_mode": "zero_centered",
           "prior_location": 0.0,
           "prior_sd": 20.0,
-          "posterior_location": 1.1572180023865142,
-          "poll_weighted_location": 1.1706144251766328,
-          "poll_sensitivity": 1.1572180023865142,
+          "posterior_location": 1.157218002386514,
+          "poll_weighted_location": 1.1706144251766324,
+          "poll_sensitivity": 1.157218002386514,
           "prior_snapshot_sha256": "f7006ce866529f2a638c8ede4115e39fb7818f455360ae0f4bcf4d412e7e34d8",
           "exceptional_outcome_used_to_set_prior": false
         }
@@ -378,7 +378,7 @@
         "n": 4,
         "mean_absolute_margin_error": 5.98743520070399,
         "brier": 0.138314234375,
-        "empirical_crps": 3.761823674260664,
+        "empirical_crps": 3.7618236742606648,
         "interval_90_coverage": 1.0,
         "average_interval_90_width": 27.115783739378386,
         "average_poll_sensitivity": 18.30824728121011,
@@ -401,7 +401,7 @@
           "absolute_margin_error": 3.0498764963473945,
           "p_modeled_candidate": 0.1055,
           "brier": 0.01113025,
-          "crps": 2.3090303206293497,
+          "crps": 2.3090303206293505,
           "interval_05": -24.142407644918624,
           "interval_95": 4.105079327316235,
           "interval_90_covered": true,
@@ -432,7 +432,7 @@
           "absolute_margin_error": 8.13684458618277,
           "p_modeled_candidate": 0.25275,
           "brier": 0.06388256249999999,
-          "crps": 4.972495630249465,
+          "crps": 4.972495630249467,
           "interval_05": -19.417007189380165,
           "interval_95": 8.674380069690212,
           "interval_90_covered": true,
@@ -460,12 +460,12 @@
             "fte-raw-88000-207596"
           ],
           "truth_modeled_candidate_margin": -6.6941,
-          "predicted_margin": -1.6575173857574996,
-          "margin_error": 5.0365826142425,
-          "absolute_margin_error": 5.0365826142425,
+          "predicted_margin": -1.657517385757499,
+          "margin_error": 5.0365826142425005,
+          "absolute_margin_error": 5.0365826142425005,
           "p_modeled_candidate": 0.41625,
           "brier": 0.1732640625,
-          "crps": 3.0687914978164352,
+          "crps": 3.068791497816436,
           "interval_05": -14.904309466102,
           "interval_95": 11.618951974743739,
           "interval_90_covered": true,
@@ -474,9 +474,9 @@
           "prior_mode": "state_structural",
           "prior_location": -25.843364149590883,
           "prior_sd": 30.0,
-          "posterior_location": -1.6575173857574994,
-          "poll_weighted_location": -1.4636041565849105,
-          "poll_sensitivity": 24.185846763833382,
+          "posterior_location": -1.657517385757499,
+          "poll_weighted_location": -1.4636041565849103,
+          "poll_sensitivity": 24.185846763833386,
           "prior_snapshot_sha256": "b5ec2e81047b90cc3479980ad8fb7761a838b0e610f7975119a20a47c381ca4e",
           "exceptional_outcome_used_to_set_prior": false
         },
@@ -511,8 +511,8 @@
           "prior_mode": "state_structural",
           "prior_location": -25.843364149590883,
           "prior_sd": 30.0,
-          "posterior_location": 1.032337106043297,
-          "poll_weighted_location": 1.1706144251766328,
+          "posterior_location": 1.0323371060432966,
+          "poll_weighted_location": 1.1706144251766324,
           "poll_sensitivity": 26.87570125563418,
           "prior_snapshot_sha256": "f7006ce866529f2a638c8ede4115e39fb7818f455360ae0f4bcf4d412e7e34d8",
           "exceptional_outcome_used_to_set_prior": false
@@ -584,7 +584,7 @@
           "absolute_margin_error": 8.222918709316616,
           "p_modeled_candidate": 0.256,
           "brier": 0.065536,
-          "crps": 5.03202727392669,
+          "crps": 5.0320272739266905,
           "interval_05": -19.33845512083699,
           "interval_95": 8.767818165353034,
           "interval_90_covered": true,
@@ -612,12 +612,12 @@
             "fte-raw-88000-207596"
           ],
           "truth_modeled_candidate_margin": -6.6941,
-          "predicted_margin": -1.573061238314116,
+          "predicted_margin": -1.5730612383141158,
           "margin_error": 5.121038761685884,
           "absolute_margin_error": 5.121038761685884,
           "p_modeled_candidate": 0.4225,
           "brier": 0.17850624999999998,
-          "crps": 3.11130277278855,
+          "crps": 3.1113027727885507,
           "interval_05": -14.822179836821,
           "interval_95": 11.70573985253453,
           "interval_90_covered": true,
@@ -626,8 +626,8 @@
           "prior_mode": "state_structural",
           "prior_location": -25.843364149590883,
           "prior_sd": 40.0,
-          "posterior_location": -1.5730612383141158,
-          "poll_weighted_location": -1.4636041565849105,
+          "posterior_location": -1.5730612383141156,
+          "poll_weighted_location": -1.4636041565849103,
           "poll_sensitivity": 24.27030291127677,
           "prior_snapshot_sha256": "b5ec2e81047b90cc3479980ad8fb7761a838b0e610f7975119a20a47c381ca4e",
           "exceptional_outcome_used_to_set_prior": false
@@ -649,22 +649,22 @@
             "fte-raw-88490-211445"
           ],
           "truth_modeled_candidate_margin": -6.6941,
-          "predicted_margin": 1.0926588559316486,
+          "predicted_margin": 1.092658855931648,
           "margin_error": 7.786758855931648,
           "absolute_margin_error": 7.786758855931648,
           "p_modeled_candidate": 0.5545,
           "brier": 0.30747025,
-          "crps": 4.739193295884264,
-          "interval_05": -11.677501879836521,
-          "interval_95": 13.925426538033866,
+          "crps": 4.739193295884263,
+          "interval_05": -11.677501879836523,
+          "interval_95": 13.925426538033864,
           "interval_90_covered": true,
           "interval_90_width": 25.602928417870388,
           "prior_spec_id": "state_structural_extra_large",
           "prior_mode": "state_structural",
           "prior_location": -25.843364149590883,
           "prior_sd": 40.0,
-          "posterior_location": 1.0926588559316486,
-          "poll_weighted_location": 1.1706144251766328,
+          "posterior_location": 1.0926588559316481,
+          "poll_weighted_location": 1.1706144251766324,
           "poll_sensitivity": 26.936023005522532,
           "prior_snapshot_sha256": "f7006ce866529f2a638c8ede4115e39fb7818f455360ae0f4bcf4d412e7e34d8",
           "exceptional_outcome_used_to_set_prior": false
@@ -826,9 +826,9 @@
           "senate-2026-SD": 0.138
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": -0.0029730386988244778,
-          "senate-2026-MT": -0.011806580914670845,
-          "senate-2026-NE": -0.006379498848060776,
+          "senate-2026-ID": -0.002973038698824468,
+          "senate-2026-MT": -0.011806580914670853,
+          "senate-2026-NE": -0.0063794988480607795,
           "senate-2026-SD": 0.004065235189075692
         },
         "exceptional_seat_count_variance": 0.7824549375000002
@@ -841,10 +841,10 @@
           "senate-2026-SD": 0.147125
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": 0.44501404781572435,
-          "senate-2026-MT": 0.43861295108298803,
-          "senate-2026-NE": 0.442538622958407,
-          "senate-2026-SD": 0.45004142534617175
+          "senate-2026-ID": 0.4450140478157245,
+          "senate-2026-MT": 0.4386129510829882,
+          "senate-2026-NE": 0.44253862295840724,
+          "senate-2026-SD": 0.45004142534617164
         },
         "exceptional_seat_count_variance": 1.0931729843750002
       },
@@ -856,10 +856,10 @@
           "senate-2026-SD": 0.157
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": 0.6309853485399202,
-          "senate-2026-MT": 0.6267773999877537,
-          "senate-2026-NE": 0.6293453209795291,
-          "senate-2026-SD": 0.6342429339240566
+          "senate-2026-ID": 0.63098534853992,
+          "senate-2026-MT": 0.6267773999877536,
+          "senate-2026-NE": 0.6293453209795289,
+          "senate-2026-SD": 0.6342429339240563
         },
         "exceptional_seat_count_variance": 1.389676859375
       }
@@ -1012,5 +1012,5 @@
     "reason": "exceptional outcomes are never used to estimate the structural location or uncertainty; every state anchor is derived only from presidential results available at that cutoff"
   },
   "calibration_claim_allowed": false,
-  "artifact_sha256": "35c981cfb95564c0deeae561abbca6e1d72858b1c29f578363aff6117b232c26"
+  "artifact_sha256": "7bafadea33d5868272327966e1da5e54e35e13e7a4c3061b437bc49cd4e78624"
 }
