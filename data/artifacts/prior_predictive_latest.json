@@ -1,24 +1,24 @@
 {
   "schema_version": "current-model-prior-predictive-v1",
-  "model_version": "senate-hierarchical-v0.9.22",
-  "run_id": "senate-2026_2026-10-03_ensemble_stack_20260901",
-  "snapshot_id": "9c467c0f9db745091e1d0db6d9ab85de30a46e955191b660fc86c4887c56e9b5",
-  "forecast_sha256": "fb6e9494a5ad72f5fa72f88f4c9ab3fb272e606e0027c3084a85c25000f1e88e",
+  "model_version": "senate-hierarchical-v0.9.23",
+  "run_id": "senate-2026_2026-10-05_ensemble_stack+limited_validation_exception_model-v1+limited_validation_alaska_rcv_model-v1_20260901",
+  "snapshot_id": "ec1632af716f9510cf019e3bc64604dd1011e4d22ef8e670e98c9ac606b78344",
+  "forecast_sha256": "ddd2a1946c185df94a3c7d38ea3c13d40b4d05cb7c2cb783bb982d91f1acfbd1",
   "diagnostic": {
     "schema_version": "bayesian-diagnostics-v1",
     "extreme_margin_threshold": 50.0,
-    "extreme_margin_fraction": 0.025285714285714286,
+    "extreme_margin_fraction": 0.027166666666666665,
     "max_extreme_fraction": 0.05,
     "summaries": {
       "race_margins": {
         "available": true,
-        "n": 7000,
-        "mean": -6.125410071982413,
-        "sd": 24.776126950650685,
-        "q01": -53.691515321518004,
-        "q50": -7.262166422886225,
-        "q99": 43.8355768268377,
-        "max_abs": 78.50050164836841
+        "n": 6000,
+        "mean": -2.4671908276345222,
+        "sd": 24.888822110429576,
+        "q01": -53.83514009043764,
+        "q50": -0.549007501176918,
+        "q99": 44.88116168332681,
+        "max_abs": 81.40702885159364
       },
       "national_shock": {
         "available": true,
@@ -32,13 +32,13 @@
       },
       "house_effects": {
         "available": true,
-        "n": 18400,
-        "mean": 0.009705425313899042,
-        "sd": 1.0941587271948292,
-        "q01": -2.5605508684657803,
-        "q50": 0.0038958483307536757,
-        "q99": 2.6523552264822166,
-        "max_abs": 5.143990317560791
+        "n": 15600,
+        "mean": 0.010822654853710662,
+        "sd": 1.101476353961226,
+        "q01": -2.556659164027288,
+        "q50": 0.013575536330575112,
+        "q99": 2.66075069126831,
+        "max_abs": 4.686978440550011
       },
       "mode_effects": {
         "available": true,
@@ -62,13 +62,13 @@
       },
       "future_movement": {
         "available": true,
-        "n": 7000,
-        "mean": -0.060748455180216814,
-        "sd": 2.9690240860493735,
-        "q01": -7.551349362095688,
-        "q50": -0.05802043011915693,
-        "q99": 7.485185610294148,
-        "max_abs": 26.562013136066252
+        "n": 6000,
+        "mean": -0.07278428011041764,
+        "sd": 2.872869869362877,
+        "q01": -7.385526677099018,
+        "q50": -0.07108798186447154,
+        "q99": 6.983070494555267,
+        "max_abs": 24.524557932427623
       },
       "terminal_national": {
         "available": true,
@@ -82,12 +82,12 @@
       },
       "terminal_race": {
         "available": true,
-        "n": 7000,
-        "mean": 0.03846074312091132,
-        "sd": 2.3365911928727883,
-        "q01": -6.049875382727224,
-        "q50": 0.014341857405637662,
-        "q99": 6.130585078136534,
+        "n": 6000,
+        "mean": 0.03658994986452493,
+        "sd": 2.3495660089599077,
+        "q01": -6.097279340428956,
+        "q50": 0.01686986358524039,
+        "q99": 6.226837120190876,
         "max_abs": 20.310367807820487
       }
     },

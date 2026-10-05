@@ -1,12 +1,12 @@
 {
   "schema_version": "validated-model-spec-candidate-v1",
-  "model_version": "senate-hierarchical-v0.9.22",
+  "model_version": "senate-hierarchical-v0.9.23",
   "status": "candidate_pending_canonical_oof",
-  "evidence_bundle_id": "eb-3e91ca3a90628d69",
-  "evidence_bundle_sha256": "3e91ca3a90628d695b234a4b784a92bff18d78d81d1faa0d75467492cc977e86",
-  "source_readiness_sha256": "8f11eb9561dcb321fed346ba5a0d96cb7bc6e9ffcc7247fc3fa38a5b38d44aa6",
-  "poll_structure_selection_sha256": "4137513a172626df35740ab5389a79091e100650a50de8b3ba642538f5873268",
-  "poll_structure_selection_source_nested_sha256": "8dfaa18639b24c9e4d2d59ed2b87f6d813bc2049b0278e22b5d9fe0041fdb7c5",
+  "evidence_bundle_id": "eb-09a25672b5b14bbf",
+  "evidence_bundle_sha256": "09a25672b5b14bbf67b1db98f23a5783e18f160ec00e7a5845b85ed4c93f59e1",
+  "source_readiness_sha256": "416375db108cd6ad7a6f22d9b4b4554dda534bb4f206ed66a9026e0c969da49f",
+  "poll_structure_selection_sha256": "5ddc02dc6f9b76dd39043c121df8a90f60a317a606f2cff003ed490b41dfabac",
+  "poll_structure_selection_source_nested_sha256": "ba8cf38e6e7fe6fe9768f5c62fb816190b718c569e49994108a7fa6c0b0e63a4",
   "selected_structure_id": "pymc",
   "selected_poll_structure": {
     "version": "poll-structure-v2",
@@ -30,8 +30,10 @@
     60,
     30
   ],
-  "code_commit_sha": "851a69b571a3dbb195df580c2e2f828608e556e3",
+  "code_commit_sha": "0fb8a54626fd2a7a0bf57f0de058362fc6712d70",
   "production_research_eligible": false,
   "next_required_phase": "canonical_poll_structure",
-  "spec_sha256": "2b0fbccc127c0a0a6a92fffecc9c3743901ad0778d657d32f626555c0e060595"
+  "ordinary_statistical_only": true,
+  "ordinary_statistical_spec_sha256": "e04140851cd5828e159cab27f2315ade51ba905519962679a6e670238bf0ecef",
+  "spec_sha256": "9cb9acbd394bebb71e5397f50696e384fc2d4c9c54b3156272078067979ba40b"
 }
