@@ -10,23 +10,23 @@
         "n": 32,
         "crps": 3.910660282681718,
         "log_score": -3.4017285974719753,
-        "brier": 0.04521505000708427,
-        "mae": 5.477368312375847
+        "brier": 0.04521505000708428,
+        "mae": 5.477368312375846
       },
       "extended": {
         "n": 32,
         "crps": 3.910660282681718,
         "interval_score_90": 31.829985225574898,
-        "brier": 0.04521505000708427,
+        "brier": 0.04521505000708428,
         "log_score": -0.15184321231264664,
-        "mae": 5.477368312375847,
+        "mae": 5.477368312375846,
         "coverage_90": 0.96875,
         "reliability": [
           {
             "bin_lo": 0.0,
             "bin_hi": 0.1,
             "n": 13.0,
-            "mean_p": 0.007862736982612058,
+            "mean_p": 0.007862736982612055,
             "mean_y": 0.0
           },
           {
@@ -54,7 +54,7 @@
             "bin_lo": 0.5,
             "bin_hi": 0.6000000000000001,
             "n": 1.0,
-            "mean_p": 0.5708054506027092,
+            "mean_p": 0.570805450602709,
             "mean_y": 0.0
           },
           {
@@ -88,8 +88,8 @@
         ],
         "calibration_slope_intercept": {
           "n": 32,
-          "slope": 1.0490700853522896,
-          "intercept": -0.056649322353907745,
+          "slope": 1.0490700853522894,
+          "intercept": -0.05664932235390766,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -98,7 +98,7 @@
         },
         "pit": {
           "n": 32,
-          "mean": 0.44931527605083343,
+          "mean": 0.4493152760508335,
           "var": 0.05449360903191659,
           "expected_mean": 0.5,
           "expected_var": 0.08333333333333333,
@@ -168,12 +168,12 @@
       },
       "chamber": {
         "ok": false,
-        "status": "incomplete_point_in_time_race_universe",
-        "error": "Senate seat accounting must total 100 (held_dem=35, held_rep=29, contested_in_fit=34, total=98). Check not_up / withdrawn / fit race_ids.",
+        "status": "binary_chamber_ineligible_race",
+        "error": "race is ineligible for binary chamber forecast: senate-2022-AK: no_single_predeclared_dem_vs_rep_final_pair",
         "n_snapshot_seats": 98,
         "n_fit_races": 34
       },
-      "energy_score": 28.254273520814337
+      "energy_score": 28.254273520814344
     },
     {
       "lead_days": 60,
@@ -181,18 +181,18 @@
       "n_polls": 195,
       "scores": {
         "n": 34,
-        "crps": 4.9204804576741275,
+        "crps": 4.920480457674127,
         "log_score": -3.6646986545967155,
         "brier": 0.058135281423404746,
-        "mae": 6.635204572253871
+        "mae": 6.635204572253872
       },
       "extended": {
         "n": 34,
-        "crps": 4.9204804576741275,
-        "interval_score_90": 45.171414047399665,
+        "crps": 4.920480457674127,
+        "interval_score_90": 45.17141404739968,
         "brier": 0.058135281423404746,
-        "log_score": -0.18854426641223954,
-        "mae": 6.635204572253871,
+        "log_score": -0.18854426641223956,
+        "mae": 6.635204572253872,
         "coverage_90": 0.8823529411764706,
         "reliability": [
           {
@@ -220,7 +220,7 @@
             "bin_lo": 0.4,
             "bin_hi": 0.5,
             "n": 2.0,
-            "mean_p": 0.4272985536838162,
+            "mean_p": 0.42729855368381614,
             "mean_y": 0.5
           },
           {
@@ -234,7 +234,7 @@
             "bin_lo": 0.6000000000000001,
             "bin_hi": 0.7000000000000001,
             "n": 2.0,
-            "mean_p": 0.656633541465033,
+            "mean_p": 0.6566335414650332,
             "mean_y": 0.0
           },
           {
@@ -261,8 +261,8 @@
         ],
         "calibration_slope_intercept": {
           "n": 34,
-          "slope": 1.0721158665808808,
-          "intercept": -0.04333364412739116,
+          "slope": 1.072115866580881,
+          "intercept": -0.0433336441273909,
           "ok": true,
           "ideal": {
             "slope": 1.0,
@@ -272,7 +272,7 @@
         "pit": {
           "n": 34,
           "mean": 0.4881032325023509,
-          "var": 0.07371852383502292,
+          "var": 0.07371852383502289,
           "expected_mean": 0.5,
           "expected_var": 0.08333333333333333,
           "histogram": [
@@ -340,13 +340,11 @@
         }
       },
       "chamber": {
-        "seat_crps": 1.054725,
-        "seat_mae": 3.47,
-        "control_brier": 0.13140625000000003,
-        "p_dem_control": 0.6375,
-        "expected_dem_seats": 51.415,
-        "n_draws": 400,
-        "ok": true
+        "ok": false,
+        "status": "binary_chamber_ineligible_race",
+        "error": "race is ineligible for binary chamber forecast: senate-2022-AK: no_single_predeclared_dem_vs_rep_final_pair",
+        "n_snapshot_seats": 100,
+        "n_fit_races": 36
       },
       "energy_score": 40.143724550793195
     },
@@ -356,17 +354,17 @@
       "n_polls": 335,
       "scores": {
         "n": 34,
-        "crps": 5.0493520230134425,
+        "crps": 5.049352023013442,
         "log_score": -3.651526269006556,
-        "brier": 0.04466107400008023,
+        "brier": 0.044661074000080236,
         "mae": 6.838918145976885
       },
       "extended": {
         "n": 34,
-        "crps": 5.0493520230134425,
+        "crps": 5.049352023013442,
         "interval_score_90": 46.592622993625774,
-        "brier": 0.04466107400008023,
-        "log_score": -0.15336335054405056,
+        "brier": 0.044661074000080236,
+        "log_score": -0.1533633505440506,
         "mae": 6.838918145976885,
         "coverage_90": 0.8529411764705882,
         "reliability": [
@@ -374,7 +372,7 @@
             "bin_lo": 0.0,
             "bin_hi": 0.1,
             "n": 12.0,
-            "mean_p": 0.01030967081598937,
+            "mean_p": 0.010309670815989372,
             "mean_y": 0.0
           },
           {
@@ -508,13 +506,11 @@
         }
       },
       "chamber": {
-        "seat_crps": 0.9767999999999999,
-        "seat_mae": 3.19,
-        "control_brier": 0.11222499999999998,
-        "p_dem_control": 0.665,
-        "expected_dem_seats": 51.88,
-        "n_draws": 400,
-        "ok": true
+        "ok": false,
+        "status": "binary_chamber_ineligible_race",
+        "error": "race is ineligible for binary chamber forecast: senate-2022-AK: no_single_predeclared_dem_vs_rep_final_pair",
+        "n_snapshot_seats": 100,
+        "n_fit_races": 36
       },
       "energy_score": 40.05275178025387
     },
@@ -534,7 +530,7 @@
         "crps": 4.193316745292101,
         "interval_score_90": 37.07393369321966,
         "brier": 0.03693172826822783,
-        "log_score": -0.1349440602230149,
+        "log_score": -0.13494406022301486,
         "mae": 5.680078686913042,
         "coverage_90": 0.7941176470588235,
         "reliability": [
@@ -542,14 +538,14 @@
             "bin_lo": 0.0,
             "bin_hi": 0.1,
             "n": 12.0,
-            "mean_p": 0.0033366721130521273,
+            "mean_p": 0.0033366721130521277,
             "mean_y": 0.0
           },
           {
             "bin_lo": 0.1,
             "bin_hi": 0.2,
             "n": 1.0,
-            "mean_p": 0.11901238628546995,
+            "mean_p": 0.1190123862854699,
             "mean_y": 0.0
           },
           {
@@ -615,7 +611,7 @@
         "pit": {
           "n": 34,
           "mean": 0.4349112036832357,
-          "var": 0.07924245684456643,
+          "var": 0.07924245684456645,
           "expected_mean": 0.5,
           "expected_var": 0.08333333333333333,
           "histogram": [
@@ -683,13 +679,11 @@
         }
       },
       "chamber": {
-        "seat_crps": 0.96095,
-        "seat_mae": 3.09,
-        "control_brier": 0.245025,
-        "p_dem_control": 0.505,
-        "expected_dem_seats": 50.765,
-        "n_draws": 400,
-        "ok": true
+        "ok": false,
+        "status": "binary_chamber_ineligible_race",
+        "error": "race is ineligible for binary chamber forecast: senate-2022-AK: no_single_predeclared_dem_vs_rep_final_pair",
+        "n_snapshot_seats": 100,
+        "n_fit_races": 36
       },
       "energy_score": 32.61044480817377
     }

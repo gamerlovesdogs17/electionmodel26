@@ -1,20 +1,20 @@
 {
   "schema_version": "stack_reliability_crossfit_v1",
-  "model_version": "senate-hierarchical-v0.9.22",
+  "model_version": "senate-hierarchical-v0.9.23",
   "procedure": "cycle_cross_fitted_production_stack",
-  "generated_at": "2026-10-03T20:22:54.899152+00:00",
+  "generated_at": "2026-10-05T01:59:38.427035+00:00",
   "complete": true,
   "freeze_before_truth": "Every outer-cycle plan is fit from other cycles only; held-out truth is read only after component eligibility, stack weights, and scale are frozen.",
   "source": {
     "nested_artifact_path": "data/artifacts/nested_component_loo_canonical.json",
-    "nested_artifact_sha256": "2c5d8c0617aa08a07bba57990302299f78647e307c7e790582614eadfbd3597c",
+    "nested_artifact_sha256": "802559943c44b04201d4be29c8a2170ce106b275142357b14d883b9e486a8f38",
     "stack_artifact_path": "data/artifacts/stack_weights_oof.json",
-    "stack_artifact_sha256": "5945bed0b5fb4483aeda10efde00dc541abd0bdf4091edbe69ab02a32b6ffd7d",
+    "stack_artifact_sha256": "23c93767e91fbdfd96bdd8d1ff63e0066fdb53e37a846378d0b22a4128e4167a",
     "frozen_index_path": "data/artifacts/nested_component_loo_canonical_frozen.json",
-    "frozen_index_semantic_sha256": "c6b75e721f5e031aa075ee92469b4a90aa036141d50e884e6c2f270d29b37836",
+    "frozen_index_semantic_sha256": "9672459427963cfb6612e450a731af735e4ff9927312398d970298fbb69b72de",
     "frozen_draws_sha256": "3d5998dfd9c346cb110972deddbe661029deac2988086f7bacaf0fe596bb449a",
     "truth_sha256": "27d8959b76de83f0667fb994dc4fdaecf0c2553104911a616e1e7b6f6b3c4fec",
-    "nested_model_version": "senate-hierarchical-v0.9.22",
+    "nested_model_version": "senate-hierarchical-v0.9.23",
     "nested_stack_training_protocol": "formal_60_30_v1",
     "stack_prediction_sha256": "e0d8bdc6ea9a4ee928ca565be3bffc45112f8506d4335e273f7a21f723712ea3",
     "stacking_mode": "empirical_predictive_mixture_crps_v1"
@@ -7726,6 +7726,6 @@
     "scale_selection_is_training_only": true,
     "heldout_truth_used_only_for_evaluation": true
   },
-  "artifact_fingerprint_sha256": "77e09986003abc20caa6d4c2d29766f056db56be8e9034126bc6494e8e618589",
+  "artifact_fingerprint_sha256": "67a7deeaeb8a46268de5b40c72cfec94e0aa3a36929ad088be803bfc759fa14d",
   "path": "data/artifacts/stack_reliability_crossfit_latest.json"
 }

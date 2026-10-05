@@ -1,14 +1,14 @@
-# Validation report — senate-hierarchical-v0.9.22
+# Validation report — senate-hierarchical-v0.9.23
 
-Generated: 2026-10-03T20:30:34.584941+00:00
-Current status refreshed: 2026-10-03T23:11:15.493486+00:00
+Generated: 2026-10-05T02:36:23.367597+00:00
+Current status refreshed: 2026-10-05T02:46:34.013899+00:00
 Primary holdout: 2022
 
 ## Current authoritative status
 
-- Evidence bundle: eb-3e91ca3a90628d69
-- Validated model spec: 4a1ee9f7baef14626dccc0cb5eadedafbeb6dc31878a956bb20cfe4fa9868323
-- Release identity: truth_v1_v0.9.22_eb-3e91ca3a90628d69
+- Evidence bundle: eb-09a25672b5b14bbf
+- Validated model spec: bdaa0b84f78855ff88490265eaa271d17172d5c82e5f96b54208f415fbb828c9
+- Release identity: truth_v1_v0.9.23_eb-09a25672b5b14bbf
 - Release identity verified: True
 - Run coherence: True
 - Research acceptance: True
@@ -44,38 +44,43 @@ Primary holdout: 2022
 
 ```json
 {
-  "ok": true,
-  "control_ok": true,
+  "ok": false,
+  "control_ok": false,
   "control_soft": true,
   "control_gaps": {
-    "ddhq": 0.28312000000000004,
-    "kalshi": 0.17401108910891094
+    "ddhq": 0.39782000000000006,
+    "kalshi": 0.28871108910891097
   },
-  "primary_control_gap": 0.17401108910891094,
-  "max_abs_control_gap": 0.28312000000000004,
+  "primary_control_gap": 0.28871108910891097,
+  "max_abs_control_gap": 0.39782000000000006,
   "race_scores": {
     "ddhq": {
-      "n": 10,
-      "brier_vs_peer_favorite": 0.23011602932000003,
-      "mae": 0.174254,
-      "crps_proxy": 0.174254,
+      "n": 9,
+      "brier_vs_peer_favorite": 0.24721232777777777,
+      "mae": 0.18267777777777777,
+      "crps_proxy": 0.18267777777777777,
       "ok": false
     },
     "kalshi": {
-      "n": 8,
-      "brier_vs_peer_favorite": 0.12122831174999998,
-      "mae": 0.12009587920546376,
-      "crps_proxy": 0.12009587920546376,
+      "n": 7,
+      "brier_vs_peer_favorite": 0.07234866634285717,
+      "mae": 0.08039167664059821,
+      "crps_proxy": 0.08039167664059821,
       "ok": true
     }
   },
   "race_ok": true,
   "mean_peer_disagreement": 0.10895576394019407,
-  "null_margin_races": [],
-  "method": "ensemble_stack",
+  "null_margin_races": [
+    "senate-2026-AK"
+  ],
+  "method": "ensemble_stack+limited_validation_exception_model-v1+limited_validation_alaska_rcv_model-v1",
   "core_method": "pymc",
-  "generic_ballot": 4.413521232216102,
-  "reasons": [],
+  "generic_ballot": 6.184921674810612,
+  "reasons": [
+    "control gap vs primary peer large (gap=0.289 > 0.25); gaps={'ddhq': 0.39782000000000006, 'kalshi': 0.28871108910891097} \u2014 informational under blueprint \u00a72 (peers not averaged)",
+    "null margins in races: ['senate-2026-AK']"
+  ],
   "thresholds": {
     "max_abs_control_gap": 0.25,
     "race_brier": 0.22,
