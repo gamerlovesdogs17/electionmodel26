@@ -253,6 +253,35 @@ def test_identity_sensitive_candidate_freshness_fails_missing_and_future_provena
     assert future["status"] == "future_timestamp"
 
 
+def test_registry_resolved_identity_uses_review_boundary_for_freshness():
+    audit = {
+        "eligible": True,
+        "conditional_identity_contract": True,
+        "n_identity_required_and_resolved": 1,
+        "n_identity_required_and_missing": 0,
+        "classification_records": [
+            {
+                "race_id": "senate-2026-AL",
+                "candidate_identity_required": True,
+                "candidate_identity_resolved": True,
+                "identity_source": "reviewed_current_candidate_registry",
+                "identity_reviewed_as_of": "2026-10-03",
+            }
+        ],
+    }
+    freshness = candidate_timeline_freshness(
+        audit, {}, checked_at="2026-10-05T12:00:00Z",
+    )
+    assert freshness["status"] == "fresh"
+    assert freshness["identity_freshness_basis"] == "reviewed_current_candidate_registry"
+    annotated, failures = apply_domain_contract(
+        {"candidate_timeline": {**audit, "freshness": freshness}},
+        {"roles": {"candidate_timeline": "required_core"}},
+    )
+    assert failures == []
+    assert annotated["candidate_timeline"]["effective_eligible"] is True
+
+
 def test_readiness_and_eligibility_select_same_canonical_products():
     readiness = audit_source_readiness(
         election_id="senate-2026", as_of="2026-09-27",

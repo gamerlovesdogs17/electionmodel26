@@ -73,6 +73,14 @@ def test_rebuild_workflow_has_strict_preflight_current_date_and_pages_deploy():
     assert "date -u +%F" in text
     assert "evidence-eligibility" in text and "--strict" in text
     assert "--publication-config" in text
+    # Publication eligibility must fail closed in prepare_evidence, not only rebuild.
+    prepare_job = text.index("  prepare_evidence:")
+    tests_job = text.index("  tests:")
+    prepare_block = text[prepare_job:tests_job]
+    assert "Strict publication-domain eligibility" in prepare_block
+    assert prepare_block.index("Strict publication-domain eligibility") < prepare_block.index(
+        "Strict blueprint source gates"
+    )
     assert "acceptance-gates --strict" in text
     assert "independent_resumed=" in text
     assert "steps.resume.outputs.independent_resumed != 'true'" in text

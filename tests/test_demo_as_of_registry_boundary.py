@@ -34,3 +34,26 @@ def test_demo_as_of_warehouse_snapshot_has_explicit_caucus() -> None:
         .tolist()
     )
     require_explicit_caucus(snap.races, active)
+
+
+def test_publication_eligibility_accepts_registry_resolved_current_cycle() -> None:
+    from midterms.evidence.eligibility import write_eligibility_report
+    from midterms.validation.overlay_validation import publication_overlay_policy
+    from midterms.evidence.eligibility import effective_production_domain_contract
+
+    policy = publication_overlay_policy(
+        rating_weight=0.15, market_weight=0.12, control_weight=0.15,
+    )
+    contract = effective_production_domain_contract(
+        use_ratings=bool(policy["use_ratings"]),
+        use_markets=bool(policy["use_race_markets"] and policy["use_control_market"]),
+    )
+    report = write_eligibility_report(
+        DEMO_ELECTION_ID, as_of=DEMO_AS_OF, domain_contract=contract,
+    )
+    assert report["publishable"] is True, report.get("reasons")
+    freshness = (report["domains"].get("candidate_timeline") or {}).get("freshness") or {}
+    assert freshness.get("status") == "fresh"
+    assert freshness.get("identity_freshness_basis") == (
+        "reviewed_current_candidate_registry"
+    )

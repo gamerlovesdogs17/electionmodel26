@@ -408,15 +408,42 @@ def candidate_timeline_freshness(
             "required_for_effective_input": False,
         }
     meta = metadata or {}
+    retrieved_at = meta.get("latest_retrieved_at")
+    observed_at = meta.get("latest_effective_at")
+    freshness_basis = meta.get("identity_freshness_basis")
+    if retrieved_at is None:
+        # Fall back to the reviewed current-registry boundary when that is the
+        # identity source for required races (no timeline retrieved_at exists).
+        from datetime import date as _date
+
+        records = list(audit.get("classification_records") or []) or list(
+            meta.get("classification_records") or []
+        )
+        registry_dates = [
+            _date.fromisoformat(str(row["identity_reviewed_as_of"]))
+            for row in records
+            if row.get("candidate_identity_required")
+            and row.get("candidate_identity_resolved")
+            and str(row.get("identity_source") or "")
+            == "reviewed_current_candidate_registry"
+            and row.get("identity_reviewed_as_of")
+        ]
+        if registry_dates:
+            stamp = max(registry_dates).isoformat()
+            retrieved_at = stamp
+            observed_at = observed_at or stamp
+            freshness_basis = "reviewed_current_candidate_registry"
     result = domain_freshness_from_provenance(
         "candidate_ballot",
         checked_at=checked_at,
-        retrieved_at=meta.get("latest_retrieved_at"),
-        observed_at=meta.get("latest_effective_at"),
+        retrieved_at=retrieved_at,
+        observed_at=observed_at,
         source_available=bool(identity_required),
     )
     result["required_for_effective_input"] = True
     result["identity_required_races"] = identity_required
+    if freshness_basis:
+        result["identity_freshness_basis"] = freshness_basis
     return result
 
 # Ordered from strongest to weakest

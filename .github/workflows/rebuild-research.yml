@@ -114,6 +114,15 @@ jobs:
         run: python -m midterms.cli sync-compliance-status --write
       - name: Seal and strictly verify evidence bundle
         run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode seal --strict
+      - name: Strict publication-domain eligibility
+        # Same gate as the rebuild job. Fail here (cheap) rather than after
+        # evidence seal + tests when registry/timeline freshness is wrong.
+        run: |
+          python -m midterms.cli evidence-eligibility \
+            --election-id senate-2026 \
+            --as-of "$AS_OF" \
+            --publication-config \
+            --strict
       - name: Strict blueprint source gates
         run: python -m midterms.cli blueprint-extension-gates --source-only --strict
       - name: Read sealed bundle ID
@@ -130,6 +139,7 @@ jobs:
           path: |
             data/artifacts/source_readiness_latest.json
             data/artifacts/current_race_poll_coverage_v0923.json
+            data/artifacts/evidence_eligibility_latest.json
             data/artifacts/non_major_adapter_validation_latest.json
             data/artifacts/alaska_rcv_validation_latest.json
             data/artifacts/historical_evidence_equivalence_v0923.json
@@ -147,6 +157,7 @@ jobs:
           git add data/raw/external data/normalized data/manifests \
             data/artifacts/source_readiness_latest.json \
             data/artifacts/current_race_poll_coverage_v0923.json \
+            data/artifacts/evidence_eligibility_latest.json \
             data/artifacts/non_major_adapter_validation_latest.json \
             data/artifacts/alaska_rcv_validation_latest.json \
             data/artifacts/historical_evidence_equivalence_v0923.json \

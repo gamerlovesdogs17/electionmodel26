@@ -697,6 +697,25 @@ def apply_candidate_state_contract(
         "held_seats_excluded": True,
         "conditional_identity_contract": True,
     }
+    # Reviewed current-registry identities are not timeline events. When they
+    # resolve required races, their review boundary is the operational freshness
+    # clock so publication eligibility does not demand a missing retrieved_at.
+    registry_review_dates = [
+        date.fromisoformat(str(record["identity_reviewed_as_of"]))
+        for record in records
+        if record.get("candidate_identity_required")
+        and record.get("candidate_identity_resolved")
+        and str(record.get("identity_source") or "")
+        == "reviewed_current_candidate_registry"
+        and record.get("identity_reviewed_as_of")
+    ]
+    if registry_review_dates and metadata.get("latest_retrieved_at") is None:
+        stamp = max(registry_review_dates).isoformat()
+        metadata["latest_retrieved_at"] = stamp
+        metadata["latest_effective_at"] = (
+            metadata.get("latest_effective_at") or stamp
+        )
+        metadata["identity_freshness_basis"] = "reviewed_current_candidate_registry"
     if has_current_2026:
         metadata["forecast_model_coverage"] = {
             "complete": not current_probability_blockers,
