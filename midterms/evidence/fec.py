@@ -96,7 +96,17 @@ def _strip_accents(text: str) -> str:
 def _normalize_person_name(name: str | None) -> str:
     if name is None or (isinstance(name, float) and pd.isna(name)):
         return ""
-    text = _strip_accents(str(name).replace(".", " ").replace(",", " ").lower())
+    text = _strip_accents(
+        str(name)
+        .replace(".", " ")
+        .replace(",", " ")
+        .replace("'", "")
+        .replace("’", "")
+        .replace("`", "")
+        .replace("(", " ")
+        .replace(")", " ")
+        .lower()
+    )
     # FEC often uses LAST FIRST; registry uses First Last.
     parts = [
         p
@@ -109,6 +119,8 @@ def _normalize_person_name(name: str | None) -> str:
 _NICKNAMES = {
     "chris": "christopher",
     "christopher": "christopher",
+    "chuck": "charles",
+    "charles": "charles",
     "dan": "daniel",
     "daniel": "daniel",
     "ed": "edward",
@@ -140,6 +152,9 @@ _NICKNAMES = {
     "joseph": "joseph",
     "dave": "david",
     "david": "david",
+    "ted": "edward",
+    "beto": "beto",
+    "jd": "jd",
 }
 
 
@@ -150,12 +165,34 @@ def _canonical_given(token: str) -> str:
 def _name_tokens(name: str | None) -> list[str]:
     if name is None or (isinstance(name, float) and pd.isna(name)):
         return []
-    text = _strip_accents(str(name).replace(".", " ").replace(",", " ").lower())
-    return [
-        p
-        for p in text.replace("-", " ").split()
-        if p and p not in {"jr", "sr", "ii", "iii", "iv"} and len(p) > 1
-    ]
+    text = _strip_accents(
+        str(name)
+        .replace(".", " ")
+        .replace(",", " ")
+        .replace("'", "")
+        .replace("’", "")
+        .replace("`", "")
+        .replace("(", " ")
+        .replace(")", " ")
+        .lower()
+    )
+    raw = [p for p in text.replace("-", " ").split() if p and p not in {"jr", "sr", "ii", "iii", "iv"}]
+    # Keep single-letter initials; also join adjacent initials (J D -> jd).
+    tokens: list[str] = []
+    i = 0
+    while i < len(raw):
+        if len(raw[i]) == 1:
+            initials = [raw[i]]
+            j = i + 1
+            while j < len(raw) and len(raw[j]) == 1:
+                initials.append(raw[j])
+                j += 1
+            tokens.append("".join(initials))
+            i = j
+        else:
+            tokens.append(raw[i])
+            i += 1
+    return tokens
 
 
 def fec_name_matches(fec_name: str | None, ticket_name: str | None) -> bool:
@@ -189,7 +226,11 @@ def fec_name_matches(fec_name: str | None, ticket_name: str | None) -> bool:
         return False
     if not fec_given or not ticket_given:
         return False
-    return _canonical_given(fec_given[0]) == _canonical_given(ticket_given[0])
+    fec_given_canon = {_canonical_given(t) for t in fec_given}
+    ticket_given_canon = {_canonical_given(t) for t in ticket_given}
+    # Any overlapping given/nickname token after canonicalization is enough when
+    # the last name already matched uniquely (handles BETO / TED parentheticals).
+    return bool(fec_given_canon & ticket_given_canon)
 
 
 def _party_code(series: pd.Series) -> pd.Series:
@@ -233,11 +274,12 @@ def select_unique_party_candidate(
 
 
 def historical_nominee_tickets(election_id: str) -> dict[str, dict[str, str]]:
-    """Map state → dem/rep nominee names from the certified ledger (historical only).
+    """Map ``race_id`` → dem/rep nominee names from the certified ledger.
 
     These are election-day certified nominee identities. They must never be used
     for current-cycle 2026 forecasting (use the reviewed registry instead).
-    When a nominee is missing, that state is omitted so finance fails closed.
+    When a major-party nominee is missing, that race is omitted so finance fails
+    closed. Dual contests in the same state receive distinct ``race_id`` keys.
     """
     from midterms.evidence.official_ledger import load_ledger
 
@@ -247,12 +289,17 @@ def historical_nominee_tickets(election_id: str) -> dict[str, dict[str, str]]:
     contests = cycle.get("contests") or []
     out: dict[str, dict[str, str]] = {}
     for contest in contests:
+        race_id = str(contest.get("race_id") or "").strip()
         state = str(contest.get("state") or "").upper()
         dem = contest.get("dem_nominee")
         rep = contest.get("rep_nominee")
-        if not state or not dem or not rep:
+        if not race_id or not state or not dem or not rep:
             continue
-        out[state] = {
+        out[race_id] = {
+            "race_id": race_id,
+            "state": state,
+            "seat_class": str(contest.get("seat_class") or ""),
+            "kind": str(contest.get("kind") or contest.get("term_type") or "regular"),
             "dem_name": str(dem),
             "rep_name": str(rep),
             "modeled_candidate_name": str(dem),
@@ -262,13 +309,16 @@ def historical_nominee_tickets(election_id: str) -> dict[str, dict[str, str]]:
 
 
 def current_registry_tickets() -> dict[str, dict[str, str]]:
-    """Current-cycle modeled ticket names from the reviewed registry only."""
+    """Current-cycle modeled ticket names keyed by ``race_id``."""
     from midterms.evidence.current_candidates import load_current_candidate_registry
 
     registry = load_current_candidate_registry()
     out: dict[str, dict[str, str]] = {}
     for row in registry["races"]:
-        out[str(row["state"]).upper()] = {
+        race_id = str(row["race_id"])
+        out[race_id] = {
+            "race_id": race_id,
+            "state": str(row["state"]).upper(),
             "dem_name": str(row["modeled_candidate_name"]),
             "rep_name": str(row["opposing_candidate_name"]),
             "modeled_candidate_id": str(row["modeled_candidate_id"]),
@@ -277,6 +327,21 @@ def current_registry_tickets() -> dict[str, dict[str, str]]:
             "opposing_candidate_name": str(row["opposing_candidate_name"]),
         }
     return out
+
+
+def _ticket_lookup(
+    ticket_map: dict[str, dict[str, Any]] | None,
+    *,
+    race_id: str,
+    state: str,
+) -> dict[str, Any]:
+    """Resolve a ticket by race_id first; state key is legacy-only fallback."""
+    if not ticket_map:
+        return {}
+    if race_id in ticket_map:
+        return ticket_map[race_id]
+    # Legacy callers / fixtures may still pass state-keyed maps.
+    return ticket_map.get(str(state).upper()) or {}
 
 
 def resolve_form3_reports_as_of(
@@ -414,9 +479,34 @@ def report_level_fundraising_shares_as_of(
         else:
             ticket_map = historical_nominee_tickets(str(election_id))
 
-    for state, group in by_candidate.groupby("state", sort=True):
-        state_key = str(state).upper()
-        ticket = (ticket_map or {}).get(state_key) or {}
+    # Race-id primary identity. Iterate tickets (one row per contested race),
+    # never collapse dual Senate contests by state.
+    race_targets: list[tuple[str, str, dict[str, Any]]] = []
+    if ticket_map:
+        for key, ticket in sorted(ticket_map.items(), key=lambda item: str(item[0])):
+            race_id = str(ticket.get("race_id") or key)
+            state_key = str(ticket.get("state") or "").upper()
+            # Legacy state-keyed maps: synthesize ordinary race_id.
+            if not state_key and len(str(key)) == 2:
+                state_key = str(key).upper()
+                race_id = f"{election_id}-{state_key}"
+            if not state_key and "-" in race_id:
+                parts = race_id.split("-")
+                if len(parts) >= 3:
+                    state_key = parts[2].upper()
+            if not state_key:
+                continue
+            race_targets.append((race_id, state_key, dict(ticket)))
+    else:
+        # Diagnostic / no-ticket path: one synthetic race per FEC state.
+        for state in sorted(by_candidate["state"].astype(str).unique()):
+            state_key = str(state).upper()
+            race_targets.append(
+                (f"{election_id}-{state_key}", state_key, {})
+            )
+
+    for race_id, state_key, ticket in race_targets:
+        group = by_candidate[by_candidate["state"].astype(str).str.upper().eq(state_key)]
         dem_ticket = ticket.get("dem_name") or ticket.get("modeled_candidate_name")
         rep_ticket = ticket.get("rep_name") or ticket.get("opposing_candidate_name")
         dem_sel = select_unique_party_candidate(
@@ -465,19 +555,19 @@ def report_level_fundraising_shares_as_of(
             # Legacy diagnostic path only — not production.
             dem = group[_party_code(group["party"]).eq("DEM")]
             rep = group[_party_code(group["party"]).eq("REP")]
-            dem_receipts = float(dem["receipts"].sum())
-            rep_receipts = float(rep["receipts"].sum())
-            dem_cash = float(dem["cash_on_hand_end_period"].sum())
-            rep_cash = float(rep["cash_on_hand_end_period"].sum())
-            dem_disb = float(dem["disbursements"].sum())
-            rep_disb = float(rep["disbursements"].sum())
+            dem_receipts = float(dem["receipts"].sum()) if len(dem) else 0.0
+            rep_receipts = float(rep["receipts"].sum()) if len(rep) else 0.0
+            dem_cash = float(dem["cash_on_hand_end_period"].sum()) if len(dem) else 0.0
+            rep_cash = float(rep["cash_on_hand_end_period"].sum()) if len(rep) else 0.0
+            dem_disb = float(dem["disbursements"].sum()) if len(dem) else 0.0
+            rep_disb = float(rep["disbursements"].sum()) if len(rep) else 0.0
             dem_id = None
             rep_id = None
             dem_committees = sorted(sum(dem["committee_ids"].tolist(), [])) if len(dem) else []
             rep_committees = sorted(sum(rep["committee_ids"].tolist(), [])) if len(rep) else []
-            filing_ids = sorted(sum(group["filing_ids"].tolist(), []))
-            committee_ids = sorted(sum(group["committee_ids"].tolist(), []))
-            available = max(group["available_at"])
+            filing_ids = sorted(sum(group["filing_ids"].tolist(), [])) if len(group) else []
+            committee_ids = sorted(sum(group["committee_ids"].tolist(), [])) if len(group) else []
+            available = max(group["available_at"]) if len(group) else None
             match_status = "legacy_party_aggregate"
 
         receipts_total = dem_receipts + rep_receipts
@@ -490,8 +580,8 @@ def report_level_fundraising_shares_as_of(
             cash_share = dem_cash / cash_total if cash_total else 0.5
         rows.append({
             "election_id": election_id,
-            "state": str(state),
-            "race_id": f"{election_id}-{state}",
+            "state": state_key,
+            "race_id": race_id,
             "fundraising_share": share,
             "cash_share": cash_share,
             "dem_receipts": dem_receipts,
@@ -513,7 +603,7 @@ def report_level_fundraising_shares_as_of(
             "availability_basis": "fec_receipt_date",
             "source": "fec_form3_report_summaries",
             "parser_version": PARSER_VERSION,
-            "finance_identity_schema": "candidate-specific-ticket-v1",
+            "finance_identity_schema": "candidate-specific-race-v2",
         })
     return pd.DataFrame(rows)
 
@@ -538,6 +628,14 @@ def _required_race_states(races: pd.DataFrame, election_id: str) -> list[str]:
         "not_up", pd.Series(False, index=selected.index),
     ).fillna(False).astype(bool)]
     return sorted(selected["state"].dropna().astype(str).unique())
+
+
+def _required_race_ids(races: pd.DataFrame, election_id: str) -> list[str]:
+    selected = races[races["election_id"].astype(str).eq(election_id)].copy()
+    selected = selected[~selected.get(
+        "not_up", pd.Series(False, index=selected.index),
+    ).fillna(False).astype(bool)]
+    return sorted(selected["race_id"].dropna().astype(str).unique())
 
 
 def prepare_official_finance_history(
@@ -637,6 +735,7 @@ def prepare_official_finance_history(
         if int(cycle) == 2026:
             cycle_cutoffs.append(current_cutoff.isoformat())
         required_states = _required_race_states(races, election_id)
+        required_race_ids = _required_race_ids(races, election_id)
         for cutoff_value in cycle_cutoffs:
             if int(cycle) == 2026:
                 label = f"{election_id}-current"
@@ -649,24 +748,36 @@ def prepare_official_finance_history(
                 election_id=election_id,
                 as_of=cutoff_value,
             )
-            share = share[share["state"].astype(str).isin(required_states)].copy()
+            if len(share) and "race_id" in share.columns and required_race_ids:
+                share = share[share["race_id"].astype(str).isin(required_race_ids)].copy()
+            else:
+                share = share[share["state"].astype(str).isin(required_states)].copy()
             share["feature_as_of"] = cutoff_value
             share["cutoff_label"] = label
             covered_states = sorted(share["state"].astype(str).unique()) if len(share) else []
+            covered_race_ids = (
+                sorted(share["race_id"].astype(str).unique()) if len(share) else []
+            )
             missing_states = sorted(set(required_states) - set(covered_states))
+            missing_race_ids = sorted(set(required_race_ids) - set(covered_race_ids))
             coverage[label] = {
                 "as_of": cutoff_value,
                 "required_states": required_states,
                 "covered_states": covered_states,
                 "missing_states": missing_states,
+                "required_race_ids": required_race_ids,
+                "covered_race_ids": covered_race_ids,
+                "missing_race_ids": missing_race_ids,
                 "n_rows": int(len(share)),
-                "production_eligible": not missing_states and bool(required_states),
+                "production_eligible": (
+                    not missing_race_ids and bool(required_race_ids)
+                ),
             }
             snapshots.append(share)
     shares = pd.concat(snapshots, ignore_index=True) if snapshots else pd.DataFrame()
     if len(shares):
         shares = shares.sort_values(
-            ["election_id", "feature_as_of", "state"], kind="stable",
+            ["election_id", "feature_as_of", "race_id"], kind="stable",
         ).reset_index(drop=True)
     shares_path = NORMALIZED_DIR / "fundraising_shares.parquet"
     shares.to_parquet(shares_path, index=False)
@@ -1345,9 +1456,27 @@ def shares_from_totals(
             ticket_map = historical_nominee_tickets(str(election_id))
 
     rows = []
-    for state, g in work.groupby("state"):
-        state_key = str(state).upper()
-        ticket = (ticket_map or {}).get(state_key) or {}
+    race_targets: list[tuple[str, str, dict[str, Any]]] = []
+    if ticket_map:
+        for key, ticket in sorted(ticket_map.items(), key=lambda item: str(item[0])):
+            race_id = str(ticket.get("race_id") or key)
+            state_key = str(ticket.get("state") or "").upper()
+            if not state_key and len(str(key)) == 2:
+                state_key = str(key).upper()
+                race_id = f"senate-{cycle}-{state_key}"
+            if not state_key and "-" in race_id:
+                parts = race_id.split("-")
+                if len(parts) >= 3:
+                    state_key = parts[2].upper()
+            if state_key:
+                race_targets.append((race_id, state_key, dict(ticket)))
+    else:
+        for state in sorted(work["state"].astype(str).unique()):
+            state_key = str(state).upper()
+            race_targets.append((f"senate-{cycle}-{state_key}", state_key, {}))
+
+    for race_id, state_key, ticket in race_targets:
+        g = work[work["state"].astype(str).str.upper().eq(state_key)]
         dem_ticket = ticket.get("dem_name") or ticket.get("modeled_candidate_name")
         rep_ticket = ticket.get("rep_name") or ticket.get("opposing_candidate_name")
         dem_sel = select_unique_party_candidate(g, party="DEM", ticket_name=dem_ticket)
@@ -1435,11 +1564,12 @@ def shares_from_totals(
             src = "fec_weball"
         else:
             src = "openfec"
+        available = str(g["available_at"].max()) if len(g) else None
         rows.append(
             {
                 "election_id": election_id,
-                "state": state,
-                "race_id": f"senate-{cycle}-{state}",
+                "state": state_key,
+                "race_id": race_id,
                 "fundraising_share": round(float(share), 6),
                 "cash_share": round(float(cash_share), 6),
                 "dem_receipts": dem_rec,
@@ -1457,9 +1587,9 @@ def shares_from_totals(
                 "amendment_chain": ">".join(cov_dates) if cov_dates else "latest_totals_row",
                 "n_filings_in_chain": int(len(cov_dates)),
                 "source": src,
-                "available_at": str(g["available_at"].max()),
+                "available_at": available,
                 "parser_version": PARSER_VERSION,
-                "finance_identity_schema": "candidate-specific-ticket-v1",
+                "finance_identity_schema": "candidate-specific-race-v2",
             }
         )
     return pd.DataFrame(rows)
@@ -1514,8 +1644,17 @@ def load_fundraising_shares() -> pd.DataFrame:
 
 
 def attach_fundraising_to_races(
-    races: pd.DataFrame, *, as_of: str | date | None = None
+    races: pd.DataFrame,
+    *,
+    as_of: str | date | None = None,
+    allow_state_fallback: bool = False,
 ) -> pd.DataFrame:
+    """Attach fundraising shares by exact ``race_id``.
+
+    Production / formal validation must keep ``allow_state_fallback=False``.
+    State-only fallback is permitted solely for labeled development fixtures.
+    Missing race-specific finance keeps the existing share or neutral 0.5.
+    """
     shares = load_fundraising_shares()
     out = races.copy()
     if "fundraising_share" not in out.columns:
@@ -1530,15 +1669,19 @@ def attach_fundraising_to_races(
             shares = shares[feature_dates.notna() & (feature_dates <= as_of_d)]
     if "feature_as_of" in shares.columns and len(shares):
         shares = shares.sort_values(
-            ["election_id", "feature_as_of", "state"], kind="stable",
-        ).drop_duplicates(["election_id", "state"], keep="last")
-    by_state = shares.set_index("state")["fundraising_share"].to_dict() if len(shares) else {}
+            ["election_id", "feature_as_of", "race_id"], kind="stable",
+        ).drop_duplicates(["election_id", "race_id"], keep="last")
     by_race = shares.set_index("race_id")["fundraising_share"].to_dict() if len(shares) else {}
+    by_state = (
+        shares.set_index("state")["fundraising_share"].to_dict()
+        if allow_state_fallback and len(shares)
+        else {}
+    )
     vals = []
     for _, r in out.iterrows():
         if r["race_id"] in by_race:
             vals.append(float(by_race[r["race_id"]]))
-        elif r["state"] in by_state:
+        elif allow_state_fallback and r["state"] in by_state:
             vals.append(float(by_state[r["state"]]))
         else:
             cur = r.get("fundraising_share")

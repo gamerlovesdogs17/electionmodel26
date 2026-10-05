@@ -183,19 +183,43 @@ def attach_2026_ticket_identities(
             # Distinct from runtime probability_model_supported / adapter status.
             "ordinary_binary_model_supported": bool(
                 candidate.get(
-                    "ordinary_binary_model_supported",
-                    candidate.get("contest_structure") == "binary_dem_vs_rep"
-                    and candidate.get("statistical_target_supported"),
+                    "ordinary_binary_target_supported",
+                    candidate.get(
+                        "ordinary_binary_model_supported",
+                        candidate.get("contest_structure") == "binary_dem_vs_rep"
+                        and candidate.get("statistical_target_supported"),
+                    ),
                 )
             ),
             "exception_adapter_supported": bool(
                 candidate.get(
-                    "exception_adapter_supported",
+                    "exceptional_probability_model_supported",
+                    candidate.get(
+                        "exception_adapter_supported",
+                        str(candidate.get("probability_model_support_status") or "").startswith(
+                            "limited_supported"
+                        ),
+                    ),
+                )
+            ),
+            "ordinary_binary_target_supported": bool(
+                candidate.get(
+                    "ordinary_binary_target_supported",
+                    candidate.get("contest_structure") == "binary_dem_vs_rep",
+                )
+            ),
+            "exceptional_probability_model_supported": bool(
+                candidate.get(
+                    "exceptional_probability_model_supported",
                     str(candidate.get("probability_model_support_status") or "").startswith(
                         "limited_supported"
                     ),
                 )
             ),
+            "probability_model_support_status": candidate.get(
+                "probability_model_support_status"
+            ),
+            "seat_identity": candidate.get("seat_identity"),
         }
         for key, value in updates.items():
             out.at[index, key] = value
