@@ -28,6 +28,33 @@ from midterms.config import (
     ROOT,
 )
 from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
+
+
+def compact_run_id(
+    election_id: str,
+    as_of: str,
+    method: str,
+    seed: int,
+    *,
+    max_len: int = 80,
+) -> str:
+    """Build a filesystem-safe run id for artifacts and release archives.
+
+    Exceptional adapters append long method suffixes
+    (``ensemble_stack+limited_validation_…+limited_validation_alaska_…``).
+    Embedding that full string in both the release directory and
+    ``draws_<run_id>.npz`` exceeds Windows ``MAX_PATH`` (~260) under typical
+    OneDrive/Desktop checkouts. Keep the full method in the manifest; use a
+    digested path token here.
+    """
+    as_of_s = str(as_of)[:10]
+    spine = str(method).split("+", 1)[0].replace("/", "-").replace("\\", "-")
+    digest = hashlib.sha256(str(method).encode("utf-8")).hexdigest()[:10]
+    candidate = f"{election_id}_{as_of_s}_{spine}_{digest}_{seed}"
+    if len(candidate) <= max_len:
+        return candidate
+    short = f"{election_id}_{as_of_s}_{digest}_{seed}"
+    return short[:max_len]
 from midterms.evidence.warehouse import Warehouse, write_run_manifest
 from midterms.model.pymc_model import (
     FitResult,
@@ -916,7 +943,7 @@ def run_forecast(
 
     out_dir = out_dir or ARTIFACTS_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
-    run_id = f"{election_id}_{as_of}_{fit.method}_{seed}"
+    run_id = compact_run_id(election_id, str(as_of)[:10], fit.method, int(seed))
 
     seat_hist = [
         {"dem_seats": int(k), "count": int(v), "probability": v / len(sim.seat_draws)}
