@@ -16,7 +16,11 @@ from midterms.model import terminal as terminal_mod
 from midterms.model.pymc_model import fit_fast_approximation
 from midterms.model.terminal import active_scales
 from midterms.simulate.chamber import simulate_chamber, vp_tiebreak_for_election_year
-from midterms.validation.cycle_replay import _forecasts_from_fit, _realized_chamber
+from midterms.validation.cycle_replay import (
+    _forecasts_from_fit,
+    _realized_chamber,
+    diagnostic_chamber_skip,
+)
 from midterms.validation.metrics import score_margins_extended
 
 
@@ -115,13 +119,23 @@ def _score_config(
                 )
                 if ext.get("n"):
                     coverage.append(float(ext["coverage_90"]))
-            sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party=vp)
-            ch = score_chamber_draws(
-                sim.seat_draws,
-                realized_dem_seats=realized_seats,
-                realized_dem_control=realized_ctl,
-                vp_tiebreak_party=vp,
-            )
+            try:
+                sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party=vp)
+                ch = score_chamber_draws(
+                    sim.seat_draws,
+                    realized_dem_seats=realized_seats,
+                    realized_dem_control=realized_ctl,
+                    vp_tiebreak_party=vp,
+                )
+            except ValueError as exc:
+                skipped = diagnostic_chamber_skip(
+                    exc,
+                    n_snapshot_seats=len(snap.races),
+                    n_fit_races=len(fit.race_ids),
+                )
+                if skipped is None:
+                    raise
+                continue
             seat_crps.append(float(ch["seat_crps"]))
             control_brier.append(float(ch["control_brier"]))
 

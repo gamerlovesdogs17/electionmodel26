@@ -96,7 +96,11 @@ jobs:
       - name: Source readiness audit
         run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict
       - name: Refresh safe sources
-        if: inputs.refresh_safe_sources
+        # Resuming a failed rebuild must keep the sealed evidence bundle identity
+        # stable so the prior research-rebuild-<bundle_id> artifact can download
+        # and verify. Refreshing sources here would risk a new bundle id and a
+        # forced full OOF/forecast rerun.
+        if: inputs.refresh_safe_sources && inputs.resume_run_id == ''
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe --summary --strict
@@ -455,7 +459,7 @@ jobs:
               )
           PY
       - name: Save canonical OOF cache
-        if: steps.canonical-cache.outputs.cache-hit != 'true'
+        if: steps.resume.outputs.resumed != 'true' && steps.canonical-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: |

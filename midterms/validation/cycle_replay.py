@@ -106,6 +106,47 @@ def _forecasts_from_fit(fit) -> list:
     return out
 
 
+# Historical diagnostic chamber scoring can hit races the binary two-caucus
+# engine cannot account for yet (Alaska RCV finals, incomplete point-in-time
+# candidate universes, withheld predictive draws).  Race/margin diagnostics
+# remain valid; never invent seats or abort the broader validation report.
+_DIAGNOSTIC_CHAMBER_SKIP_MARKERS = (
+    "Senate seat accounting must total 100",
+    "race is ineligible for binary chamber forecast",
+    "nonstandard contest lacks supported explicit caucus mapping",
+    "held Independent lacks supported explicit caucus",
+    "chamber accounting requires complete race columns",
+    "complete chamber forecast requires predictive draws",
+)
+
+
+def diagnostic_chamber_skip(
+    exc: BaseException,
+    *,
+    n_snapshot_seats: int,
+    n_fit_races: int,
+) -> dict[str, Any] | None:
+    """Return a soft-fail chamber block for known diagnostic incompleteness."""
+    message = str(exc)
+    if not any(marker in message for marker in _DIAGNOSTIC_CHAMBER_SKIP_MARKERS):
+        return None
+    if "ineligible for binary chamber forecast" in message:
+        status = "binary_chamber_ineligible_race"
+    elif "nonstandard contest" in message or "held Independent" in message:
+        status = "nonstandard_chamber_mapping"
+    elif "predictive draws" in message:
+        status = "incomplete_predictive_chamber_coverage"
+    else:
+        status = "incomplete_point_in_time_race_universe"
+    return {
+        "ok": False,
+        "status": status,
+        "error": message,
+        "n_snapshot_seats": int(n_snapshot_seats),
+        "n_fit_races": int(n_fit_races),
+    }
+
+
 def _realized_chamber(races, results, *, vp_tiebreak_party: str = "R") -> tuple[float, int]:
     held = races[races["not_up"]]
     held_dem = int((held["held_by"] == "D").sum()) + int((held["held_by"] == "I").sum())
@@ -142,48 +183,58 @@ def _overlay_ablation_block(
     from midterms.model.overlays import rating_from_probability
     from scipy.stats import norm
 
-    realized_seats, realized_ctl = _realized_chamber(
-        snap.races, results, vp_tiebreak_party=vp_tiebreak_party
-    )
-    core_sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party=vp_tiebreak_party)
-    core_scores = score_chamber_draws(
-        core_sim.seat_draws,
-        realized_dem_seats=realized_seats,
-        realized_dem_control=realized_ctl,
-    )
-
-    # Build soft ratings from model itself (identity) vs shifted anchors — ablation plumbing
-    rows = []
-    for i, rid in enumerate(fit.race_ids):
-        p = float(norm.sf(0, loc=fit.mean_margin[i], scale=max(fit.sd_margin[i], 0.5)))
-        rows.append(
-            {
-                "race_id": rid,
-                "rating": rating_from_probability(min(0.98, max(0.02, p + 0.05))),
-                "source": "ablation_shift",
-            }
+    try:
+        realized_seats, realized_ctl = _realized_chamber(
+            snap.races, results, vp_tiebreak_party=vp_tiebreak_party
         )
-    import pandas as pd
+        core_sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party=vp_tiebreak_party)
+        core_scores = score_chamber_draws(
+            core_sim.seat_draws,
+            realized_dem_seats=realized_seats,
+            realized_dem_control=realized_ctl,
+        )
 
-    ratings = pd.DataFrame(rows)
-    adj = apply_rating_overlay(fit.mean_margin.copy(), fit.race_ids, ratings, weight=0.15)
-    shifted = shift_draws_to_means(fit.draws_margin, adj)
-    adj_fit = FitResult(
-        race_ids=fit.race_ids,
-        states=fit.states,
-        mean_margin=shifted.mean(axis=0),
-        sd_margin=shifted.std(axis=0),
-        draws_margin=shifted,
-        house_effects=fit.house_effects,
-        diagnostics=fit.diagnostics,
-        method=fit.method + "+rating_ablation",
-    )
-    adj_sim, _ = simulate_chamber(adj_fit, snap.races, vp_tiebreak_party=vp_tiebreak_party)
-    adj_scores = score_chamber_draws(
-        adj_sim.seat_draws,
-        realized_dem_seats=realized_seats,
-        realized_dem_control=realized_ctl,
-    )
+        # Build soft ratings from model itself (identity) vs shifted anchors — ablation plumbing
+        rows = []
+        for i, rid in enumerate(fit.race_ids):
+            p = float(norm.sf(0, loc=fit.mean_margin[i], scale=max(fit.sd_margin[i], 0.5)))
+            rows.append(
+                {
+                    "race_id": rid,
+                    "rating": rating_from_probability(min(0.98, max(0.02, p + 0.05))),
+                    "source": "ablation_shift",
+                }
+            )
+        import pandas as pd
+
+        ratings = pd.DataFrame(rows)
+        adj = apply_rating_overlay(fit.mean_margin.copy(), fit.race_ids, ratings, weight=0.15)
+        shifted = shift_draws_to_means(fit.draws_margin, adj)
+        adj_fit = FitResult(
+            race_ids=fit.race_ids,
+            states=fit.states,
+            mean_margin=shifted.mean(axis=0),
+            sd_margin=shifted.std(axis=0),
+            draws_margin=shifted,
+            house_effects=fit.house_effects,
+            diagnostics=fit.diagnostics,
+            method=fit.method + "+rating_ablation",
+        )
+        adj_sim, _ = simulate_chamber(adj_fit, snap.races, vp_tiebreak_party=vp_tiebreak_party)
+        adj_scores = score_chamber_draws(
+            adj_sim.seat_draws,
+            realized_dem_seats=realized_seats,
+            realized_dem_control=realized_ctl,
+        )
+    except ValueError as exc:
+        skipped = diagnostic_chamber_skip(
+            exc,
+            n_snapshot_seats=len(snap.races),
+            n_fit_races=len(fit.race_ids),
+        )
+        if skipped is None:
+            raise
+        return skipped
     return {
         "unadjusted": core_scores,
         "rating_overlay": adj_scores,
@@ -415,17 +466,28 @@ def _replay_cycle_body(
                         lead_block[cname] = {"error": str(exc), "n": 0}
 
             if include_chamber:
-                sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party=vp)
-                realized_seats, realized_ctl = _realized_chamber(
-                    snap.races, results, vp_tiebreak_party=vp
-                )
-                ch = score_chamber_draws(
-                    sim.seat_draws,
-                    realized_dem_seats=realized_seats,
-                    realized_dem_control=realized_ctl,
-                )
-                lead_block["chamber"] = ch
-                chamber_scores.append(ch)
+                try:
+                    sim, _ = simulate_chamber(fit, snap.races, vp_tiebreak_party=vp)
+                    realized_seats, realized_ctl = _realized_chamber(
+                        snap.races, results, vp_tiebreak_party=vp
+                    )
+                    ch = score_chamber_draws(
+                        sim.seat_draws,
+                        realized_dem_seats=realized_seats,
+                        realized_dem_control=realized_ctl,
+                    )
+                    ch["ok"] = True
+                    lead_block["chamber"] = ch
+                    chamber_scores.append(ch)
+                except ValueError as exc:
+                    skipped = diagnostic_chamber_skip(
+                        exc,
+                        n_snapshot_seats=len(snap.races),
+                        n_fit_races=len(fit.race_ids),
+                    )
+                    if skipped is None:
+                        raise
+                    lead_block["chamber"] = skipped
 
             if include_overlay_ablation:
                 lead_block["overlay_ablation"] = _overlay_ablation_block(

@@ -13,7 +13,11 @@ from midterms.config import ARTIFACTS_DIR, CYCLES, LEAD_DAYS, PRIMARY_HOLDOUT
 from midterms.evidence.warehouse import Warehouse
 from midterms.model.pymc_model import fit_fast_approximation
 from midterms.model.state_space import fit_state_space
-from midterms.validation.cycle_replay import _forecasts_from_fit, _realized_chamber
+from midterms.validation.cycle_replay import (
+    _forecasts_from_fit,
+    _realized_chamber,
+    diagnostic_chamber_skip,
+)
 from midterms.validation.metrics import energy_score, score_margins_extended
 from midterms.baselines.score import score_chamber_draws
 from midterms.simulate.chamber import simulate_chamber
@@ -66,19 +70,18 @@ def replay_lead_time_grid(
             )
             chamber["ok"] = True
         except ValueError as exc:
-            if "Senate seat accounting must total 100" not in str(exc):
-                raise
             # Broad diagnostic leads can precede a traceable general-election
-            # candidate identity for every seat.  Preserve the race/margin
+            # candidate identity for every seat (or include Alaska RCV finals
+            # the binary chamber engine cannot score). Preserve race/margin
             # scores that are valid at that cutoff, but never manufacture the
             # missing seats or abort the formal 60/30 validation report.
-            chamber = {
-                "ok": False,
-                "status": "incomplete_point_in_time_race_universe",
-                "error": str(exc),
-                "n_snapshot_seats": int(len(snap.races)),
-                "n_fit_races": int(len(fit.race_ids)),
-            }
+            chamber = diagnostic_chamber_skip(
+                exc,
+                n_snapshot_seats=len(snap.races),
+                n_fit_races=len(fit.race_ids),
+            )
+            if chamber is None:
+                raise
         # Energy score on realized margins vector
         y_vec = []
         idx = []
