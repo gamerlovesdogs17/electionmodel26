@@ -28,7 +28,7 @@ def test_baseline_replay_writes_report():
 
 def test_joint_chamber_not_independent():
     wh = Warehouse()
-    snap = wh.build_as_of("2026-09-01", "senate-2026")
+    snap = wh.build_as_of("2026-10-03", "senate-2026")
     fit = fit_fast_approximation(snap, n_draws=1500, seed=7)
     sim, summaries = simulate_chamber(fit, snap.races)
     assert len(sim.seat_draws) == 1500
@@ -36,7 +36,17 @@ def test_joint_chamber_not_independent():
     # Correlated draws: variance of seat total should exceed independent-ish lower bound loosely
     import numpy as np
 
-    ps = np.array([s["p_dem"] for s in summaries])
+    # Independent / RCV races omit the D-vs-R p_dem alias; use the chamber marginal.
+    ps = np.array([
+        float(
+            s["p_dem"]
+            if s.get("p_dem") is not None
+            else s.get("p_dem_caucus")
+            if s.get("p_dem_caucus") is not None
+            else s["p_modeled_candidate"]
+        )
+        for s in summaries
+    ])
     indep_var = float(ps.sum() * 0) + float(np.sum(ps * (1 - ps)))
     joint_var = float(np.var(sim.seat_draws))
     assert joint_var > indep_var * 0.5  # smoke: joint uncertainty present

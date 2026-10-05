@@ -294,5 +294,8 @@ def test_rebuild_tests_cannot_mutate_the_sealed_evidence_checkout():
     rebuild_job = workflow.index("  rebuild:")
     assert tests_job < rebuild_job
     assert "needs: [prepare_evidence, tests]" in workflow[rebuild_job:]
-    assert "Run full test suite in isolated checkout" in workflow[tests_job:rebuild_job]
+    tests_block = workflow[tests_job:rebuild_job]
+    assert "Run evidence-compatible regression suite" in tests_block
+    assert "Smoke forecast at sealed evidence cutoff" in tests_block
+    assert "Checkout exact evidence commit for tests" in tests_block
     assert "pytest -q" not in workflow[rebuild_job:]

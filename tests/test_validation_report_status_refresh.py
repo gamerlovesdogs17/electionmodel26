@@ -142,6 +142,48 @@ def _artifacts(root: Path) -> Path:
             },
         },
     )
+    _write(
+        art / "source_readiness_latest.json",
+        {
+            "model_version": MODEL_VERSION,
+            "ready_for_expensive_rebuild": True,
+            "blockers": [],
+        },
+    )
+    _write(
+        art / "current_race_poll_coverage_v0923.json",
+        {
+            "schema_version": "current-race-poll-coverage-v3",
+            "summary": {
+                "forecast_complete": True,
+                "n_races": 35,
+                "n_fail": 0,
+            },
+        },
+    )
+    _write(
+        art / "non_major_adapter_validation_latest.json",
+        {
+            "model_version": MODEL_VERSION,
+            "classification": "limited_validation_exception_model",
+            "calibration_claim_allowed": False,
+        },
+    )
+    _write(
+        art / "alaska_rcv_validation_latest.json",
+        {
+            "model_version": MODEL_VERSION,
+            "validation_class": "limited_validation_exception_model",
+            "calibration_claim_allowed": False,
+        },
+    )
+    _write(
+        art / "historical_evidence_equivalence_v0923.json",
+        {
+            "model_version": MODEL_VERSION,
+            "equivalent": True,
+        },
+    )
     return art
 
 

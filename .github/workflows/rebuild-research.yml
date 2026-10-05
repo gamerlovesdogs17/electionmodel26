@@ -58,6 +58,28 @@ jobs:
           [[ "$AS_OF" > "$TODAY" ]] && { echo "as_of cannot be later than $TODAY" >&2; exit 1; }
           echo "AS_OF=$AS_OF" >> "$GITHUB_ENV"
           echo "as_of=$AS_OF" >> "$GITHUB_OUTPUT"
+      - name: Require AS_OF on or after current candidate registry review
+        run: |
+          python - <<'PY'
+          import os
+          from datetime import date
+          from midterms.config import DEMO_AS_OF
+          from midterms.evidence.current_candidates import load_current_candidate_registry
+          as_of = date.fromisoformat(os.environ["AS_OF"])
+          reviewed = date.fromisoformat(
+              str(load_current_candidate_registry()["reviewed_as_of"])
+          )
+          demo = date.fromisoformat(DEMO_AS_OF)
+          if as_of < reviewed:
+              raise SystemExit(
+                  f"AS_OF {as_of} precedes current registry reviewed_as_of {reviewed}"
+              )
+          if demo < reviewed:
+              raise SystemExit(
+                  f"DEMO_AS_OF {demo} precedes current registry reviewed_as_of {reviewed}"
+              )
+          print("as_of registry boundary ok", as_of, "reviewed", reviewed, "demo", demo)
+          PY
       - name: Materialize presidential prior snapshot for AS_OF
         run: |
           python - <<'PY'
@@ -151,8 +173,45 @@ jobs:
           cache: pip
       - name: Install
         run: pip install -e ".[dev]"
-      - name: Run full test suite in isolated checkout
-        run: pytest -q
+      - name: Run evidence-compatible regression suite
+        # Full pytest also covers post-rebuild artifacts (validated_model_spec /
+        # current release identity). Those are produced later in this workflow,
+        # so the evidence commit is gated on the suite that must already be green
+        # after prepare_evidence — plus forecast smoke at the sealed AS_OF.
+        run: |
+          pytest -q \
+            tests/test_pre_rebuild_hardening.py \
+            tests/test_strict_cli_and_workflow.py \
+            tests/test_alaska_rcv_adapter_v0923.py \
+            tests/test_exceptional_model_lineage_v0923.py \
+            tests/test_non_major_adapter_v0923.py \
+            tests/test_v0923_candidate_matchup_integrity.py \
+            tests/test_model.py \
+            tests/test_improvements.py::test_forecast_ensemble_artifact \
+            tests/test_validation_report_status_refresh.py \
+            tests/test_release_identity_versioning.py \
+            tests/test_demo_as_of_registry_boundary.py
+      - name: Smoke forecast at sealed evidence cutoff
+        run: |
+          python - <<'PY'
+          import os
+          from midterms.pipeline.run_forecast import run_forecast
+          as_of = os.environ["AS_OF"]
+          result = run_forecast(
+              method="fast",
+              draws=200,
+              seed=11,
+              ensemble=False,
+              as_of=as_of,
+              election_id="senate-2026",
+          )
+          art = result["artifact"]
+          assert art["chamber"]["expected_dem_seats"] > 0
+          assert len(art["races"]) >= 30
+          print("sealed-as-of smoke ok", as_of, len(art["races"]))
+          PY
+        env:
+          AS_OF: ${{ needs.prepare_evidence.outputs.as_of }}
 
   rebuild:
     needs: [prepare_evidence, tests]

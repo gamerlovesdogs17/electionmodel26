@@ -36,7 +36,9 @@ PRODUCTION_METHOD = "pymc"
 # Demo forecast target
 DEMO_ELECTION_ID = "senate-2026"
 DEMO_ELECTION_DAY = "2026-11-03"
-DEMO_AS_OF = "2026-09-13"
+# Must stay on/after data/current/current_candidates_2026.json reviewed_as_of;
+# earlier cutoffs intentionally omit current-registry caucus identities.
+DEMO_AS_OF = "2026-10-03"
 
 # Inference defaults — raised for P2.3 MCSE/convergence (demo still local-friendly)
 DEMO_DRAWS = 800

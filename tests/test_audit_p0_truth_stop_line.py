@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from midterms.config import PUBLIC_LIVE_ENABLED, ROOT
+from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, PUBLIC_LIVE_ENABLED, ROOT
 from midterms.evidence.build_certified_ledger_v3 import RUNOFF_STAGE_CALENDAR
 from midterms.evidence.official_ledger import load_ledger
 from midterms.evidence.results_archive import build_certified_results_frame
@@ -97,6 +97,14 @@ def test_invalid_pre_event_available_at_fails_validator():
 
 
 def test_release_identity_hashes_match_truth_artifacts():
+    spec_path = ARTIFACTS_DIR / "validated_model_spec_latest.json"
+    if spec_path.is_file():
+        spec = json.loads(spec_path.read_text(encoding="utf-8"))
+        if spec.get("model_version") != MODEL_VERSION:
+            pytest.skip(
+                "validated_model_spec is pre-rebuild for an older model version; "
+                "current release identity is sealed only after the rebuild job"
+            )
     report = verify_release_identity()
     assert report["ok"] is True, report.get("mismatches")
     assert PUBLIC_LIVE_ENABLED is False

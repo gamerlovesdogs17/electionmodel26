@@ -9,6 +9,9 @@
 # separately protect its parsed evidence across platforms.
 data/raw/external/kalshi_senate.json -text
 data/raw/external/votehub_us_senator.json -text
+# Truth ledger is hash-locked by non-major source lineage; keep LF bytes stable.
+data/raw/external/official_senate_ledger.json -text
+data/raw/external/independent_chamber_expectations.json -text
 # Preserve official pages byte-for-byte. Their source whitespace is evidence,
 # not a repository formatting defect.
 data/raw/external/current_candidates_2026/* -text -whitespace
