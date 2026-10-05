@@ -24,6 +24,10 @@ import numpy as np
 from midterms.baselines.models import BASELINES, RaceForecast
 from midterms.baselines.score import score_forecasts
 from midterms.config import ARTIFACTS_DIR, MODEL_VERSION
+from midterms.evidence.historical_model_snapshot import (
+    STRUCTURAL_FEATURE_SCHEMA,
+    prepare_historical_model_snapshot,
+)
 from midterms.evidence.warehouse import Warehouse
 from midterms.model.challengers import (
     fit_poll_only_state_space,
@@ -98,6 +102,7 @@ class FrozenPrediction:
     evidence_snapshot_id: str | None = None
     prior_snapshot_sha256: str | None = None
     presidential_source_sha256: str | None = None
+    historical_structural_feature_sha256: str | None = None
     structural_ablation_lineage: dict[str, Any] | None = None
 
 
@@ -438,6 +443,9 @@ def freeze_component_predictions(
         frozen[name].evidence_snapshot_id = getattr(snap, "snapshot_id", None)
         frozen[name].prior_snapshot_sha256 = getattr(snap, "prior_snapshot_sha256", None)
         frozen[name].presidential_source_sha256 = getattr(snap, "presidential_source_sha256", None)
+        frozen[name].historical_structural_feature_sha256 = getattr(
+            snap, "historical_structural_feature_sha256", None
+        )
 
     _safe(
         hier_name,
@@ -997,6 +1005,12 @@ def repair_failed_oof_inference(
     if original["as_of"] != as_of.isoformat():
         raise ValueError("freeze index date differs from reconstructed as-of")
     snap = wh.build_as_of(as_of, election_id)
+    snap = prepare_historical_model_snapshot(
+        snap,
+        election_id=election_id,
+        as_of=as_of,
+        lead_days=lead_days,
+    )
     recovery_settings = {
         "draws_per_chain": int(draws_per_chain),
         "tune_per_chain": int(tune_per_chain),
@@ -1039,6 +1053,9 @@ def repair_failed_oof_inference(
         replacement.evidence_snapshot_id = snap.snapshot_id
         replacement.prior_snapshot_sha256 = snap.prior_snapshot_sha256
         replacement.presidential_source_sha256 = snap.presidential_source_sha256
+        replacement.historical_structural_feature_sha256 = (
+            snap.historical_structural_feature_sha256
+        )
         # Persist the expensive fit before the first scored-report/truth access.
         # If any later lineage or report mutation fails, a resumed run can reuse
         # these exact draws rather than spending another inference cycle.
@@ -1065,6 +1082,16 @@ def repair_failed_oof_inference(
             or report["presidential_source_sha256_by_fold_lead"][str(year)][str(lead_days)]
             != replacement.presidential_source_sha256):
         raise ValueError("replacement prediction uses a different prior source snapshot")
+    structural_by_fold = report.get("historical_structural_feature_sha256_by_fold_lead") or {}
+    expected_structural = (structural_by_fold.get(str(year)) or {}).get(str(lead_days))
+    if (
+        expected_structural
+        and replacement.historical_structural_feature_sha256
+        and expected_structural != replacement.historical_structural_feature_sha256
+    ):
+        raise ValueError(
+            "replacement prediction uses different historical structural features"
+        )
     if not any(f.get("year") == year and f.get("lead") == lead_days
                and f.get("component") == component for f in report["failures"]):
         raise ValueError("scored report has no corresponding failed candidate")
@@ -1247,6 +1274,7 @@ def run_nested_component_loo(
     prior_snapshot_sha256_by_fold_lead: dict[str, dict[str, str | None]] = {}
     source_set_sha256_by_fold_lead: dict[str, dict[str, str | None]] = {}
     candidate_score_exclusions_by_fold_lead: dict[str, dict[str, list[dict[str, Any]]]] = {}
+    historical_structural_feature_sha256_by_fold_lead: dict[str, dict[str, str | None]] = {}
 
     for year in years:
         election_id = f"senate-{year}"
@@ -1261,19 +1289,29 @@ def run_nested_component_loo(
         prior_snapshot_sha256_by_fold_lead[str(year)] = {}
         source_set_sha256_by_fold_lead[str(year)] = {}
         candidate_score_exclusions_by_fold_lead[str(year)] = {}
+        historical_structural_feature_sha256_by_fold_lead[str(year)] = {}
         for lead in lead_days:
             as_of = ed - timedelta(days=lead)
-            snap = wh.build_as_of(as_of, election_id)
+            raw_snap = wh.build_as_of(as_of, election_id)
             if bundle is not None:
                 label = f"{election_id}-lead-{lead}"
                 expected_snapshot = (bundle.get("historical_snapshot_ids") or {}).get(label)
-                if not expected_snapshot or expected_snapshot != snap.snapshot_id:
+                if not expected_snapshot or expected_snapshot != raw_snap.snapshot_id:
                     raise ValueError(
                         f"sealed evidence bundle snapshot mismatch for {label}: "
-                        f"{expected_snapshot} != {snap.snapshot_id}"
+                        f"{expected_snapshot} != {raw_snap.snapshot_id}"
                     )
+            snap = prepare_historical_model_snapshot(
+                raw_snap,
+                election_id=election_id,
+                as_of=as_of,
+                lead_days=lead,
+            )
             prior_snapshot_sha256_by_fold_lead[str(year)][str(lead)] = snap.prior_snapshot_sha256
             source_set_sha256_by_fold_lead[str(year)][str(lead)] = snap.presidential_source_sha256
+            historical_structural_feature_sha256_by_fold_lead[str(year)][str(lead)] = (
+                snap.historical_structural_feature_sha256
+            )
             candidate_score_exclusions_by_fold_lead[str(year)][str(lead)] = list(
                 (snap.candidate_timeline or {}).get("score_exclusions") or []
             )
@@ -1434,6 +1472,10 @@ def run_nested_component_loo(
         },
         "prior_snapshot_sha256_by_fold_lead": prior_snapshot_sha256_by_fold_lead,
         "presidential_source_sha256_by_fold_lead": source_set_sha256_by_fold_lead,
+        "historical_structural_feature_sha256_by_fold_lead": (
+            historical_structural_feature_sha256_by_fold_lead
+        ),
+        "historical_structural_feature_schema": STRUCTURAL_FEATURE_SCHEMA,
         "candidate_state_score_exclusions_by_fold_lead": (
             candidate_score_exclusions_by_fold_lead
         ),

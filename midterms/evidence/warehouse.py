@@ -216,6 +216,9 @@ class EvidenceSnapshot:
     fingerprint_schema: str = SNAPSHOT_FINGERPRINT_VERSION
     component_hashes: dict[str, str | None] | None = None
     exceptional_polls: pd.DataFrame | None = None
+    # Derived structural-feature lineage (finance + personal incumbency). Not part
+    # of the certified evidence fingerprint; set by prepare_historical_model_snapshot.
+    historical_structural_feature_sha256: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         n_contested = (

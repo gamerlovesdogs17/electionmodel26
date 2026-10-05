@@ -313,6 +313,47 @@ jobs:
           print(f"independent_resumed={str(bool(report.get('independent_rebuild_restored'))).lower()}")
           print(f"forecast_run_id={report.get('forecast_run_id') or ''}")
           PY
+      - name: Historical structural-feature parity (pre-OOF)
+        if: steps.resume.outputs.resumed != 'true'
+        run: |
+          python -m midterms.cli historical-model-feature-parity \
+            --out data/artifacts/historical_model_feature_parity_v0923.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path("data/artifacts/historical_model_feature_parity_v0923.json").read_text())
+          if payload.get("status") != "parity_ok":
+              raise SystemExit(f"structural feature parity failed: {payload.get('n_parity_mismatches')}")
+          if payload.get("n_parity_mismatches", 1) != 0:
+              raise SystemExit("structural feature parity mismatches present")
+          if not payload.get("aggregate_historical_structural_features_sha256"):
+              raise SystemExit("missing aggregate historical structural feature hash")
+          # Pre-integration OOF artifacts lack structural-feature lineage; remove them
+          # so ordinary OOF cannot be reused under a stale identity.
+          for name in (
+              "nested_component_loo_selection.json",
+              "nested_component_loo_selection_frozen.json",
+              "nested_component_loo_canonical.json",
+              "nested_component_loo_canonical_frozen.json",
+              "poll_structure_crossfit_latest.json",
+          ):
+              path = Path("data/artifacts") / name
+              if not path.is_file():
+                  continue
+              report = json.loads(path.read_text(encoding="utf-8"))
+              has_lineage = bool(report.get("historical_structural_feature_sha256_by_fold_lead"))
+              schema_ok = (
+                  report.get("historical_structural_feature_schema")
+                  == "historical-structural-features-v1"
+              )
+              if name.startswith("poll_structure"):
+                  # Crossfit is derived from selection OOF; drop if companion OOF is stale.
+                  continue
+              if not has_lineage or not schema_ok:
+                  print(f"removing stale ordinary OOF artifact without structural lineage: {name}")
+                  path.unlink()
+          print("historical structural feature parity ok")
+          PY
       - name: Restore poll-structure selection-pass cache
         id: selection-cache
         if: steps.resume.outputs.resumed != 'true'
@@ -326,7 +367,8 @@ jobs:
           # Ordinary selection OOF keys only on ordinary statistical inputs.
           # Exceptional adapters are verified separately via verify-exceptional-models
           # and must not invalidate expensive ordinary PyMC OOF caches.
-          key: selection-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
+          # struct-v1 bumps cache identity after race-id finance + personal incumbency wiring.
+          key: selection-oof-v0923-struct-v1-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
       - name: Selection-pass freeze-before-truth OOF and same-family challengers
         if: steps.resume.outputs.resumed != 'true' && steps.selection-cache.outputs.cache-hit != 'true'
         run: |
@@ -379,7 +421,7 @@ jobs:
             data/artifacts/nested_component_loo_selection_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
             data/artifacts/poll_structure_crossfit_latest.json
-          key: selection-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
+          key: selection-oof-v0923-struct-v1-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
       - name: Restore canonical selected-structure OOF cache
         id: canonical-cache
         if: steps.resume.outputs.resumed != 'true'
@@ -390,7 +432,7 @@ jobs:
             data/artifacts/nested_component_loo_canonical_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
           # Ordinary-statistical identity only — not whole candidate JSON / exceptional lineage.
-          key: canonical-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ steps.candidate_spec.outputs.ordinary_statistical_spec_sha256 }}-2018-2024-60-30-pymc1600-seed-v2
+          key: canonical-oof-v0923-struct-v1-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ steps.candidate_spec.outputs.ordinary_statistical_spec_sha256 }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Canonical OOF using the frozen selected poll structure
         if: steps.resume.outputs.resumed != 'true' && steps.canonical-cache.outputs.cache-hit != 'true'
         run: |
@@ -466,7 +508,7 @@ jobs:
             data/artifacts/nested_component_loo_canonical.json
             data/artifacts/nested_component_loo_canonical_frozen.json
             data/artifacts/posterior_predictive_oof_latest.json
-          key: canonical-oof-v0923-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ steps.candidate_spec.outputs.ordinary_statistical_spec_sha256 }}-2018-2024-60-30-pymc1600-seed-v2
+          key: canonical-oof-v0923-struct-v1-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ steps.candidate_spec.outputs.ordinary_statistical_spec_sha256 }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Fit predictive-mixture stack from canonical OOF only
         if: steps.resume.outputs.forecast_resumed != 'true'
         run: |

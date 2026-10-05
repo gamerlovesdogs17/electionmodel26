@@ -35,6 +35,9 @@ ORDINARY_STATISTICAL_SPEC_FIELDS = (
     "selected_poll_structure_id",
     "historical_cycles",
     "lead_cutoffs_days",
+    # Ordinary OOF consumes derived race-id finance + personal incumbency.
+    # Exceptional adapters remain excluded from this identity.
+    "historical_structural_feature_schema",
 )
 
 STRUCTURE_CONFIGS: dict[str, dict[str, bool]] = {
@@ -139,6 +142,7 @@ def write_candidate_model_spec(
         "selected_poll_structure_id": poll_structure_identity(config),
         "historical_cycles": [2018, 2020, 2022, 2024],
         "lead_cutoffs_days": [60, 30],
+        "historical_structural_feature_schema": "historical-structural-features-v1",
         "code_commit_sha": code_commit_sha,
         "production_research_eligible": False,
         "next_required_phase": CANONICAL_OOF_PHASE,
@@ -275,6 +279,10 @@ def finalize_validated_model_spec(
         ],
         "historical_cycles": candidate["historical_cycles"],
         "lead_cutoffs_days": candidate["lead_cutoffs_days"],
+        "historical_structural_feature_schema": candidate.get(
+            "historical_structural_feature_schema",
+            "historical-structural-features-v1",
+        ),
         "code_commit_sha": code_commit_sha or candidate.get("code_commit_sha"),
         "lineage_checks": checks,
         "production_research_eligible": True,

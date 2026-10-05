@@ -1,21 +1,135 @@
 {
-  "schema_version": "probability-integrity-repair-summary-v0923.1",
-  "generated_at": "2026-10-05T23:06:06.994116+00:00",
+  "schema_version": "probability-integrity-repair-summary-v0923.2",
+  "generated_at": "2026-10-05T23:23:17.971736+00:00",
   "model_version": "senate-hierarchical-v0.9.23",
-  "structural_metadata": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\structural_metadata_consistency_v0923.json",
-  "finance_input_diff": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\historical_finance_input_diff_v0923.json",
-  "finance_status": "historical_inputs_changed",
-  "finance_n_changed_formal_inputs": 270,
-  "historical_personal_incumbency": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\historical_personal_incumbency_v0923.json",
-  "historical_incumbency_n_changed": 20,
-  "probability_integrity_audit": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\probability_integrity_audit_v0923.json",
-  "incumbency_changed_2026": {
-    "n_changed": 2,
-    "changed_race_ids": [
-      "senate-2026-LA",
-      "senate-2026-TX"
-    ]
-  },
+  "historical_model_feature_parity": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\historical_model_feature_parity_v0923.json",
+  "parity_status": "parity_ok",
+  "n_parity_mismatches": 0,
+  "aggregate_historical_structural_features_sha256": "ef64d8910f97f4752c06333020053f5ce70185ea20531594abf6f8b33a1485ae",
+  "folds": [
+    {
+      "cutoff_label": "senate-2018-lead-60",
+      "year": 2018,
+      "lead_days": 60,
+      "as_of": "2018-09-07",
+      "evidence_snapshot_id": "c22f88fb77e7d84fd7cf1aa210172429bd2946ea5492d82d0d84eeb890c8f0e3",
+      "n_active_races": 35,
+      "n_finance_candidate_matched": 28,
+      "n_finance_neutral_unmatched": 7,
+      "n_personal_incumbency_nonzero": 28,
+      "n_open_or_non_incumbent": 5,
+      "n_unresolved_personal_incumbency": 2,
+      "historical_structural_feature_sha256": "7794032f2a15ed14a680fd5234cf6e4e1f27e7009596be8658852fcb977e763a"
+    },
+    {
+      "cutoff_label": "senate-2018-lead-30",
+      "year": 2018,
+      "lead_days": 30,
+      "as_of": "2018-10-07",
+      "evidence_snapshot_id": "e3846331b7b563a798e3d1787ff9a1999add235051847b448557e3bffdfb56aa",
+      "n_active_races": 35,
+      "n_finance_candidate_matched": 28,
+      "n_finance_neutral_unmatched": 7,
+      "n_personal_incumbency_nonzero": 29,
+      "n_open_or_non_incumbent": 5,
+      "n_unresolved_personal_incumbency": 1,
+      "historical_structural_feature_sha256": "b07d8c7ba367de1ddd92bdb4af897ec62525e343734efb7d19b37466cf32e1d0"
+    },
+    {
+      "cutoff_label": "senate-2020-lead-60",
+      "year": 2020,
+      "lead_days": 60,
+      "as_of": "2020-09-04",
+      "evidence_snapshot_id": "d248fc452486463fc53974814644b19d94e809c2beb046c3e02e94e02bf5f0a9",
+      "n_active_races": 35,
+      "n_finance_candidate_matched": 27,
+      "n_finance_neutral_unmatched": 8,
+      "n_personal_incumbency_nonzero": 27,
+      "n_open_or_non_incumbent": 4,
+      "n_unresolved_personal_incumbency": 4,
+      "historical_structural_feature_sha256": "78c4c507df1792cf6f996ae1fba05c2f24a84d6b0e93401adfaee157b6e99973"
+    },
+    {
+      "cutoff_label": "senate-2020-lead-30",
+      "year": 2020,
+      "lead_days": 30,
+      "as_of": "2020-10-04",
+      "evidence_snapshot_id": "0df91680ee5f8445dab1646f2c22644d84b209d6233c59568e4bdb2948639e65",
+      "n_active_races": 35,
+      "n_finance_candidate_matched": 28,
+      "n_finance_neutral_unmatched": 7,
+      "n_personal_incumbency_nonzero": 30,
+      "n_open_or_non_incumbent": 4,
+      "n_unresolved_personal_incumbency": 1,
+      "historical_structural_feature_sha256": "459b79fb3a67e040a40e8bf5c616161f867e5a866d1b76426b4e47f36496794a"
+    },
+    {
+      "cutoff_label": "senate-2022-lead-60",
+      "year": 2022,
+      "lead_days": 60,
+      "as_of": "2022-09-09",
+      "evidence_snapshot_id": "b7ca6b4efcd67bbcf9260d79e4d8742b6d85ae553c6650fb47049245eeeb7011",
+      "n_active_races": 36,
+      "n_finance_candidate_matched": 25,
+      "n_finance_neutral_unmatched": 11,
+      "n_personal_incumbency_nonzero": 27,
+      "n_open_or_non_incumbent": 8,
+      "n_unresolved_personal_incumbency": 1,
+      "historical_structural_feature_sha256": "c13f01ee4a146e2234e79b622c5b3904b6e247118205945a3466e32d5a764fe8"
+    },
+    {
+      "cutoff_label": "senate-2022-lead-30",
+      "year": 2022,
+      "lead_days": 30,
+      "as_of": "2022-10-09",
+      "evidence_snapshot_id": "0d55123275571d452c8e510cfb6a5f42ee2fbfd4118a49811fbe8b123fe61327",
+      "n_active_races": 36,
+      "n_finance_candidate_matched": 25,
+      "n_finance_neutral_unmatched": 11,
+      "n_personal_incumbency_nonzero": 28,
+      "n_open_or_non_incumbent": 8,
+      "n_unresolved_personal_incumbency": 0,
+      "historical_structural_feature_sha256": "7c330789a53ed3bbc134c6181114c6a212c35edc780f3008ff4bc37c7ee32d23"
+    },
+    {
+      "cutoff_label": "senate-2024-lead-60",
+      "year": 2024,
+      "lead_days": 60,
+      "as_of": "2024-09-06",
+      "evidence_snapshot_id": "d973b8761f2e9be89a585775a92c7ac2add86c2779a3bef5366438dfcff0db40",
+      "n_active_races": 35,
+      "n_finance_candidate_matched": 30,
+      "n_finance_neutral_unmatched": 5,
+      "n_personal_incumbency_nonzero": 22,
+      "n_open_or_non_incumbent": 11,
+      "n_unresolved_personal_incumbency": 2,
+      "historical_structural_feature_sha256": "bdd1dd1d99a363d694f72f7f05a427a4bd139a88c2f62ab5d6e8b40777f665e8"
+    },
+    {
+      "cutoff_label": "senate-2024-lead-30",
+      "year": 2024,
+      "lead_days": 30,
+      "as_of": "2024-10-06",
+      "evidence_snapshot_id": "38e53d0d3d08a141bd3506bb93427add3d4e4483d9d69256571a63f708562b7a",
+      "n_active_races": 35,
+      "n_finance_candidate_matched": 30,
+      "n_finance_neutral_unmatched": 5,
+      "n_personal_incumbency_nonzero": 23,
+      "n_open_or_non_incumbent": 12,
+      "n_unresolved_personal_incumbency": 0,
+      "historical_structural_feature_sha256": "619c1045e11a3fa9225720e0a977cd1c741fec928b8c201ea2770528e0e4ca40"
+    }
+  ],
   "decision_gate": "HISTORICAL MODEL INPUTS CHANGED \u2014 FULL ORDINARY OOF REVALIDATION REQUIRED",
-  "note": "Supersedes any prior '258 changed formal inputs' figure. Counts are race_id-scoped against EvidenceSnapshot active races only. No PyMC OOF / stack / calibration / 50k chamber / release seal was run."
+  "integration": {
+    "prepare_fn": "midterms.evidence.historical_model_snapshot.prepare_historical_model_snapshot",
+    "oof_consumers": [
+      "nested_component_loo.run_nested_component_loo",
+      "nested_component_loo.repair_failed_oof_inference",
+      "cycle_replay.replay_cycle"
+    ],
+    "raw_build_as_of_immutable": true,
+    "allow_state_fallback": false
+  },
+  "note": "Repaired historical finance and personal incumbency are now attached on the formal OOF path. Old Brier/CRPS/stack weights remain reference-only until ordinary OOF revalidation. No expensive OOF was run in this pass."
 }

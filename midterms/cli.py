@@ -950,6 +950,29 @@ def main(argv: list[str] | None = None) -> None:
         )
     )
 
+    p_feat_parity = sub.add_parser(
+        "historical-model-feature-parity",
+        help=(
+            "Cheap dry-run: prepare all formal historical folds with repaired "
+            "finance/incumbency and verify audit↔OOF feature parity (no inference)"
+        ),
+    )
+    p_feat_parity.add_argument("--out", default=None)
+    p_feat_parity.set_defaults(
+        func=lambda a: print(
+            json.dumps(
+                __import__(
+                    "midterms.evidence.historical_model_snapshot",
+                    fromlist=["write_historical_model_feature_parity"],
+                ).write_historical_model_feature_parity(
+                    out_path=Path(a.out) if a.out else None,
+                ),
+                indent=2,
+                default=str,
+            )
+        )
+    )
+
     p_repair_oof = sub.add_parser(
         "repair-failed-oof-inference",
         help=(

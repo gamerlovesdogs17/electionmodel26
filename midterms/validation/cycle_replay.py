@@ -12,11 +12,14 @@ import numpy as np
 from midterms.baselines.models import BASELINES
 from midterms.baselines.score import score_chamber_draws, score_forecasts
 from midterms.config import ARTIFACTS_DIR, CYCLES, LEAD_DAYS, PRIMARY_HOLDOUT
+from midterms.evidence.historical_model_snapshot import (
+    prepare_historical_model_snapshot,
+)
 from midterms.evidence.warehouse import Warehouse
-from midterms.model.ensemble import default_weights_from_replay, softmax_neg_scores
+from midterms.model.ensemble import default_weights_from_replay
 from midterms.model.overlays import apply_rating_overlay, shift_draws_to_means
-from midterms.model.pymc_model import FitResult, fit_fast_approximation, fit_pymc
 from midterms.model.poll_weights import attach_poll_weights, global_enop
+from midterms.model.pymc_model import FitResult, fit_fast_approximation, fit_pymc
 from midterms.simulate.chamber import simulate_chamber, vp_tiebreak_for_election_year
 
 
@@ -87,8 +90,9 @@ def _fit_hierarchical(
 
 
 def _forecasts_from_fit(fit) -> list:
-    from midterms.baselines.models import RaceForecast
     from scipy.stats import norm
+
+    from midterms.baselines.models import RaceForecast
 
     out = []
     for i, rid in enumerate(fit.race_ids):
@@ -180,8 +184,9 @@ def _overlay_ablation_block(
     fit: FitResult, snap, results, *, vp_tiebreak_party: str = "R"
 ) -> dict[str, Any]:
     """Compare unadjusted vs soft rating overlay chamber scores (synthetic ratings OK)."""
-    from midterms.model.overlays import rating_from_probability
     from scipy.stats import norm
+
+    from midterms.model.overlays import rating_from_probability
 
     try:
         realized_seats, realized_ctl = _realized_chamber(
@@ -377,10 +382,16 @@ def _replay_cycle_body(
 
     for lead in lead_days:
         as_of = ed - timedelta(days=lead)
-        snap = wh.build_as_of(as_of, election_id)
+        raw_snap = wh.build_as_of(as_of, election_id)
+        snap = prepare_historical_model_snapshot(
+            raw_snap,
+            election_id=election_id,
+            as_of=as_of,
+            lead_days=lead,
+        )
         weighted = attach_poll_weights(snap.polls, as_of=snap.as_of)
         report["enop"][str(lead)] = {
-            "n_polls": int(len(snap.polls)),
+            "n_polls": len(snap.polls),
             "enop_global": global_enop(weighted),
         }
         lead_block: dict[str, Any] = {}
