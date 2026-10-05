@@ -184,24 +184,38 @@ jobs:
           cache: pip
       - name: Install
         run: pip install -e ".[dev]"
+      - name: Verify sealed publication eligibility artifact
+        # Read-only check of the prepare_evidence seal. Do not recompute
+        # eligibility here — forecast tests below may mutate sealed stores.
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("data/artifacts/evidence_eligibility_latest.json")
+          report = json.loads(path.read_text(encoding="utf-8"))
+          if not report.get("publishable"):
+              raise SystemExit(f"sealed eligibility not publishable: {report.get('reasons')}")
+          freshness = (report.get("domains") or {}).get("candidate_timeline", {}).get("freshness") or {}
+          if freshness.get("status") != "fresh":
+              raise SystemExit(f"sealed candidate_timeline freshness not fresh: {freshness}")
+          print("sealed eligibility ok", report.get("as_of"), freshness.get("identity_freshness_basis"))
+          PY
       - name: Run evidence-compatible regression suite
-        # Full pytest also covers post-rebuild artifacts (validated_model_spec /
-        # current release identity). Those are produced later in this workflow,
-        # so the evidence commit is gated on the suite that must already be green
-        # after prepare_evidence — plus forecast smoke at the sealed AS_OF.
+        # Order: read-only / sealed-state checks first, then adapters, then
+        # forecast smokes last (they can mutate normalized stores in-process).
         run: |
           pytest -q \
+            tests/test_demo_as_of_registry_boundary.py \
             tests/test_pre_rebuild_hardening.py \
             tests/test_strict_cli_and_workflow.py \
+            tests/test_release_identity_versioning.py \
+            tests/test_validation_report_status_refresh.py \
             tests/test_alaska_rcv_adapter_v0923.py \
             tests/test_exceptional_model_lineage_v0923.py \
             tests/test_non_major_adapter_v0923.py \
             tests/test_v0923_candidate_matchup_integrity.py \
             tests/test_model.py \
-            tests/test_improvements.py::test_forecast_ensemble_artifact \
-            tests/test_validation_report_status_refresh.py \
-            tests/test_release_identity_versioning.py \
-            tests/test_demo_as_of_registry_boundary.py
+            tests/test_improvements.py::test_forecast_ensemble_artifact
       - name: Smoke forecast at sealed evidence cutoff
         run: |
           python - <<'PY'

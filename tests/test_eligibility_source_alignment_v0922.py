@@ -324,7 +324,15 @@ def test_rebuild_tests_cannot_mutate_the_sealed_evidence_checkout():
     assert tests_job < rebuild_job
     assert "needs: [prepare_evidence, tests]" in workflow[rebuild_job:]
     tests_block = workflow[tests_job:rebuild_job]
+    assert "Verify sealed publication eligibility artifact" in tests_block
     assert "Run evidence-compatible regression suite" in tests_block
     assert "Smoke forecast at sealed evidence cutoff" in tests_block
     assert "Checkout exact evidence commit for tests" in tests_block
+    # Sealed eligibility check must precede mutating forecast tests.
+    assert tests_block.index("Verify sealed publication eligibility artifact") < (
+        tests_block.index("Run evidence-compatible regression suite")
+    )
+    assert tests_block.index("tests/test_demo_as_of_registry_boundary.py") < (
+        tests_block.index("tests/test_model.py")
+    )
     assert "pytest -q" not in workflow[rebuild_job:]
