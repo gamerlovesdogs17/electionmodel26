@@ -1,9 +1,9 @@
 {
   "schema_version": "alaska-rcv-validation-v1",
   "model_version": "senate-hierarchical-v0.9.23",
-  "adapter_spec_version": "alaska-rcv-adapter-v1",
+  "adapter_spec_version": "alaska-rcv-adapter-v2",
   "adapter_specification": {
-    "adapter_spec_version": "alaska-rcv-adapter-v1",
+    "adapter_spec_version": "alaska-rcv-adapter-v2",
     "method": "limited_validation_alaska_rcv_model-v1",
     "target": "candidate_win_probability_and_chamber_caucus_probability",
     "first_choice_spec_version": "official-primary-anchor-v1",
@@ -17,7 +17,7 @@
       "pairwise_weight": 0.65,
       "common_shock_strength": 0.1
     },
-    "pairwise_poll_contract": "relative Peltola/incumbent-Sullivan preference; never RCV first choice",
+    "pairwise_poll_contract": "directional Peltola/incumbent-Sullivan preference vs 50% (logit shift on transfer weights only; never RCV first choice)",
     "write_in_treatment": "aggregate_residual_fail_closed_if_winner"
   },
   "race_id": "senate-2026-AK",
@@ -144,25 +144,25 @@
       },
       "candidate_first_choice_mean": {
         "senate-2026-AK:gerald-l-heikes": 0.011209913806831224,
-        "senate-2026-AK:mary-peltola": 0.5191771401490244,
+        "senate-2026-AK:mary-peltola": 0.5191771401490245,
         "senate-2026-AK:dan-s-sullivan": 0.43337687658279955,
         "senate-2026-AK:daniel-j-sullivan-jr": 0.027084135638383966,
         "senate-2026-AK:write-in-aggregate": 0.009151933822961571
       },
       "candidate_final_support_mean": {
-        "senate-2026-AK:gerald-l-heikes": 0.008723549891273724,
-        "senate-2026-AK:mary-peltola": 0.5218064478455038,
-        "senate-2026-AK:dan-s-sullivan": 0.4370791740272536,
-        "senate-2026-AK:daniel-j-sullivan-jr": 0.022055276002879685,
-        "senate-2026-AK:write-in-aggregate": 0.006876602149284872
+        "senate-2026-AK:gerald-l-heikes": 0.008723575126787408,
+        "senate-2026-AK:mary-peltola": 0.5218263606216261,
+        "senate-2026-AK:dan-s-sullivan": 0.4370571127893023,
+        "senate-2026-AK:daniel-j-sullivan-jr": 0.022055364029776935,
+        "senate-2026-AK:write-in-aggregate": 0.006876602171142225
       },
       "p_dem_caucus": 0.7295,
-      "mean_exhausted_share": 0.0034589500838049245,
+      "mean_exhausted_share": 0.003460985261365238,
       "poll_measurement_audit": {
         "p_peltola": 0.5062242780076651,
         "sd": 0.038596916171754085,
         "n": 16,
-        "enop": 6.712662105003739,
+        "enop": 6.712662105003737,
         "poll_ids": [
           "vh-us-202ala3352af00",
           "vh-us-202ala3b65f6ef",
@@ -181,7 +181,7 @@
           "vh-us-202qua198b0338",
           "vh-us-202the011805d2"
         ],
-        "measurement_contract": "relative Peltola/incumbent-Sullivan preference; never RCV first choice",
+        "measurement_contract": "directional Peltola/incumbent-Sullivan preference vs 50% (logit shift on transfer weights only; never RCV first choice)",
         "measurement_type_counts": {
           "binary_pairwise_normalized": 14,
           "multiway_question_normalized_pairwise_projection": 2
@@ -198,32 +198,32 @@
       },
       "candidate_p_win": {
         "senate-2026-AK:gerald-l-heikes": 0.0,
-        "senate-2026-AK:mary-peltola": 0.6805,
-        "senate-2026-AK:dan-s-sullivan": 0.3195,
+        "senate-2026-AK:mary-peltola": 0.681,
+        "senate-2026-AK:dan-s-sullivan": 0.319,
         "senate-2026-AK:daniel-j-sullivan-jr": 0.0,
         "senate-2026-AK:write-in-aggregate": 0.0
       },
       "candidate_first_choice_mean": {
         "senate-2026-AK:gerald-l-heikes": 0.011264098397923932,
         "senate-2026-AK:mary-peltola": 0.5192971507323102,
-        "senate-2026-AK:dan-s-sullivan": 0.4335372111573642,
+        "senate-2026-AK:dan-s-sullivan": 0.4335372111573643,
         "senate-2026-AK:daniel-j-sullivan-jr": 0.02657130997851153,
-        "senate-2026-AK:write-in-aggregate": 0.009330229733890229
+        "senate-2026-AK:write-in-aggregate": 0.009330229733890227
       },
       "candidate_final_support_mean": {
-        "senate-2026-AK:gerald-l-heikes": 0.009035252349870848,
-        "senate-2026-AK:mary-peltola": 0.5214761860036055,
-        "senate-2026-AK:dan-s-sullivan": 0.4366751001226462,
-        "senate-2026-AK:daniel-j-sullivan-jr": 0.022447536783852914,
-        "senate-2026-AK:write-in-aggregate": 0.007517901471718985
+        "senate-2026-AK:gerald-l-heikes": 0.009035257074844245,
+        "senate-2026-AK:mary-peltola": 0.5214957975434399,
+        "senate-2026-AK:dan-s-sullivan": 0.43665331475911295,
+        "senate-2026-AK:daniel-j-sullivan-jr": 0.022447634809867684,
+        "senate-2026-AK:write-in-aggregate": 0.007517901516234104
       },
-      "p_dem_caucus": 0.6805,
-      "mean_exhausted_share": 0.002848023268305659,
+      "p_dem_caucus": 0.681,
+      "mean_exhausted_share": 0.0028500942965007715,
       "poll_measurement_audit": {
         "p_peltola": 0.5062242780076651,
         "sd": 0.038596916171754085,
         "n": 16,
-        "enop": 6.712662105003739,
+        "enop": 6.712662105003737,
         "poll_ids": [
           "vh-us-202ala3352af00",
           "vh-us-202ala3b65f6ef",
@@ -242,7 +242,7 @@
           "vh-us-202qua198b0338",
           "vh-us-202the011805d2"
         ],
-        "measurement_contract": "relative Peltola/incumbent-Sullivan preference; never RCV first choice",
+        "measurement_contract": "directional Peltola/incumbent-Sullivan preference vs 50% (logit shift on transfer weights only; never RCV first choice)",
         "measurement_type_counts": {
           "binary_pairwise_normalized": 14,
           "multiway_question_normalized_pairwise_projection": 2
@@ -259,32 +259,32 @@
       },
       "candidate_p_win": {
         "senate-2026-AK:gerald-l-heikes": 0.0,
-        "senate-2026-AK:mary-peltola": 0.656,
-        "senate-2026-AK:dan-s-sullivan": 0.344,
+        "senate-2026-AK:mary-peltola": 0.6585,
+        "senate-2026-AK:dan-s-sullivan": 0.3415,
         "senate-2026-AK:daniel-j-sullivan-jr": 0.0,
         "senate-2026-AK:write-in-aggregate": 0.0
       },
       "candidate_first_choice_mean": {
-        "senate-2026-AK:gerald-l-heikes": 0.011312548280226119,
-        "senate-2026-AK:mary-peltola": 0.5194887670109363,
-        "senate-2026-AK:dan-s-sullivan": 0.4332875624879667,
-        "senate-2026-AK:daniel-j-sullivan-jr": 0.026796529173655704,
-        "senate-2026-AK:write-in-aggregate": 0.009114593047216646
+        "senate-2026-AK:gerald-l-heikes": 0.011338940912457185,
+        "senate-2026-AK:mary-peltola": 0.5197230015588303,
+        "senate-2026-AK:dan-s-sullivan": 0.43303381525457263,
+        "senate-2026-AK:daniel-j-sullivan-jr": 0.026776125449334227,
+        "senate-2026-AK:write-in-aggregate": 0.00912811682480692
       },
       "candidate_final_support_mean": {
-        "senate-2026-AK:gerald-l-heikes": 0.009319177928623811,
-        "senate-2026-AK:mary-peltola": 0.5215349879549419,
-        "senate-2026-AK:dan-s-sullivan": 0.4362244784828836,
-        "senate-2026-AK:daniel-j-sullivan-jr": 0.022760283775441623,
-        "senate-2026-AK:write-in-aggregate": 0.00750735287870716
+        "senate-2026-AK:gerald-l-heikes": 0.009340697811094588,
+        "senate-2026-AK:mary-peltola": 0.5217757397186306,
+        "senate-2026-AK:dan-s-sullivan": 0.4359230217494054,
+        "senate-2026-AK:daniel-j-sullivan-jr": 0.02278904775030094,
+        "senate-2026-AK:write-in-aggregate": 0.007534634347711253
       },
-      "p_dem_caucus": 0.656,
-      "mean_exhausted_share": 0.0026537189794038143,
+      "p_dem_caucus": 0.6585,
+      "mean_exhausted_share": 0.002636858622858581,
       "poll_measurement_audit": {
         "p_peltola": 0.5062242780076651,
         "sd": 0.038596916171754085,
         "n": 16,
-        "enop": 6.712662105003739,
+        "enop": 6.712662105003737,
         "poll_ids": [
           "vh-us-202ala3352af00",
           "vh-us-202ala3b65f6ef",
@@ -303,7 +303,7 @@
           "vh-us-202qua198b0338",
           "vh-us-202the011805d2"
         ],
-        "measurement_contract": "relative Peltola/incumbent-Sullivan preference; never RCV first choice",
+        "measurement_contract": "directional Peltola/incumbent-Sullivan preference vs 50% (logit shift on transfer weights only; never RCV first choice)",
         "measurement_type_counts": {
           "binary_pairwise_normalized": 14,
           "multiway_question_normalized_pairwise_projection": 2
@@ -321,32 +321,32 @@
     },
     "candidate_p_win": {
       "senate-2026-AK:gerald-l-heikes": 0.0,
-      "senate-2026-AK:mary-peltola": 0.6805,
-      "senate-2026-AK:dan-s-sullivan": 0.3195,
+      "senate-2026-AK:mary-peltola": 0.681,
+      "senate-2026-AK:dan-s-sullivan": 0.319,
       "senate-2026-AK:daniel-j-sullivan-jr": 0.0,
       "senate-2026-AK:write-in-aggregate": 0.0
     },
     "candidate_first_choice_mean": {
       "senate-2026-AK:gerald-l-heikes": 0.011264098397923932,
       "senate-2026-AK:mary-peltola": 0.5192971507323102,
-      "senate-2026-AK:dan-s-sullivan": 0.4335372111573642,
+      "senate-2026-AK:dan-s-sullivan": 0.4335372111573643,
       "senate-2026-AK:daniel-j-sullivan-jr": 0.02657130997851153,
-      "senate-2026-AK:write-in-aggregate": 0.009330229733890229
+      "senate-2026-AK:write-in-aggregate": 0.009330229733890227
     },
     "candidate_final_support_mean": {
-      "senate-2026-AK:gerald-l-heikes": 0.009035252349870848,
-      "senate-2026-AK:mary-peltola": 0.5214761860036055,
-      "senate-2026-AK:dan-s-sullivan": 0.4366751001226462,
-      "senate-2026-AK:daniel-j-sullivan-jr": 0.022447536783852914,
-      "senate-2026-AK:write-in-aggregate": 0.007517901471718985
+      "senate-2026-AK:gerald-l-heikes": 0.009035257074844245,
+      "senate-2026-AK:mary-peltola": 0.5214957975434399,
+      "senate-2026-AK:dan-s-sullivan": 0.43665331475911295,
+      "senate-2026-AK:daniel-j-sullivan-jr": 0.022447634809867684,
+      "senate-2026-AK:write-in-aggregate": 0.007517901516234104
     },
-    "p_dem_caucus": 0.6805,
-    "mean_exhausted_share": 0.002848023268305659,
+    "p_dem_caucus": 0.681,
+    "mean_exhausted_share": 0.0028500942965007715,
     "poll_measurement_audit": {
       "p_peltola": 0.5062242780076651,
       "sd": 0.038596916171754085,
       "n": 16,
-      "enop": 6.712662105003739,
+      "enop": 6.712662105003737,
       "poll_ids": [
         "vh-us-202ala3352af00",
         "vh-us-202ala3b65f6ef",
@@ -365,7 +365,7 @@
         "vh-us-202qua198b0338",
         "vh-us-202the011805d2"
       ],
-      "measurement_contract": "relative Peltola/incumbent-Sullivan preference; never RCV first choice",
+      "measurement_contract": "directional Peltola/incumbent-Sullivan preference vs 50% (logit shift on transfer weights only; never RCV first choice)",
       "measurement_type_counts": {
         "binary_pairwise_normalized": 14,
         "multiway_question_normalized_pairwise_projection": 2
@@ -376,5 +376,5 @@
   "ordinary_oof_touched": false,
   "note": "Historical check validates tabulation/transfer behavior only; no hindsight-derived pre-election probability or Brier score is claimed.",
   "source_semantic_sha256": "8c5fa884fe8e1cbb39c528511d36a1c064b0a8d48f6794b3144dd46b8726cf43",
-  "artifact_sha256": "717da5520012d656d3d84fcfa5f7b16bbe034c015515c02c013a7df8ff8d4034"
+  "artifact_sha256": "6eaa4d215c927783339ddb7dc335ec3b42f4c2bdc30ba3e7b59136c139dd96b4"
 }
