@@ -399,19 +399,58 @@ jobs:
         id: candidate_spec
         shell: bash
         run: |
-          if [ "${{ steps.resume.outputs.resumed }}" != "true" ]; then
-            python -m midterms.cli freeze-model-spec-candidate \
-              --selection data/artifacts/poll_structure_crossfit_latest.json \
-              --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
-              --source-readiness data/artifacts/source_readiness_latest.json \
-              --code-commit-sha "$(git rev-parse HEAD)" \
-              --out data/artifacts/validated_model_spec_candidate.json
-          fi
-          # Ordinary OOF cache key uses ordinary-statistical identity only.
-          # Exceptional adapters bind later into the finalized release spec.
-          # Always emit the hash so resumed runs still key canonical OOF correctly.
+          # Always (re)freeze so selection G8 structural enables bind into the
+          # ordinary-statistical identity — including resume paths that restored
+          # a pre-enables candidate from an older failed run.
+          python -m midterms.cli freeze-model-spec-candidate \
+            --selection data/artifacts/poll_structure_crossfit_latest.json \
+            --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
+            --source-readiness data/artifacts/source_readiness_latest.json \
+            --code-commit-sha "$(git rev-parse HEAD)" \
+            --out data/artifacts/validated_model_spec_candidate.json
           ORD_SHA="$(python -c "import json; print(json.load(open('data/artifacts/validated_model_spec_candidate.json'))['ordinary_statistical_spec_sha256'])")"
           echo "ordinary_statistical_spec_sha256=$ORD_SHA" >> "$GITHUB_OUTPUT"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          candidate_path = Path("data/artifacts/validated_model_spec_candidate.json")
+          candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+          candidate_sha = hashlib.sha256(candidate_path.read_bytes()).hexdigest()
+          canonical_path = Path("data/artifacts/nested_component_loo_canonical.json")
+          invalidate = False
+          if canonical_path.is_file():
+              canonical = json.loads(canonical_path.read_text(encoding="utf-8"))
+              if canonical.get("model_spec_candidate_sha256") != candidate_sha:
+                  invalidate = True
+              enables = candidate.get("structural_feature_enables") or {}
+              if set(enables) != {"similarity_terminal", "terminal_race"}:
+                  invalidate = True
+          if invalidate:
+              for name in (
+                  "nested_component_loo_canonical.json",
+                  "nested_component_loo_canonical_frozen.json",
+                  "posterior_predictive_oof_latest.json",
+                  "stack_weights_oof.json",
+                  "stack_reliability_crossfit_latest.json",
+                  "joint_oof_scores_latest.json",
+                  "validated_model_spec_latest.json",
+                  "forecast_latest.json",
+                  "prior_predictive_latest.json",
+                  "race_decomposition_latest.json",
+                  "independent_rebuild_latest.json",
+                  "run_coherence_latest.json",
+                  "acceptance_gates_latest.json",
+              ):
+                  path = Path("data/artifacts") / name
+                  if path.is_file():
+                      path.unlink()
+                      print(f"removed stale downstream artifact: {name}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write(f"invalidate_canonical={str(invalidate).lower()}\n")
+          PY
       - name: Save selection-pass validation cache
         if: steps.resume.outputs.resumed != 'true' && steps.selection-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -424,7 +463,7 @@ jobs:
           key: selection-oof-v0923-struct-v1-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-2018-2024-60-30-single-additions-pymc1600-seed-v2
       - name: Restore canonical selected-structure OOF cache
         id: canonical-cache
-        if: steps.resume.outputs.resumed != 'true'
+        if: steps.resume.outputs.resumed != 'true' && steps.candidate_spec.outputs.invalidate_canonical != 'true'
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -434,7 +473,10 @@ jobs:
           # Ordinary-statistical identity only — not whole candidate JSON / exceptional lineage.
           key: canonical-oof-v0923-struct-v1-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ steps.candidate_spec.outputs.ordinary_statistical_spec_sha256 }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Canonical OOF using the frozen selected poll structure
-        if: steps.resume.outputs.resumed != 'true' && steps.canonical-cache.outputs.cache-hit != 'true'
+        if: >
+          (steps.resume.outputs.resumed != 'true' &&
+           steps.canonical-cache.outputs.cache-hit != 'true') ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true'
         run: |
           python -m midterms.cli nested-component-loo \
             --hierarchical-method pymc \
@@ -510,25 +552,33 @@ jobs:
             data/artifacts/posterior_predictive_oof_latest.json
           key: canonical-oof-v0923-struct-v1-${{ github.sha }}-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}-${{ steps.candidate_spec.outputs.ordinary_statistical_spec_sha256 }}-2018-2024-60-30-pymc1600-seed-v2
       - name: Fit predictive-mixture stack from canonical OOF only
-        if: steps.resume.outputs.forecast_resumed != 'true'
+        if: >
+          steps.resume.outputs.forecast_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true'
         run: |
           python -m midterms.cli fit-stack-weights \
             --nested-path data/artifacts/nested_component_loo_canonical.json \
             --out data/artifacts/stack_weights_oof.json \
             --require-canonical
       - name: Cross-fitted production-stack reliability
-        if: steps.resume.outputs.forecast_resumed != 'true'
+        if: >
+          steps.resume.outputs.forecast_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true'
         run: |
           python -m midterms.cli crossfit-stack-reliability \
             --nested-path data/artifacts/nested_component_loo_canonical.json \
             --stack-path data/artifacts/stack_weights_oof.json
       - name: Joint historical proper scores
-        if: steps.resume.outputs.forecast_resumed != 'true'
+        if: >
+          steps.resume.outputs.forecast_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true'
         run: |
           python -m midterms.cli joint-oof-scores --strict \
             --nested-path data/artifacts/nested_component_loo_canonical.json
       - name: Finalize validated model spec
-        if: steps.resume.outputs.forecast_resumed != 'true'
+        if: >
+          steps.resume.outputs.forecast_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true'
         run: |
           python -m midterms.cli finalize-validated-model-spec \
             --candidate data/artifacts/validated_model_spec_candidate.json \
@@ -538,7 +588,9 @@ jobs:
             --code-commit-sha "$(git rev-parse HEAD)" \
             --out data/artifacts/validated_model_spec_latest.json
       - name: Run publication-quality research forecast
-        if: steps.resume.outputs.forecast_resumed != 'true'
+        if: >
+          steps.resume.outputs.forecast_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true'
         run: |
           python -m midterms.cli forecast \
             --election-id senate-2026 \
@@ -549,7 +601,9 @@ jobs:
             --target-accept 0.99 \
             --n-joint-sims 50000
       - name: Verify forecast exceptional-model attribution and lineage
-        if: steps.resume.outputs.forecast_resumed != 'true'
+        if: >
+          steps.resume.outputs.forecast_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true'
         run: |
           python - <<'PY'
           import json
@@ -565,7 +619,9 @@ jobs:
       - name: Validation report and reused posterior diagnostics
         run: python -m midterms.cli validation-report --full
       - name: Independent rebuild
-        if: steps.resume.outputs.independent_resumed != 'true'
+        if: >
+          steps.resume.outputs.independent_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true'
         run: python -m midterms.cli verify-rebuild --independent
       - name: Seal current version release identity
         run: python -m midterms.cli release-identity

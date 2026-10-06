@@ -1553,6 +1553,16 @@ def main(argv: list[str] | None = None) -> None:
         ).evaluate_acceptance_gates()
         print(json.dumps(report, indent=2, default=str))
         if a.strict and not report.get("full_validation_ok", report.get("ok")):
+            ext = ((report.get("blueprint_extensions") or {}).get("evaluation") or {})
+            summary = {
+                "full_validation_ok": report.get("full_validation_ok"),
+                "g1_g11_ok": report.get("g1_g11_ok"),
+                "failures": report.get("failures"),
+                "research_failures": report.get("research_failures"),
+                "blocking_extension_gates": ext.get("blocking_gates"),
+                "coherence_ok": (report.get("run_coherence") or {}).get("ok"),
+            }
+            print(json.dumps({"acceptance_gates_strict_failure": summary}, indent=2), flush=True)
             raise SystemExit(1)
 
     p_acc.set_defaults(func=_acceptance_gates)

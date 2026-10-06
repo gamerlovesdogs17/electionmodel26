@@ -383,6 +383,10 @@ def evaluate_blueprint_extension_gates(
                     "convergence_available": convergence.get("available"),
                 })
             elif name == "same_family_ablation_oos":
+                from midterms.validation.validated_model_spec import (
+                    coerce_structural_feature_enables,
+                )
+
                 frozen_path = artifacts_dir / "nested_component_loo_selection_frozen.json"
                 if not frozen_path.exists():
                     legacy_frozen_path = artifacts_dir / "nested_component_loo_frozen.json"
@@ -398,30 +402,51 @@ def evaluate_blueprint_extension_gates(
                     and bool(semantic_expected)
                     and semantic_actual == semantic_expected
                 )
-                required_ids = {"hier_no_similarity", "hier_no_terminal_race"}
+                spec_latest = _read(artifacts_dir / "validated_model_spec_latest.json") or {}
+                spec_candidate = _read(artifacts_dir / "validated_model_spec_candidate.json") or {}
+                enables_raw = None
+                for doc in (spec_latest, spec_candidate):
+                    if doc.get("structural_feature_enables") is not None:
+                        enables_raw = doc.get("structural_feature_enables")
+                        break
+                enables = coerce_structural_feature_enables(enables_raw)
+                feature_to_ablation = {
+                    "similarity_terminal": "hier_no_similarity",
+                    "terminal_race": "hier_no_terminal_race",
+                }
+                required_ids = {
+                    feature_to_ablation[feature]
+                    for feature, enabled in enables.items()
+                    if enabled
+                }
                 found: set[str] = set()
                 invalid: list[str] = []
                 for entry in frozen.get("entries") or []:
                     component = str(entry.get("component") or "")
-                    if component not in required_ids:
+                    if component not in feature_to_ablation.values():
                         continue
                     lineage = entry.get("structural_ablation_lineage") or {}
                     if entry.get("status") == "ok" and lineage.get("eligible") and len(lineage.get("changed_features") or []) == 1:
                         found.add(component)
-                    else:
+                    elif component in required_ids:
                         invalid.append(component)
                 recommendations = payload.get("g8_recommendations") or {}
                 feature_recommendations = {
                     feature: (recommendations.get(feature) or {}).get("recommend")
                     for feature in ("similarity_terminal", "terminal_race")
                 }
-                supported = all(
-                    recommendation == "keep"
-                    for recommendation in feature_recommendations.values()
-                )
+                supported = True
+                for feature, enabled in enables.items():
+                    recommend = feature_recommendations.get(feature)
+                    if enabled and recommend != "keep":
+                        supported = False
+                    if (not enabled) and recommend not in {"drop_or_shrink", "disable"}:
+                        supported = False
                 ok = (
-                    frozen_lineage_ok and found == required_ids
-                    and not invalid and supported
+                    frozen_lineage_ok
+                    and required_ids.issubset(found)
+                    and not invalid
+                    and supported
                 )
                 result.update({
                     "status": "pass" if ok else "blocked", "ok": ok,
@@ -429,6 +454,7 @@ def evaluate_blueprint_extension_gates(
                         "enabled same-family structures lack current one-change evidence "
                         "with a fold-majority keep recommendation"
                     ),
+                    "structural_feature_enables": enables,
                     "validated_ablation_ids": sorted(found),
                     "invalid_ablation_ids": sorted(set(invalid)),
                     "feature_recommendations": feature_recommendations,

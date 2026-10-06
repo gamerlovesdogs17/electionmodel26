@@ -38,7 +38,36 @@ ORDINARY_STATISTICAL_SPEC_FIELDS = (
     # Ordinary OOF consumes derived race-id finance + personal incumbency.
     # Exceptional adapters remain excluded from this identity.
     "historical_structural_feature_schema",
+    # Same-family G8 keep/drop decisions for hierarchical structural terms.
+    "structural_feature_enables",
 )
+
+
+DEFAULT_STRUCTURAL_FEATURE_ENABLES = {
+    "similarity_terminal": True,
+    "terminal_race": True,
+}
+
+
+def structural_feature_enables_from_g8(
+    recommendations: dict[str, Any] | None,
+) -> dict[str, bool]:
+    """Enable hierarchical structural terms only when selection OOF votes keep."""
+
+    recs = recommendations or {}
+    enables: dict[str, bool] = {}
+    for feature in DEFAULT_STRUCTURAL_FEATURE_ENABLES:
+        recommend = (recs.get(feature) or {}).get("recommend")
+        enables[feature] = recommend == "keep"
+    return enables
+
+
+def coerce_structural_feature_enables(value: Any | None) -> dict[str, bool]:
+    raw = dict(value or {})
+    return {
+        feature: bool(raw.get(feature, default))
+        for feature, default in DEFAULT_STRUCTURAL_FEATURE_ENABLES.items()
+    }
 
 STRUCTURE_CONFIGS: dict[str, dict[str, bool]] = {
     "pymc": {},
@@ -90,6 +119,7 @@ def write_candidate_model_spec(
     selection_path: str | Path | None = None,
     evidence_bundle_path: str | Path,
     source_readiness_path: str | Path | None = None,
+    nested_selection_path: str | Path | None = None,
     out_path: str | Path | None = None,
     code_commit_sha: str | None = None,
 ) -> dict[str, Any]:
@@ -98,7 +128,11 @@ def write_candidate_model_spec(
     source_readiness_path = Path(
         source_readiness_path or ARTIFACTS_DIR / "source_readiness_latest.json"
     )
+    nested_selection_path = Path(
+        nested_selection_path or ARTIFACTS_DIR / "nested_component_loo_selection.json"
+    )
     selection = json.loads(selection_path.read_text(encoding="utf-8"))
+    nested_selection = json.loads(nested_selection_path.read_text(encoding="utf-8"))
     bundle = json.loads(evidence_bundle_path.read_text(encoding="utf-8"))
     readiness = json.loads(source_readiness_path.read_text(encoding="utf-8"))
     if selection.get("model_version") != MODEL_VERSION:
@@ -115,6 +149,11 @@ def write_candidate_model_spec(
         raise ValueError("poll-structure selection evidence bundle differs from candidate spec")
     if selection.get("source_evidence_bundle_sha256") != bundle.get("evidence_bundle_sha256"):
         raise ValueError("poll-structure selection evidence bundle hash differs from candidate spec")
+    if nested_selection.get("validation_phase") != SELECTION_OOF_PHASE:
+        raise ValueError("nested selection OOF phase mismatch while freezing candidate spec")
+    nested_sha = file_sha256(nested_selection_path)
+    if selection.get("source_nested_loo_sha256") != nested_sha:
+        raise ValueError("poll-structure crossfit is not bound to the selection nested OOF")
     folds = selection.get("outer_folds") or []
     if (selection.get("freeze_before_truth") is not True or len(folds) != 4
             or any(fold.get("heldout_truth_used_for_selection") is not False for fold in folds)):
@@ -126,6 +165,9 @@ def write_candidate_model_spec(
     recommendation_config_id = recommendation.get("selected_poll_structure_id")
     if recommendation_config_id != poll_structure_identity(config):
         raise ValueError("poll-structure recommendation config identity changed")
+    structural_feature_enables = structural_feature_enables_from_g8(
+        nested_selection.get("g8_recommendations")
+    )
     payload = {
         "schema_version": CANDIDATE_SPEC_SCHEMA,
         "model_version": MODEL_VERSION,
@@ -143,6 +185,7 @@ def write_candidate_model_spec(
         "historical_cycles": [2018, 2020, 2022, 2024],
         "lead_cutoffs_days": [60, 30],
         "historical_structural_feature_schema": "historical-structural-features-v1",
+        "structural_feature_enables": structural_feature_enables,
         "code_commit_sha": code_commit_sha,
         "production_research_eligible": False,
         "next_required_phase": CANONICAL_OOF_PHASE,
@@ -169,6 +212,9 @@ def load_candidate_model_spec(path: str | Path) -> dict[str, Any]:
     config = poll_structure_from_dict(payload.get("selected_poll_structure"))
     if payload.get("selected_poll_structure_id") != poll_structure_identity(config):
         raise ValueError("validated model candidate poll structure identity changed")
+    payload["structural_feature_enables"] = coerce_structural_feature_enables(
+        payload.get("structural_feature_enables")
+    )
     return payload
 
 
@@ -282,6 +328,9 @@ def finalize_validated_model_spec(
         "historical_structural_feature_schema": candidate.get(
             "historical_structural_feature_schema",
             "historical-structural-features-v1",
+        ),
+        "structural_feature_enables": coerce_structural_feature_enables(
+            candidate.get("structural_feature_enables")
         ),
         "code_commit_sha": code_commit_sha or candidate.get("code_commit_sha"),
         "lineage_checks": checks,

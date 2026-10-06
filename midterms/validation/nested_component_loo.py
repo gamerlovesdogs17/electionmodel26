@@ -412,6 +412,8 @@ def freeze_component_predictions(
     seed: int = 21,
     poll_structure=None,
     include_structural_challengers: bool = True,
+    include_similarity: bool = True,
+    include_terminal_race: bool = True,
 ) -> dict[str, FrozenPrediction]:
     """
     Fit every component and freeze predictive distributions.
@@ -453,6 +455,8 @@ def freeze_component_predictions(
             _fit_hierarchical(
                 snap, method=hierarchical_method, n_draws=n_draws, seed=seed, gb=gb,
                 poll_structure=poll_structure,
+                include_similarity=include_similarity,
+                include_terminal_race=include_terminal_race,
             ),
             component=hier_name,
             election_id=election_id,
@@ -476,6 +480,8 @@ def freeze_component_predictions(
         "draws": max(n_draws // 2, OOF_PYMC_DRAWS_PER_CHAIN),
         "tune": max(n_draws // 2, OOF_PYMC_TUNE_PER_CHAIN),
         "chains": OOF_PYMC_CHAINS,
+        "include_similarity": bool(include_similarity),
+        "include_terminal_race": bool(include_terminal_race),
     }
     for ablation_id in (
         ("hier_no_similarity", "hier_no_terminal_race")
@@ -1222,6 +1228,7 @@ def run_nested_component_loo(
     from midterms.validation.validated_model_spec import (
         CANONICAL_OOF_PHASE,
         SELECTION_OOF_PHASE,
+        coerce_structural_feature_enables,
         load_candidate_model_spec,
         poll_structure_from_dict,
         poll_structure_identity,
@@ -1230,6 +1237,8 @@ def run_nested_component_loo(
     if validation_phase not in {SELECTION_OOF_PHASE, CANONICAL_OOF_PHASE}:
         raise ValueError("validation_phase must be poll_structure_selection or canonical_poll_structure")
     candidate_spec: dict[str, Any] | None = None
+    include_similarity = True
+    include_terminal_race = True
     if validation_phase == CANONICAL_OOF_PHASE:
         if model_spec_candidate_path is None:
             raise ValueError("canonical OOF requires a validated model candidate spec")
@@ -1238,6 +1247,11 @@ def run_nested_component_loo(
         if poll_structure is not None and PollStructureConfig.coerce(poll_structure) != selected:
             raise ValueError("canonical OOF poll structure differs from candidate spec")
         poll_structure = selected
+        enables = coerce_structural_feature_enables(
+            candidate_spec.get("structural_feature_enables")
+        )
+        include_similarity = bool(enables.get("similarity_terminal", True))
+        include_terminal_race = bool(enables.get("terminal_race", True))
     reference_poll_structure = PollStructureConfig.coerce(poll_structure)
     poll_structure_config_id = poll_structure_identity(reference_poll_structure)
 
@@ -1325,6 +1339,8 @@ def run_nested_component_loo(
                 seed=seed + year + lead,
                 poll_structure=reference_poll_structure,
                 include_structural_challengers=validation_phase == SELECTION_OOF_PHASE,
+                include_similarity=include_similarity,
+                include_terminal_race=include_terminal_race,
             )
             lead_frozen[str(lead)] = frozen
             for name, fp in frozen.items():
@@ -1476,6 +1492,10 @@ def run_nested_component_loo(
             historical_structural_feature_sha256_by_fold_lead
         ),
         "historical_structural_feature_schema": STRUCTURAL_FEATURE_SCHEMA,
+        "structural_feature_enables": {
+            "similarity_terminal": bool(include_similarity),
+            "terminal_race": bool(include_terminal_race),
+        },
         "candidate_state_score_exclusions_by_fold_lead": (
             candidate_score_exclusions_by_fold_lead
         ),
