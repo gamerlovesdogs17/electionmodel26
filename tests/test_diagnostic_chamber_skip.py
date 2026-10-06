@@ -60,3 +60,5 @@ def test_rebuild_workflow_runs_validation_report_after_forecast():
     )
     assert "resume_run_id" in text
     assert "inputs.refresh_safe_sources && inputs.resume_run_id == ''" in text
+    assert "Verify existing sealed evidence for resume" in text
+    assert "git pull --rebase origin main" in text

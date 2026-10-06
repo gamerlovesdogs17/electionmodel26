@@ -117,7 +117,33 @@ jobs:
       - name: Synchronize compliance readiness metadata
         run: python -m midterms.cli sync-compliance-status --write
       - name: Seal and strictly verify evidence bundle
+        if: inputs.resume_run_id == ''
         run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode seal --strict
+      - name: Verify existing sealed evidence for resume
+        if: inputs.resume_run_id != ''
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          latest = json.loads(Path("data/manifests/evidence_bundle_latest.json").read_text())
+          manifest_name = latest.get("manifest")
+          if not manifest_name:
+              raise SystemExit("missing sealed evidence_bundle_latest.json manifest pointer")
+          path = Path("data/manifests") / manifest_name
+          bundle = json.loads(path.read_text(encoding="utf-8"))
+          as_of = os.environ["AS_OF"]
+          if str(bundle.get("as_of") or "")[:10] != as_of:
+              raise SystemExit(
+                  f"resume AS_OF {as_of} does not match sealed evidence as_of "
+                  f"{bundle.get('as_of')}; pass the original as_of to reuse OOF"
+              )
+          print("resume sealed evidence ok", bundle.get("evidence_bundle_id"), as_of)
+          PY
+          BUNDLE_FILE="$(python -c "import json; p=json.load(open('data/manifests/evidence_bundle_latest.json')); print('data/manifests/'+p['manifest'])")"
+          python -m midterms.cli verify-evidence-bundle --path "$BUNDLE_FILE" --strict
       - name: Strict publication-domain eligibility
         # Same gate as the rebuild job. Fail here (cheap) rather than after
         # evidence seal + tests when registry/timeline freshness is wrong.
@@ -168,6 +194,9 @@ jobs:
             BLUEPRINT_COMPLIANCE_AUDIT.json
           if ! git diff --cached --quiet; then
             git commit -m "evidence: seal research snapshot ${AS_OF} [no-model-fit]"
+            # Concurrent pushes (including manual main commits) must not fail the seal.
+            git fetch origin main
+            git pull --rebase origin main
             git push origin HEAD:main
           fi
           echo "evidence_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
