@@ -61,8 +61,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 0.00037463394675925924,
-        "observation_age_days": 2.985323772222222
+        "retrieval_age_days": 0.09404990482638889,
+        "observation_age_days": 3.078999043101852
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -2478,8 +2478,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 2.985323772222222,
-        "observation_age_days": 2.985323772222222,
+        "retrieval_age_days": 3.078999043101852,
+        "observation_age_days": 3.078999043101852,
         "required_for_effective_input": true,
         "identity_required_races": 35,
         "identity_freshness_basis": "reviewed_current_candidate_registry"
@@ -2523,8 +2523,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 6.43882584880787,
-        "observation_age_days": 8.985323772222223
+        "retrieval_age_days": 6.5325011196875,
+        "observation_age_days": 9.078999043101852
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -2571,8 +2571,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 11.01935155,
-        "observation_age_days": 11.985323772222223
+        "retrieval_age_days": 11.11302682087963,
+        "observation_age_days": 12.078999043101852
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -2609,8 +2609,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 0.0003381145717592593,
-        "observation_age_days": 38.98532377222222
+        "retrieval_age_days": 0.09401338545138889,
+        "observation_age_days": 39.07899904310185
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -2653,8 +2653,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 6.997650161111111,
-        "observation_age_days": 249.98532377222222
+        "retrieval_age_days": 7.091325431990741,
+        "observation_age_days": 250.07899904310185
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -2669,15 +2669,15 @@
       "freshness": {
         "policy_version": "domain-freshness-v2",
         "domain": "ratings",
-        "status": "fresh",
+        "status": "stale_retrieval",
         "limits_days": {
           "retrieval": 14,
           "observation": 45
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 13.933323919872686,
-        "observation_age_days": 22.985323772222223
+        "retrieval_age_days": 14.026999190752313,
+        "observation_age_days": null
       },
       "production_role": "disabled",
       "hard_dependency": false,
@@ -2698,7 +2698,7 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 13.985323772222223,
+        "retrieval_age_days": 14.07899904310185,
         "observation_age_days": null
       },
       "production_role": "disabled",
@@ -2748,7 +2748,7 @@
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-10-05T23:38:51.993368+00:00",
+  "checked_at": "2026-10-06T01:53:45.555284+00:00",
   "evidence_fingerprint": {
     "sha256": "0a732cc77040d227b552920ec248258920efa265a025728903c95f0893bf371a",
     "manifests": {
@@ -2764,8 +2764,8 @@
       "wiki_ratings.json": "130fec70c426abab9027a85f83c930d796c6a523c6edc9aabe40a3942585c4fd",
       "alaska_rcv_sources.json": "a7e246f20675678c0e7ae04f0e2fe0f865a4a47fbcef4af88b78c248612ef2ec"
     },
-    "generated_at": "2026-10-05T23:38:51.997333+00:00"
+    "generated_at": "2026-10-06T01:53:45.559364+00:00"
   },
   "PUBLIC_LIVE_ENABLED": false,
-  "identity_checked_at": "2026-10-05T23:38:51.997341+00:00"
+  "identity_checked_at": "2026-10-06T01:53:45.559372+00:00"
 }
