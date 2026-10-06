@@ -143,7 +143,8 @@ jobs:
           print("resume sealed evidence ok", bundle.get("evidence_bundle_id"), as_of)
           PY
           BUNDLE_FILE="$(python -c "import json; p=json.load(open('data/manifests/evidence_bundle_latest.json')); print('data/manifests/'+p['manifest'])")"
-          python -m midterms.cli verify-evidence-bundle --path "$BUNDLE_FILE" --strict
+          BUNDLE_ID="$(python -c "import json; print(json.load(open('data/manifests/evidence_bundle_latest.json'))['evidence_bundle_id'])")"
+          python -m midterms.cli verify-evidence-bundle --path "$BUNDLE_FILE" --expected-id "$BUNDLE_ID"
       - name: Strict publication-domain eligibility
         # Same gate as the rebuild job. Fail here (cheap) rather than after
         # evidence seal + tests when registry/timeline freshness is wrong.
