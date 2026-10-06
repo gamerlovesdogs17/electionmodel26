@@ -81,6 +81,7 @@ jobs:
           print("as_of registry boundary ok", as_of, "reviewed", reviewed, "demo", demo)
           PY
       - name: Materialize presidential prior snapshot for AS_OF
+        if: inputs.resume_run_id == ''
         run: |
           python - <<'PY'
           from datetime import date
@@ -107,14 +108,17 @@ jobs:
       - name: Fail-closed source and forecast coverage gate
         run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict
       - name: Verify official Alaska source archive
+        if: inputs.resume_run_id == ''
         run: python -m midterms.cli prepare-alaska-rcv
       - name: Refresh cheap exceptional validation artifacts
+        if: inputs.resume_run_id == ''
         run: |
           python -m midterms.cli validate-non-major-adapter --current-as-of "$AS_OF"
           python -m midterms.cli validate-alaska-rcv --as-of "$AS_OF"
       - name: Strict exceptional-model and coverage preflight
         run: python -m midterms.cli verify-exceptional-models --strict
       - name: Synchronize compliance readiness metadata
+        if: inputs.resume_run_id == ''
         run: python -m midterms.cli sync-compliance-status --write
       - name: Seal and strictly verify evidence bundle
         if: inputs.resume_run_id == ''
@@ -185,14 +189,29 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/raw/external data/normalized data/manifests \
-            data/artifacts/source_readiness_latest.json \
-            data/artifacts/current_race_poll_coverage_v0923.json \
-            data/artifacts/evidence_eligibility_latest.json \
-            data/artifacts/non_major_adapter_validation_latest.json \
-            data/artifacts/alaska_rcv_validation_latest.json \
-            data/artifacts/historical_evidence_equivalence_v0923.json \
-            BLUEPRINT_COMPLIANCE_AUDIT.json
+          if [[ -n "${{ inputs.resume_run_id }}" ]]; then
+            # Resume must keep the sealed warehouse identity stable. Allow only
+            # eligibility/readiness artifacts — never normalized/raw mutations.
+            if ! git diff --quiet -- data/normalized data/raw; then
+              echo "resume path mutated sealed warehouse inputs; refusing commit" >&2
+              git diff --stat -- data/normalized data/raw >&2
+              exit 1
+            fi
+            git add data/manifests/evidence_eligibility.json \
+              data/artifacts/evidence_eligibility_latest.json \
+              data/artifacts/source_readiness_latest.json \
+              data/artifacts/current_race_poll_coverage_v0923.json \
+              BLUEPRINT_COMPLIANCE_AUDIT.json
+          else
+            git add data/raw/external data/normalized data/manifests \
+              data/artifacts/source_readiness_latest.json \
+              data/artifacts/current_race_poll_coverage_v0923.json \
+              data/artifacts/evidence_eligibility_latest.json \
+              data/artifacts/non_major_adapter_validation_latest.json \
+              data/artifacts/alaska_rcv_validation_latest.json \
+              data/artifacts/historical_evidence_equivalence_v0923.json \
+              BLUEPRINT_COMPLIANCE_AUDIT.json
+          fi
           if ! git diff --cached --quiet; then
             git commit -m "evidence: seal research snapshot ${AS_OF} [no-model-fit]"
             # Concurrent pushes (including manual main commits) must not fail the seal.

@@ -196,3 +196,39 @@ def test_falsy_empty_dict_is_not_none():
     r = rating_for("Anyone", lookup={})
     assert isinstance(r, PollsterRating)
     assert r.source == "prior_default"
+
+
+def test_living_ratings_retrieval_manifest_beats_checkout_mtime(tmp_path, monkeypatch):
+    """Git checkout rewrites mtimes; sealed retrieval day must keep snapshot stable."""
+    import os
+    from datetime import datetime, timezone
+
+    from midterms.evidence import ratings as ratings_mod
+    from midterms.evidence.ratings import (
+        living_ratings_retrieval_available_at,
+        seal_living_pollster_ratings_retrieval,
+    )
+
+    raw = tmp_path / "raw" / "external"
+    raw.mkdir(parents=True)
+    manifests = tmp_path / "manifests"
+    manifests.mkdir()
+    fte = raw / "fte_pollster_ratings_combined.csv"
+    vh = raw / "votehub_pollster_scorecards.json"
+    fte.write_text("pollster,numeric_grade,bias_ppm,error_ppm\nEmerson,2.7,0,1.0\n", encoding="utf-8")
+    vh.write_text(
+        json.dumps([{"pollster": "Emerson", "grade": "A", "house_effect_dem_pp": 0.0}]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(ratings_mod, "RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(ratings_mod, "MANIFESTS_DIR", manifests)
+    monkeypatch.setattr(ratings_mod, "LIVING_RATINGS_RETRIEVAL_MANIFEST", manifests / "living_pollster_ratings_retrieval.json")
+    monkeypatch.setattr(ratings_mod, "ROOT", tmp_path)
+
+    seal_living_pollster_ratings_retrieval(retrieved_at="2026-10-05")
+    future = datetime.fromisoformat("2026-10-06T12:00:00+00:00").timestamp()
+    os.utime(fte, (future, future))
+    os.utime(vh, (future, future))
+    assert living_ratings_retrieval_available_at(fte) == "2026-10-05"
+    assert living_ratings_retrieval_available_at(vh) == "2026-10-05"
+

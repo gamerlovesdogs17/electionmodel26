@@ -215,8 +215,12 @@ def seal_evidence(*, election_id: str, as_of: str) -> dict[str, Any]:
                 f"{row['domain']}={row['status']}" for row in readiness["blockers"]
             )
         )
+    from midterms.evidence.ratings import seal_living_pollster_ratings_retrieval
     from midterms.evidence.warehouse import Warehouse
 
+    # Pin living ratings retrieval before fingerprinting so git checkout mtimes
+    # cannot change current_snapshot_id after the seal commit.
+    seal_living_pollster_ratings_retrieval(retrieved_at=as_of)
     warehouse = Warehouse(ensure_fixtures=False)
     current = warehouse.build_as_of(as_of, election_id)
     historical: dict[str, str] = {}

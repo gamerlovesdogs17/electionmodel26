@@ -21,7 +21,7 @@ from typing import Any
 
 import pandas as pd
 
-from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
+from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR, ROOT
 from midterms.evidence.candidates import canonicalize_pollster, normalize_candidate_key
 
 GRADE_QUALITY = {
@@ -42,6 +42,12 @@ DEFAULT_EXTRA_SD = 2.2
 # historical publication date). Historical backtests before this date use
 # prior_default unless a vintaged ratings snapshot is present.
 RATINGS_SNAPSHOT_FLOOR = date(2024, 1, 1)
+
+# Git checkout rewrites filesystem mtimes, so living dumps must pin retrieval
+# time in a tracked manifest. Using raw mtime after clone falsely marks the
+# dump as "future" relative to a sealed as_of and breaks snapshot identity.
+LIVING_RATINGS_RETRIEVAL_MANIFEST = MANIFESTS_DIR / "living_pollster_ratings_retrieval.json"
+LIVING_RATINGS_RETRIEVAL_SCHEMA = "living-pollster-ratings-retrieval-v1"
 
 # Availability comes from the public source repository commit that introduced
 # the exact checked-in bytes, never from the vintage-looking filename.
@@ -218,6 +224,89 @@ def _vintaged_ratings_path() -> Path:
     return RAW_DIR / "external" / "pollster_ratings_vintages.json"
 
 
+def _file_sha256(path: Path) -> str:
+    # Normalize newlines so Windows checkout CRLF matches the git blob / Linux CI.
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
+def _mtime_available_at(path: Path) -> str:
+    return datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).date().isoformat()
+
+
+def living_ratings_retrieval_available_at(path: Path) -> str:
+    """Return sealed retrieval day for a living ratings dump, else file mtime day.
+
+    Prefer the tracked retrieval manifest when the on-disk bytes still match the
+    sealed content hash. Fall back to mtime only for local/dev trees that have
+    not sealed living ratings yet.
+    """
+    path = path.resolve()
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    content_sha = _file_sha256(path)
+    if LIVING_RATINGS_RETRIEVAL_MANIFEST.is_file():
+        try:
+            payload = json.loads(
+                LIVING_RATINGS_RETRIEVAL_MANIFEST.read_text(encoding="utf-8")
+            )
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+        for entry in (payload.get("sources") or {}).values():
+            if not isinstance(entry, dict):
+                continue
+            if str(entry.get("content_sha256") or "") != content_sha:
+                continue
+            retrieved = str(entry.get("retrieved_at") or "")[:10]
+            if retrieved:
+                return retrieved
+    return _mtime_available_at(path)
+
+
+def seal_living_pollster_ratings_retrieval(
+    *,
+    retrieved_at: str | date,
+    fte_path: Path | None = None,
+    votehub_path: Path | None = None,
+) -> dict[str, Any]:
+    """Pin living FTE/VoteHub retrieval time so checkout mtimes cannot drift identity."""
+    retrieved = (
+        retrieved_at.isoformat()
+        if isinstance(retrieved_at, date)
+        else str(retrieved_at)[:10]
+    )
+    date.fromisoformat(retrieved)  # validate
+    fte_path = (fte_path or _fte_ratings_path()).resolve()
+    votehub_path = (votehub_path or _votehub_scorecards_path()).resolve()
+    sources: dict[str, Any] = {}
+    for key, path in (
+        ("fte_pollster_ratings_combined", fte_path),
+        ("votehub_pollster_scorecards", votehub_path),
+    ):
+        if not path.is_file():
+            sources[key] = {"status": "missing", "path": path.as_posix()}
+            continue
+        try:
+            rel = path.relative_to(ROOT.resolve())
+        except ValueError:
+            rel = path
+        sources[key] = {
+            "status": "sealed",
+            "path": rel.as_posix().replace("\\", "/"),
+            "content_sha256": _file_sha256(path),
+            "retrieved_at": retrieved,
+        }
+    payload = {
+        "schema_version": LIVING_RATINGS_RETRIEVAL_SCHEMA,
+        "retrieved_at": retrieved,
+        "sources": sources,
+    }
+    MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
+    LIVING_RATINGS_RETRIEVAL_MANIFEST.write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8",
+    )
+    return payload
+
+
 def _neutral_rating(pollster: str) -> PollsterRating:
     canon = canonicalize_pollster(pollster)
     return PollsterRating(
@@ -248,12 +337,12 @@ def load_votehub_scorecards(path: Path | None = None) -> pd.DataFrame:
     df["pollster_key"] = df["pollster"].map(lambda x: normalize_candidate_key(canonicalize_pollster(x)))
     df["quality_weight"] = df["grade"].map(lambda g: GRADE_QUALITY.get(str(g), DEFAULT_QUALITY))
     df["source"] = "votehub_pollster_scorecards"
-    # Living page: retrieval mtime is NOT a historical publication date.
-    mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).date().isoformat()
+    # Living page: prefer sealed retrieval day over checkout-volatile mtime.
+    retrieved = living_ratings_retrieval_available_at(path)
     if "available_at" not in df.columns or df["available_at"].isna().all():
-        df["available_at"] = mtime
-    df["provenance"] = "living_scorecard_mtime"
-    df["retrieval_mtime"] = mtime
+        df["available_at"] = retrieved
+    df["provenance"] = "living_scorecard_retrieval"
+    df["retrieval_mtime"] = retrieved
     return df
 
 
@@ -264,7 +353,7 @@ def load_fte_ratings(path: Path | None = None) -> pd.DataFrame:
     df = pd.read_csv(path)
     if df.empty:
         return df
-    mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).date().isoformat()
+    retrieved = living_ratings_retrieval_available_at(path)
     out = pd.DataFrame(
         {
             "pollster": df["pollster"],
@@ -280,10 +369,10 @@ def load_fte_ratings(path: Path | None = None) -> pd.DataFrame:
             "herding_error_pct": None,
             "within_moe_pct": None,
             "source": "fivethirtyeight_pollster_ratings",
-            # Living dump without row vintages: stamp retrieval mtime + provenance flag.
-            "available_at": mtime,
-            "provenance": "living_csv_mtime",
-            "retrieval_mtime": mtime,
+            # Living dump without row vintages: sealed retrieval day (not checkout mtime).
+            "available_at": retrieved,
+            "provenance": "living_csv_retrieval",
+            "retrieval_mtime": retrieved,
         }
     )
     # Prefer VoteHub for house effects; FTE bias_ppm scale differs — zero house prior from FTE
