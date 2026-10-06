@@ -1,13 +1,13 @@
 {
-  "run_id": "senate-2026_2026-10-05_ensemble_stack+limited_validation_exception_model-v1+limited_validation_alaska_rcv_model-v1_20260901",
+  "run_id": "senate-2026_2026-10-05_ensemble_stack_43f06d4b6b_20260901",
   "model_version": "senate-hierarchical-v0.9.23",
-  "snapshot_id": "ec1632af716f9510cf019e3bc64604dd1011e4d22ef8e670e98c9ac606b78344",
+  "snapshot_id": "a359430ff1fb4dae6e8a81bc77a62dbc332041dbc14a94f5cec23cdb86f92cae",
   "evidence_fingerprint": {
-    "sha256": "55240af577a96b609d6f273c1d21192c9a2e3cf644c329f226fa287540afd928",
+    "sha256": "0a732cc77040d227b552920ec248258920efa265a025728903c95f0893bf371a",
     "manifests": {
       "fundraising_shares.json": "402cec51d741875fe238d02039760c62f2c611848d5fe31edb3f1fba2a181905",
       "economics_vintages.json": "565f2a4b280d9d80f4ebed0efeecef8a1b49a362e6381a2afb2cc7441c51ecca",
-      "pres_approval.json": "e092c62c6b7b8e4a7ecfb6ab47e2281ca118f664864272ab30860828e7c6cedd",
+      "pres_approval.json": "263f0dc0d365b5e8cf2f3940c7259f0fee67f6c42c2cee277aa7cb8c461ded27",
       "demographic_vintages.json": "e8be3309a8ed8626010b81cc1ce646d950ccaf32b3ad662a964d0fe086d53690",
       "candidate_timeline.json": "22eceda5c4dbba75e448439b1b7cfb6b1523b60c69edcf8d1dac006160732d91",
       "expert_ratings.json": "626aba81604531c17b221c41165c3cff6cb35ea4c9fd613672fdfc1da5b08ad6",
@@ -17,13 +17,13 @@
       "wiki_ratings.json": "130fec70c426abab9027a85f83c930d796c6a523c6edc9aabe40a3942585c4fd",
       "alaska_rcv_sources.json": "a7e246f20675678c0e7ae04f0e2fe0f865a4a47fbcef4af88b78c248612ef2ec"
     },
-    "generated_at": "2026-10-05T02:03:58.758443+00:00"
+    "generated_at": "2026-10-06T03:08:06.229840+00:00"
   },
   "prior_store_sha256": "18395f9596a2bf614bb7713de489609a52193fd980314d62caeaa05901ff10bc",
   "market_store_sha256": null,
   "market_audit_sha256": null,
-  "stack_artifact_sha256": "23c93767e91fbdfd96bdd8d1ff63e0066fdb53e37a846378d0b22a4128e4167a",
-  "forecast_sha256": "ddd2a1946c185df94a3c7d38ea3c13d40b4d05cb7c2cb783bb982d91f1acfbd1",
+  "stack_artifact_sha256": "c4d4ab0e1ca88a45eede52d2ecae8b10ee1ad0fe3851776bb6a76131baa21110",
+  "forecast_sha256": "462f89194ab9997c20cfaaea4533cc34a875b012cd0829abf24d9d0a4a484ebe",
   "rows": [
     {
       "subject_id": "senate-2026-AL",
@@ -84,21 +84,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -25.017043189183106,
+        "value": -24.943877707684475,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -25.017043189183106,
+        "value": -24.943877707684475,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.798062317808814,
+        "value": 5.67187121515337,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -155,7 +155,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.798062317808814,
+          "value": 5.67187121515337,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -245,21 +245,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -23.09716411892491,
+        "value": -23.01772767495397,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -23.09716411892491,
+        "value": -23.01772767495397,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.724116657534658,
+        "value": 5.638309538819057,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -281,7 +281,7 @@
         },
         {
           "name": "fundraising_logit",
-          "value": -2.5201382219859148,
+          "value": -2.520138221985915,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -316,7 +316,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.724116657534658,
+          "value": 5.638309538819057,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -406,21 +406,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 21.84161652645004,
+        "value": 21.892276881883088,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 21.84161652645004,
+        "value": 21.892276881883088,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.820548278923948,
+        "value": 7.759411483255442,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -470,7 +470,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.820548278923948,
+          "value": 7.759411483255442,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -553,28 +553,28 @@
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 26.844019294541685,
+        "value": 26.84401929454169,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 25.878979150676237,
+        "value": 25.717687347614635,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 25.878979150676237,
+        "value": 25.717687347614635,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.997416597330601,
+        "value": 7.880824449430419,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -596,7 +596,7 @@
         },
         {
           "name": "fundraising_logit",
-          "value": 4.510354652660292,
+          "value": 4.5103546526602925,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -624,7 +624,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.997416597330601,
+          "value": 7.880824449430419,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -714,21 +714,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 8.912829963890877,
+        "value": 8.984037182608636,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 8.912829963890877,
+        "value": 8.984037182608636,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.204794647961006,
+        "value": 5.114978568664656,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -750,7 +750,7 @@
         },
         {
           "name": "fundraising_logit",
-          "value": 2.5735619971092407,
+          "value": 2.573561997109241,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -778,14 +778,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 9.487942349671098,
+          "value": 9.4879423496711,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.204794647961006,
+          "value": 5.114978568664656,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -812,7 +812,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 5.785487674410501,
+      "effective_sample_size": 5.785487674410502,
       "observation_count": 14,
       "exact_overlay_chain": true
     },
@@ -875,21 +875,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 21.152943668264268,
+        "value": 21.372793205953382,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 21.152943668264268,
+        "value": 21.372793205953382,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.818241354337208,
+        "value": 7.721262039034019,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -911,7 +911,7 @@
         },
         {
           "name": "fundraising_logit",
-          "value": 3.249906806978648,
+          "value": 3.2499068069786485,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -939,7 +939,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.818241354337208,
+          "value": 7.721262039034019,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1029,21 +1029,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -1.948200437805254,
+        "value": -1.9030927235235426,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -1.948200437805254,
+        "value": -1.9030927235235426,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.199593992623593,
+        "value": 5.116904310170345,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1093,14 +1093,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 1.3306810412640624,
+          "value": 1.3306810412640622,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.199593992623593,
+          "value": 5.116904310170345,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1190,21 +1190,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -4.4292894203034,
+        "value": -4.284560498059327,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -4.4292894203034,
+        "value": -4.284560498059327,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.7042044589953615,
+        "value": 5.713187137400749,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1261,7 +1261,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.7042044589953615,
+          "value": 5.713187137400749,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1351,21 +1351,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -26.913910060976455,
+        "value": -26.73625805801602,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -26.913910060976455,
+        "value": -26.73625805801602,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.989689293091431,
+        "value": 7.9583649244036945,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1415,7 +1415,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.989689293091431,
+          "value": 7.9583649244036945,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1498,28 +1498,28 @@
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -23.151822775620317,
+        "value": -21.151822775620317,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -21.801851783965017,
+        "value": -19.578919081944207,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -21.801851783965017,
+        "value": -19.578919081944207,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.938651012478184,
+        "value": 7.925251598115075,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1534,14 +1534,14 @@
         },
         {
           "name": "incumbency",
-          "value": -2.0,
+          "value": 0.0,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
         },
         {
           "name": "fundraising_logit",
-          "value": -3.881036268765901,
+          "value": -3.8810362687659015,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1569,7 +1569,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.938651012478184,
+          "value": 7.925251598115075,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1659,21 +1659,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 4.040566434530428,
+        "value": 3.953338263657943,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 4.040566434530428,
+        "value": 3.953338263657943,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.410319781915259,
+        "value": 5.326644295407069,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1730,7 +1730,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.410319781915259,
+          "value": 5.326644295407069,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1820,21 +1820,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 31.170037657197966,
+        "value": 31.04218752537391,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 31.170037657197966,
+        "value": 31.04218752537391,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.490136490421899,
+        "value": 5.393137936232447,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1891,7 +1891,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.490136490421899,
+          "value": 5.393137936232447,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1981,21 +1981,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 3.891589680967823,
+        "value": 3.8789291541746103,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 3.891589680967823,
+        "value": 3.8789291541746103,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.227306772462092,
+        "value": 5.107088049417806,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2052,7 +2052,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.227306772462092,
+          "value": 5.107088049417806,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2079,7 +2079,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 14.482700635411906,
+      "effective_sample_size": 14.482700635411907,
       "observation_count": 33,
       "exact_overlay_chain": true
     },
@@ -2142,21 +2142,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 6.421384349767169,
+        "value": 6.441155928727317,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 6.421384349767169,
+        "value": 6.441155928727317,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.549216220013444,
+        "value": 5.4444764700269745,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2213,7 +2213,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.549216220013444,
+          "value": 5.4444764700269745,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2303,21 +2303,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -11.964031883104484,
+        "value": -11.842063180715757,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -11.964031883104484,
+        "value": -11.842063180715757,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.662434085080359,
+        "value": 5.646302809347601,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2374,7 +2374,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.662434085080359,
+          "value": 5.646302809347601,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2464,21 +2464,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 6.894543259937808,
+        "value": 6.798740558174077,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 6.894543259937808,
+        "value": 6.798740558174077,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.243693229789368,
+        "value": 5.178341690233806,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2535,7 +2535,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.243693229789368,
+          "value": 5.178341690233806,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2625,21 +2625,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 19.981866341333294,
+        "value": 19.761137103636774,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 19.981866341333294,
+        "value": 19.761137103636774,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.99311822186351,
+        "value": 7.997211461847993,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2689,7 +2689,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.99311822186351,
+          "value": 7.997211461847993,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2779,21 +2779,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 18.101334078882317,
+        "value": 18.118928048992313,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 18.101334078882317,
+        "value": 18.118928048992313,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 6.145521636054088,
+        "value": 6.071340256996398,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2850,7 +2850,7 @@
         },
         {
           "name": "core_scale",
-          "value": 6.145521636054088,
+          "value": 6.071340256996398,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2940,21 +2940,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 7.536502559526851,
+        "value": 7.626878226541958,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 7.536502559526851,
+        "value": 7.626878226541958,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.627692369987255,
+        "value": 5.540402011946455,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3004,14 +3004,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 10.548973575533104,
+          "value": 10.548973575533102,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.627692369987255,
+          "value": 5.540402011946455,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3038,7 +3038,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 16.659097036622256,
+      "effective_sample_size": 16.65909703662226,
       "observation_count": 35,
       "exact_overlay_chain": true
     },
@@ -3101,21 +3101,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -33.970286685208336,
+        "value": -33.73362698202577,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -33.970286685208336,
+        "value": -33.73362698202577,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.876577806411888,
+        "value": 7.811842928886279,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3165,7 +3165,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.876577806411888,
+          "value": 7.811842928886279,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3255,21 +3255,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 26.92069443898859,
+        "value": 26.947480341201953,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 26.92069443898859,
+        "value": 26.947480341201953,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.944375786155983,
+        "value": 7.878267181284158,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3319,7 +3319,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.944375786155983,
+          "value": 7.878267181284158,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3409,21 +3409,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 24.78963701308369,
+        "value": 24.698433778233927,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 24.78963701308369,
+        "value": 24.698433778233927,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.82277953931964,
+        "value": 5.771765143081162,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3480,7 +3480,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.82277953931964,
+          "value": 5.771765143081162,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3570,21 +3570,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -5.574624904436781,
+        "value": -5.423855765505587,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -5.574624904436781,
+        "value": -5.423855765505587,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.645893392298519,
+        "value": 5.529262511239491,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3641,7 +3641,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.645893392298519,
+          "value": 5.529262511239491,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3731,21 +3731,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -27.456007858791594,
+        "value": -27.339307563245807,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -27.456007858791594,
+        "value": -27.339307563245807,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.8631372692752,
+        "value": 5.757162094425005,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3802,7 +3802,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.8631372692752,
+          "value": 5.757162094425005,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3885,28 +3885,28 @@
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -7.51013838356124,
+        "value": -5.51013838356124,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -0.33112218685866146,
+        "value": 0.41563078797919506,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -0.33112218685866146,
+        "value": 0.41563078797919506,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.276954090668076,
+        "value": 5.175318318536606,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3921,7 +3921,7 @@
         },
         {
           "name": "incumbency",
-          "value": -2.0,
+          "value": 0.0,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3963,7 +3963,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.276954090668076,
+          "value": 5.175318318536606,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4053,21 +4053,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 19.71231463612041,
+        "value": 19.839880055627155,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 19.71231463612041,
+        "value": 19.839880055627155,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.769696648226082,
+        "value": 5.68325815471192,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4124,7 +4124,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.769696648226082,
+          "value": 5.68325815471192,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4214,21 +4214,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -41.85100417261743,
+        "value": -41.580048658206344,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -41.85100417261743,
+        "value": -41.580048658206344,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 8.02798202331602,
+        "value": 8.033480306448162,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4278,7 +4278,7 @@
         },
         {
           "name": "core_scale",
-          "value": 8.02798202331602,
+          "value": 8.033480306448162,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4368,21 +4368,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -47.77164194030228,
+        "value": -47.73395401858903,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -47.77164194030228,
+        "value": -47.73395401858903,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.898232691834669,
+        "value": 7.825367210384204,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4432,7 +4432,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.898232691834669,
+          "value": 7.825367210384204,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4522,21 +4522,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 0.7848257305348032,
+        "value": 0.9051450672309628,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 0.7848257305348032,
+        "value": 0.9051450672309628,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.331076897482057,
+        "value": 5.280981138241701,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4593,7 +4593,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.331076897482057,
+          "value": 5.280981138241701,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4683,21 +4683,21 @@
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -5.544618047362874,
+        "value": -5.420229912095375,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -5.544618047362874,
+        "value": -5.420229912095375,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.261145404810361,
+        "value": 5.174785462826196,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4754,7 +4754,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.261145404810361,
+          "value": 5.174785462826196,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"

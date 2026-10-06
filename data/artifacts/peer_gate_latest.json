@@ -3,24 +3,24 @@
   "control_ok": false,
   "control_soft": true,
   "control_gaps": {
-    "ddhq": 0.39782000000000006,
-    "kalshi": 0.28871108910891097
+    "ddhq": 0.39783999999999997,
+    "kalshi": 0.2887310891089109
   },
-  "primary_control_gap": 0.28871108910891097,
-  "max_abs_control_gap": 0.39782000000000006,
+  "primary_control_gap": 0.2887310891089109,
+  "max_abs_control_gap": 0.39783999999999997,
   "race_scores": {
     "ddhq": {
       "n": 9,
-      "brier_vs_peer_favorite": 0.24721232777777777,
-      "mae": 0.18267777777777777,
-      "crps_proxy": 0.18267777777777777,
+      "brier_vs_peer_favorite": 0.25808710004444446,
+      "mae": 0.19322,
+      "crps_proxy": 0.19322,
       "ok": false
     },
     "kalshi": {
       "n": 7,
-      "brier_vs_peer_favorite": 0.07234866634285717,
-      "mae": 0.08039167664059821,
-      "crps_proxy": 0.08039167664059821,
+      "brier_vs_peer_favorite": 0.06251146405714285,
+      "mae": 0.07157453378345535,
+      "crps_proxy": 0.07157453378345535,
       "ok": true
     }
   },
@@ -33,7 +33,7 @@
   "core_method": "pymc",
   "generic_ballot": 6.184921674810612,
   "reasons": [
-    "control gap vs primary peer large (gap=0.289 > 0.25); gaps={'ddhq': 0.39782000000000006, 'kalshi': 0.28871108910891097} \u2014 informational under blueprint \u00a72 (peers not averaged)",
+    "control gap vs primary peer large (gap=0.289 > 0.25); gaps={'ddhq': 0.39783999999999997, 'kalshi': 0.2887310891089109} \u2014 informational under blueprint \u00a72 (peers not averaged)",
     "null margins in races: ['senate-2026-AK']"
   ],
   "thresholds": {

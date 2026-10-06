@@ -1,0 +1,78 @@
+{
+  "audit_item": "P3",
+  "shadow_id": "shadow_senate-2026_2026-10-05_senate-hierarchical-v0.9.23_20261006T031802Z",
+  "mode": "prospective_live",
+  "election_id": "senate-2026",
+  "run_id": "senate-2026_2026-10-05_ensemble_stack_43f06d4b6b_20260901",
+  "as_of": "2026-10-05",
+  "model_version": "senate-hierarchical-v0.9.23",
+  "code_commit": "8c7c03c9793593fe06929c689fd22bc49cf8039f",
+  "frozen_at": "2026-10-06T03:18:02.336213+00:00",
+  "evaluation": null,
+  "environment": {
+    "schema_version": "environment-lock-v2",
+    "python": "3.11.16 (main, Aug 13 2026, 02:46:14) [GCC 13.3.0]",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "packages": {
+      "numpy": "1.26.4",
+      "pandas": "2.3.3",
+      "scipy": "1.13.1",
+      "pymc": "5.25.1",
+      "pytensor": "2.31.7",
+      "arviz": "0.19.0",
+      "matplotlib": "3.10.9",
+      "pyarrow": "16.1.0"
+    },
+    "numerical_backend": "Build Dependencies:\n  blas:\n    detection method: pkgconfig\n    found: true\n    include directory: /usr/local/include\n    lib directory: /usr/local/lib\n    name: openblas64\n    openblas configuration: USE_64BITINT=1 DYNAMIC_ARCH=1 DYNAMIC_OLDER= NO_CBLAS=\n      NO_LAPACK= NO_LAPACKE= NO_AFFINITY=1 USE_OPENMP= HASWELL MAX_THREADS=2\n    pc file directory: /usr/local/lib/pkgconfig\n    version: 0.3.23.dev\n  lapack:\n    detection method: internal\n    found: true\n    include directory: unknown\n    lib directory: unknown\n    name: dep140213194937296\n    openblas configuration: unknown\n    pc file directory: unknown\n    version: 1.26.4\nCompilers:\n  c:\n    args: -fno-strict-aliasing\n    commands: cc\n    linker: ld.bfd\n    linker args: -Wl,--strip-debug, -fno-strict-aliasing\n    name: gcc\n    version: 10.2.1\n  c++:\n    commands: c++\n    linker: ld.bfd\n    linker args: -Wl,--strip-debug\n    name: gcc\n    version: 10.2.1\n  cython:\n    commands: cython\n    linker: cython\n    name: cython\n    version: 3.0.8\nMachine Information:\n  build:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: linux\n  host:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: linux\nPython Information:\n  path: /opt/python/cp311-cp311/bin/python\n  version: '3.11'\nSIMD Extensions:\n  baseline:\n  - SSE\n  - SSE2\n  - SSE3\n  found:\n  - SSSE3\n  - SSE41\n  - POPCNT\n  - SSE42\n  - AVX\n  - F16C\n  - FMA3\n  - AVX2\n  not found:\n  - AVX512F\n  - AVX512CD\n  - AVX512_KNL\n  - AVX512_KNM\n  - AVX512_SKX\n  - AVX512_CLX\n  - AVX512_CNL\n  - AVX512_ICL",
+    "dependency_lock_sha256": "45eb394ea80dd96ec9101a1ca40ad28822d7d6442f515bad7ed2e9c9a11ac34f",
+    "dependency_files": [
+      "pyproject.toml"
+    ],
+    "locked_at": "2026-10-06T03:18:02.387511+00:00"
+  },
+  "domain_hashes": {
+    "alaska_rcv_2026.json": "80e59e38478541b25bfb9c66402f741f32d64a942608d335762ed79eb9312bbb",
+    "candidate_ballot_source_inventory.parquet": "4977656eba24c1fecc4e50f2fbf5307af8b99ac41e6e10623038700a16790d3f",
+    "candidate_timeline.parquet": "279a857e472b152728f535964ab10f72a7d9422191dee9fb92fcd84924fa5075",
+    "demographic_vintages.parquet": "563cba0013170f094c624bb0637344f78f02565efe9844ae248feba4303a6e3c",
+    "demography.parquet": "31c1431bb96d87e3ff9b20ab894f4c9399b111ae667560edf642b827e50153fa",
+    "economics_vintages.parquet": "73e6335519016209ba39a1e4268113b678b6365f9eef89ace2c6f94e74e342c3",
+    "expert_ratings.parquet": "552c2e9e20cbd3cc2365aaef0f93d916f1469513287212b5f2316d91d02eb3a7",
+    "fec_candidate_committees.parquet": "1b6e37a570748129fc9aab586bd074fbe18e993adfc0dae12830e1620855038c",
+    "fec_form3_reports.parquet": "764da2ef29623a37ed1a01511dd33c074dff5583bbc5b77128470b28e4c0c285",
+    "fundraising_shares.parquet": "655d4871a3345bd73d58a9ae44ceb54d0e8d453f2daa6185bda93d66590fab88",
+    "fundraising_shares_candidate_specific.parquet": "c6a58633ab7ea03a503dc7c36bf2557d6f24a488f9d7bb64f081a99bdadbe021",
+    "markets.parquet": "88333a7e079b2b9daf5c209129d04ce6ee30d6bd2e286c30e7d7e95ec6e4f8e9",
+    "markets_control.json": "b516514faf66e06e8009bf1b7c6489b09835eb6871cb3757f73eb33cbeefa1dc",
+    "markets_mapping_audit.json": "3c2dddabd016acdf763cec52068c524073f57bb7422e3f09644c04fe07caab02",
+    "peer_snapshots.json": "0efc062e7d43be3924786fcc2d5ea3d0f82437597266d2fb5368506163f09b22",
+    "polls.parquet": "72aeb1e96a5f272c6ab2cfac2a234cdca7735e888bddf399297c95be1e102d7a",
+    "polls_fte_historical.parquet": "c3458f7630a4b6942b28dfa824f8a9e320984992f4a348df54391bd13f0a82b6",
+    "polls_historical.parquet": "c6093d35903af0b88ccf73199f7173f67c2a017817dbd1791120c714343b0942",
+    "polls_live_votehub.parquet": "a600dfa17c2560c7b6f26262d2768fd117cd6104d5b6ddc42635abf96895a82f",
+    "polls_votehub_ccby.parquet": "26fde7cfe303b67623b6a446018b64a82983922bb27a65ae091313ad28af006a",
+    "pollster_ratings.parquet": "51c5fb370e8480d60518007c9cdf72094e0689a4217e17dd0af8a8ae3396acf4",
+    "pres_approval.parquet": "1bb672dd7e97598cfcb50812d5170a2d8ab10ef304911914dfec373275a4519b",
+    "presidential_vote_counts.parquet": "0cd22c4c5a49b8077af5b5893d5aa63ab46619d380fe835c6852757e6ae14fd7",
+    "races.parquet": "8c87381e6136bc52ead02b3d4ef77c585a5290fc3412b4432d6fbac93356ce82",
+    "races_official.parquet": "f76b1470c0fed6bfae67424d3222bebca458f474c0039d515db03424848c746d",
+    "results.parquet": "825d8325b945a1f7514e2bfa6834142618e4ef51916280387700209d7717a9cb",
+    "results_certified.parquet": "5c6941809c6ecb8ae5374202d3a8af819d64e494f8b613a249b8b879cc67a5dc"
+  },
+  "file_hashes": {
+    "forecast.json": "462f89194ab9997c20cfaaea4533cc34a875b012cd0829abf24d9d0a4a484ebe",
+    "validation/stack_weights_oof.json": "c4d4ab0e1ca88a45eede52d2ecae8b10ee1ad0fe3851776bb6a76131baa21110",
+    "validation/nested_component_loo.json": "f6a806ef07591866bb54b00ad6de6e726904a312e1acdd02056c389d86e7f9de",
+    "numerical_quality.json": "88aa630b9db37bc254c704876fda47ef30040af8fa16492901070d77e300575d",
+    "AUDIT_NOTICE.md": "61cdb199c1c232b513836b0ac5854dea4cd9df1e36c83c033964c6122d6dde6d"
+  },
+  "paths": {
+    "shadow_dir": "data/shadow/shadow_senate-2026_2026-10-05_senate-hierarchical-v0.9.23_20261006T031802Z",
+    "forecast": "data/shadow/shadow_senate-2026_2026-10-05_senate-hierarchical-v0.9.23_20261006T031802Z/forecast.json"
+  },
+  "publishable": true,
+  "publication_surface": "research_only",
+  "run_class": "publication",
+  "exit_condition": "At least one cycle of frozen, timestamped evaluation is retained.",
+  "write_once": true
+}

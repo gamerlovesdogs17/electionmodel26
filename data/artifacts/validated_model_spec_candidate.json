@@ -2,16 +2,16 @@
   "schema_version": "validated-model-spec-candidate-v1",
   "model_version": "senate-hierarchical-v0.9.23",
   "status": "candidate_pending_canonical_oof",
-  "evidence_bundle_id": "eb-09a25672b5b14bbf",
-  "evidence_bundle_sha256": "09a25672b5b14bbf67b1db98f23a5783e18f160ec00e7a5845b85ed4c93f59e1",
-  "source_readiness_sha256": "416375db108cd6ad7a6f22d9b4b4554dda534bb4f206ed66a9026e0c969da49f",
-  "poll_structure_selection_sha256": "5ddc02dc6f9b76dd39043c121df8a90f60a317a606f2cff003ed490b41dfabac",
-  "poll_structure_selection_source_nested_sha256": "ba8cf38e6e7fe6fe9768f5c62fb816190b718c569e49994108a7fa6c0b0e63a4",
-  "selected_structure_id": "pymc",
+  "evidence_bundle_id": "eb-19f9ccea0cc3812a",
+  "evidence_bundle_sha256": "19f9ccea0cc3812a6819b559321c2e6c7e38ed9c5ebe0336ebbf7748c67e6690",
+  "source_readiness_sha256": "acebd18ee0f8c986593191fb3b174babcac670b7463375127f9d6f15a1a23cbd",
+  "poll_structure_selection_sha256": "ec5253a40cd4d72bacdae559884a6b0a8aeb59257b8fedd83ceb11a9e5df76f1",
+  "poll_structure_selection_source_nested_sha256": "5da70a3398a0130d8a715dc1592f0517985895dba43f8b2c5f03d2db4a50e4a7",
+  "selected_structure_id": "hier_plus_questionnaire_effect",
   "selected_poll_structure": {
     "version": "poll-structure-v2",
     "sponsor_effect": false,
-    "questionnaire_effect": false,
+    "questionnaire_effect": true,
     "study_effect": false,
     "heuristic_study_downweight": null,
     "sponsor_scale": 0.75,
@@ -19,7 +19,7 @@
     "study_scale": 1.25,
     "effective_heuristic_study_downweight": true
   },
-  "selected_poll_structure_id": "psc-7819fcedea982286",
+  "selected_poll_structure_id": "psc-5035810fb1f3d5e7",
   "historical_cycles": [
     2018,
     2020,
@@ -30,10 +30,15 @@
     60,
     30
   ],
-  "code_commit_sha": "0fb8a54626fd2a7a0bf57f0de058362fc6712d70",
+  "historical_structural_feature_schema": "historical-structural-features-v1",
+  "structural_feature_enables": {
+    "similarity_terminal": true,
+    "terminal_race": false
+  },
+  "code_commit_sha": "8c7c03c9793593fe06929c689fd22bc49cf8039f",
   "production_research_eligible": false,
   "next_required_phase": "canonical_poll_structure",
   "ordinary_statistical_only": true,
-  "ordinary_statistical_spec_sha256": "e04140851cd5828e159cab27f2315ade51ba905519962679a6e670238bf0ecef",
-  "spec_sha256": "9cb9acbd394bebb71e5397f50696e384fc2d4c9c54b3156272078067979ba40b"
+  "ordinary_statistical_spec_sha256": "2334c348ea86704d0eeb15c36aa1309dd503545fa971576b8d4529d1021e8f29",
+  "spec_sha256": "5ada4ecc12ed4e82772ab2ebaac51446b2f01716f91377c7424c37ec58df029c"
 }

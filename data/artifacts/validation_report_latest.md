@@ -1,14 +1,14 @@
 # Validation report — senate-hierarchical-v0.9.23
 
-Generated: 2026-10-05T02:36:23.367597+00:00
-Current status refreshed: 2026-10-05T02:46:34.013899+00:00
+Generated: 2026-10-06T03:09:19.178306+00:00
+Current status refreshed: 2026-10-06T03:18:45.429818+00:00
 Primary holdout: 2022
 
 ## Current authoritative status
 
-- Evidence bundle: eb-09a25672b5b14bbf
-- Validated model spec: bdaa0b84f78855ff88490265eaa271d17172d5c82e5f96b54208f415fbb828c9
-- Release identity: truth_v1_v0.9.23_eb-09a25672b5b14bbf
+- Evidence bundle: eb-19f9ccea0cc3812a
+- Validated model spec: 05af5a5e4c079b9cc5d78d3dbd4a346e0b06de73c7ce0eb64b04231c1e1995c3
+- Release identity: truth_v1_v0.9.23_eb-19f9ccea0cc3812a
 - Release identity verified: True
 - Run coherence: True
 - Research acceptance: True
@@ -20,17 +20,17 @@ Primary holdout: 2022
 ## Cycle-cross-fitted production-stack reliability
 
 - n: 260
-- Brier: 0.04780733512393962
-- Calibration slope: 1.0277592451274935
-- Calibration intercept: -0.012766053411955226
+- Brier: 0.04400128402456663
+- Calibration slope: 1.0221632042412925
+- Calibration intercept: -0.018171060950831437
 - Flagged overconfident bins: 0
 
 ## Stack weights
 
 ```json
 {
-  "pymc": 0.21914105930674144,
-  "state_space": 0.7808589406932586
+  "pymc": 0.2616683595737922,
+  "state_space": 0.7383316404262078
 }
 ```
 
@@ -48,24 +48,24 @@ Primary holdout: 2022
   "control_ok": false,
   "control_soft": true,
   "control_gaps": {
-    "ddhq": 0.39782000000000006,
-    "kalshi": 0.28871108910891097
+    "ddhq": 0.39783999999999997,
+    "kalshi": 0.2887310891089109
   },
-  "primary_control_gap": 0.28871108910891097,
-  "max_abs_control_gap": 0.39782000000000006,
+  "primary_control_gap": 0.2887310891089109,
+  "max_abs_control_gap": 0.39783999999999997,
   "race_scores": {
     "ddhq": {
       "n": 9,
-      "brier_vs_peer_favorite": 0.24721232777777777,
-      "mae": 0.18267777777777777,
-      "crps_proxy": 0.18267777777777777,
+      "brier_vs_peer_favorite": 0.25808710004444446,
+      "mae": 0.19322,
+      "crps_proxy": 0.19322,
       "ok": false
     },
     "kalshi": {
       "n": 7,
-      "brier_vs_peer_favorite": 0.07234866634285717,
-      "mae": 0.08039167664059821,
-      "crps_proxy": 0.08039167664059821,
+      "brier_vs_peer_favorite": 0.06251146405714285,
+      "mae": 0.07157453378345535,
+      "crps_proxy": 0.07157453378345535,
       "ok": true
     }
   },
@@ -78,7 +78,7 @@ Primary holdout: 2022
   "core_method": "pymc",
   "generic_ballot": 6.184921674810612,
   "reasons": [
-    "control gap vs primary peer large (gap=0.289 > 0.25); gaps={'ddhq': 0.39782000000000006, 'kalshi': 0.28871108910891097} \u2014 informational under blueprint \u00a72 (peers not averaged)",
+    "control gap vs primary peer large (gap=0.289 > 0.25); gaps={'ddhq': 0.39783999999999997, 'kalshi': 0.2887310891089109} \u2014 informational under blueprint \u00a72 (peers not averaged)",
     "null margins in races: ['senate-2026-AK']"
   ],
   "thresholds": {
