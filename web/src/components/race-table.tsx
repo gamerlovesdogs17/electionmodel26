@@ -6,6 +6,7 @@ import {
   pct,
   signedRaceMargin,
 } from "@/lib/utils";
+import { presentRace } from "@/lib/race-presentation";
 import { useMemo, useState } from "react";
 
 export function RaceTable({ races }: { races: RaceForecast[] }) {
@@ -92,40 +93,13 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
           </thead>
           <tbody>
             {rows.map((r) => {
-              if (
-                r.contest_structure === "ranked_choice_multiway" &&
-                r.candidate_probabilities?.length
-              ) {
-                return (
-                  <tr key={r.race_id} className="border-t border-[var(--line)] bg-[var(--panel)]/35 align-top">
-                    <td className="px-3 py-3 font-medium text-[var(--ink)]">
-                      {r.state}
-                      <span className="ml-2 rounded border border-[var(--line)] px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wide text-[var(--muted)]">RCV</span>
-                    </td>
-                    <td className="hidden px-3 py-3 lg:table-cell">
-                      <div className="space-y-1">
-                        {[...r.candidate_probabilities].sort((a, b) => b.p_win - a.p_win).map((candidate) => (
-                          <div key={candidate.candidate_id} className="flex items-center justify-between gap-3 text-xs">
-                            <span>{candidate.candidate_name} <span className="text-[var(--muted)]">({candidate.ballot_party})</span></span>
-                            <span className="tabular-nums">{pct(candidate.p_win, 1)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 text-xs font-medium text-[var(--ink)]">RCV · limited</td>
-                    <td className="px-3 py-3 text-xs text-[var(--muted)]">
-                      Candidate probabilities
-                      <span className="mt-1 block">D-caucus seat: {pct(r.p_dem_caucus, 1)}</span>
-                    </td>
-                    <td className="px-3 py-3 text-[var(--muted)]">—</td>
-                    <td className="hidden px-3 py-3 text-xs text-[var(--muted)] sm:table-cell">
-                      Exhaustion: {pct(r.exhausted_ballot_share, 1)}
-                    </td>
-                  </tr>
-                );
-              }
-              const demParty = (r.modeled_ballot_party ?? r.dem_party) === "I" ? "I" : "D";
-              const pModeled = modeledProbability(r);
+              const view = presentRace(r);
+              const demParty = (view.favored_party === "I" || r.modeled_ballot_party === "I")
+                ? "I"
+                : (r.modeled_ballot_party ?? r.dem_party) === "I"
+                  ? "I"
+                  : "D";
+              const pModeled = view.favored_win_probability ?? modeledProbability(r);
               return (
                 <tr
                   key={r.race_id}
@@ -133,6 +107,11 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                 >
                   <td className="px-3 py-2.5 font-medium text-[var(--ink)]">
                     {r.state}
+                    {view.rcv_detail ? (
+                      <span className="ml-2 rounded border border-[var(--line)] px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wide text-[var(--muted)]">
+                        RCV
+                      </span>
+                    ) : null}
                     {r.is_open ? (
                       <span className="ml-2 text-xs font-normal text-[var(--muted)]">
                         open
@@ -144,16 +123,37 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                     ) : null}
                   </td>
                   <td className="hidden px-3 py-2.5 text-xs text-[var(--muted)] lg:table-cell">
-                    <span className={demParty === "I" ? "text-[var(--ind)]" : ""}>
-                      {r.modeled_candidate ?? r.dem_candidate ?? (demParty === "I" ? "Independent" : "Dem")}
-                      <span className="ml-1 opacity-70">({demParty})</span>
-                    </span>
-                    {" / "}
-                    {r.opposing_candidate ?? r.rep_candidate ?? "Rep"}
-                    <span className="ml-1 opacity-70">(R)</span>
+                    {view.candidates.length ? (
+                      <div className="space-y-1">
+                        {view.candidates.slice(0, view.rcv_detail ? 4 : 2).map((candidate) => (
+                          <div
+                            key={candidate.candidate_id || candidate.candidate_name}
+                            className="flex justify-between gap-3"
+                          >
+                            <span className={candidate.ballot_party === "I" ? "text-[var(--ind)]" : ""}>
+                              {candidate.candidate_name}
+                              <span className="ml-1 opacity-70">({candidate.ballot_party})</span>
+                            </span>
+                            {view.rcv_detail ? (
+                              <span className="tabular-nums">{pct(candidate.p_win, 1)}</span>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <>
+                        <span className={demParty === "I" ? "text-[var(--ind)]" : ""}>
+                          {r.modeled_candidate ?? r.dem_candidate ?? (demParty === "I" ? "Independent" : "Dem")}
+                          <span className="ml-1 opacity-70">({demParty})</span>
+                        </span>
+                        {" / "}
+                        {r.opposing_candidate ?? r.rep_candidate ?? "Rep"}
+                        <span className="ml-1 opacity-70">(R)</span>
+                      </>
+                    )}
                   </td>
                   <td className="px-3 py-2.5 text-xs font-medium text-[var(--ink)]">
-                    {r.rating ?? "—"}
+                    {view.rating ?? "—"}
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                           className="h-full bg-[var(--dem)]"
                           style={{
                             width: `${
-                              Number.isFinite(pModeled)
+                              typeof pModeled === "number" && Number.isFinite(pModeled)
                                 ? Math.min(100, Math.max(0, pModeled * 100))
                                 : 0
                             }%`,
@@ -171,21 +171,30 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                       </div>
                       <span className="tabular-nums">{pct(pModeled, 0)}</span>
                     </div>
+                    {view.rcv_detail ? (
+                      <span className="mt-1 block text-xs text-[var(--muted)]">
+                        D-caucus seat: {pct(view.seat_control_p_dem_caucus, 1)}
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-3 py-2.5 tabular-nums text-[var(--ink)]">
-                    {typeof r.mean_margin === "number"
-                      ? signedRaceMargin(r)
-                      : "—"}
+                    {view.rcv_detail
+                      ? "—"
+                      : typeof r.mean_margin === "number"
+                        ? signedRaceMargin(r)
+                        : "—"}
                     <span className="ml-1 text-xs text-[var(--muted)]">
-                      {typeof r.sd_margin === "number"
+                      {!view.rcv_detail && typeof r.sd_margin === "number"
                         ? `±${r.sd_margin.toFixed(1)}`
                         : ""}
                     </span>
                   </td>
                   <td className="hidden px-3 py-2.5 tabular-nums text-[var(--muted)] sm:table-cell">
-                    {typeof r.ci05 === "number" && typeof r.ci95 === "number"
-                      ? `${signedRaceMargin(r, r.ci05)} – ${signedRaceMargin(r, r.ci95)}`
-                      : "—"}
+                    {view.rcv_detail
+                      ? `Exhaustion: ${pct(view.rcv_detail.exhausted_ballot_share, 1)}`
+                      : typeof r.ci05 === "number" && typeof r.ci95 === "number"
+                        ? `${signedRaceMargin(r, r.ci05)} – ${signedRaceMargin(r, r.ci95)}`
+                        : "—"}
                   </td>
                 </tr>
               );

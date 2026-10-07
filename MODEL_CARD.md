@@ -1,13 +1,14 @@
-# Model card — Senate hierarchical v0.9.23 development boundary
+# Model card — Senate hierarchical v0.9.24 development boundary
 
-> **Validation status (2026-10-04):** v0.9.23 is an unvalidated current-cycle
-> evidence and target repair. Source readiness is green and forecast coverage
-> is complete with Alaska classified as limited-validation warning;
-> no v0.9.23 release identity, evidence seal, or forecast exists. v0.9.22 remains
-> the last completed sealed research rebuild against bundle
-> `eb-3e91ca3a90628d69`, with release identity
-> `truth_v1_v0.9.22_eb-3e91ca3a90628d69`. Both surfaces remain `research_only`
-> with `PUBLIC_LIVE_ENABLED=False`.
+> **Validation status (2026-10-06):** `senate-hierarchical-v0.9.23` completed a
+> sealed research rebuild for as-of `2026-10-05` against evidence bundle
+> `eb-19f9ccea0cc3812a` (release identity retained under `data/releases/` and
+> `data/shadow/`). Those v0.9.23 artifacts are historical records and must not
+> be rewritten. **v0.9.24** begins blueprint-faithful contest/presentation and
+> poll-mechanics repair on top of that rebuild; it is research-only development
+> code that has **not** received a fresh full nested OOF / stack / publication
+> rebuild. `PUBLIC_LIVE_ENABLED=False`; publication surface remains
+> `research_only`.
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)

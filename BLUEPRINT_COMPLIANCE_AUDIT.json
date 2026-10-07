@@ -1,29 +1,30 @@
 {
   "schema_version": "blueprint-compliance-audit-v2",
-  "generated_at": "2026-10-04",
+  "generated_at": "2026-10-06",
   "scope": "code_capability_and_current_empirical_status",
   "public_live_enabled": false,
   "publication_surface": "research_only",
   "current_artifacts_stale_relative_to_code": true,
   "validated_release_status": {
-    "model_version": "senate-hierarchical-v0.9.22",
-    "evidence_bundle_id": "eb-3e91ca3a90628d69",
-    "evidence_bundle_sha256": "3e91ca3a90628d695b234a4b784a92bff18d78d81d1faa0d75467492cc977e86",
-    "validated_model_spec_sha256": "4a1ee9f7baef14626dccc0cb5eadedafbeb6dc31878a956bb20cfe4fa9868323",
-    "release_id": "truth_v1_v0.9.22_eb-3e91ca3a90628d69",
+    "model_version": "senate-hierarchical-v0.9.23",
+    "note": "Completed sealed research rebuild as-of 2026-10-05 (eb-19f9ccea0cc3812a). Ordinary formal lineage still also references prior v0.9.22 validated_model_spec until a fresh v0.9.24 OOF/rebuild.",
+    "evidence_bundle_id": "eb-19f9ccea0cc3812a",
+    "release_id": "retained_under_data_releases_and_shadow",
     "g1_g11_ok": true,
     "extension_gates_ok": true,
     "run_coherence_ok": true,
     "research_acceptance_ok": true,
-    "promotion_eligible": true,
+    "promotion_eligible": false,
     "public_live_enabled": false,
     "publication_surface": "research_only"
   },
   "development_status": {
-    "model_version": "senate-hierarchical-v0.9.23",
+    "model_version": "senate-hierarchical-v0.9.24",
     "release_identity_exists": false,
     "research_acceptance_ok": false,
     "promotion_eligible": false,
+    "full_historical_rebuild_completed": false,
+    "v0923_rebuild_completed": true,
     "source_readiness_ok": true,
     "source_blockers": [],
     "forecast_coverage_ok": true,
@@ -66,6 +67,8 @@
     "overlay_contract": "implemented",
     "market_semantics": "implemented",
     "joint_institutional_rules": "implemented",
+    "multiway_plurality_fail_closed": "implemented",
+    "shared_race_presentation": "implemented",
     "turnout_interface": "implemented",
     "joint_scores": "implemented",
     "domain_freshness": "implemented_with_reasonable_variation",
@@ -116,7 +119,7 @@
     "forecast_model_coverage": "source_and_model_coverage_ready",
     "historical_evidence_equivalence": "historically_equivalent"
   },
-  "empirical_validation_gates_scope": "v0.9.22 remains the last completed ordinary empirical release. v0.9.23 current source readiness and forecast coverage are green; the binary non-major and Alaska RCV paths retain separate limited validation, and full v0.9.23 promotion requires the rebuild.",
+  "empirical_validation_gates_scope": "v0.9.23 completed a sealed research rebuild (2026-10-05). v0.9.24 is research-only code for contest presentation, MT/ID/NE audits, multiway fail-closed, and poll-mechanics repairs; it has not received a fresh nested OOF / stack / publication rebuild. Outside-model probabilities are not calibration targets.",
   "requirements": [
     {
       "id": "warehouse_as_of",
@@ -215,14 +218,15 @@
       "blueprint_requirement": "ENOP, recency and influence caps",
       "classification": "implemented",
       "code_paths": [
-        "midterms/model/poll_weights.py"
+        "midterms/model/poll_weights.py",
+        "midterms/model/state_space.py"
       ],
-      "current_implementation": "Recency, quality, pollster caps, study clustering and ENOP are computed explicitly.",
-      "remaining_issue": "Explicit study effects disable heuristic clustering by default to avoid double counting.",
+      "current_implementation": "v0.9.24: influence_weight = absolute recency × partisan × pollster caps × study clustering (n/quality enter measurement variance once). Absolute recency is preserved after within-race structural normalization. State-space process variance uses calendar Δt.",
+      "remaining_issue": "Repairs await a fresh historical OOF before publication claims; explicit study effects still disable heuristic clustering by default.",
       "severity": "medium",
       "blocks_publication_quality_research": false,
       "requires_expensive_model_fitting": false,
-      "proposed_validation_test": "Synthetic weight concentration and repeated-study tests."
+      "proposed_validation_test": "Synthetic weight concentration, absolute-recency cross-race, and repeated-study tests."
     },
     {
       "id": "fundamentals",
@@ -336,10 +340,12 @@
       "blueprint_requirement": "Draw-by-draw institutional election rules",
       "classification": "partial",
       "code_paths": [
-        "midterms/simulate/institutional.py"
+        "midterms/simulate/institutional.py",
+        "midterms/model/multiway_plurality.py",
+        "midterms/presentation/race_view.py"
       ],
-      "current_implementation": "Generic threshold, runoff advancement, same-draw transition and no-double-count architecture is implemented.",
-      "remaining_issue": "No validated runoff transition distribution is enabled in the primary forecast.",
+      "current_implementation": "v0.9.24 adds a generic plurality path with residual/tie fail-closed and a shared race presentation contract. Alaska RCV remains on its dedicated adapter. Runoff threshold architecture remains; unsupported multiway races fail closed on win probability when analogs are sparse.",
+      "remaining_issue": "No validated runoff transition distribution is enabled in the primary forecast; multiway probability models remain unsupported without historical analogs.",
       "severity": "high",
       "blocks_publication_quality_research": false,
       "requires_expensive_model_fitting": true,

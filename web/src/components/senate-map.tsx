@@ -14,6 +14,7 @@ import {
   ratingFill,
   signedRaceMargin,
 } from "@/lib/utils";
+import { presentRace } from "@/lib/race-presentation";
 import { geoAlbersUsa, geoPath, type GeoPermissibleObjects } from "d3-geo";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { feature } from "topojson-client";
@@ -419,100 +420,116 @@ function MapTooltip({
 }
 
 function RaceTooltipBlock({ race }: { race: RaceForecast }) {
-  if (
-    race.contest_structure === "ranked_choice_multiway" &&
-    race.candidate_probabilities?.length
-  ) {
-    return (
-      <div className="border-t border-[var(--line)] pt-2 first:border-0 first:pt-0">
-        <p className="text-xs font-medium text-[var(--ink)]">Ranked-choice contest</p>
-        <div className="mt-1 space-y-1">
-          {[...race.candidate_probabilities]
-            .sort((a, b) => b.p_win - a.p_win)
-            .map((candidate) => (
-              <p key={candidate.candidate_id} className="flex justify-between gap-3 text-xs text-[var(--muted)]">
-                <span>{candidate.candidate_name} ({candidate.ballot_party})</span>
-                <span className="tabular-nums text-[var(--ink)]">{pct(candidate.p_win, 1)}</span>
-              </p>
-            ))}
-        </div>
-        <p className="mt-2 text-[10px] uppercase tracking-wide text-[var(--muted)]">
-          Limited-validation Alaska RCV model
-        </p>
-      </div>
-    );
-  }
-  const demParty = (race.modeled_ballot_party ?? race.dem_party) === "I" ? "I" : "D";
-  const pModeled = modeledProbability(race);
-  const pOpposing = opposingProbability(race);
-  const favoredIndOrDem = pModeled >= 0.5;
-  const favoredName = favoredIndOrDem
-    ? (race.modeled_candidate ?? race.dem_candidate ?? (demParty === "I" ? "Independent" : "Democrat"))
-    : (race.opposing_candidate ?? race.rep_candidate ?? "Republican");
-  const favoredP = favoredIndOrDem ? pModeled : pOpposing;
-  const favoredTone = favoredIndOrDem
-    ? demParty === "I"
+  const view = presentRace(race);
+  const favoredParty = view.favored_party ?? "D";
+  const favoredTone =
+    favoredParty === "I"
       ? "text-[var(--ind)]"
-      : "text-[var(--dem)]"
-    : "text-[var(--rep)]";
+      : favoredParty === "R"
+        ? "text-[var(--rep)]"
+        : "text-[var(--dem)]";
+  const topTwo = view.candidates.slice(0, 2);
 
   return (
     <div className="border-t border-[var(--line)] pt-2 first:border-t-0 first:pt-0">
       <div className="flex flex-wrap gap-1.5">
         <span
           className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-            race.rating?.includes("I")
+            view.rating?.includes("I")
               ? "bg-[#e4dcf2] text-[var(--ind)]"
-              : race.rating?.includes("D")
+              : view.rating?.includes("D")
               ? "bg-[#d7e6f2] text-[var(--dem)]"
-              : race.rating?.includes("R")
+              : view.rating?.includes("R")
                 ? "bg-[#f0d8d3] text-[var(--rep)]"
                 : "bg-[#efe8c8] text-[#6a5f20]"
           }`}
         >
-          {race.rating ?? "Tossup"}
+          {view.rating ?? "Tossup"}
         </span>
         {race.is_flip ? (
           <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px] text-[var(--muted)]">
             Flip
           </span>
         ) : null}
+        {view.rcv_detail ? (
+          <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px] text-[var(--muted)]">
+            RCV
+          </span>
+        ) : null}
       </div>
       <p className={`mt-2 text-sm font-medium ${favoredTone}`}>
-        {favoredName} has a {pct(favoredP, 1)} chance.
+        {view.favored_candidate ?? "—"}
+        {view.favored_win_probability != null
+          ? ` has a ${pct(view.favored_win_probability, 1)} chance.`
+          : " — probability withheld."}
       </p>
       <div className="mt-2">
-        <CandidateRow
-          name={race.modeled_candidate ?? race.dem_candidate ?? (demParty === "I" ? "Independent" : "Democrat")}
-          party={demParty}
-          share={
-            race.modeled_candidate_share ?? race.dem_share ??
-            (typeof race.mean_margin === "number" ? 50 + race.mean_margin / 2 : 50)
-          }
-        />
-        <CandidateRow
-          name={race.opposing_candidate ?? race.rep_candidate ?? "Republican"}
-          party="R"
-          share={
-            race.opposing_candidate_share ?? race.rep_share ??
-            (typeof race.mean_margin === "number" ? 50 - race.mean_margin / 2 : 50)
-          }
-        />
+        {topTwo.map((candidate) => (
+          <CandidateRow
+            key={candidate.candidate_id || candidate.candidate_name}
+            name={candidate.candidate_name}
+            party={
+              candidate.ballot_party === "I"
+                ? "I"
+                : candidate.ballot_party === "R"
+                  ? "R"
+                  : "D"
+            }
+            share={
+              candidate.share_estimate != null
+                ? candidate.share_estimate <= 1
+                  ? candidate.share_estimate * 100
+                  : candidate.share_estimate
+                : candidate.p_win != null
+                  ? candidate.p_win * 100
+                  : 50
+            }
+          />
+        ))}
         <div className="mt-1 flex justify-between text-sm">
-          <span className="text-[var(--muted)]">Margin</span>
+          <span className="text-[var(--muted)]">
+            {view.rcv_detail ? "D-caucus seat" : "Margin"}
+          </span>
           <span
             className={`font-medium ${
-              typeof race.mean_margin === "number" && race.mean_margin >= 0
-                ? "text-[var(--dem)]"
-                : "text-[var(--rep)]"
+              view.rcv_detail
+                ? "text-[var(--ink)]"
+                : typeof race.mean_margin === "number" && race.mean_margin >= 0
+                  ? "text-[var(--dem)]"
+                  : "text-[var(--rep)]"
             }`}
           >
-            {typeof race.mean_margin === "number"
-              ? signedRaceMargin(race)
-              : "—"}
+            {view.rcv_detail
+              ? pct(view.seat_control_p_dem_caucus, 1)
+              : typeof race.mean_margin === "number"
+                ? signedRaceMargin(race)
+                : "—"}
           </span>
         </div>
       </div>
+      {view.rcv_detail ? (
+        <div className="mt-2 space-y-1 border-t border-[var(--line)] pt-2">
+          <p className="text-[10px] uppercase tracking-wide text-[var(--muted)]">
+            RCV candidate detail · {view.modeling_path}
+          </p>
+          {view.rcv_detail.candidate_probabilities.map((candidate) => (
+            <p
+              key={candidate.candidate_id}
+              className="flex justify-between gap-3 text-xs text-[var(--muted)]"
+            >
+              <span>
+                {candidate.candidate_name} ({candidate.ballot_party})
+              </span>
+              <span className="tabular-nums text-[var(--ink)]">
+                {pct(candidate.p_win, 1)}
+              </span>
+            </p>
+          ))}
+          <p className="text-[10px] text-[var(--muted)]">
+            Exhaustion {pct(view.rcv_detail.exhausted_ballot_share, 1)}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

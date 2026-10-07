@@ -20,20 +20,19 @@ def attach_poll_weights(
     """
     Attach normalized influence weights and ENOP diagnostics.
 
-    ENOP = (sum w)^2 / sum(w^2)  — effective number of independent poll signals.
-    Within a race, prolific pollsters are soft-capped and shared study_id rows
-    are down-weighted so repeated releases add sublinear information.
-    Per-race max/median weight ratio is capped so a single recent poll cannot
-    dominate (~half-life 28d default).
-
-    Weights use recency, sample size, quality, and partisan status only.
-    Mode / population corrections are hierarchical measurement effects in the
-    PyMC likelihood (see midterms.model.effects) — not applied here as weights.
+    Blueprint-faithful information entry (v0.9.24):
+    - Sample size and pollster quality enter the measurement variance once in
+      the likelihood / state-space filter — not again through influence weights.
+    - Absolute calendar recency is preserved: within-race renormalization applies
+      only to non-recency factors, then absolute recency is multiplied back so a
+      lone 100-day-old poll stays weaker than a 10-day-old poll in another race.
+    - Pollster caps and shared-study clustering remain relative adjustments.
     """
     if polls.empty:
         out = polls.copy()
         out["influence_weight"] = pd.Series(dtype=float)
         out["enop_race"] = pd.Series(dtype=float)
+        out["absolute_recency"] = pd.Series(dtype=float)
         return out
 
     out = polls.reset_index(drop=True).copy()
@@ -41,28 +40,17 @@ def attach_poll_weights(
     field_end = pd.to_datetime(out["field_end"], errors="coerce")
     age = (as_of_ts - field_end).dt.days.clip(lower=0).astype(float)
     recency = np.exp(-np.log(2.0) * age / max(half_life_days, 1.0))
-
-    n_raw = pd.to_numeric(out["sample_size"], errors="coerce")
-    n = n_raw.where(np.isfinite(n_raw) & (n_raw > 0), 500.0).clip(lower=50.0)
-    size_w = np.sqrt(n / 600.0).clip(0.35, 2.0)
-
-    qw = (
-        out["quality_weight"].astype(float)
-        if "quality_weight" in out.columns
-        else pd.Series(np.ones(len(out)), index=out.index)
-    ).fillna(1.0).clip(0.2, 1.25)
+    out["absolute_recency"] = recency.to_numpy()
 
     partisan = out["partisan"].fillna(False).astype(bool) if "partisan" in out.columns else False
     partisan_w = np.where(partisan, 0.35, 1.0)
 
-    # Mode / population enter as hierarchical measurement effects in PyMC
-    # (midterms.model.effects / pymc_model._measurement_effects). Fast and
-    # state-space paths use documented prior means — not again as weights.
-    raw = recency.to_numpy() * size_w.to_numpy() * qw.to_numpy() * partisan_w
-    raw = np.nan_to_num(raw, nan=0.0, posinf=0.0, neginf=0.0)
-    out["raw_weight"] = raw
+    # Non-recency factors only — n and quality intentionally excluded here.
+    structural = np.asarray(partisan_w, dtype=float)
+    structural = np.nan_to_num(structural, nan=0.0, posinf=0.0, neginf=0.0)
+    out["raw_weight"] = structural * recency.to_numpy()
 
-    capped = raw.copy()
+    capped = structural.copy()
     for _, g in out.groupby("race_id", sort=False):
         ix = g.index.to_numpy()
         race_raw = capped[ix]
@@ -91,21 +79,24 @@ def attach_poll_weights(
     for _, g in out.groupby("race_id", sort=False):
         ix = g.index.to_numpy()
         w = clustered[ix].astype(float, copy=True)
-        # Cap extreme within-race weights (single recent poll domination)
         pos = w[w > 0]
         if len(pos) and max_weight_ratio > 0:
             med = float(np.median(pos))
             if med > 0:
                 w = np.minimum(w, med * float(max_weight_ratio))
-        s = float(w.sum())
-        ss = float(np.square(w).sum())
-        race_enop = (s * s / ss) if ss > 0 else 0.0
-        enop[ix] = race_enop
+        # Normalize only non-recency structure within the race...
         mean_w = float(w.mean()) if len(w) else 1.0
         if mean_w > 0:
-            normed[ix] = w / mean_w
+            structural_norm = w / mean_w
         else:
-            normed[ix] = w
+            structural_norm = w
+        # ...then restore absolute calendar recency so age is not erased.
+        final = structural_norm * recency.to_numpy()[ix]
+        s = float(final.sum())
+        ss = float(np.square(final).sum())
+        race_enop = (s * s / ss) if ss > 0 else 0.0
+        enop[ix] = race_enop
+        normed[ix] = final
 
     out["enop_race"] = enop
     out["influence_weight"] = np.nan_to_num(normed, nan=0.0, posinf=0.0, neginf=0.0)
@@ -118,14 +109,17 @@ def race_enop_summary(polls: pd.DataFrame) -> dict[str, float]:
         return {}
     return {
         str(rid): float(g["enop_race"].iloc[0])
-        for rid, g in polls.groupby("race_id")
+        for rid, g in polls.groupby("race_id", sort=False)
     }
 
 
 def global_enop(polls: pd.DataFrame) -> float:
     if polls.empty or "influence_weight" not in polls.columns:
         return 0.0
-    w = polls["influence_weight"].astype(float).to_numpy()
+    w = polls["influence_weight"].to_numpy(dtype=float)
+    w = w[np.isfinite(w) & (w > 0)]
+    if not len(w):
+        return 0.0
     s = float(w.sum())
     ss = float(np.square(w).sum())
     return float(s * s / ss) if ss > 0 else 0.0

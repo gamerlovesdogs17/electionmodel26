@@ -1,38 +1,5 @@
 {
-  "schema_version": "probability-integrity-audit-v0923",
-  "generated_at": "2026-10-05T23:06:06.899787+00:00",
-  "model_version": "senate-hierarchical-v0.9.23",
-  "concerns": [
-    {
-      "id": "sample_size_quality_double_influence",
-      "confirmed_behavior": "Sample size and quality enter influence_weight (sqrt(n/600) and quality_weight) in poll_weights.attach_poll_weights, and again inflate observation precision via poll_se = 100/sqrt(n)/sqrt(qw)/sqrt(iw) in pymc_model._prepare and obs_var = (100/sqrt(n))^2 / (qw*iw) in state_space.fit_state_space.",
-      "production_change_recommended": false,
-      "oos_challenger_required": true,
-      "changed_in_this_repair": false
-    },
-    {
-      "id": "absolute_recency_race_normalization",
-      "confirmed_behavior": "Recency uses absolute calendar age exp(-ln2 * age / half_life). After caps, per-race influence weights are renormalized to mean \u2248 1.",
-      "production_change_recommended": false,
-      "oos_challenger_required": true,
-      "changed_in_this_repair": false
-    },
-    {
-      "id": "state_space_process_variance_per_poll",
-      "confirmed_behavior": "fit_state_space adds a fixed process variance increment (+0.8**2) once per poll observation, independent of elapsed calendar days between polls.",
-      "production_change_recommended": false,
-      "oos_challenger_required": true,
-      "changed_in_this_repair": false
-    }
-  ],
-  "repairs_in_this_task": [
-    "seat_specific_personal_incumbency",
-    "historical_personal_incumbency_cutoff_safe",
-    "race_id_candidate_specific_finance",
-    "no_publication_state_finance_fallback",
-    "alaska_pairwise_directional",
-    "fail_closed_nonfinite_margins",
-    "support_status_semantics_clarification"
-  ],
-  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\probability_integrity_audit_v0923.json"
+  "schema_version": "probability-integrity-audit-v0923.1",
+  "replaced_by": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\probability_integrity_audit_v0924.json",
+  "note": "See probability_integrity_audit_v0924.json for current status."
 }

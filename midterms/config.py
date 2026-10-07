@@ -13,7 +13,9 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.9.23"
+MODEL_VERSION = "senate-hierarchical-v0.9.24"
+# Immutable completed research rebuild identity (do not rewrite those artifacts).
+PREVIOUS_SEALED_MODEL_VERSION = "senate-hierarchical-v0.9.23"
 
 # Blueprint audit 14 Sep 2026 (v0.9.19 review): HOLD live until truth ledger,
 # vintages, fold purity, and version-coherent release clearance are repaired.
@@ -25,6 +27,8 @@ CYCLES = (2014, 2016, 2018, 2020, 2022, 2024)
 PRIMARY_HOLDOUT = 2022
 SECONDARY_HOLDOUT = 2018
 LEAD_DAYS = (120, 90, 60, 45, 30, 14, 7, 1)
+# Blueprint broader historical lead grid (callable later; formal OOF remains 60/30).
+FORMAL_VALIDATION_LEADS = (90, 60, 30, 14, 7)
 
 # Uncertainty hyperparameters (nested-validated defaults; see validation/lead_time_grid.py)
 STUDENT_T_DF = 5.0

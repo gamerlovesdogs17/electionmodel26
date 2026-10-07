@@ -1,0 +1,101 @@
+{
+  "schema_version": "blueprint-fidelity-delta-v0924",
+  "generated_at": "2026-10-07T01:13:19.929221+00:00",
+  "model_version": "senate-hierarchical-v0.9.24",
+  "active_statistical_changes": [
+    {
+      "id": "poll_weight_no_n_quality_double_count",
+      "status": "repaired",
+      "detail": "influence_weight uses recency \u00d7 partisan \u00d7 caps \u00d7 study-cluster only; n and quality enter measurement variance once"
+    },
+    {
+      "id": "absolute_recency_preserved",
+      "status": "repaired",
+      "detail": "Within-race normalization applies to non-recency factors; absolute calendar recency is multiplied back"
+    },
+    {
+      "id": "state_space_calendar_delta_t",
+      "status": "repaired",
+      "detail": "Process variance accumulates (0.8 pp/\u221aday)^2 \u00d7 calendar \u0394t; same-day \u0394t = 0"
+    },
+    {
+      "id": "multiway_plurality_fail_closed",
+      "status": "implemented",
+      "detail": "Generic plurality path + unsupported fail-closed when analogs sparse"
+    },
+    {
+      "id": "shared_race_presentation",
+      "status": "implemented",
+      "detail": "UI presentation contract; no Alaska draw / candidate_probability mutation"
+    }
+  ],
+  "deferred_or_disabled": [
+    {
+      "id": "candidate_experience_challenger",
+      "status": "disabled",
+      "enabled": false,
+      "activation_gate": "nested_oos_plus_available_at_pit"
+    },
+    {
+      "id": "special_election_signal_challenger",
+      "status": "disabled",
+      "enabled": false,
+      "activation_gate": "nested_oos_plus_available_at_pit"
+    },
+    {
+      "id": "recent_statewide_performance_challenger",
+      "status": "disabled",
+      "enabled": false,
+      "activation_gate": "nested_oos_plus_available_at_pit"
+    },
+    {
+      "id": "turnout_layer",
+      "status": "disabled",
+      "enabled": false,
+      "evidence_gap": "No validated turnout\u2192margin translation for production seats"
+    },
+    {
+      "id": "dynamic_pymc_sponsor_questionnaire_study",
+      "status": "disabled_in_validated_spec",
+      "detail": "Selection remains all-off; heuristic study downweighting only"
+    },
+    {
+      "id": "expert_market_overlays",
+      "status": "disabled_for_publication",
+      "detail": "Require exact-weight timestamp-pure nested-OOS contract"
+    },
+    {
+      "id": "formal_validation_lead_grid",
+      "status": "wired_not_run",
+      "formal_validation_leads": [
+        90,
+        60,
+        30,
+        14,
+        7
+      ],
+      "diagnostic_lead_days": [
+        120,
+        90,
+        60,
+        45,
+        30,
+        14,
+        7,
+        1
+      ],
+      "canonical_formal_oof_subset": [
+        60,
+        30
+      ],
+      "note": "FORMAL_VALIDATION_LEADS available for later full validation; not executed in v0.9.24 cheap pass"
+    },
+    {
+      "id": "joint_heavy_tails",
+      "status": "preserved",
+      "detail": "Student-t national + local path retained in state_space / chamber"
+    }
+  ],
+  "outside_model_calibration_targets": false,
+  "expensive_rebuild_run": false
+}

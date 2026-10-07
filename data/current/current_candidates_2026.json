@@ -257,7 +257,7 @@
       "current_matchup_status": "reviewed_current",
       "reviewed_as_of": "2026-10-03",
       "statistical_target_supported": false,
-      "note": "Independent ballot identity retained; Democratic-caucus treatment is a separate model assumption and the I-v-R probability target remains unsupported.",
+      "note": "Independent ballot identity retained; Democratic-caucus treatment is a separate model assumption and the I-v-R probability target remains unsupported. ballot_candidates lists reviewed general pair plus poll-observed unverified challengers.",
       "sitting_senator_name": "Jim Risch",
       "modeled_candidate_is_incumbent": false,
       "opposing_candidate_is_incumbent": true,
@@ -265,7 +265,29 @@
       "personal_incumbency_identity_status": "opposing_is_seat_incumbent",
       "ordinary_binary_target_supported": false,
       "exceptional_probability_model_supported": true,
-      "probability_model_support_status": "limited_supported"
+      "probability_model_support_status": "limited_supported",
+      "ballot_candidates": [
+        {
+          "candidate_id": "senate-2026-ID:todd-achilles",
+          "candidate_name": "Todd Achilles",
+          "ballot_party": "I",
+          "caucus": "D",
+          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+          "status": "reviewed_general_modeled",
+          "qualification_source": "current_candidates_2026_registry",
+          "reviewed_as_of": "2026-10-03"
+        },
+        {
+          "candidate_id": "senate-2026-ID:jim-risch",
+          "candidate_name": "Jim Risch",
+          "ballot_party": "R",
+          "caucus": "R",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "reviewed_general_opposing",
+          "qualification_source": "current_candidates_2026_registry",
+          "reviewed_as_of": "2026-10-03"
+        }
+      ]
     },
     {
       "race_id": "senate-2026-IL",
@@ -538,7 +560,7 @@
       "current_matchup_status": "reviewed_current",
       "reviewed_as_of": "2026-10-03",
       "statistical_target_supported": false,
-      "note": "Independent ballot identity retained; Democratic-caucus treatment is a separate model assumption and the I-v-R probability target remains unsupported.",
+      "note": "Independent ballot identity retained; Democratic-caucus treatment is a separate model assumption and the I-v-R probability target remains unsupported. ballot_candidates lists reviewed general pair plus poll-observed unverified challengers.",
       "sitting_senator_name": "Steve Daines",
       "modeled_candidate_is_incumbent": false,
       "opposing_candidate_is_incumbent": false,
@@ -546,7 +568,57 @@
       "personal_incumbency_identity_status": "open_seat_officeholder_not_nominee",
       "ordinary_binary_target_supported": false,
       "exceptional_probability_model_supported": true,
-      "probability_model_support_status": "limited_supported"
+      "probability_model_support_status": "limited_supported",
+      "ballot_candidates": [
+        {
+          "candidate_id": "senate-2026-MT:seth-bodnar",
+          "candidate_name": "Seth Bodnar",
+          "ballot_party": "I",
+          "caucus": "D",
+          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+          "status": "reviewed_general_modeled",
+          "qualification_source": "current_candidates_2026_registry",
+          "reviewed_as_of": "2026-10-03"
+        },
+        {
+          "candidate_id": "senate-2026-MT:kurt-alme",
+          "candidate_name": "Kurt Alme",
+          "ballot_party": "R",
+          "caucus": "R",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "reviewed_general_opposing",
+          "qualification_source": "current_candidates_2026_registry",
+          "reviewed_as_of": "2026-10-03"
+        },
+        {
+          "candidate_id": "senate-2026-MT:alani-bankhead",
+          "candidate_name": "Alani Bankhead",
+          "ballot_party": null,
+          "caucus": null,
+          "status": "poll_observed_not_verified_general_ballot",
+          "qualification_source": "votehub_poll_matchup_observation_only",
+          "poll_matchups": [
+            "senate-2026:MT:votehub:alani-bankhead|votehub:kurt-alme"
+          ],
+          "n_poll_rows": 16,
+          "reviewed_as_of": "2026-10-03",
+          "note": "Observed in stored poll matchups; not verified as a ballot-qualified general-election candidate from an official ballot authority in-repo."
+        },
+        {
+          "candidate_id": "senate-2026-MT:reilly-neill",
+          "candidate_name": "Reilly Neill",
+          "ballot_party": null,
+          "caucus": null,
+          "status": "poll_observed_not_verified_general_ballot",
+          "qualification_source": "votehub_poll_matchup_observation_only",
+          "poll_matchups": [
+            "senate-2026:MT:votehub:reilly-neill|votehub:kurt-alme"
+          ],
+          "n_poll_rows": 2,
+          "reviewed_as_of": "2026-10-03",
+          "note": "Observed in stored poll matchups; not verified as a ballot-qualified general-election candidate from an official ballot authority in-repo."
+        }
+      ]
     },
     {
       "race_id": "senate-2026-NC",
@@ -667,7 +739,7 @@
       "race_id": "senate-2026-NM",
       "state": "NM",
       "modeled_candidate_id": "senate-2026-NM:ben-ray-lujan",
-      "modeled_candidate_name": "Ben Ray Luján",
+      "modeled_candidate_name": "Ben Ray Luj\u00e1n",
       "modeled_ballot_party": "D",
       "modeled_side": "modeled",
       "modeled_caucus": "D",
@@ -682,7 +754,7 @@
       "current_matchup_status": "reviewed_current",
       "reviewed_as_of": "2026-10-03",
       "statistical_target_supported": true,
-      "sitting_senator_name": "Ben Ray Luján",
+      "sitting_senator_name": "Ben Ray Luj\u00e1n",
       "modeled_candidate_is_incumbent": true,
       "opposing_candidate_is_incumbent": false,
       "seat_identity": "US_SENATE:NM:II",

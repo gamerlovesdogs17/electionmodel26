@@ -115,8 +115,11 @@ def fit_state_space(
         rp = polls[polls["race_id"] == rid] if len(polls) else polls
         mu = prior
         var = 8.0**2
+        # Calendar-time process diffusion (pp / sqrt(day)); same-day polls add 0.
+        process_sd_per_sqrt_day = 0.8
         if len(rp):
             rp = rp.sort_values("field_end")
+            prev_day: date | None = None
             for _, row in rp.iterrows():
                 try:
                     y = float(row["two_party_margin"])
@@ -149,8 +152,20 @@ def fit_state_space(
                         iw = 1.0
                 else:
                     iw = 1.0
-                var = var + 0.8**2
-                obs_var = (100.0 / np.sqrt(n)) ** 2 / max(qw * max(iw, 0.0), 0.05) + 2.0**2
+                try:
+                    poll_day = pd.Timestamp(row["field_end"]).date()
+                except (TypeError, ValueError):
+                    poll_day = None
+                if prev_day is not None and poll_day is not None:
+                    delta_days = max((poll_day - prev_day).days, 0)
+                else:
+                    delta_days = 0
+                var = var + (process_sd_per_sqrt_day**2) * float(delta_days)
+                if poll_day is not None:
+                    prev_day = poll_day
+                # n and quality enter measurement variance once; influence_weight
+                # carries absolute recency / clustering only (v0.9.24).
+                obs_var = (100.0 / np.sqrt(n)) ** 2 / max(qw * max(iw, 0.05), 0.05) + 2.0**2
                 k = var / (var + obs_var)
                 mu = mu + k * (y - mu)
                 var = (1 - k) * var

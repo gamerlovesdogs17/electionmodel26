@@ -464,48 +464,54 @@ def audit_historical_finance_input_diff() -> dict[str, Any]:
 
 
 def write_probability_integrity_audit() -> dict[str, Any]:
-    """Document poll-weighting concerns without changing production behavior."""
+    """Document poll-weighting concerns and v0.9.24 production repairs."""
     payload = {
-        "schema_version": "probability-integrity-audit-v0923",
+        "schema_version": "probability-integrity-audit-v0924",
         "generated_at": datetime.now(UTC).isoformat(),
         "model_version": MODEL_VERSION,
         "concerns": [
             {
                 "id": "sample_size_quality_double_influence",
                 "confirmed_behavior": (
-                    "Sample size and quality enter influence_weight "
-                    "(sqrt(n/600) and quality_weight) in poll_weights.attach_poll_weights, "
-                    "and again inflate observation precision via "
+                    "v0.9.24: sample size and quality no longer enter influence_weight. "
+                    "They inflate observation precision once via "
                     "poll_se = 100/sqrt(n)/sqrt(qw)/sqrt(iw) in pymc_model._prepare "
-                    "and obs_var = (100/sqrt(n))^2 / (qw*iw) in state_space.fit_state_space."
+                    "and obs_var = (100/sqrt(n))^2 / (qw*iw) in state_space.fit_state_space, "
+                    "where iw carries absolute recency / clustering only."
                 ),
                 "production_change_recommended": False,
                 "oos_challenger_required": True,
-                "changed_in_this_repair": False,
+                "changed_in_this_repair": True,
             },
             {
                 "id": "absolute_recency_race_normalization",
                 "confirmed_behavior": (
-                    "Recency uses absolute calendar age exp(-ln2 * age / half_life). "
-                    "After caps, per-race influence weights are renormalized to mean ≈ 1."
+                    "v0.9.24: within-race renormalization applies only to non-recency "
+                    "structural factors; absolute calendar recency "
+                    "exp(-ln2 * age / half_life) is multiplied back afterward."
                 ),
                 "production_change_recommended": False,
                 "oos_challenger_required": True,
-                "changed_in_this_repair": False,
+                "changed_in_this_repair": True,
             },
             {
                 "id": "state_space_process_variance_per_poll",
                 "confirmed_behavior": (
-                    "fit_state_space adds a fixed process variance increment "
-                    "(+0.8**2) once per poll observation, independent of elapsed "
-                    "calendar days between polls."
+                    "v0.9.24: fit_state_space accumulates process variance as "
+                    "(0.8 pp/√day)^2 × calendar Δt between successive polls; "
+                    "same-day Δt = 0 (no fixed +0.8^2 per poll)."
                 ),
                 "production_change_recommended": False,
                 "oos_challenger_required": True,
-                "changed_in_this_repair": False,
+                "changed_in_this_repair": True,
             },
         ],
         "repairs_in_this_task": [
+            "poll_weight_no_n_quality_double_count",
+            "absolute_recency_preserved_across_races",
+            "state_space_calendar_delta_t_process_variance",
+        ],
+        "prior_v0923_repairs_retained": [
             "seat_specific_personal_incumbency",
             "historical_personal_incumbency_cutoff_safe",
             "race_id_candidate_specific_finance",
@@ -515,9 +521,18 @@ def write_probability_integrity_audit() -> dict[str, Any]:
             "support_status_semantics_clarification",
         ],
     }
-    path = ARTIFACTS_DIR / "probability_integrity_audit_v0923.json"
+    path = ARTIFACTS_DIR / "probability_integrity_audit_v0924.json"
     payload["path"] = str(path)
     _write(path, payload)
+    # Pointer so older docs still resolve.
+    _write(
+        ARTIFACTS_DIR / "probability_integrity_audit_v0923.json",
+        {
+            "schema_version": "probability-integrity-audit-v0923.1",
+            "replaced_by": str(path),
+            "note": "See probability_integrity_audit_v0924.json for current status.",
+        },
+    )
     return payload
 
 

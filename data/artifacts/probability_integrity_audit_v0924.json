@@ -1,0 +1,43 @@
+{
+  "schema_version": "probability-integrity-audit-v0924",
+  "generated_at": "2026-10-07T01:13:19.932748+00:00",
+  "model_version": "senate-hierarchical-v0.9.24",
+  "concerns": [
+    {
+      "id": "sample_size_quality_double_influence",
+      "confirmed_behavior": "v0.9.24: sample size and quality no longer enter influence_weight. They inflate observation precision once via poll_se = 100/sqrt(n)/sqrt(qw)/sqrt(iw) in pymc_model._prepare and obs_var = (100/sqrt(n))^2 / (qw*iw) in state_space.fit_state_space, where iw carries absolute recency / clustering only.",
+      "production_change_recommended": false,
+      "oos_challenger_required": true,
+      "changed_in_this_repair": true
+    },
+    {
+      "id": "absolute_recency_race_normalization",
+      "confirmed_behavior": "v0.9.24: within-race renormalization applies only to non-recency structural factors; absolute calendar recency exp(-ln2 * age / half_life) is multiplied back afterward.",
+      "production_change_recommended": false,
+      "oos_challenger_required": true,
+      "changed_in_this_repair": true
+    },
+    {
+      "id": "state_space_process_variance_per_poll",
+      "confirmed_behavior": "v0.9.24: fit_state_space accumulates process variance as (0.8 pp/\u221aday)^2 \u00d7 calendar \u0394t between successive polls; same-day \u0394t = 0 (no fixed +0.8^2 per poll).",
+      "production_change_recommended": false,
+      "oos_challenger_required": true,
+      "changed_in_this_repair": true
+    }
+  ],
+  "repairs_in_this_task": [
+    "poll_weight_no_n_quality_double_count",
+    "absolute_recency_preserved_across_races",
+    "state_space_calendar_delta_t_process_variance"
+  ],
+  "prior_v0923_repairs_retained": [
+    "seat_specific_personal_incumbency",
+    "historical_personal_incumbency_cutoff_safe",
+    "race_id_candidate_specific_finance",
+    "no_publication_state_finance_fallback",
+    "alaska_pairwise_directional",
+    "fail_closed_nonfinite_margins",
+    "support_status_semantics_clarification"
+  ],
+  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\probability_integrity_audit_v0924.json"
+}

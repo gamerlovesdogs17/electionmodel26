@@ -23,6 +23,59 @@ class InstitutionalContestRule:
     vacancy_status: str | None = None
 
 
+def apply_plurality_rule_to_draws(
+    candidate_shares: np.ndarray,
+    candidate_ids: list[str],
+    *,
+    residual_ids: set[str] | frozenset[str] | None = None,
+    joint_draw_ids: np.ndarray | None = None,
+    caucus_by_candidate: dict[str, str | None] | None = None,
+) -> dict[str, Any]:
+    """Draw-by-draw plurality winners from candidate shares (no runoff).
+
+    Unresolved residual / unknown-caucus winners fail closed rather than
+    assigning a seat. This is the generic multiway path; Alaska RCV remains on
+    its dedicated adapter.
+    """
+    from midterms.model.multiway_plurality import caucus_from_winners, plurality_winners
+
+    shares = np.asarray(candidate_shares, dtype=float)
+    if shares.ndim != 2 or shares.shape[1] != len(candidate_ids) or len(candidate_ids) < 2:
+        raise ValueError("candidate_shares must be (draw, candidate)")
+    totals = shares.sum(axis=1, keepdims=True)
+    if np.any(totals <= 0):
+        raise ValueError("each draw must have positive candidate mass")
+    shares = shares / totals
+    draw_ids = np.arange(shares.shape[0]) if joint_draw_ids is None else np.asarray(joint_draw_ids)
+    if len(draw_ids) != shares.shape[0]:
+        raise ValueError("joint_draw_ids length mismatch")
+    winners = plurality_winners(
+        shares, list(candidate_ids), residual_ids=set(residual_ids or ()),
+    )
+    caucus = None
+    if caucus_by_candidate is not None:
+        caucus = caucus_from_winners(winners["winner_candidate_ids"], caucus_by_candidate)
+    return {
+        "schema_version": "joint-plurality-rules-v1",
+        "rule": {
+            "phase": "general",
+            "threshold": 0.0,
+            "runoff_required": False,
+            "tie_policy": "unresolved",
+        },
+        "joint_draw_ids": draw_ids.tolist(),
+        "candidate_ids": list(candidate_ids),
+        "winner_candidate_ids": winners["winner_candidate_ids"],
+        "fail_closed_draws": winners["fail_closed_draws"],
+        "unresolved_draws": int(winners["n_fail_closed"]),
+        "transition_model": "plurality_no_runoff",
+        "seat_count_per_draw": [
+            0 if failed else 1 for failed in winners["fail_closed_draws"]
+        ],
+        "caucus": caucus,
+    }
+
+
 def apply_institutional_rules_to_draws(
     first_round_shares: np.ndarray,
     candidate_ids: list[str],
@@ -35,7 +88,14 @@ def apply_institutional_rules_to_draws(
 
     A runoff transition is unresolved unless callers supply validated runoff
     draws.  Row alignment retains the same shared-shock draw identity.
+    When runoff_required is False, this is plain plurality with unresolved ties.
     """
+    if not rule.runoff_required and float(rule.threshold) <= 0.0:
+        return apply_plurality_rule_to_draws(
+            first_round_shares,
+            candidate_ids,
+            joint_draw_ids=joint_draw_ids,
+        )
     shares = np.asarray(first_round_shares, dtype=float)
     if shares.ndim != 2 or shares.shape[1] != len(candidate_ids) or len(candidate_ids) < 2:
         raise ValueError("first_round_shares must be (draw, candidate)")

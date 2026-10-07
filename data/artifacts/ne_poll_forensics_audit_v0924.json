@@ -1,0 +1,39 @@
+{
+  "schema_version": "ne-poll-forensics-v0924",
+  "generated_at": "2026-10-07T01:14:04.070556+00:00",
+  "model_version": "senate-hierarchical-v0.9.24",
+  "race_id": "senate-2026-NE",
+  "reviewed_pair": {
+    "modeled": "Dan Osborn",
+    "opposing": "Pete Ricketts",
+    "modeled_ballot_party": "I",
+    "modeled_caucus": "D"
+  },
+  "n_raw_ne_polls": 1,
+  "n_candidate_compatible": 1,
+  "n_exact_osborn_ricketts_matchups": 1,
+  "n_exact_excluded": 0,
+  "diagnosis": "B_actual_source_coverage_limitation",
+  "repair_applied": false,
+  "repair_note": "Eligible count matches stored candidate-compatible set; public sites may use out-of-architecture sources.",
+  "outside_architecture_sources_added": false,
+  "ledger": [
+    {
+      "poll_id": "vh-us-202gba71e992b6",
+      "pollster": "GBAO Strategies",
+      "field_end": "2026-09-08",
+      "sample_size": 800.0,
+      "population": "LV",
+      "matchup_id": "senate-2026:NE:votehub:dan-osborn|votehub:pete-ricketts",
+      "dem_or_modeled_name": null,
+      "rep_or_opposing_name": null,
+      "osborn_alias_resolved": true,
+      "ricketts_alias_resolved": true,
+      "exact_osborn_ricketts_matchup": true,
+      "included": true,
+      "exclusion_reason": null,
+      "classification": "included_candidate_compatible",
+      "source_url": "https://www.washingtonsun.com/newsletters/panic-week"
+    }
+  ]
+}

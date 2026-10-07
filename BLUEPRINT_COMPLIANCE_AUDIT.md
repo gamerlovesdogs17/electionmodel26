@@ -1,15 +1,17 @@
 # Blueprint compliance audit
 
-**Audit date:** 2026-10-04
+**Audit date:** 2026-10-06
 
 **Scope:** code capability and current empirical status
 
-**Model boundary:** `senate-hierarchical-v0.9.23` development; empirical
-reference remains `senate-hierarchical-v0.9.22`
+**Model boundary:** `senate-hierarchical-v0.9.24` research-only development;
+immutable completed rebuild remains `senate-hierarchical-v0.9.23`
+(as-of `2026-10-05`, evidence bundle `eb-19f9ccea0cc3812a`)
 
-**Current artifacts:** v0.9.23 source/coverage and limited adapter diagnostics;
-v0.9.22 remains the last completed research rebuild, validated against evidence
-bundle `eb-3e91ca3a90628d69`
+**Current artifacts:** v0.9.23 sealed forecast/release/shadow identities are
+historical records. v0.9.24 adds contest presentation, MT/ID/NE audits,
+multiway fail-closed, and poll-mechanics repairs without a fresh nested OOF /
+publication rebuild.
 
 **Public live:** disabled
 
@@ -23,92 +25,23 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 |---|---|---|
 | Warehouse/as-of polls and truth | Implemented with variation | Canonical content identity includes the conditional candidate-state contract and poll exclusions |
 | Raw immutability and hashes | Implemented | New ingests must use the same contracts |
-| Poll measurement, pollster, mode/pop, ENOP | Implemented | Optional metadata terms still require OOS testing |
+| Poll measurement, pollster, mode/pop, ENOP | Implemented | v0.9.24 removes n/quality double-count; absolute recency and calendar Δt repaired; await fresh OOF |
 | Sponsor/questionnaire/study terms | Implemented and evaluated | Cross-fitted selection retained the all-off base; optional effects remain disabled |
-| Fundamentals and structural priors | Implemented with variation | Challenger features remain off |
-| Static/dynamic PyMC and terminal layers | Implemented and evaluated | Canonical OOF is bound to the validated model spec; dynamic PyMC earned zero stack mass |
+| Fundamentals and structural priors | Implemented with variation | Experience/special/turnout challengers remain off |
+| Static/dynamic PyMC and terminal layers | Implemented and evaluated | Canonical OOF is bound to the prior validated model spec; dynamic PyMC earned zero stack mass |
 | Similarity | Implemented and evaluated | Point-in-time source and same-family ablation evidence pass |
-| Joint simulation | Implemented and evaluated for v0.9.22 | v0.9.23 forecast coverage is complete, but the full chamber rebuild has not run |
-| Institutional rules | Partial | Transition model remains disabled |
+| Joint simulation | Implemented | v0.9.23 rebuild completed; v0.9.24 has no new 50k publication run |
+| Institutional rules / multiway | Partial + plurality path | Plurality fail-closed implemented; runoff transition still disabled |
+| Shared race presentation | Implemented | Alaska UI parity without mutating RCV draws |
 | Turnout | Intentionally deferred | Auxiliary only |
-| Predictive-mixture stack | Implemented and evaluated | Validated weights are approximately 21.9% PyMC and 78.1% state-space |
+| Predictive-mixture stack | Implemented and evaluated | Validated weights remain historical until a v0.9.24 rebuild |
 | Expert/market overlays | Intentionally deferred | Disabled/compare-only layers do not enter the production research forecast |
-| Market contract semantics | Intentionally deferred | Market layer is disabled in the effective production configuration |
-| Whole-cycle/nested validation | Implemented and evaluated | Four-cycle 60/30-day canonical OOF is frozen and lineage-bound |
-| Joint proper scores | Implemented and evaluated | Historical joint score artifact passes its current lineage gate |
-| Prior predictive/PPC/SBC | Implemented with variation | Prior/PPC gates pass; full-model SBC remains a nonblocking future diagnostic |
-| Sampler health | Implemented and evaluated | Current reference fit passes numerical-quality requirements |
-| Reproducibility/lineage/MCSE | Implemented with variation | Legacy absolute paths remain historical records |
-| Source readiness and sealing | Implemented | v0.9.23 source domains and coverage are ready; bundle `eb-3e91ca3a90628d69` remains the sealed v0.9.22 evidence boundary |
-| Domain freshness | Implemented with variation | Retrieval and observation age are enforced only for enabled layers; source adapters must retain their timestamps |
-| Acceptance gates | Implemented and passing for v0.9.22 | v0.9.23 has not run production acceptance and cannot reuse the old result as current evidence |
+| Whole-cycle/nested validation | Implemented historically | Formal OOF remains 60/30; broader lead grid wired but not re-run |
+| Acceptance gates | Passing for sealed v0.9.23 rebuild | v0.9.24 cannot promote using v0.9.23 validated-model-spec identity |
 
-## Important deviations and decisions
+## Important v0.9.24 notes
 
-- The current turnout layer remains an auxiliary diagnostic. It is not described as propagated uncertainty.
-- Rare common movement is represented with heavy-tailed shared factors rather than a separate disaster-mixture parameter. A new mixture is deferred until it has OOS support.
-- Optional sponsor, questionnaire and shared-study effects use shrinkage and are disabled by default. Enabling an explicit study effect disables heuristic study downweighting unless the caller explicitly overrides that choice.
-- v0.9.22 evaluates only three positive single-term additions: study, sponsor,
-  and questionnaire. Each changes one reference setting, remains excluded from
-  stacking, and is selected by an outer-cycle cross-fitted majority-plus-CRPS
-  parsimony rule. Multi-term interactions are intentionally deferred.
-- Unvalidated expert and market overlays are compare-only for publication-quality execution. The reference fit runs core-only for those layers until an exact-weight nested-OOS contract exists.
-- A 2018 demographic table is labeled as a reuse approximation. No earlier historical snapshot is fabricated.
-- Ordinary FRED latest/revised data and World Bank annual data are degraded substitutes for historical replay; only traceable ALFRED real-time vintages qualify.
-- Single-holdout calibration in the legacy validation report is exploratory and cannot satisfy formal reliability acceptance.
-- Historical v0.9.21 OOF, stack, forecast, and diagnostic artifacts remain
-  historical records and cannot substitute for the lineage-bound v0.9.22 set.
-- Same-family ablations freeze reference and challenger configurations and must
-  show exactly one changed feature. No-op ablations are ineligible.
-- `source-readiness` is the pre-fit authority. `prepare-evidence --mode seal`
-  writes a content-addressed bundle only after every hard current and historical
-  domain is ready. OOF, stack and forecast stages require that exact bundle ID.
-- Poll-structure validation is deliberately two-stage. The selection pass may
-  compare the all-off reference with one-term structural challengers, then
-  freezes `validated_model_spec_candidate.json`. A separately keyed canonical
-  pass refits the static and dynamic candidates with that selected structure.
-  Only the canonical OOF may feed the stack, and the finalized validated model
-  spec must bind the bundle, source-readiness report, selected structure,
-  canonical OOF, stack and calibration artifact before publication fitting.
-- Candidate identity is conditionally required. Ordinary binary races may use
-  a content-addressed side-only state, while replacements, withdrawals,
-  top-two pairings, and incompatible matchup evidence require point-in-time
-  resolution. Pre-primary candidate polls are excluded without using eventual
-  nominees. Structurally nonbinary race/cutoffs remain visible but are excluded
-  from binary scoring with a recorded reason.
-
-## Current source and validation status
-
-The sealed v0.9.22 source audit remains green for its immutable completed
-research release. The current v0.9.23 evidence-source audit is also green.
-Forecast coverage is a separate gate: 20 current races pass, 15 have warnings,
-and none fail. Idaho, Montana, and Nebraska use a separately identified limited-
-validation binary non-major-party adapter; South Dakota is explicitly prior-only
-with zero compatible polls and wide uncertainty. Alaska uses a separately
-identified limited-validation IRV adapter built from official Alaska primary
-and round-transition evidence. Markets and expert ratings remain
-disabled optional domains.
-
-The adapter preserves Independent ballot identity and explicit Democratic
-caucus accounting as separate concepts. Its candidate-neutral target and draw
-columns never enter the ordinary D-v-R PyMC, state-space, stack, calibration, or
-OOF machinery. Four historical 60/30 cases across 2020 Alaska and 2024 Nebraska
-provide limited diagnostics only; no calibration or broad empirical-validation
-claim is allowed. The selected state-anchored 30-point candidate-deviation prior
-was compared with predeclared zero-centered 20-point and state-anchored 40-point
-forms; it was not tuned over a large grid. All ordinary historical evidence projections remain
-semantically identical to the v0.9.22 inputs.
-
-The Alaska adapter is not an ordinary stack member. Four predeclared official
-Alaska RCV analogs support transfer/tabulation checks only. The small sample,
-including a weak 2022 special-House holdout, prohibits calibration or ordinary
-stack-performance claims. Candidate-level probabilities are authoritative and
-the chamber seat draw follows the simulated winner's explicit caucus.
-
-Evidence bundle `eb-3e91ca3a90628d69` binds the v0.9.22 ready source report and the
-current/historical snapshot identities. The completed rebuild selected the
-all-off PyMC poll structure, regenerated canonical OOF, stack, reliability,
-joint scores and Bayesian diagnostics, then passed the independent rebuild,
-run coherence, G1–G11, and required extension gates. Release identity
-`truth_v1_v0.9.22_eb-3e91ca3a90628d69` binds the finalized model spec. Public
-live remains disabled and the surface remains `research_only`.
+- Outside-model MT/ID/NE/IA/KS map oddities are audit triggers only, never tuning targets.
+- MT/ID verified general fields remain binary I-vs-R unless ≥3 reviewed ballot-qualified candidates are confirmed from in-repo authorities.
+- Nebraska poll forensics document coverage vs filter bugs without adapter probability tuning.
+- `PUBLIC_LIVE_ENABLED=False`; fresh OOF/rebuild required before any promotion claim.

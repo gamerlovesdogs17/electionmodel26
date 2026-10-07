@@ -41,7 +41,7 @@ from midterms.validation.structural_ablations import (
 
 
 def test_model_version_boundary_rejects_old_stack(tmp_path: Path):
-    assert MODEL_VERSION == "senate-hierarchical-v0.9.23"
+    assert MODEL_VERSION == "senate-hierarchical-v0.9.24"
     payload = {"source_model_version": "senate-hierarchical-v0.9.21"}
     with pytest.raises(ValueError, match="stale stack artifact model_version"):
         require_current_model_version(

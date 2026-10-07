@@ -1,0 +1,113 @@
+{
+  "schema_version": "mt-id-contest-field-audit-v0924",
+  "generated_at": "2026-10-07T01:14:52.892680+00:00",
+  "model_version": "senate-hierarchical-v0.9.24",
+  "authority": "current_candidates_2026_registry + in-repo poll matchup observation",
+  "forecast_sites_as_ballot_authority": false,
+  "races": [
+    {
+      "race_id": "senate-2026-MT",
+      "state": "MT",
+      "reviewed_as_of": "2026-10-03",
+      "previous_contest_structure": "non_major_party_vs_republican",
+      "verified_contest_structure": "non_major_party_vs_republican",
+      "previous_modeling_path": "binary_non_major_adapter",
+      "recommended_modeling_path": "binary_non_major_adapter",
+      "n_verified_general_ballot_candidates": 2,
+      "n_poll_observed_unverified_candidates": 2,
+      "ballot_candidates": [
+        {
+          "candidate_id": "senate-2026-MT:seth-bodnar",
+          "candidate_name": "Seth Bodnar",
+          "ballot_party": "I",
+          "caucus": "D",
+          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+          "status": "reviewed_general_modeled",
+          "qualification_source": "current_candidates_2026_registry",
+          "reviewed_as_of": "2026-10-03"
+        },
+        {
+          "candidate_id": "senate-2026-MT:kurt-alme",
+          "candidate_name": "Kurt Alme",
+          "ballot_party": "R",
+          "caucus": "R",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "reviewed_general_opposing",
+          "qualification_source": "current_candidates_2026_registry",
+          "reviewed_as_of": "2026-10-03"
+        },
+        {
+          "candidate_id": "senate-2026-MT:alani-bankhead",
+          "candidate_name": "Alani Bankhead",
+          "ballot_party": null,
+          "caucus": null,
+          "status": "poll_observed_not_verified_general_ballot",
+          "qualification_source": "votehub_poll_matchup_observation_only",
+          "poll_matchups": [
+            "senate-2026:MT:votehub:alani-bankhead|votehub:kurt-alme"
+          ],
+          "n_poll_rows": 16,
+          "reviewed_as_of": "2026-10-03",
+          "note": "Observed in stored poll matchups; not verified as a ballot-qualified general-election candidate from an official ballot authority in-repo."
+        },
+        {
+          "candidate_id": "senate-2026-MT:reilly-neill",
+          "candidate_name": "Reilly Neill",
+          "ballot_party": null,
+          "caucus": null,
+          "status": "poll_observed_not_verified_general_ballot",
+          "qualification_source": "votehub_poll_matchup_observation_only",
+          "poll_matchups": [
+            "senate-2026:MT:votehub:reilly-neill|votehub:kurt-alme"
+          ],
+          "n_poll_rows": 2,
+          "reviewed_as_of": "2026-10-03",
+          "note": "Observed in stored poll matchups; not verified as a ballot-qualified general-election candidate from an official ballot authority in-repo."
+        }
+      ],
+      "support": {
+        "probability_model_support_status": "limited_supported",
+        "note": "Verified general field remains binary I-vs-R; alternate poll matchups treated as non-general / unverified."
+      },
+      "outside_model_probabilities_used": false
+    },
+    {
+      "race_id": "senate-2026-ID",
+      "state": "ID",
+      "reviewed_as_of": "2026-10-03",
+      "previous_contest_structure": "non_major_party_vs_republican",
+      "verified_contest_structure": "non_major_party_vs_republican",
+      "previous_modeling_path": "binary_non_major_adapter",
+      "recommended_modeling_path": "binary_non_major_adapter",
+      "n_verified_general_ballot_candidates": 2,
+      "n_poll_observed_unverified_candidates": 0,
+      "ballot_candidates": [
+        {
+          "candidate_id": "senate-2026-ID:todd-achilles",
+          "candidate_name": "Todd Achilles",
+          "ballot_party": "I",
+          "caucus": "D",
+          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+          "status": "reviewed_general_modeled",
+          "qualification_source": "current_candidates_2026_registry",
+          "reviewed_as_of": "2026-10-03"
+        },
+        {
+          "candidate_id": "senate-2026-ID:jim-risch",
+          "candidate_name": "Jim Risch",
+          "ballot_party": "R",
+          "caucus": "R",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "reviewed_general_opposing",
+          "qualification_source": "current_candidates_2026_registry",
+          "reviewed_as_of": "2026-10-03"
+        }
+      ],
+      "support": {
+        "probability_model_support_status": "limited_supported",
+        "note": "Verified general field remains binary I-vs-R; alternate poll matchups treated as non-general / unverified."
+      },
+      "outside_model_probabilities_used": false
+    }
+  ]
+}

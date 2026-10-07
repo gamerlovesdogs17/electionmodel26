@@ -1,0 +1,369 @@
+{
+  "schema_version": "ia-ks-ne-cross-race-decomposition-v0924",
+  "generated_at": "2026-10-07T01:14:53.691863+00:00",
+  "model_version": "senate-hierarchical-v0.9.24",
+  "source_forecast_model_version": "senate-hierarchical-v0.9.23",
+  "note": "Explanatory only. No cross-race ordering gates and no tuning toward outside-model IA/KS/NE probability orderings.",
+  "outside_model_probabilities_used": false,
+  "races": {
+    "IA": {
+      "race_id": "senate-2026-IA",
+      "state": "IA",
+      "modeling_path": "ordinary_stack",
+      "p_dem": 0.34236,
+      "mean_margin": -1.9030927235235426,
+      "sd_margin": 5.116904310170345,
+      "rating": "Lean R",
+      "prior_lean": -12.264494934009972,
+      "decomposition_available": true,
+      "base_prior": {
+        "name": "state_prior",
+        "value": -12.264494934009972,
+        "kind": "additive_location",
+        "source": "point_in_time_presidential_prior",
+        "note": ""
+      },
+      "fundamentals_anchor": {
+        "name": "fundamentals_anchor",
+        "value": -8.928882808346225,
+        "kind": "posterior_location",
+        "source": "reference_fundamentals_anchor",
+        "note": "Deterministic prior location; not additive to stacked core"
+      },
+      "stacked_core_location": {
+        "name": "stacked_core_location",
+        "value": -1.9030927235235426,
+        "kind": "posterior_location",
+        "source": "stacked_predictive_draws",
+        "note": ""
+      },
+      "final_location": {
+        "name": "final_location",
+        "value": -1.9030927235235426,
+        "kind": "posterior_location",
+        "source": "final_predictive_draws",
+        "note": ""
+      },
+      "final_scale": {
+        "name": "final_scale",
+        "value": 5.116904310170345,
+        "kind": "uncertainty_component",
+        "source": "final_predictive_draws",
+        "note": ""
+      },
+      "terms": [
+        {
+          "name": "generic_ballot",
+          "value": 1.7317780689469715,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "incumbency",
+          "value": 0.0,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "fundraising_logit",
+          "value": -1.1198299554182227,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "pres_approval",
+          "value": 1.596,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "midterm_outparty",
+          "value": 1.2,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "real_income_yoy",
+          "value": -0.07233598786500095,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "weighted_observed_poll_location",
+          "value": 1.3306810412640622,
+          "kind": "observation_location",
+          "source": "available_poll_evidence"
+        },
+        {
+          "name": "core_scale",
+          "value": 5.116904310170345,
+          "kind": "uncertainty_component",
+          "source": "stacked_core"
+        },
+        {
+          "name": "terminal_nat_sd",
+          "value": 1.8,
+          "kind": "uncertainty_component",
+          "source": "error_budget"
+        },
+        {
+          "name": "terminal_race_sd",
+          "value": 1.8,
+          "kind": "uncertainty_component",
+          "source": "error_budget"
+        },
+        {
+          "name": "similarity_terminal_sd",
+          "value": 1.4,
+          "kind": "uncertainty_component",
+          "source": "error_budget"
+        }
+      ],
+      "outside_model_ordering_used": false
+    },
+    "KS": {
+      "race_id": "senate-2026-KS",
+      "state": "KS",
+      "modeling_path": "ordinary_stack",
+      "p_dem": 0.21794,
+      "mean_margin": -4.284560498059327,
+      "sd_margin": 5.713187137400749,
+      "rating": "Likely R",
+      "prior_lean": -16.448522504642227,
+      "decomposition_available": true,
+      "base_prior": {
+        "name": "state_prior",
+        "value": -16.448522504642227,
+        "kind": "additive_location",
+        "source": "point_in_time_presidential_prior",
+        "note": ""
+      },
+      "fundamentals_anchor": {
+        "name": "fundamentals_anchor",
+        "value": -14.020410889959331,
+        "kind": "posterior_location",
+        "source": "reference_fundamentals_anchor",
+        "note": "Deterministic prior location; not additive to stacked core"
+      },
+      "stacked_core_location": {
+        "name": "stacked_core_location",
+        "value": -4.284560498059327,
+        "kind": "posterior_location",
+        "source": "stacked_predictive_draws",
+        "note": ""
+      },
+      "final_location": {
+        "name": "final_location",
+        "value": -4.284560498059327,
+        "kind": "posterior_location",
+        "source": "final_predictive_draws",
+        "note": ""
+      },
+      "final_scale": {
+        "name": "final_scale",
+        "value": 5.713187137400749,
+        "kind": "uncertainty_component",
+        "source": "final_predictive_draws",
+        "note": ""
+      },
+      "terms": [
+        {
+          "name": "generic_ballot",
+          "value": 1.7317780689469715,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "incumbency",
+          "value": -2.0,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "fundraising_logit",
+          "value": -0.027330466399076696,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "pres_approval",
+          "value": 1.596,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "midterm_outparty",
+          "value": 1.2,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "real_income_yoy",
+          "value": -0.07233598786500095,
+          "kind": "additive_location",
+          "source": "reference_fundamentals_anchor"
+        },
+        {
+          "name": "weighted_observed_poll_location",
+          "value": 2.133059109822882,
+          "kind": "observation_location",
+          "source": "available_poll_evidence"
+        },
+        {
+          "name": "core_scale",
+          "value": 5.713187137400749,
+          "kind": "uncertainty_component",
+          "source": "stacked_core"
+        },
+        {
+          "name": "terminal_nat_sd",
+          "value": 1.8,
+          "kind": "uncertainty_component",
+          "source": "error_budget"
+        },
+        {
+          "name": "terminal_race_sd",
+          "value": 1.8,
+          "kind": "uncertainty_component",
+          "source": "error_budget"
+        },
+        {
+          "name": "similarity_terminal_sd",
+          "value": 1.4,
+          "kind": "uncertainty_component",
+          "source": "error_budget"
+        }
+      ],
+      "outside_model_ordering_used": false
+    },
+    "NE": {
+      "race_id": "senate-2026-NE",
+      "state": "NE",
+      "modeling_path": "binary_non_major_adapter",
+      "p_modeled_candidate": 0.49262,
+      "p_opposing_candidate": 0.5073799999999999,
+      "modeled_candidate_margin": -0.033085468110159603,
+      "sd_margin": 10.561740031608105,
+      "rating": "Tossup",
+      "prior_lean": -20.92841143818746,
+      "decomposition_available": false,
+      "decomposition_omission_reason": "race_decomposition_latest covers ordinary binary races only; NE terms reconstructed from non-major adapter forecast fields",
+      "adapter_terms": [
+        {
+          "name": "presidential_relative_state_anchor",
+          "value": -20.92841143818746,
+          "kind": "weak_geographic_location",
+          "source": "binary_non_major_adapter"
+        },
+        {
+          "name": "exceptional_candidate_deviation_prior_sd",
+          "value": 30.0,
+          "kind": "structural_prior_scale",
+          "source": "binary_non_major_adapter"
+        },
+        {
+          "name": "posterior_modeled_candidate_margin",
+          "value": -0.033085468110159603,
+          "kind": "posterior_location",
+          "source": "binary_non_major_adapter"
+        },
+        {
+          "name": "n_candidate_compatible_polls",
+          "value": 1,
+          "kind": "coverage",
+          "source": "uncertainty_metadata"
+        },
+        {
+          "name": "enop",
+          "value": 1.0,
+          "kind": "coverage",
+          "source": "uncertainty_metadata"
+        },
+        {
+          "name": "posterior_sd",
+          "value": 6.7322909181937645,
+          "kind": "uncertainty_component",
+          "source": "uncertainty_metadata"
+        },
+        {
+          "name": "predictive_sd",
+          "value": 10.45579939589481,
+          "kind": "uncertainty_component",
+          "source": "uncertainty_metadata"
+        }
+      ],
+      "poll_coverage": {
+        "race_id": "senate-2026-NE",
+        "state": "NE",
+        "candidate_state": "ineligible_for_binary_scoring",
+        "candidate_state_reason": "non_major_party_contest_requires_separate_statistical_target",
+        "resolved_matchup": {
+          "modeled_candidate_id": "senate-2026-NE:dan-osborn",
+          "modeled_candidate_name": "Dan Osborn",
+          "modeled_ballot_party": "I",
+          "opposing_candidate_id": "senate-2026-NE:pete-ricketts",
+          "opposing_candidate_name": "Pete Ricketts",
+          "opposing_ballot_party": "R",
+          "identity_source": "reviewed_current_candidate_registry",
+          "current_matchup_status": "reviewed_current",
+          "reviewed_as_of": "2026-10-03"
+        },
+        "contest_structure": "non_major_party_vs_republican",
+        "candidate_identity_resolved": true,
+        "polling_available": true,
+        "statistical_target_supported": false,
+        "ordinary_binary_model_supported": false,
+        "exception_adapter_supported": true,
+        "binary_score_eligible": false,
+        "probability_model_supported": true,
+        "probability_model_support_status": "limited_supported",
+        "probability_model_support_reason": "limited_validation_exception_model-v1",
+        "identity_sensitive": true,
+        "qa_universe": true,
+        "n_raw_current_polls": 1,
+        "n_candidate_compatible_polls": 1,
+        "n_model_safe_polls": 0,
+        "n_exception_adapter_polls": 1,
+        "n_excluded_obsolete_or_incompatible": 0,
+        "n_excluded_identity_unresolved": 0,
+        "n_excluded_unsupported_target": 0,
+        "ordinary_model_excluded_poll_ids": [
+          "vh-us-202gba71e992b6"
+        ],
+        "n_excluded_hypothetical_or_pre_nomination": 0,
+        "raw_poll_ids": [
+          "vh-us-202gba71e992b6"
+        ],
+        "compatible_poll_ids": [
+          "vh-us-202gba71e992b6"
+        ],
+        "model_safe_poll_ids": [],
+        "excluded_poll_ids": [
+          "vh-us-202gba71e992b6"
+        ],
+        "matchup_ids_seen": [
+          "senate-2026:NE:votehub:dan-osborn|votehub:pete-ricketts"
+        ],
+        "latest_compatible_field_end": "2026-09-08T00:00:00",
+        "latest_compatible_available_at": "2026-09-25T00:00:00",
+        "status": "warning",
+        "forecast_status": "warning",
+        "evidence_status": "pass",
+        "evidence_reasons": [],
+        "reasons": [
+          "limited_validation_exception_model"
+        ]
+      },
+      "outside_model_ordering_used": false,
+      "cross_race_probability_ordering_gate": false
+    }
+  },
+  "summary": {
+    "IA_p_dem": 0.34236,
+    "KS_p_dem": 0.21794,
+    "NE_p_modeled_candidate": 0.49262,
+    "NE_modeling_path": "binary_non_major_adapter",
+    "comparable_on_same_estimand": false,
+    "reason_not_comparable": "IA/KS are ordinary D-v-R stack margins; NE is modeled_candidate_margin on a limited-validation binary non-major adapter."
+  }
+}
