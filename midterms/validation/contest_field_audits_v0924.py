@@ -1,4 +1,4 @@
-"""MT/ID contest-field and poll-inclusion audits for v0.9.24 (no probability tuning)."""
+"""Independent MT/ID contest-field and poll-inclusion audits (non-circular)."""
 
 from __future__ import annotations
 
@@ -13,10 +13,15 @@ from midterms.evidence.current_candidates import (
     CURRENT_CANDIDATE_REGISTRY_PATH,
     load_current_candidate_registry,
 )
-from midterms.evidence.warehouse import Warehouse
 from midterms.model.multiway_plurality import (
     MULTIWAY_CONTEST_STRUCTURE,
+    MULTIWAY_MODELING_PATH,
     historical_analog_support_report,
+)
+from midterms.validation.official_ballot_fields import (
+    certified_candidates,
+    load_official_ballot_fields,
+    official_race,
 )
 
 TARGET_STATES = ("MT", "ID")
@@ -31,199 +36,158 @@ def _poll_frame() -> pd.DataFrame:
 
 
 def _matchup_candidates(matchup_id: str) -> list[str]:
-    """Extract candidate slugs from VoteHub-style matchup ids.
-
-    Example: ``senate-2026:MT:votehub:alani-bankhead|votehub:kurt-alme``
-    → ``['alani-bankhead', 'kurt-alme']``.
-    """
     text = str(matchup_id or "")
     if not text:
         return []
     if "|" in text:
-        parts = text.split("|")
-        slugs: list[str] = []
-        for part in parts:
-            token = part.split(":")[-1].strip()
-            if token:
-                slugs.append(token)
-        return slugs
+        return [part.split(":")[-1].strip() for part in text.split("|") if part.strip()]
     if ":" in text:
         return [text.split(":")[-1]]
     return [text]
 
 
+def _slug(candidate_id: str) -> str:
+    return str(candidate_id).split(":")[-1]
+
+
 def build_mt_id_contest_field_audit() -> dict[str, Any]:
+    """Audit MT/ID using official ballot authorities — never the registry as truth."""
+    official = load_official_ballot_fields()
     registry = load_current_candidate_registry()
-    polls = _poll_frame()
+    reg_by_state = {str(r["state"]): r for r in registry["races"]}
     races_out: list[dict[str, Any]] = []
+
     for state in TARGET_STATES:
-        race = next(r for r in registry["races"] if r["state"] == state)
-        race_polls = polls[polls["state"].astype(str).eq(state)]
-        observed: dict[str, dict[str, Any]] = {}
-        for matchup_id, count in (
-            race_polls.get("matchup_id", pd.Series(dtype=object))
-            .dropna()
-            .astype(str)
-            .value_counts()
-            .items()
-        ):
-            for slug in _matchup_candidates(str(matchup_id)):
-                entry = observed.setdefault(
-                    slug,
-                    {
-                        "candidate_slug": slug,
-                        "poll_matchups": [],
-                        "n_poll_rows": 0,
-                        "status": "poll_observed_not_verified_general_ballot",
-                    },
-                )
-                entry["poll_matchups"].append(str(matchup_id))
-                entry["n_poll_rows"] += int(count)
-
-        ballot_candidates = [
-            {
-                "candidate_id": race["modeled_candidate_id"],
-                "candidate_name": race["modeled_candidate_name"],
-                "ballot_party": race["modeled_ballot_party"],
-                "caucus": race["modeled_caucus"],
-                "caucus_basis": race["modeled_caucus_basis"],
-                "status": "reviewed_general_modeled",
-                "qualification_source": "current_candidates_2026_registry",
-                "reviewed_as_of": race["reviewed_as_of"],
-            },
-            {
-                "candidate_id": race["opposing_candidate_id"],
-                "candidate_name": race["opposing_candidate_name"],
-                "ballot_party": race["opposing_ballot_party"],
-                "caucus": race["opposing_caucus"],
-                "caucus_basis": race["opposing_caucus_basis"],
-                "status": "reviewed_general_opposing",
-                "qualification_source": "current_candidates_2026_registry",
-                "reviewed_as_of": race["reviewed_as_of"],
-            },
-        ]
-        reviewed_slugs = {
-            str(race["modeled_candidate_id"]).split(":")[-1],
-            str(race["opposing_candidate_id"]).split(":")[-1],
-        }
-        for slug, meta in sorted(observed.items()):
-            if slug in reviewed_slugs:
-                continue
-            ballot_candidates.append(
-                {
-                    "candidate_id": f"senate-2026-{state}:{slug}",
-                    "candidate_name": slug.replace("-", " ").title(),
-                    "ballot_party": None,
-                    "caucus": None,
-                    "status": meta["status"],
-                    "qualification_source": "votehub_poll_matchup_observation_only",
-                    "poll_matchups": sorted(set(meta["poll_matchups"])),
-                    "n_poll_rows": meta["n_poll_rows"],
-                    "reviewed_as_of": race["reviewed_as_of"],
-                    "note": (
-                        "Observed in stored poll matchups; not verified as a "
-                        "ballot-qualified general-election candidate from an "
-                        "official ballot authority in-repo."
-                    ),
-                }
-            )
-
-        verified_general = [
-            c for c in ballot_candidates if str(c.get("status", "")).startswith("reviewed_general")
-        ]
-        n_verified = len(verified_general)
-        if n_verified >= 3:
-            structure = MULTIWAY_CONTEST_STRUCTURE
-            path = "multiway_plurality_adapter"
-            support = historical_analog_support_report(n_analogs=0)
+        off = official_race(state)
+        certified = certified_candidates(state)
+        n_certified = len(certified)
+        structure = str(off["contest_structure"])
+        support = historical_analog_support_report(n_analogs=0)
+        if structure == MULTIWAY_CONTEST_STRUCTURE:
+            path = MULTIWAY_MODELING_PATH
+            win_status = "fail_closed"
+            prob_status = "unsupported"
         else:
-            structure = race["contest_structure"]
             path = "binary_non_major_adapter"
-            support = {
-                "probability_model_support_status": race.get("probability_model_support_status"),
-                "note": (
-                    "Verified general field remains binary I-vs-R; alternate "
-                    "poll matchups treated as non-general / unverified."
-                ),
-            }
+            win_status = "ok"
+            prob_status = "limited_supported"
+
+        reg = reg_by_state.get(state, {})
+        reg_ballot_ids = {
+            _slug(str(row.get("candidate_id") or ""))
+            for row in (reg.get("ballot_candidates") or [])
+            if str(row.get("status") or "")
+            in {"certified_general_ballot", "reviewed_general_modeled", "reviewed_general_opposing"}
+            or str(row.get("status", "")).startswith("reviewed_general")
+        }
+        # Modeled/opposing alone are not a complete ballot field.
+        official_ids = {_slug(c["candidate_id"]) for c in certified}
+        omitted_from_registry = sorted(official_ids - reg_ballot_ids)
+        extra_in_registry_as_verified = sorted(reg_ballot_ids - official_ids)
 
         races_out.append(
             {
-                "race_id": race["race_id"],
+                "race_id": off["race_id"],
                 "state": state,
-                "reviewed_as_of": race["reviewed_as_of"],
-                "previous_contest_structure": race["contest_structure"],
+                "registry_used_as_ballot_authority": False,
+                "authority": off["authority"],
+                "previous_registry_contest_structure": reg.get("contest_structure"),
                 "verified_contest_structure": structure,
                 "previous_modeling_path": "binary_non_major_adapter",
                 "recommended_modeling_path": path,
-                "n_verified_general_ballot_candidates": n_verified,
-                "n_poll_observed_unverified_candidates": len(ballot_candidates) - n_verified,
-                "ballot_candidates": ballot_candidates,
-                "support": support,
+                "n_certified_general_ballot_candidates": n_certified,
+                "probability_model_support_status": prob_status,
+                "win_probability_status": win_status,
+                "analog_support": support,
+                "ballot_candidates": certified,
+                "registry_errors": {
+                    "official_candidates_omitted_from_registry": omitted_from_registry,
+                    "registry_verified_candidates_not_on_official_ballot": extra_in_registry_as_verified,
+                    "circular_binary_assumption_detected": (
+                        str(reg.get("contest_structure")) == "non_major_party_vs_republican"
+                        and n_certified >= 3
+                    ),
+                },
+                "prior_binary_probabilities_invalid": n_certified >= 3,
                 "outside_model_probabilities_used": False,
             }
         )
 
     return {
-        "schema_version": "mt-id-contest-field-audit-v0924",
+        "schema_version": "mt-id-contest-field-audit-v0924.1",
         "generated_at": datetime.now(UTC).isoformat(),
         "model_version": MODEL_VERSION,
-        "authority": "current_candidates_2026_registry + in-repo poll matchup observation",
-        "forecast_sites_as_ballot_authority": False,
+        "registry_used_as_ballot_authority": False,
+        "authority_root": official.get("disallowed_authorities"),
         "races": races_out,
     }
 
 
+def _classify_poll(
+    matchup_slugs: set[str],
+    official_slugs: set[str],
+) -> str:
+    if not matchup_slugs:
+        return "missing_matchup_identity"
+    if matchup_slugs == official_slugs:
+        return "full_multiway"
+    if matchup_slugs.issubset(official_slugs) and len(matchup_slugs) >= 3:
+        return "partial_multiway"
+    if matchup_slugs.issubset(official_slugs) and len(matchup_slugs) == 2:
+        return "explicit_binary_matchup"
+    if matchup_slugs & official_slugs and matchup_slugs - official_slugs:
+        return "outdated_candidate_field"
+    if not (matchup_slugs & official_slugs):
+        return "hypothetical_or_unrelated_matchup"
+    return "partial_multiway"
+
+
 def build_mt_id_poll_inclusion_audit() -> dict[str, Any]:
-    registry = load_current_candidate_registry()
-    wh = Warehouse(ensure_fixtures=False)
-    snap = wh.build_as_of(str(registry["reviewed_as_of"]), "senate-2026")
-    polls = snap.polls.copy() if len(snap.polls) else pd.DataFrame()
+    field = build_mt_id_contest_field_audit()
+    by_state = {row["state"]: row for row in field["races"]}
     raw = _poll_frame()
-    timeline_meta = snap.candidate_timeline or {}
-    compatible = {
-        str(race_id): set(map(str, ids))
-        for race_id, ids in (
-            timeline_meta.get("candidate_compatible_poll_ids_by_race") or {}
-        ).items()
-    }
-    exclusions = list(timeline_meta.get("poll_exclusions") or [])
     rows: list[dict[str, Any]] = []
     for state in TARGET_STATES:
-        race = next(r for r in registry["races"] if r["state"] == state)
-        race_id = str(race["race_id"])
+        info = by_state[state]
+        official_slugs = {_slug(c["candidate_id"]) for c in info["ballot_candidates"]}
         state_raw = raw[raw["state"].astype(str).eq(state)]
-        compatible_ids = compatible.get(race_id, set())
+        multiway = info["verified_contest_structure"] == MULTIWAY_CONTEST_STRUCTURE
         for _, poll in state_raw.iterrows():
-            poll_id = str(poll.get("poll_id") or "")
             matchup = str(poll.get("matchup_id") or "")
-            modeled = str(race["modeled_candidate_id"]).split(":")[-1]
-            opposing = str(race["opposing_candidate_id"]).split(":")[-1]
             matchup_slugs = set(_matchup_candidates(matchup))
-            binary_match = matchup_slugs == {modeled, opposing}
-            multiway_options = len(matchup_slugs) > 2
-            included = poll_id in compatible_ids
-            reason = None
-            if not included:
-                matched_excl = [
-                    item for item in exclusions
-                    if str(item.get("poll_id") or "") == poll_id
-                    or str(item.get("race_id") or "") == race_id
-                ]
+            poll_type = _classify_poll(matchup_slugs, official_slugs)
+            omitted = sorted(official_slugs - matchup_slugs)
+            # Under multiway structure, binary/partial polls do not enter a
+            # validated multiway likelihood (no fake renormalization).
+            if multiway:
+                included = False
                 reason = (
-                    str(matched_excl[0].get("reason"))
-                    if matched_excl
-                    else (
-                        "matchup_not_selected_current_reviewed_pair"
-                        if not binary_match
-                        else "excluded_by_candidate_state_contract"
-                    )
+                    "multiway_contest_binary_or_partial_poll_not_validated_likelihood"
+                    if poll_type
+                    in {
+                        "explicit_binary_matchup",
+                        "partial_multiway",
+                        "outdated_candidate_field",
+                        "hypothetical_or_unrelated_matchup",
+                        "missing_matchup_identity",
+                    }
+                    else "multiway_probability_model_unsupported"
                 )
+                if poll_type == "full_multiway":
+                    reason = "full_multiway_poll_but_probability_model_unsupported"
+                model_qty = "diagnostic_only"
+            else:
+                included = matchup_slugs == official_slugs or (
+                    len(official_slugs) == 2 and matchup_slugs == official_slugs
+                )
+                reason = None if included else "matchup_not_current_reviewed_pair"
+                model_qty = "modeled_candidate_margin" if included else None
+
             rows.append(
                 {
-                    "race_id": race_id,
+                    "race_id": info["race_id"],
                     "state": state,
-                    "poll_id": poll_id,
+                    "poll_id": str(poll.get("poll_id") or ""),
                     "pollster": poll.get("pollster") or poll.get("pollster_id"),
                     "field_start": str(poll.get("field_start") or ""),
                     "field_end": str(poll.get("field_end") or ""),
@@ -231,29 +195,32 @@ def build_mt_id_poll_inclusion_audit() -> dict[str, Any]:
                     "population": poll.get("population"),
                     "matchup_id": matchup,
                     "candidates_or_options": sorted(matchup_slugs),
+                    "ballot_field_candidates_omitted": omitted,
+                    "poll_type": poll_type,
                     "raw_dem_share": poll.get("dem_share"),
                     "raw_rep_share": poll.get("rep_share"),
                     "two_party_margin": poll.get("two_party_margin"),
                     "included": included,
-                    "model_path": "binary_non_major_adapter" if included else None,
+                    "model_quantity_informed": model_qty,
+                    "model_path": None,
                     "exclusion_reason": reason,
-                    "binary_or_multiway": (
-                        "multiway_options" if multiway_options else "binary_matchup"
-                    ),
-                    "matches_reviewed_general_pair": binary_match,
-                    "share_renormalized_to_binary": bool(
-                        included and binary_match and not multiway_options
-                    ),
+                    "share_renormalized_to_fake_multiway": False,
                     "silent_multiway_to_binary": False,
+                    "candidate_identity_resolution": {
+                        slug: ("on_certified_ballot" if slug in official_slugs else "not_on_certified_ballot")
+                        for slug in sorted(matchup_slugs)
+                    },
                 }
             )
     return {
-        "schema_version": "mt-id-poll-inclusion-audit-v0924",
+        "schema_version": "mt-id-poll-inclusion-audit-v0924.1",
         "generated_at": datetime.now(UTC).isoformat(),
         "model_version": MODEL_VERSION,
         "policy": (
-            "Multiway observed options are not silently converted into an I-v-R "
-            "binary likelihood; only the reviewed general pair is adapter-eligible."
+            "Polls are classified against the independently verified ballot field. "
+            "Binary or partial questionnaires are not renormalized into a fake "
+            "multiway November ballot. Unsupported multiway races withhold win "
+            "probability rather than reuse the binary non-major adapter."
         ),
         "rows": rows,
         "n_rows": len(rows),
@@ -261,35 +228,71 @@ def build_mt_id_poll_inclusion_audit() -> dict[str, Any]:
     }
 
 
-def attach_ballot_candidates_to_registry() -> dict[str, Any]:
-    """Write ballot_candidates onto MT/ID registry rows (verified pair + observations)."""
+def apply_official_fields_to_registry(
+    *,
+    states: tuple[str, ...] = ("MT", "ID", "NE", "SD"),
+) -> dict[str, Any]:
+    """Rewrite registry ballot fields from official evidence (non-circular)."""
     path = CURRENT_CANDIDATE_REGISTRY_PATH
     payload = json.loads(path.read_text(encoding="utf-8"))
-    audit = build_mt_id_contest_field_audit()
-    by_state = {row["state"]: row for row in audit["races"]}
+    official = load_official_ballot_fields()
     for race in payload["races"]:
         state = str(race["state"])
-        if state not in by_state:
+        if state not in states or state not in official["races"]:
             continue
-        info = by_state[state]
-        race["ballot_candidates"] = info["ballot_candidates"]
-        race["contest_structure"] = info["verified_contest_structure"]
-        if info["verified_contest_structure"] == MULTIWAY_CONTEST_STRUCTURE:
+        off = official["races"][state]
+        certified = [
+            {
+                "candidate_id": c["candidate_id"],
+                "candidate_name": c["candidate_name"],
+                "ballot_party": c["ballot_party"],
+                "ballot_party_label": c.get("ballot_party_label"),
+                "caucus": c.get("caucus"),
+                "caucus_basis": c.get("caucus_basis"),
+                "status": "certified_general_ballot",
+                "qualification_source": off["authority"]["source_url"],
+                "qualification_authority": off["authority"]["issuer"],
+                "source_publication_date": off["authority"].get("publication_date"),
+                "reviewed_as_of": official["reviewed_as_of"],
+                "write_in": bool(c.get("write_in")),
+                "withdrawn": bool(c.get("withdrawn")),
+            }
+            for c in off["candidates"]
+            if c.get("status") == "certified_general_ballot" and not c.get("withdrawn")
+        ]
+        race["ballot_candidates"] = certified
+        race["contest_structure"] = off["contest_structure"]
+        race["ballot_field_authority"] = off["authority"]
+        if off["contest_structure"] == MULTIWAY_CONTEST_STRUCTURE:
             race["ordinary_binary_target_supported"] = False
             race["exceptional_probability_model_supported"] = False
             race["probability_model_support_status"] = "unsupported"
             race["statistical_target_supported"] = False
+            race["win_probability_status"] = "fail_closed"
+            race["modeling_path"] = MULTIWAY_MODELING_PATH
             race["note"] = (
-                "Multiway plurality general field verified; binary non-major "
-                "adapter disabled; win probability fail-closed pending analog support."
+                "Official general ballot is multiway plurality. Binary non-major "
+                "adapter disabled. Win probability withheld until a historically "
+                "supported multiway model exists. Prior binary I-v-R probabilities "
+                "are superseded under the wrong contest structure."
             )
         else:
-            suffix = (
-                "ballot_candidates lists reviewed general pair plus "
-                "poll-observed unverified challengers."
+            # SD remains binary I-v-R
+            race["ordinary_binary_target_supported"] = False
+            race["exceptional_probability_model_supported"] = True
+            race["probability_model_support_status"] = "limited_supported"
+            race["statistical_target_supported"] = False
+            race["modeling_path"] = "binary_non_major_adapter"
+            race["note"] = (
+                "Official SD general ballot is binary Independent-vs-Republican "
+                "(Democratic nominee withdrawn). Binary non-major adapter retained."
             )
-            base = str(race.get("note") or "").replace(suffix, "").strip()
-            race["note"] = f"{base} {suffix}".strip()
+    # Keep a single registry review boundary; ballot-field authority timestamps
+    # remain on ballot_field_authority / candidate qualification metadata.
+    reviewed = str(payload.get("reviewed_as_of") or official["reviewed_as_of"])
+    payload["reviewed_as_of"] = reviewed
+    for race in payload["races"]:
+        race["reviewed_as_of"] = reviewed
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     return load_current_candidate_registry()
 
@@ -302,7 +305,6 @@ def write_mt_id_audits() -> dict[str, Any]:
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     field_path.write_text(json.dumps(field, indent=2) + "\n", encoding="utf-8")
     poll_path.write_text(json.dumps(polls, indent=2) + "\n", encoding="utf-8")
-    attach_ballot_candidates_to_registry()
     return {
         "contest_field": str(field_path.relative_to(ROOT)),
         "poll_inclusion": str(poll_path.relative_to(ROOT)),

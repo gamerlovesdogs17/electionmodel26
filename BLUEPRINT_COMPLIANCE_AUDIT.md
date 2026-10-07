@@ -42,6 +42,14 @@ The machine-readable source is `BLUEPRINT_COMPLIANCE_AUDIT.json`. “Implemented
 ## Important v0.9.24 notes
 
 - Outside-model MT/ID/NE/IA/KS map oddities are audit triggers only, never tuning targets.
-- MT/ID verified general fields remain binary I-vs-R unless ≥3 reviewed ballot-qualified candidates are confirmed from in-repo authorities.
-- Nebraska poll forensics document coverage vs filter bugs without adapter probability tuning.
+- Corrective pass: MT/ID/NE official general ballots are multiway plurality; binary
+  non-major probabilities for those races are superseded and withheld. SD remains
+  binary I-v-R after the Democratic nominee withdrew.
+- Ballot authority is independent official SOS / election-admin evidence
+  (`data/current/official_ballot_fields_2026.json`); the current registry is not
+  its own ballot authority.
+- Candidate-experience / special-election challengers are **not yet implemented**
+  (config stubs only), not merely disabled.
+- Nebraska in-architecture poll coverage remains a source-coverage limitation
+  (1 exact Osborn–Ricketts row); structure is now multiway regardless.
 - `PUBLIC_LIVE_ENABLED=False`; fresh OOF/rebuild required before any promotion claim.

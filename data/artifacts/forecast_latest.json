@@ -5819,8 +5819,8 @@
       "race_id": "senate-2026-NE",
       "state": "NE",
       "seat_class": "II",
-      "p_modeled_candidate": 0.49262,
-      "p_opposing_candidate": 0.5073799999999999,
+      "p_modeled_candidate": null,
+      "p_opposing_candidate": null,
       "modeled_candidate_margin": -0.033085468110159603,
       "modeled_candidate_share": 50.0,
       "opposing_candidate_share": 50.0,
@@ -5846,11 +5846,11 @@
       "opposing_caucus_basis": "declared_major_party_nominee_assumption",
       "favored_candidate_id": "senate-2026-NE:pete-ricketts",
       "caucus": "R",
-      "rating": "Tossup",
+      "rating": null,
       "is_flip": false,
       "favored_party": "R",
       "favored_caucus": "R",
-      "modeling_path": "binary_non_major_adapter",
+      "modeling_path": "multiway_plurality_adapter",
       "method": "limited_validation_exception_model-v1",
       "uncertainty_metadata": {
         "n_candidate_compatible_polls": 1,
@@ -5858,7 +5858,89 @@
         "posterior_sd": 6.7322909181937645,
         "predictive_sd": 10.45579939589481,
         "house_effect_treatment": "not_applied_party_direction_not_portable"
-      }
+      },
+      "contest_structure": "multiway_plurality",
+      "probability_model_support_status": "unsupported",
+      "win_probability_status": "fail_closed",
+      "exceptional_probability_model_supported": false,
+      "statistical_target_supported": false,
+      "p_dem": null,
+      "p_rep": null,
+      "ballot_candidates": [
+        {
+          "candidate_id": "senate-2026-NE:pete-ricketts",
+          "candidate_name": "Pete Ricketts",
+          "ballot_party": "R",
+          "caucus": "R",
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-NE:mike-marvin",
+          "candidate_name": "Mike Marvin",
+          "ballot_party": "LMN",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-NE:robin-richards",
+          "candidate_name": "Robin Richards",
+          "ballot_party": "NWP",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-NE:chuck-conboy",
+          "candidate_name": "Chuck Conboy",
+          "ballot_party": "AF",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-NE:dan-osborn",
+          "candidate_name": "Dan Osborn",
+          "ballot_party": "I",
+          "caucus": "D",
+          "p_win": null
+        }
+      ],
+      "candidate_probabilities": [
+        {
+          "candidate_id": "senate-2026-NE:pete-ricketts",
+          "candidate_name": "Pete Ricketts",
+          "ballot_party": "R",
+          "caucus": "R",
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-NE:mike-marvin",
+          "candidate_name": "Mike Marvin",
+          "ballot_party": "LMN",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-NE:robin-richards",
+          "candidate_name": "Robin Richards",
+          "ballot_party": "NWP",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-NE:chuck-conboy",
+          "candidate_name": "Chuck Conboy",
+          "ballot_party": "AF",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-NE:dan-osborn",
+          "candidate_name": "Dan Osborn",
+          "ballot_party": "I",
+          "caucus": "D",
+          "p_win": null
+        }
+      ],
+      "structure_correction_note": "v0.9.24 corrective pass: official multiway general ballot; prior binary non-major probabilities superseded and withheld. Sealed v0.9.23 release artifacts remain immutable historical artifacts."
     },
     {
       "race_id": "senate-2026-TX",
@@ -5910,8 +5992,8 @@
       "race_id": "senate-2026-MT",
       "state": "MT",
       "seat_class": "II",
-      "p_modeled_candidate": 0.55942,
-      "p_opposing_candidate": 0.44057999999999997,
+      "p_modeled_candidate": null,
+      "p_opposing_candidate": null,
       "modeled_candidate_margin": 1.1870515130511916,
       "modeled_candidate_share": 50.6,
       "opposing_candidate_share": 49.4,
@@ -5937,11 +6019,11 @@
       "opposing_caucus_basis": "declared_major_party_nominee_assumption",
       "favored_candidate_id": "senate-2026-MT:seth-bodnar",
       "caucus": "D",
-      "rating": "Tilt I",
+      "rating": null,
       "is_flip": true,
       "favored_party": "I",
       "favored_caucus": "D",
-      "modeling_path": "binary_non_major_adapter",
+      "modeling_path": "multiway_plurality_adapter",
       "method": "limited_validation_exception_model-v1",
       "uncertainty_metadata": {
         "n_candidate_compatible_polls": 6,
@@ -5949,7 +6031,75 @@
         "posterior_sd": 3.0782991134771347,
         "predictive_sd": 8.571809927432719,
         "house_effect_treatment": "not_applied_party_direction_not_portable"
-      }
+      },
+      "contest_structure": "multiway_plurality",
+      "probability_model_support_status": "unsupported",
+      "win_probability_status": "fail_closed",
+      "exceptional_probability_model_supported": false,
+      "statistical_target_supported": false,
+      "p_dem": null,
+      "p_rep": null,
+      "ballot_candidates": [
+        {
+          "candidate_id": "senate-2026-MT:kurt-alme",
+          "candidate_name": "Kurt Alme",
+          "ballot_party": "R",
+          "caucus": "R",
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-MT:kyle-austin",
+          "candidate_name": "Kyle Austin",
+          "ballot_party": "L",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-MT:alani-bankhead",
+          "candidate_name": "Alani Bankhead",
+          "ballot_party": "D",
+          "caucus": "D",
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-MT:seth-bodnar",
+          "candidate_name": "Seth Bodnar",
+          "ballot_party": "I",
+          "caucus": "D",
+          "p_win": null
+        }
+      ],
+      "candidate_probabilities": [
+        {
+          "candidate_id": "senate-2026-MT:kurt-alme",
+          "candidate_name": "Kurt Alme",
+          "ballot_party": "R",
+          "caucus": "R",
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-MT:kyle-austin",
+          "candidate_name": "Kyle Austin",
+          "ballot_party": "L",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-MT:alani-bankhead",
+          "candidate_name": "Alani Bankhead",
+          "ballot_party": "D",
+          "caucus": "D",
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-MT:seth-bodnar",
+          "candidate_name": "Seth Bodnar",
+          "ballot_party": "I",
+          "caucus": "D",
+          "p_win": null
+        }
+      ],
+      "structure_correction_note": "v0.9.24 corrective pass: official multiway general ballot; prior binary non-major probabilities superseded and withheld. Sealed v0.9.23 release artifacts remain immutable historical artifacts."
     },
     {
       "race_id": "senate-2026-OH",
@@ -6353,8 +6503,8 @@
       "race_id": "senate-2026-ID",
       "state": "ID",
       "seat_class": "II",
-      "p_modeled_candidate": 0.20612,
-      "p_opposing_candidate": 0.79388,
+      "p_modeled_candidate": null,
+      "p_opposing_candidate": null,
       "modeled_candidate_margin": -7.96693735536847,
       "modeled_candidate_share": 46.0,
       "opposing_candidate_share": 54.0,
@@ -6380,11 +6530,11 @@
       "opposing_caucus_basis": "declared_major_party_nominee_assumption",
       "favored_candidate_id": "senate-2026-ID:jim-risch",
       "caucus": "R",
-      "rating": "Likely R",
+      "rating": null,
       "is_flip": false,
       "favored_party": "R",
       "favored_caucus": "R",
-      "modeling_path": "binary_non_major_adapter",
+      "modeling_path": "multiway_plurality_adapter",
       "method": "limited_validation_exception_model-v1",
       "uncertainty_metadata": {
         "n_candidate_compatible_polls": 1,
@@ -6392,7 +6542,75 @@
         "posterior_sd": 7.193570974115654,
         "predictive_sd": 10.75859950735407,
         "house_effect_treatment": "not_applied_party_direction_not_portable"
-      }
+      },
+      "contest_structure": "multiway_plurality",
+      "probability_model_support_status": "unsupported",
+      "win_probability_status": "fail_closed",
+      "exceptional_probability_model_supported": false,
+      "statistical_target_supported": false,
+      "p_dem": null,
+      "p_rep": null,
+      "ballot_candidates": [
+        {
+          "candidate_id": "senate-2026-ID:todd-achilles",
+          "candidate_name": "Todd Achilles",
+          "ballot_party": "I",
+          "caucus": "D",
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-ID:natalie-fleming",
+          "candidate_name": "Natalie Fleming",
+          "ballot_party": "I",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-ID:matt-loesby",
+          "candidate_name": "Matt Loesby",
+          "ballot_party": "L",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-ID:jim-risch",
+          "candidate_name": "Jim Risch",
+          "ballot_party": "R",
+          "caucus": "R",
+          "p_win": null
+        }
+      ],
+      "candidate_probabilities": [
+        {
+          "candidate_id": "senate-2026-ID:todd-achilles",
+          "candidate_name": "Todd Achilles",
+          "ballot_party": "I",
+          "caucus": "D",
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-ID:natalie-fleming",
+          "candidate_name": "Natalie Fleming",
+          "ballot_party": "I",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-ID:matt-loesby",
+          "candidate_name": "Matt Loesby",
+          "ballot_party": "L",
+          "caucus": null,
+          "p_win": null
+        },
+        {
+          "candidate_id": "senate-2026-ID:jim-risch",
+          "candidate_name": "Jim Risch",
+          "ballot_party": "R",
+          "caucus": "R",
+          "p_win": null
+        }
+      ],
+      "structure_correction_note": "v0.9.24 corrective pass: official multiway general ballot; prior binary non-major probabilities superseded and withheld. Sealed v0.9.23 release artifacts remain immutable historical artifacts."
     },
     {
       "race_id": "senate-2026-MI",

@@ -207,15 +207,18 @@ def test_challengers_and_turnout_remain_disabled():
     assert turned["status"] == "disabled"
 
 
-def test_mt_id_structure_binary_unless_verified_multiway():
+def test_mt_id_structure_uses_official_multiway_field():
     from midterms.validation.contest_field_audits_v0924 import build_mt_id_contest_field_audit
 
     audit = build_mt_id_contest_field_audit()
+    assert audit["registry_used_as_ballot_authority"] is False
     for race in audit["races"]:
-        if race["n_verified_general_ballot_candidates"] < 3:
-            assert race["verified_contest_structure"] != MULTIWAY_CONTEST_STRUCTURE
-            assert race["recommended_modeling_path"] == "binary_non_major_adapter"
+        assert race["n_certified_general_ballot_candidates"] >= 3
+        assert race["verified_contest_structure"] == MULTIWAY_CONTEST_STRUCTURE
+        assert race["recommended_modeling_path"] == "multiway_plurality_adapter"
+        assert race["win_probability_status"] == "fail_closed"
         assert race["outside_model_probabilities_used"] is False
+        assert race["registry_used_as_ballot_authority"] is False
 
 
 def test_ne_forensics_ledger_counts():

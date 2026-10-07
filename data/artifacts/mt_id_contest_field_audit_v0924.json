@@ -1,112 +1,217 @@
 {
-  "schema_version": "mt-id-contest-field-audit-v0924",
-  "generated_at": "2026-10-07T01:14:52.892680+00:00",
+  "schema_version": "mt-id-contest-field-audit-v0924.1",
+  "generated_at": "2026-10-07T01:55:28.974778+00:00",
   "model_version": "senate-hierarchical-v0.9.24",
-  "authority": "current_candidates_2026_registry + in-repo poll matchup observation",
-  "forecast_sites_as_ballot_authority": false,
+  "registry_used_as_ballot_authority": false,
+  "authority_root": [
+    "DDHQ",
+    "Cook",
+    "HDR",
+    "prediction_markets",
+    "polling_aggregators",
+    "current_candidates_2026_registry"
+  ],
   "races": [
     {
       "race_id": "senate-2026-MT",
       "state": "MT",
-      "reviewed_as_of": "2026-10-03",
-      "previous_contest_structure": "non_major_party_vs_republican",
-      "verified_contest_structure": "non_major_party_vs_republican",
+      "registry_used_as_ballot_authority": false,
+      "authority": {
+        "level": "state_secretary_of_state_certification",
+        "issuer": "Montana Secretary of State Christi Jacobsen",
+        "source_title": "2026 General Election State Candidate Certification",
+        "source_url": "https://www.cascadecountymt.gov/DocumentCenter/View/8147/2026-General-Election-State-Candidate-Certification",
+        "publication_date": "2026-08-20",
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00",
+        "note": "County-hosted true copy of the Montana Secretary of State general-election certification under MCA 13-12-201."
+      },
+      "previous_registry_contest_structure": "multiway_plurality",
+      "verified_contest_structure": "multiway_plurality",
       "previous_modeling_path": "binary_non_major_adapter",
-      "recommended_modeling_path": "binary_non_major_adapter",
-      "n_verified_general_ballot_candidates": 2,
-      "n_poll_observed_unverified_candidates": 2,
-      "ballot_candidates": [
-        {
-          "candidate_id": "senate-2026-MT:seth-bodnar",
-          "candidate_name": "Seth Bodnar",
-          "ballot_party": "I",
-          "caucus": "D",
-          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
-          "status": "reviewed_general_modeled",
-          "qualification_source": "current_candidates_2026_registry",
-          "reviewed_as_of": "2026-10-03"
+      "recommended_modeling_path": "multiway_plurality_adapter",
+      "n_certified_general_ballot_candidates": 4,
+      "probability_model_support_status": "unsupported",
+      "win_probability_status": "fail_closed",
+      "analog_support": {
+        "schema_version": "multiway-plurality-analog-support-v1",
+        "analog_selection_rule": {
+          "id": "senate-plurality-multiway-analogs-v1",
+          "predeclared_before_scoring": true,
+          "include": [
+            "US Senate general elections 1990\u20132024",
+            "at least three ballot-qualified candidates",
+            "plurality (not RCV, not majority-runoff) institutional rule"
+          ],
+          "exclude": [
+            "Alaska RCV / IRV contests",
+            "Louisiana jungle-primary / majority-threshold contests",
+            "Georgia runoff-threshold contests",
+            "same-party generals without multi-party field"
+          ]
         },
+        "n_analogs": 0,
+        "min_analogs_for_probability_model": 8,
+        "probability_model_support_status": "unsupported",
+        "win_probability_status": "fail_closed",
+        "note": "Historical support too sparse; classify contest correctly and withhold win probability"
+      },
+      "ballot_candidates": [
         {
           "candidate_id": "senate-2026-MT:kurt-alme",
           "candidate_name": "Kurt Alme",
           "ballot_party": "R",
+          "ballot_party_label": "Republican",
           "caucus": "R",
           "caucus_basis": "declared_major_party_nominee_assumption",
-          "status": "reviewed_general_opposing",
-          "qualification_source": "current_candidates_2026_registry",
-          "reviewed_as_of": "2026-10-03"
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-MT:kyle-austin",
+          "candidate_name": "Kyle Austin",
+          "ballot_party": "L",
+          "ballot_party_label": "Libertarian",
+          "caucus": null,
+          "caucus_basis": null,
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
         },
         {
           "candidate_id": "senate-2026-MT:alani-bankhead",
           "candidate_name": "Alani Bankhead",
-          "ballot_party": null,
-          "caucus": null,
-          "status": "poll_observed_not_verified_general_ballot",
-          "qualification_source": "votehub_poll_matchup_observation_only",
-          "poll_matchups": [
-            "senate-2026:MT:votehub:alani-bankhead|votehub:kurt-alme"
-          ],
-          "n_poll_rows": 16,
-          "reviewed_as_of": "2026-10-03",
-          "note": "Observed in stored poll matchups; not verified as a ballot-qualified general-election candidate from an official ballot authority in-repo."
+          "ballot_party": "D",
+          "ballot_party_label": "Democrat",
+          "caucus": "D",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
         },
         {
-          "candidate_id": "senate-2026-MT:reilly-neill",
-          "candidate_name": "Reilly Neill",
-          "ballot_party": null,
-          "caucus": null,
-          "status": "poll_observed_not_verified_general_ballot",
-          "qualification_source": "votehub_poll_matchup_observation_only",
-          "poll_matchups": [
-            "senate-2026:MT:votehub:reilly-neill|votehub:kurt-alme"
-          ],
-          "n_poll_rows": 2,
-          "reviewed_as_of": "2026-10-03",
-          "note": "Observed in stored poll matchups; not verified as a ballot-qualified general-election candidate from an official ballot authority in-repo."
+          "candidate_id": "senate-2026-MT:seth-bodnar",
+          "candidate_name": "Seth Bodnar",
+          "ballot_party": "I",
+          "ballot_party_label": "Independent",
+          "caucus": "D",
+          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
         }
       ],
-      "support": {
-        "probability_model_support_status": "limited_supported",
-        "note": "Verified general field remains binary I-vs-R; alternate poll matchups treated as non-general / unverified."
+      "registry_errors": {
+        "official_candidates_omitted_from_registry": [],
+        "registry_verified_candidates_not_on_official_ballot": [],
+        "circular_binary_assumption_detected": false
       },
+      "prior_binary_probabilities_invalid": true,
       "outside_model_probabilities_used": false
     },
     {
       "race_id": "senate-2026-ID",
       "state": "ID",
-      "reviewed_as_of": "2026-10-03",
-      "previous_contest_structure": "non_major_party_vs_republican",
-      "verified_contest_structure": "non_major_party_vs_republican",
+      "registry_used_as_ballot_authority": false,
+      "authority": {
+        "level": "state_election_authority_corroborated",
+        "issuer": "Idaho Secretary of State / VoteIdaho.gov candidate field",
+        "source_title": "Idaho Capital Sun 2026 General Election voter guide (quotes statewide U.S. Senate field; directs readers to VoteIdaho.gov)",
+        "source_url": "https://idahocapitalsun.com/voter-guides/2026-general-election/",
+        "publication_date": "2026-10-05",
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00",
+        "primary_sos_url_attempted": "https://sos.idaho.gov/elections-division/2026-general-election-candidate-list/",
+        "primary_sos_retrieval_status": "HTTP 403 Forbidden from this environment",
+        "corroborating_sources": [
+          {
+            "source_url": "https://ballotpedia.org/United_States_Senate_election_in_Idaho,_2026",
+            "role": "secondary_corroboration_not_ballot_authority"
+          }
+        ],
+        "note": "Direct sos.idaho.gov candidate-list fetch returned 403. Ballot field recorded from contemporaneous Idaho Capital Sun voter guide that lists the statewide U.S. Senate nominees and points to VoteIdaho.gov; not DDHQ/Cook/HDR/markets."
+      },
+      "previous_registry_contest_structure": "multiway_plurality",
+      "verified_contest_structure": "multiway_plurality",
       "previous_modeling_path": "binary_non_major_adapter",
-      "recommended_modeling_path": "binary_non_major_adapter",
-      "n_verified_general_ballot_candidates": 2,
-      "n_poll_observed_unverified_candidates": 0,
+      "recommended_modeling_path": "multiway_plurality_adapter",
+      "n_certified_general_ballot_candidates": 4,
+      "probability_model_support_status": "unsupported",
+      "win_probability_status": "fail_closed",
+      "analog_support": {
+        "schema_version": "multiway-plurality-analog-support-v1",
+        "analog_selection_rule": {
+          "id": "senate-plurality-multiway-analogs-v1",
+          "predeclared_before_scoring": true,
+          "include": [
+            "US Senate general elections 1990\u20132024",
+            "at least three ballot-qualified candidates",
+            "plurality (not RCV, not majority-runoff) institutional rule"
+          ],
+          "exclude": [
+            "Alaska RCV / IRV contests",
+            "Louisiana jungle-primary / majority-threshold contests",
+            "Georgia runoff-threshold contests",
+            "same-party generals without multi-party field"
+          ]
+        },
+        "n_analogs": 0,
+        "min_analogs_for_probability_model": 8,
+        "probability_model_support_status": "unsupported",
+        "win_probability_status": "fail_closed",
+        "note": "Historical support too sparse; classify contest correctly and withhold win probability"
+      },
       "ballot_candidates": [
         {
           "candidate_id": "senate-2026-ID:todd-achilles",
           "candidate_name": "Todd Achilles",
           "ballot_party": "I",
+          "ballot_party_label": "Independent",
           "caucus": "D",
           "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
-          "status": "reviewed_general_modeled",
-          "qualification_source": "current_candidates_2026_registry",
-          "reviewed_as_of": "2026-10-03"
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-ID:natalie-fleming",
+          "candidate_name": "Natalie Fleming",
+          "ballot_party": "I",
+          "ballot_party_label": "Independent",
+          "caucus": null,
+          "caucus_basis": null,
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-ID:matt-loesby",
+          "candidate_name": "Matt Loesby",
+          "ballot_party": "L",
+          "ballot_party_label": "Libertarian",
+          "caucus": null,
+          "caucus_basis": null,
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
         },
         {
           "candidate_id": "senate-2026-ID:jim-risch",
           "candidate_name": "Jim Risch",
           "ballot_party": "R",
+          "ballot_party_label": "Republican",
           "caucus": "R",
           "caucus_basis": "declared_major_party_nominee_assumption",
-          "status": "reviewed_general_opposing",
-          "qualification_source": "current_candidates_2026_registry",
-          "reviewed_as_of": "2026-10-03"
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
         }
       ],
-      "support": {
-        "probability_model_support_status": "limited_supported",
-        "note": "Verified general field remains binary I-vs-R; alternate poll matchups treated as non-general / unverified."
+      "registry_errors": {
+        "official_candidates_omitted_from_registry": [],
+        "registry_verified_candidates_not_on_official_ballot": [],
+        "circular_binary_assumption_detected": false
       },
+      "prior_binary_probabilities_invalid": true,
       "outside_model_probabilities_used": false
     }
   ]

@@ -1,8 +1,8 @@
 {
-  "schema_version": "mt-id-poll-inclusion-audit-v0924",
-  "generated_at": "2026-10-07T01:14:53.648231+00:00",
+  "schema_version": "mt-id-poll-inclusion-audit-v0924.1",
+  "generated_at": "2026-10-07T01:55:29.031360+00:00",
   "model_version": "senate-hierarchical-v0.9.24",
-  "policy": "Multiway observed options are not silently converted into an I-v-R binary likelihood; only the reviewed general pair is adapter-eligible.",
+  "policy": "Polls are classified against the independently verified ballot field. Binary or partial questionnaires are not renormalized into a fake multiway November ballot. Unsupported multiway races withhold win probability rather than reuse the binary non-major adapter.",
   "rows": [
     {
       "race_id": "senate-2026-MT",
@@ -18,16 +18,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 29.688,
       "raw_rep_share": 70.312,
       "two_party_margin": -40.625,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -43,16 +51,24 @@
         "kurt-alme",
         "seth-bodnar"
       ],
+      "ballot_field_candidates_omitted": [
+        "alani-bankhead",
+        "kyle-austin"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": NaN,
       "raw_rep_share": NaN,
       "two_party_margin": NaN,
-      "included": true,
-      "model_path": "binary_non_major_adapter",
-      "exclusion_reason": null,
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": true,
-      "share_renormalized_to_binary": true,
-      "silent_multiway_to_binary": false
+      "included": false,
+      "model_quantity_informed": "diagnostic_only",
+      "model_path": null,
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "kurt-alme": "on_certified_ballot",
+        "seth-bodnar": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -68,16 +84,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 45.833,
       "raw_rep_share": 54.167,
       "two_party_margin": -8.333,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -93,16 +117,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 34.921,
       "raw_rep_share": 65.079,
       "two_party_margin": -30.159,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -118,16 +150,24 @@
         "kurt-alme",
         "seth-bodnar"
       ],
+      "ballot_field_candidates_omitted": [
+        "alani-bankhead",
+        "kyle-austin"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": NaN,
       "raw_rep_share": NaN,
       "two_party_margin": NaN,
-      "included": true,
-      "model_path": "binary_non_major_adapter",
-      "exclusion_reason": null,
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": true,
-      "share_renormalized_to_binary": true,
-      "silent_multiway_to_binary": false
+      "included": false,
+      "model_quantity_informed": "diagnostic_only",
+      "model_path": null,
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "kurt-alme": "on_certified_ballot",
+        "seth-bodnar": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -143,16 +183,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 47.619,
       "raw_rep_share": 52.381,
       "two_party_margin": -4.762,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -168,16 +216,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 37.879,
       "raw_rep_share": 62.121,
       "two_party_margin": -24.242,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -193,16 +249,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 46.739,
       "raw_rep_share": 53.261,
       "two_party_margin": -6.522,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -218,16 +282,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 25.0,
       "raw_rep_share": 75.0,
       "two_party_margin": -50.0,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -243,16 +315,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 36.232,
       "raw_rep_share": 63.768,
       "two_party_margin": -27.536,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -268,16 +348,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 34.328,
       "raw_rep_share": 65.672,
       "two_party_margin": -31.343,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -293,16 +381,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 44.0,
       "raw_rep_share": 56.0,
       "two_party_margin": -12.0,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -318,16 +414,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 41.0,
       "raw_rep_share": 59.0,
       "two_party_margin": -18.0,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -343,16 +447,25 @@
         "kurt-alme",
         "reilly-neill"
       ],
+      "ballot_field_candidates_omitted": [
+        "alani-bankhead",
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "outdated_candidate_field",
       "raw_dem_share": 42.0,
       "raw_rep_share": 58.0,
       "two_party_margin": -16.0,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "kurt-alme": "on_certified_ballot",
+        "reilly-neill": "not_on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -368,16 +481,24 @@
         "kurt-alme",
         "seth-bodnar"
       ],
+      "ballot_field_candidates_omitted": [
+        "alani-bankhead",
+        "kyle-austin"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": NaN,
       "raw_rep_share": NaN,
       "two_party_margin": NaN,
-      "included": true,
-      "model_path": "binary_non_major_adapter",
-      "exclusion_reason": null,
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": true,
-      "share_renormalized_to_binary": true,
-      "silent_multiway_to_binary": false
+      "included": false,
+      "model_quantity_informed": "diagnostic_only",
+      "model_path": null,
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "kurt-alme": "on_certified_ballot",
+        "seth-bodnar": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -393,16 +514,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 30.986,
       "raw_rep_share": 69.014,
       "two_party_margin": -38.028,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -418,16 +547,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 35.526,
       "raw_rep_share": 64.474,
       "two_party_margin": -28.947,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -443,16 +580,25 @@
         "kurt-alme",
         "reilly-neill"
       ],
+      "ballot_field_candidates_omitted": [
+        "alani-bankhead",
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "outdated_candidate_field",
       "raw_dem_share": 34.286,
       "raw_rep_share": 65.714,
       "two_party_margin": -31.429,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "kurt-alme": "on_certified_ballot",
+        "reilly-neill": "not_on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -468,16 +614,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 32.877,
       "raw_rep_share": 67.123,
       "two_party_margin": -34.247,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -493,16 +647,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 39.13,
       "raw_rep_share": 60.87,
       "two_party_margin": -21.739,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -518,16 +680,24 @@
         "kurt-alme",
         "seth-bodnar"
       ],
+      "ballot_field_candidates_omitted": [
+        "alani-bankhead",
+        "kyle-austin"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": NaN,
       "raw_rep_share": NaN,
       "two_party_margin": NaN,
-      "included": true,
-      "model_path": "binary_non_major_adapter",
-      "exclusion_reason": null,
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": true,
-      "share_renormalized_to_binary": true,
-      "silent_multiway_to_binary": false
+      "included": false,
+      "model_quantity_informed": "diagnostic_only",
+      "model_path": null,
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "kurt-alme": "on_certified_ballot",
+        "seth-bodnar": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -543,16 +713,24 @@
         "kurt-alme",
         "seth-bodnar"
       ],
+      "ballot_field_candidates_omitted": [
+        "alani-bankhead",
+        "kyle-austin"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": NaN,
       "raw_rep_share": NaN,
       "two_party_margin": NaN,
-      "included": true,
-      "model_path": "binary_non_major_adapter",
-      "exclusion_reason": null,
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": true,
-      "share_renormalized_to_binary": true,
-      "silent_multiway_to_binary": false
+      "included": false,
+      "model_quantity_informed": "diagnostic_only",
+      "model_path": null,
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "kurt-alme": "on_certified_ballot",
+        "seth-bodnar": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -568,16 +746,24 @@
         "kurt-alme",
         "seth-bodnar"
       ],
+      "ballot_field_candidates_omitted": [
+        "alani-bankhead",
+        "kyle-austin"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": NaN,
       "raw_rep_share": NaN,
       "two_party_margin": NaN,
-      "included": true,
-      "model_path": "binary_non_major_adapter",
-      "exclusion_reason": null,
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": true,
-      "share_renormalized_to_binary": true,
-      "silent_multiway_to_binary": false
+      "included": false,
+      "model_quantity_informed": "diagnostic_only",
+      "model_path": null,
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "kurt-alme": "on_certified_ballot",
+        "seth-bodnar": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-MT",
@@ -593,16 +779,24 @@
         "alani-bankhead",
         "kurt-alme"
       ],
+      "ballot_field_candidates_omitted": [
+        "kyle-austin",
+        "seth-bodnar"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": 37.931,
       "raw_rep_share": 62.069,
       "two_party_margin": -24.138,
       "included": false,
+      "model_quantity_informed": "diagnostic_only",
       "model_path": null,
-      "exclusion_reason": "matchup_not_selected_by_reviewed_current_registry",
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": false,
-      "share_renormalized_to_binary": false,
-      "silent_multiway_to_binary": false
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "alani-bankhead": "on_certified_ballot",
+        "kurt-alme": "on_certified_ballot"
+      }
     },
     {
       "race_id": "senate-2026-ID",
@@ -618,18 +812,26 @@
         "jim-risch",
         "todd-achilles"
       ],
+      "ballot_field_candidates_omitted": [
+        "matt-loesby",
+        "natalie-fleming"
+      ],
+      "poll_type": "explicit_binary_matchup",
       "raw_dem_share": NaN,
       "raw_rep_share": NaN,
       "two_party_margin": NaN,
-      "included": true,
-      "model_path": "binary_non_major_adapter",
-      "exclusion_reason": null,
-      "binary_or_multiway": "binary_matchup",
-      "matches_reviewed_general_pair": true,
-      "share_renormalized_to_binary": true,
-      "silent_multiway_to_binary": false
+      "included": false,
+      "model_quantity_informed": "diagnostic_only",
+      "model_path": null,
+      "exclusion_reason": "multiway_contest_binary_or_partial_poll_not_validated_likelihood",
+      "share_renormalized_to_fake_multiway": false,
+      "silent_multiway_to_binary": false,
+      "candidate_identity_resolution": {
+        "jim-risch": "on_certified_ballot",
+        "todd-achilles": "on_certified_ballot"
+      }
     }
   ],
   "n_rows": 25,
-  "n_included": 7
+  "n_included": 0
 }

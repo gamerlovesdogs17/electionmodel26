@@ -428,7 +428,9 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
       : favoredParty === "R"
         ? "text-[var(--rep)]"
         : "text-[var(--dem)]";
-  const topTwo = view.candidates.slice(0, 2);
+  const listed = view.candidates.slice(0, view.rcv_detail || view.unsupported_probability ? 6 : 2);
+  const multiwayUnsupported =
+    view.unsupported_probability && view.contest_structure === "multiway_plurality";
 
   return (
     <div className="border-t border-[var(--line)] pt-2 first:border-t-0 first:pt-0">
@@ -444,7 +446,7 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
                 : "bg-[#efe8c8] text-[#6a5f20]"
           }`}
         >
-          {view.rating ?? "Tossup"}
+          {view.rating ?? (multiwayUnsupported ? "Withheld" : "Tossup")}
         </span>
         {race.is_flip ? (
           <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px] text-[var(--muted)]">
@@ -456,56 +458,63 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
             RCV
           </span>
         ) : null}
+        {multiwayUnsupported ? (
+          <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px] text-[var(--muted)]">
+            Multiway
+          </span>
+        ) : null}
       </div>
-      <p className={`mt-2 text-sm font-medium ${favoredTone}`}>
-        {view.favored_candidate ?? "—"}
-        {view.favored_win_probability != null
-          ? ` has a ${pct(view.favored_win_probability, 1)} chance.`
-          : " — probability withheld."}
+      <p className={`mt-2 text-sm font-medium ${multiwayUnsupported ? "text-[var(--muted)]" : favoredTone}`}>
+        {view.unsupported_message
+          ? view.unsupported_message
+          : view.favored_win_probability != null
+            ? `${view.favored_candidate ?? "—"} has a ${pct(view.favored_win_probability, 1)} chance.`
+            : `${view.favored_candidate ?? "—"} — probability withheld.`}
+      </p>
+      <p className="mt-1 text-[10px] uppercase tracking-wide text-[var(--muted)]">
+        {view.modeling_path}
       </p>
       <div className="mt-2">
-        {topTwo.map((candidate) => (
-          <CandidateRow
-            key={candidate.candidate_id || candidate.candidate_name}
-            name={candidate.candidate_name}
-            party={
-              candidate.ballot_party === "I"
-                ? "I"
-                : candidate.ballot_party === "R"
-                  ? "R"
-                  : "D"
-            }
-            share={
-              candidate.share_estimate != null
-                ? candidate.share_estimate <= 1
-                  ? candidate.share_estimate * 100
-                  : candidate.share_estimate
-                : candidate.p_win != null
-                  ? candidate.p_win * 100
-                  : 50
-            }
-          />
-        ))}
-        <div className="mt-1 flex justify-between text-sm">
-          <span className="text-[var(--muted)]">
-            {view.rcv_detail ? "D-caucus seat" : "Margin"}
-          </span>
-          <span
-            className={`font-medium ${
-              view.rcv_detail
-                ? "text-[var(--ink)]"
-                : typeof race.mean_margin === "number" && race.mean_margin >= 0
-                  ? "text-[var(--dem)]"
-                  : "text-[var(--rep)]"
-            }`}
-          >
-            {view.rcv_detail
-              ? pct(view.seat_control_p_dem_caucus, 1)
-              : typeof race.mean_margin === "number"
-                ? signedRaceMargin(race)
-                : "—"}
-          </span>
-        </div>
+        {listed.map((candidate) => {
+          const share =
+            candidate.share_estimate != null
+              ? candidate.share_estimate <= 1
+                ? candidate.share_estimate * 100
+                : candidate.share_estimate
+              : candidate.p_win != null
+                ? candidate.p_win * 100
+                : null;
+          return (
+            <CandidateRow
+              key={candidate.candidate_id || candidate.candidate_name}
+              name={candidate.candidate_name}
+              party={candidate.ballot_party || "—"}
+              share={share}
+            />
+          );
+        })}
+        {!multiwayUnsupported ? (
+          <div className="mt-1 flex justify-between text-sm">
+            <span className="text-[var(--muted)]">
+              {view.rcv_detail ? "D-caucus seat" : "Margin"}
+            </span>
+            <span
+              className={`font-medium ${
+                view.rcv_detail
+                  ? "text-[var(--ink)]"
+                  : typeof race.mean_margin === "number" && race.mean_margin >= 0
+                    ? "text-[var(--dem)]"
+                    : "text-[var(--rep)]"
+              }`}
+            >
+              {view.rcv_detail
+                ? pct(view.seat_control_p_dem_caucus, 1)
+                : typeof race.mean_margin === "number"
+                  ? signedRaceMargin(race)
+                  : "—"}
+            </span>
+          </div>
+        ) : null}
       </div>
       {view.rcv_detail ? (
         <div className="mt-2 space-y-1 border-t border-[var(--line)] pt-2">
@@ -540,29 +549,34 @@ function CandidateRow({
   share,
 }: {
   name: string;
-  party: "D" | "R" | "I";
-  share: number;
+  party: string;
+  share: number | null;
 }) {
   const tone =
     party === "R"
       ? "text-[var(--rep)]"
-      : party === "I"
+      : party === "I" || party === "L"
         ? "text-[var(--ind)]"
-        : "text-[var(--dem)]";
+        : party === "D"
+          ? "text-[var(--dem)]"
+          : "text-[var(--muted)]";
   const badge =
     party === "R"
       ? "bg-[var(--rep)]"
-      : party === "I"
+      : party === "I" || party === "L"
         ? "bg-[var(--ind)]"
-        : "bg-[var(--dem)]";
+        : party === "D"
+          ? "bg-[var(--dem)]"
+          : "bg-[var(--muted)]";
+  const label = party.length <= 3 ? party : party.slice(0, 3);
   return (
     <div className="grid grid-cols-[1fr_auto] items-center gap-2 py-1 text-sm">
       <span className="inline-flex items-center gap-2 truncate text-[var(--ink)]">
         <span className="truncate">{name}</span>
         <span
-          className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white ${badge}`}
+          className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-0.5 text-[9px] font-bold text-white ${badge}`}
         >
-          {party}
+          {label}
         </span>
       </span>
       <span className={`font-medium tabular-nums ${tone}`}>

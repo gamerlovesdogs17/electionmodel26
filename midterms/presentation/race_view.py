@@ -41,6 +41,7 @@ class RacePresentation:
     candidates: tuple[CandidatePresentation, ...] = field(default_factory=tuple)
     rcv_detail: dict[str, Any] | None = None
     unsupported_probability: bool = False
+    unsupported_message: str | None = None
     presentation_schema: str = "race-presentation-v1"
 
     def to_dict(self) -> dict[str, Any]:
@@ -69,23 +70,50 @@ def present_race(race: dict[str, Any]) -> RacePresentation:
     unsupported = bool(
         race.get("probability_model_support_status") in {"unsupported", "fail_closed"}
         or race.get("win_probability_status") == "fail_closed"
+        or (is_multiway and race.get("p_modeled_candidate") is None and not candidate_probs)
     )
+    unsupported_message = None
+    if unsupported and is_multiway:
+        unsupported_message = (
+            "Probability withheld — multiway model not sufficiently validated"
+        )
+    elif unsupported:
+        unsupported_message = "Probability withheld — limited-validation / unsupported path"
 
     candidates: list[CandidatePresentation] = []
+    ballot_field = list(race.get("ballot_candidates") or [])
     if candidate_probs:
-        for row in sorted(candidate_probs, key=lambda item: -float(item.get("p_win") or 0.0)):
+        for row in sorted(
+            candidate_probs,
+            key=lambda item: (
+                -1.0 if item.get("p_win") is None else -float(item.get("p_win") or 0.0),
+                str(item.get("candidate_id") or ""),
+            ),
+        ):
             candidates.append(
                 CandidatePresentation(
                     candidate_id=str(row.get("candidate_id") or ""),
                     candidate_name=str(row.get("candidate_name") or ""),
                     ballot_party=str(row.get("ballot_party") or ""),
                     caucus=(str(row["caucus"]) if row.get("caucus") is not None else None),
-                    p_win=_finite(row.get("p_win")),
+                    p_win=None if unsupported else _finite(row.get("p_win")),
                     share_estimate=_finite(
                         row.get("final_support_estimate")
                         if row.get("final_support_estimate") is not None
                         else row.get("first_choice_estimate")
                     ),
+                )
+            )
+    elif ballot_field and (is_multiway or unsupported):
+        for row in ballot_field:
+            candidates.append(
+                CandidatePresentation(
+                    candidate_id=str(row.get("candidate_id") or ""),
+                    candidate_name=str(row.get("candidate_name") or ""),
+                    ballot_party=str(row.get("ballot_party") or ""),
+                    caucus=(str(row["caucus"]) if row.get("caucus") is not None else None),
+                    p_win=None,
+                    share_estimate=None,
                 )
             )
     else:
@@ -200,5 +228,6 @@ def present_race(race: dict[str, Any]) -> RacePresentation:
         seat_control_p_rep_caucus=_finite(race.get("p_rep_caucus")),
         candidates=tuple(candidates),
         rcv_detail=rcv_detail,
-        unsupported_probability=unsupported or is_multiway and race.get("p_win") is None,
+        unsupported_probability=unsupported or (is_multiway and all(c.p_win is None for c in candidates)),
+        unsupported_message=unsupported_message,
     )

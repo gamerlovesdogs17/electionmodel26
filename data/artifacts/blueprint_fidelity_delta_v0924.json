@@ -1,6 +1,6 @@
 {
   "schema_version": "blueprint-fidelity-delta-v0924",
-  "generated_at": "2026-10-07T01:13:19.929221+00:00",
+  "generated_at": "2026-10-07T01:55:29.044421+00:00",
   "model_version": "senate-hierarchical-v0.9.24",
   "active_statistical_changes": [
     {
@@ -32,25 +32,28 @@
   "deferred_or_disabled": [
     {
       "id": "candidate_experience_challenger",
-      "status": "disabled",
+      "status": "not_yet_implemented",
       "enabled": false,
-      "activation_gate": "nested_oos_plus_available_at_pit"
+      "implementation_status": "Config flag and provenance-gated consumer exist in fundamentals_challengers.py, but no feature builder / sourced store constructs candidate_experience values. Do not treat as an implemented-but-disabled production challenger.",
+      "activation_gate": "implement_builder_then_nested_oos"
     },
     {
       "id": "special_election_signal_challenger",
-      "status": "disabled",
+      "status": "not_yet_implemented",
       "enabled": false,
-      "activation_gate": "nested_oos_plus_available_at_pit"
+      "implementation_status": "Config flag and provenance-gated consumer exist; no special-election signal feature builder or sourced historical store is implemented.",
+      "activation_gate": "implement_builder_then_nested_oos"
     },
     {
       "id": "recent_statewide_performance_challenger",
-      "status": "disabled",
+      "status": "not_yet_implemented",
       "enabled": false,
-      "activation_gate": "nested_oos_plus_available_at_pit"
+      "implementation_status": "Config flag only; no feature builder / sourced store.",
+      "activation_gate": "implement_builder_then_nested_oos"
     },
     {
       "id": "turnout_layer",
-      "status": "disabled",
+      "status": "intentionally_deferred_interface_only",
       "enabled": false,
       "evidence_gap": "No validated turnout\u2192margin translation for production seats"
     },

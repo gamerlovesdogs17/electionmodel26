@@ -1,0 +1,288 @@
+{
+  "schema_version": "official-ballot-fields-2026-v1",
+  "election_id": "senate-2026",
+  "reviewed_as_of": "2026-10-06",
+  "retrieved_at": "2026-10-07T01:45:00+00:00",
+  "registry_used_as_ballot_authority": false,
+  "disallowed_authorities": [
+    "DDHQ",
+    "Cook",
+    "HDR",
+    "prediction_markets",
+    "polling_aggregators",
+    "current_candidates_2026_registry"
+  ],
+  "races": {
+    "MT": {
+      "race_id": "senate-2026-MT",
+      "state": "MT",
+      "office": "United States Senator",
+      "contest_structure": "multiway_plurality",
+      "institutional_rule": "plurality_vote_for_one",
+      "n_certified_ballot_candidates": 4,
+      "authority": {
+        "level": "state_secretary_of_state_certification",
+        "issuer": "Montana Secretary of State Christi Jacobsen",
+        "source_title": "2026 General Election State Candidate Certification",
+        "source_url": "https://www.cascadecountymt.gov/DocumentCenter/View/8147/2026-General-Election-State-Candidate-Certification",
+        "publication_date": "2026-08-20",
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00",
+        "note": "County-hosted true copy of the Montana Secretary of State general-election certification under MCA 13-12-201."
+      },
+      "candidates": [
+        {
+          "candidate_id": "senate-2026-MT:kurt-alme",
+          "candidate_name": "Kurt Alme",
+          "ballot_party": "R",
+          "ballot_party_label": "Republican",
+          "caucus": "R",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-MT:kyle-austin",
+          "candidate_name": "Kyle Austin",
+          "ballot_party": "L",
+          "ballot_party_label": "Libertarian",
+          "caucus": null,
+          "caucus_basis": null,
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-MT:alani-bankhead",
+          "candidate_name": "Alani Bankhead",
+          "ballot_party": "D",
+          "ballot_party_label": "Democrat",
+          "caucus": "D",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-MT:seth-bodnar",
+          "candidate_name": "Seth Bodnar",
+          "ballot_party": "I",
+          "ballot_party_label": "Independent",
+          "caucus": "D",
+          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        }
+      ],
+      "audit_leads_not_on_certified_ballot": [
+        {
+          "name": "Reilly Neill",
+          "note": "Appears in stored VoteHub primary-era matchups; not on Montana SOS certified general ballot."
+        }
+      ]
+    },
+    "ID": {
+      "race_id": "senate-2026-ID",
+      "state": "ID",
+      "office": "United States Senator",
+      "contest_structure": "multiway_plurality",
+      "institutional_rule": "plurality_vote_for_one",
+      "n_certified_ballot_candidates": 4,
+      "authority": {
+        "level": "state_election_authority_corroborated",
+        "issuer": "Idaho Secretary of State / VoteIdaho.gov candidate field",
+        "source_title": "Idaho Capital Sun 2026 General Election voter guide (quotes statewide U.S. Senate field; directs readers to VoteIdaho.gov)",
+        "source_url": "https://idahocapitalsun.com/voter-guides/2026-general-election/",
+        "publication_date": "2026-10-05",
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00",
+        "primary_sos_url_attempted": "https://sos.idaho.gov/elections-division/2026-general-election-candidate-list/",
+        "primary_sos_retrieval_status": "HTTP 403 Forbidden from this environment",
+        "corroborating_sources": [
+          {
+            "source_url": "https://ballotpedia.org/United_States_Senate_election_in_Idaho,_2026",
+            "role": "secondary_corroboration_not_ballot_authority"
+          }
+        ],
+        "note": "Direct sos.idaho.gov candidate-list fetch returned 403. Ballot field recorded from contemporaneous Idaho Capital Sun voter guide that lists the statewide U.S. Senate nominees and points to VoteIdaho.gov; not DDHQ/Cook/HDR/markets."
+      },
+      "candidates": [
+        {
+          "candidate_id": "senate-2026-ID:todd-achilles",
+          "candidate_name": "Todd Achilles",
+          "ballot_party": "I",
+          "ballot_party_label": "Independent",
+          "caucus": "D",
+          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-ID:natalie-fleming",
+          "candidate_name": "Natalie Fleming",
+          "ballot_party": "I",
+          "ballot_party_label": "Independent",
+          "caucus": null,
+          "caucus_basis": null,
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-ID:matt-loesby",
+          "candidate_name": "Matt Loesby",
+          "ballot_party": "L",
+          "ballot_party_label": "Libertarian",
+          "caucus": null,
+          "caucus_basis": null,
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-ID:jim-risch",
+          "candidate_name": "Jim Risch",
+          "ballot_party": "R",
+          "ballot_party_label": "Republican",
+          "caucus": "R",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        }
+      ],
+      "withdrawn_not_on_ballot": [
+        {
+          "name": "David Roth",
+          "ballot_party": "D",
+          "status": "withdrawn",
+          "note": "Democratic nominee withdrawn; no Democrat on the November ballot per corroborating secondary sources."
+        }
+      ]
+    },
+    "NE": {
+      "race_id": "senate-2026-NE",
+      "state": "NE",
+      "office": "United States Senator",
+      "contest_structure": "multiway_plurality",
+      "institutional_rule": "plurality_vote_for_one",
+      "n_certified_ballot_candidates": 5,
+      "authority": {
+        "level": "state_secretary_of_state_filing_list",
+        "issuer": "Nebraska Secretary of State",
+        "source_title": "Final Statewide General Candidate Filing List 9/11/2026 — November 3, 2026 General Election",
+        "source_url": "https://sos.nebraska.gov/sites/default/files/doc/elections/2026/Final_Statewide_General_Candidate_Filing_List_9.11.26.pdf",
+        "publication_date": "2026-09-11",
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00"
+      },
+      "candidates": [
+        {
+          "candidate_id": "senate-2026-NE:pete-ricketts",
+          "candidate_name": "Pete Ricketts",
+          "ballot_party": "R",
+          "ballot_party_label": "Republican",
+          "caucus": "R",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-NE:mike-marvin",
+          "candidate_name": "Mike Marvin",
+          "ballot_party": "LMN",
+          "ballot_party_label": "Legal Marijuana NOW",
+          "caucus": null,
+          "caucus_basis": null,
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false,
+          "note": "Remains on certified SOS list; contemporaneous reporting says campaign suspended for health but ballot status is certified."
+        },
+        {
+          "candidate_id": "senate-2026-NE:robin-richards",
+          "candidate_name": "Robin Richards",
+          "ballot_party": "NWP",
+          "ballot_party_label": "Nebraska Working People",
+          "caucus": null,
+          "caucus_basis": null,
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-NE:chuck-conboy",
+          "candidate_name": "Chuck Conboy",
+          "ballot_party": "AF",
+          "ballot_party_label": "America First",
+          "caucus": null,
+          "caucus_basis": null,
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-NE:dan-osborn",
+          "candidate_name": "Dan Osborn",
+          "ballot_party": "I",
+          "ballot_party_label": "By Petition",
+          "caucus": "D",
+          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        }
+      ]
+    },
+    "SD": {
+      "race_id": "senate-2026-SD",
+      "state": "SD",
+      "office": "United States Senator",
+      "contest_structure": "non_major_party_vs_republican",
+      "institutional_rule": "plurality_vote_for_one",
+      "n_certified_ballot_candidates": 2,
+      "authority": {
+        "level": "state_secretary_of_state_candidate_list",
+        "issuer": "South Dakota Secretary of State",
+        "source_title": "2026 General Election Candidate List",
+        "source_url": "https://vip.sdsos.gov/candidatelist.aspx?eid=774",
+        "publication_date": null,
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00"
+      },
+      "candidates": [
+        {
+          "candidate_id": "senate-2026-SD:mike-rounds",
+          "candidate_name": "Mike Rounds",
+          "ballot_party": "R",
+          "ballot_party_label": "Republican",
+          "caucus": "R",
+          "caucus_basis": "declared_major_party_nominee_assumption",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        },
+        {
+          "candidate_id": "senate-2026-SD:brian-bengs",
+          "candidate_name": "Brian Bengs",
+          "ballot_party": "I",
+          "ballot_party_label": "Independent",
+          "caucus": "D",
+          "caucus_basis": "user_declared_independent_dem_caucus_assumption_2026_09_20",
+          "status": "certified_general_ballot",
+          "write_in": false,
+          "withdrawn": false
+        }
+      ],
+      "withdrawn_not_on_ballot": [
+        {
+          "name": "Julian Beaudion",
+          "ballot_party": "D",
+          "status": "withdrawn",
+          "effective_date": "2026-08-04",
+          "note": "Listed on SD SOS candidate list as Withdrawn 08/04/2026; not an active general-ballot nominee."
+        }
+      ]
+    }
+  }
+}

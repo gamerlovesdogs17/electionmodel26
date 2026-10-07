@@ -99,7 +99,9 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                 : (r.modeled_ballot_party ?? r.dem_party) === "I"
                   ? "I"
                   : "D";
-              const pModeled = view.favored_win_probability ?? modeledProbability(r);
+              const pModeled = view.unsupported_probability
+                ? null
+                : (view.favored_win_probability ?? modeledProbability(r));
               return (
                 <tr
                   key={r.race_id}
@@ -125,16 +127,18 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                   <td className="hidden px-3 py-2.5 text-xs text-[var(--muted)] lg:table-cell">
                     {view.candidates.length ? (
                       <div className="space-y-1">
-                        {view.candidates.slice(0, view.rcv_detail ? 4 : 2).map((candidate) => (
+                        {view.candidates
+                          .slice(0, view.rcv_detail || view.unsupported_probability ? 6 : 2)
+                          .map((candidate) => (
                           <div
                             key={candidate.candidate_id || candidate.candidate_name}
                             className="flex justify-between gap-3"
                           >
-                            <span className={candidate.ballot_party === "I" ? "text-[var(--ind)]" : ""}>
+                            <span className={candidate.ballot_party === "I" || candidate.ballot_party === "L" ? "text-[var(--ind)]" : ""}>
                               {candidate.candidate_name}
                               <span className="ml-1 opacity-70">({candidate.ballot_party})</span>
                             </span>
-                            {view.rcv_detail ? (
+                            {view.rcv_detail && !view.unsupported_probability ? (
                               <span className="tabular-nums">{pct(candidate.p_win, 1)}</span>
                             ) : null}
                           </div>
@@ -153,25 +157,31 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                     )}
                   </td>
                   <td className="px-3 py-2.5 text-xs font-medium text-[var(--ink)]">
-                    {view.rating ?? "—"}
+                    {view.rating ?? (view.unsupported_probability ? "Withheld" : "—")}
                   </td>
                   <td className="px-3 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-20 overflow-hidden rounded bg-[var(--rep)]/25 sm:w-28">
-                        <div
-                          className="h-full bg-[var(--dem)]"
-                          style={{
-                            width: `${
-                              typeof pModeled === "number" && Number.isFinite(pModeled)
-                                ? Math.min(100, Math.max(0, pModeled * 100))
-                                : 0
-                            }%`,
-                          }}
-                        />
+                    {view.unsupported_probability ? (
+                      <span className="text-xs text-[var(--muted)]">
+                        {view.unsupported_message ?? "Probability withheld"}
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-20 overflow-hidden rounded bg-[var(--rep)]/25 sm:w-28">
+                          <div
+                            className="h-full bg-[var(--dem)]"
+                            style={{
+                              width: `${
+                                typeof pModeled === "number" && Number.isFinite(pModeled)
+                                  ? Math.min(100, Math.max(0, pModeled * 100))
+                                  : 0
+                              }%`,
+                            }}
+                          />
+                        </div>
+                        <span className="tabular-nums">{pct(pModeled, 0)}</span>
                       </div>
-                      <span className="tabular-nums">{pct(pModeled, 0)}</span>
-                    </div>
-                    {view.rcv_detail ? (
+                    )}
+                    {view.rcv_detail && !view.unsupported_probability ? (
                       <span className="mt-1 block text-xs text-[var(--muted)]">
                         D-caucus seat: {pct(view.seat_control_p_dem_caucus, 1)}
                       </span>

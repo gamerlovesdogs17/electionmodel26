@@ -66,6 +66,12 @@ def probability_support_status(
         except (FileNotFoundError, ValueError, KeyError, TypeError):
             pass
         return False, "unsupported", "ranked_choice_multiway_evidence_or_adapter_not_ready"
+    if structure == "multiway_plurality":
+        return (
+            False,
+            "unsupported",
+            "multiway_plurality_probability_model_not_historically_supported",
+        )
     if structure != NON_MAJOR_CONTEST_STRUCTURE:
         binary_value = row.get("binary_score_eligible")
         binary = (

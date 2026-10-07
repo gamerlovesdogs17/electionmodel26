@@ -57,25 +57,38 @@ def build_blueprint_fidelity_delta() -> dict[str, Any]:
         "deferred_or_disabled": [
             {
                 "id": "candidate_experience_challenger",
-                "status": "disabled",
+                "status": "not_yet_implemented",
                 "enabled": challengers.candidate_experience,
-                "activation_gate": "nested_oos_plus_available_at_pit",
+                "implementation_status": (
+                    "Config flag and provenance-gated consumer exist in "
+                    "fundamentals_challengers.py, but no feature builder / sourced "
+                    "store constructs candidate_experience values. Do not treat as "
+                    "an implemented-but-disabled production challenger."
+                ),
+                "activation_gate": "implement_builder_then_nested_oos",
             },
             {
                 "id": "special_election_signal_challenger",
-                "status": "disabled",
+                "status": "not_yet_implemented",
                 "enabled": challengers.special_election_signal,
-                "activation_gate": "nested_oos_plus_available_at_pit",
+                "implementation_status": (
+                    "Config flag and provenance-gated consumer exist; no special-election "
+                    "signal feature builder or sourced historical store is implemented."
+                ),
+                "activation_gate": "implement_builder_then_nested_oos",
             },
             {
                 "id": "recent_statewide_performance_challenger",
-                "status": "disabled",
+                "status": "not_yet_implemented",
                 "enabled": challengers.recent_statewide_performance,
-                "activation_gate": "nested_oos_plus_available_at_pit",
+                "implementation_status": (
+                    "Config flag only; no feature builder / sourced store."
+                ),
+                "activation_gate": "implement_builder_then_nested_oos",
             },
             {
                 "id": "turnout_layer",
-                "status": "disabled",
+                "status": "intentionally_deferred_interface_only",
                 "enabled": turnout.enabled,
                 "evidence_gap": "No validated turnout→margin translation for production seats",
             },
