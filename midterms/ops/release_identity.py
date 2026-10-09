@@ -211,7 +211,12 @@ def validate_release_identity_document(
         != expected_evidence_bundle_id
     ):
         problems.append("release identity evidence bundle mismatch")
-    if version == "v0.9.23":
+    # Exceptional lineage binding is required for v0.9.23+ research identities.
+    try:
+        parts = [int(p) for p in version.lstrip("v").split(".")]
+    except ValueError:
+        parts = []
+    if parts >= [0, 9, 23]:
         lineage = payload.get("lineage") or {}
         for field in (
             "exceptional_model_lineage_sha256",

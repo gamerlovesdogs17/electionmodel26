@@ -1,0 +1,477 @@
+{
+  "schema_version": "pre-rebuild-model-integrity-v1",
+  "model_version": "senate-hierarchical-v0.9.25",
+  "previous_sealed_model_version": "senate-hierarchical-v0.9.23",
+  "verdict": "NOT_READY_FOR_EXPENSIVE_OOF_REBUILD",
+  "blockers": [
+    "formal OOF generic-ballot archive missing/incomplete for the eight T-60/T-30 cutoffs",
+    "eight formal folds lack reconstructable historical generic ballot"
+  ],
+  "source_integrity": {
+    "votehub_pagination": "defensive_multi_page_client_implemented",
+    "generic_ballot_history_status": "source_gap",
+    "generic_ballot_parity_path": "data/artifacts/generic_ballot_parity_v0924.json",
+    "discovery_artifact": "data/artifacts/current_poll_discovery_reconciliation_v0924.json"
+  },
+  "candidate_identity": {
+    "race_scoped_contract": "midterms.evidence.race_scoped_identity",
+    "global_name_party_production": "disabled_for_collisions",
+    "montana_kyle_austin": "race_scoped_L_not_global_R"
+  },
+  "ordinary_model": {
+    "generic_ballot_parity": {
+      "schema_version": "generic-ballot-parity-v0925",
+      "model_contract": "generic-ballot-context-v1",
+      "formal_cycles": [
+        2018,
+        2020,
+        2022,
+        2024
+      ],
+      "formal_leads": [
+        60,
+        30
+      ],
+      "n_cutoffs": 8,
+      "n_formal_eligible": 0,
+      "historical_archive_path": null,
+      "senate_poll_residual_forbidden": true,
+      "status": "source_gap",
+      "rows": [
+        {
+          "election_id": "senate-2018",
+          "lead_days": 60,
+          "election_day": "2018-11-06",
+          "as_of": "2018-09-07",
+          "context": {
+            "schema_version": "generic-ballot-context-v1",
+            "election_id": "senate-2018",
+            "as_of": "2018-09-07",
+            "margin": null,
+            "n_polls": 0,
+            "source_ids": [],
+            "field_dates": [],
+            "available_at_dates": [],
+            "weighting_method": "historical_archive_missing",
+            "source_version_hash": "",
+            "historically_reconstructable": false,
+            "fallback_used": true,
+            "fallback_reason": "historical_generic_ballot_archive_absent",
+            "formal_oof_eligible": false,
+            "path": "unavailable"
+          }
+        },
+        {
+          "election_id": "senate-2018",
+          "lead_days": 30,
+          "election_day": "2018-11-06",
+          "as_of": "2018-10-07",
+          "context": {
+            "schema_version": "generic-ballot-context-v1",
+            "election_id": "senate-2018",
+            "as_of": "2018-10-07",
+            "margin": null,
+            "n_polls": 0,
+            "source_ids": [],
+            "field_dates": [],
+            "available_at_dates": [],
+            "weighting_method": "historical_archive_missing",
+            "source_version_hash": "",
+            "historically_reconstructable": false,
+            "fallback_used": true,
+            "fallback_reason": "historical_generic_ballot_archive_absent",
+            "formal_oof_eligible": false,
+            "path": "unavailable"
+          }
+        },
+        {
+          "election_id": "senate-2020",
+          "lead_days": 60,
+          "election_day": "2020-11-03",
+          "as_of": "2020-09-04",
+          "context": {
+            "schema_version": "generic-ballot-context-v1",
+            "election_id": "senate-2020",
+            "as_of": "2020-09-04",
+            "margin": null,
+            "n_polls": 0,
+            "source_ids": [],
+            "field_dates": [],
+            "available_at_dates": [],
+            "weighting_method": "historical_archive_missing",
+            "source_version_hash": "",
+            "historically_reconstructable": false,
+            "fallback_used": true,
+            "fallback_reason": "historical_generic_ballot_archive_absent",
+            "formal_oof_eligible": false,
+            "path": "unavailable"
+          }
+        },
+        {
+          "election_id": "senate-2020",
+          "lead_days": 30,
+          "election_day": "2020-11-03",
+          "as_of": "2020-10-04",
+          "context": {
+            "schema_version": "generic-ballot-context-v1",
+            "election_id": "senate-2020",
+            "as_of": "2020-10-04",
+            "margin": null,
+            "n_polls": 0,
+            "source_ids": [],
+            "field_dates": [],
+            "available_at_dates": [],
+            "weighting_method": "historical_archive_missing",
+            "source_version_hash": "",
+            "historically_reconstructable": false,
+            "fallback_used": true,
+            "fallback_reason": "historical_generic_ballot_archive_absent",
+            "formal_oof_eligible": false,
+            "path": "unavailable"
+          }
+        },
+        {
+          "election_id": "senate-2022",
+          "lead_days": 60,
+          "election_day": "2022-11-01",
+          "as_of": "2022-09-02",
+          "context": {
+            "schema_version": "generic-ballot-context-v1",
+            "election_id": "senate-2022",
+            "as_of": "2022-09-02",
+            "margin": null,
+            "n_polls": 0,
+            "source_ids": [],
+            "field_dates": [],
+            "available_at_dates": [],
+            "weighting_method": "historical_archive_missing",
+            "source_version_hash": "",
+            "historically_reconstructable": false,
+            "fallback_used": true,
+            "fallback_reason": "historical_generic_ballot_archive_absent",
+            "formal_oof_eligible": false,
+            "path": "unavailable"
+          }
+        },
+        {
+          "election_id": "senate-2022",
+          "lead_days": 30,
+          "election_day": "2022-11-01",
+          "as_of": "2022-10-02",
+          "context": {
+            "schema_version": "generic-ballot-context-v1",
+            "election_id": "senate-2022",
+            "as_of": "2022-10-02",
+            "margin": null,
+            "n_polls": 0,
+            "source_ids": [],
+            "field_dates": [],
+            "available_at_dates": [],
+            "weighting_method": "historical_archive_missing",
+            "source_version_hash": "",
+            "historically_reconstructable": false,
+            "fallback_used": true,
+            "fallback_reason": "historical_generic_ballot_archive_absent",
+            "formal_oof_eligible": false,
+            "path": "unavailable"
+          }
+        },
+        {
+          "election_id": "senate-2024",
+          "lead_days": 60,
+          "election_day": "2024-11-05",
+          "as_of": "2024-09-06",
+          "context": {
+            "schema_version": "generic-ballot-context-v1",
+            "election_id": "senate-2024",
+            "as_of": "2024-09-06",
+            "margin": null,
+            "n_polls": 0,
+            "source_ids": [],
+            "field_dates": [],
+            "available_at_dates": [],
+            "weighting_method": "historical_archive_missing",
+            "source_version_hash": "",
+            "historically_reconstructable": false,
+            "fallback_used": true,
+            "fallback_reason": "historical_generic_ballot_archive_absent",
+            "formal_oof_eligible": false,
+            "path": "unavailable"
+          }
+        },
+        {
+          "election_id": "senate-2024",
+          "lead_days": 30,
+          "election_day": "2024-11-05",
+          "as_of": "2024-10-06",
+          "context": {
+            "schema_version": "generic-ballot-context-v1",
+            "election_id": "senate-2024",
+            "as_of": "2024-10-06",
+            "margin": null,
+            "n_polls": 0,
+            "source_ids": [],
+            "field_dates": [],
+            "available_at_dates": [],
+            "weighting_method": "historical_archive_missing",
+            "source_version_hash": "",
+            "historically_reconstructable": false,
+            "fallback_used": true,
+            "fallback_reason": "historical_generic_ballot_archive_absent",
+            "formal_oof_eligible": false,
+            "path": "unavailable"
+          }
+        }
+      ],
+      "note": "Formal OOF must use reconstructable national generic-ballot evidence. Deriving GB from Senate poll residuals is forbidden.",
+      "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\generic_ballot_parity_v0924.json"
+    },
+    "fundamentals_coefficient_parity": {
+      "production": "PRIOR_COEF / COEF",
+      "oof_primary": "same PRIOR_COEF via fundamentals_mean",
+      "ridge_challenger": "fit_ridge_fundamentals only",
+      "status": "aligned_on_PRIOR_COEF_for_primary_paths"
+    },
+    "state_space_repull": {
+      "reference_fund_pull": 0.35,
+      "challenger": "state_space_no_ed_fund_repull",
+      "lineage": {
+        "challenger": "state_space_no_ed_fund_repull",
+        "reference": {
+          "fund_pull": 0.35,
+          "flat_prior": false,
+          "process_sd_per_sqrt_day": 0.8
+        },
+        "challenger_config": {
+          "fund_pull": 0.0,
+          "flat_prior": false,
+          "process_sd_per_sqrt_day": 0.8
+        },
+        "differing_keys": [
+          "fund_pull"
+        ],
+        "declared_differs_exactly": [
+          "fund_pull"
+        ],
+        "lineage_ok": true
+      }
+    },
+    "calendar_time_propagation": {
+      "last_poll_to_as_of": true,
+      "as_of_to_ed": "future_movement_sd_only",
+      "process_sd_per_sqrt_day": 0.8,
+      "process_scale_challengers": [
+        "state_space_process_sd_0_5",
+        "state_space_process_sd_1_2"
+      ]
+    },
+    "national_environment_ablations": {
+      "schema_version": "national-environment-ablations-v1",
+      "reference": {
+        "prior_lean": 1.0,
+        "generic_ballot": 0.28,
+        "incumbency": 2.0,
+        "fundraising_logit": 1.4,
+        "pres_approval": 0.08,
+        "midterm_outparty": 1.2,
+        "real_income_yoy": 0.35
+      },
+      "challengers": {
+        "no_generic_ballot": {
+          "challenger": "no_generic_ballot",
+          "reference_coefs": {
+            "prior_lean": 1.0,
+            "generic_ballot": 0.28,
+            "incumbency": 2.0,
+            "fundraising_logit": 1.4,
+            "pres_approval": 0.08,
+            "midterm_outparty": 1.2,
+            "real_income_yoy": 0.35
+          },
+          "challenger_coefs": {
+            "prior_lean": 1.0,
+            "generic_ballot": 0.0,
+            "incumbency": 2.0,
+            "fundraising_logit": 1.4,
+            "pres_approval": 0.08,
+            "midterm_outparty": 1.2,
+            "real_income_yoy": 0.35
+          },
+          "differing_keys": [
+            "generic_ballot"
+          ],
+          "declared_zero_keys": [
+            "generic_ballot"
+          ],
+          "lineage_ok": true,
+          "production_unchanged": true
+        },
+        "no_approval": {
+          "challenger": "no_approval",
+          "reference_coefs": {
+            "prior_lean": 1.0,
+            "generic_ballot": 0.28,
+            "incumbency": 2.0,
+            "fundraising_logit": 1.4,
+            "pres_approval": 0.08,
+            "midterm_outparty": 1.2,
+            "real_income_yoy": 0.35
+          },
+          "challenger_coefs": {
+            "prior_lean": 1.0,
+            "generic_ballot": 0.28,
+            "incumbency": 2.0,
+            "fundraising_logit": 1.4,
+            "pres_approval": 0.0,
+            "midterm_outparty": 1.2,
+            "real_income_yoy": 0.35
+          },
+          "differing_keys": [
+            "pres_approval"
+          ],
+          "declared_zero_keys": [
+            "pres_approval"
+          ],
+          "lineage_ok": true,
+          "production_unchanged": true
+        },
+        "no_midterm_outparty": {
+          "challenger": "no_midterm_outparty",
+          "reference_coefs": {
+            "prior_lean": 1.0,
+            "generic_ballot": 0.28,
+            "incumbency": 2.0,
+            "fundraising_logit": 1.4,
+            "pres_approval": 0.08,
+            "midterm_outparty": 1.2,
+            "real_income_yoy": 0.35
+          },
+          "challenger_coefs": {
+            "prior_lean": 1.0,
+            "generic_ballot": 0.28,
+            "incumbency": 2.0,
+            "fundraising_logit": 1.4,
+            "pres_approval": 0.08,
+            "midterm_outparty": 0.0,
+            "real_income_yoy": 0.35
+          },
+          "differing_keys": [
+            "midterm_outparty"
+          ],
+          "declared_zero_keys": [
+            "midterm_outparty"
+          ],
+          "lineage_ok": true,
+          "production_unchanged": true
+        },
+        "no_income_economic": {
+          "challenger": "no_income_economic",
+          "reference_coefs": {
+            "prior_lean": 1.0,
+            "generic_ballot": 0.28,
+            "incumbency": 2.0,
+            "fundraising_logit": 1.4,
+            "pres_approval": 0.08,
+            "midterm_outparty": 1.2,
+            "real_income_yoy": 0.35
+          },
+          "challenger_coefs": {
+            "prior_lean": 1.0,
+            "generic_ballot": 0.28,
+            "incumbency": 2.0,
+            "fundraising_logit": 1.4,
+            "pres_approval": 0.08,
+            "midterm_outparty": 1.2,
+            "real_income_yoy": 0.0
+          },
+          "differing_keys": [
+            "real_income_yoy"
+          ],
+          "declared_zero_keys": [
+            "real_income_yoy"
+          ],
+          "lineage_ok": true,
+          "production_unchanged": true
+        }
+      },
+      "note": "Registered for later OOS only; production PRIOR_COEF unchanged."
+    },
+    "oof_diagnostic_slices": {
+      "schema_version": "oof-diagnostic-slices-v1",
+      "poll_coverage": [
+        "zero_polls",
+        "very_low_enop",
+        "moderate_enop",
+        "high_enop"
+      ],
+      "prior_poll_disagreement_abs_pp": 8.0,
+      "seat_status": [
+        "personal_incumbent",
+        "open_non_incumbent"
+      ],
+      "competitiveness": [
+        "tossup_band",
+        "lean_band",
+        "likely_safe_band"
+      ],
+      "lead_time": [
+        "T60",
+        "T30"
+      ],
+      "contest_structure": [
+        "ordinary_d_v_r",
+        "candidate_neutral_binary",
+        "multiway"
+      ],
+      "note": "Diagnostics only; not separate state-specific models."
+    }
+  },
+  "exceptional_models": {
+    "contest_classifier": "midterms.model.contest_classifier",
+    "binary_nonmajor_prior_sd_challengers": [
+      20.0,
+      30.0,
+      40.0
+    ],
+    "historical_multiway_analogs_n": 158,
+    "historical_multiway_status": "ok",
+    "leave_one_poll_out": "midterms.validation.exceptional_loo_diagnostics"
+  },
+  "historical_validation_readiness": {
+    "point_in_time_structural_prior": "assumed_available_via_existing_snapshot_pipeline",
+    "candidate_specific_finance": "assumed_available_via_existing_snapshot_pipeline",
+    "personal_incumbency": "assumed_available_via_existing_snapshot_pipeline",
+    "true_historical_generic_ballot": "FAIL",
+    "required_poll_evidence": "assumed_available_via_existing_snapshot_pipeline",
+    "candidate_identity": "race_scoped_contract_added_current; historical ledger path retained",
+    "release_hashes": "pending_new_release_identity_after_spec_bump",
+    "all_eight_folds_ready": false
+  },
+  "forecast_artifact": {
+    "sealed": {
+      "sealed_path": "data\\artifacts\\forecast_sealed_v0923_publication.json",
+      "already_present": true,
+      "model_version": "senate-hierarchical-v0.9.23",
+      "sha256": "be956919cf02b0190eb5373804e599d69c9adb232ea90b8de17f9fa237f943a9"
+    },
+    "latest_coherence": {
+      "ok": true,
+      "status": "forecast_not_rebuilt_after_spec_change",
+      "model_version": "senate-hierarchical-v0.9.25"
+    },
+    "stub_status": "forecast_not_rebuilt_after_spec_change"
+  },
+  "statistical_choices_unchanged_pending_oos": [
+    "fund_pull",
+    "process_sd_per_sqrt_day",
+    "exceptional_prior_sd",
+    "stack_weights",
+    "national_environment_feature_inclusion",
+    "recency_half_life",
+    "sample_size_weighting",
+    "quality_weighting",
+    "house_effect_strength",
+    "structural_prior_composition",
+    "terminal_error_scales"
+  ]
+}

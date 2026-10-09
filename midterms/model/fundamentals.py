@@ -164,13 +164,13 @@ def fundamentals_mean(
 
 
 def _cycle_generic_ballot(polls: pd.DataFrame, races: pd.DataFrame) -> float:
-    if polls is None or len(polls) == 0 or races is None or len(races) == 0:
-        return 0.0
-    merged = polls.merge(races[["race_id", "prior_lean"]], on="race_id", how="left")
-    if merged.empty or "two_party_margin" not in merged.columns:
-        return 0.0
-    delta = merged["two_party_margin"].astype(float) - merged["prior_lean"].astype(float)
-    return float(delta.mean()) if len(delta) else 0.0
+    """Deprecated Senate-residual estimator — returns 0 and must not feed formal OOF.
+
+    Callers must pass an explicit ``generic_ballot`` from
+    ``resolve_generic_ballot_context``. Silent residual reuse is a feature-definition bug.
+    """
+    del polls, races
+    return 0.0
 
 
 def build_design(

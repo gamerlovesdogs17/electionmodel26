@@ -105,11 +105,13 @@ CANDIDATE_PARTY: dict[str, str] = {
     # Virginia
     "mark warner": "D",
     "alexander vindman": "D",
-    "kyle austin": "R",
+    # NOTE: "kyle austin" is intentionally absent from the global map — VA R and
+    # MT Libertarian collide. Production must use race-scoped identity.
     "bert mizusawa": "R",
     "kim farington": "R",
     "mark moran": "R",
-    "david williams": "R",  # VA challenger name collision with ID Dem — prefer R for senate GE
+    # NOTE: "david williams" also collides across races; race-scoped identity required.
+
     # South Dakota / others occasionally present
     "mike rounds": "R",
     "brian bengs": "I",
@@ -166,6 +168,12 @@ def normalize_candidate_key(name: str) -> str:
 
 
 def candidate_party(name: str) -> str | None:
+    """Legacy global name→party lookup (aliases / diagnostics only).
+
+    Production poll normalization must resolve via race-scoped identity
+    (``midterms.evidence.race_scoped_identity``). Collision-prone names are
+    deliberately omitted from ``CANDIDATE_PARTY``.
+    """
     key = normalize_candidate_key(name)
     if key in CANDIDATE_PARTY:
         return CANDIDATE_PARTY[key]

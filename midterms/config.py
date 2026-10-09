@@ -13,9 +13,11 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 MANIFESTS_DIR = DATA_DIR / "manifests"
 
 OFFICE = "US_SENATE"
-MODEL_VERSION = "senate-hierarchical-v0.9.24"
+MODEL_VERSION = "senate-hierarchical-v0.9.25"
 # Immutable completed research rebuild identity (do not rewrite those artifacts).
 PREVIOUS_SEALED_MODEL_VERSION = "senate-hierarchical-v0.9.23"
+# Prior code-spec identity before this integrity pass (not a sealed publication).
+PREVIOUS_CODE_MODEL_VERSION = "senate-hierarchical-v0.9.24"
 
 # Blueprint audit 14 Sep 2026 (v0.9.19 review): HOLD live until truth ledger,
 # vintages, fold purity, and version-coherent release clearance are repaired.

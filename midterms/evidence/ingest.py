@@ -32,6 +32,11 @@ from midterms.evidence.candidates import (
     normalize_candidate_key,
     stable_candidate_id,
 )
+from midterms.evidence.race_scoped_identity import (
+    RaceScopedCandidate,
+    build_race_identity_index,
+    resolve_race_candidate,
+)
 from midterms.evidence.ratings import (
     build_rating_lookup,
     rating_for,
@@ -40,8 +45,8 @@ from midterms.evidence.ratings import (
 from midterms.evidence.schema import POLL_COLUMNS, empty_poll_row
 
 VOTEHUB_API = "https://api.votehub.com"
-PARSER_VERSION = "votehub-ingest-v2-candidate-identity"
-VOTEHUB_LINEAGE_VERSION = "votehub-poll-lineage-v2"
+PARSER_VERSION = "votehub-ingest-v3-race-scoped-candidate-level"
+VOTEHUB_LINEAGE_VERSION = "votehub-poll-lineage-v3"
 
 STATE_NAME_TO_ABBR = {
     "alabama": "AL",
@@ -162,42 +167,167 @@ def votehub_get(path: str, params: dict[str, Any] | None = None) -> Any:
         return json.loads(resp.read().decode("utf-8"))
 
 
-def fetch_votehub_polls(*, poll_type: str = "us-senator", subject: str | None = None) -> dict:
-    params: dict[str, Any] = {"poll_type": poll_type}
-    if subject:
-        params["subject"] = subject
-    payload = votehub_get("/polls", params)
+def _extract_poll_page(payload: Any) -> tuple[list[dict], dict[str, Any]]:
+    """Normalize a VoteHub /polls response into (polls, pagination_meta)."""
+    meta: dict[str, Any] = {
+        "response_shape": type(payload).__name__,
+        "next_token": None,
+        "next_offset": None,
+        "total_count": None,
+        "has_more": False,
+    }
     if isinstance(payload, list):
-        payload = {"polls": payload}
+        return list(payload), meta
+    if not isinstance(payload, dict):
+        return [], meta
+    polls = payload.get("polls")
+    if polls is None and isinstance(payload.get("data"), list):
+        polls = payload["data"]
+    if polls is None and isinstance(payload.get("results"), list):
+        polls = payload["results"]
+    polls = list(polls or [])
+    meta["total_count"] = (
+        payload.get("total")
+        or payload.get("total_count")
+        or payload.get("count")
+        or payload.get("n_polls")
+    )
+    next_token = (
+        payload.get("next")
+        or payload.get("next_token")
+        or payload.get("next_cursor")
+        or (payload.get("pagination") or {}).get("next")
+        or (payload.get("pagination") or {}).get("next_token")
+    )
+    next_offset = payload.get("next_offset")
+    if next_offset is None and payload.get("offset") is not None and payload.get("limit") is not None:
+        try:
+            next_offset = int(payload["offset"]) + int(payload["limit"])
+        except (TypeError, ValueError):
+            next_offset = None
+    meta["next_token"] = next_token
+    meta["next_offset"] = next_offset
+    meta["has_more"] = bool(next_token) or (
+        next_offset is not None
+        and meta["total_count"] is not None
+        and int(next_offset) < int(meta["total_count"])
+    )
+    return polls, meta
+
+
+def fetch_votehub_polls(
+    *,
+    poll_type: str = "us-senator",
+    subject: str | None = None,
+    page_limit: int | None = None,
+    max_pages: int = 50,
+    client: Any | None = None,
+    dest_dir: Path | None = None,
+) -> dict:
+    """Fetch VoteHub polls with defensive pagination.
+
+    Documented VoteHub API historically returns the full feed in one response.
+    This client still walks next-token / offset / page metadata when present so
+    polls are never silently truncated if the contract gains pagination.
+    """
+    get = client or votehub_get
+    base_params: dict[str, Any] = {"poll_type": poll_type}
+    if subject:
+        base_params["subject"] = subject
+    if page_limit is not None:
+        base_params["limit"] = int(page_limit)
+
+    all_polls: list[dict] = []
+    seen_ids: set[str] = set()
+    page_hashes: list[str] = []
+    page_ids: list[str] = []
+    terminated_cleanly = False
+    offset = 0
+    cursor: str | None = None
+    total_count = None
+
+    for page_idx in range(max_pages):
+        params = dict(base_params)
+        if cursor:
+            params["cursor"] = cursor
+            params["next"] = cursor
+        elif page_limit is not None or offset:
+            params["offset"] = offset
+        payload = get("/polls", params)
+        polls, page_meta = _extract_poll_page(payload)
+        page_blob = json.dumps(payload, sort_keys=True, default=str).encode()
+        page_hashes.append(_sha256_bytes(page_blob))
+        page_ids.append(f"page-{page_idx}")
+        if page_meta.get("total_count") is not None:
+            total_count = page_meta["total_count"]
+        new_on_page = 0
+        for poll in polls:
+            pid = str(poll.get("id") or poll.get("poll_id") or _sha256_bytes(json.dumps(poll, sort_keys=True).encode())[:16])
+            if pid in seen_ids:
+                continue
+            seen_ids.add(pid)
+            all_polls.append(poll)
+            new_on_page += 1
+        # Stop when empty page, no new records, or no pagination signal.
+        if not polls or new_on_page == 0:
+            terminated_cleanly = True
+            break
+        if page_meta.get("next_token"):
+            cursor = str(page_meta["next_token"])
+            continue
+        if page_meta.get("has_more") and page_meta.get("next_offset") is not None:
+            offset = int(page_meta["next_offset"])
+            cursor = None
+            continue
+        # Single-page full feed (current documented VoteHub behavior).
+        terminated_cleanly = True
+        break
+    else:
+        terminated_cleanly = False
+
+    combined = {"polls": all_polls, "pagination": {
+        "n_pages": len(page_ids),
+        "page_ids": page_ids,
+        "page_hashes": page_hashes,
+        "terminated_cleanly": terminated_cleanly,
+        "total_count": total_count,
+    }}
     name = f"votehub_{poll_type.replace('-', '_')}"
     if subject:
         name += f"_{re.sub(r'[^a-z0-9]+', '_', subject.lower()).strip('_')}"
-    dest = RAW_DIR / "external"
+    dest = dest_dir or (RAW_DIR / "external")
     dest.mkdir(parents=True, exist_ok=True)
     out = dest / f"{name}.json"
-    blob = json.dumps(payload, indent=2).encode()
+    blob = json.dumps(combined, indent=2).encode()
     out.write_bytes(blob)
     try:
         recorded_path = out.resolve().relative_to(RAW_DIR.parent.parent.resolve()).as_posix()
     except ValueError:
-        # Tests and explicitly redirected stores may live outside the project
-        # root; keep their caller-provided path while production receipts stay
-        # repository-relative and portable.
         recorded_path = out.as_posix()
     meta = {
         "name": name,
+        "endpoint": f"{VOTEHUB_API}/polls",
         "url": f"{VOTEHUB_API}/polls",
-        "params": params,
+        "api_source_version": "votehub-polls-api",
+        "params": base_params,
         "retrieved_at": datetime.now(UTC).isoformat(),
         "sha256": _sha256_bytes(blob),
         "bytes": len(blob),
-        "n_polls": len(payload.get("polls", [])),
+        "n_polls": len(all_polls),
+        "n_pages": len(page_ids),
+        "first_page_id": page_ids[0] if page_ids else None,
+        "last_page_id": page_ids[-1] if page_ids else None,
+        "page_hashes": page_hashes,
+        "total_result_count": total_count,
+        "pagination_terminated_cleanly": terminated_cleanly,
         "path": recorded_path,
         "license": "CC BY 4.0",
         "attribution": "Polling data from VoteHub (https://votehub.com)",
     }
-    MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
-    (MANIFESTS_DIR / f"fetch_{name}.json").write_text(json.dumps(meta, indent=2))
+    # Only write production fetch manifests when using the default store.
+    if dest_dir is None:
+        MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
+        (MANIFESTS_DIR / f"fetch_{name}.json").write_text(json.dumps(meta, indent=2))
     return meta
 
 
@@ -242,15 +372,135 @@ def _parse_subject_state(subject: str) -> tuple[str | None, bool]:
     return STATE_NAME_TO_ABBR.get(name), is_primary
 
 
-def _two_party_from_answers(answers: list[dict]) -> dict[str, Any] | None:
+def extract_candidate_level_answers(
+    answers: list[dict],
+    *,
+    race_id: str,
+    identity_index: dict[str, dict[str, RaceScopedCandidate]] | None = None,
+    poll_id: str | None = None,
+    study_id: str | None = None,
+    question_id: str | None = None,
+    field_start: str | None = None,
+    field_end: str | None = None,
+    available_at: str | None = None,
+    source_lineage: str | None = None,
+    candidate_set_version: str = "race-scoped-candidate-set-v1",
+) -> dict[str, Any]:
+    """Preserve every candidate response; never collapse multiway to binary truth."""
+    undecided = 0.0
+    other_unresolved = 0.0
+    rows: list[dict[str, Any]] = []
+    unresolved: list[str] = []
+    for a in answers or []:
+        choice = str(a.get("choice") or "")
+        pct = float(a.get("pct") or 0.0)
+        key = normalize_candidate_key(choice)
+        if key in {"undecided", "unsure", "not sure", ""}:
+            undecided += pct
+            continue
+        resolved = None
+        if identity_index is not None and race_id:
+            resolved = resolve_race_candidate(
+                race_id, choice, index=identity_index, allow_global_fallback=False
+            )
+        if resolved is None:
+            # Fail closed on party: keep raw share under unresolved bucket.
+            unresolved.append(choice)
+            other_unresolved += pct
+            rows.append(
+                {
+                    "poll_id": poll_id,
+                    "study_id": study_id,
+                    "race_id": race_id,
+                    "question_id": question_id,
+                    "candidate_id": None,
+                    "candidate_name": choice,
+                    "ballot_party": None,
+                    "caucus": None,
+                    "raw_share": round(pct, 3),
+                    "undecided": None,
+                    "other": None,
+                    "candidate_set_version": candidate_set_version,
+                    "field_start": field_start,
+                    "field_end": field_end,
+                    "available_at": available_at,
+                    "source_lineage": source_lineage,
+                    "resolution_status": "unresolved_fail_closed",
+                }
+            )
+            continue
+        rows.append(
+            {
+                "poll_id": poll_id,
+                "study_id": study_id,
+                "race_id": race_id,
+                "question_id": question_id,
+                "candidate_id": resolved.candidate_id,
+                "candidate_name": resolved.candidate_name,
+                "ballot_party": resolved.ballot_party,
+                "caucus": resolved.caucus,
+                "raw_share": round(pct, 3),
+                "undecided": None,
+                "other": None,
+                "candidate_set_version": candidate_set_version,
+                "field_start": field_start,
+                "field_end": field_end,
+                "available_at": available_at,
+                "source_lineage": source_lineage,
+                "resolution_status": "race_scoped",
+            }
+        )
+    return {
+        "candidates": rows,
+        "undecided": round(undecided, 3),
+        "other_unresolved_share": round(other_unresolved, 3),
+        "unresolved_names": unresolved,
+        "n_candidates": len([r for r in rows if r.get("candidate_id")]),
+        "multiway": len([r for r in rows if r.get("candidate_id")]) >= 3,
+    }
+
+
+def _party_for_answer(
+    choice: str,
+    *,
+    race_id: str | None,
+    identity_index: dict[str, dict[str, RaceScopedCandidate]] | None,
+) -> str | None:
+    if race_id and identity_index is not None:
+        resolved = resolve_race_candidate(
+            race_id, choice, index=identity_index, allow_global_fallback=False
+        )
+        if resolved is not None:
+            return resolved.ballot_party
+        return None
+    return candidate_party(choice)
+
+
+def _two_party_from_answers(
+    answers: list[dict],
+    *,
+    race_id: str | None = None,
+    identity_index: dict[str, dict[str, RaceScopedCandidate]] | None = None,
+    modeled_candidate_id: str | None = None,
+    opposing_candidate_id: str | None = None,
+) -> dict[str, Any] | None:
+    """Derive an explicit D-v-R or modeled-v-opposing view from candidate answers.
+
+    Canonical multiway shares live in ``extract_candidate_level_answers``.
+    This function is a derived view only.
+    """
     dem_pct = 0.0
     independent_pct = 0.0
     rep_pct = 0.0
     dem_name = None
     independent_name = None
     rep_name = None
+    dem_id = None
+    independent_id = None
+    rep_id = None
     other = 0.0
     undecided = 0.0
+    n_named = 0
     for a in answers or []:
         choice = str(a.get("choice") or "")
         pct = float(a.get("pct") or 0.0)
@@ -258,21 +508,88 @@ def _two_party_from_answers(answers: list[dict]) -> dict[str, Any] | None:
         if key in {"undecided", "unsure", "not sure"}:
             undecided += pct
             continue
-        party = candidate_party(choice)
+        resolved = None
+        if race_id and identity_index is not None:
+            resolved = resolve_race_candidate(
+                race_id, choice, index=identity_index, allow_global_fallback=False
+            )
+            party = resolved.ballot_party if resolved else None
+        else:
+            party = candidate_party(choice)
+        if party is None:
+            other += pct
+            continue
+        n_named += 1
+        cid = resolved.candidate_id if resolved else stable_candidate_id(choice)
         if party == "D":
             if pct >= dem_pct:
-                dem_pct, dem_name = pct, choice
+                dem_pct, dem_name, dem_id = pct, choice, cid
         elif party == "R":
             if pct >= rep_pct:
-                rep_pct, rep_name = pct, choice
+                rep_pct, rep_name, rep_id = pct, choice, cid
         elif party == "I":
             if pct >= independent_pct:
-                independent_pct, independent_name = pct, choice
+                independent_pct, independent_name, independent_id = pct, choice, cid
         else:
             other += pct
+    # Prefer explicit modeled/opposing IDs from the race registry when provided.
+    if modeled_candidate_id and opposing_candidate_id and identity_index and race_id:
+        modeled_pct = None
+        opposing_pct = None
+        modeled_name = None
+        opposing_name = None
+        modeled_party = None
+        for a in answers or []:
+            choice = str(a.get("choice") or "")
+            pct = float(a.get("pct") or 0.0)
+            resolved = resolve_race_candidate(
+                race_id, choice, index=identity_index, allow_global_fallback=False
+            )
+            if resolved is None:
+                continue
+            if resolved.candidate_id == modeled_candidate_id:
+                modeled_pct, modeled_name, modeled_party = pct, resolved.candidate_name, resolved.ballot_party
+            elif resolved.candidate_id == opposing_candidate_id:
+                opposing_pct, opposing_name = pct, resolved.candidate_name
+        if (
+            modeled_pct is not None
+            and opposing_pct is not None
+            and modeled_pct > 0
+            and opposing_pct > 0
+        ):
+            total = modeled_pct + opposing_pct
+            modeled_tw = 100.0 * modeled_pct / total
+            opp_tw = 100.0 * opposing_pct / total
+            is_dr = modeled_party == "D"
+            return {
+                "dem_share": round(modeled_tw, 3) if is_dr else None,
+                "rep_share": round(opp_tw, 3) if is_dr else None,
+                "two_party_margin": round(modeled_tw - opp_tw, 3) if is_dr else None,
+                "modeled_share": round(modeled_tw, 3),
+                "opposing_share": round(opp_tw, 3),
+                "modeled_margin": round(modeled_tw - opp_tw, 3),
+                "modeled_candidate_margin": round(modeled_tw - opp_tw, 3),
+                "margin_definition": (
+                    "dem_minus_rep_two_party" if is_dr else "modeled_minus_opposing_two_candidate"
+                ),
+                "undecided": round(undecided, 3),
+                "other_share": round(other + (independent_pct if is_dr else dem_pct), 3),
+                "dem_candidate": modeled_name if is_dr else None,
+                "rep_candidate": opposing_name,
+                "modeled_candidate": modeled_name,
+                "opposing_candidate": opposing_name,
+                "modeled_candidate_id": modeled_candidate_id,
+                "opposing_candidate_id": opposing_candidate_id,
+                "modeled_ballot_party": modeled_party,
+                "opposing_ballot_party": "R",
+                "multiway": bool(n_named >= 3 or other > 0 or (dem_pct > 0 and independent_pct > 0)),
+                "derived_view": True,
+            }
+
     modeled_party = "D" if dem_pct > 0 else "I" if independent_pct > 0 else None
     modeled_pct = dem_pct if modeled_party == "D" else independent_pct
     modeled_name = dem_name if modeled_party == "D" else independent_name
+    modeled_id = dem_id if modeled_party == "D" else independent_id
     if modeled_party is None or modeled_pct <= 0 or rep_pct <= 0:
         return None
     total = modeled_pct + rep_pct
@@ -297,9 +614,12 @@ def _two_party_from_answers(answers: list[dict]) -> dict[str, Any] | None:
         "rep_candidate": rep_name,
         "modeled_candidate": modeled_name,
         "opposing_candidate": rep_name,
+        "modeled_candidate_id": modeled_id,
+        "opposing_candidate_id": rep_id,
         "modeled_ballot_party": modeled_party,
         "opposing_ballot_party": "R",
-        "multiway": bool(other > 0 or (dem_pct > 0 and independent_pct > 0)),
+        "multiway": bool(other > 0 or (dem_pct > 0 and independent_pct > 0) or n_named >= 3),
+        "derived_view": True,
     }
 
 
@@ -320,7 +640,19 @@ def normalize_votehub_senate_polls(
     ratings = build_rating_lookup()
     now = retrieved_at or source_receipt.get("retrieved_at") or datetime.now(UTC).isoformat()
     rows: list[dict] = []
-    skipped = {"primary": 0, "no_state": 0, "no_twoway": 0}
+    candidate_level_rows: list[dict] = []
+    skipped = {"primary": 0, "no_state": 0, "no_twoway": 0, "unresolved_identity": 0}
+    identity_index: dict[str, dict[str, RaceScopedCandidate]] | None = None
+    registry_by_race: dict[str, dict] = {}
+    if election_id == DEMO_ELECTION_ID:
+        try:
+            from midterms.evidence.current_candidates import load_current_candidate_registry
+
+            registry = load_current_candidate_registry()
+            registry_by_race = {str(r["race_id"]): r for r in registry.get("races") or []}
+            identity_index = build_race_identity_index(list(registry.get("races") or []))
+        except Exception:  # noqa: BLE001
+            identity_index = None
 
     for p in polls or []:
         subject = str(p.get("subject") or "")
@@ -331,18 +663,43 @@ def normalize_votehub_senate_polls(
         if not state:
             skipped["no_state"] += 1
             continue
-        tw = _two_party_from_answers(p.get("answers") or [])
+        race_id = f"{election_id}-{state}"
+        race_reg = registry_by_race.get(race_id) or {}
+        poll_id = f"vh-{p.get('id')}"
+        field_start = p.get("start_date")
+        field_end = p.get("end_date") or field_start
+        published = p.get("created_at") or field_end
+        available_at = published
+        cand_level = extract_candidate_level_answers(
+            p.get("answers") or [],
+            race_id=race_id,
+            identity_index=identity_index,
+            poll_id=poll_id,
+            study_id=f"vh-study-{p.get('id')}",
+            question_id=f"{poll_id}:q0",
+            field_start=field_start,
+            field_end=field_end,
+            available_at=available_at,
+            source_lineage=VOTEHUB_LINEAGE_VERSION,
+        )
+        candidate_level_rows.extend(cand_level["candidates"])
+        tw = _two_party_from_answers(
+            p.get("answers") or [],
+            race_id=race_id,
+            identity_index=identity_index,
+            modeled_candidate_id=race_reg.get("modeled_candidate_id"),
+            opposing_candidate_id=race_reg.get("opposing_candidate_id"),
+        )
         if not tw:
-            skipped["no_twoway"] += 1
+            if cand_level["unresolved_names"] and identity_index is not None:
+                skipped["unresolved_identity"] += 1
+            else:
+                skipped["no_twoway"] += 1
             continue
 
         pollster_raw = str(p.get("pollster") or "unknown")
         pollster = canonicalize_pollster(pollster_raw)
         rating = rating_for(pollster, ratings)
-        field_start = p.get("start_date")
-        field_end = p.get("end_date") or field_start
-        published = p.get("created_at") or field_end
-        available_at = published
         sponsors = p.get("sponsors") or []
         sponsor_id = ",".join(sponsors) if sponsors else "none"
         pop = str(p.get("population") or "").upper() or "LV"
@@ -355,11 +712,10 @@ def normalize_votehub_senate_polls(
 
         sample_size = int(float(p.get("sample_size") or 0) or 0)
         raw_hash = _sha256_bytes(json.dumps(p, sort_keys=True).encode())
-        poll_id = f"vh-{p.get('id')}"
         modeled_name = str(tw["modeled_candidate"] or "").strip()
         opposing_name = str(tw["opposing_candidate"] or "").strip()
-        modeled_id = stable_candidate_id(modeled_name)
-        opposing_id = stable_candidate_id(opposing_name)
+        modeled_id = str(tw.get("modeled_candidate_id") or stable_candidate_id(modeled_name))
+        opposing_id = str(tw.get("opposing_candidate_id") or stable_candidate_id(opposing_name))
         matchup_id = f"{election_id}:{state}:{modeled_id}|{opposing_id}"
         hypothetical = bool(p.get("hypothetical"))
         row = empty_poll_row(
@@ -382,7 +738,7 @@ def normalize_votehub_senate_polls(
             election_id=election_id,
             office="US_SENATE",
             state=state,
-            race_id=f"{election_id}-{state}",
+            race_id=race_id,
             population=pop,
             sample_size=sample_size if sample_size > 0 else None,
             mode=None,
@@ -397,7 +753,7 @@ def normalize_votehub_senate_polls(
             parser_version=PARSER_VERSION,
             normalized_at=now,
             supersedes=None,
-            candidate_set_version="votehub-candidate-matchup-v2",
+            candidate_set_version="votehub-candidate-matchup-v3-race-scoped",
             dem_candidate_id=modeled_id if tw["modeled_ballot_party"] == "D" else None,
             dem_candidate_name=modeled_name if tw["modeled_ballot_party"] == "D" else None,
             rep_candidate_id=opposing_id,
@@ -415,7 +771,7 @@ def normalize_votehub_senate_polls(
             modeled_margin=tw["modeled_margin"],
             modeled_candidate_margin=tw["modeled_candidate_margin"],
             margin_definition=tw["margin_definition"],
-            multiway=tw["multiway"],
+            multiway=bool(tw["multiway"] or cand_level["multiway"]),
         )
         # Rating fields carried alongside for model priors (not in core POLL_COLUMNS contract)
         row["quality_weight"] = rating.quality_weight
@@ -426,23 +782,29 @@ def normalize_votehub_senate_polls(
         row["dem_candidate"] = tw["dem_candidate"]
         row["rep_candidate"] = tw["rep_candidate"]
         row["region"] = REGIONS.get(state)
+        row["candidate_level_shares"] = cand_level["candidates"]
+        row["candidate_level_undecided"] = cand_level["undecided"]
+        row["derived_binary_view"] = True
         rows.append(row)
 
     df = pd.DataFrame(rows)
+    if candidate_level_rows:
+        NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
+        cand_path = NORMALIZED_DIR / "poll_candidate_shares_votehub.parquet"
+        pd.DataFrame(candidate_level_rows).to_parquet(cand_path, index=False)
     meta = {
         "parser_version": PARSER_VERSION,
         "n_normalized": len(df),
+        "n_candidate_level_rows": len(candidate_level_rows),
         "skipped": skipped,
+        "race_scoped_identity": identity_index is not None,
         "unknown_candidates": sorted(
             {
-                normalize_candidate_key(a.get("choice", ""))
-                for p in (polls or [])
-                for a in (p.get("answers") or [])
-                if candidate_party(str(a.get("choice") or "")) is None
-                and normalize_candidate_key(str(a.get("choice") or ""))
-                not in {"undecided", "unsure", "not sure", ""}
+                normalize_candidate_key(str(r.get("candidate_name") or ""))
+                for r in candidate_level_rows
+                if r.get("resolution_status") == "unresolved_fail_closed"
             }
-        ),
+        )[:200],
         "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0",
         "scorecards": "https://votehub.com/polls/pollster-scorecards/",
     }

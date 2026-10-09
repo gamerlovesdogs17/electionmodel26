@@ -1,0 +1,1744 @@
+{
+  "schema_version": "current-poll-discovery-reconciliation-v1",
+  "model_version": "senate-hierarchical-v0.9.25",
+  "as_of": "2026-10-03",
+  "source_feed": "votehub_us_senator",
+  "n_races": 35,
+  "races": [
+    {
+      "race_id": "senate-2026-AK",
+      "state": "AK",
+      "contest_classification": {
+        "category": "alaska_rcv_multiway",
+        "basis": "election_rule_or_registry_hint",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 17,
+      "n_candidate_compatible": 17,
+      "n_exact_current_matchup": 16,
+      "n_excluded": 1,
+      "latest_field_date": "2026-09-30",
+      "latest_available_at": "2026-10-02",
+      "pollsters": [
+        "Alaska Survey Research",
+        "Data for Progress",
+        "Fabrizio, Lee & Associates/Impact Research",
+        "Public Policy Polling",
+        "Quantus Insights",
+        "The New York Times/Siena University",
+        "co/efficient"
+      ],
+      "warehouse_poll_count": 17,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202alafbc93030",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 1
+      }
+    },
+    {
+      "race_id": "senate-2026-AL",
+      "state": "AL",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 2,
+      "n_candidate_compatible": 2,
+      "n_exact_current_matchup": 2,
+      "n_excluded": 0,
+      "latest_field_date": "2026-09-25",
+      "latest_available_at": "2026-10-01",
+      "pollsters": [
+        "RMG Research",
+        "yes. every kid."
+      ],
+      "warehouse_poll_count": 2,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-AR",
+      "state": "AR",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 2,
+      "n_candidate_compatible": 2,
+      "n_exact_current_matchup": 2,
+      "n_excluded": 0,
+      "latest_field_date": "2026-08-18",
+      "latest_available_at": "2026-08-20",
+      "pollsters": [
+        "GrayHouse",
+        "J.L. Partners"
+      ],
+      "warehouse_poll_count": 2,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-CO",
+      "state": "CO",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-DE",
+      "state": "DE",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-FL",
+      "state": "FL",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 22,
+      "n_candidate_compatible": 22,
+      "n_exact_current_matchup": 10,
+      "n_excluded": 12,
+      "latest_field_date": "2026-09-27",
+      "latest_available_at": "2026-09-29",
+      "pollsters": [
+        "Change Research",
+        "Cherry Communications",
+        "Echelon Insights",
+        "Emerson College",
+        "InsiderAdvantage",
+        "MDW Communications",
+        "McLaughlin & Associates",
+        "Quantus Insights",
+        "St. Pete Polls",
+        "Stetson University",
+        "Stetson University Center for Public Opinion Research",
+        "University of North Florida"
+      ],
+      "warehouse_poll_count": 22,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202eme1adbecdc",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202uni187076c4",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202mdw67caa80b",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202ech2b342f18",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202ste008437cf",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202checa283b6c",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202chae3c0b874",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202cha0c7666ff",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202cha4c08cfde",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202cha6cfd344c",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202mclfb3c3e69",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202uni1ae0881e",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 12
+      }
+    },
+    {
+      "race_id": "senate-2026-GA",
+      "state": "GA",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 18,
+      "n_candidate_compatible": 18,
+      "n_exact_current_matchup": 14,
+      "n_excluded": 5,
+      "latest_field_date": "2026-10-03",
+      "latest_available_at": "2026-10-04",
+      "pollsters": [
+        "Beacon Research/Shaw & Co. Research",
+        "Big Data Poll",
+        "Cygnal",
+        "Echelon Insights",
+        "Emerson College",
+        "Fabrizio, Lee & Associates/Impact Research",
+        "InsiderAdvantage",
+        "Quantus Insights",
+        "TIPP Insights",
+        "Trafalgar Group",
+        "WPA Intelligence",
+        "Wedgewood Polls",
+        "Wick"
+      ],
+      "warehouse_poll_count": 18,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202ech80c320f6",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202eme529afc79",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202quafd79c6ef",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202tip53f19ba5",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202wed7f897488",
+          "category": "publication_after_as_of",
+          "reason": "available_at=2026-10-04 > as_of=2026-10-03"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 4,
+        "publication_after_as_of": 1
+      }
+    },
+    {
+      "race_id": "senate-2026-IA",
+      "state": "IA",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 18,
+      "n_candidate_compatible": 18,
+      "n_exact_current_matchup": 15,
+      "n_excluded": 3,
+      "latest_field_date": "2026-09-28",
+      "latest_available_at": "2026-10-02",
+      "pollsters": [
+        "Beacon Research/Shaw & Co. Research",
+        "Change Research",
+        "Cygnal",
+        "Echelon Insights",
+        "Emerson College",
+        "GBAO",
+        "Marist University",
+        "Public Policy Polling",
+        "Suffolk University",
+        "The New York Times/Siena University",
+        "YouGov",
+        "co/efficient"
+      ],
+      "warehouse_poll_count": 18,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202gba62b36025",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202cha683eb5ac",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202eche7c2869f",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 3
+      }
+    },
+    {
+      "race_id": "senate-2026-ID",
+      "state": "ID",
+      "contest_classification": {
+        "category": "genuine_multiway_plurality",
+        "basis": "three_plus_ballot_candidates",
+        "n_ballot_candidates": 4,
+        "parties": [
+          "I",
+          "L",
+          "R"
+        ],
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 1,
+      "n_candidate_compatible": 1,
+      "n_exact_current_matchup": 1,
+      "n_excluded": 0,
+      "latest_field_date": "2026-08-07",
+      "latest_available_at": "2026-08-14",
+      "pollsters": [
+        "The Bullfinch Group"
+      ],
+      "warehouse_poll_count": 1,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-IL",
+      "state": "IL",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-KS",
+      "state": "KS",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 3,
+      "n_candidate_compatible": 3,
+      "n_exact_current_matchup": 3,
+      "n_excluded": 0,
+      "latest_field_date": "2026-09-24",
+      "latest_available_at": "2026-09-25",
+      "pollsters": [
+        "Emerson College",
+        "Tavern Research",
+        "Wedgewood Polls"
+      ],
+      "warehouse_poll_count": 3,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-KY",
+      "state": "KY",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-LA",
+      "state": "LA",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-MA",
+      "state": "MA",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 16,
+      "n_candidate_compatible": 16,
+      "n_exact_current_matchup": 9,
+      "n_excluded": 7,
+      "latest_field_date": "2026-09-22",
+      "latest_available_at": "2026-09-29",
+      "pollsters": [
+        "MassINC Polling Group",
+        "Suffolk University",
+        "SurveyUSA",
+        "University of Massachusetts Department of Political Science/YouGov",
+        "University of New Hampshire"
+      ],
+      "warehouse_poll_count": 16,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202sufcfbc9a05",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202unif8cfec03",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202unid95802f4",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202suf791a9846",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202unieba4dd24",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202unibd1bf2da",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202unif995f365",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 7
+      }
+    },
+    {
+      "race_id": "senate-2026-ME",
+      "state": "ME",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 42,
+      "n_candidate_compatible": 42,
+      "n_exact_current_matchup": 11,
+      "n_excluded": 31,
+      "latest_field_date": "2026-10-01",
+      "latest_available_at": "2026-10-02",
+      "pollsters": [
+        "Beacon Research/Shaw & Co. Research",
+        "Cyngal",
+        "Echelon Insights",
+        "Emerson College",
+        "Fabrizio, Lee & Associates",
+        "Fabrizio, Lee & Associates/Impact Research",
+        "Hart Research Associates",
+        "Maine People's Resource Center",
+        "Pan Atlantic SMS Group",
+        "Quantus Insights",
+        "Tavern Research",
+        "The New York Times/Siena University",
+        "The Public Sentiment Institute",
+        "University of Massachusetts Lowell Center for Public Opinion/YouGov",
+        "University of New Hampshire",
+        "University of New Hampshire Survey Center",
+        "Wedgewood Polls",
+        "Wick",
+        "YouGov",
+        "Zenith Research",
+        "co/efficient"
+      ],
+      "warehouse_poll_count": 42,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202uni63b326ca",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202mai1c9d66fd",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202mai395fc865",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202emeae25a0b0",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202eme316dd7a3",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202quad631010c",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202qua10b03a8f",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202pan6f538bdb",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202pan8d235770",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202unib4f650e2",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202unie1113a54",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202fab3ee58419",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202fabb74398c5",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202panabcd1049",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202pan5a9b4cde",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202cyn79bb9aaf",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202maic1315c13",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202mai234492e4",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202zen3e7d2e5c",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202zena6743f9d",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 31
+      }
+    },
+    {
+      "race_id": "senate-2026-MI",
+      "state": "MI",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 64,
+      "n_candidate_compatible": 64,
+      "n_exact_current_matchup": 33,
+      "n_excluded": 31,
+      "latest_field_date": "2026-09-30",
+      "latest_available_at": "2026-10-02",
+      "pollsters": [
+        "Beacon Research/Shaw & Co. Research",
+        "Cygnal/Beacon Research",
+        "EPIC-MRA",
+        "Emerson College",
+        "Fabrizio, Lee & Associates/Impact Research",
+        "GBAO Strategies",
+        "Glengariff Group, Inc.",
+        "Michigan State University Institute for Public Policy and Social Research/YouGov",
+        "Mitchell Research & Communications",
+        "Normington, Petts & Associates",
+        "Quantus Insights",
+        "Rosetta Stone",
+        "SoCal Strategies",
+        "Suffolk University",
+        "Susquehanna Polling & Research",
+        "TIPP Insights",
+        "Target Insyght",
+        "The New York Times/Siena University",
+        "The Washington Post/George Mason University School of Policy and Government",
+        "Trafalgar Group",
+        "Tulchin Research",
+        "Zenith Research",
+        "co/efficient"
+      ],
+      "warehouse_poll_count": 64,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202mitf3d55a81",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202mit39173145",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202gleeeb6be84",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202gle2939b758",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202emeb507fcbb",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202emee754e4c5",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202glec0316553",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202gle322439ae",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202mit61ba1fad",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202mit87b44bfc",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202epid9595901",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202epi46ef28e5",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202ros2c880fd3",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202ros8e5ec4d9",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202nor7a88e643",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202norbd336de9",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202gleb42f5fae",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202glec19f2301",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202tar417e15f3",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202tip99de5023",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 31
+      }
+    },
+    {
+      "race_id": "senate-2026-MN",
+      "state": "MN",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 8,
+      "n_candidate_compatible": 7,
+      "n_exact_current_matchup": 5,
+      "n_excluded": 3,
+      "latest_field_date": "2026-09-30",
+      "latest_available_at": "2026-10-02",
+      "pollsters": [
+        "Big Data Poll",
+        "Emerson College",
+        "Public Policy Polling",
+        "Quantus Insights",
+        "SurveyUSA"
+      ],
+      "warehouse_poll_count": 8,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202emec7074b5d",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202pubd69c1e7f",
+          "category": "identity_resolution_failure",
+          "reason": "no_race_scoped_resolution"
+        },
+        {
+          "poll_id": "vh-us-202pubde180c20",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 2,
+        "identity_resolution_failure": 1
+      }
+    },
+    {
+      "race_id": "senate-2026-MS",
+      "state": "MS",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 2,
+      "n_candidate_compatible": 2,
+      "n_exact_current_matchup": 2,
+      "n_excluded": 0,
+      "latest_field_date": "2026-08-15",
+      "latest_available_at": "2026-08-29",
+      "pollsters": [
+        "Data for Progress",
+        "Impact Research"
+      ],
+      "warehouse_poll_count": 2,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-MT",
+      "state": "MT",
+      "contest_classification": {
+        "category": "genuine_multiway_plurality",
+        "basis": "three_plus_ballot_candidates",
+        "n_ballot_candidates": 4,
+        "parties": [
+          "D",
+          "I",
+          "L",
+          "R"
+        ],
+        "optional_principal_binary_view": "principal_binary_with_minor_residual",
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 24,
+      "n_candidate_compatible": 24,
+      "n_exact_current_matchup": 17,
+      "n_excluded": 7,
+      "latest_field_date": "2026-09-24",
+      "latest_available_at": "2026-09-29",
+      "pollsters": [
+        "American Pulse Research & Polling",
+        "GQR",
+        "GrayHouse",
+        "Hart Research Associates",
+        "Public Opinion Strategies",
+        "Quantus Insights",
+        "Tavern Research",
+        "The Bullfinch Group"
+      ],
+      "warehouse_poll_count": 24,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202tav2313c4bf",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202tav16c902e1",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202har44ddb49c",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202tav1d399417",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202tav8cd1705b",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202gqre6dc037c",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202gqr10c806ef",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 7
+      }
+    },
+    {
+      "race_id": "senate-2026-NC",
+      "state": "NC",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 39,
+      "n_candidate_compatible": 39,
+      "n_exact_current_matchup": 35,
+      "n_excluded": 4,
+      "latest_field_date": "2026-09-29",
+      "latest_available_at": "2026-10-01",
+      "pollsters": [
+        "Beacon Research/Shaw & Co. Research",
+        "Big Data Poll",
+        "Change Research",
+        "East Carolina University",
+        "Elon University/YouGov",
+        "Emerson College",
+        "Harper Polling",
+        "High Point University Survey Research Center",
+        "High Point University Survey Research Center/YouGov",
+        "InsiderAdvantage",
+        "Nexus Strategies/Strategic Partners Solutions",
+        "Opinion Diagnostics",
+        "Public Policy Polling",
+        "TIPP Insights",
+        "The New York Times/Siena University",
+        "Victory Insights",
+        "YouGov"
+      ],
+      "warehouse_poll_count": 37,
+      "known_discoverable_absent_from_warehouse": [
+        {
+          "poll_id": "vh-us-202pubdc157848",
+          "category": "not_present_in_normalized_warehouse",
+          "reason": "present_in_source_feed_absent_from_warehouse"
+        },
+        {
+          "poll_id": "vh-us-202vic15890316",
+          "category": "not_present_in_normalized_warehouse",
+          "reason": "present_in_source_feed_absent_from_warehouse"
+        }
+      ],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202vic0a006caa",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202vic15890316",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202pubdc157848",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202harc344974e",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 4
+      }
+    },
+    {
+      "race_id": "senate-2026-NE",
+      "state": "NE",
+      "contest_classification": {
+        "category": "genuine_multiway_plurality",
+        "basis": "three_plus_ballot_candidates",
+        "n_ballot_candidates": 5,
+        "parties": [
+          "AF",
+          "I",
+          "LMN",
+          "NWP",
+          "R"
+        ],
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 1,
+      "n_candidate_compatible": 1,
+      "n_exact_current_matchup": 1,
+      "n_excluded": 0,
+      "latest_field_date": "2026-09-08",
+      "latest_available_at": "2026-09-25",
+      "pollsters": [
+        "GBAO Strategies"
+      ],
+      "warehouse_poll_count": 1,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-NH",
+      "state": "NH",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 23,
+      "n_candidate_compatible": 23,
+      "n_exact_current_matchup": 19,
+      "n_excluded": 4,
+      "latest_field_date": "2026-09-22",
+      "latest_available_at": "2026-09-25",
+      "pollsters": [
+        "1892 Polling",
+        "Emerson College",
+        "InsiderAdvantage",
+        "Praecones Analytica",
+        "Quantus Insights",
+        "Saint Anselm",
+        "Saint Anselm College Survey Center",
+        "The New York Times/Siena University",
+        "University of New Hampshire",
+        "co/efficient",
+        "yes. every kid."
+      ],
+      "warehouse_poll_count": 23,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202uni983e65a4",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202saif530b9d2",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202saif937cd00",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202uni38178073",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 4
+      }
+    },
+    {
+      "race_id": "senate-2026-NJ",
+      "state": "NJ",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-NM",
+      "state": "NM",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 1,
+      "n_candidate_compatible": 1,
+      "n_exact_current_matchup": 1,
+      "n_excluded": 0,
+      "latest_field_date": "2026-08-28",
+      "latest_available_at": "2026-09-01",
+      "pollsters": [
+        "Research & Polling Inc."
+      ],
+      "warehouse_poll_count": 1,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-OH",
+      "state": "OH",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 21,
+      "n_candidate_compatible": 21,
+      "n_exact_current_matchup": 21,
+      "n_excluded": 0,
+      "latest_field_date": "2026-09-29",
+      "latest_available_at": "2026-10-02",
+      "pollsters": [
+        "Beacon Research/Shaw & Co. Research",
+        "Big Data Poll",
+        "Bowling Green State University/YouGov",
+        "EMC Research",
+        "Echelon Insights",
+        "Emerson College",
+        "Fabrizio Ward/Impact Research",
+        "InsiderAdvantage",
+        "Marist University",
+        "OnMessage",
+        "Quantus Insights",
+        "The New York Times/Siena University",
+        "Trafalgar Group",
+        "Wedgewood Polls"
+      ],
+      "warehouse_poll_count": 21,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-OK",
+      "state": "OK",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-OR",
+      "state": "OR",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-RI",
+      "state": "RI",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 2,
+      "n_candidate_compatible": 2,
+      "n_exact_current_matchup": 2,
+      "n_excluded": 0,
+      "latest_field_date": "2026-08-24",
+      "latest_available_at": "2026-08-27",
+      "pollsters": [
+        "University of New Hampshire"
+      ],
+      "warehouse_poll_count": 2,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-SC",
+      "state": "SC",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 2,
+      "n_candidate_compatible": 2,
+      "n_exact_current_matchup": 2,
+      "n_excluded": 0,
+      "latest_field_date": "2026-09-29",
+      "latest_available_at": "2026-10-02",
+      "pollsters": [
+        "InsiderAdvantage"
+      ],
+      "warehouse_poll_count": 2,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-SD",
+      "state": "SD",
+      "contest_classification": {
+        "category": "binary_non_major_v_r",
+        "basis": "two_ballot_candidates_nonmajor_v_r",
+        "n_ballot_candidates": 2,
+        "parties": [
+          "I",
+          "R"
+        ],
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-TN",
+      "state": "TN",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 1,
+      "n_candidate_compatible": 1,
+      "n_exact_current_matchup": 1,
+      "n_excluded": 0,
+      "latest_field_date": "2026-08-26",
+      "latest_available_at": "2026-09-03",
+      "pollsters": [
+        "Targoz Market Research"
+      ],
+      "warehouse_poll_count": 1,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-TX",
+      "state": "TX",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 43,
+      "n_candidate_compatible": 43,
+      "n_exact_current_matchup": 35,
+      "n_excluded": 8,
+      "latest_field_date": "2026-09-28",
+      "latest_available_at": "2026-10-02",
+      "pollsters": [
+        "A2 Insights",
+        "Beacon Research/Shaw & Co. Research",
+        "Emerson College",
+        "Fabrizio Ward/Impact Research",
+        "Impact Research",
+        "InsiderAdvantage",
+        "Public Policy Polling",
+        "Quantus Insights",
+        "Ragnar Research Partners",
+        "ReconMR/Siena University",
+        "Slingshot Strategies",
+        "SoCal Strategies",
+        "Texas Politics Project at the University of Texas/YouGov",
+        "Texas Public Opinion Research",
+        "Texas Southern University Barbara Jordan Public Policy Research and Survey Center",
+        "The New York Times/Siena University",
+        "The Texas Politics Project at the University of Texas at Austin/YouGov",
+        "University of Houston/Texas Southern University",
+        "University of Houston/YouGov",
+        "University of Texas at Tyler",
+        "Wedgewood Polls",
+        "YouGov",
+        "YouGov Blue"
+      ],
+      "warehouse_poll_count": 43,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202unidb95df99",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202uni731e2279",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202rag8552bbbc",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202eme9b9f44a5",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202uni5040ddd3",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202pubaf44626b",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202texaca3925a",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202you0dcc69cb",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 8
+      }
+    },
+    {
+      "race_id": "senate-2026-VA",
+      "state": "VA",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 6,
+      "n_candidate_compatible": 6,
+      "n_exact_current_matchup": 2,
+      "n_excluded": 4,
+      "latest_field_date": "2026-06-16",
+      "latest_available_at": "2026-06-18",
+      "pollsters": [
+        "The Public Sentiment Institute"
+      ],
+      "warehouse_poll_count": 6,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202the65a34aca",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202thecc936039",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202the23cfbe50",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202the5f79b2da",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 4
+      }
+    },
+    {
+      "race_id": "senate-2026-WV",
+      "state": "WV",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-WY",
+      "state": "WY",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 0,
+      "n_candidate_compatible": 0,
+      "n_exact_current_matchup": 0,
+      "n_excluded": 0,
+      "latest_field_date": null,
+      "latest_available_at": null,
+      "pollsters": [],
+      "warehouse_poll_count": 0,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    }
+  ],
+  "sparse_state_focus": [
+    {
+      "race_id": "senate-2026-IA",
+      "state": "IA",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 18,
+      "n_candidate_compatible": 18,
+      "n_exact_current_matchup": 15,
+      "n_excluded": 3,
+      "latest_field_date": "2026-09-28",
+      "latest_available_at": "2026-10-02",
+      "pollsters": [
+        "Beacon Research/Shaw & Co. Research",
+        "Change Research",
+        "Cygnal",
+        "Echelon Insights",
+        "Emerson College",
+        "GBAO",
+        "Marist University",
+        "Public Policy Polling",
+        "Suffolk University",
+        "The New York Times/Siena University",
+        "YouGov",
+        "co/efficient"
+      ],
+      "warehouse_poll_count": 18,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202gba62b36025",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202cha683eb5ac",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202eche7c2869f",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 3
+      }
+    },
+    {
+      "race_id": "senate-2026-ID",
+      "state": "ID",
+      "contest_classification": {
+        "category": "genuine_multiway_plurality",
+        "basis": "three_plus_ballot_candidates",
+        "n_ballot_candidates": 4,
+        "parties": [
+          "I",
+          "L",
+          "R"
+        ],
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 1,
+      "n_candidate_compatible": 1,
+      "n_exact_current_matchup": 1,
+      "n_excluded": 0,
+      "latest_field_date": "2026-08-07",
+      "latest_available_at": "2026-08-14",
+      "pollsters": [
+        "The Bullfinch Group"
+      ],
+      "warehouse_poll_count": 1,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-KS",
+      "state": "KS",
+      "contest_classification": {
+        "category": "ordinary_d_v_r_binary",
+        "basis": "registry_hint_without_ballot_list",
+        "n_ballot_candidates": 0,
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 3,
+      "n_candidate_compatible": 3,
+      "n_exact_current_matchup": 3,
+      "n_excluded": 0,
+      "latest_field_date": "2026-09-24",
+      "latest_available_at": "2026-09-25",
+      "pollsters": [
+        "Emerson College",
+        "Tavern Research",
+        "Wedgewood Polls"
+      ],
+      "warehouse_poll_count": 3,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    },
+    {
+      "race_id": "senate-2026-MT",
+      "state": "MT",
+      "contest_classification": {
+        "category": "genuine_multiway_plurality",
+        "basis": "three_plus_ballot_candidates",
+        "n_ballot_candidates": 4,
+        "parties": [
+          "D",
+          "I",
+          "L",
+          "R"
+        ],
+        "optional_principal_binary_view": "principal_binary_with_minor_residual",
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 24,
+      "n_candidate_compatible": 24,
+      "n_exact_current_matchup": 17,
+      "n_excluded": 7,
+      "latest_field_date": "2026-09-24",
+      "latest_available_at": "2026-09-29",
+      "pollsters": [
+        "American Pulse Research & Polling",
+        "GQR",
+        "GrayHouse",
+        "Hart Research Associates",
+        "Public Opinion Strategies",
+        "Quantus Insights",
+        "Tavern Research",
+        "The Bullfinch Group"
+      ],
+      "warehouse_poll_count": 24,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [
+        {
+          "poll_id": "vh-us-202tav2313c4bf",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202tav16c902e1",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202har44ddb49c",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202tav1d399417",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202tav8cd1705b",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202gqre6dc037c",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        },
+        {
+          "poll_id": "vh-us-202gqr10c806ef",
+          "category": "candidate_mismatch",
+          "reason": "resolved_but_not_exact_current_matchup"
+        }
+      ],
+      "absence_category_counts": {
+        "candidate_mismatch": 7
+      }
+    },
+    {
+      "race_id": "senate-2026-NE",
+      "state": "NE",
+      "contest_classification": {
+        "category": "genuine_multiway_plurality",
+        "basis": "three_plus_ballot_candidates",
+        "n_ballot_candidates": 5,
+        "parties": [
+          "AF",
+          "I",
+          "LMN",
+          "NWP",
+          "R"
+        ],
+        "state_identity_used": false
+      },
+      "n_source_feed_polls": 1,
+      "n_candidate_compatible": 1,
+      "n_exact_current_matchup": 1,
+      "n_excluded": 0,
+      "latest_field_date": "2026-09-08",
+      "latest_available_at": "2026-09-25",
+      "pollsters": [
+        "GBAO Strategies"
+      ],
+      "warehouse_poll_count": 1,
+      "known_discoverable_absent_from_warehouse": [],
+      "exclusion_samples": [],
+      "absence_category_counts": {}
+    }
+  ],
+  "absence_categories": [
+    "not_present_in_source_api",
+    "candidate_mismatch",
+    "pre_nomination_matchup",
+    "duplicate",
+    "publication_after_as_of",
+    "unsupported_contest_structure",
+    "source_inaccessible",
+    "parser_failure",
+    "identity_resolution_failure"
+  ],
+  "note": "Discovery audit only \u2014 does not ingest another site's polling average. Missing individual polls require original-release reconciliation."
+}

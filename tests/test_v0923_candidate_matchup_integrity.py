@@ -369,7 +369,7 @@ def test_checked_in_votehub_regression_matchups():
 
 
 def test_v0922_empirical_artifact_is_stale_at_v0923_boundary():
-    assert MODEL_VERSION == "senate-hierarchical-v0.9.24"
+    assert MODEL_VERSION == "senate-hierarchical-v0.9.25"
     with pytest.raises(ValueError, match="stale historical OOF model_version"):
         require_current_model_version(
             {"model_version": "senate-hierarchical-v0.9.22"},

@@ -227,9 +227,15 @@ def _write_json(path: Path, payload: dict) -> Path:
 
 
 def test_validated_model_spec_binds_selected_structure_and_rejects_stale_stack(tmp_path: Path):
+    nested = _write_json(tmp_path / "nested_selection.json", {
+        "model_version": MODEL_VERSION,
+        "validation_phase": "poll_structure_selection",
+        "g8_recommendations": {},
+    })
+    nested_sha = hashlib.sha256(nested.read_bytes()).hexdigest()
     selection = _write_json(tmp_path / "selection.json", {
         "model_version": MODEL_VERSION,
-        "source_nested_loo_sha256": "1" * 64,
+        "source_nested_loo_sha256": nested_sha,
         "source_validation_phase": "poll_structure_selection",
         "source_evidence_bundle_id": "eb-test",
         "source_evidence_bundle_sha256": "2" * 64,
@@ -255,7 +261,8 @@ def test_validated_model_spec_binds_selected_structure_and_rejects_stale_stack(t
     candidate_path = tmp_path / "candidate.json"
     candidate = write_candidate_model_spec(
         selection_path=selection, evidence_bundle_path=bundle,
-        source_readiness_path=readiness, out_path=candidate_path,
+        source_readiness_path=readiness, nested_selection_path=nested,
+        out_path=candidate_path,
     )
     assert candidate["selected_poll_structure"]["study_effect"] is True
     config_id = candidate["selected_poll_structure_id"]

@@ -355,12 +355,11 @@ def test_common_shock_sensitivity_preserves_marginals_and_changes_dependence() -
 def test_current_nebraska_poll_moves_posterior_and_sd_is_wide_prior_only() -> None:
     report = build_non_major_adapter_validation()
     records = report["selected_current_adapter_records"]
-    nebraska = records["senate-2026-NE"]
-    assert nebraska["n_candidate_compatible_polls"] == 1
-    assert nebraska["poll_weighted_location"] == pytest.approx(1.075)
-    assert abs(
-        nebraska["posterior_location"] - nebraska["poll_weighted_location"]
-    ) < abs(nebraska["posterior_location"] - nebraska["prior_location"])
+    # Nebraska is multiway plurality under the official ballot field; the binary
+    # non-major adapter must not select it. SD remains the binary I-v-R case.
+    assert "senate-2026-NE" not in records
+    assert "senate-2026-ID" not in records
+    assert "senate-2026-MT" not in records
     south_dakota = report["zero_poll_behavior"]["state_structural_very_large"]
     assert south_dakota["support_status"] == "limited_supported_prior_only"
     assert south_dakota["prior_location"] != 0.0
@@ -409,7 +408,8 @@ def test_current_coverage_separates_limited_withheld_and_unsupported() -> None:
     )
     by_state = {row["state"]: row for row in coverage["races"]}
     assert all(
-        by_state[state]["probability_model_support_status"] == "limited_supported"
+        by_state[state]["probability_model_support_status"] == "unsupported"
+        and by_state[state]["contest_structure"] == "multiway_plurality"
         for state in ("ID", "MT", "NE")
     )
     assert by_state["SD"]["probability_model_support_status"] == "limited_supported_prior_only"

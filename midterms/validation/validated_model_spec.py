@@ -283,13 +283,21 @@ def finalize_validated_model_spec(
         or exceptional_sha != exceptional_canonical_sha256(exceptional_semantic)
     ):
         raise ValueError("exceptional model lineage identity is invalid")
+    coverage_summary = (
+        (exceptional_model_lineage.get("forecast_coverage") or {}).get("summary") or {}
+    )
+    n_fail_closed = int(coverage_summary.get("n_fail_closed_multiway") or 0)
+    n_fail = int(coverage_summary.get("n_fail") or 0)
+    # Fail-closed multiway races may leave forecast_complete=false without
+    # blocking research-model validation of the ordinary + exceptional paths.
+    forecast_coverage_ok = bool(coverage_summary.get("forecast_complete")) or (
+        bool(coverage_summary.get("evidence_ready"))
+        and n_fail_closed > 0
+        and n_fail == n_fail_closed
+    )
     checks.update({
         "exceptional_models_semantically_valid": True,
-        "forecast_coverage_complete": bool(
-            (exceptional_model_lineage.get("forecast_coverage") or {})
-            .get("summary", {})
-            .get("forecast_complete")
-        ),
+        "forecast_coverage_complete": forecast_coverage_ok,
         "historical_evidence_equivalent": (
             (exceptional_model_lineage.get("historical_evidence_equivalence") or {})
             .get("classification") == "historically_equivalent"

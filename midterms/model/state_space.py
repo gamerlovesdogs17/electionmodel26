@@ -42,6 +42,23 @@ def _safe_sample_size(value: object, *, default: float = 500.0, floor: float = 5
     return float(max(n, floor))
 
 
+# Production calendar-time diffusion scale (pp / sqrt(day)). Declared in release
+# identity; same-family process-scale challengers exist for later OOS comparison.
+DEFAULT_PROCESS_SD_PER_SQRT_DAY = 0.8
+DEFAULT_FUND_PULL = 0.35
+
+
+def process_variance_for_days(
+    delta_days: float,
+    *,
+    process_sd_per_sqrt_day: float = DEFAULT_PROCESS_SD_PER_SQRT_DAY,
+) -> float:
+    """Accumulate latent process variance over elapsed calendar days."""
+    days = max(float(delta_days), 0.0)
+    scale = float(process_sd_per_sqrt_day)
+    return (scale**2) * days
+
+
 def fit_state_space(
     snapshot: EvidenceSnapshot,
     *,
@@ -50,19 +67,27 @@ def fit_state_space(
     generic_ballot: float = 0.0,
     student_t_df: float = STUDENT_T_DF,
     era_weight: float = ERA_WEIGHT,
-    fund_pull: float = 0.35,
+    fund_pull: float = DEFAULT_FUND_PULL,
     flat_prior: bool = False,
     future_base: float = 4.5,
     terminal_base: float = 3.5,
     national_path_sd: float | None = None,
+    process_sd_per_sqrt_day: float = DEFAULT_PROCESS_SD_PER_SQRT_DAY,
     allow_neutral_fill: bool = False,
+    collect_race_diagnostics: bool = False,
 ) -> FitResult:
     """
     Per-race forward filter of poll margins → current latent, then project to ED.
 
     National latent path is shared; race residuals + similarity shocks remain.
     fund_pull blends the filtered latent toward the fundamentals prior at ED
-    (set 0 for a poll-only challenger). flat_prior starts the filter at 0.
+    (set 0 for the single-dimension no-ED-repull challenger). flat_prior starts
+    the filter at 0.
+
+    Calendar intervals handled separately:
+    - poll-to-poll elapsed days accumulate process variance before each update
+    - last-poll → forecast as_of accumulates process variance once
+    - as_of → Election Day uncertainty uses future_movement_sd (not process scale)
     """
     rng = np.random.default_rng(seed)
     races = snapshot.races.copy()
@@ -80,7 +105,7 @@ def fit_state_space(
 
         year = int(str(races["election_day"].iloc[0])[:4])
         real_income_yoy = yoy_growth_as_of(snapshot.as_of, election_year=year)
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001, S110
         pass
 
     fund = fundamentals_mean(
@@ -90,18 +115,21 @@ def fit_state_space(
     )
 
     ed = date.fromisoformat(str(races["election_day"].iloc[0])[:10])
-    days_to_ed = max((ed - snapshot.as_of).days, 1)
+    as_of_day = snapshot.as_of if isinstance(snapshot.as_of, date) else date.fromisoformat(str(snapshot.as_of)[:10])
+    days_to_ed = max((ed - as_of_day).days, 1)
     future_sd = future_movement_sd(days_to_ed, era_weight=era_weight, base=future_base)
     terminal_sd = terminal_error_sd(era_weight=era_weight, base=terminal_base)
     if national_path_sd is None:
         national_path_sd = float(2.5 + 0.02 * days_to_ed)
     pull = float(np.clip(fund_pull, 0.0, 1.0))
+    process_scale = float(process_sd_per_sqrt_day)
 
     means = []
     sds = []
     race_ids = races["race_id"].tolist()
     states = races["state"].astype(str).tolist()
     house_effects: dict[str, float] = {}
+    race_diagnostics: list[dict] = []
 
     for i, rid in enumerate(race_ids):
         prior = 0.0 if flat_prior else float(fund.get(rid, races.iloc[i]["prior_lean"]))
@@ -116,17 +144,19 @@ def fit_state_space(
         mu = prior
         var = 8.0**2
         # Calendar-time process diffusion (pp / sqrt(day)); same-day polls add 0.
-        process_sd_per_sqrt_day = 0.8
+        last_poll_day: date | None = None
+        poll_diag_rows: list[dict] = []
         if len(rp):
             rp = rp.sort_values("field_end")
             prev_day: date | None = None
             for _, row in rp.iterrows():
                 try:
-                    y = float(row["two_party_margin"])
+                    y_raw = float(row["two_party_margin"])
                 except (TypeError, ValueError):
                     continue
-                if not np.isfinite(y):
+                if not np.isfinite(y_raw):
                     continue
+                y = y_raw
                 # Measurement offsets (same channel as hierarchical spine)
                 y = y - _mode_offset(row.get("mode")) - _population_offset(row.get("population"))
                 if "house_effect_prior" in rp.columns and pd.notna(row.get("house_effect_prior")):
@@ -160,23 +190,75 @@ def fit_state_space(
                     delta_days = max((poll_day - prev_day).days, 0)
                 else:
                     delta_days = 0
-                var = var + (process_sd_per_sqrt_day**2) * float(delta_days)
+                process_var_step = process_variance_for_days(
+                    delta_days, process_sd_per_sqrt_day=process_scale
+                )
+                var = var + process_var_step
                 if poll_day is not None:
                     prev_day = poll_day
+                    last_poll_day = poll_day
                 # n and quality enter measurement variance once; influence_weight
                 # carries absolute recency / clustering only (v0.9.24).
                 obs_var = (100.0 / np.sqrt(n)) ** 2 / max(qw * max(iw, 0.05), 0.05) + 2.0**2
                 k = var / (var + obs_var)
                 mu = mu + k * (y - mu)
                 var = (1 - k) * var
+                if collect_race_diagnostics:
+                    age_days = None
+                    if poll_day is not None:
+                        age_days = max((as_of_day - poll_day).days, 0)
+                    poll_diag_rows.append(
+                        {
+                            "poll_id": str(row.get("poll_id") or ""),
+                            "raw_margin": float(y_raw),
+                            "adjusted_margin": float(y),
+                            "poll_age_days": age_days,
+                            "recency_multiplier": float(iw),
+                            "quality_multiplier": float(qw),
+                            "sample_size": float(n),
+                            "measurement_variance": float(obs_var),
+                            "process_variance_since_prev_poll": float(process_var_step),
+                            "filtered_mu_after": float(mu),
+                            "filtered_var_after": float(var),
+                        }
+                    )
+        # Propagate uncertainty from last poll date to forecast as_of once.
+        # Future as_of→ED movement uses future_movement_sd only (no double count).
+        as_of_gap_days = 0
+        process_var_to_as_of = 0.0
+        if last_poll_day is not None:
+            as_of_gap_days = max((as_of_day - last_poll_day).days, 0)
+            process_var_to_as_of = process_variance_for_days(
+                as_of_gap_days, process_sd_per_sqrt_day=process_scale
+            )
+            var = var + process_var_to_as_of
         if not np.isfinite(mu):
             mu = prior
         if not np.isfinite(var) or var <= 0:
             var = 8.0**2
+        filtered_mu = float(mu)
         ed_mu = (1.0 - pull) * mu + pull * prior
+        # Process variance already covers last-poll→as_of; future_sd covers as_of→ED.
         ed_sd = float(np.sqrt(var + future_sd**2 + terminal_sd**2))
         means.append(float(ed_mu))
         sds.append(float(ed_sd))
+        if collect_race_diagnostics:
+            race_diagnostics.append(
+                {
+                    "race_id": rid,
+                    "fundamentals_prior": float(prior),
+                    "filtered_mu_at_as_of": filtered_mu,
+                    "filtered_var_at_as_of": float(var),
+                    "last_poll_to_as_of_days": int(as_of_gap_days),
+                    "process_variance_last_poll_to_as_of": float(process_var_to_as_of),
+                    "fund_pull": float(pull),
+                    "ed_mu": float(ed_mu),
+                    "future_movement_sd": float(future_sd),
+                    "terminal_error_sd": float(terminal_sd),
+                    "process_sd_per_sqrt_day": float(process_scale),
+                    "polls": poll_diag_rows,
+                }
+            )
 
     means_a = np.asarray(means, dtype=float)
     sds_a = np.asarray(sds, dtype=float)
@@ -227,7 +309,7 @@ def fit_state_space(
         draws_margin=mu_draws,
         house_effects=house_effects,
         diagnostics={
-            "n_polls": int(len(polls)),
+            "n_polls": len(polls),
             "n_races": len(race_ids),
             "days_to_ed": days_to_ed,
             "future_movement_sd": float(future_sd),
@@ -239,13 +321,18 @@ def fit_state_space(
             "flat_prior": bool(flat_prior),
             "future_base": float(future_base),
             "terminal_base": float(terminal_base),
+            "process_sd_per_sqrt_day": float(process_scale),
+            "last_poll_to_as_of_process": True,
+            "as_of_to_ed_uses_future_movement_only": True,
             "terminal_layers": "national+race+similarity",
             "error_budget": budget,
             "draws": n_draws,
             "seed": seed,
+            "race_diagnostics": race_diagnostics if collect_race_diagnostics else None,
             "note": (
-                "national-path state-space: contracting future movement + layered "
-                "terminal (P1.3); mode/pop/house offsets aligned with hierarchical measurement"
+                "national-path state-space: calendar process to as_of, contracting "
+                "future movement as_of→ED + layered terminal; mode/pop/house offsets "
+                "aligned with hierarchical measurement"
             ),
         },
         method="state_space",

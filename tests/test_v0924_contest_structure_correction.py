@@ -38,7 +38,7 @@ from midterms.validation.nonmajor_contest_structure_audit_v0924 import (
 
 
 def test_lineage_still_v0924_research_only():
-    assert MODEL_VERSION == "senate-hierarchical-v0.9.24"
+    assert MODEL_VERSION == "senate-hierarchical-v0.9.25"
     assert PUBLIC_LIVE_ENABLED is False
 
 
@@ -251,4 +251,5 @@ def test_calendar_delta_t_source_contract():
 
     src = inspect.getsource(ss.fit_state_space)
     assert "delta_days" in src
-    assert "(process_sd_per_sqrt_day**2) * float(delta_days)" in src
+    assert "process_variance_for_days" in src
+    assert ss.process_variance_for_days(7) == pytest.approx(7 * 0.8**2)

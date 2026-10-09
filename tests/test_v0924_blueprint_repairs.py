@@ -34,7 +34,7 @@ from midterms.simulate.institutional import (
 
 def test_public_live_still_disabled():
     assert PUBLIC_LIVE_ENABLED is False
-    assert MODEL_VERSION == "senate-hierarchical-v0.9.24"
+    assert MODEL_VERSION == "senate-hierarchical-v0.9.25"
 
 
 def test_presentation_does_not_mutate_alaska_forecast():
@@ -174,13 +174,11 @@ def test_state_space_calendar_delta_t_same_day_zero():
     src = inspect.getsource(state_space_mod.fit_state_space)
     assert "delta_days" in src
     assert "process_sd_per_sqrt_day" in src
-    assert "process_sd_per_sqrt_day**2) * float(delta_days)" in src.replace(" ", "") or (
-        "(process_sd_per_sqrt_day**2) * float(delta_days)" in src
-    )
+    assert "process_variance_for_days" in src
+    assert "last_poll_to_as_of" in src or "as_of_gap_days" in src
     # Same-day Δt contributes zero process variance; multi-day gap accumulates.
-    process_sd = 0.8
-    assert (process_sd**2) * 0 == 0.0
-    assert (process_sd**2) * 10 == pytest.approx(6.4)
+    assert state_space_mod.process_variance_for_days(0) == 0.0
+    assert state_space_mod.process_variance_for_days(10) == pytest.approx(6.4)
 
 
 def test_challengers_and_turnout_remain_disabled():

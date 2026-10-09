@@ -142,6 +142,21 @@ def _copy_promotion_bundle(scratch: Path) -> dict[str, Path]:
     shutil.copy2(ALASKA_NORMALIZED, paths["normalized_alaska"])
     shutil.copy2(CURRENT_CANDIDATE_REGISTRY_PATH, paths["registry"])
     shutil.copy2(ARTIFACTS / "source_readiness_latest.json", paths["readiness"])
+    # Rebind sealed v0.9.23 lineage fixtures to the current code identity so
+    # mutation tests exercise the intended gate rather than a version mismatch.
+    for key, rehash in (
+        ("non_major", _rehash_artifact),
+        ("alaska", _rehash_artifact),
+        ("coverage", _rehash_coverage),
+    ):
+        payload = _load(paths[key])
+        payload["model_version"] = MODEL_VERSION
+        _write(paths[key], rehash(payload))
+    hist = _load(paths["historical"])
+    hist["candidate_model_version"] = MODEL_VERSION
+    if "model_version" in hist:
+        hist["model_version"] = MODEL_VERSION
+    _write(paths["historical"], hist)
     return paths
 
 
@@ -410,16 +425,16 @@ def test_alaska_calibration_brier_overclaim_blocks(scratch_dir: Path) -> None:
 def test_incomplete_current_race_coverage_blocks(scratch_dir: Path) -> None:
     paths = _copy_promotion_bundle(scratch_dir)
     payload = _load(paths["coverage"])
-    payload["races"] = payload["races"][:-1]
+    # Claim forecast_complete while unsupported multiway races remain failed.
     races = payload["races"]
     payload["summary"] = {
         "n_races": len(races),
         "n_pass": sum(r.get("forecast_status") == "pass" for r in races),
         "n_warning": sum(r.get("forecast_status") == "warning" for r in races),
-        "n_fail": 0,
-        "n_evidence_fail": 0,
+        "n_fail": sum(r.get("forecast_status") == "fail" for r in races),
+        "n_evidence_fail": sum(r.get("evidence_status") == "fail" for r in races),
         "evidence_ready": True,
-        "forecast_complete": False,
+        "forecast_complete": True,
         "source_and_model_coverage_separated": True,
     }
     _write(paths["coverage"], _rehash_coverage(payload))
@@ -459,8 +474,9 @@ def test_unsupported_predictive_model_blocks(scratch_dir: Path) -> None:
 def test_classified_warnings_alone_are_permitted() -> None:
     coverage = validate_forecast_coverage(COVERAGE)
     assert coverage["summary"]["n_warning"] > 0
-    assert coverage["summary"]["n_fail"] == 0
-    assert coverage["summary"]["forecast_complete"] is True
+    # Fail-closed multiway races are explicit forecast fails, not silent gaps.
+    assert coverage["summary"]["n_fail_closed_multiway"] >= 3
+    assert coverage["summary"]["forecast_complete"] is False
 
 
 def test_evidence_readiness_and_forecast_coverage_remain_separate() -> None:
@@ -470,7 +486,8 @@ def test_evidence_readiness_and_forecast_coverage_remain_separate() -> None:
     assert "ready_for_expensive_rebuild" in readiness
     # Source readiness artifact must not be the forecast-coverage authority.
     assert "n_pass" not in readiness
-    assert coverage["summary"]["forecast_complete"] is True
+    assert coverage["summary"]["evidence_ready"] is True
+    assert coverage["summary"]["forecast_complete"] is False
 
 
 def test_historical_ordinary_evidence_equivalence_is_8_of_8() -> None:
@@ -522,10 +539,13 @@ def test_alaska_spec_change_alters_exceptional_lineage(scratch_dir: Path) -> Non
 
 
 def test_old_release_identity_fails_when_exceptional_hashes_missing() -> None:
-    # v0.9.23 release identities must bind exceptional hashes; a stripped lineage fails.
+    # Release identities must bind exceptional hashes; a stripped lineage fails.
+    from midterms.ops.release_identity import _version_suffix
+
+    tag = _version_suffix(MODEL_VERSION)
     payload = {
-        "schema_version": "truth-contract-v1",
-        "release_id": "truth-contract-v1_v0.9.23_eb-test",
+        "schema_version": "truth_v1",
+        "release_id": f"truth_v1_{tag}_eb-test",
         "model_version": MODEL_VERSION,
         "PUBLIC_LIVE_ENABLED": False,
         "publication_surface": "research_only",
@@ -548,14 +568,11 @@ def test_modeling_paths_ak_ne_oh() -> None:
     coverage = validate_forecast_coverage(COVERAGE)
     paths = coverage["race_paths"]
     assert paths["senate-2026-AK"] == "alaska_rcv_adapter"
-    assert paths["senate-2026-NE"] == "binary_non_major_adapter"
+    assert paths["senate-2026-NE"] == "multiway_plurality_adapter"
     assert paths["senate-2026-OH"] == "ordinary_stack"
-    for race_id in (
-        "senate-2026-ID",
-        "senate-2026-MT",
-        "senate-2026-SD",
-    ):
-        assert paths[race_id] == "binary_non_major_adapter"
+    assert paths["senate-2026-ID"] == "multiway_plurality_adapter"
+    assert paths["senate-2026-MT"] == "multiway_plurality_adapter"
+    assert paths["senate-2026-SD"] == "binary_non_major_adapter"
 
 
 # ---------------------------------------------------------------------------
@@ -693,7 +710,14 @@ def test_forecast_model_paths_validate_against_lineage(scratch_dir: Path) -> Non
         row: dict[str, Any] = {
             "race_id": rid,
             "modeling_path": path,
-            "p_modeled_candidate": None if path == "alaska_rcv_adapter" else 0.5,
+            "p_modeled_candidate": (
+                None
+                if path in {"alaska_rcv_adapter", "multiway_plurality_adapter"}
+                else 0.5
+            ),
+            "win_probability_status": (
+                "fail_closed" if path == "multiway_plurality_adapter" else "ok"
+            ),
         }
         if path == "alaska_rcv_adapter":
             row["candidate_probabilities"] = [
@@ -827,4 +851,6 @@ def test_authoritative_development_status_is_pending_promotion() -> None:
     assert status["promotion_eligible"] is False
     assert status["research_acceptance_ok"] is False
     assert status["source_readiness_ok"] is True
-    assert status["forecast_coverage_ok"] is True
+    # Multiway fail-closed races keep forecast coverage incomplete until a
+    # historically supported multiway model exists.
+    assert status["forecast_coverage_ok"] is False

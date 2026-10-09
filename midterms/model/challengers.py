@@ -215,7 +215,7 @@ def fit_poll_only_state_space(
     n_draws: int = 2000,
     seed: int = 11,
 ) -> FitResult:
-    """State-space with flat fundamentals and no ED fund pull (poll-only challenger)."""
+    """State-space with flat fundamentals and no ED fund pull (multi-dimension challenger)."""
     return fit_state_space(
         snapshot,
         n_draws=n_draws,
@@ -226,6 +226,87 @@ def fit_poll_only_state_space(
         fund_pull=0.0,
         flat_prior=True,
     )
+
+
+def fit_state_space_no_ed_fund_repull(
+    snapshot: EvidenceSnapshot,
+    *,
+    n_draws: int = 2000,
+    seed: int = 11,
+    generic_ballot: float = 0.0,
+) -> FitResult:
+    """Same-family challenger: only ``fund_pull`` differs (0.0 vs production 0.35)."""
+    return fit_state_space(
+        snapshot,
+        n_draws=n_draws,
+        seed=seed,
+        generic_ballot=generic_ballot,
+        fund_pull=0.0,
+        flat_prior=False,
+    )
+
+
+def fit_state_space_process_scale(
+    snapshot: EvidenceSnapshot,
+    *,
+    process_sd_per_sqrt_day: float,
+    n_draws: int = 2000,
+    seed: int = 11,
+    generic_ballot: float = 0.0,
+) -> FitResult:
+    """Same-family challenger differing only in calendar process scale."""
+    return fit_state_space(
+        snapshot,
+        n_draws=n_draws,
+        seed=seed,
+        generic_ballot=generic_ballot,
+        process_sd_per_sqrt_day=float(process_sd_per_sqrt_day),
+    )
+
+
+STATE_SPACE_REFERENCE_CONFIG = {
+    "fund_pull": 0.35,
+    "flat_prior": False,
+    "process_sd_per_sqrt_day": 0.8,
+}
+
+STATE_SPACE_CHALLENGERS = {
+    "state_space_no_ed_fund_repull": {
+        **STATE_SPACE_REFERENCE_CONFIG,
+        "fund_pull": 0.0,
+        "differs_exactly": ("fund_pull",),
+    },
+    "state_space_process_sd_0_5": {
+        **STATE_SPACE_REFERENCE_CONFIG,
+        "process_sd_per_sqrt_day": 0.5,
+        "differs_exactly": ("process_sd_per_sqrt_day",),
+    },
+    "state_space_process_sd_1_2": {
+        **STATE_SPACE_REFERENCE_CONFIG,
+        "process_sd_per_sqrt_day": 1.2,
+        "differs_exactly": ("process_sd_per_sqrt_day",),
+    },
+}
+
+
+def state_space_challenger_lineage(name: str) -> dict:
+    """Prove a registered challenger differs from reference in exactly one key."""
+    if name not in STATE_SPACE_CHALLENGERS:
+        raise KeyError(name)
+    cfg = STATE_SPACE_CHALLENGERS[name]
+    diffs = [
+        key
+        for key in ("fund_pull", "flat_prior", "process_sd_per_sqrt_day")
+        if cfg[key] != STATE_SPACE_REFERENCE_CONFIG[key]
+    ]
+    return {
+        "challenger": name,
+        "reference": dict(STATE_SPACE_REFERENCE_CONFIG),
+        "challenger_config": {k: cfg[k] for k in STATE_SPACE_REFERENCE_CONFIG},
+        "differing_keys": diffs,
+        "declared_differs_exactly": list(cfg["differs_exactly"]),
+        "lineage_ok": diffs == list(cfg["differs_exactly"]),
+    }
 
 
 def build_challenger_draws(
@@ -239,6 +320,9 @@ def build_challenger_draws(
     """Named draw tensors for stacking."""
     ss = fit_state_space(snapshot, n_draws=n_draws, seed=seed + 1, generic_ballot=generic_ballot)
     poll_only = fit_poll_only_state_space(snapshot, n_draws=n_draws, seed=seed + 2)
+    no_repull = fit_state_space_no_ed_fund_repull(
+        snapshot, n_draws=n_draws, seed=seed + 4, generic_ballot=generic_ballot
+    )
     ridge = fit_ridge_fundamentals(
         snapshot, n_draws=n_draws, seed=seed + 3, generic_ballot=generic_ballot,
         require_historical_fit=require_historical_fit,
@@ -246,5 +330,6 @@ def build_challenger_draws(
     return {
         "state_space": ss.draws_margin,
         "poll_only_state_space": poll_only.draws_margin,
+        "state_space_no_ed_fund_repull": no_repull.draws_margin,
         "ridge_fundamentals": ridge.draws_margin,
     }

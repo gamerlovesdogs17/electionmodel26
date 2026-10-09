@@ -42,7 +42,10 @@ def attach_poll_weights(
     recency = np.exp(-np.log(2.0) * age / max(half_life_days, 1.0))
     out["absolute_recency"] = recency.to_numpy()
 
-    partisan = out["partisan"].fillna(False).astype(bool) if "partisan" in out.columns else False
+    if "partisan" in out.columns:
+        partisan = out["partisan"].fillna(False).astype(bool).to_numpy()
+    else:
+        partisan = np.zeros(len(out), dtype=bool)
     partisan_w = np.where(partisan, 0.35, 1.0)
 
     # Non-recency factors only — n and quality intentionally excluded here.

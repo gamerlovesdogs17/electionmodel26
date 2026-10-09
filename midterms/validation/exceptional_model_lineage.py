@@ -293,9 +293,29 @@ def validate_forecast_coverage(path: str | Path) -> dict[str, Any]:
     _require(len({row.get("race_id") for row in races}) == len(races), "forecast coverage has duplicate race IDs")
     _require(all(row.get("candidate_identity_resolved") is True for row in races), "one or more active race identities are unresolved")
     _require(all(row.get("evidence_status") == "pass" for row in races), "forecast coverage has evidence failures")
-    _require(all(row.get("forecast_status") in {"pass", "warning"} for row in races), "forecast coverage has hard failures")
-    _require(all(row.get("probability_model_supported") is True for row in races), "active race lacks a supported predictive model")
+
+    def _is_fail_closed_multiway(row: dict[str, Any]) -> bool:
+        return (
+            str(row.get("contest_structure") or "") == "multiway_plurality"
+            and row.get("probability_model_supported") is False
+            and str(row.get("probability_model_support_status") or "") == "unsupported"
+        )
+
     for row in races:
+        if _is_fail_closed_multiway(row):
+            _require(
+                row.get("forecast_status") in {"fail", "warning"},
+                f"fail-closed multiway race must not pretend to be complete: {row.get('race_id')}",
+            )
+            continue
+        _require(
+            row.get("forecast_status") in {"pass", "warning"},
+            f"forecast coverage has hard failures: {row.get('race_id')}",
+        )
+        _require(
+            row.get("probability_model_supported") is True,
+            f"active race lacks a supported predictive model: {row.get('race_id')}",
+        )
         if row.get("forecast_status") == "warning":
             _require(bool(row.get("reasons")), f"forecast warning is unclassified: {row.get('race_id')}")
     summary = payload.get("summary") or {}
@@ -308,7 +328,13 @@ def validate_forecast_coverage(path: str | Path) -> dict[str, Any]:
     }
     _require(all(int(summary.get(key, -1)) == value for key, value in recomputed.items()), "forecast coverage summary counts changed")
     _require(summary.get("evidence_ready") is True, "forecast coverage evidence_ready is false")
-    _require(summary.get("forecast_complete") is True, "forecast coverage forecast_complete is false")
+    # Complete only when every race has a supported predictive path (fail-closed
+    # multiway races intentionally keep forecast_complete=false).
+    unsupported_multiway = [row for row in races if _is_fail_closed_multiway(row)]
+    if unsupported_multiway:
+        _require(summary.get("forecast_complete") is False, "unsupported multiway races must keep forecast_complete false")
+    else:
+        _require(summary.get("forecast_complete") is True, "forecast coverage forecast_complete is false")
     _require(summary.get("source_and_model_coverage_separated") is True, "source readiness and model coverage are conflated")
     return {
         "artifact_sha256": payload["artifact_sha256"],
@@ -316,14 +342,17 @@ def validate_forecast_coverage(path: str | Path) -> dict[str, Any]:
         "as_of": payload.get("as_of"),
         "summary": recomputed | {
             "evidence_ready": True,
-            "forecast_complete": True,
+            "forecast_complete": summary.get("forecast_complete"),
             "source_and_model_coverage_separated": True,
+            "n_fail_closed_multiway": len(unsupported_multiway),
         },
         "active_race_ids": sorted(str(row["race_id"]) for row in races),
         "race_paths": {
             str(row["race_id"]): (
                 "alaska_rcv_adapter"
                 if row.get("contest_structure") == "ranked_choice_multiway"
+                else "multiway_plurality_adapter"
+                if row.get("contest_structure") == "multiway_plurality"
                 else "binary_non_major_adapter"
                 if row.get("contest_structure") == "non_major_party_vs_republican"
                 else "ordinary_stack"
@@ -449,9 +478,19 @@ def validate_forecast_model_paths(
             )
             _require(candidate_ids == expected_ids, "Alaska forecast candidate field differs from sealed model identity")
             _require(row.get("p_modeled_candidate") is None, "Alaska RCV output was reduced to an ordinary binary target")
+        elif expected_path == "multiway_plurality_adapter":
+            _require(
+                row.get("p_modeled_candidate") is None
+                or row.get("win_probability_status") == "fail_closed",
+                f"{race_id} multiway path must fail closed on binary win probability",
+            )
         else:
             _require(row.get("p_modeled_candidate") is not None, f"{race_id} lacks predictive draws")
-    _require(expected_paths.get("senate-2026-NE") == "binary_non_major_adapter", "NE may not use the ordinary model")
+    _require(
+        expected_paths.get("senate-2026-NE")
+        in {"binary_non_major_adapter", "multiway_plurality_adapter"},
+        "NE may not use the ordinary model",
+    )
     _require(expected_paths.get("senate-2026-AK") == "alaska_rcv_adapter", "AK may use only the Alaska RCV model")
     _require(expected_paths.get("senate-2026-OH") == "ordinary_stack", "OH must remain in the ordinary stack")
     return {"ok": True, "n_races": len(actual), "race_paths_sha256": canonical_sha256(expected_paths)}

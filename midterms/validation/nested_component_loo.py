@@ -354,11 +354,54 @@ def _failed_freeze(
     )
 
 
-def _generic_ballot(snap) -> float:
-    if not len(snap.polls):
+def _generic_ballot(snap, *, election_id: str | None = None) -> float:
+    """Resolve national GB via the shared context contract (never Senate residuals).
+
+    Formal OOF fails closed when a reconstructable historical series is absent.
+    The legacy mean(Senate margin − prior_lean) estimator is forbidden.
+    """
+    from midterms.evidence.generic_ballot_context import (
+        require_formal_generic_ballot,
+        resolve_generic_ballot_context,
+    )
+
+    races = getattr(snap, "races", None)
+    if not election_id and races is not None and len(races):
+        if "election_id" in races.columns:
+            election_id = str(races["election_id"].iloc[0])
+        elif "race_id" in races.columns:
+            rid = str(races["race_id"].iloc[0])
+            parts = rid.split("-")
+            if len(parts) >= 2:
+                election_id = f"{parts[0]}-{parts[1]}"
+    if not election_id:
+        as_of = getattr(snap, "as_of", None)
+        election_id = f"senate-{as_of.year}" if as_of is not None else "senate-2026"
+    try:
+        year = int(str(election_id).split("-")[-1])
+    except ValueError:
+        # Synthetic fixtures outside senate-YYYY naming.
         return 0.0
-    merged = snap.polls.merge(snap.races[["race_id", "prior_lean"]], on="race_id", how="left")
-    return float((merged["two_party_margin"] - merged["prior_lean"]).mean())
+    # Formal historical folds must use reconstructable national GB evidence.
+    if str(election_id).startswith("senate-") and year <= 2024:
+        ctx = require_formal_generic_ballot(election_id, snap.as_of)
+        return float(ctx.margin)
+    ctx = resolve_generic_ballot_context(election_id, snap.as_of, require_point_in_time=True)
+    if ctx.margin is not None and ctx.formal_oof_eligible:
+        return float(ctx.margin)
+    # Live path may still fall back to VoteHub aggregate helper.
+    from midterms.evidence.ingest import generic_ballot_latest
+
+    live = generic_ballot_latest(as_of=snap.as_of.isoformat())
+    return float(live) if live is not None else 0.0
+
+
+def _senate_poll_residual_generic_ballot_forbidden(snap) -> float:
+    """Retained only so tests can prove the old estimator is not used in OOF."""
+    raise RuntimeError(
+        "Senate-poll-derived generic ballot is forbidden for formal OOF; "
+        "use resolve_generic_ballot_context / require_formal_generic_ballot"
+    )
 
 
 def _fit_hierarchical(
@@ -421,18 +464,21 @@ def freeze_component_predictions(
     Intentionally does not accept or read certified results.
     """
     as_of = snap.as_of
-    gb = _generic_ballot(snap)
     frozen: dict[str, FrozenPrediction] = {}
     hier_name = (
         "pymc_dynamic"
         if hierarchical_method.startswith("pymc_dynamic")
         else ("pymc" if hierarchical_method.startswith("pymc") else "fast_hierarchical_t")
     )
+    gb_error: str | None = None
+    try:
+        gb = _generic_ballot(snap, election_id=election_id)
+    except ValueError as exc:
+        gb = 0.0
+        gb_error = str(exc)
 
     def _safe(name: str, fn: Callable[[], FrozenPrediction]) -> None:
-        try:
-            frozen[name] = fn()
-        except Exception as exc:  # noqa: BLE001
+        if gb_error is not None:
             frozen[name] = _failed_freeze(
                 name,
                 election_id=election_id,
@@ -440,8 +486,21 @@ def freeze_component_predictions(
                 lead_days=lead_days,
                 as_of=as_of,
                 seed=seed,
-                error=str(exc),
+                error=gb_error,
             )
+        else:
+            try:
+                frozen[name] = fn()
+            except Exception as exc:  # noqa: BLE001
+                frozen[name] = _failed_freeze(
+                    name,
+                    election_id=election_id,
+                    holdout_year=holdout_year,
+                    lead_days=lead_days,
+                    as_of=as_of,
+                    seed=seed,
+                    error=str(exc),
+                )
         frozen[name].evidence_snapshot_id = getattr(snap, "snapshot_id", None)
         frozen[name].prior_snapshot_sha256 = getattr(snap, "prior_snapshot_sha256", None)
         frozen[name].presidential_source_sha256 = getattr(snap, "presidential_source_sha256", None)
