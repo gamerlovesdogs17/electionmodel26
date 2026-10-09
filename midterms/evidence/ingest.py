@@ -857,7 +857,9 @@ def generic_ballot_aggregate(
     """
     from midterms.evidence.generic_ballot_aggregate import aggregate_generic_ballot
 
-    path = path or (RAW_DIR / "external" / "votehub_generic_ballot_2026.json")
+    from midterms.evidence.live_generic_ballot import LIVE_GENERIC_BALLOT_PATH
+
+    path = path or LIVE_GENERIC_BALLOT_PATH
     if not path.exists():
         return None
     payload = json.loads(path.read_text(encoding="utf-8"))

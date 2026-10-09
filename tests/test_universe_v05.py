@@ -66,7 +66,18 @@ def test_forecast_rating_matches_probability(tmp_path):
     states = {r["state"] for r in art["races"]}
     assert "OH" in states and "FL" in states
     for r in art["races"]:
-        assert r["rating"] == rating_from_probability(r["p_dem"])
+        p_binary = r.get("p_dem")
+        if p_binary is None:
+            p_binary = r.get("p_modeled_candidate")
+        if p_binary is None:
+            # Alaska RCV / multiway summaries intentionally omit binary aliases.
+            assert r.get("modeling_path") in {
+                "alaska_rcv_adapter", "multiway_plurality_adapter",
+            } or r.get("contest_structure") in {
+                "ranked_choice_multiway", "multiway_plurality",
+            }
+            continue
+        assert r["rating"] == rating_from_probability(float(p_binary))
         assert "expert_rating" in r or True  # optional if store empty for race
     assert art["chamber"].get("held_ind", 0) >= 2
     assert "peer_comparison" in art

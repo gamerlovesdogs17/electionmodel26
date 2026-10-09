@@ -550,7 +550,9 @@ def audit_source_readiness(
                 canonical_domain_contract(registry_name),
             )
 
-    generic_path = raw_dir / "external" / "votehub_generic_ballot_2026.json"
+    from midterms.evidence.live_generic_ballot import LIVE_GENERIC_BALLOT_FILENAME
+
+    generic_path = raw_dir / "external" / LIVE_GENERIC_BALLOT_FILENAME
     domains["generic_ballot"].update({
         # Candidate/matchup coverage is a Senate race-poll gate.  It must not
         # make an independently sourced generic-ballot file appear absent.

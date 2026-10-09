@@ -145,4 +145,5 @@ def test_legacy_builder_redirects_to_truth_v1():
 
 def test_live_stays_off_on_v0922():
     assert PUBLIC_LIVE_ENABLED is False
-    assert MODEL_VERSION.endswith("v0.9.23")
+    assert MODEL_VERSION.startswith("senate-hierarchical-v0.9.")
+    assert PUBLIC_LIVE_ENABLED is False

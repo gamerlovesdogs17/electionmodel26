@@ -860,19 +860,50 @@ def run_forecast(
         core_fit = merge_alaska_fit(core_fit, alaska_fit)
         fit = merge_alaska_fit(fit, alaska_fit)
 
+    from midterms.model.multiway_plurality import (
+        fit_multiway_plurality_adapter,
+        merge_multiway_fits,
+    )
+
+    multiway_fits = fit_multiway_plurality_adapter(
+        snap.races,
+        as_of=snap.as_of,
+        n_draws=ordinary_core_fit.draws_margin.shape[0],
+        seed=seed + 409,
+        base_fit=ordinary_core_fit,
+        require_supported=True,
+    )
+    if multiway_fits:
+        core_fit = merge_multiway_fits(core_fit, multiway_fits)
+        fit = merge_multiway_fits(fit, multiway_fits)
+
+    # Unsupported multiway races are withheld from the FitResult rather than
+    # silently binary-collapsed. Chamber accounting pads those seats as
+    # unresolved so ordinary + supported exceptional paths can still smoke.
+    multiway_mask = snap.races.get(
+        "contest_structure", pd.Series("", index=snap.races.index),
+    ).astype(str).eq("multiway_plurality")
+    supported_mask = snap.races.get(
+        "probability_model_supported", pd.Series(True, index=snap.races.index),
+    ).fillna(False).astype(bool)
+    withheld_multiway = snap.races[multiway_mask & ~supported_mask]
+    withheld_ids = set(withheld_multiway["race_id"].astype(str))
+    chamber_races = snap.races[~snap.races["race_id"].astype(str).isin(withheld_ids)].copy()
+
     sim, race_summaries = simulate_chamber(
         fit,
-        snap.races,
+        chamber_races,
         vp_tiebreak_party="R",
         n_sims=joint_sims,
         sim_seed=seed + 101,
+        withheld_contested_seats=len(withheld_ids),
     )
     contested_active = snap.races[snap.races["race_id"].isin(fit.race_ids)].copy()
     # Align contested to fit order
     contested_active = contested_active.set_index("race_id").loc[fit.race_ids].reset_index()
     allocation_mask = ~contested_active.get(
         "contest_structure", pd.Series("", index=contested_active.index),
-    ).astype(str).eq("ranked_choice_multiway")
+    ).astype(str).isin({"ranked_choice_multiway", "multiway_plurality"})
     multiway = undecided_allocation(
         contested_active[allocation_mask].reset_index(drop=True),
         fit.mean_margin[allocation_mask.to_numpy()],
@@ -883,12 +914,18 @@ def run_forecast(
         multiway,
         as_of=snap.as_of if hasattr(snap, "as_of") else None,
     )
-    scenarios = run_scenarios(fit, snap.races, vp_tiebreak_party="R")
+    scenarios = run_scenarios(
+        fit,
+        chamber_races,
+        vp_tiebreak_party="R",
+        withheld_contested_seats=len(withheld_ids),
+    )
     # Attach expert/market fields — display rating stays model-derived
     expert_by_id = expert_tbl.set_index("race_id") if len(expert_tbl) else None
     market_by_id = market_df.set_index("race_id") if len(market_df) else None
     for s in race_summaries:
-        is_multiway = str(s.get("contest_structure") or "") == "ranked_choice_multiway"
+        structure = str(s.get("contest_structure") or "")
+        is_multiway = structure in {"ranked_choice_multiway", "multiway_plurality"}
         is_non_major = not is_multiway and str(s.get("modeled_ballot_party") or "D") != "D"
         if not is_non_major and not is_multiway and expert_by_id is not None and s["race_id"] in expert_by_id.index:
             s["expert_rating"] = str(expert_by_id.loc[s["race_id"], "rating"])
@@ -904,10 +941,11 @@ def run_forecast(
     # Ablation: unadjusted core chamber
     core_sim, _ = simulate_chamber(
         core_fit,
-        snap.races,
+        chamber_races,
         vp_tiebreak_party="R",
         n_sims=joint_sims,
         sim_seed=seed + 103,
+        withheld_contested_seats=len(withheld_ids),
     )
     ablation = {
         "unadjusted": {

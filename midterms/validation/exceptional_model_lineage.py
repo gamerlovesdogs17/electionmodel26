@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -45,10 +46,31 @@ from midterms.model.non_major_adapter import (
 LINEAGE_SCHEMA_VERSION = "exceptional-model-lineage-v1"
 NON_MAJOR_CLASS = "limited_validation_exception_model"
 ALASKA_CLASS = "limited_validation_alaska_rcv_model"
-NON_MAJOR_RACE_IDS = {
-    "senate-2026-ID", "senate-2026-MT", "senate-2026-NE", "senate-2026-SD",
-}
+MULTIWAY_CLASS = "limited_validation_multiway_plurality_model"
 ALASKA_RACE_ID = "senate-2026-AK"
+
+
+def current_binary_non_major_race_ids(
+    candidate_registry_path: str | Path = CURRENT_CANDIDATE_REGISTRY_PATH,
+) -> frozenset[str]:
+    """Derive binary/principal-binary adapter races from the live contest contract."""
+    from midterms.evidence.modeling_paths import (
+        assert_no_binary_contamination,
+        binary_non_major_eligible_race_ids,
+        multiway_plurality_race_ids,
+    )
+
+    registry = load_current_candidate_registry(candidate_registry_path)
+    binary_ids = binary_non_major_eligible_race_ids(registry)
+    multiway_ids = multiway_plurality_race_ids(registry)
+    assert_no_binary_contamination(
+        binary_race_ids=binary_ids, multiway_race_ids=multiway_ids,
+    )
+    return binary_ids
+
+
+# Deprecated name retained for imports; always derived from the registry contract.
+NON_MAJOR_RACE_IDS = current_binary_non_major_race_ids()
 
 
 def canonical_sha256(value: Any) -> str:
@@ -142,7 +164,16 @@ def validate_binary_non_major_artifact(
     common = payload.get("common_shock_sensitivity") or {}
     _require(float(common.get("retained_share")) == COMMON_VARIANCE_SHARE, "non-major common shock differs from implementation")
     records = payload.get("selected_current_adapter_records") or {}
-    _require(set(records) == NON_MAJOR_RACE_IDS, "non-major current race coverage changed")
+    expected_binary = current_binary_non_major_race_ids()
+    _require(
+        set(records) == set(expected_binary),
+        "non-major current race coverage diverges from registry contest contract "
+        f"(artifact={sorted(records)}, registry={sorted(expected_binary)})",
+    )
+    _require(
+        "senate-2026-MT" not in records,
+        "Montana multiway race contaminated binary non-major adapter records",
+    )
     _require(all((row or {}).get("race_id") == race_id for race_id, row in records.items()), "non-major current adapter records are malformed")
     if verify_sources:
         _verify_file_lineage(payload.get("source_lineage") or {})
@@ -354,7 +385,10 @@ def validate_forecast_coverage(path: str | Path) -> dict[str, Any]:
                 else "multiway_plurality_adapter"
                 if row.get("contest_structure") == "multiway_plurality"
                 else "binary_non_major_adapter"
-                if row.get("contest_structure") == "non_major_party_vs_republican"
+                if row.get("contest_structure") in {
+                    "non_major_party_vs_republican",
+                    "principal_binary_with_minor_residual",
+                }
                 else "ordinary_stack"
             )
             for row in races
@@ -399,6 +433,48 @@ def validate_historical_equivalence(
     }
 
 
+def validate_multiway_plurality_artifact(
+    path: str | Path,
+) -> dict[str, Any]:
+    """Bind the multiway validation artifact into exceptional lineage."""
+    from midterms.model.multiway_plurality import adapter_specification
+
+    payload = _read(Path(path))
+    _require(payload.get("model_version") == MODEL_VERSION, "multiway model version is stale")
+    _require(
+        payload.get("adapter_specification") == adapter_specification()
+        or payload.get("adapter_spec_version") == adapter_specification()["adapter_spec_version"],
+        "multiway adapter specification changed",
+    )
+    _require(_self_hash(payload, "artifact_sha256"), "multiway artifact semantic hash changed")
+    _require(payload.get("ordinary_oof_touched") is False, "multiway validation falsely claims ordinary OOF")
+    summary = payload.get("summary") or {}
+    activates = payload.get("activates_forecast_probabilities") is True
+    if activates:
+        _require(payload.get("validation_class") == MULTIWAY_CLASS, "multiway validation class changed")
+        _require(int(summary.get("n_scorable_cases") or 0) > 0, "activated multiway lacks scorable cases")
+    else:
+        _require(
+            payload.get("probability_model_support_status") == "unsupported",
+            "inactive multiway must remain unsupported",
+        )
+        _require(
+            payload.get("win_probability_status") == "fail_closed",
+            "inactive multiway must fail closed on win probability",
+        )
+    return {
+        "classification": payload.get("validation_class") or "insufficient_scorable_historical_multiway_poll_cases",
+        "probability_model_support_status": payload.get("probability_model_support_status"),
+        "activates_forecast_probabilities": activates,
+        "n_scorable_cases": int(summary.get("n_scorable_cases") or 0),
+        "n_materially_multiway_analogs": int(summary.get("n_materially_multiway_analogs") or 0),
+        "artifact_sha256": payload.get("artifact_sha256"),
+        "document_sha256": canonical_json_sha256(path),
+        "adapter_specification": adapter_specification(),
+        "ordinary_oof_touched": False,
+    }
+
+
 def build_exceptional_model_lineage(
     *,
     artifacts_dir: str | Path = ARTIFACTS_DIR,
@@ -421,6 +497,17 @@ def build_exceptional_model_lineage(
         candidate_registry_path=candidate_registry_path,
         verify_sources=verify_sources,
     )
+    multiway_path = artifacts / "multiway_plurality_validation_latest.json"
+    multiway = (
+        validate_multiway_plurality_artifact(multiway_path)
+        if multiway_path.is_file()
+        else {
+            "classification": "missing_multiway_validation_artifact",
+            "probability_model_support_status": "unsupported",
+            "activates_forecast_probabilities": False,
+            "n_scorable_cases": 0,
+        }
+    )
     coverage = validate_forecast_coverage(
         artifacts / "current_race_poll_coverage_v0923.json",
     )
@@ -428,12 +515,22 @@ def build_exceptional_model_lineage(
         artifacts / "historical_evidence_equivalence_v0923.json",
         recompute_current=recompute_historical,
     )
+    # Guard: MT must never appear in binary non-major current records.
+    binary_races = set((binary.get("current_adapter_race_ids") or binary.get("race_ids") or []))
+    if not binary_races:
+        # Fall back to artifact records embedded in the validated block.
+        binary_races = set(current_binary_non_major_race_ids(candidate_registry_path))
+    _require(
+        "senate-2026-MT" not in binary_races,
+        "Montana multiway race contaminated binary non-major lineage",
+    )
     payload = {
         "schema_version": LINEAGE_SCHEMA_VERSION,
         "model_version": MODEL_VERSION,
         "exceptional_models": {
             "binary_non_major": binary,
             "alaska_rcv": alaska,
+            "multiway_plurality": multiway,
         },
         "forecast_coverage": coverage,
         "historical_evidence_equivalence": historical,
@@ -484,15 +581,47 @@ def validate_forecast_model_paths(
                 or row.get("win_probability_status") == "fail_closed",
                 f"{race_id} multiway path must fail closed on binary win probability",
             )
+            _require(row.get("modeling_path") == "multiway_plurality_adapter", f"{race_id} missing multiway path")
+            _require(
+                expected_path != "binary_non_major_adapter",
+                f"{race_id} multiway race must not use binary non-major",
+            )
+            probs = row.get("candidate_probabilities") or []
+            if probs and all(item.get("p_win") is not None for item in probs):
+                mass = sum(float(item.get("p_win") or 0.0) for item in probs)
+                _require(abs(mass - 1.0) <= 1e-6, f"{race_id} candidate win probabilities must sum to 1")
+                _require(
+                    all(math.isfinite(float(item.get("p_win"))) for item in probs),
+                    f"{race_id} has nonfinite candidate probabilities",
+                )
+            multiway_meta = (lineage.get("exceptional_models") or {}).get("multiway_plurality") or {}
+            if multiway_meta.get("activates_forecast_probabilities") is not True:
+                _require(
+                    row.get("win_probability_status") == "fail_closed"
+                    or all(item.get("p_win") is None for item in probs),
+                    f"{race_id} unbound multiway lineage cannot publish win probabilities",
+                )
         else:
             _require(row.get("p_modeled_candidate") is not None, f"{race_id} lacks predictive draws")
     _require(
-        expected_paths.get("senate-2026-NE")
-        in {"binary_non_major_adapter", "multiway_plurality_adapter"},
-        "NE may not use the ordinary model",
+        expected_paths.get("senate-2026-NE") == "binary_non_major_adapter",
+        "NE must use the candidate-neutral principal-binary path",
+    )
+    _require(
+        expected_paths.get("senate-2026-ID") == "binary_non_major_adapter",
+        "ID must use the candidate-neutral principal-binary path",
+    )
+    _require(
+        expected_paths.get("senate-2026-SD") == "binary_non_major_adapter",
+        "SD must use the binary non-major path",
     )
     _require(expected_paths.get("senate-2026-AK") == "alaska_rcv_adapter", "AK may use only the Alaska RCV model")
+    _require(
+        expected_paths.get("senate-2026-MT") == "multiway_plurality_adapter",
+        "MT must use the multiway plurality path (never binary non-major)",
+    )
     _require(expected_paths.get("senate-2026-OH") == "ordinary_stack", "OH must remain in the ordinary stack")
+    _require("senate-2026-MT" in actual, "MT missing from forecast")
     return {"ok": True, "n_races": len(actual), "race_paths_sha256": canonical_sha256(expected_paths)}
 
 

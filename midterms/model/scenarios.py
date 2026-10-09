@@ -15,12 +15,18 @@ def run_scenarios(
     races,
     *,
     vp_tiebreak_party: str = "R",
+    withheld_contested_seats: int = 0,
 ) -> dict[str, Any]:
     """
     National / regional / reduced-quality miss scenarios on joint draws.
     Published as sensitivity, not production forecasts.
     """
-    base_sim, _ = simulate_chamber(fit, races, vp_tiebreak_party=vp_tiebreak_party)
+    base_sim, _ = simulate_chamber(
+        fit,
+        races,
+        vp_tiebreak_party=vp_tiebreak_party,
+        withheld_contested_seats=withheld_contested_seats,
+    )
     out: dict[str, Any] = {
         "note": "Scenario sensitivities — not production forecasts",
         "baseline": {
@@ -53,7 +59,12 @@ def run_scenarios(
             diagnostics=fit.diagnostics,
             method=fit.method + "+scenario",
         )
-        sim, _ = simulate_chamber(shifted, races, vp_tiebreak_party=vp_tiebreak_party)
+        sim, _ = simulate_chamber(
+            shifted,
+            races,
+            vp_tiebreak_party=vp_tiebreak_party,
+            withheld_contested_seats=withheld_contested_seats,
+        )
         return {
             "p_dem_majority": sim.p_dem_majority,
             "expected_dem_seats": sim.expected_dem_seats,
@@ -87,7 +98,12 @@ def run_scenarios(
         diagnostics=fit.diagnostics,
         method=fit.method + "+low_quality",
     )
-    sim_q, _ = simulate_chamber(noisy_fit, races, vp_tiebreak_party=vp_tiebreak_party)
+    sim_q, _ = simulate_chamber(
+        noisy_fit,
+        races,
+        vp_tiebreak_party=vp_tiebreak_party,
+        withheld_contested_seats=withheld_contested_seats,
+    )
     out["reduced_poll_quality"] = {
         "p_dem_majority": sim_q.p_dem_majority,
         "expected_dem_seats": sim_q.expected_dem_seats,

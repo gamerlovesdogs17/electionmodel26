@@ -284,6 +284,12 @@ def require_binary_chamber_compatibility(races: pd.DataFrame) -> None:
             ):
                 raise ValueError(f"held Independent lacks supported explicit caucus: {race_id}")
             continue
+        contest_structure = str(row.get("contest_structure") or "")
+        # Correctly classified multiway/RCV races are not binary chamber targets.
+        # Supported adapters supply candidate-winner overrides; unsupported
+        # multiway races are rejected later if omitted from the FitResult.
+        if contest_structure in {"multiway_plurality", "ranked_choice_multiway"}:
+            continue
         binary_eligible = row.get("binary_score_eligible")
         if (
             "binary_score_eligible" in races.columns

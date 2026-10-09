@@ -50,6 +50,9 @@ class ChamberSimulation:
     held_ind: int = 0
     n_joint_sims: int = 0
     n_posterior_margin_draws: int = 0
+    unresolved_seat_draws: np.ndarray | None = None  # seats with unknown caucus
+    p_unresolved_control: float = 0.0
+    expected_unresolved_seats: float = 0.0
 
 
 def expand_joint_draws(
@@ -84,6 +87,7 @@ def simulate_chamber(
     vp_tiebreak_party: str = "R",
     n_sims: int | None = None,
     sim_seed: int | None = None,
+    withheld_contested_seats: int = 0,
 ) -> tuple[ChamberSimulation, list[dict]]:
     """
     Translate joint margin draws into seat outcomes and chamber control.
@@ -96,10 +100,17 @@ def simulate_chamber(
 
     ``n_sims`` optionally expands posterior draws to a larger joint-simulation
     count via resampling (correlated structure preserved).
+
+    ``withheld_contested_seats`` counts active contests intentionally excluded
+    from the FitResult (e.g. unsupported multiway) so 100-seat accounting still
+    closes; those seats are unresolved for chamber control.
     """
     from midterms.evidence.outcome_identity import require_binary_chamber_compatibility
 
     require_binary_chamber_compatibility(races)
+    withheld_contested_seats = int(withheld_contested_seats)
+    if withheld_contested_seats < 0:
+        raise ValueError("withheld_contested_seats must be nonnegative")
     # ``fit`` can intentionally exclude an active contested seat from binary
     # margin scoring (for example, a non D-v-R general election). Such a seat
     # still exists for chamber accounting. Inactive alternate rows (withdrawn
@@ -148,6 +159,66 @@ def simulate_chamber(
         alaska_index = fit.race_ids.index(alaska_race_id)
         wins[:, alaska_index] = (winner_caucuses == "D").astype(int)
 
+    # Generic multiway plurality: candidate winners are authoritative; signed
+    # margin is only a FitResult compatibility carrier. Unknown-caucus winners
+    # fail closed (seat contributes to neither caucus for that draw).
+    multiway_block = (fit.diagnostics or {}).get("multiway_plurality_adapter")
+    multiway_rows = (
+        multiway_block
+        if isinstance(multiway_block, list)
+        else ([multiway_block] if multiway_block else [])
+    )
+    unresolved_by_race = np.zeros((n_draws, n_races), dtype=int)
+    for multiway_diagnostics in multiway_rows:
+        if not isinstance(multiway_diagnostics, dict):
+            continue
+        multiway_race_id = str(multiway_diagnostics.get("race_id") or "")
+        if not multiway_race_id or multiway_race_id not in fit.race_ids:
+            continue
+        winner_ids = list(multiway_diagnostics.get("winner_candidate_ids") or [])
+        fail_closed = np.asarray(
+            multiway_diagnostics.get("fail_closed_draws") or [], dtype=bool,
+        )
+        if len(winner_ids) != n_post and len(fail_closed) == n_post:
+            winner_ids = [None] * n_post
+        if len(winner_ids) != n_post:
+            raise ValueError(
+                f"multiway plurality winner draws are not aligned for {multiway_race_id}"
+            )
+        if n_draws != n_post:
+            if n_sims is None or int(n_sims) <= n_post:
+                winner_ids = winner_ids[:n_draws]
+                fail_closed = fail_closed[:n_draws]
+            else:
+                resample_rng = np.random.default_rng(int(sim_seed if sim_seed is not None else 0))
+                idx = resample_rng.integers(0, n_post, size=n_draws)
+                winner_ids = [winner_ids[i] for i in idx]
+                fail_closed = fail_closed[idx]
+        caucus_map = {
+            str(cid): cau
+            for cid, cau in zip(
+                multiway_diagnostics.get("candidate_ids") or [],
+                multiway_diagnostics.get("caucuses") or [],
+                strict=False,
+            )
+        }
+        dem_col = np.zeros(n_draws, dtype=int)
+        for draw, (winner, failed) in enumerate(zip(winner_ids, fail_closed)):
+            if failed or winner is None:
+                continue
+            caucus = caucus_map.get(str(winner))
+            if caucus == "D":
+                dem_col[draw] = 1
+            elif caucus != "R":
+                # Unknown caucus: leave as 0 Dem and do not invent an R seat.
+                continue
+        multiway_index = fit.race_ids.index(multiway_race_id)
+        wins[:, multiway_index] = dem_col
+        # Track unknown-caucus / residual winners separately so they are not
+        # silently mapped to Republican via (margins < 0).
+        if fail_closed.size == n_draws:
+            unresolved_by_race[:, multiway_index] = fail_closed.astype(int)
+
     # An active contest without predictive draws is an incomplete chamber
     # forecast.  Incumbent/held_by is historical state, not a deterministic
     # substitute for the missing election distribution.
@@ -161,28 +232,38 @@ def simulate_chamber(
                 + ", ".join(sorted(omitted["race_id"].astype(str).tolist()))
             )
 
+    draw_unresolved = unresolved_by_race.sum(axis=1)
     dem_seats = held_dem + wins.sum(axis=1)
-    total = held_dem + held_rep + n_races
+    # Permanent withheld seats (unsupported multiway not in FitResult) conserve
+    # the 100-seat total as unresolved, but do not zero every draw's majority
+    # probability — only draw-level unknown-caucus winners do that.
+    unresolved_seats = draw_unresolved + withheld_contested_seats
+    total = held_dem + held_rep + n_races + withheld_contested_seats
     if total != 100:
         raise ValueError(
             f"Senate seat accounting must total 100 (held_dem={held_dem}, "
-            f"held_rep={held_rep}, contested_in_fit={n_races}, total={total}). "
+            f"held_rep={held_rep}, contested_in_fit={n_races}, "
+            f"withheld_contested={withheld_contested_seats}, total={total}). "
             "Check not_up / withdrawn / fit race_ids."
         )
+    rep_seats = total - dem_seats - unresolved_seats
+    if np.any(rep_seats < 0) or np.any(dem_seats + unresolved_seats + rep_seats != total):
+        raise ValueError("multiway unknown-caucus accounting broke 100-seat conservation")
 
     hist: dict[str, int] = {}
     for s in dem_seats.astype(int):
         hist[str(int(s))] = hist.get(str(int(s)), 0) + 1
 
-    p_fifty = float((dem_seats == 50).mean())
-    # VP tiebreak: 50–50 → chamber control for the Vice President's party
+    draw_resolved = draw_unresolved == 0
+    p_fifty = float(((dem_seats == 50) & draw_resolved).mean())
+    p_unresolved = float((~draw_resolved).mean())
+    # VP tiebreak among draws without fitted unknown-caucus winners.
     if vp_tiebreak_party == "R":
-        p_dem_maj = float((dem_seats >= majority_threshold).mean())
-        p_rep_maj = float((dem_seats < majority_threshold).mean())  # includes 50–50
+        p_dem_maj = float(((dem_seats >= majority_threshold) & draw_resolved).mean())
+        p_rep_maj = float(((dem_seats < majority_threshold) & draw_resolved).mean())
     elif vp_tiebreak_party == "D":
-        # Dem VP: Dem needs >=50; Rep needs <=49
-        p_dem_maj = float((dem_seats >= 50).mean())
-        p_rep_maj = float((dem_seats <= 49).mean())
+        p_dem_maj = float(((dem_seats >= 50) & draw_resolved).mean())
+        p_rep_maj = float(((dem_seats <= 49) & draw_resolved).mean())
     else:
         raise ValueError(f"vp_tiebreak_party must be 'R' or 'D', got {vp_tiebreak_party!r}")
 
@@ -203,6 +284,9 @@ def simulate_chamber(
         held_ind=held_ind,
         n_joint_sims=int(n_draws),
         n_posterior_margin_draws=int(n_post),
+        unresolved_seat_draws=unresolved_seats,
+        p_unresolved_control=p_unresolved,
+        expected_unresolved_seats=float(unresolved_seats.mean()),
     )
 
     contested_ix = contested.set_index("race_id")
@@ -313,6 +397,97 @@ def simulate_chamber(
                 "held_by": held_by, "election_phase": election_phase, "vacancy_reason": vacancy_reason,
                 "rating": "RCV · limited validation", "exhausted_ballot_share": alaska_diagnostics["exhausted_mean"],
                 "uncertainty_metadata": alaska_diagnostics.get("uncertainty"),
+                "authoritative_binary_aliases": False,
+            }
+            summaries.append(summary)
+            continue
+        multiway_match = next(
+            (
+                block for block in multiway_rows
+                if isinstance(block, dict) and str(block.get("race_id") or "") == rid
+            ),
+            None,
+        )
+        if multiway_match is not None:
+            candidate_ids = list(multiway_match["candidate_ids"])
+            candidate_names = list(multiway_match["candidate_names"])
+            parties = list(multiway_match["ballot_parties"])
+            caucuses = list(multiway_match["caucuses"])
+            winner_ids = np.asarray(multiway_match.get("winner_candidate_ids") or [], dtype=object)
+            probabilities = [
+                float(np.mean(winner_ids == candidate_id)) for candidate_id in candidate_ids
+            ]
+            mass = float(sum(probabilities))
+            if mass > 0 and abs(mass - 1.0) > 1e-6:
+                # Fail-closed / tied draws leave residual probability mass.
+                residual = max(0.0, 1.0 - mass)
+                probabilities = [p + residual / len(probabilities) for p in probabilities]
+            favored_index = int(np.argmax(probabilities))
+            uncertainty = multiway_match.get("uncertainty") or {}
+            p_unknown = float(multiway_match.get("p_unknown_caucus") or 0.0)
+            p_dem_caucus = uncertainty.get("p_dem_caucus")
+            p_rep_caucus = uncertainty.get("p_rep_caucus")
+            if p_dem_caucus is None:
+                p_dem_caucus = float(
+                    sum(
+                        probabilities[index]
+                        for index, caucus in enumerate(caucuses)
+                        if caucus == "D"
+                    )
+                )
+            if p_rep_caucus is None:
+                p_rep_caucus = float(
+                    sum(
+                        probabilities[index]
+                        for index, caucus in enumerate(caucuses)
+                        if caucus == "R"
+                    )
+                )
+            summary = {
+                "race_id": rid,
+                "state": state,
+                "seat_class": seat_class,
+                "contest_structure": "multiway_plurality",
+                "modeling_path": "multiway_plurality_adapter",
+                "validation_status": uncertainty.get("support_status")
+                or multiway_match.get("method"),
+                "method": multiway_match.get("method"),
+                "candidate_probabilities": [
+                    {
+                        "candidate_id": candidate_ids[index],
+                        "candidate_name": candidate_names[index],
+                        "ballot_party": parties[index],
+                        "caucus": caucuses[index],
+                        "p_win": probabilities[index],
+                        "share_estimate": (multiway_match.get("share_mean") or [None] * len(candidate_ids))[index],
+                    }
+                    for index in range(len(candidate_ids))
+                ],
+                "favored_candidate_id": candidate_ids[favored_index],
+                "favored_candidate": candidate_names[favored_index],
+                "favored_party": parties[favored_index],
+                "favored_ballot_party": parties[favored_index],
+                "favored_caucus": caucuses[favored_index],
+                "caucus": caucuses[favored_index],
+                "p_dem_caucus": p_dem_caucus,
+                "p_rep_caucus": p_rep_caucus,
+                "p_unknown_caucus": p_unknown,
+                "p_dem": None,
+                "p_rep": None,
+                "p_modeled_candidate": None,
+                "p_opposing_candidate": None,
+                "mean_margin": None,
+                "sd_margin": None,
+                "ci05": None,
+                "ci95": None,
+                "prior_lean": prior_lean,
+                "incumbent_party": incumbent,
+                "is_open": is_open,
+                "held_by": held_by,
+                "election_phase": election_phase,
+                "vacancy_reason": vacancy_reason,
+                "rating": "Multiway plurality · limited validation",
+                "uncertainty_metadata": uncertainty,
                 "authoritative_binary_aliases": False,
             }
             summaries.append(summary)

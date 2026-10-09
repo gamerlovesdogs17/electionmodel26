@@ -1,0 +1,264 @@
+{
+  "schema_version": "multiway-plurality-validation-v1",
+  "model_version": "senate-hierarchical-v0.9.25",
+  "adapter_spec_version": "multiway-plurality-adapter-v1",
+  "adapter_specification": {
+    "adapter_spec_version": "multiway-plurality-adapter-v1",
+    "method": "limited_validation_multiway_plurality_model-v1",
+    "modeling_path": "multiway_plurality_adapter",
+    "contest_structure": "multiway_plurality",
+    "target": "candidate_share_draws_and_plurality_winner",
+    "poll_question_schema": "multiway-poll-question-class-v1",
+    "candidate_share_schema": "poll-candidate-shares-v1",
+    "prior_concentration": 4.0,
+    "poll_error_floor": 0.04,
+    "common_shock_strength": 0.08,
+    "heavy_tail_df": 5.0,
+    "binary_poll_treatment": "ignored_not_translated_to_shares",
+    "unknown_caucus_policy": "fail_closed_draw_level_unknown_caucus",
+    "activation_requires": "scorable_historical_multiway_poll_validation"
+  },
+  "validation_class": null,
+  "probability_model_support_status": "unsupported",
+  "activates_forecast_probabilities": false,
+  "win_probability_status": "fail_closed",
+  "eligibility_rule": {
+    "id": "multiway-poll-validation-universe-v1",
+    "predeclared_before_scoring": true,
+    "require": [
+      "plurality institutional rule",
+      "at least three ballot candidates",
+      "structural_class == materially_multiway (not principal-binary-with-minors)",
+      "at least one candidate-level multiway poll question before cutoff",
+      "certified candidate-level vote shares available after freeze"
+    ],
+    "exclude": [
+      "principal_binary_with_minor_residual elections used as multiway proxies",
+      "Alaska RCV / IRV",
+      "majority-runoff / jungle-primary contests",
+      "fabricated multiway polls"
+    ],
+    "formal_lead_days": [
+      60,
+      30
+    ],
+    "note": "Materially multiway races are validated separately from ordinary D/R + small-residual contests."
+  },
+  "structural_analog_inventory": {
+    "n_analogs": 158,
+    "n_ballot_multiway": 158,
+    "n_principal_binary_with_minors": 148,
+    "n_materially_multiway": 10,
+    "structural_inventory_only": true,
+    "does_not_activate_probabilities": true,
+    "analog_support_report": {
+      "schema_version": "multiway-plurality-analog-support-v1",
+      "analog_selection_rule": {
+        "id": "senate-plurality-multiway-analogs-v1",
+        "predeclared_before_scoring": true,
+        "include": [
+          "US Senate general elections 1990\u20132024",
+          "at least three ballot-qualified candidates",
+          "plurality (not RCV, not majority-runoff) institutional rule"
+        ],
+        "exclude": [
+          "Alaska RCV / IRV contests",
+          "Louisiana jungle-primary / majority-threshold contests",
+          "Georgia runoff-threshold contests",
+          "same-party generals without multi-party field"
+        ]
+      },
+      "n_analogs": 158,
+      "min_analogs_for_probability_model": 8,
+      "probability_model_support_status": "unsupported",
+      "win_probability_status": "fail_closed",
+      "structural_inventory_only": true,
+      "activates_forecast_probabilities": false,
+      "note": "Election-result analogs classify contest structure only; scorable historical poll validation is required to support win probabilities"
+    }
+  },
+  "poll_source_audit": {
+    "votehub_candidate_shares_present": true,
+    "fte_historical_present": true,
+    "fte_is_binary_two_party_only": true,
+    "historical_multiway_poll_archive_present": false,
+    "usable_for_multiway_share_validation": false,
+    "votehub_share_years": [
+      2026
+    ]
+  },
+  "eligible_universe": [
+    {
+      "race_id": "senate-2014-SD",
+      "state": "SD",
+      "year": 2014,
+      "n_candidates": 4,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2014-11-04",
+      "eligible_cutoffs": [
+        "2014-09-05",
+        "2014-10-05"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    },
+    {
+      "race_id": "senate-2014-WY",
+      "state": "WY",
+      "year": 2014,
+      "n_candidates": 4,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2014-11-04",
+      "eligible_cutoffs": [
+        "2014-09-05",
+        "2014-10-05"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    },
+    {
+      "race_id": "senate-2016-NY",
+      "state": "NY",
+      "year": 2016,
+      "n_candidates": 9,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2016-11-08",
+      "eligible_cutoffs": [
+        "2016-09-09",
+        "2016-10-09"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    },
+    {
+      "race_id": "senate-2018-ME",
+      "state": "ME",
+      "year": 2018,
+      "n_candidates": 3,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2018-11-06",
+      "eligible_cutoffs": [
+        "2018-09-07",
+        "2018-10-07"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    },
+    {
+      "race_id": "senate-2018-NM",
+      "state": "NM",
+      "year": 2018,
+      "n_candidates": 3,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2018-11-06",
+      "eligible_cutoffs": [
+        "2018-09-07",
+        "2018-10-07"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    },
+    {
+      "race_id": "senate-2020-NE",
+      "state": "NE",
+      "year": 2020,
+      "n_candidates": 4,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2020-11-03",
+      "eligible_cutoffs": [
+        "2020-09-04",
+        "2020-10-04"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    },
+    {
+      "race_id": "senate-2022-ID",
+      "state": "ID",
+      "year": 2022,
+      "n_candidates": 5,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2022-11-08",
+      "eligible_cutoffs": [
+        "2022-09-09",
+        "2022-10-09"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    },
+    {
+      "race_id": "senate-2022-ND",
+      "state": "ND",
+      "year": 2022,
+      "n_candidates": 3,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2022-11-08",
+      "eligible_cutoffs": [
+        "2022-09-09",
+        "2022-10-09"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    },
+    {
+      "race_id": "senate-2022-NY",
+      "state": "NY",
+      "year": 2022,
+      "n_candidates": 5,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2022-11-08",
+      "eligible_cutoffs": [
+        "2022-09-09",
+        "2022-10-09"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    },
+    {
+      "race_id": "senate-2024-ME",
+      "state": "ME",
+      "year": 2024,
+      "n_candidates": 4,
+      "structural_class": "genuine_multiway_plurality",
+      "election_day": "2024-11-05",
+      "eligible_cutoffs": [
+        "2024-09-06",
+        "2024-10-06"
+      ],
+      "has_certified_candidate_shares": true,
+      "has_usable_multiway_polls_before_cutoff": false,
+      "exclusion_reason": "no_historical_candidate_level_multiway_poll_archive"
+    }
+  ],
+  "scorable_cases": [],
+  "summary": {
+    "n_materially_multiway_analogs": 10,
+    "n_predeclared_eligible_races": 10,
+    "n_scorable_cases": 0,
+    "n_scorable_fold_cutoffs": 0,
+    "min_scorable_for_limited_validation": 4,
+    "metrics": {
+      "candidate_share_mae": null,
+      "winner_accuracy": null,
+      "winner_margin_mae": null,
+      "crps_multivariate": null,
+      "mass_conservation_rate": null,
+      "candidate_winner_frequency": null,
+      "interval_coverage": null
+    },
+    "calibration_claim_allowed": false,
+    "label": "insufficient_scorable_historical_multiway_poll_cases"
+  },
+  "ordinary_oof_touched": false,
+  "note": "Materially multiway structural analogs exist, but no historical candidate-level multiway poll archive is available to freeze and score a share model. Montana remains correctly classified and withheld from publishable win probabilities until scorable historical poll validation exists.",
+  "artifact_sha256": "5fadd18881eb930ac68752a205d6e0ce3d5eab888980f8ac7d74ef7295f48c2d"
+}

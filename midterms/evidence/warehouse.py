@@ -431,7 +431,10 @@ class Warehouse:
                 races.get(
                     "contest_structure", pd.Series("", index=races.index)
                 ).astype(str).isin({
-                    "non_major_party_vs_republican", "ranked_choice_multiway",
+                    "non_major_party_vs_republican",
+                    "principal_binary_with_minor_residual",
+                    "ranked_choice_multiway",
+                    "multiway_plurality",
                 }),
                 "race_id",
             ].astype(str)

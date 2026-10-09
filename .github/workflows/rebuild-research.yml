@@ -94,8 +94,10 @@ jobs:
           print(path)
           print("snapshot_sha256", snapshot.get("snapshot_sha256"))
           PY
-      - name: Source readiness audit
-        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict
+      - name: Diagnostic source preflight (read-only, non-strict)
+        # Cheap pass: audit current source coverage without failing the job.
+        # This gives a clear snapshot of domain status before any refresh.
+        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary
       - name: Refresh safe sources
         # Resuming a failed rebuild must keep the sealed evidence bundle identity
         # stable so the prior research-rebuild-<bundle_id> artifact can download
@@ -105,8 +107,53 @@ jobs:
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe --summary --strict
-      - name: Fail-closed source and forecast coverage gate
-        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict
+      - name: Strict source readiness after refresh
+        # Fail only when required evidence domains are not ready (--strict-sources).
+        # Forecast completeness is checked separately below so that fail-closed
+        # multiway (MT withheld) produces a clear signal rather than a conflated error.
+        run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict-sources
+      - name: Forecast coverage gate (allow fail-closed multiway)
+        # Require all active races to have an approved predictive path.
+        # When the only failures are fail-closed genuine-multiway races (MT),
+        # continue with MULTIWAY_WITHHELD=1 and defer MT publication completeness.
+        shell: bash
+        run: |
+          set +e
+          python -m midterms.cli source-readiness \
+            --election-id senate-2026 \
+            --as-of "$AS_OF" \
+            --summary \
+            --require-forecast-complete > /tmp/fc_gate.json 2>&1
+          FC_EXIT=$?
+          cat /tmp/fc_gate.json
+          if [ "$FC_EXIT" -eq 0 ]; then
+            echo "MULTIWAY_WITHHELD=0" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          # Check whether the only failing races are genuine multiway (MT withheld)
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          report = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text())
+          coverage = (report.get("forecast_coverage") or {})
+          summary = coverage.get("summary") or {}
+          failing = coverage.get("unsupported_or_withheld_race_ids") or []
+          from midterms.evidence.current_candidates import load_current_candidate_registry
+          from midterms.evidence.modeling_paths import multiway_plurality_race_ids
+          registry = load_current_candidate_registry()
+          multiway_ids = multiway_plurality_race_ids(registry)
+          non_multiway_failures = [r for r in failing if r not in multiway_ids]
+          if non_multiway_failures:
+              print(f"::error::Forecast incomplete for non-multiway races: {non_multiway_failures}")
+              sys.exit(1)
+          print(f"Forecast coverage: only fail-closed multiway races withheld: {failing}")
+          print("Setting MULTIWAY_WITHHELD=1 — MT deferred to post-OOF completeness check.")
+          PY
+          PY_EXIT=$?
+          if [ "$PY_EXIT" -ne 0 ]; then
+            exit 1
+          fi
+          echo "MULTIWAY_WITHHELD=1" >> "$GITHUB_ENV"
       - name: Verify official Alaska source archive
         if: inputs.resume_run_id == ''
         run: python -m midterms.cli prepare-alaska-rcv
@@ -272,8 +319,11 @@ jobs:
       - name: Smoke forecast at sealed evidence cutoff
         run: |
           python - <<'PY'
-          import os
+          import os, json
+          from pathlib import Path
           from midterms.pipeline.run_forecast import run_forecast
+          from midterms.evidence.current_candidates import load_current_candidate_registry
+          from midterms.evidence.modeling_paths import multiway_plurality_race_ids
           as_of = os.environ["AS_OF"]
           result = run_forecast(
               method="fast",
@@ -284,12 +334,61 @@ jobs:
               election_id="senate-2026",
           )
           art = result["artifact"]
-          assert art["chamber"]["expected_dem_seats"] > 0
-          assert len(art["races"]) >= 30
-          print("sealed-as-of smoke ok", as_of, len(art["races"]))
+          races = art["races"]
+          assert art["chamber"]["expected_dem_seats"] > 0, "no expected Dem seats"
+          assert len(races) >= 30, f"too few races: {len(races)}"
+
+          # All active races represented OR explicitly withheld as multiway
+          registry = load_current_candidate_registry()
+          multiway_ids = multiway_plurality_race_ids(registry)
+          forecast_race_ids = {r["race_id"] for r in races}
+          registry_race_ids = {
+              str(row["race_id"]) for row in (registry.get("races") or [])
+              if isinstance(row, dict) and row.get("race_id")
+          }
+          missing = registry_race_ids - forecast_race_ids - multiway_ids
+          assert not missing, f"Races absent from forecast (not withheld multiway): {sorted(missing)}"
+
+          # No duplicate race IDs
+          seen = {}
+          for r in races:
+              rid = r["race_id"]
+              assert rid not in seen, f"Duplicate race_id in forecast: {rid}"
+              seen[rid] = True
+
+          # Candidate probability mass: every race sums to ~1
+          for r in races:
+              probs = [float(c.get("win_probability") or 0) for c in r.get("candidates") or []]
+              if probs:
+                  total = sum(probs)
+                  assert 0.95 <= total <= 1.05, (
+                      f"Race {r['race_id']} candidate probabilities sum to {total:.4f}"
+                  )
+
+          # Path assignment spot-checks for known special-case states
+          path_by_race = {r["race_id"]: r.get("modeling_path") or r.get("model_path") for r in races}
+          multiway_withheld = os.environ.get("MULTIWAY_WITHHELD", "0") == "1"
+
+          # AK: must use alaska_rcv_adapter if present
+          ak_races = [rid for rid in forecast_race_ids if "AK" in rid]
+          for ak in ak_races:
+              p = path_by_race.get(ak)
+              assert p is None or "alaska" in str(p).lower(), (
+                  f"AK race {ak} has unexpected path {p!r}"
+              )
+
+          # MT: must be withheld (not in forecast) when MULTIWAY_WITHHELD=1
+          mt_in_forecast = [rid for rid in forecast_race_ids if "-MT" in rid or rid.endswith("MT")]
+          if multiway_withheld:
+              assert not mt_in_forecast, (
+                  f"MT should be withheld (MULTIWAY_WITHHELD=1) but appears in forecast: {mt_in_forecast}"
+              )
+
+          print("sealed-as-of smoke ok", as_of, len(races), "races; multiway_withheld=", multiway_withheld)
           PY
         env:
           AS_OF: ${{ needs.prepare_evidence.outputs.as_of }}
+          MULTIWAY_WITHHELD: ${{ env.MULTIWAY_WITHHELD }}
 
   rebuild:
     needs: [prepare_evidence, tests]
@@ -362,6 +461,14 @@ jobs:
           print(f"independent_resumed={str(bool(report.get('independent_rebuild_restored'))).lower()}")
           print(f"forecast_run_id={report.get('forecast_run_id') or ''}")
           PY
+      - name: Rebuild preflight (cheap pre-OOF gates)
+        # Run all cheap blocking checks before committing to the expensive OOF.
+        # Allows fail-closed multiway (MT withheld); fails on all other blockers.
+        run: |
+          python -m midterms.cli rebuild-preflight \
+            --election-id senate-2026 \
+            --as-of "$AS_OF" \
+            --strict
       - name: Historical structural-feature parity (pre-OOF)
         if: steps.resume.outputs.resumed != 'true'
         run: |

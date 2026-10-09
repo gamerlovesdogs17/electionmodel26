@@ -172,7 +172,9 @@ def resolve_generic_ballot_context(
                 path="unavailable",
                 election_day=ed_s,
             )
-        gb_path = path or (RAW_DIR / "external" / "votehub_generic_ballot_2026.json")
+        from midterms.evidence.live_generic_ballot import LIVE_GENERIC_BALLOT_PATH
+
+        gb_path = path or LIVE_GENERIC_BALLOT_PATH
         blob = gb_path.read_bytes() if gb_path.is_file() else b""
         return GenericBallotContext(
             schema_version=GB_CONTEXT_SCHEMA,

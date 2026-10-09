@@ -22,12 +22,13 @@ PREPARE_EVIDENCE_VERSION = "prepare-evidence-v1"
 
 def _poll_snapshot_paths() -> tuple[Path, ...]:
     from midterms.config import NORMALIZED_DIR, RAW_DIR
+    from midterms.evidence.live_generic_ballot import LIVE_GENERIC_BALLOT_PATH
 
     return (
         NORMALIZED_DIR / "polls.parquet",
         NORMALIZED_DIR / "polls_live_votehub.parquet",
         RAW_DIR / "external" / "votehub_us_senator.json",
-        RAW_DIR / "external" / "votehub_generic_ballot_2026.json",
+        LIVE_GENERIC_BALLOT_PATH,
         RAW_DIR / "polls_live_votehub.csv",
     )
 

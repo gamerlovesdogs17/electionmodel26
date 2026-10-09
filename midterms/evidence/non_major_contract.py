@@ -73,11 +73,9 @@ def probability_support_status(
             pass
         return False, "unsupported", "ranked_choice_multiway_evidence_or_adapter_not_ready"
     if structure == "multiway_plurality":
-        return (
-            False,
-            "unsupported",
-            "multiway_plurality_probability_model_not_historically_supported",
-        )
+        from midterms.model.multiway_plurality import multiway_probability_supported
+
+        return multiway_probability_supported()
     if structure == PRINCIPAL_BINARY_CONTEST_STRUCTURE:
         if not non_major_identity_supported(row):
             return False, "unsupported", "principal_binary_identity_or_caucus_contract_incomplete"

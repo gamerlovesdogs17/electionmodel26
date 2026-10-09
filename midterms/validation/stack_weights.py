@@ -24,9 +24,32 @@ from midterms.validation.artifact_lineage import (
     require_current_model_version,
 )
 
-# Structural ablation labels are diagnostics, not stack members.
-EXCLUDE_FROM_STACK = frozenset(
+# ---------------------------------------------------------------------------
+# Production stack membership vs same-family specification challengers
+# ---------------------------------------------------------------------------
+# STACK_CANDIDATES: models that may receive non-zero weight in the production
+# predictive mixture (subject to G8 disable and completeness checks).
+STACK_CANDIDATES = frozenset(
     {
+        "pymc",
+        "pymc_dynamic",
+        "state_space",
+        "ridge_fundamentals",
+        "poll_only_state_space",
+        "last_election_swing",
+        "equal_weight_polls",
+        "shrinkage_polls",
+    }
+)
+
+# SPECIFICATION_CHALLENGERS: models scored OOF to select one representative
+# state-space config and one national-environment (ridge coef) config.
+# They are NEVER permitted in the production predictive mixture.
+# Includes hierarchical structural ablations (diagnostic variants of the spine)
+# plus the two same-family groups whose winning member enters the spec.
+SPECIFICATION_CHALLENGERS = frozenset(
+    {
+        # --- Hierarchical structural ablations (spine diagnostics) ---
         "hier_no_similarity",
         "hier_no_terminal_race",
         "hier_no_study_effect",
@@ -35,8 +58,41 @@ EXCLUDE_FROM_STACK = frozenset(
         "hier_plus_study_effect",
         "hier_plus_sponsor_effect",
         "hier_plus_questionnaire_effect",
+        # --- State-space same-family configuration challengers ---
+        "state_space_no_ed_fund_repull",
+        "state_space_process_sd_0_5",
+        "state_space_process_sd_1_2",
+        # --- National-environment (ridge fundamentals) ablations ---
+        "no_generic_ballot",
+        "no_approval",
+        "no_midterm_outparty",
+        "no_income_economic",
     }
 )
+
+# EXCLUDE_FROM_STACK is the union of all non-stack models: specification
+# challengers must never enter fit_predictive_mixture.
+EXCLUDE_FROM_STACK = SPECIFICATION_CHALLENGERS
+
+
+def specification_challenger_names() -> frozenset[str]:
+    """Return the frozen set of all same-family configuration challenger names."""
+    return SPECIFICATION_CHALLENGERS
+
+
+def assert_no_same_family_stack_leakage(weights: dict[str, Any]) -> None:
+    """Raise ValueError if any production stack key is a specification challenger.
+
+    Call this after fitting or loading stack weights to enforce the invariant that
+    same-family challengers and production candidates never coexist in the mixture.
+    """
+    leaked = sorted(k for k in weights if k in SPECIFICATION_CHALLENGERS and float(weights.get(k, 0.0)) != 0.0)
+    if leaked:
+        raise ValueError(
+            f"same-family specification challengers leaked into production stack weights: "
+            f"{leaked}. These models must only appear in SPECIFICATION_CHALLENGERS, never "
+            f"in the predictive mixture."
+        )
 
 STACK_WEIGHTS_PATH = ARTIFACTS_DIR / "stack_weights_oof.json"
 NESTED_LOO_PATH = ARTIFACTS_DIR / "nested_component_loo.json"
@@ -143,11 +199,13 @@ def fit_stack_weights_from_oof(
         for k in {n for fold in filtered.values() for n in fold}
     }
 
+    assert_no_same_family_stack_leakage(production)
     return {
         "audit_item": "P2.2",
         "temperature": temperature,
         "stacking_mode": "empirical_predictive_mixture_crps_v1",
-        "excluded_structural": sorted(EXCLUDE_FROM_STACK),
+        "excluded_specification_challengers": sorted(SPECIFICATION_CHALLENGERS),
+        "excluded_structural": sorted(SPECIFICATION_CHALLENGERS),  # backward-compat alias
         "excluded_g8_disable": sorted(disabled),
         "excluded_extra": sorted(extra_exclude or ()),
         "excluded_missing_predictions": excluded_missing,
@@ -216,6 +274,7 @@ def reproduce_weights(payload: dict[str, Any]) -> dict[str, float]:
     if nested.get("frozen_draws_sha256") != _draws_fingerprint(nested.get("oof_draws") or {}):
         raise ValueError("frozen draw archive fingerprint changed")
     excluded = set(payload.get("excluded_g8_disable") or []) | set(EXCLUDE_FROM_STACK)
+    excluded |= set(SPECIFICATION_CHALLENGERS)  # always ban same-family challengers
     excluded |= set(payload.get("excluded_extra") or [])
     excluded |= set(payload.get("excluded_missing_predictions") or {})
     allowed = {name for fold in (payload.get("filtered_crps_by_fold") or {}).values() for name in fold}
@@ -230,6 +289,7 @@ def reproduce_weights(payload: dict[str, Any]) -> dict[str, float]:
     )
     if fitted["prediction_sha256"] != payload.get("prediction_sha256"):
         raise ValueError("frozen prediction fingerprint changed")
+    assert_no_same_family_stack_leakage(fitted["weights"])
     return fitted["weights"]
 
 

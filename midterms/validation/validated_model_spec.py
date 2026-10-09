@@ -40,6 +40,13 @@ ORDINARY_STATISTICAL_SPEC_FIELDS = (
     "historical_structural_feature_schema",
     # Same-family G8 keep/drop decisions for hierarchical structural terms.
     "structural_feature_enables",
+    # Same-family selection: chosen state-space configuration (fund_pull,
+    # flat_prior, process_sd_per_sqrt_day).  Changing selection changes SHA256.
+    "selected_state_space_config",
+    # Same-family selection: chosen national-environment (ridge-fundamentals
+    # coefficient) configuration (generic_ballot_enabled, approval_enabled,
+    # midterm_outparty_enabled, income_enabled).
+    "selected_national_environment_config",
 )
 
 
@@ -168,6 +175,12 @@ def write_candidate_model_spec(
     structural_feature_enables = structural_feature_enables_from_g8(
         nested_selection.get("g8_recommendations")
     )
+
+    # Same-family configuration selection: choose one state-space config and one
+    # national-environment config from the selection OOF challenger scores.
+    from midterms.validation.same_family_selection import select_same_family_configs
+    same_family_selection = select_same_family_configs(nested_selection)
+
     payload = {
         "schema_version": CANDIDATE_SPEC_SCHEMA,
         "model_version": MODEL_VERSION,
@@ -186,6 +199,12 @@ def write_candidate_model_spec(
         "lead_cutoffs_days": [60, 30],
         "historical_structural_feature_schema": "historical-structural-features-v1",
         "structural_feature_enables": structural_feature_enables,
+        # Same-family config selections (part of ordinary-statistical-spec identity)
+        "selected_state_space_config": same_family_selection["selected_state_space_config"],
+        "selected_national_environment_config": same_family_selection["selected_national_environment_config"],
+        "selected_state_space_name": same_family_selection["selected_state_space_name"],
+        "selected_national_environment_name": same_family_selection["selected_national_environment_name"],
+        "same_family_selection_audit": same_family_selection["same_family_selection_audit"],
         "code_commit_sha": code_commit_sha,
         "production_research_eligible": False,
         "next_required_phase": CANONICAL_OOF_PHASE,

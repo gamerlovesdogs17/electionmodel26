@@ -1260,7 +1260,21 @@ def main(argv: list[str] | None = None) -> None:
     )
     p_ready.add_argument("--election-id", default="senate-2026")
     p_ready.add_argument("--as-of", required=True)
-    p_ready.add_argument("--strict", action="store_true")
+    p_ready.add_argument(
+        "--strict",
+        action="store_true",
+        help="Deprecated alias for --strict-sources --require-forecast-complete",
+    )
+    p_ready.add_argument(
+        "--strict-sources",
+        action="store_true",
+        help="Fail only when required evidence domains are not ready for rebuild",
+    )
+    p_ready.add_argument(
+        "--require-forecast-complete",
+        action="store_true",
+        help="Fail when an active race lacks an approved predictive path",
+    )
     p_ready.add_argument(
         "--summary",
         action="store_true",
@@ -1288,15 +1302,19 @@ def main(argv: list[str] | None = None) -> None:
             "path": report.get("path"),
         }
         print(json.dumps(compact if a.summary else report, indent=2, default=str))
-        if not a.strict:
+        check_sources = bool(a.strict_sources or a.strict)
+        check_forecast = bool(a.require_forecast_complete or a.strict)
+        if not check_sources and not check_forecast:
             return
         failures: list[str] = []
-        if not report.get("ready_for_expensive_rebuild"):
+        if check_sources and not report.get("ready_for_expensive_rebuild"):
             failures.append(
                 "source readiness is not green: "
                 + json.dumps(report.get("blockers") or [], sort_keys=True, default=str)
             )
-        if summary.get("forecast_complete") is not True or int(summary.get("n_fail") or 0) != 0:
+        if check_forecast and (
+            summary.get("forecast_complete") is not True or int(summary.get("n_fail") or 0) != 0
+        ):
             failures.append(
                 "forecast coverage incomplete: "
                 + json.dumps(summary, sort_keys=True, default=str)
@@ -1729,6 +1747,49 @@ def main(argv: list[str] | None = None) -> None:
             raise SystemExit(1)
 
     p_ver.set_defaults(func=_verify)
+
+    p_preflight = sub.add_parser(
+        "rebuild-preflight",
+        help=(
+            "Cheap pre-OOF rebuild gates (v0.9.25): source readiness, forecast coverage, "
+            "modeling paths, challenger/stack classification, exceptional lineage, "
+            "multiway share smoke, and chamber accounting. No PyMC is invoked."
+        ),
+    )
+    p_preflight.add_argument("--election-id", default="senate-2026")
+    p_preflight.add_argument("--as-of", required=True)
+    p_preflight.add_argument(
+        "--strict",
+        action="store_true",
+        help="Exit nonzero when any blocking gate fails",
+    )
+    p_preflight.add_argument(
+        "--out",
+        default=None,
+        help="Optional path to write the preflight JSON artifact",
+    )
+
+    def _rebuild_preflight(a: argparse.Namespace) -> None:
+        from midterms.validation.rebuild_preflight import run_rebuild_preflight
+
+        result = run_rebuild_preflight(
+            election_id=a.election_id,
+            as_of=a.as_of,
+            strict=a.strict,
+            out_path=a.out,
+        )
+        compact = {
+            "ok": result["ok"],
+            "multiway_withheld": result["multiway_withheld"],
+            "blockers": result["blockers"],
+            "warnings": result["warnings"],
+            "gate_summary": {
+                name: check.get("ok") for name, check in (result.get("checks") or {}).items()
+            },
+        }
+        print(json.dumps(compact, indent=2, default=str))
+
+    p_preflight.set_defaults(func=_rebuild_preflight)
 
     args = parser.parse_args(argv)
     args.func(args)

@@ -475,7 +475,8 @@ def test_classified_warnings_alone_are_permitted() -> None:
     coverage = validate_forecast_coverage(COVERAGE)
     assert coverage["summary"]["n_warning"] > 0
     # Fail-closed multiway races are explicit forecast fails, not silent gaps.
-    assert coverage["summary"]["n_fail_closed_multiway"] >= 3
+    # After principal-binary reclassification only MT remains genuine multiway.
+    assert coverage["summary"]["n_fail_closed_multiway"] >= 1
     assert coverage["summary"]["forecast_complete"] is False
 
 
@@ -568,11 +569,12 @@ def test_modeling_paths_ak_ne_oh() -> None:
     coverage = validate_forecast_coverage(COVERAGE)
     paths = coverage["race_paths"]
     assert paths["senate-2026-AK"] == "alaska_rcv_adapter"
-    assert paths["senate-2026-NE"] == "multiway_plurality_adapter"
+    assert paths["senate-2026-NE"] == "binary_non_major_adapter"
     assert paths["senate-2026-OH"] == "ordinary_stack"
-    assert paths["senate-2026-ID"] == "multiway_plurality_adapter"
+    assert paths["senate-2026-ID"] == "binary_non_major_adapter"
     assert paths["senate-2026-MT"] == "multiway_plurality_adapter"
     assert paths["senate-2026-SD"] == "binary_non_major_adapter"
+    assert paths["senate-2026-MT"] != "binary_non_major_adapter"
 
 
 # ---------------------------------------------------------------------------

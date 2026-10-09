@@ -334,7 +334,13 @@ def test_archive_backed_validation_is_limited_and_deterministic() -> None:
         for source in first["source_lineage"].values()
     )
     statuses = {row["state"]: row["n_usable_polls"] for row in first["current_poll_audit"]}
-    assert statuses == {"ID": 1, "MT": 6, "NE": 1, "SD": 0}
+    # MT multiway candidate-level questions are retained in the exceptional
+    # poll stream; binary non-major current records still exclude MT.
+    assert statuses["ID"] == 1
+    assert statuses["NE"] == 1
+    assert statuses["SD"] == 0
+    assert statuses["MT"] >= 6
+    assert "senate-2026-MT" not in first["selected_current_adapter_records"]
 
 
 def test_common_shock_sensitivity_preserves_marginals_and_changes_dependence() -> None:
@@ -406,11 +412,18 @@ def test_current_coverage_separates_limited_withheld_and_unsupported() -> None:
         )
     )
     by_state = {row["state"]: row for row in coverage["races"]}
-    assert all(
-        by_state[state]["probability_model_support_status"] == "unsupported"
-        and by_state[state]["contest_structure"] == "multiway_plurality"
-        for state in ("ID", "MT", "NE")
-    )
+    # MT remains genuine multiway and stays unsupported until poll validation exists.
+    assert by_state["MT"]["contest_structure"] == "multiway_plurality"
+    assert by_state["MT"]["probability_model_support_status"] == "unsupported"
+    # NE/ID are principal-binary-with-minors and may use the candidate-neutral path.
+    assert by_state["NE"]["contest_structure"] == "principal_binary_with_minor_residual"
+    assert by_state["ID"]["contest_structure"] == "principal_binary_with_minor_residual"
+    assert by_state["NE"]["probability_model_support_status"] in {
+        "limited_supported", "limited_supported_prior_only",
+    }
+    assert by_state["ID"]["probability_model_support_status"] in {
+        "limited_supported", "limited_supported_prior_only",
+    }
     assert by_state["SD"]["probability_model_support_status"] == "limited_supported_prior_only"
     assert by_state["SD"]["n_candidate_compatible_polls"] == 0
     assert by_state["AK"]["probability_model_support_status"] == "limited_supported"

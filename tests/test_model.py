@@ -27,10 +27,17 @@ def test_baseline_replay_writes_report():
 
 
 def test_joint_chamber_not_independent():
+    from midterms.model.non_major_adapter import ordinary_model_snapshot
+
     wh = Warehouse()
-    snap = wh.build_as_of("2026-10-03", "senate-2026")
+    snap = ordinary_model_snapshot(wh.build_as_of("2026-10-03", "senate-2026"))
     fit = fit_fast_approximation(snap, n_draws=1500, seed=7)
-    sim, summaries = simulate_chamber(fit, snap.races)
+    # Unsupported multiway seats are withheld from ordinary chamber smokes.
+    held = int(snap.races["not_up"].sum())
+    withheld = max(0, 100 - held - len(fit.race_ids))
+    sim, summaries = simulate_chamber(
+        fit, snap.races, withheld_contested_seats=withheld,
+    )
     assert len(sim.seat_draws) == 1500
     assert 0 <= sim.p_dem_majority <= 1
     # Correlated draws: variance of seat total should exceed independent-ish lower bound loosely

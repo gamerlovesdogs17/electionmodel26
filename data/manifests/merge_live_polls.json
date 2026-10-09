@@ -1,6 +1,6 @@
 {
-  "schema_version": "votehub-poll-lineage-v2",
-  "parser_version": "votehub-ingest-v2-candidate-identity",
+  "schema_version": "votehub-poll-lineage-v3",
+  "parser_version": "votehub-ingest-v3-race-scoped-candidate-level",
   "n_live": 376,
   "n_warehouse_polls": 4533,
   "election_id": "senate-2026",
@@ -42,7 +42,7 @@
     "raw_canonical_json_sha256": "16936d382f5c4e7af8ac11cc31cc16a284daa8e3418560d74c1dd826464ef362",
     "retrieved_at": "2026-10-05T23:38:19.605547+00:00",
     "fetch_manifest_path": "data/manifests/fetch_votehub_us_senator.json",
-    "fetch_manifest_sha256": "c3ceffd692d8b4fffd21a0116fd591d2d70975da527159e089912fdfb920d3f4",
+    "fetch_manifest_sha256": "4982e8c7a4921a068c967107838f380d4d4927ab668c30990f19977a336093b2",
     "fetch_manifest_recorded_raw_sha256": "9e52469311e79b109bc12033542cecae83ff22a6cff1da4ec7371226fb00ae67"
   },
   "outputs": {
@@ -52,5 +52,6 @@
     "warehouse_current_semantic_sha256": "748e3762ba93d406aba26ad2f5ddf80a939ab3b3c74fdcb2e4c6c88bf853455d"
   },
   "lineage_verified": true,
-  "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0"
+  "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0",
+  "resealed_without_renormalize": true
 }

@@ -473,13 +473,16 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
         "prepare-evidence --election-id senate-2026 --as-of \"$AS_OF\" "
         "--mode refresh-safe --summary --strict"
     ) in text
-    assert text.index("Source readiness audit") < text.index("Refresh safe sources")
-    assert text.index("Refresh safe sources") < text.index(
-        "Fail-closed source and forecast coverage gate"
+    # v0.9.25: diagnostic (read-only) → refresh → strict-sources → forecast gate
+    assert text.index("Diagnostic source preflight") < text.index("Refresh safe sources"), (
+        "v0.9.25: diagnostic preflight must precede refresh"
     )
-    assert text.count(
-        "source-readiness --election-id senate-2026 --as-of \"$AS_OF\" --summary --strict"
-    ) >= 2
+    assert text.index("Refresh safe sources") < text.index("Strict source readiness after refresh"), (
+        "v0.9.25: strict-sources check must come after refresh"
+    )
+    # --strict-sources and --require-forecast-complete are separate gates in v0.9.25
+    assert "--strict-sources" in text, "v0.9.25 requires --strict-sources flag"
+    assert "--require-forecast-complete" in text, "v0.9.25 requires --require-forecast-complete flag"
     assert "ordinary_statistical_spec_sha256" in text
     assert '"--tune-per-chain", "4000"' in text
     assert '"--chains", "4"' in text
