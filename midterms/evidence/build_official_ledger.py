@@ -27,10 +27,9 @@ AZ_2024 = (1_676_335, 1_595_761, 0)  # AZ SOS signed canvass 2024-11-25
 
 
 def _election_day(year: int) -> str:
-    d = date(year, 11, 1)
-    while d.weekday() != 0:
-        d += timedelta(days=1)
-    return (d + timedelta(days=1)).isoformat()
+    from midterms.evidence.federal_election_day import federal_election_day
+
+    return federal_election_day(year).isoformat()
 
 
 def _votes_from_margin(margin_pp: float, *, scale: int = 1_000_000) -> tuple[int, int, int]:

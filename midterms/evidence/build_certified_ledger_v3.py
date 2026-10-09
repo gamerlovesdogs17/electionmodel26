@@ -220,15 +220,9 @@ def _sha(path: Path) -> str:
 
 
 def _election_day(year: int) -> str:
-    # First Tuesday after first Monday in November — approximate fixed dates used elsewhere.
-    return {
-        2014: "2014-11-04",
-        2016: "2016-11-08",
-        2018: "2018-11-06",
-        2020: "2020-11-03",
-        2022: "2022-11-08",
-        2024: "2024-11-05",
-    }.get(year, f"{year}-11-01")
+    from midterms.evidence.federal_election_day import federal_election_day
+
+    return federal_election_day(year).isoformat()
 
 
 def build_from_fte(years: tuple[int, ...] = (2014, 2016, 2018, 2020, 2022, 2024)) -> dict[str, Any]:

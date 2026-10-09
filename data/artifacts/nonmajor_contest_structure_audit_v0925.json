@@ -1,0 +1,430 @@
+{
+  "schema_version": "nonmajor-contest-structure-audit-v0925",
+  "generated_at": "2026-10-09T00:56:24.355938+00:00",
+  "model_version": "senate-hierarchical-v0.9.25",
+  "registry_used_as_ballot_authority": false,
+  "alaska": {
+    "race_id": "senate-2026-AK",
+    "verified_structure": "ranked_choice_multiway",
+    "statistical_path": "alaska_rcv_adapter",
+    "validation_level": "limited"
+  },
+  "races": {
+    "MT": {
+      "race_id": "senate-2026-MT",
+      "verified_structure": "multiway_plurality",
+      "classifier_category": "genuine_multiway_plurality",
+      "statistical_path": "multiway_plurality_adapter",
+      "validation_level": "unsupported",
+      "n_certified_ballot_candidates": 4,
+      "principal_pair": [
+        {
+          "candidate_id": "senate-2026-MT:kurt-alme",
+          "candidate_name": "Kurt Alme",
+          "ballot_party": "R",
+          "caucus": "R"
+        },
+        {
+          "candidate_id": "senate-2026-MT:alani-bankhead",
+          "candidate_name": "Alani Bankhead",
+          "ballot_party": "D",
+          "caucus": "D"
+        },
+        {
+          "candidate_id": "senate-2026-MT:seth-bodnar",
+          "candidate_name": "Seth Bodnar",
+          "ballot_party": "I",
+          "caucus": "D"
+        }
+      ],
+      "residual_candidates": [
+        {
+          "candidate_id": "senate-2026-MT:kyle-austin",
+          "candidate_name": "Kyle Austin",
+          "ballot_party": "L"
+        }
+      ],
+      "classification_evidence": {
+        "criterion_id": "principal-binary-with-minors-v1-historical-2014-2024",
+        "n_credible_principals": 3,
+        "n_residual_candidates": 1,
+        "principal_poll_share_floor": 0.05,
+        "historical_top_two_min": 0.9,
+        "historical_third_max": 0.08,
+        "poll_shares_supplied": false
+      },
+      "authority": {
+        "level": "state_secretary_of_state_certification",
+        "issuer": "Montana Secretary of State Christi Jacobsen",
+        "source_title": "2026 General Election State Candidate Certification",
+        "source_url": "https://www.cascadecountymt.gov/DocumentCenter/View/8147/2026-General-Election-State-Candidate-Certification",
+        "publication_date": "2026-08-20",
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00",
+        "note": "County-hosted true copy of the Montana Secretary of State general-election certification under MCA 13-12-201."
+      },
+      "previous_registry_structure": "multiway_plurality",
+      "previous_registry_path": "multiway_plurality_adapter",
+      "prior_binary_probabilities_invalid": true,
+      "analog_support": {
+        "schema_version": "multiway-plurality-analog-support-v1",
+        "analog_selection_rule": {
+          "id": "senate-plurality-multiway-analogs-v1",
+          "predeclared_before_scoring": true,
+          "include": [
+            "US Senate general elections 1990\u20132024",
+            "at least three ballot-qualified candidates",
+            "plurality (not RCV, not majority-runoff) institutional rule"
+          ],
+          "exclude": [
+            "Alaska RCV / IRV contests",
+            "Louisiana jungle-primary / majority-threshold contests",
+            "Georgia runoff-threshold contests",
+            "same-party generals without multi-party field"
+          ]
+        },
+        "n_analogs": 0,
+        "min_analogs_for_probability_model": 8,
+        "probability_model_support_status": "unsupported",
+        "win_probability_status": "fail_closed",
+        "note": "Historical support too sparse; classify contest correctly and withhold win probability"
+      },
+      "candidates": [
+        {
+          "candidate_name": "Kurt Alme",
+          "ballot_party": "R",
+          "caucus": "R"
+        },
+        {
+          "candidate_name": "Kyle Austin",
+          "ballot_party": "L",
+          "caucus": null
+        },
+        {
+          "candidate_name": "Alani Bankhead",
+          "ballot_party": "D",
+          "caucus": "D"
+        },
+        {
+          "candidate_name": "Seth Bodnar",
+          "ballot_party": "I",
+          "caucus": "D"
+        }
+      ],
+      "outside_model_probabilities_used": false,
+      "registry_used_as_ballot_authority": false
+    },
+    "ID": {
+      "race_id": "senate-2026-ID",
+      "verified_structure": "principal_binary_with_minor_residual",
+      "classifier_category": "principal_binary_with_minor_residual",
+      "statistical_path": "candidate_neutral_binary_with_minor_residual",
+      "validation_level": "limited_supported_principal_binary",
+      "n_certified_ballot_candidates": 4,
+      "principal_pair": [
+        {
+          "candidate_id": "senate-2026-ID:todd-achilles",
+          "candidate_name": "Todd Achilles",
+          "ballot_party": "I",
+          "caucus": "D"
+        },
+        {
+          "candidate_id": "senate-2026-ID:jim-risch",
+          "candidate_name": "Jim Risch",
+          "ballot_party": "R",
+          "caucus": "R"
+        }
+      ],
+      "residual_candidates": [
+        {
+          "candidate_id": "senate-2026-ID:natalie-fleming",
+          "candidate_name": "Natalie Fleming",
+          "ballot_party": "I"
+        },
+        {
+          "candidate_id": "senate-2026-ID:matt-loesby",
+          "candidate_name": "Matt Loesby",
+          "ballot_party": "L"
+        }
+      ],
+      "classification_evidence": {
+        "criterion_id": "principal-binary-with-minors-v1-historical-2014-2024",
+        "n_credible_principals": 2,
+        "n_residual_candidates": 2,
+        "principal_poll_share_floor": 0.05,
+        "historical_top_two_min": 0.9,
+        "historical_third_max": 0.08,
+        "poll_shares_supplied": false
+      },
+      "authority": {
+        "level": "state_election_authority_corroborated",
+        "issuer": "Idaho Secretary of State / VoteIdaho.gov candidate field",
+        "source_title": "Idaho Capital Sun 2026 General Election voter guide (quotes statewide U.S. Senate field; directs readers to VoteIdaho.gov)",
+        "source_url": "https://idahocapitalsun.com/voter-guides/2026-general-election/",
+        "publication_date": "2026-10-05",
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00",
+        "primary_sos_url_attempted": "https://sos.idaho.gov/elections-division/2026-general-election-candidate-list/",
+        "primary_sos_retrieval_status": "HTTP 403 Forbidden from this environment",
+        "corroborating_sources": [
+          {
+            "source_url": "https://ballotpedia.org/United_States_Senate_election_in_Idaho,_2026",
+            "role": "secondary_corroboration_not_ballot_authority"
+          }
+        ],
+        "note": "Direct sos.idaho.gov candidate-list fetch returned 403. Ballot field recorded from contemporaneous Idaho Capital Sun voter guide that lists the statewide U.S. Senate nominees and points to VoteIdaho.gov; not DDHQ/Cook/HDR/markets."
+      },
+      "previous_registry_structure": "principal_binary_with_minor_residual",
+      "previous_registry_path": "candidate_neutral_binary_with_minor_residual",
+      "prior_binary_probabilities_invalid": false,
+      "analog_support": {
+        "schema_version": "multiway-plurality-analog-support-v1",
+        "analog_selection_rule": {
+          "id": "senate-plurality-multiway-analogs-v1",
+          "predeclared_before_scoring": true,
+          "include": [
+            "US Senate general elections 1990\u20132024",
+            "at least three ballot-qualified candidates",
+            "plurality (not RCV, not majority-runoff) institutional rule"
+          ],
+          "exclude": [
+            "Alaska RCV / IRV contests",
+            "Louisiana jungle-primary / majority-threshold contests",
+            "Georgia runoff-threshold contests",
+            "same-party generals without multi-party field"
+          ]
+        },
+        "n_analogs": 0,
+        "min_analogs_for_probability_model": 8,
+        "probability_model_support_status": "unsupported",
+        "win_probability_status": "fail_closed",
+        "note": "Historical support too sparse; classify contest correctly and withhold win probability"
+      },
+      "candidates": [
+        {
+          "candidate_name": "Todd Achilles",
+          "ballot_party": "I",
+          "caucus": "D"
+        },
+        {
+          "candidate_name": "Natalie Fleming",
+          "ballot_party": "I",
+          "caucus": null
+        },
+        {
+          "candidate_name": "Matt Loesby",
+          "ballot_party": "L",
+          "caucus": null
+        },
+        {
+          "candidate_name": "Jim Risch",
+          "ballot_party": "R",
+          "caucus": "R"
+        }
+      ],
+      "outside_model_probabilities_used": false,
+      "registry_used_as_ballot_authority": false
+    },
+    "NE": {
+      "race_id": "senate-2026-NE",
+      "verified_structure": "principal_binary_with_minor_residual",
+      "classifier_category": "principal_binary_with_minor_residual",
+      "statistical_path": "candidate_neutral_binary_with_minor_residual",
+      "validation_level": "limited_supported_principal_binary",
+      "n_certified_ballot_candidates": 5,
+      "principal_pair": [
+        {
+          "candidate_id": "senate-2026-NE:pete-ricketts",
+          "candidate_name": "Pete Ricketts",
+          "ballot_party": "R",
+          "caucus": "R"
+        },
+        {
+          "candidate_id": "senate-2026-NE:dan-osborn",
+          "candidate_name": "Dan Osborn",
+          "ballot_party": "I",
+          "caucus": "D"
+        }
+      ],
+      "residual_candidates": [
+        {
+          "candidate_id": "senate-2026-NE:mike-marvin",
+          "candidate_name": "Mike Marvin",
+          "ballot_party": "LMN"
+        },
+        {
+          "candidate_id": "senate-2026-NE:robin-richards",
+          "candidate_name": "Robin Richards",
+          "ballot_party": "NWP"
+        },
+        {
+          "candidate_id": "senate-2026-NE:chuck-conboy",
+          "candidate_name": "Chuck Conboy",
+          "ballot_party": "AF"
+        }
+      ],
+      "classification_evidence": {
+        "criterion_id": "principal-binary-with-minors-v1-historical-2014-2024",
+        "n_credible_principals": 2,
+        "n_residual_candidates": 3,
+        "principal_poll_share_floor": 0.05,
+        "historical_top_two_min": 0.9,
+        "historical_third_max": 0.08,
+        "poll_shares_supplied": false
+      },
+      "authority": {
+        "level": "state_secretary_of_state_filing_list",
+        "issuer": "Nebraska Secretary of State",
+        "source_title": "Final Statewide General Candidate Filing List 9/11/2026 \u2014 November 3, 2026 General Election",
+        "source_url": "https://sos.nebraska.gov/sites/default/files/doc/elections/2026/Final_Statewide_General_Candidate_Filing_List_9.11.26.pdf",
+        "publication_date": "2026-09-11",
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00"
+      },
+      "previous_registry_structure": "principal_binary_with_minor_residual",
+      "previous_registry_path": "candidate_neutral_binary_with_minor_residual",
+      "prior_binary_probabilities_invalid": false,
+      "analog_support": {
+        "schema_version": "multiway-plurality-analog-support-v1",
+        "analog_selection_rule": {
+          "id": "senate-plurality-multiway-analogs-v1",
+          "predeclared_before_scoring": true,
+          "include": [
+            "US Senate general elections 1990\u20132024",
+            "at least three ballot-qualified candidates",
+            "plurality (not RCV, not majority-runoff) institutional rule"
+          ],
+          "exclude": [
+            "Alaska RCV / IRV contests",
+            "Louisiana jungle-primary / majority-threshold contests",
+            "Georgia runoff-threshold contests",
+            "same-party generals without multi-party field"
+          ]
+        },
+        "n_analogs": 0,
+        "min_analogs_for_probability_model": 8,
+        "probability_model_support_status": "unsupported",
+        "win_probability_status": "fail_closed",
+        "note": "Historical support too sparse; classify contest correctly and withhold win probability"
+      },
+      "candidates": [
+        {
+          "candidate_name": "Pete Ricketts",
+          "ballot_party": "R",
+          "caucus": "R"
+        },
+        {
+          "candidate_name": "Mike Marvin",
+          "ballot_party": "LMN",
+          "caucus": null
+        },
+        {
+          "candidate_name": "Robin Richards",
+          "ballot_party": "NWP",
+          "caucus": null
+        },
+        {
+          "candidate_name": "Chuck Conboy",
+          "ballot_party": "AF",
+          "caucus": null
+        },
+        {
+          "candidate_name": "Dan Osborn",
+          "ballot_party": "I",
+          "caucus": "D"
+        }
+      ],
+      "outside_model_probabilities_used": false,
+      "registry_used_as_ballot_authority": false
+    },
+    "SD": {
+      "race_id": "senate-2026-SD",
+      "verified_structure": "non_major_party_vs_republican",
+      "classifier_category": "binary_non_major_v_r",
+      "statistical_path": "binary_non_major_adapter",
+      "validation_level": "limited_supported",
+      "n_certified_ballot_candidates": 2,
+      "principal_pair": [
+        {
+          "candidate_id": "senate-2026-SD:mike-rounds",
+          "candidate_name": "Mike Rounds",
+          "ballot_party": "R"
+        },
+        {
+          "candidate_id": "senate-2026-SD:brian-bengs",
+          "candidate_name": "Brian Bengs",
+          "ballot_party": "I"
+        }
+      ],
+      "residual_candidates": [],
+      "classification_evidence": null,
+      "authority": {
+        "level": "state_secretary_of_state_candidate_list",
+        "issuer": "South Dakota Secretary of State",
+        "source_title": "2026 General Election Candidate List",
+        "source_url": "https://vip.sdsos.gov/candidatelist.aspx?eid=774",
+        "publication_date": null,
+        "retrieval_timestamp": "2026-10-07T01:45:00+00:00"
+      },
+      "previous_registry_structure": "non_major_party_vs_republican",
+      "previous_registry_path": "binary_non_major_adapter",
+      "prior_binary_probabilities_invalid": false,
+      "analog_support": {
+        "schema_version": "multiway-plurality-analog-support-v1",
+        "analog_selection_rule": {
+          "id": "senate-plurality-multiway-analogs-v1",
+          "predeclared_before_scoring": true,
+          "include": [
+            "US Senate general elections 1990\u20132024",
+            "at least three ballot-qualified candidates",
+            "plurality (not RCV, not majority-runoff) institutional rule"
+          ],
+          "exclude": [
+            "Alaska RCV / IRV contests",
+            "Louisiana jungle-primary / majority-threshold contests",
+            "Georgia runoff-threshold contests",
+            "same-party generals without multi-party field"
+          ]
+        },
+        "n_analogs": 0,
+        "min_analogs_for_probability_model": 8,
+        "probability_model_support_status": "unsupported",
+        "win_probability_status": "fail_closed",
+        "note": "Historical support too sparse; classify contest correctly and withhold win probability"
+      },
+      "candidates": [
+        {
+          "candidate_name": "Mike Rounds",
+          "ballot_party": "R",
+          "caucus": "R"
+        },
+        {
+          "candidate_name": "Brian Bengs",
+          "ballot_party": "I",
+          "caucus": "D"
+        }
+      ],
+      "outside_model_probabilities_used": false,
+      "registry_used_as_ballot_authority": false
+    }
+  },
+  "decision_gate": {
+    "ID": {
+      "verified_structure": "principal_binary_with_minor_residual",
+      "statistical_path": "candidate_neutral_binary_with_minor_residual",
+      "validation_level": "limited_supported_principal_binary"
+    },
+    "MT": {
+      "verified_structure": "multiway_plurality",
+      "statistical_path": "multiway_plurality_adapter",
+      "validation_level": "unsupported"
+    },
+    "NE": {
+      "verified_structure": "principal_binary_with_minor_residual",
+      "statistical_path": "candidate_neutral_binary_with_minor_residual",
+      "validation_level": "limited_supported_principal_binary"
+    },
+    "SD": {
+      "verified_structure": "non_major_party_vs_republican",
+      "statistical_path": "binary_non_major_adapter",
+      "validation_level": "limited_supported"
+    }
+  }
+}

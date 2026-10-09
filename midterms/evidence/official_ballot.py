@@ -66,12 +66,10 @@ BASE_LEANS = {
 
 
 def election_day(year: int) -> date:
-    from datetime import timedelta
+    """Authoritative federal Election Day (Tuesday after the first Monday)."""
+    from midterms.evidence.federal_election_day import federal_election_day
 
-    d = date(year, 11, 1)
-    while d.weekday() != 0:
-        d += timedelta(days=1)
-    return d + timedelta(days=1)
+    return federal_election_day(year)
 
 
 # Per-cycle official metadata (pre-election held caucus counts + post control)

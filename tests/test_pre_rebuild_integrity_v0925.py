@@ -4,14 +4,17 @@ from __future__ import annotations
 
 import inspect
 import json
-from datetime import date, timedelta
+from datetime import date
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import pytest
 
-from midterms.config import MODEL_VERSION, PREVIOUS_SEALED_MODEL_VERSION, PUBLIC_LIVE_ENABLED
+from midterms.config import (
+    MODEL_VERSION,
+    PREVIOUS_SEALED_MODEL_VERSION,
+    PUBLIC_LIVE_ENABLED,
+)
 from midterms.evidence.generic_ballot_context import (
     resolve_generic_ballot_context,
     write_generic_ballot_parity_artifact,
@@ -47,7 +50,9 @@ from midterms.ops.forecast_artifact_coherence import (
     assert_forecast_latest_coherent,
     write_development_forecast_stub,
 )
-from midterms.validation.exceptional_loo_diagnostics import leave_one_poll_out_diagnostics
+from midterms.validation.exceptional_loo_diagnostics import (
+    leave_one_poll_out_diagnostics,
+)
 from midterms.validation.historical_multiway_analogs import (
     discover_historical_multiway_plurality_analogs,
 )
@@ -76,7 +81,8 @@ def test_gb_as_of_filtering_rejects_future_polls(tmp_path: Path):
     archive.write_text(
         json.dumps(
             {
-                "weighting_method": "test",
+                "archive_semantic_hash": "test-hash",
+                "aggregation_config_id": "trailing_weighted_headline_v1",
                 "rows": [
                     {
                         "election_id": "senate-2022",
@@ -84,6 +90,7 @@ def test_gb_as_of_filtering_rejects_future_polls(tmp_path: Path):
                         "margin": 2.0,
                         "available_at": "2022-09-01",
                         "field_end": "2022-08-28",
+                        "sample_size": 1000,
                         "poll_id": "gb-past",
                     },
                     {
@@ -92,6 +99,7 @@ def test_gb_as_of_filtering_rejects_future_polls(tmp_path: Path):
                         "margin": 9.0,
                         "available_at": "2022-11-10",
                         "field_end": "2022-11-05",
+                        "sample_size": 1000,
                         "poll_id": "gb-future",
                     },
                 ],
@@ -108,6 +116,7 @@ def test_gb_as_of_filtering_rejects_future_polls(tmp_path: Path):
         assert ctx.n_polls == 1
         assert ctx.margin == pytest.approx(2.0)
         assert "gb-future" not in ctx.source_ids
+        assert ctx.formal_oof_eligible is True
     finally:
         gbc.HISTORICAL_GB_STORE = monkey_path
 
@@ -403,19 +412,33 @@ def test_exceptional_loo_deterministic():
 
 
 def test_no_state_specific_probability_override_in_classifier():
+    from midterms.model.contest_classifier import PRINCIPAL_BINARY_WITH_MINORS
+
     src = inspect.getsource(classify_contest_structure)
     assert 'state == "NE"' not in src
     assert 'state == "MT"' not in src
     mt = classify_contest_structure(
         ballot_candidates=[
-            {"ballot_party": "R"},
-            {"ballot_party": "I"},
-            {"ballot_party": "D"},
+            {"ballot_party": "R", "caucus": "R"},
+            {"ballot_party": "I", "caucus": "D"},
+            {"ballot_party": "D", "caucus": "D"},
             {"ballot_party": "L"},
         ]
     )
     assert mt["category"] == GENUINE_MULTIWAY_PLURALITY
     assert mt["state_identity_used"] is False
+    ne = classify_contest_structure(
+        ballot_candidates=[
+            {"ballot_party": "R", "caucus": "R", "candidate_name": "R"},
+            {"ballot_party": "I", "caucus": "D", "candidate_name": "I"},
+            {"ballot_party": "L", "candidate_name": "L1"},
+            {"ballot_party": "G", "candidate_name": "G1"},
+            {"ballot_party": "AF", "candidate_name": "AF1"},
+        ]
+    )
+    assert ne["category"] == PRINCIPAL_BINARY_WITH_MINORS
+    assert ne["state_identity_used"] is False
+    assert len(ne["residual_candidates"]) == 3
     sd = classify_contest_structure(
         ballot_candidates=[{"ballot_party": "I"}, {"ballot_party": "R"}]
     )
@@ -424,6 +447,84 @@ def test_no_state_specific_probability_override_in_classifier():
         ballot_candidates=[{"ballot_party": "D"}, {"ballot_party": "R"}]
     )
     assert dr["category"] == ORDINARY_DVR
+
+
+def test_federal_election_day_rule_and_2022_regression():
+    from midterms.evidence.federal_election_day import (
+        federal_election_day,
+        formal_cutoff,
+    )
+
+    assert federal_election_day(2018).isoformat() == "2018-11-06"
+    assert federal_election_day(2020).isoformat() == "2020-11-03"
+    assert federal_election_day(2022).isoformat() == "2022-11-08"
+    assert federal_election_day(2024).isoformat() == "2024-11-05"
+    # November 1 is Monday → Election Day is Nov 2
+    assert federal_election_day(2010).isoformat() == "2010-11-02"
+    # November 1 is Tuesday → Election Day is Nov 8, not Nov 1
+    assert federal_election_day(2005).isoformat() == "2005-11-08"
+    assert formal_cutoff(2022, 60).isoformat() == "2022-09-09"
+    assert formal_cutoff(2022, 30).isoformat() == "2022-10-09"
+
+
+def test_historical_gb_archive_covers_eight_formal_folds():
+    from midterms.evidence.generic_ballot_context import (
+        HISTORICAL_GB_STORE,
+        write_generic_ballot_parity_artifact,
+    )
+
+    assert HISTORICAL_GB_STORE.is_file()
+    payload = write_generic_ballot_parity_artifact()
+    assert payload["n_formal_eligible"] == 8
+    assert payload["status"] == "ok"
+    assert payload["path"].endswith("generic_ballot_parity_v0925.json")
+    assert "2022-11-08" in {r["election_day"] for r in payload["rows"]}
+    assert "2022-11-01" not in {r["election_day"] for r in payload["rows"]}
+
+
+def test_historical_gb_source_changes_invalidate_oof_fold_identity(tmp_path: Path):
+    from midterms.evidence.generic_ballot_context import formal_oof_gb_fold_identity
+
+    a = formal_oof_gb_fold_identity("senate-2022", "2022-10-09", archive_hash="hash-a")
+    b = formal_oof_gb_fold_identity("senate-2022", "2022-10-09", archive_hash="hash-b")
+    c = formal_oof_gb_fold_identity("senate-2022", "2022-09-09", archive_hash="hash-a")
+    assert a != b
+    assert a != c
+
+
+def test_oof_challengers_are_wired_into_freeze_component_predictions():
+    from midterms.validation.nested_component_loo import (
+        FORMAL_OOF_NATIONAL_ENV_CHALLENGERS,
+        FORMAL_OOF_STATE_SPACE_CHALLENGERS,
+        freeze_component_predictions,
+    )
+
+    src = inspect.getsource(freeze_component_predictions)
+    for name in FORMAL_OOF_STATE_SPACE_CHALLENGERS:
+        assert name in src
+    assert "FORMAL_OOF_NATIONAL_ENV_CHALLENGERS" in src
+    for name in (
+        "no_generic_ballot",
+        "no_approval",
+        "no_midterm_outparty",
+        "no_income_economic",
+    ):
+        assert name in FORMAL_OOF_NATIONAL_ENV_CHALLENGERS
+
+
+def test_tracked_artifacts_avoid_user_home_absolute_paths():
+    roots = [
+        Path("data/artifacts/generic_ballot_parity_v0925.json"),
+        Path("data/artifacts/historical_multiway_plurality_analogs_v0925.json"),
+        Path("data/raw/external/historical_generic_ballot_archive.json"),
+    ]
+    home_markers = ("C:/Users/", "C:\\Users\\", "/Users/", "OneDrive")
+    for path in roots:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for marker in home_markers:
+            assert marker not in text, f"{path} contains absolute local path marker {marker}"
 
 
 def test_release_spec_identity_changes_with_probability_config():

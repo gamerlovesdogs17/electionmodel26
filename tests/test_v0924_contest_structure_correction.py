@@ -71,23 +71,29 @@ def test_mt_official_field_is_four_way_plurality():
     assert mt["win_probability_status"] == "fail_closed"
 
 
-def test_id_official_field_is_four_way_plurality():
+def test_id_official_field_is_four_way_ballot_principal_binary():
     names = {c["candidate_name"] for c in certified_candidates("ID")}
     assert names == {"Todd Achilles", "Natalie Fleming", "Matt Loesby", "Jim Risch"}
     audit = build_mt_id_contest_field_audit()
     idaho = next(r for r in audit["races"] if r["state"] == "ID")
-    assert idaho["verified_contest_structure"] == MULTIWAY_CONTEST_STRUCTURE
-    assert idaho["recommended_modeling_path"] == "multiway_plurality_adapter"
+    # Four ballot lines, but historical principal-binary-with-minors criterion applies.
+    assert idaho["n_certified_general_ballot_candidates"] == 4
+    assert idaho["verified_contest_structure"] == "principal_binary_with_minor_residual"
+    assert idaho["recommended_modeling_path"] == "candidate_neutral_binary_with_minor_residual"
 
 
 def test_registry_matches_official_multiway_and_sd_binary():
     reg = load_current_candidate_registry()
     by = {r["state"]: r for r in reg["races"]}
-    for state in ("MT", "ID", "NE"):
-        assert by[state]["contest_structure"] == MULTIWAY_CONTEST_STRUCTURE
-        assert by[state]["probability_model_support_status"] == "unsupported"
-        assert by[state]["exceptional_probability_model_supported"] is False
-        assert not non_major_identity_supported(by[state])
+    assert by["MT"]["contest_structure"] == MULTIWAY_CONTEST_STRUCTURE
+    assert by["MT"]["probability_model_support_status"] == "unsupported"
+    assert by["MT"]["exceptional_probability_model_supported"] is False
+    assert not non_major_identity_supported(by["MT"])
+    for state in ("ID", "NE"):
+        assert by[state]["contest_structure"] == "principal_binary_with_minor_residual"
+        assert by[state]["probability_model_support_status"] == "limited_supported"
+        assert by[state]["exceptional_probability_model_supported"] is True
+        assert non_major_identity_supported(by[state])
     assert by["SD"]["contest_structure"] == "non_major_party_vs_republican"
     assert by["SD"]["probability_model_support_status"] == "limited_supported"
     assert non_major_identity_supported(by["SD"])
@@ -156,8 +162,10 @@ def test_omitted_official_candidate_detected_as_registry_error():
 
 def test_ne_sd_structure_gate():
     gate = build_nonmajor_contest_structure_audit()["decision_gate"]
-    assert gate["NE"]["verified_structure"] == MULTIWAY_CONTEST_STRUCTURE
-    assert gate["NE"]["validation_level"] == "unsupported"
+    assert gate["NE"]["verified_structure"] == "principal_binary_with_minor_residual"
+    assert gate["NE"]["validation_level"] == "limited_supported_principal_binary"
+    assert gate["ID"]["verified_structure"] == "principal_binary_with_minor_residual"
+    assert gate["MT"]["verified_structure"] == MULTIWAY_CONTEST_STRUCTURE
     assert gate["SD"]["verified_structure"] == "non_major_party_vs_republican"
     assert gate["SD"]["statistical_path"] == "binary_non_major_adapter"
 

@@ -253,19 +253,19 @@
       "opposing_side": "opposing",
       "opposing_caucus": "R",
       "opposing_caucus_basis": "declared_major_party_nominee_assumption",
-      "contest_structure": "multiway_plurality",
+      "contest_structure": "principal_binary_with_minor_residual",
       "current_matchup_status": "reviewed_current",
       "reviewed_as_of": "2026-10-03",
       "statistical_target_supported": false,
-      "note": "Official general ballot is multiway plurality. Binary non-major adapter disabled. Win probability withheld until a historically supported multiway model exists. Prior binary I-v-R probabilities are superseded under the wrong contest structure.",
+      "note": "Ballot has 3+ lines but historical principal-binary-with-minors criterion applies. Modeled estimand is the principal-candidate relative margin; residual minors are preserved and not assumed to make principal shares sum to 100%.",
       "sitting_senator_name": "Jim Risch",
       "modeled_candidate_is_incumbent": false,
       "opposing_candidate_is_incumbent": true,
       "seat_identity": "US_SENATE:ID:II",
       "personal_incumbency_identity_status": "opposing_is_seat_incumbent",
       "ordinary_binary_target_supported": false,
-      "exceptional_probability_model_supported": false,
-      "probability_model_support_status": "unsupported",
+      "exceptional_probability_model_supported": true,
+      "probability_model_support_status": "limited_supported",
       "ballot_candidates": [
         {
           "candidate_id": "senate-2026-ID:todd-achilles",
@@ -345,8 +345,85 @@
         ],
         "note": "Direct sos.idaho.gov candidate-list fetch returned 403. Ballot field recorded from contemporaneous Idaho Capital Sun voter guide that lists the statewide U.S. Senate nominees and points to VoteIdaho.gov; not DDHQ/Cook/HDR/markets."
       },
-      "win_probability_status": "fail_closed",
-      "modeling_path": "multiway_plurality_adapter"
+      "win_probability_status": "ok",
+      "modeling_path": "candidate_neutral_binary_with_minor_residual",
+      "contest_classification": {
+        "category": "principal_binary_with_minor_residual",
+        "registry_alias": "principal_binary_with_minor_residual",
+        "basis": "two_credible_principals_with_minor_residual",
+        "n_ballot_candidates": 4,
+        "parties": [
+          "I",
+          "L",
+          "R"
+        ],
+        "principal_pair": [
+          {
+            "candidate_id": "senate-2026-ID:todd-achilles",
+            "candidate_name": "Todd Achilles",
+            "ballot_party": "I",
+            "caucus": "D"
+          },
+          {
+            "candidate_id": "senate-2026-ID:jim-risch",
+            "candidate_name": "Jim Risch",
+            "ballot_party": "R",
+            "caucus": "R"
+          }
+        ],
+        "residual_candidates": [
+          {
+            "candidate_id": "senate-2026-ID:natalie-fleming",
+            "candidate_name": "Natalie Fleming",
+            "ballot_party": "I"
+          },
+          {
+            "candidate_id": "senate-2026-ID:matt-loesby",
+            "candidate_name": "Matt Loesby",
+            "ballot_party": "L"
+          }
+        ],
+        "classification_evidence": {
+          "criterion_id": "principal-binary-with-minors-v1-historical-2014-2024",
+          "n_credible_principals": 2,
+          "n_residual_candidates": 2,
+          "principal_poll_share_floor": 0.05,
+          "historical_top_two_min": 0.9,
+          "historical_third_max": 0.08,
+          "poll_shares_supplied": false
+        },
+        "state_identity_used": false,
+        "modeling_path": "candidate_neutral_binary_with_minor_residual",
+        "estimand_note": "Modeled estimand is the principal-candidate relative margin (e.g. independent/petition nominee minus Republican). Residual minor-party ballot lines are preserved; principal shares are not assumed to sum to 100%.",
+        "validation_level": "limited_supported_principal_binary"
+      },
+      "principal_pair": [
+        {
+          "candidate_id": "senate-2026-ID:todd-achilles",
+          "candidate_name": "Todd Achilles",
+          "ballot_party": "I",
+          "caucus": "D"
+        },
+        {
+          "candidate_id": "senate-2026-ID:jim-risch",
+          "candidate_name": "Jim Risch",
+          "ballot_party": "R",
+          "caucus": "R"
+        }
+      ],
+      "residual_candidates": [
+        {
+          "candidate_id": "senate-2026-ID:natalie-fleming",
+          "candidate_name": "Natalie Fleming",
+          "ballot_party": "I"
+        },
+        {
+          "candidate_id": "senate-2026-ID:matt-loesby",
+          "candidate_name": "Matt Loesby",
+          "ballot_party": "L"
+        }
+      ],
+      "estimand_note": "Modeled estimand is the principal-candidate relative margin (e.g. independent/petition nominee minus Republican). Residual minor-party ballot lines are preserved; principal shares are not assumed to sum to 100%."
     },
     {
       "race_id": "senate-2026-IL",
@@ -619,7 +696,7 @@
       "current_matchup_status": "reviewed_current",
       "reviewed_as_of": "2026-10-03",
       "statistical_target_supported": false,
-      "note": "Official general ballot is multiway plurality. Binary non-major adapter disabled. Win probability withheld until a historically supported multiway model exists. Prior binary I-v-R probabilities are superseded under the wrong contest structure.",
+      "note": "Official general ballot is genuine multiway plurality under the historical principal-binary criterion. Win probability withheld until a historically supported multiway model exists.",
       "sitting_senator_name": "Steve Daines",
       "modeled_candidate_is_incumbent": false,
       "opposing_candidate_is_incumbent": false,
@@ -700,7 +777,57 @@
         "note": "County-hosted true copy of the Montana Secretary of State general-election certification under MCA 13-12-201."
       },
       "win_probability_status": "fail_closed",
-      "modeling_path": "multiway_plurality_adapter"
+      "modeling_path": "multiway_plurality_adapter",
+      "contest_classification": {
+        "category": "genuine_multiway_plurality",
+        "registry_alias": "multiway_plurality",
+        "basis": "three_or_more_credible_principals",
+        "n_ballot_candidates": 4,
+        "parties": [
+          "D",
+          "I",
+          "L",
+          "R"
+        ],
+        "principal_pair": [
+          {
+            "candidate_id": "senate-2026-MT:kurt-alme",
+            "candidate_name": "Kurt Alme",
+            "ballot_party": "R",
+            "caucus": "R"
+          },
+          {
+            "candidate_id": "senate-2026-MT:alani-bankhead",
+            "candidate_name": "Alani Bankhead",
+            "ballot_party": "D",
+            "caucus": "D"
+          },
+          {
+            "candidate_id": "senate-2026-MT:seth-bodnar",
+            "candidate_name": "Seth Bodnar",
+            "ballot_party": "I",
+            "caucus": "D"
+          }
+        ],
+        "residual_candidates": [
+          {
+            "candidate_id": "senate-2026-MT:kyle-austin",
+            "candidate_name": "Kyle Austin",
+            "ballot_party": "L"
+          }
+        ],
+        "classification_evidence": {
+          "criterion_id": "principal-binary-with-minors-v1-historical-2014-2024",
+          "n_credible_principals": 3,
+          "n_residual_candidates": 1,
+          "principal_poll_share_floor": 0.05,
+          "historical_top_two_min": 0.9,
+          "historical_third_max": 0.08,
+          "poll_shares_supplied": false
+        },
+        "state_identity_used": false,
+        "modeling_path": "multiway_plurality_adapter"
+      }
     },
     {
       "race_id": "senate-2026-NC",
@@ -745,19 +872,19 @@
       "opposing_side": "opposing",
       "opposing_caucus": "R",
       "opposing_caucus_basis": "declared_major_party_nominee_assumption",
-      "contest_structure": "multiway_plurality",
+      "contest_structure": "principal_binary_with_minor_residual",
       "current_matchup_status": "reviewed_current",
       "reviewed_as_of": "2026-10-03",
       "statistical_target_supported": false,
-      "note": "Official general ballot is multiway plurality. Binary non-major adapter disabled. Win probability withheld until a historically supported multiway model exists. Prior binary I-v-R probabilities are superseded under the wrong contest structure.",
+      "note": "Ballot has 3+ lines but historical principal-binary-with-minors criterion applies. Modeled estimand is the principal-candidate relative margin; residual minors are preserved and not assumed to make principal shares sum to 100%.",
       "sitting_senator_name": "Pete Ricketts",
       "modeled_candidate_is_incumbent": false,
       "opposing_candidate_is_incumbent": true,
       "seat_identity": "US_SENATE:NE:II",
       "personal_incumbency_identity_status": "opposing_is_seat_incumbent",
       "ordinary_binary_target_supported": false,
-      "exceptional_probability_model_supported": false,
-      "probability_model_support_status": "unsupported",
+      "exceptional_probability_model_supported": true,
+      "probability_model_support_status": "limited_supported",
       "ballot_candidates": [
         {
           "candidate_id": "senate-2026-NE:pete-ricketts",
@@ -843,8 +970,97 @@
         "publication_date": "2026-09-11",
         "retrieval_timestamp": "2026-10-07T01:45:00+00:00"
       },
-      "win_probability_status": "fail_closed",
-      "modeling_path": "multiway_plurality_adapter"
+      "win_probability_status": "ok",
+      "modeling_path": "candidate_neutral_binary_with_minor_residual",
+      "contest_classification": {
+        "category": "principal_binary_with_minor_residual",
+        "registry_alias": "principal_binary_with_minor_residual",
+        "basis": "two_credible_principals_with_minor_residual",
+        "n_ballot_candidates": 5,
+        "parties": [
+          "AF",
+          "I",
+          "LMN",
+          "NWP",
+          "R"
+        ],
+        "principal_pair": [
+          {
+            "candidate_id": "senate-2026-NE:pete-ricketts",
+            "candidate_name": "Pete Ricketts",
+            "ballot_party": "R",
+            "caucus": "R"
+          },
+          {
+            "candidate_id": "senate-2026-NE:dan-osborn",
+            "candidate_name": "Dan Osborn",
+            "ballot_party": "I",
+            "caucus": "D"
+          }
+        ],
+        "residual_candidates": [
+          {
+            "candidate_id": "senate-2026-NE:mike-marvin",
+            "candidate_name": "Mike Marvin",
+            "ballot_party": "LMN"
+          },
+          {
+            "candidate_id": "senate-2026-NE:robin-richards",
+            "candidate_name": "Robin Richards",
+            "ballot_party": "NWP"
+          },
+          {
+            "candidate_id": "senate-2026-NE:chuck-conboy",
+            "candidate_name": "Chuck Conboy",
+            "ballot_party": "AF"
+          }
+        ],
+        "classification_evidence": {
+          "criterion_id": "principal-binary-with-minors-v1-historical-2014-2024",
+          "n_credible_principals": 2,
+          "n_residual_candidates": 3,
+          "principal_poll_share_floor": 0.05,
+          "historical_top_two_min": 0.9,
+          "historical_third_max": 0.08,
+          "poll_shares_supplied": false
+        },
+        "state_identity_used": false,
+        "modeling_path": "candidate_neutral_binary_with_minor_residual",
+        "estimand_note": "Modeled estimand is the principal-candidate relative margin (e.g. independent/petition nominee minus Republican). Residual minor-party ballot lines are preserved; principal shares are not assumed to sum to 100%.",
+        "validation_level": "limited_supported_principal_binary"
+      },
+      "principal_pair": [
+        {
+          "candidate_id": "senate-2026-NE:pete-ricketts",
+          "candidate_name": "Pete Ricketts",
+          "ballot_party": "R",
+          "caucus": "R"
+        },
+        {
+          "candidate_id": "senate-2026-NE:dan-osborn",
+          "candidate_name": "Dan Osborn",
+          "ballot_party": "I",
+          "caucus": "D"
+        }
+      ],
+      "residual_candidates": [
+        {
+          "candidate_id": "senate-2026-NE:mike-marvin",
+          "candidate_name": "Mike Marvin",
+          "ballot_party": "LMN"
+        },
+        {
+          "candidate_id": "senate-2026-NE:robin-richards",
+          "candidate_name": "Robin Richards",
+          "ballot_party": "NWP"
+        },
+        {
+          "candidate_id": "senate-2026-NE:chuck-conboy",
+          "candidate_name": "Chuck Conboy",
+          "ballot_party": "AF"
+        }
+      ],
+      "estimand_note": "Modeled estimand is the principal-candidate relative margin (e.g. independent/petition nominee minus Republican). Residual minor-party ballot lines are preserved; principal shares are not assumed to sum to 100%."
     },
     {
       "race_id": "senate-2026-NH",
@@ -1141,7 +1357,32 @@
         "publication_date": null,
         "retrieval_timestamp": "2026-10-07T01:45:00+00:00"
       },
-      "modeling_path": "binary_non_major_adapter"
+      "modeling_path": "binary_non_major_adapter",
+      "contest_classification": {
+        "category": "binary_non_major_v_r",
+        "registry_alias": "non_major_party_vs_republican",
+        "basis": "two_ballot_candidates_nonmajor_v_r",
+        "n_ballot_candidates": 2,
+        "parties": [
+          "I",
+          "R"
+        ],
+        "state_identity_used": false,
+        "modeling_path": "binary_non_major_adapter",
+        "principal_pair": [
+          {
+            "candidate_id": "senate-2026-SD:mike-rounds",
+            "candidate_name": "Mike Rounds",
+            "ballot_party": "R"
+          },
+          {
+            "candidate_id": "senate-2026-SD:brian-bengs",
+            "candidate_name": "Brian Bengs",
+            "ballot_party": "I"
+          }
+        ],
+        "residual_candidates": []
+      }
     },
     {
       "race_id": "senate-2026-TN",

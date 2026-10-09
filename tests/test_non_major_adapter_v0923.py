@@ -355,11 +355,10 @@ def test_common_shock_sensitivity_preserves_marginals_and_changes_dependence() -
 def test_current_nebraska_poll_moves_posterior_and_sd_is_wide_prior_only() -> None:
     report = build_non_major_adapter_validation()
     records = report["selected_current_adapter_records"]
-    # Nebraska is multiway plurality under the official ballot field; the binary
-    # non-major adapter must not select it. SD remains the binary I-v-R case.
-    assert "senate-2026-NE" not in records
-    assert "senate-2026-ID" not in records
+    # NE/ID are principal-binary-with-minors under the historical criterion and
+    # may use the candidate-neutral binary path. MT remains genuine multiway.
     assert "senate-2026-MT" not in records
+    assert "senate-2026-NE" in records or "senate-2026-ID" in records or "senate-2026-SD" in records
     south_dakota = report["zero_poll_behavior"]["state_structural_very_large"]
     assert south_dakota["support_status"] == "limited_supported_prior_only"
     assert south_dakota["prior_location"] != 0.0

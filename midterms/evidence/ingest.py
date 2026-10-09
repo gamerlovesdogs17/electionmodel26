@@ -852,10 +852,11 @@ def generic_ballot_aggregate(
     """
     VoteHub generic-ballot Dem−Rep margin (pp), ENOP-ish trailing average.
 
-    Uses polls in the last `window_days` on/before as_of (else all eligible),
-    Winsorizes outlier margins, and weights by recency × √N. Avoids letting a
-    single YouGov/etc. print dominate fundamentals.
+    Uses the shared ``aggregate_generic_ballot`` summarizer so live and
+    historical paths apply the same weighting / winsorization math.
     """
+    from midterms.evidence.generic_ballot_aggregate import aggregate_generic_ballot
+
     path = path or (RAW_DIR / "external" / "votehub_generic_ballot_2026.json")
     if not path.exists():
         return None
@@ -887,15 +888,13 @@ def generic_ballot_aggregate(
         if dem is None or rep is None:
             continue
         end = str(p.get("end_date") or p.get("created_at") or "")[:10]
+        # Live VoteHub rows usually carry created_at; fall back to field_end only
+        # for the live feed (historical archive forbids field_end eligibility).
         published = str(p.get("created_at") or end)[:10]
         if cutoff and published > cutoff[:10]:
             continue
         if not end:
             continue
-        total = dem + rep
-        raw = 100.0 * (dem - rep) / total if total else dem - rep
-        # Headline D−R (not two-party renorm) — closer to public GB reporting
-        headline = float(dem) - float(rep)
         sample = p.get("sample_size")
         try:
             n = float(sample) if sample is not None else 1000.0
@@ -905,57 +904,22 @@ def generic_ballot_aggregate(
             n = 1000.0
         rows.append(
             {
-                "end": end,
-                "margin_renorm": float(raw),
-                "margin_headline": float(headline),
-                "n": n,
+                "field_end": end,
+                "available_at": published,
+                "margin": float(dem) - float(rep),
+                "dem": float(dem),
+                "rep": float(rep),
+                "sample_size": n,
                 "pollster": str(p.get("pollster") or p.get("pollster_id") or ""),
+                "poll_id": str(p.get("id") or p.get("poll_id") or ""),
             }
         )
     if not rows:
         return None
-
-    import math
-    from datetime import date
-
-    ref = date.fromisoformat((cutoff or max(r["end"] for r in rows))[:10])
-    windowed = [
-        r
-        for r in rows
-        if (ref - date.fromisoformat(r["end"])).days <= window_days
-        and (ref - date.fromisoformat(r["end"])).days >= 0
-    ]
-    if not windowed:
-        # Fall back to most recent 5 polls overall
-        windowed = sorted(rows, key=lambda r: r["end"], reverse=True)[:5]
-
-    margins = []
-    weights = []
-    for r in windowed:
-        m = float(np.clip(r["margin_headline"], -winsor_abs, winsor_abs))
-        age = max((ref - date.fromisoformat(r["end"])).days, 0)
-        recency = math.exp(-math.log(2.0) * age / max(window_days / 2.0, 1.0))
-        w = recency * math.sqrt(max(r["n"], 100.0) / 1000.0)
-        margins.append(m)
-        weights.append(w)
-    w_arr = np.asarray(weights, dtype=float)
-    m_arr = np.asarray(margins, dtype=float)
-    if float(w_arr.sum()) <= 0:
-        margin = float(np.median(m_arr))
-    else:
-        margin = float(np.average(m_arr, weights=w_arr))
-    return {
-        "margin": margin,
-        "n_polls": len(windowed),
-        "window_days": window_days,
-        "winsor_abs": winsor_abs,
-        "as_of": cutoff,
-        "ref_date": ref.isoformat(),
-        "raw_median": float(np.median(m_arr)),
-        "raw_mean": float(np.mean(m_arr)),
-        "method": "trailing_weighted_headline",
-        "note": "Headline D-R pp (not two-party renorm); Winsorized; recency*sqrt(N) weights",
-    }
+    ref = cutoff or max(r["field_end"] for r in rows)
+    return aggregate_generic_ballot(
+        rows, as_of=ref, window_days=window_days, winsor_abs=winsor_abs
+    )
 
 
 def merge_live_polls_into_warehouse(

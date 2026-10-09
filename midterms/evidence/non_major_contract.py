@@ -13,8 +13,13 @@ from typing import Any
 import pandas as pd
 
 NON_MAJOR_CONTEST_STRUCTURE = "non_major_party_vs_republican"
+PRINCIPAL_BINARY_CONTEST_STRUCTURE = "principal_binary_with_minor_residual"
 NON_MAJOR_ADAPTER_METHOD = "limited_validation_exception_model-v1"
 NON_MAJOR_TARGET = "modeled_candidate_margin"
+PRINCIPAL_BINARY_ELIGIBLE_STRUCTURES = {
+    NON_MAJOR_CONTEST_STRUCTURE,
+    PRINCIPAL_BINARY_CONTEST_STRUCTURE,
+}
 
 
 def _present(value: Any) -> bool:
@@ -29,8 +34,9 @@ def non_major_identity_supported(row: Mapping[str, Any] | pd.Series) -> bool:
     opponent, with both caucus mappings explicitly declared.
     """
 
+    structure = str(row.get("contest_structure") or "")
     return bool(
-        str(row.get("contest_structure") or "") == NON_MAJOR_CONTEST_STRUCTURE
+        structure in PRINCIPAL_BINARY_ELIGIBLE_STRUCTURES
         and str(row.get("modeled_ballot_party") or "").upper() == "I"
         and str(row.get("opposing_ballot_party") or "").upper() == "R"
         and str(row.get("modeled_caucus") or "").upper() == "D"
@@ -71,6 +77,16 @@ def probability_support_status(
             False,
             "unsupported",
             "multiway_plurality_probability_model_not_historically_supported",
+        )
+    if structure == PRINCIPAL_BINARY_CONTEST_STRUCTURE:
+        if not non_major_identity_supported(row):
+            return False, "unsupported", "principal_binary_identity_or_caucus_contract_incomplete"
+        if int(n_compatible_polls) < 1:
+            return False, "unsupported", "principal_binary_requires_compatible_polls"
+        return (
+            True,
+            "limited_supported",
+            "principal_binary_with_minor_residual_candidate_neutral_path",
         )
     if structure != NON_MAJOR_CONTEST_STRUCTURE:
         binary_value = row.get("binary_score_eligible")

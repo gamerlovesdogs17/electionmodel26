@@ -24,16 +24,29 @@ import numpy as np
 from midterms.baselines.models import BASELINES, RaceForecast
 from midterms.baselines.score import score_forecasts
 from midterms.config import ARTIFACTS_DIR, MODEL_VERSION
+from midterms.evidence.generic_ballot_context import (
+    formal_oof_gb_fold_identity,
+    historical_gb_archive_hash,
+)
 from midterms.evidence.historical_model_snapshot import (
     STRUCTURAL_FEATURE_SCHEMA,
     prepare_historical_model_snapshot,
 )
 from midterms.evidence.warehouse import Warehouse
 from midterms.model.challengers import (
+    STATE_SPACE_CHALLENGERS,
     fit_poll_only_state_space,
     fit_ridge_fundamentals,
+    fit_state_space_no_ed_fund_repull,
+    fit_state_space_process_scale,
+    state_space_challenger_lineage,
 )
 from midterms.model.ensemble import weights_from_oof_scores
+from midterms.model.national_environment_ablations import (
+    NATIONAL_ENVIRONMENT_ABLATIONS,
+    ablation_coefficients,
+    ablation_lineage,
+)
 from midterms.model.poll_structure import PollStructureConfig
 from midterms.model.pymc_model import (
     FitResult,
@@ -75,6 +88,10 @@ STRUCTURAL_VARIANTS = (
     "hier_plus_questionnaire_effect",
 )
 
+# Same-family challengers frozen/scored in formal OOF (not production stack weights).
+FORMAL_OOF_STATE_SPACE_CHALLENGERS = tuple(STATE_SPACE_CHALLENGERS)
+FORMAL_OOF_NATIONAL_ENV_CHALLENGERS = tuple(NATIONAL_ENVIRONMENT_ABLATIONS)
+
 REPAIR_CHECKPOINT_SCHEMA = "oof-inference-repair-checkpoint-v1"
 REPAIR_CHECKPOINT_DIRNAME = "oof_inference_repair_checkpoints"
 
@@ -104,6 +121,8 @@ class FrozenPrediction:
     presidential_source_sha256: str | None = None
     historical_structural_feature_sha256: str | None = None
     structural_ablation_lineage: dict[str, Any] | None = None
+    generic_ballot_source_hash: str | None = None
+    generic_ballot_fold_identity: str | None = None
 
 
 def _canonical_sha256(payload: Any) -> str:
@@ -471,6 +490,14 @@ def freeze_component_predictions(
         else ("pymc" if hierarchical_method.startswith("pymc") else "fast_hierarchical_t")
     )
     gb_error: str | None = None
+    gb_source_hash = historical_gb_archive_hash()
+    try:
+        gb_fold_identity = formal_oof_gb_fold_identity(
+            election_id, as_of, archive_hash=gb_source_hash
+        )
+    except ValueError:
+        # Synthetic / non-calendar election ids (CI fixtures).
+        gb_fold_identity = None
     try:
         gb = _generic_ballot(snap, election_id=election_id)
     except ValueError as exc:
@@ -507,6 +534,8 @@ def freeze_component_predictions(
         frozen[name].historical_structural_feature_sha256 = getattr(
             snap, "historical_structural_feature_sha256", None
         )
+        frozen[name].generic_ballot_source_hash = gb_source_hash or None
+        frozen[name].generic_ballot_fold_identity = gb_fold_identity
 
     _safe(
         hier_name,
@@ -599,6 +628,66 @@ def freeze_component_predictions(
             seed=seed + 11,
         ),
     )
+    # Exact single-dimension state-space challengers (formal OOF scoring).
+    _safe(
+        "state_space_no_ed_fund_repull",
+        lambda: _freeze_from_fit(
+            fit_state_space_no_ed_fund_repull(
+                snap, n_draws=n_draws, seed=seed + 111, generic_ballot=gb
+            ),
+            component="state_space_no_ed_fund_repull",
+            election_id=election_id,
+            holdout_year=holdout_year,
+            lead_days=lead_days,
+            as_of=as_of,
+            seed=seed + 111,
+            structural_ablation_lineage=state_space_challenger_lineage(
+                "state_space_no_ed_fund_repull"
+            ),
+        ),
+    )
+    _safe(
+        "state_space_process_sd_0_5",
+        lambda: _freeze_from_fit(
+            fit_state_space_process_scale(
+                snap,
+                process_sd_per_sqrt_day=0.5,
+                n_draws=n_draws,
+                seed=seed + 112,
+                generic_ballot=gb,
+            ),
+            component="state_space_process_sd_0_5",
+            election_id=election_id,
+            holdout_year=holdout_year,
+            lead_days=lead_days,
+            as_of=as_of,
+            seed=seed + 112,
+            structural_ablation_lineage=state_space_challenger_lineage(
+                "state_space_process_sd_0_5"
+            ),
+        ),
+    )
+    _safe(
+        "state_space_process_sd_1_2",
+        lambda: _freeze_from_fit(
+            fit_state_space_process_scale(
+                snap,
+                process_sd_per_sqrt_day=1.2,
+                n_draws=n_draws,
+                seed=seed + 113,
+                generic_ballot=gb,
+            ),
+            component="state_space_process_sd_1_2",
+            election_id=election_id,
+            holdout_year=holdout_year,
+            lead_days=lead_days,
+            as_of=as_of,
+            seed=seed + 113,
+            structural_ablation_lineage=state_space_challenger_lineage(
+                "state_space_process_sd_1_2"
+            ),
+        ),
+    )
     _safe(
         "poll_only_state_space",
         lambda: _freeze_from_fit(
@@ -611,6 +700,28 @@ def freeze_component_predictions(
             seed=seed + 13,
         ),
     )
+    # National-environment ablations: same ridge-fundamentals family, one zeroed term.
+    for abl_i, abl_name in enumerate(FORMAL_OOF_NATIONAL_ENV_CHALLENGERS):
+        _safe(
+            abl_name,
+            lambda abl_name=abl_name, abl_i=abl_i: _freeze_from_fit(
+                fit_ridge_fundamentals(
+                    snap,
+                    n_draws=n_draws,
+                    seed=seed + 170 + abl_i,
+                    generic_ballot=gb,
+                    coefs=ablation_coefficients(abl_name),
+                    require_historical_fit=False,
+                ),
+                component=abl_name,
+                election_id=election_id,
+                holdout_year=holdout_year,
+                lead_days=lead_days,
+                as_of=as_of,
+                seed=seed + 170 + abl_i,
+                structural_ablation_lineage=ablation_lineage(abl_name),
+            ),
+        )
     _safe(
         "ridge_fundamentals",
         lambda: _freeze_from_fit(

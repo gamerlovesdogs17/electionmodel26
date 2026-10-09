@@ -11,10 +11,14 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, RAW_DIR
+from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, RAW_DIR, ROOT
 from midterms.model.multiway_plurality import (
     ANALOG_SELECTION_RULE,
     historical_analog_support_report,
+)
+from midterms.model.principal_binary_criterion import (
+    classify_share_profile,
+    summarize_analog_share_distribution,
 )
 
 OFFICIAL_CANDIDATES = RAW_DIR / "external" / "official_senate_candidates.json"
@@ -118,6 +122,12 @@ def discover_historical_multiway_plurality_analogs(
                 }
             )
         shares.sort(key=lambda r: r["share"], reverse=True)
+        top_two = float(shares[0]["share"]) + float(shares[1]["share"])
+        third_place = float(shares[2]["share"])
+        residual = 1.0 - top_two
+        structural_class = classify_share_profile(
+            top_two_combined_share=top_two, third_place_share=third_place
+        )
         dr_share = sum(s["share"] for s in shares if s["ballot_party"] in {"D", "R"})
         third = max((s["share"] for s in shares if s["ballot_party"] not in {"D", "R"}), default=0.0)
         winner = next((s for s in shares if s["winner"]), shares[0])
@@ -130,6 +140,15 @@ def discover_historical_multiway_plurality_analogs(
                 "contest_type": "plurality_general",
                 "n_candidates": len(shares),
                 "candidates": shares,
+                "top_two_combined_share": round(top_two, 6),
+                "third_place_share": round(third_place, 6),
+                "residual_share": round(residual, 6),
+                "structural_class": structural_class,
+                "ballot_multiway": True,
+                "principal_binary_with_minor_residual": (
+                    structural_class == "principal_binary_with_minor_residual"
+                ),
+                "materially_multiway": structural_class == "genuine_multiway_plurality",
                 "d_r_combined_share": round(dr_share, 6),
                 "largest_nonmajor_share": round(third, 6),
                 "winner_candidate_name": winner["candidate_name"],
@@ -143,22 +162,38 @@ def discover_historical_multiway_plurality_analogs(
         )
 
     support = historical_analog_support_report(n_analogs=len(analogs))
+    class_summary = summarize_analog_share_distribution(analogs)
+    try:
+        source_rel = path.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        source_rel = path.as_posix()
     return {
         "schema_version": "historical-multiway-plurality-analogs-v1",
         "model_version": MODEL_VERSION,
         "status": "ok" if analogs else "no_qualifying_analogs",
         "analog_selection_rule": ANALOG_SELECTION_RULE,
-        "source_path": str(path.as_posix()),
+        "source_path": source_rel,
         "source_sha256": payload.get("source_sha256"),
         "years_requested": [min_year, max_year],
         "years_present": sorted(years_present),
         "coverage_gaps": coverage_gaps,
+        "coverage_gap_explicit": (
+            "candidate-level certified results cover 2014–2024 only; "
+            "1990–2012 requested range remains a coverage gap"
+        ),
         "n_analogs": len(analogs),
+        "n_ballot_multiway": class_summary["class_counts"]["ballot_multiway"],
+        "n_principal_binary_with_minors": class_summary["class_counts"][
+            "principal_binary_with_minor_residual"
+        ],
+        "n_materially_multiway": class_summary["class_counts"]["materially_multiway"],
+        "class_summary": class_summary,
         "analogs": analogs,
         "support": support,
         "note": (
-            "Built from candidate-level certified rows. Production multiway model "
-            "is not automatically enabled."
+            "Built from candidate-level certified rows. Distinguishes ballot-multiway, "
+            "principal-binary-with-minors, and materially multiway. Production multiway "
+            "model is not automatically enabled."
         ),
     }
 
@@ -174,7 +209,10 @@ def normalize_slug(name: object) -> str:
 def write_historical_multiway_analogs_artifact() -> dict[str, Any]:
     payload = discover_historical_multiway_plurality_analogs()
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = ARTIFACTS_DIR / "historical_multiway_plurality_analogs_v0924.json"
+    path = ARTIFACTS_DIR / "historical_multiway_plurality_analogs_v0925.json"
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    payload["path"] = str(path)
+    try:
+        payload["path"] = path.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        payload["path"] = path.as_posix()
     return payload

@@ -184,9 +184,14 @@ def build_current_poll_discovery_reconciliation(
 
 
 def write_poll_discovery_artifact(**kwargs: Any) -> dict[str, Any]:
+    from midterms.config import ROOT
+
     payload = build_current_poll_discovery_reconciliation(**kwargs)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = ARTIFACTS_DIR / "current_poll_discovery_reconciliation_v0924.json"
+    path = ARTIFACTS_DIR / "current_poll_discovery_reconciliation_v0925.json"
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    payload["path"] = str(path)
+    try:
+        payload["path"] = path.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        payload["path"] = path.as_posix()
     return payload

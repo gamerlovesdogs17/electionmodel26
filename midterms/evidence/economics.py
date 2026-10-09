@@ -162,10 +162,9 @@ def build_fixture_vintages() -> pd.DataFrame:
     }
     rows = []
     for year, leads in seeds.items():
-        ed = date(year, 11, 1)
-        while ed.weekday() != 0:
-            ed = date.fromordinal(ed.toordinal() + 1)
-        ed = date.fromordinal(ed.toordinal() + 1)
+        from midterms.evidence.federal_election_day import federal_election_day
+
+        ed = federal_election_day(year)
         for lead, yoy in leads.items():
             as_of = date.fromordinal(ed.toordinal() - lead)
             obs = as_of.isoformat()

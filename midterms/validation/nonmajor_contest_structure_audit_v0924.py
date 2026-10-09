@@ -6,10 +6,15 @@ import json
 from datetime import UTC, datetime
 from typing import Any
 
-from midterms.config import ARTIFACTS_DIR, MODEL_VERSION
+from midterms.config import ARTIFACTS_DIR, MODEL_VERSION, ROOT
 from midterms.evidence.current_candidates import load_current_candidate_registry
+from midterms.model.contest_classifier import (
+    GENUINE_MULTIWAY_PLURALITY,
+    PRINCIPAL_BINARY_WITH_MINORS,
+    classify_contest_structure,
+    registry_contest_structure,
+)
 from midterms.model.multiway_plurality import (
-    MULTIWAY_CONTEST_STRUCTURE,
     MULTIWAY_MODELING_PATH,
     historical_analog_support_report,
 )
@@ -23,28 +28,39 @@ def build_nonmajor_contest_structure_audit() -> dict[str, Any]:
     races: dict[str, Any] = {}
     for state, off in official["races"].items():
         reg = reg_by_state.get(state, {})
-        n = len(
-            [
-                c
-                for c in off.get("candidates") or []
-                if c.get("status") == "certified_general_ballot" and not c.get("withdrawn")
-            ]
+        certified = [
+            c
+            for c in off.get("candidates") or []
+            if c.get("status") == "certified_general_ballot" and not c.get("withdrawn")
+        ]
+        n = len(certified)
+        classification = classify_contest_structure(
+            ballot_candidates=certified,
+            election_rule=str(off.get("institutional_rule") or ""),
         )
-        structure = off["contest_structure"]
-        if structure == MULTIWAY_CONTEST_STRUCTURE:
+        structure = registry_contest_structure(classification)
+        if classification["category"] == GENUINE_MULTIWAY_PLURALITY:
             path = MULTIWAY_MODELING_PATH
             validation = "unsupported"
             prior_binary_invalid = True
+        elif classification["category"] == PRINCIPAL_BINARY_WITH_MINORS:
+            path = "candidate_neutral_binary_with_minor_residual"
+            validation = "limited_supported_principal_binary"
+            prior_binary_invalid = False
         else:
-            path = "binary_non_major_adapter"
+            path = str(classification.get("modeling_path") or "binary_non_major_adapter")
             validation = "limited_supported"
             prior_binary_invalid = False
         races[state] = {
             "race_id": off["race_id"],
             "verified_structure": structure,
+            "classifier_category": classification["category"],
             "statistical_path": path,
             "validation_level": validation,
             "n_certified_ballot_candidates": n,
+            "principal_pair": classification.get("principal_pair"),
+            "residual_candidates": classification.get("residual_candidates"),
+            "classification_evidence": classification.get("classification_evidence"),
             "authority": off["authority"],
             "previous_registry_structure": reg.get("contest_structure"),
             "previous_registry_path": (
@@ -60,14 +76,13 @@ def build_nonmajor_contest_structure_audit() -> dict[str, Any]:
                     "ballot_party": c["ballot_party"],
                     "caucus": c.get("caucus"),
                 }
-                for c in off.get("candidates") or []
-                if c.get("status") == "certified_general_ballot" and not c.get("withdrawn")
+                for c in certified
             ],
             "outside_model_probabilities_used": False,
             "registry_used_as_ballot_authority": False,
         }
     return {
-        "schema_version": "nonmajor-contest-structure-audit-v0924",
+        "schema_version": "nonmajor-contest-structure-audit-v0925",
         "generated_at": datetime.now(UTC).isoformat(),
         "model_version": MODEL_VERSION,
         "registry_used_as_ballot_authority": False,
@@ -91,8 +106,11 @@ def build_nonmajor_contest_structure_audit() -> dict[str, Any]:
 
 def write_nonmajor_contest_structure_audit() -> dict[str, Any]:
     payload = build_nonmajor_contest_structure_audit()
-    path = ARTIFACTS_DIR / "nonmajor_contest_structure_audit_v0924.json"
+    path = ARTIFACTS_DIR / "nonmajor_contest_structure_audit_v0925.json"
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    payload["path"] = str(path)
+    try:
+        payload["path"] = path.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        payload["path"] = path.as_posix()
     return payload

@@ -12,11 +12,14 @@ from midterms.model.contest_classifier import (
     BINARY_NONMAJOR_PRIOR_SD_CHALLENGERS,
     BINARY_NONMAJOR_REFERENCE_PRIOR_SD,
     BINARY_NONMAJOR_V_R,
+    PRINCIPAL_BINARY_WITH_MINORS,
     classify_contest_structure,
 )
 from midterms.model.non_major_adapter import PRIOR_SD, modeled_candidate_margin
 
 assert PRIOR_SD == BINARY_NONMAJOR_REFERENCE_PRIOR_SD
+
+CANDIDATE_NEUTRAL_ELIGIBLE = {BINARY_NONMAJOR_V_R, PRINCIPAL_BINARY_WITH_MINORS}
 
 
 def candidate_neutral_binary_spec(
@@ -27,11 +30,19 @@ def candidate_neutral_binary_spec(
     opposing_ballot_party: str = "R",
     modeled_caucus: str | None = None,
     prior_sd: float = BINARY_NONMAJOR_REFERENCE_PRIOR_SD,
+    residual_candidates: list[dict[str, Any]] | None = None,
+    contest_category: str = BINARY_NONMAJOR_V_R,
 ) -> dict[str, Any]:
     return {
         "schema_version": "candidate-neutral-binary-challenger-v1",
         "production_enabled": False,
         "estimand": "modeled_minus_opposing_margin",
+        "estimand_note": (
+            "Principal-candidate relative margin. When residual ballot lines exist, "
+            "principal shares are not assumed to sum to 100%."
+            if residual_candidates
+            else None
+        ),
         "modeled_candidate_id": modeled_candidate_id,
         "opposing_candidate_id": opposing_candidate_id,
         "modeled_ballot_party": modeled_ballot_party,
@@ -40,7 +51,9 @@ def candidate_neutral_binary_spec(
         "prior_sd": float(prior_sd),
         "prior_sd_challengers": list(BINARY_NONMAJOR_PRIOR_SD_CHALLENGERS),
         "margin_fn": "modeled_candidate_margin",
-        "eligible_contest_category": BINARY_NONMAJOR_V_R,
+        "eligible_contest_category": contest_category,
+        "residual_candidates": list(residual_candidates or []),
+        "claims_only_two_ballot_candidates": not bool(residual_candidates),
     }
 
 
@@ -53,7 +66,7 @@ def is_eligible_candidate_neutral_binary(
         ballot_candidates=ballot_candidates,
         contest_structure_hint=contest_structure_hint,
     )
-    return cls["category"] == BINARY_NONMAJOR_V_R
+    return cls["category"] in CANDIDATE_NEUTRAL_ELIGIBLE
 
 
 __all__ = [

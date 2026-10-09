@@ -13,6 +13,12 @@ from midterms.evidence.current_candidates import (
     CURRENT_CANDIDATE_REGISTRY_PATH,
     load_current_candidate_registry,
 )
+from midterms.model.contest_classifier import (
+    GENUINE_MULTIWAY_PLURALITY,
+    PRINCIPAL_BINARY_WITH_MINORS,
+    classify_contest_structure,
+    registry_contest_structure,
+)
 from midterms.model.multiway_plurality import (
     MULTIWAY_CONTEST_STRUCTURE,
     MULTIWAY_MODELING_PATH,
@@ -61,14 +67,22 @@ def build_mt_id_contest_field_audit() -> dict[str, Any]:
         off = official_race(state)
         certified = certified_candidates(state)
         n_certified = len(certified)
-        structure = str(off["contest_structure"])
+        classification = classify_contest_structure(
+            ballot_candidates=certified,
+            election_rule=str(off.get("institutional_rule") or ""),
+        )
+        structure = registry_contest_structure(classification)
         support = historical_analog_support_report(n_analogs=0)
-        if structure == MULTIWAY_CONTEST_STRUCTURE:
+        if classification["category"] == GENUINE_MULTIWAY_PLURALITY:
             path = MULTIWAY_MODELING_PATH
             win_status = "fail_closed"
             prob_status = "unsupported"
+        elif classification["category"] == PRINCIPAL_BINARY_WITH_MINORS:
+            path = "candidate_neutral_binary_with_minor_residual"
+            win_status = "ok"
+            prob_status = "limited_supported"
         else:
-            path = "binary_non_major_adapter"
+            path = str(classification.get("modeling_path") or "binary_non_major_adapter")
             win_status = "ok"
             prob_status = "limited_supported"
 
@@ -260,10 +274,16 @@ def apply_official_fields_to_registry(
             for c in off["candidates"]
             if c.get("status") == "certified_general_ballot" and not c.get("withdrawn")
         ]
+        classification = classify_contest_structure(
+            ballot_candidates=certified,
+            election_rule=str(off.get("institutional_rule") or ""),
+        )
+        structure = registry_contest_structure(classification)
         race["ballot_candidates"] = certified
-        race["contest_structure"] = off["contest_structure"]
+        race["contest_structure"] = structure
+        race["contest_classification"] = classification
         race["ballot_field_authority"] = off["authority"]
-        if off["contest_structure"] == MULTIWAY_CONTEST_STRUCTURE:
+        if classification["category"] == GENUINE_MULTIWAY_PLURALITY:
             race["ordinary_binary_target_supported"] = False
             race["exceptional_probability_model_supported"] = False
             race["probability_model_support_status"] = "unsupported"
@@ -271,13 +291,28 @@ def apply_official_fields_to_registry(
             race["win_probability_status"] = "fail_closed"
             race["modeling_path"] = MULTIWAY_MODELING_PATH
             race["note"] = (
-                "Official general ballot is multiway plurality. Binary non-major "
-                "adapter disabled. Win probability withheld until a historically "
-                "supported multiway model exists. Prior binary I-v-R probabilities "
-                "are superseded under the wrong contest structure."
+                "Official general ballot is genuine multiway plurality under the "
+                "historical principal-binary criterion. Win probability withheld "
+                "until a historically supported multiway model exists."
+            )
+        elif classification["category"] == PRINCIPAL_BINARY_WITH_MINORS:
+            race["ordinary_binary_target_supported"] = False
+            race["exceptional_probability_model_supported"] = True
+            race["probability_model_support_status"] = "limited_supported"
+            race["statistical_target_supported"] = False
+            race["win_probability_status"] = "ok"
+            race["modeling_path"] = "candidate_neutral_binary_with_minor_residual"
+            race["principal_pair"] = classification.get("principal_pair")
+            race["residual_candidates"] = classification.get("residual_candidates")
+            race["estimand_note"] = classification.get("estimand_note")
+            race["note"] = (
+                "Ballot has 3+ lines but historical principal-binary-with-minors "
+                "criterion applies. Modeled estimand is the principal-candidate "
+                "relative margin; residual minors are preserved and not assumed "
+                "to make principal shares sum to 100%."
             )
         else:
-            # SD remains binary I-v-R
+            # SD remains true binary I-v-R
             race["ordinary_binary_target_supported"] = False
             race["exceptional_probability_model_supported"] = True
             race["probability_model_support_status"] = "limited_supported"

@@ -89,11 +89,9 @@ def _sha256_bytes(data: bytes) -> str:
 
 
 def _election_day(year: int) -> date:
-    # First Tuesday after first Monday in November
-    d = date(year, 11, 1)
-    while d.weekday() != 0:  # Monday
-        d += timedelta(days=1)
-    return d + timedelta(days=1)
+    from midterms.evidence.federal_election_day import federal_election_day
+
+    return federal_election_day(year)
 
 
 def _states_for_cycle(year: int) -> list[str]:

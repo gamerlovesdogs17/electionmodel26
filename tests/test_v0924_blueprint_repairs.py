@@ -210,11 +210,15 @@ def test_mt_id_structure_uses_official_multiway_field():
 
     audit = build_mt_id_contest_field_audit()
     assert audit["registry_used_as_ballot_authority"] is False
+    by = {r["state"]: r for r in audit["races"]}
+    assert by["MT"]["n_certified_general_ballot_candidates"] >= 3
+    assert by["MT"]["verified_contest_structure"] == MULTIWAY_CONTEST_STRUCTURE
+    assert by["MT"]["recommended_modeling_path"] == "multiway_plurality_adapter"
+    assert by["MT"]["win_probability_status"] == "fail_closed"
+    assert by["ID"]["n_certified_general_ballot_candidates"] >= 3
+    assert by["ID"]["verified_contest_structure"] == "principal_binary_with_minor_residual"
+    assert by["ID"]["recommended_modeling_path"] == "candidate_neutral_binary_with_minor_residual"
     for race in audit["races"]:
-        assert race["n_certified_general_ballot_candidates"] >= 3
-        assert race["verified_contest_structure"] == MULTIWAY_CONTEST_STRUCTURE
-        assert race["recommended_modeling_path"] == "multiway_plurality_adapter"
-        assert race["win_probability_status"] == "fail_closed"
         assert race["outside_model_probabilities_used"] is False
         assert race["registry_used_as_ballot_authority"] is False
 

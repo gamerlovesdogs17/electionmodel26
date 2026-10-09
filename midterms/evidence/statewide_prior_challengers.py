@@ -44,7 +44,9 @@ def recent_senate_two_party_performance(
             # Same-cycle / future results unavailable.
             continue
         # Election Day of that year must be before as_of.
-        ed = date(year, 11, 1)
+        from midterms.evidence.federal_election_day import federal_election_day
+
+        ed = federal_election_day(year)
         if ed > cutoff:
             continue
         by_race[str(row.get("race_id"))].append(row)
