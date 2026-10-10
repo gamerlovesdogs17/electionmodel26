@@ -100,17 +100,26 @@ def test_registry_matches_official_multiway_and_sd_binary():
 
 
 def test_poll_observed_name_alone_is_not_ballot_qualified():
-    # Reilly Neill appears in MT polls but not on certified ballot.
-    official = {c["candidate_name"] for c in certified_candidates("MT")}
-    assert "Reilly Neill" not in official
+    # Policy: a poll-observed name that is not on the certified ballot must be
+    # classified as outdated_candidate_field and excluded (no fake multiway
+    # renormalization). Do not require any particular live VoteHub matchup
+    # (e.g. historical Reilly Neill rows) to remain in the warehouse forever.
+    from midterms.validation.contest_field_audits_v0924 import _classify_poll
+
+    certified = certified_candidates("MT")
+    official_names = {c["candidate_name"] for c in certified}
+    official_slugs = {str(c["candidate_id"]).split(":")[-1] for c in certified}
+    assert "Reilly Neill" not in official_names
+    assert official_slugs, "MT certified ballot field must be non-empty"
+    synthetic = {"reilly-neill", next(iter(sorted(official_slugs)))}
+    assert _classify_poll(synthetic, official_slugs) == "outdated_candidate_field"
+
     polls = build_mt_id_poll_inclusion_audit()
     outdated = [
         row
         for row in polls["rows"]
-        if row["state"] == "MT" and "reilly-neill" in row["candidates_or_options"]
+        if row["state"] == "MT" and row["poll_type"] == "outdated_candidate_field"
     ]
-    assert outdated
-    assert all(row["poll_type"] == "outdated_candidate_field" for row in outdated)
     assert all(row["included"] is False for row in outdated)
     assert all(row["share_renormalized_to_fake_multiway"] is False for row in outdated)
 

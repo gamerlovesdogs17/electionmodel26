@@ -1069,8 +1069,10 @@ class TestWorkflowStructure:
 
 
 def test_live_generic_ballot_path_matches_fetch_receipt() -> None:
-    """File consumed by live GB aggregator must match the fetch-receipt hash."""
+    """Live GB raw bytes must match the *current* fetch receipt (refreshable)."""
+    import hashlib
     import inspect
+    import json
 
     from midterms.evidence.ingest import (
         generic_ballot_aggregate,
@@ -1086,24 +1088,32 @@ def test_live_generic_ballot_path_matches_fetch_receipt() -> None:
 
     src = inspect.getsource(generic_ballot_aggregate)
     assert LIVE_GENERIC_BALLOT_FILENAME in src or "LIVE_GENERIC_BALLOT_PATH" in src
-    # Clean-checkout contract: on-disk bytes (LF) match the sealed receipt.
+    receipt = json.loads(LIVE_GENERIC_BALLOT_FETCH_MANIFEST.read_text(encoding="utf-8"))
     checked = validate_local_fetch_receipt(
         LIVE_GENERIC_BALLOT_PATH, LIVE_GENERIC_BALLOT_FETCH_MANIFEST,
     )
     assert checked["ok"] is True
-    assert checked["sha256"] == "c3b5219599c49ae54a2c419ad14a53fefc219409a5b731566699583b01b7e19f"
-    assert checked["bytes"] == 375549
-    # CRLF working-tree hashes must never be treated as the sealed receipt.
-    assert checked["sha256"] != "cb0c471ac9df5774e4865e8996a4032681e60f9855d648cd26598c430371c56f"
+    # Compare against the current receipt — never a frozen historical hash.
+    assert checked["sha256"] == receipt["sha256"]
+    assert checked["bytes"] == receipt["bytes"]
+    raw = LIVE_GENERIC_BALLOT_PATH.read_bytes()
+    assert len(raw) == receipt["bytes"]
+    assert hashlib.sha256(raw).hexdigest() == receipt["sha256"]
+    # Windows autocrlf must not rewrite the live capture (see .gitattributes -text).
+    assert b"\r\n" not in raw
+    crlf_hash = hashlib.sha256(raw.replace(b"\n", b"\r\n")).hexdigest()
+    assert crlf_hash != receipt["sha256"]
     lineage = assert_live_generic_ballot_lineage_coherent()
     assert lineage["canonical_filename"] == LIVE_GENERIC_BALLOT_FILENAME
     assert lineage["file_matches_fetch_receipt"] is True
+    assert lineage["file_sha256"] == receipt["sha256"]
     assert (
         live_generic_ballot_lineage()["archive_filename_not_used_for_live"]
         == "votehub_generic_ballot.json"
     )
     attrs = Path(".gitattributes").read_text(encoding="utf-8")
     assert "votehub_generic_ballot_2026.json -text" in attrs
+    assert "fetch_votehub_generic_ballot_2026.json -text" in attrs
 
 
 def test_raw_generic_ballot_change_without_receipt_fails(tmp_path: Path) -> None:
