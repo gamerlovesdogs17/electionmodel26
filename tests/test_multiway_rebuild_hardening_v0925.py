@@ -281,6 +281,203 @@ class TestSourceReadinessSplit:
 
 
 # ---------------------------------------------------------------------------
+# 3b. A–F: source readiness vs forecast coverage separation
+# ---------------------------------------------------------------------------
+
+class TestSourceVsForecastGateSemantics:
+    """Regression matrix for strict SOURCE gate vs forecast-coverage withholdal."""
+
+    def test_a_evidence_ready_and_forecast_complete_strict_sources_passes(self):
+        """A: evidence ready + full forecast coverage => --strict-sources passes."""
+        from midterms.cli import main
+
+        def fake_write(**kwargs):
+            return {
+                "ready_for_expensive_rebuild": True,
+                "forecast_coverage_ready": True,
+                "blockers": [],
+                "domains": {},
+                "forecast_coverage": {
+                    "summary": {"forecast_complete": True, "n_fail": 0, "n_pass": 35},
+                },
+                "as_of": kwargs.get("as_of"),
+                "path": "data/artifacts/source_readiness_latest.json",
+            }
+
+        with patch(
+            "midterms.evidence.source_readiness.write_source_readiness", fake_write,
+        ):
+            main([
+                "source-readiness",
+                "--election-id", "senate-2026",
+                "--as-of", "2026-10-10",
+                "--strict-sources",
+                "--summary",
+            ])
+
+    def test_b_permitted_multiway_only_strict_sources_passes(self):
+        """B: evidence ready + only MT multiway incomplete => --strict-sources passes."""
+        from midterms.cli import main
+        from midterms.evidence.preparation import classify_strict_forecast_coverage
+
+        readiness = {
+            "ready_for_expensive_rebuild": True,
+            "forecast_coverage_ready": False,
+            "blockers": [],
+            "domains": {
+                "polls": {
+                    "current_race_coverage": {
+                        "races": [{
+                            "race_id": "senate-2026-MT",
+                            "state": "MT",
+                            "forecast_status": "fail",
+                            "evidence_status": "pass",
+                            "reasons": [
+                                "multiway_plurality_probability_model_not_historically_supported",
+                            ],
+                            "contest_structure": "multiway_plurality",
+                        }],
+                    }
+                }
+            },
+            "forecast_coverage": {
+                "summary": {
+                    "forecast_complete": False,
+                    "n_fail": 1,
+                    "n_races": 35,
+                    "evidence_ready": True,
+                },
+                "unsupported_or_withheld_race_ids": ["senate-2026-MT"],
+            },
+        }
+        state = classify_strict_forecast_coverage(readiness)
+        assert state["multiway_withheld_only"] is True
+        assert state["blocking_forecast_incomplete"] is False
+
+        def fake_write(**kwargs):
+            return {**readiness, "as_of": kwargs.get("as_of"), "path": "x"}
+
+        with patch(
+            "midterms.evidence.source_readiness.write_source_readiness", fake_write,
+        ):
+            main([
+                "source-readiness",
+                "--election-id", "senate-2026",
+                "--as-of", "2026-10-10",
+                "--strict-sources",
+                "--summary",
+            ])
+
+    def test_c_actual_source_failure_strict_sources_fails(self):
+        """C: genuine source/evidence failure => --strict-sources exits 1."""
+        from midterms.cli import main
+
+        def fake_write(**kwargs):
+            return {
+                "ready_for_expensive_rebuild": False,
+                "forecast_coverage_ready": False,
+                "blockers": [{"domain": "polls", "status": "missing"}],
+                "domains": {},
+                "forecast_coverage": {
+                    "summary": {"forecast_complete": True, "n_fail": 0},
+                },
+                "as_of": kwargs.get("as_of"),
+                "path": "data/artifacts/source_readiness_latest.json",
+            }
+
+        with patch(
+            "midterms.evidence.source_readiness.write_source_readiness", fake_write,
+        ):
+            with pytest.raises(SystemExit) as exc:
+                main([
+                    "source-readiness",
+                    "--election-id", "senate-2026",
+                    "--as-of", "2026-10-10",
+                    "--strict-sources",
+                    "--summary",
+                ])
+            assert exc.value.code == 1
+
+    def test_d_ordinary_race_forecast_gap_not_approved_multiway(self):
+        """D: ordinary binary forecast gap is blocking, not multiway withholdal."""
+        from midterms.evidence.preparation import classify_strict_forecast_coverage
+
+        readiness = {
+            "ready_for_expensive_rebuild": True,
+            "domains": {
+                "polls": {
+                    "current_race_coverage": {
+                        "races": [{
+                            "race_id": "senate-2026-OH",
+                            "state": "OH",
+                            "forecast_status": "fail",
+                            "evidence_status": "pass",
+                            "reasons": ["identity_sensitive_race_has_zero_compatible_polls"],
+                            "contest_structure": "binary_dem_vs_rep",
+                        }],
+                    }
+                }
+            },
+            "forecast_coverage": {
+                "summary": {"forecast_complete": False, "n_fail": 1, "n_races": 35},
+                "unsupported_or_withheld_race_ids": ["senate-2026-OH"],
+            },
+        }
+        state = classify_strict_forecast_coverage(readiness)
+        assert state["multiway_withheld_only"] is False
+        assert state["blocking_forecast_incomplete"] is True
+        assert "senate-2026-OH" in (state.get("unexpected_forecast_failure_race_ids") or [])
+
+    def test_e_alaska_adapter_still_enforced_in_workflow(self):
+        """E: Alaska RCV exception path remains a hard prepare_evidence requirement."""
+        text = Path(".github/workflows/rebuild-research.yml").read_text(encoding="utf-8")
+        prepare_start = text.index("  prepare_evidence:")
+        tests_start = text.index("  tests:")
+        prepare_block = text[prepare_start:tests_start]
+        assert "prepare-alaska-rcv" in prepare_block
+        assert "validate-alaska-rcv --as-of" in prepare_block
+        assert "verify-exceptional-models --strict" in prepare_block
+
+    def test_f_source_gate_separation_does_not_imply_promotion(self):
+        """F: separating source gate must not make publication/promotion true by itself."""
+        from midterms.cli import main
+
+        # Sources green + forecast incomplete must still fail the conflated --strict
+        # alias (sources + require-forecast-complete), proving promotion-path
+        # consumers of --strict remain fail-closed.
+        def fake_write(**kwargs):
+            return {
+                "ready_for_expensive_rebuild": True,
+                "forecast_coverage_ready": False,
+                "blockers": [],
+                "domains": {},
+                "forecast_coverage": {
+                    "summary": {"forecast_complete": False, "n_fail": 1, "n_pass": 34},
+                },
+                "as_of": kwargs.get("as_of"),
+                "path": "data/artifacts/source_readiness_latest.json",
+            }
+
+        with patch(
+            "midterms.evidence.source_readiness.write_source_readiness", fake_write,
+        ):
+            with pytest.raises(SystemExit) as exc:
+                main([
+                    "source-readiness",
+                    "--election-id", "senate-2026",
+                    "--as-of", "2026-10-10",
+                    "--strict",
+                    "--summary",
+                ])
+            assert exc.value.code == 1
+
+        text = Path(".github/workflows/rebuild-research.yml").read_text(encoding="utf-8")
+        assert "evidence-eligibility" in text and "--publication-config" in text
+        assert "--require-publishable" in text
+        assert "acceptance-gates --strict" in text
+
+
+# ---------------------------------------------------------------------------
 # 4. rebuild-preflight importable and runs (may allow multiway withheld)
 # ---------------------------------------------------------------------------
 
@@ -782,7 +979,7 @@ class TestWorkflowStructure:
         )
 
     def test_workflow_prepare_evidence_order(self):
-        """prepare_evidence: diagnostic → refresh → strict-sources → require-forecast-complete."""
+        """prepare_evidence: diagnostic → refresh → strict-sources → forecast coverage gate."""
         text, _ = self._load_workflow()
         prepare_start = text.index("  prepare_evidence:")
         tests_start = text.index("  tests:")
@@ -792,18 +989,23 @@ class TestWorkflowStructure:
         diag_pos = prepare_block.find("Diagnostic source preflight")
         refresh_pos = prepare_block.find("Refresh safe sources")
         strict_src_pos = prepare_block.find("--strict-sources")
-        forecast_gate_pos = prepare_block.find("--require-forecast-complete")
+        forecast_gate_pos = prepare_block.find("Forecast coverage gate")
+        classify_pos = prepare_block.find("classify_strict_forecast_coverage")
 
         assert diag_pos > 0, "Diagnostic source preflight step missing"
         assert refresh_pos > 0, "Refresh safe sources step missing"
         assert strict_src_pos > 0, "--strict-sources step missing"
-        assert forecast_gate_pos > 0, "--require-forecast-complete step missing"
+        assert forecast_gate_pos > 0, "Forecast coverage gate step missing"
+        assert classify_pos > 0, "forecast coverage must classify via classify_strict_forecast_coverage"
 
         assert diag_pos < refresh_pos < strict_src_pos < forecast_gate_pos, (
             "prepare_evidence steps are out of order: "
             f"diag={diag_pos}, refresh={refresh_pos}, "
             f"strict_src={strict_src_pos}, fc_gate={forecast_gate_pos}"
         )
+        # Hard CLI require-forecast-complete would ::error:: on approved MT withholdal.
+        assert " --require-forecast-complete" not in prepare_block
+        assert "--require-forecast-complete\n" not in prepare_block
 
     def test_workflow_no_conflated_strict_before_refresh(self):
         """The old --strict before refresh must be gone from prepare_evidence."""
@@ -830,13 +1032,28 @@ class TestWorkflowStructure:
             "multiway_withheld"
         ]
         assert "id: forecast_coverage" in text
-        assert 'echo "multiway_withheld=1" >> "$GITHUB_OUTPUT"' in text
-        assert 'echo "multiway_withheld=0" >> "$GITHUB_OUTPUT"' in text
+        assert 'multiway_withheld={value}' in text
+        assert "_write_flag(\"1\")" in text or "_write_flag('1')" in text
+        assert "_write_flag(\"0\")" in text or "_write_flag('0')" in text
         # Downstream jobs must consume the prepare_evidence output, not env.MULTIWAY_WITHHELD
         assert "needs.prepare_evidence.outputs.multiway_withheld" in text
         assert "env.MULTIWAY_WITHHELD" not in text
         assert "POST_OOF_EXCEPTIONAL_MODEL_BLOCKER" in text
         assert "constraints/research-rebuild.txt" in text
+
+    def test_workflow_commit_stages_full_raw_including_live_polls_csv(self):
+        """Commit step must stage data/raw (incl. polls_live_votehub.csv), not only external/."""
+        text, _ = self._load_workflow()
+        prepare_start = text.index("  prepare_evidence:")
+        tests_start = text.index("  tests:")
+        prepare_block = text[prepare_start:tests_start]
+        commit_pos = prepare_block.find("Commit coherent evidence state")
+        assert commit_pos > 0
+        commit_block = prepare_block[commit_pos:]
+        assert "git add data/raw data/normalized data/manifests" in commit_block
+        assert "git add data/raw/external" not in commit_block
+        assert "polls_live_votehub.csv" in commit_block
+        assert "git pull --rebase --autostash origin main" in commit_block
 
     def test_workflow_rebuild_preflight_strict(self):
         """rebuild-preflight in rebuild job must use --strict flag."""

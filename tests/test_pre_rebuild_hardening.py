@@ -480,9 +480,17 @@ def test_rebuild_workflow_orders_regeneration_before_forecast():
     assert text.index("Refresh safe sources") < text.index("Strict source readiness after refresh"), (
         "v0.9.25: strict-sources check must come after refresh"
     )
-    # --strict-sources and --require-forecast-complete are separate gates in v0.9.25
+    # --strict-sources and the forecast-coverage gate are separate in v0.9.25
     assert "--strict-sources" in text, "v0.9.25 requires --strict-sources flag"
-    assert "--require-forecast-complete" in text, "v0.9.25 requires --require-forecast-complete flag"
+    assert "Forecast coverage gate" in text, "v0.9.25 requires separate forecast coverage gate"
+    assert "classify_strict_forecast_coverage" in text
+    # Hard CLI require-forecast-complete must not be invoked in prepare_evidence
+    # (it ::error::s on approved genuine-multiway withholdal).
+    prepare_job = text.index("  prepare_evidence:")
+    tests_job = text.index("  tests:")
+    prepare_block = text[prepare_job:tests_job]
+    assert " --require-forecast-complete" not in prepare_block
+    assert "--require-forecast-complete\n" not in prepare_block
     assert "ordinary_statistical_spec_sha256" in text
     assert '"--tune-per-chain", "4000"' in text
     assert '"--chains", "4"' in text

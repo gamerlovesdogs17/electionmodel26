@@ -118,12 +118,16 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/raw/external data/normalized data/manifests data/artifacts/source_readiness_latest.json
+          # Stage full data/raw (not only external/): merge_live_polls writes
+          # data/raw/polls_live_votehub.csv outside external/.
+          git add data/raw data/normalized data/manifests data/artifacts/source_readiness_latest.json
           if git diff --cached --quiet; then
             echo "commit_created=false" >> "$GITHUB_OUTPUT"
             echo "evidence_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           else
             git commit -m "evidence: seal research snapshot ${AS_OF} [no-model-fit]"
+            git fetch origin main
+            git pull --rebase --autostash origin main
             git push origin HEAD:main
             echo "commit_created=true" >> "$GITHUB_OUTPUT"
             echo "evidence_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"

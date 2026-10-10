@@ -116,51 +116,61 @@ jobs:
         # multiway withholdal produces a clear signal rather than a conflated error.
         run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict-sources
       - name: Forecast coverage gate (allow fail-closed multiway)
-        # Require all active races to have an approved predictive path.
-        # When the only failures are fail-closed genuine-multiway races,
-        # continue with multiway_withheld=1 (job output) and defer publication
-        # completeness to the post-OOF exceptional blocker.
+        # Separate from --strict-sources. Classify from the readiness artifact so
+        # an approved multiway withholdal emits ::warning:: rather than ::error::
+        # (the previous hard require-forecast-complete CLI path annotated a false failure).
         id: forecast_coverage
         shell: bash
         run: |
-          set +e
           python -m midterms.cli source-readiness \
             --election-id senate-2026 \
             --as-of "$AS_OF" \
-            --summary \
-            --require-forecast-complete > /tmp/fc_gate.json 2>&1
-          FC_EXIT=$?
-          cat /tmp/fc_gate.json
-          if [ "$FC_EXIT" -eq 0 ]; then
-            echo "multiway_withheld=0" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          # Check whether the only failing races are approved genuine multiway.
+            --summary
           python - <<'PY'
-          import json, sys
+          import json
+          import os
+          import sys
           from pathlib import Path
           from midterms.evidence.preparation import classify_strict_forecast_coverage
-          report = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text())
+
+          report = json.loads(
+              Path("data/artifacts/source_readiness_latest.json").read_text(encoding="utf-8")
+          )
           state = classify_strict_forecast_coverage(report)
-          if state.get("blocking_forecast_incomplete"):
+          print(json.dumps({
+              "forecast_coverage": state.get("summary") or {},
+              "multiway_withheld_only": state.get("multiway_withheld_only"),
+              "blocking_forecast_incomplete": state.get("blocking_forecast_incomplete"),
+              "approved_multiway_withheld_race_ids": state.get(
+                  "approved_multiway_withheld_race_ids"
+              ),
+              "unexpected_forecast_failure_race_ids": state.get(
+                  "unexpected_forecast_failure_race_ids"
+              ),
+          }, indent=2, sort_keys=True))
+
+          def _write_flag(value: str) -> None:
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+                  out.write(f"multiway_withheld={value}\n")
+
+          if not state.get("forecast_incomplete"):
+              _write_flag("0")
+              sys.exit(0)
+          if state.get("multiway_withheld_only"):
+              withheld = state.get("approved_multiway_withheld_race_ids") or []
               print(
-                  "::error::Forecast incomplete for non-approved races: "
-                  + json.dumps(state.get("unexpected_forecast_failure_race_ids") or [])
+                  "::warning::Forecast coverage: only fail-closed multiway races withheld: "
+                  + json.dumps(withheld)
               )
-              sys.exit(1)
-          if not state.get("multiway_withheld_only"):
-              print("::error::Forecast incomplete without approved multiway withholdal")
-              sys.exit(1)
-          withheld = state.get("approved_multiway_withheld_race_ids") or []
-          print(f"Forecast coverage: only fail-closed multiway races withheld: {withheld}")
-          print("Setting multiway_withheld=1 — publication deferred to post-OOF completeness check.")
+              _write_flag("1")
+              sys.exit(0)
+          print(
+              "::error::Forecast incomplete for non-approved races: "
+              + json.dumps(state.get("unexpected_forecast_failure_race_ids") or [])
+          )
+          _write_flag("0")
+          sys.exit(1)
           PY
-          PY_EXIT=$?
-          if [ "$PY_EXIT" -ne 0 ]; then
-            echo "multiway_withheld=0" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-          echo "multiway_withheld=1" >> "$GITHUB_OUTPUT"
       - name: Verify official Alaska source archive
         if: inputs.resume_run_id == ''
         run: python -m midterms.cli prepare-alaska-rcv
@@ -241,6 +251,7 @@ jobs:
         if: success()
         shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [[ -n "${{ inputs.resume_run_id }}" ]]; then
@@ -257,21 +268,32 @@ jobs:
               data/artifacts/current_race_poll_coverage_v0923.json \
               BLUEPRINT_COMPLIANCE_AUDIT.json
           else
-            git add data/raw/external data/normalized data/manifests \
+            # Stage the full refresh/seal surface. merge_live_polls also writes
+            # data/raw/polls_live_votehub.csv (outside data/raw/external/). Leaving
+            # that unstaged made `git pull --rebase` fail with exit 128.
+            git add data/raw data/normalized data/manifests \
               data/artifacts/source_readiness_latest.json \
               data/artifacts/current_race_poll_coverage_v0923.json \
               data/artifacts/evidence_eligibility_latest.json \
               data/artifacts/non_major_adapter_validation_latest.json \
               data/artifacts/alaska_rcv_validation_latest.json \
               data/artifacts/historical_evidence_equivalence_v0923.json \
+              data/artifacts/multiway_plurality_validation_latest.json \
               BLUEPRINT_COMPLIANCE_AUDIT.json
           fi
           if ! git diff --cached --quiet; then
             git commit -m "evidence: seal research snapshot ${AS_OF} [no-model-fit]"
-            # Concurrent pushes (including manual main commits) must not fail the seal.
+            # Concurrent pushes must not fail the seal. Autostash covers any
+            # leftover unstaged workspace noise before rebase.
             git fetch origin main
-            git pull --rebase origin main
+            git pull --rebase --autostash origin main
             git push origin HEAD:main
+          else
+            echo "No staged evidence changes to commit; reusing current HEAD"
+          fi
+          if ! git diff --quiet; then
+            echo "::warning::Unstaged files remain after evidence seal commit:"
+            git status --short >&2
           fi
           echo "evidence_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
@@ -314,6 +336,7 @@ jobs:
           pytest -q \
             tests/test_demo_as_of_registry_boundary.py \
             tests/test_pre_rebuild_hardening.py \
+            tests/test_multiway_rebuild_hardening_v0925.py \
             tests/test_strict_cli_and_workflow.py \
             tests/test_release_identity_versioning.py \
             tests/test_validation_report_status_refresh.py \
