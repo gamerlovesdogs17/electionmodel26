@@ -123,6 +123,44 @@ def _file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def validate_local_fetch_receipt(
+    raw_path: Path,
+    receipt_path: Path,
+) -> dict[str, Any]:
+    """Fail closed when on-disk raw bytes disagree with the fetch receipt.
+
+    Receipt ``sha256`` / ``bytes`` must describe the exact repository bytes of
+    ``raw_path``. This is the contract Linux CI and Windows checkouts share
+    once raw VoteHub JSON is marked ``-text`` in ``.gitattributes``.
+    """
+    if not raw_path.is_file():
+        raise FileNotFoundError(f"fetch raw file missing: {raw_path}")
+    if not receipt_path.is_file():
+        raise FileNotFoundError(f"fetch receipt missing: {receipt_path}")
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    raw = raw_path.read_bytes()
+    digest = _sha256_bytes(raw)
+    recorded = receipt.get("sha256")
+    recorded_bytes = receipt.get("bytes")
+    if recorded != digest:
+        raise ValueError(
+            "local fetch receipt sha256 does not match on-disk raw file: "
+            f"file={digest} receipt={recorded} path={raw_path}"
+        )
+    if recorded_bytes is not None and int(recorded_bytes) != len(raw):
+        raise ValueError(
+            "local fetch receipt bytes does not match on-disk raw file: "
+            f"file={len(raw)} receipt={recorded_bytes} path={raw_path}"
+        )
+    return {
+        "path": str(raw_path),
+        "receipt_path": str(receipt_path),
+        "sha256": digest,
+        "bytes": len(raw),
+        "ok": True,
+    }
+
+
 def _votehub_receipt(path: Path) -> dict[str, Any]:
     receipt_path = MANIFESTS_DIR / "fetch_votehub_us_senator.json"
     if path.name != "votehub_us_senator.json" or not receipt_path.exists():
@@ -298,10 +336,20 @@ def fetch_votehub_polls(
     dest = dest_dir or (RAW_DIR / "external")
     dest.mkdir(parents=True, exist_ok=True)
     out = dest / f"{name}.json"
-    blob = json.dumps(combined, indent=2).encode()
+    # Explicit UTF-8 LF bytes via write_bytes (not Path.write_text) so Windows
+    # never seals a CRLF raw capture whose receipt hash then fails on Linux CI.
+    blob = json.dumps(combined, indent=2).encode("utf-8")
     out.write_bytes(blob)
+    on_disk = out.read_bytes()
+    if on_disk != blob:
+        raise RuntimeError(
+            f"VoteHub raw write failed atomic integrity check for {out}: "
+            "on-disk bytes differ from sealed payload"
+        )
+    digest = _sha256_bytes(on_disk)
     try:
-        recorded_path = out.resolve().relative_to(RAW_DIR.parent.parent.resolve()).as_posix()
+        root = RAW_DIR.parent.parent.resolve()
+        recorded_path = out.resolve().relative_to(root).as_posix()
     except ValueError:
         recorded_path = out.as_posix()
     meta = {
@@ -311,8 +359,8 @@ def fetch_votehub_polls(
         "api_source_version": "votehub-polls-api",
         "params": base_params,
         "retrieved_at": datetime.now(UTC).isoformat(),
-        "sha256": _sha256_bytes(blob),
-        "bytes": len(blob),
+        "sha256": digest,
+        "bytes": len(on_disk),
         "n_polls": len(all_polls),
         "n_pages": len(page_ids),
         "first_page_id": page_ids[0] if page_ids else None,
@@ -325,9 +373,14 @@ def fetch_votehub_polls(
         "attribution": "Polling data from VoteHub (https://votehub.com)",
     }
     # Only write production fetch manifests when using the default store.
+    # Receipt is written immediately after the raw file, with the same LF
+    # policy, and re-validated so a raw update cannot orphan a stale receipt.
     if dest_dir is None:
         MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
-        (MANIFESTS_DIR / f"fetch_{name}.json").write_text(json.dumps(meta, indent=2))
+        receipt_path = MANIFESTS_DIR / f"fetch_{name}.json"
+        receipt_blob = (json.dumps(meta, indent=2) + "\n").encode("utf-8")
+        receipt_path.write_bytes(receipt_blob)
+        validate_local_fetch_receipt(out, receipt_path)
     return meta
 
 

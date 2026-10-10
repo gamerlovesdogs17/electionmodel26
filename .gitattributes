@@ -9,6 +9,14 @@
 # separately protect its parsed evidence across platforms.
 data/raw/external/kalshi_senate.json -text
 data/raw/external/votehub_us_senator.json -text
+# Live + archive VoteHub generic-ballot captures are hash-locked by fetch
+# receipts. Without -text, Windows autocrlf rewrites CRLF and breaks CI.
+data/raw/external/votehub_generic_ballot.json -text
+data/raw/external/votehub_generic_ballot_2026.json -text
+data/raw/external/votehub_pollsters.json -text
+data/manifests/fetch_votehub_generic_ballot.json -text
+data/manifests/fetch_votehub_generic_ballot_2026.json -text
+data/manifests/fetch_votehub_us_senator.json -text
 # Truth ledger is hash-locked by non-major source lineage; keep LF bytes stable.
 data/raw/external/official_senate_ledger.json -text
 data/raw/external/independent_chamber_expectations.json -text

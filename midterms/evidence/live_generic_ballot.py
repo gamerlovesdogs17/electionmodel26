@@ -9,6 +9,7 @@ must not silently become the live production input.
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 from typing import Any
 
@@ -56,9 +57,22 @@ def live_generic_ballot_lineage() -> dict[str, Any]:
 
 
 def assert_live_generic_ballot_lineage_coherent() -> dict[str, Any]:
+    from midterms.evidence.ingest import validate_local_fetch_receipt
+
     lineage = live_generic_ballot_lineage()
     if not lineage["file_sha256"]:
         raise ValueError(f"canonical live GB file missing: {LIVE_GENERIC_BALLOT_FILENAME}")
+    # Prefer the shared receipt validator so CI and refresh share one contract.
+    try:
+        validate_local_fetch_receipt(
+            LIVE_GENERIC_BALLOT_PATH, LIVE_GENERIC_BALLOT_FETCH_MANIFEST,
+        )
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+        raise ValueError(
+            "live GB file hash does not match fetch receipt: "
+            f"file={lineage['file_sha256']} receipt={lineage['fetch_manifest_recorded_raw_sha256']}"
+        ) from exc
+    lineage = live_generic_ballot_lineage()
     if not lineage["file_matches_fetch_receipt"]:
         raise ValueError(
             "live GB file hash does not match fetch receipt: "

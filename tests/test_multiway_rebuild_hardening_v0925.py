@@ -1072,15 +1072,29 @@ def test_live_generic_ballot_path_matches_fetch_receipt() -> None:
     """File consumed by live GB aggregator must match the fetch-receipt hash."""
     import inspect
 
-    from midterms.evidence.ingest import generic_ballot_aggregate
+    from midterms.evidence.ingest import (
+        generic_ballot_aggregate,
+        validate_local_fetch_receipt,
+    )
     from midterms.evidence.live_generic_ballot import (
+        LIVE_GENERIC_BALLOT_FETCH_MANIFEST,
         LIVE_GENERIC_BALLOT_FILENAME,
+        LIVE_GENERIC_BALLOT_PATH,
         assert_live_generic_ballot_lineage_coherent,
         live_generic_ballot_lineage,
     )
 
     src = inspect.getsource(generic_ballot_aggregate)
     assert LIVE_GENERIC_BALLOT_FILENAME in src or "LIVE_GENERIC_BALLOT_PATH" in src
+    # Clean-checkout contract: on-disk bytes (LF) match the sealed receipt.
+    checked = validate_local_fetch_receipt(
+        LIVE_GENERIC_BALLOT_PATH, LIVE_GENERIC_BALLOT_FETCH_MANIFEST,
+    )
+    assert checked["ok"] is True
+    assert checked["sha256"] == "c3b5219599c49ae54a2c419ad14a53fefc219409a5b731566699583b01b7e19f"
+    assert checked["bytes"] == 375549
+    # CRLF working-tree hashes must never be treated as the sealed receipt.
+    assert checked["sha256"] != "cb0c471ac9df5774e4865e8996a4032681e60f9855d648cd26598c430371c56f"
     lineage = assert_live_generic_ballot_lineage_coherent()
     assert lineage["canonical_filename"] == LIVE_GENERIC_BALLOT_FILENAME
     assert lineage["file_matches_fetch_receipt"] is True
@@ -1088,3 +1102,84 @@ def test_live_generic_ballot_path_matches_fetch_receipt() -> None:
         live_generic_ballot_lineage()["archive_filename_not_used_for_live"]
         == "votehub_generic_ballot.json"
     )
+    attrs = Path(".gitattributes").read_text(encoding="utf-8")
+    assert "votehub_generic_ballot_2026.json -text" in attrs
+
+
+def test_raw_generic_ballot_change_without_receipt_fails(tmp_path: Path) -> None:
+    """A raw GB mutation that leaves the receipt stale must fail closed."""
+    import json
+
+    from midterms.evidence.ingest import validate_local_fetch_receipt
+
+    raw = tmp_path / "votehub_generic_ballot_2026.json"
+    receipt = tmp_path / "fetch_votehub_generic_ballot_2026.json"
+    raw.write_bytes(b'{"polls":[]}')
+    receipt.write_text(
+        json.dumps({
+            "name": "votehub_generic_ballot_2026",
+            "sha256": "0" * 64,
+            "bytes": 999,
+            "path": str(raw),
+        }),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="does not match on-disk raw file"):
+        validate_local_fetch_receipt(raw, receipt)
+
+
+def test_canonical_votehub_fetch_writes_matching_raw_and_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """fetch_votehub_polls must seal raw + receipt that validate together."""
+    import json
+
+    from midterms.evidence import ingest
+
+    raw_dir = tmp_path / "raw" / "external"
+    manifests = tmp_path / "manifests"
+    raw_dir.mkdir(parents=True)
+    manifests.mkdir(parents=True)
+    monkeypatch.setattr(ingest, "RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(ingest, "MANIFESTS_DIR", manifests)
+
+    def fake_get(path: str, params: dict | None = None):
+        assert path == "/polls"
+        return {
+            "polls": [
+                {"id": "gb-1", "poll_type": "generic-ballot", "subject": "2026"},
+            ],
+        }
+
+    meta = ingest.fetch_votehub_polls(
+        poll_type="generic-ballot",
+        subject="2026",
+        client=fake_get,
+        dest_dir=None,
+    )
+    raw_path = Path(meta["path"])
+    if not raw_path.is_file():
+        # recorded_path may be repo-relative; resolve under monkeypatched RAW_DIR
+        raw_path = (tmp_path / "raw" / "external" / "votehub_generic_ballot_2026.json")
+    receipt_path = manifests / "fetch_votehub_generic_ballot_2026.json"
+    assert raw_path.is_file()
+    assert receipt_path.is_file()
+    checked = ingest.validate_local_fetch_receipt(raw_path, receipt_path)
+    assert checked["ok"] is True
+    assert checked["sha256"] == meta["sha256"]
+    assert b"\r\n" not in raw_path.read_bytes()
+    assert receipt_path.read_bytes().endswith(b"\n")
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["url"] == "https://api.votehub.com/polls"
+    assert receipt["license"] == "CC BY 4.0"
+    assert "VoteHub" in receipt["attribution"]
+
+
+def test_workflow_stages_raw_and_fetch_receipts_together() -> None:
+    """Evidence seal commit must stage data/raw and data/manifests together."""
+    text = Path(".github/workflows/rebuild-research.yml").read_text(encoding="utf-8")
+    prepare = text[text.index("  prepare_evidence:"): text.index("  tests:")]
+    commit = prepare[prepare.index("Commit coherent evidence state"):]
+    assert "git add data/raw data/normalized data/manifests" in commit
+    prepare_ev = Path(".github/workflows/prepare-evidence.yml").read_text(encoding="utf-8")
+    assert "git add data/raw data/normalized data/manifests" in prepare_ev

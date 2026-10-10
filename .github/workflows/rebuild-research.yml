@@ -268,9 +268,10 @@ jobs:
               data/artifacts/current_race_poll_coverage_v0923.json \
               BLUEPRINT_COMPLIANCE_AUDIT.json
           else
-            # Stage the full refresh/seal surface. merge_live_polls also writes
-            # data/raw/polls_live_votehub.csv (outside data/raw/external/). Leaving
-            # that unstaged made `git pull --rebase` fail with exit 128.
+            # Stage the full refresh/seal surface together:
+            # - data/raw (incl. polls_live_votehub.csv outside external/)
+            # - data/manifests (fetch receipts must move with their raw captures)
+            # Leaving either side unstaged caused rebase exit 128 or hash drift.
             git add data/raw data/normalized data/manifests \
               data/artifacts/source_readiness_latest.json \
               data/artifacts/current_race_poll_coverage_v0923.json \
