@@ -1,0 +1,11 @@
+# Pins for reproducible Rebuild Research Forecast / CI installs.
+# Broad pyproject ranges caused pip backtracking among PyMC/PyTensor.
+# Only the numerically material stack is locked here; other deps follow pyproject.
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.13.1
+pyarrow==16.1.0
+pymc==5.16.2
+pytensor==2.25.5
+arviz==0.19.0
+matplotlib==3.9.4

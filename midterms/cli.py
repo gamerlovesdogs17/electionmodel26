@@ -1443,6 +1443,13 @@ def main(argv: list[str] | None = None) -> None:
                 "mode": report.get("mode"),
                 "ready_for_expensive_rebuild": readiness.get("ready_for_expensive_rebuild"),
                 "forecast_coverage": coverage,
+                "multiway_withheld": bool(report.get("multiway_withheld")),
+                "approved_multiway_withheld_race_ids": (
+                    report.get("approved_multiway_withheld_race_ids") or []
+                ),
+                "unexpected_forecast_failure_race_ids": (
+                    report.get("unexpected_forecast_failure_race_ids") or []
+                ),
                 "failing_forecast_races": detail.get("failing_forecast_races") or [],
                 "polls_refresh_status": polls.get("status"),
                 "polls_refresh_error": polls.get("error") or polls.get("live_fetch_error"),

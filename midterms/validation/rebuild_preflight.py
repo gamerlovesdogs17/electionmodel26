@@ -55,37 +55,20 @@ def _check_forecast_coverage(
 
     Returns ok=True when forecast_complete is True and n_fail==0.
     Returns ok='withheld_multiway' when the only failures are
-    fail-closed multiway races (MT), which is expected and not a blocker.
+    fail-closed multiway races, which is expected and not a blocker.
     """
+    from midterms.evidence.preparation import classify_strict_forecast_coverage
     from midterms.evidence.source_readiness import audit_source_readiness
 
     report = audit_source_readiness(election_id=election_id, as_of=as_of)
-    coverage = report.get("forecast_coverage") or {}
-    summary = coverage.get("summary") or {}
+    state = classify_strict_forecast_coverage(report)
+    summary = state.get("summary") or {}
     if not isinstance(summary, dict):
         summary = {}
 
     complete = bool(summary.get("forecast_complete"))
     n_fail = int(summary.get("n_fail") or 0)
-
-    # Detect fail-closed multiway (MT withheld)
-    multiway_withheld = False
-    if not complete and n_fail > 0:
-        failing_races = coverage.get("unsupported_or_withheld_race_ids") or []
-        if failing_races:
-            # Check if every failing race is a multiway race
-            try:
-                from midterms.evidence.current_candidates import (
-                    load_current_candidate_registry,
-                )
-                from midterms.evidence.modeling_paths import multiway_plurality_race_ids
-
-                registry = load_current_candidate_registry()
-                multiway_ids = multiway_plurality_race_ids(registry)
-                if all(r in multiway_ids for r in failing_races):
-                    multiway_withheld = True
-            except Exception:  # noqa: BLE001
-                pass
+    multiway_withheld = bool(state.get("multiway_withheld_only"))
 
     if complete and n_fail == 0:
         status = "complete"
@@ -104,6 +87,12 @@ def _check_forecast_coverage(
         "forecast_complete": complete,
         "n_fail": n_fail,
         "multiway_withheld": multiway_withheld,
+        "approved_multiway_withheld_race_ids": list(
+            state.get("approved_multiway_withheld_race_ids") or []
+        ),
+        "unexpected_forecast_failure_race_ids": list(
+            state.get("unexpected_forecast_failure_race_ids") or []
+        ),
         "summary": summary,
     }
 
@@ -232,7 +221,7 @@ def _check_challenger_stack_classification() -> dict[str, Any]:
                 stack_checked = True
         except ValueError as exc:
             failures.append(f"Stack leakage: {exc}")
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S110
             pass  # artifact may not exist or may be malformed; non-blocking
 
     return {
@@ -390,10 +379,12 @@ def run_rebuild_preflight(
             + json.dumps(fc.get("summary") or {}, sort_keys=True)
         )
     elif multiway_withheld:
+        withheld_ids = fc.get("approved_multiway_withheld_race_ids") or []
         warnings.append(
-            "MULTIWAY_WITHHELD=1: Montana (genuine multiway) is correctly withheld from "
-            "publishable win probabilities. Evidence seal and OOF may proceed, but final "
-            "publication completeness for MT will be deferred until multiway validation exists."
+            "MULTIWAY_WITHHELD=1: genuine multiway races are intentionally fail-closed "
+            f"({', '.join(withheld_ids) or 'registry multiway set'}). Evidence seal and "
+            "ordinary OOF may proceed; final publication completeness remains deferred "
+            "until historically supported multiway probabilities exist."
         )
 
     # --- 3. Modeling paths ---

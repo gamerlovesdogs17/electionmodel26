@@ -33,6 +33,7 @@ jobs:
       as_of: ${{ steps.resolve.outputs.as_of }}
       evidence_bundle_id: ${{ steps.bundle.outputs.evidence_bundle_id }}
       evidence_commit_sha: ${{ steps.commit.outputs.evidence_commit_sha }}
+      multiway_withheld: ${{ steps.forecast_coverage.outputs.multiway_withheld }}
     steps:
       - name: Checkout main for evidence preparation
         uses: actions/checkout@v4
@@ -44,7 +45,7 @@ jobs:
           python-version: "3.11"
           cache: pip
       - name: Install
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev]" -c constraints/research-rebuild.txt
       - name: Resolve AS_OF
         id: resolve
         shell: bash
@@ -103,6 +104,8 @@ jobs:
         # stable so the prior research-rebuild-<bundle_id> artifact can download
         # and verify. Refreshing sources here would risk a new bundle id and a
         # forced full OOF/forecast rerun.
+        # --strict fails on source/evidence blockers and unexpected forecast
+        # failures, but permits approved fail-closed genuine-multiway withholdal.
         if: inputs.refresh_safe_sources && inputs.resume_run_id == ''
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
@@ -110,12 +113,14 @@ jobs:
       - name: Strict source readiness after refresh
         # Fail only when required evidence domains are not ready (--strict-sources).
         # Forecast completeness is checked separately below so that fail-closed
-        # multiway (MT withheld) produces a clear signal rather than a conflated error.
+        # multiway withholdal produces a clear signal rather than a conflated error.
         run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF" --summary --strict-sources
       - name: Forecast coverage gate (allow fail-closed multiway)
         # Require all active races to have an approved predictive path.
-        # When the only failures are fail-closed genuine-multiway races (MT),
-        # continue with MULTIWAY_WITHHELD=1 and defer MT publication completeness.
+        # When the only failures are fail-closed genuine-multiway races,
+        # continue with multiway_withheld=1 (job output) and defer publication
+        # completeness to the post-OOF exceptional blocker.
+        id: forecast_coverage
         shell: bash
         run: |
           set +e
@@ -127,33 +132,35 @@ jobs:
           FC_EXIT=$?
           cat /tmp/fc_gate.json
           if [ "$FC_EXIT" -eq 0 ]; then
-            echo "MULTIWAY_WITHHELD=0" >> "$GITHUB_ENV"
+            echo "multiway_withheld=0" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          # Check whether the only failing races are genuine multiway (MT withheld)
+          # Check whether the only failing races are approved genuine multiway.
           python - <<'PY'
           import json, sys
           from pathlib import Path
+          from midterms.evidence.preparation import classify_strict_forecast_coverage
           report = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text())
-          coverage = (report.get("forecast_coverage") or {})
-          summary = coverage.get("summary") or {}
-          failing = coverage.get("unsupported_or_withheld_race_ids") or []
-          from midterms.evidence.current_candidates import load_current_candidate_registry
-          from midterms.evidence.modeling_paths import multiway_plurality_race_ids
-          registry = load_current_candidate_registry()
-          multiway_ids = multiway_plurality_race_ids(registry)
-          non_multiway_failures = [r for r in failing if r not in multiway_ids]
-          if non_multiway_failures:
-              print(f"::error::Forecast incomplete for non-multiway races: {non_multiway_failures}")
+          state = classify_strict_forecast_coverage(report)
+          if state.get("blocking_forecast_incomplete"):
+              print(
+                  "::error::Forecast incomplete for non-approved races: "
+                  + json.dumps(state.get("unexpected_forecast_failure_race_ids") or [])
+              )
               sys.exit(1)
-          print(f"Forecast coverage: only fail-closed multiway races withheld: {failing}")
-          print("Setting MULTIWAY_WITHHELD=1 — MT deferred to post-OOF completeness check.")
+          if not state.get("multiway_withheld_only"):
+              print("::error::Forecast incomplete without approved multiway withholdal")
+              sys.exit(1)
+          withheld = state.get("approved_multiway_withheld_race_ids") or []
+          print(f"Forecast coverage: only fail-closed multiway races withheld: {withheld}")
+          print("Setting multiway_withheld=1 — publication deferred to post-OOF completeness check.")
           PY
           PY_EXIT=$?
           if [ "$PY_EXIT" -ne 0 ]; then
+            echo "multiway_withheld=0" >> "$GITHUB_OUTPUT"
             exit 1
           fi
-          echo "MULTIWAY_WITHHELD=1" >> "$GITHUB_ENV"
+          echo "multiway_withheld=1" >> "$GITHUB_OUTPUT"
       - name: Verify official Alaska source archive
         if: inputs.resume_run_id == ''
         run: python -m midterms.cli prepare-alaska-rcv
@@ -283,7 +290,7 @@ jobs:
           python-version: "3.11"
           cache: pip
       - name: Install
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev]" -c constraints/research-rebuild.txt
       - name: Verify sealed publication eligibility artifact
         # Read-only check of the prepare_evidence seal. Do not recompute
         # eligibility here — forecast tests below may mutate sealed stores.
@@ -377,18 +384,25 @@ jobs:
                   f"AK race {ak} has unexpected path {p!r}"
               )
 
-          # MT: must be withheld (not in forecast) when MULTIWAY_WITHHELD=1
-          mt_in_forecast = [rid for rid in forecast_race_ids if "-MT" in rid or rid.endswith("MT")]
+          # Authoritative multiway set may be omitted only when withheld=1.
+          multiway_in_forecast = sorted(forecast_race_ids & multiway_ids)
           if multiway_withheld:
-              assert not mt_in_forecast, (
-                  f"MT should be withheld (MULTIWAY_WITHHELD=1) but appears in forecast: {mt_in_forecast}"
+              assert not multiway_in_forecast, (
+                  "multiway_withheld=1 but multiway races appear in forecast: "
+                  f"{multiway_in_forecast}"
+              )
+          else:
+              missing_multiway = sorted(multiway_ids - forecast_race_ids)
+              assert not missing_multiway, (
+                  "multiway_withheld=0 but registry multiway races missing from forecast: "
+                  f"{missing_multiway}"
               )
 
           print("sealed-as-of smoke ok", as_of, len(races), "races; multiway_withheld=", multiway_withheld)
           PY
         env:
           AS_OF: ${{ needs.prepare_evidence.outputs.as_of }}
-          MULTIWAY_WITHHELD: ${{ env.MULTIWAY_WITHHELD }}
+          MULTIWAY_WITHHELD: ${{ needs.prepare_evidence.outputs.multiway_withheld }}
 
   rebuild:
     needs: [prepare_evidence, tests]
@@ -403,6 +417,7 @@ jobs:
     env:
       AS_OF: ${{ needs.prepare_evidence.outputs.as_of }}
       EVIDENCE_BUNDLE_ID: ${{ needs.prepare_evidence.outputs.evidence_bundle_id }}
+      MULTIWAY_WITHHELD: ${{ needs.prepare_evidence.outputs.multiway_withheld }}
     steps:
       - name: Checkout exact evidence commit
         uses: actions/checkout@v4
@@ -415,7 +430,7 @@ jobs:
           python-version: "3.11"
           cache: pip
       - name: Install
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev]" -c constraints/research-rebuild.txt
       - name: Verify exact sealed evidence bundle
         shell: bash
         run: |
@@ -743,6 +758,61 @@ jobs:
             --calibration data/artifacts/stack_reliability_crossfit_latest.json \
             --code-commit-sha "$(git rev-parse HEAD)" \
             --out data/artifacts/validated_model_spec_latest.json
+      - name: Upload ordinary OOF checkpoint before exceptional completeness gate
+        # Preserve reusable ordinary OOF/stack artifacts even when publication is
+        # blocked by fail-closed multiway withholdal.
+        if: always() && env.EVIDENCE_BUNDLE_ID != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-rebuild-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}
+          path: |
+            data/artifacts/
+            data/releases/
+            data/manifests/
+            data/shadow/
+            web/public/data/forecast_latest.json
+          if-no-files-found: warn
+          overwrite: true
+      - name: Post-OOF exceptional-model completeness blocker
+        # Ordinary OOF/stack work is reusable. Publication must remain impossible
+        # while registry multiway races are intentionally fail-closed.
+        id: exceptional_completeness
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+          from midterms.evidence.current_candidates import load_current_candidate_registry
+          from midterms.evidence.modeling_paths import multiway_plurality_race_ids
+          from midterms.evidence.preparation import classify_strict_forecast_coverage
+
+          withheld_flag = os.environ.get("MULTIWAY_WITHHELD", "0") == "1"
+          report = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text())
+          state = classify_strict_forecast_coverage(report)
+          registry = load_current_candidate_registry()
+          multiway_ids = sorted(multiway_plurality_race_ids(registry))
+          approved = list(state.get("approved_multiway_withheld_race_ids") or [])
+          if withheld_flag or state.get("multiway_withheld_only"):
+              print(
+                  "::error::POST_OOF_EXCEPTIONAL_MODEL_BLOCKER: ordinary OOF/stack "
+                  "artifacts were produced, but publication completeness is blocked "
+                  f"while genuine multiway races remain fail-closed: {approved or multiway_ids}"
+              )
+              print(
+                  "Do not fabricate multiway probabilities. Resume later with the same "
+                  "evidence bundle after historically supported multiway validation exists."
+              )
+              sys.exit(1)
+          if state.get("blocking_forecast_incomplete"):
+              print(
+                  "::error::Forecast coverage still incomplete after OOF: "
+                  + json.dumps(state.get("unexpected_forecast_failure_race_ids") or [])
+              )
+              sys.exit(1)
+          print("exceptional completeness ok; proceeding to publication forecast")
+          PY
       - name: Run publication-quality research forecast
         if: >
           steps.resume.outputs.forecast_resumed != 'true' ||
@@ -807,6 +877,7 @@ jobs:
             data/manifests/
             data/shadow/
             web/public/data/forecast_latest.json
+          overwrite: true
       - name: Refuse artifact push if main diverged from evidence commit
         if: success()
         shell: bash

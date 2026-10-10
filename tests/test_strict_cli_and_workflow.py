@@ -89,3 +89,19 @@ def test_rebuild_workflow_has_strict_preflight_current_date_and_pages_deploy():
     assert "deploy_pages:" in text
     assert "ref: main" in text
     assert "actions/deploy-pages@v4" in text
+    prepare_outputs = parsed["jobs"]["prepare_evidence"]["outputs"]
+    assert "multiway_withheld" in prepare_outputs
+    assert "needs.prepare_evidence.outputs.multiway_withheld" in text
+    assert "POST_OOF_EXCEPTIONAL_MODEL_BLOCKER" in text
+    # No cross-job GITHUB_ENV leakage for multiway_withheld
+    assert 'echo "MULTIWAY_WITHHELD=' not in text
+    assert "-c constraints/research-rebuild.txt" in text
+
+
+def test_rebuild_workflow_resume_preserves_sealed_bundle_identity():
+    path = Path(".github/workflows/rebuild-research.yml")
+    text = path.read_text(encoding="utf-8")
+    assert "inputs.resume_run_id == ''" in text
+    assert "Verify existing sealed evidence for resume" in text
+    assert "resume path mutated sealed warehouse inputs; refusing commit" in text
+    assert "research-rebuild-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}" in text

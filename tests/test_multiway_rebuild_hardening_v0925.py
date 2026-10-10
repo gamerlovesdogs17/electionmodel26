@@ -13,13 +13,10 @@ Covers:
 
 from __future__ import annotations
 
-import json
-import sys
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -134,11 +131,10 @@ class TestStatePathAssignments:
 
     def test_sd_binary_non_major(self):
         from midterms.evidence.modeling_paths import (
-            binary_non_major_eligible_race_ids,
             modeling_path_for_structure,
         )
+
         # SD is a binary non-major (non-D vs R) race
-        from midterms.evidence.non_major_contract import PRINCIPAL_BINARY_ELIGIBLE_STRUCTURES
 
         # Either structure may apply; verify the path resolves correctly
         path = modeling_path_for_structure("non_major_party_vs_republican")
@@ -293,7 +289,9 @@ class TestRebuildPreflight:
 
     def test_importable(self):
         from midterms.validation import rebuild_preflight  # noqa: F401
-        from midterms.validation.rebuild_preflight import run_rebuild_preflight  # noqa: F401
+        from midterms.validation.rebuild_preflight import (
+            run_rebuild_preflight,  # noqa: F401
+        )
 
     def test_run_preflight_passes_with_mocks(self, monkeypatch):
         """Preflight should return ok=True when all mocked gates pass."""
@@ -515,7 +513,9 @@ class TestRebuildPreflight:
         for gate in ("_check_forecast_coverage",):
             monkeypatch.setattr(
                 f"midterms.validation.rebuild_preflight.{gate}",
-                lambda *a, **kw: {"gate": gate, "ok": True, "multiway_withheld": False, "summary": {}},
+                lambda *a, g=gate, **kw: {
+                    "gate": g, "ok": True, "multiway_withheld": False, "summary": {},
+                },
             )
         for gate in (
             "_check_modeling_paths",
@@ -526,13 +526,15 @@ class TestRebuildPreflight:
         ):
             monkeypatch.setattr(
                 f"midterms.validation.rebuild_preflight.{gate}",
-                lambda: {"gate": gate, "ok": True, "failures": [],
-                         "path_assignments": {}, "highlight_states": {},
-                         "n_binary_non_major": 0, "n_multiway": 0, "n_alaska": 0,
-                         "mt_in_binary_set": [], "skipped": False,
-                         "n_active_contested_races": 33, "note": "",
-                         "n_specification_challengers": 6,
-                         "stack_artifact_checked": False, "stack_artifact_exists": False},
+                lambda g=gate: {
+                    "gate": g, "ok": True, "failures": [],
+                    "path_assignments": {}, "highlight_states": {},
+                    "n_binary_non_major": 0, "n_multiway": 0, "n_alaska": 0,
+                    "mt_in_binary_set": [], "skipped": False,
+                    "n_active_contested_races": 33, "note": "",
+                    "n_specification_challengers": 6,
+                    "stack_artifact_checked": False, "stack_artifact_exists": False,
+                },
             )
 
         with pytest.raises(SystemExit) as exc:
@@ -819,10 +821,22 @@ class TestWorkflowStructure:
             "the diagnostic step must be read-only (no --strict)"
         )
 
-    def test_workflow_multiway_withheld_env_set(self):
-        """Workflow must set MULTIWAY_WITHHELD env var in the forecast coverage gate."""
-        text, _ = self._load_workflow()
-        assert "MULTIWAY_WITHHELD" in text
+    def test_workflow_multiway_withheld_job_output_not_cross_job_env(self):
+        """multiway_withheld must propagate via job outputs, not cross-job GITHUB_ENV."""
+        text, parsed = self._load_workflow()
+        prepare = parsed["jobs"]["prepare_evidence"]
+        assert "multiway_withheld" in (prepare.get("outputs") or {})
+        assert "steps.forecast_coverage.outputs.multiway_withheld" in prepare["outputs"][
+            "multiway_withheld"
+        ]
+        assert "id: forecast_coverage" in text
+        assert 'echo "multiway_withheld=1" >> "$GITHUB_OUTPUT"' in text
+        assert 'echo "multiway_withheld=0" >> "$GITHUB_OUTPUT"' in text
+        # Downstream jobs must consume the prepare_evidence output, not env.MULTIWAY_WITHHELD
+        assert "needs.prepare_evidence.outputs.multiway_withheld" in text
+        assert "env.MULTIWAY_WITHHELD" not in text
+        assert "POST_OOF_EXCEPTIONAL_MODEL_BLOCKER" in text
+        assert "constraints/research-rebuild.txt" in text
 
     def test_workflow_rebuild_preflight_strict(self):
         """rebuild-preflight in rebuild job must use --strict flag."""

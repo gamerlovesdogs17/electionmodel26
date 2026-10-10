@@ -513,7 +513,7 @@ def test_validation_report_does_not_refit_legacy_hierarchical_spine():
 
 
 def test_source_readiness_strict_checks_forecast_coverage(monkeypatch, capsys):
-    import midterms.cli as cli
+    from midterms import cli
 
     fake = {
         "as_of": "2026-10-04",
@@ -570,6 +570,161 @@ def test_prepare_evidence_strict_treats_missing_forecast_complete_as_failure(mon
     )
     assert report["strict_failure"] is True
     assert "forecast_coverage_incomplete" in report["strict_failure_reasons"]
+
+
+def test_prepare_evidence_strict_allows_approved_multiway_withheld_only(monkeypatch):
+    """Genuine multiway fail-closed coverage must not fail prepare-evidence --strict."""
+    from midterms.evidence import preparation
+
+    monkeypatch.setattr(
+        preparation,
+        "refresh_safe_evidence",
+        lambda *, as_of: {"results": {"polls": {"status": "ok"}}},
+    )
+    monkeypatch.setattr(
+        preparation,
+        "write_source_readiness",
+        lambda **kwargs: {
+            "ready_for_expensive_rebuild": True,
+            "blockers": [],
+            "domains": {
+                "polls": {
+                    "current_race_coverage": {
+                        "races": [{
+                            "race_id": "senate-2026-MT",
+                            "state": "MT",
+                            "forecast_status": "fail",
+                            "evidence_status": "pass",
+                            "reasons": [
+                                "multiway_plurality_probability_model_not_historically_supported",
+                            ],
+                            "contest_structure": "multiway_plurality",
+                            "n_raw_current_polls": 24,
+                            "n_candidate_compatible_polls": 6,
+                        }],
+                    }
+                }
+            },
+            "forecast_coverage": {
+                "summary": {
+                    "forecast_complete": False,
+                    "n_fail": 1,
+                    "n_races": 35,
+                    "evidence_ready": True,
+                },
+                "unsupported_or_withheld_race_ids": ["senate-2026-MT"],
+            },
+        },
+    )
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-10",
+        mode="refresh-safe",
+        strict=True,
+    )
+    assert report.get("strict_failure") is not True
+    assert report["multiway_withheld"] is True
+    assert report["approved_multiway_withheld_race_ids"] == ["senate-2026-MT"]
+    assert "forecast_coverage_multiway_withheld_only" in (report.get("strict_warnings") or [])
+    assert "poll_refresh_reverted_coverage_regression" not in (
+        report.get("strict_warnings") or []
+    )
+
+
+def test_prepare_evidence_strict_fails_non_multiway_forecast_gap(monkeypatch):
+    from midterms.evidence import preparation
+
+    monkeypatch.setattr(
+        preparation,
+        "refresh_safe_evidence",
+        lambda *, as_of: {"results": {"polls": {"status": "ok"}}},
+    )
+    monkeypatch.setattr(
+        preparation,
+        "write_source_readiness",
+        lambda **kwargs: {
+            "ready_for_expensive_rebuild": True,
+            "blockers": [],
+            "domains": {
+                "polls": {
+                    "current_race_coverage": {
+                        "races": [{
+                            "race_id": "senate-2026-OH",
+                            "state": "OH",
+                            "forecast_status": "fail",
+                            "evidence_status": "pass",
+                            "reasons": ["identity_sensitive_race_has_zero_compatible_polls"],
+                            "contest_structure": "binary_dem_vs_rep",
+                            "n_raw_current_polls": 0,
+                            "n_candidate_compatible_polls": 0,
+                        }],
+                    }
+                }
+            },
+            "forecast_coverage": {
+                "summary": {
+                    "forecast_complete": False,
+                    "n_fail": 1,
+                    "n_races": 35,
+                },
+                "unsupported_or_withheld_race_ids": ["senate-2026-OH"],
+            },
+        },
+    )
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-10",
+        mode="refresh-safe",
+        strict=True,
+    )
+    assert report["strict_failure"] is True
+    assert "forecast_coverage_incomplete" in report["strict_failure_reasons"]
+    assert report["unexpected_forecast_failure_race_ids"] == ["senate-2026-OH"]
+    assert report["multiway_withheld"] is False
+
+
+def test_prepare_evidence_strict_fails_multiway_with_evidence_fail(monkeypatch):
+    from midterms.evidence import preparation
+
+    monkeypatch.setattr(
+        preparation,
+        "refresh_safe_evidence",
+        lambda *, as_of: {"results": {"polls": {"status": "ok"}}},
+    )
+    monkeypatch.setattr(
+        preparation,
+        "write_source_readiness",
+        lambda **kwargs: {
+            "ready_for_expensive_rebuild": True,
+            "blockers": [],
+            "domains": {
+                "polls": {
+                    "current_race_coverage": {
+                        "races": [{
+                            "race_id": "senate-2026-MT",
+                            "state": "MT",
+                            "forecast_status": "fail",
+                            "evidence_status": "fail",
+                            "reasons": ["missing_required_poll_source"],
+                            "contest_structure": "multiway_plurality",
+                        }],
+                    }
+                }
+            },
+            "forecast_coverage": {
+                "summary": {"forecast_complete": False, "n_fail": 1, "n_races": 35},
+            },
+        },
+    )
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-10",
+        mode="refresh-safe",
+        strict=True,
+    )
+    assert report["strict_failure"] is True
+    assert "forecast_coverage_incomplete" in report["strict_failure_reasons"]
+    assert report["multiway_withheld"] is False
 
 
 def test_prepare_evidence_strict_allows_live_poll_outage_when_sealed_ready(monkeypatch):
@@ -730,13 +885,15 @@ def test_prepare_evidence_reverts_live_poll_merge_that_breaks_forecast_coverage(
 
 
 def test_refresh_safe_falls_back_to_sealed_votehub_when_live_fetch_fails(monkeypatch, tmp_path):
-    from midterms.evidence import preparation
-    import midterms.config as config
-    import midterms.evidence.approval as approval
-    import midterms.evidence.economics as economics
-    import midterms.evidence.ingest as ingest
-    import midterms.evidence.presidential_results as presidential_results
-    import midterms.evidence.ratings as ratings
+    from midterms import config
+    from midterms.evidence import (
+        approval,
+        economics,
+        ingest,
+        preparation,
+        presidential_results,
+        ratings,
+    )
 
     external = tmp_path / "external"
     external.mkdir()

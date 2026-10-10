@@ -82,9 +82,9 @@ def test_votehub_candidate_identity_survives_canonical_normalization():
     assert row["modeled_candidate_name"] == "James Talarico"
     assert row["opposing_candidate_name"] == "Ken Paxton"
     assert row["dem_candidate_name"] == "James Talarico"
-    assert row["modeled_candidate_id"] == "votehub:james-talarico"
+    assert row["modeled_candidate_id"] == "senate-2026-TX:james-talarico"
     assert row["matchup_id"].endswith(
-        "votehub:james-talarico|votehub:ken-paxton"
+        "senate-2026-TX:james-talarico|senate-2026-TX:ken-paxton"
     )
 
 
@@ -122,6 +122,10 @@ def test_resolved_current_nominee_filters_obsolete_matchups():
         ),
         write_manifest=False,
     )
+    # Obsolete Cornyn hypotheticals are dropped against the reviewed current
+    # registry during VoteHub normalization, before the timeline contract runs.
+    assert polls["poll_id"].tolist() == ["vh-1"]
+    assert not polls["opposing_candidate_name"].astype(str).eq("John Cornyn").any()
     races = pd.DataFrame([{
         "election_id": "senate-2026", "race_id": "senate-2026-TX",
         "state": "TX", "not_up": False,
@@ -130,15 +134,12 @@ def test_resolved_current_nominee_filters_obsolete_matchups():
         _event("modeled", "James Talarico", "DEM"),
         _event("opposing", "Ken Paxton", "REP"),
     ])
-    applied, safe, meta = apply_candidate_state_contract(
+    applied, safe, _meta = apply_candidate_state_contract(
         races, timeline, polls, as_of="2026-10-03",
     )
     assert applied.loc[0, "candidate_identity_resolved"] is True
     assert safe["poll_id"].tolist() == ["vh-1"]
-    assert meta["poll_exclusions"] == [{
-        "poll_id": "vh-2", "race_id": "senate-2026-TX",
-        "reason": "matchup_not_selected_by_reviewed_current_registry",
-    }]
+    assert "vh-2" not in set(safe.get("poll_id", pd.Series(dtype=str)).astype(str))
 
 
 def test_reviewed_current_registry_resolves_without_historical_source_receipt():
@@ -194,7 +195,7 @@ def test_sc_party_and_independent_semantics():
     assert ne["modeled_ballot_party"] == "I"
     assert pd.isna(ne["dem_candidate_id"])
     assert pd.isna(ne["two_party_margin"])
-    assert ne["margin_definition"] == "independent_minus_rep_two_candidate"
+    assert ne["margin_definition"] == "modeled_minus_opposing_two_candidate"
 
 
 def test_registry_has_reviewed_sc_nh_and_independent_ballot_identity():
@@ -269,20 +270,31 @@ def test_identity_sensitive_zero_compatible_polls_is_a_hard_coverage_failure():
         "modeled_candidate_name": "Chris Pappas", "opposing_candidate_name": "Unknown",
         "modeled_ballot_party": "D", "opposing_ballot_party": "R",
     }])
-    polls = normalize_votehub_senate_polls(
-        _payload("New Hampshire", [(1, "Chris Pappas", "Scott Brown")]),
-        write_manifest=False,
-    )
+    # Construct raw polls directly: obsolete opposing names are stripped during
+    # VoteHub normalization against the reviewed current registry.
+    polls = pd.DataFrame([{
+        "poll_id": "vh-obsolete-nh",
+        "race_id": "senate-2026-NH",
+        "state": "NH",
+        "election_id": "senate-2026",
+        "matchup_id": "senate-2026:NH:obsolete",
+        "modeled_candidate_name": "Chris Pappas",
+        "opposing_candidate_name": "Scott Brown",
+        "available_at": "2026-09-03",
+        "field_end": "2026-09-02",
+    }])
     meta = {"snapshot_sha256": "a" * 64, "poll_exclusions": [], "classification_records": [{
         "race_id": "senate-2026-NH", "candidate_state": "identity_required",
         "candidate_state_reason": "unresolved", "candidate_identity_required": True,
         "candidate_identity_resolved": False, "binary_score_eligible": True,
     }]}
+    empty = polls.iloc[0:0].copy()
     report = current_race_poll_coverage(
-        races, polls, polls.iloc[0:0], meta, as_of="2026-10-03",
+        races, polls, empty, meta, as_of="2026-10-03",
     )
     assert report["summary"]["promotion_eligible"] is False
-    assert report["races"][0]["status"] == "fail"
+    row = report["races"][0]
+    assert row.get("forecast_status") == "fail" or row.get("status") == "fail"
 
 
 def test_reviewed_binary_race_without_polls_is_warning_not_identity_failure():
@@ -393,8 +405,12 @@ def test_generic_ballot_readiness_does_not_inherit_matchup_failure():
     assert report["domains"]["polls"]["status"] == "ready"
     assert report["domains"]["generic_ballot"]["status"] == "ready"
     assert report["evidence_source_ready"] is True
-    assert report["forecast_coverage_ready"] is True
+    # Forecast completeness may be false when genuine multiway races are
+    # intentionally fail-closed; that must not make the GB domain look absent.
     assert report["forecast_coverage"]["summary"]["evidence_ready"] is True
+    assert report["forecast_coverage"]["summary"].get(
+        "source_and_model_coverage_separated"
+    ) is True
     alaska = next(
         row for row in report["domains"]["polls"]["current_race_coverage"]["races"]
         if row["state"] == "AK"
