@@ -1,13 +1,23 @@
 {
   "name": "votehub_us_senator",
+  "endpoint": "https://api.votehub.com/polls",
   "url": "https://api.votehub.com/polls",
+  "api_source_version": "votehub-polls-api",
   "params": {
     "poll_type": "us-senator"
   },
-  "retrieved_at": "2026-10-05T23:38:19.605547+00:00",
-  "sha256": "9e52469311e79b109bc12033542cecae83ff22a6cff1da4ec7371226fb00ae67",
-  "bytes": 329001,
-  "n_polls": 438,
+  "retrieved_at": "2026-10-10T16:41:48.336232+00:00",
+  "sha256": "e44a5af6cdd2482d03cccf772d56cccff7bb0cc739dfecde11f1c2ab6c5d5c99",
+  "bytes": 346228,
+  "n_polls": 460,
+  "n_pages": 1,
+  "first_page_id": "page-0",
+  "last_page_id": "page-0",
+  "page_hashes": [
+    "f9d548eaac417655b0b042211e9671a6ce029104d129e7dec35bb096a88c0b18"
+  ],
+  "total_result_count": null,
+  "pagination_terminated_cleanly": true,
   "path": "data/raw/external/votehub_us_senator.json",
   "license": "CC BY 4.0",
   "attribution": "Polling data from VoteHub (https://votehub.com)"

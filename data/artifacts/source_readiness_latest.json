@@ -2,17 +2,17 @@
   "schema_version": "source-readiness-v1",
   "model_version": "senate-hierarchical-v0.9.25",
   "election_id": "senate-2026",
-  "as_of": "2026-10-09",
+  "as_of": "2026-10-10",
   "ready_for_expensive_rebuild": true,
   "evidence_source_ready": true,
   "forecast_coverage_ready": false,
   "forecast_coverage": {
     "schema_version": "current-race-poll-coverage-v3",
-    "artifact_sha256": "32ed628e1a24735d609b03470c62b62feaea9ad8aaa53541b8d88d95d712ea49",
+    "artifact_sha256": "a5688bae87c1ddd09ae1280111e134071e5591506535f683849022632884fe64",
     "summary": {
       "n_races": 35,
-      "n_pass": 20,
-      "n_warning": 14,
+      "n_pass": 21,
+      "n_warning": 13,
       "n_fail": 1,
       "n_evidence_fail": 0,
       "evidence_ready": true,
@@ -288,7 +288,7 @@
       "adapter": "midterms.evidence.ingest",
       "status": "ready",
       "reasons": [],
-      "n_current_rows": 376,
+      "n_current_rows": 287,
       "historical_cutoff_counts": {
         "senate-2018-lead-60": 289,
         "senate-2018-lead-30": 435,
@@ -300,12 +300,12 @@
         "senate-2024-lead-30": 567
       },
       "missing_cutoffs": [],
-      "semantic_sha256": "a5f481bf37dc9c65b2d75aca29e9e1dd8b65c6133273e704e0e708f30ad8cae8",
+      "semantic_sha256": "885c25d150715e689466faa55f1eedb37e30a975159d2bbe0423994762cbb7da",
       "current_race_coverage": {
         "schema_version": "current-race-poll-coverage-v3",
         "model_version": "senate-hierarchical-v0.9.25",
-        "as_of": "2026-10-09",
-        "candidate_state_snapshot_sha256": "a2fe30db7e030afb3823158f15da0161d79e005eeb1484507927d78e70e3c7fc",
+        "as_of": "2026-10-10",
+        "candidate_state_snapshot_sha256": "70347d98e184df934bbed3b02c465f715383053be40b6b260dca72b1b923f9ef",
         "races": [
           {
             "race_id": "senate-2026-AK",
@@ -335,11 +335,11 @@
             "probability_model_support_reason": "limited_validation_alaska_rcv_model",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 17,
+            "n_raw_current_polls": 16,
             "n_candidate_compatible_polls": 16,
             "n_model_safe_polls": 0,
             "n_exception_adapter_polls": 16,
-            "n_excluded_obsolete_or_incompatible": 1,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [
@@ -371,7 +371,6 @@
               "vh-us-202alab987738a",
               "vh-us-202alabbd6655e",
               "vh-us-202alabcabdd28",
-              "vh-us-202alafbc93030",
               "vh-us-202co/0acc5699",
               "vh-us-202datde291215",
               "vh-us-202datff65423b",
@@ -409,7 +408,6 @@
               "vh-us-202alab987738a",
               "vh-us-202alabbd6655e",
               "vh-us-202alabcabdd28",
-              "vh-us-202alafbc93030",
               "vh-us-202co/0acc5699",
               "vh-us-202datde291215",
               "vh-us-202datff65423b",
@@ -419,8 +417,7 @@
               "vh-us-202the011805d2"
             ],
             "matchup_ids_seen": [
-              "senate-2026:AK:votehub:mary-peltola|votehub:dan-sullivan",
-              "senate-2026:AK:votehub:mary-peltola|votehub:dan-sullvian"
+              "senate-2026:AK:senate-2026-AK:mary-peltola|senate-2026-AK:dan-s-sullivan"
             ],
             "latest_compatible_field_end": "2026-09-30T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
@@ -429,8 +426,7 @@
             "evidence_status": "pass",
             "evidence_reasons": [],
             "reasons": [
-              "limited_validation_exception_model",
-              "matchup_not_selected_by_reviewed_current_registry"
+              "limited_validation_exception_model"
             ]
           },
           {
@@ -484,7 +480,7 @@
             ],
             "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:AL:votehub:everett-wess|votehub:barry-moore"
+              "senate-2026:AL:senate-2026-AL:everett-wess|senate-2026-AL:barry-moore"
             ],
             "latest_compatible_field_end": "2026-09-25T00:00:00",
             "latest_compatible_available_at": "2026-10-01T00:00:00",
@@ -522,9 +518,9 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 2,
-            "n_candidate_compatible_polls": 2,
-            "n_model_safe_polls": 2,
+            "n_raw_current_polls": 3,
+            "n_candidate_compatible_polls": 3,
+            "n_model_safe_polls": 3,
             "n_exception_adapter_polls": 0,
             "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
@@ -532,23 +528,26 @@
             "ordinary_model_excluded_poll_ids": [],
             "n_excluded_hypothetical_or_pre_nomination": 0,
             "raw_poll_ids": [
+              "vh-us-202gracbfdd9ed",
               "vh-us-202grae15a8aed",
               "vh-us-202j.le2159a92"
             ],
             "compatible_poll_ids": [
+              "vh-us-202gracbfdd9ed",
               "vh-us-202grae15a8aed",
               "vh-us-202j.le2159a92"
             ],
             "model_safe_poll_ids": [
+              "vh-us-202gracbfdd9ed",
               "vh-us-202grae15a8aed",
               "vh-us-202j.le2159a92"
             ],
             "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:AR:votehub:hallie-shoffner|votehub:tom-cotton"
+              "senate-2026:AR:senate-2026-AR:hallie-shoffner|senate-2026-AR:tom-cotton"
             ],
-            "latest_compatible_field_end": "2026-08-18T00:00:00",
-            "latest_compatible_available_at": "2026-08-20T00:00:00",
+            "latest_compatible_field_end": "2026-10-04T00:00:00",
+            "latest_compatible_available_at": "2026-10-09T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
@@ -687,36 +686,27 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 22,
-            "n_candidate_compatible_polls": 10,
-            "n_model_safe_polls": 10,
+            "n_raw_current_polls": 13,
+            "n_candidate_compatible_polls": 13,
+            "n_model_safe_polls": 13,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 12,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
             "n_excluded_hypothetical_or_pre_nomination": 0,
             "raw_poll_ids": [
-              "vh-us-202cha0c7666ff",
-              "vh-us-202cha4c08cfde",
               "vh-us-202cha69e5536b",
-              "vh-us-202cha6cfd344c",
               "vh-us-202chad8109bd5",
-              "vh-us-202chae3c0b874",
-              "vh-us-202checa283b6c",
-              "vh-us-202ech2b342f18",
-              "vh-us-202eme1adbecdc",
               "vh-us-202emed67d42c8",
               "vh-us-202insad41796a",
-              "vh-us-202mclfb3c3e69",
-              "vh-us-202mdw67caa80b",
               "vh-us-202qua2b8ed3cb",
               "vh-us-202st.73c64f89",
-              "vh-us-202ste008437cf",
+              "vh-us-202st.fc2e22ed",
               "vh-us-202ste198f7a4a",
               "vh-us-202ste67ef4e2d",
-              "vh-us-202uni187076c4",
-              "vh-us-202uni1ae0881e",
+              "vh-us-202tar0bbd9d56",
+              "vh-us-202tarc49d2a14",
               "vh-us-202uni979cabda",
               "vh-us-202unic788577e"
             ],
@@ -727,8 +717,11 @@
               "vh-us-202insad41796a",
               "vh-us-202qua2b8ed3cb",
               "vh-us-202st.73c64f89",
+              "vh-us-202st.fc2e22ed",
               "vh-us-202ste198f7a4a",
               "vh-us-202ste67ef4e2d",
+              "vh-us-202tar0bbd9d56",
+              "vh-us-202tarc49d2a14",
               "vh-us-202uni979cabda",
               "vh-us-202unic788577e"
             ],
@@ -739,38 +732,25 @@
               "vh-us-202insad41796a",
               "vh-us-202qua2b8ed3cb",
               "vh-us-202st.73c64f89",
+              "vh-us-202st.fc2e22ed",
               "vh-us-202ste198f7a4a",
               "vh-us-202ste67ef4e2d",
+              "vh-us-202tar0bbd9d56",
+              "vh-us-202tarc49d2a14",
               "vh-us-202uni979cabda",
               "vh-us-202unic788577e"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202cha0c7666ff",
-              "vh-us-202cha4c08cfde",
-              "vh-us-202cha6cfd344c",
-              "vh-us-202chae3c0b874",
-              "vh-us-202checa283b6c",
-              "vh-us-202ech2b342f18",
-              "vh-us-202eme1adbecdc",
-              "vh-us-202mclfb3c3e69",
-              "vh-us-202mdw67caa80b",
-              "vh-us-202ste008437cf",
-              "vh-us-202uni187076c4",
-              "vh-us-202uni1ae0881e"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:FL:votehub:alexander-vindman|votehub:ashley-moody",
-              "senate-2026:FL:votehub:angie-nixon|votehub:ashley-moody"
+              "senate-2026:FL:senate-2026-FL:angie-nixon|senate-2026-FL:ashley-moody"
             ],
-            "latest_compatible_field_end": "2026-09-27T00:00:00",
-            "latest_compatible_available_at": "2026-09-29T00:00:00",
+            "latest_compatible_field_end": "2026-10-07T00:00:00",
+            "latest_compatible_available_at": "2026-10-09T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-GA",
@@ -800,11 +780,11 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 18,
+            "n_raw_current_polls": 14,
             "n_candidate_compatible_polls": 14,
             "n_model_safe_polls": 14,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 4,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
@@ -814,16 +794,12 @@
               "vh-us-202bigbe8a8854",
               "vh-us-202cyg167b9abc",
               "vh-us-202ech1a9afcfb",
-              "vh-us-202ech80c320f6",
               "vh-us-202eme1bcacacc",
-              "vh-us-202eme529afc79",
               "vh-us-202fab389395b2",
               "vh-us-202ins63791cfb",
               "vh-us-202insbbb32dd3",
               "vh-us-202qua80fe18a7",
-              "vh-us-202quafd79c6ef",
               "vh-us-202tip0382be0d",
-              "vh-us-202tip53f19ba5",
               "vh-us-202traba6abade",
               "vh-us-202wed7f897488",
               "vh-us-202wic6dd1649c",
@@ -861,16 +837,9 @@
               "vh-us-202wic6dd1649c",
               "vh-us-202wpa60d3da4e"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202ech80c320f6",
-              "vh-us-202eme529afc79",
-              "vh-us-202quafd79c6ef",
-              "vh-us-202tip53f19ba5"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:GA:votehub:jon-ossoff|votehub:buddy-carter",
-              "senate-2026:GA:votehub:jon-ossoff|votehub:derek-dooley",
-              "senate-2026:GA:votehub:jon-ossoff|votehub:mike-collins"
+              "senate-2026:GA:senate-2026-GA:jon-ossoff|senate-2026-GA:mike-collins"
             ],
             "latest_compatible_field_end": "2026-10-03T00:00:00",
             "latest_compatible_available_at": "2026-10-04T00:00:00",
@@ -878,9 +847,7 @@
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-IA",
@@ -910,11 +877,11 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 18,
-            "n_candidate_compatible_polls": 15,
-            "n_model_safe_polls": 15,
+            "n_raw_current_polls": 17,
+            "n_candidate_compatible_polls": 17,
+            "n_model_safe_polls": 17,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 3,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
@@ -922,15 +889,14 @@
             "raw_poll_ids": [
               "vh-us-202bea93a2c09c",
               "vh-us-202beaadb6c4f9",
-              "vh-us-202cha683eb5ac",
               "vh-us-202cha781abe34",
+              "vh-us-202cnnc393624c",
               "vh-us-202co/dc2b4681",
               "vh-us-202cyg40c776c5",
-              "vh-us-202eche7c2869f",
               "vh-us-202echf4929c57",
+              "vh-us-202eme2172a9a0",
               "vh-us-202eme4923d9f5",
               "vh-us-202emec4141ca7",
-              "vh-us-202gba62b36025",
               "vh-us-202gbab93d5de3",
               "vh-us-202marf54f428e",
               "vh-us-202pub957d3bcc",
@@ -943,9 +909,11 @@
               "vh-us-202bea93a2c09c",
               "vh-us-202beaadb6c4f9",
               "vh-us-202cha781abe34",
+              "vh-us-202cnnc393624c",
               "vh-us-202co/dc2b4681",
               "vh-us-202cyg40c776c5",
               "vh-us-202echf4929c57",
+              "vh-us-202eme2172a9a0",
               "vh-us-202eme4923d9f5",
               "vh-us-202emec4141ca7",
               "vh-us-202gbab93d5de3",
@@ -960,9 +928,11 @@
               "vh-us-202bea93a2c09c",
               "vh-us-202beaadb6c4f9",
               "vh-us-202cha781abe34",
+              "vh-us-202cnnc393624c",
               "vh-us-202co/dc2b4681",
               "vh-us-202cyg40c776c5",
               "vh-us-202echf4929c57",
+              "vh-us-202eme2172a9a0",
               "vh-us-202eme4923d9f5",
               "vh-us-202emec4141ca7",
               "vh-us-202gbab93d5de3",
@@ -973,24 +943,17 @@
               "vh-us-202youa33846f3",
               "vh-us-202youe257a121"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202cha683eb5ac",
-              "vh-us-202eche7c2869f",
-              "vh-us-202gba62b36025"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:IA:votehub:josh-turek|votehub:ashley-hinson",
-              "senate-2026:IA:votehub:zach-wahls|votehub:ashley-hinson"
+              "senate-2026:IA:senate-2026-IA:josh-turek|senate-2026-IA:ashley-hinson"
             ],
-            "latest_compatible_field_end": "2026-09-28T00:00:00",
-            "latest_compatible_available_at": "2026-10-02T00:00:00",
+            "latest_compatible_field_end": "2026-10-06T00:00:00",
+            "latest_compatible_available_at": "2026-10-09T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-ID",
@@ -1042,7 +1005,7 @@
               "vh-us-202the39a65ca5"
             ],
             "matchup_ids_seen": [
-              "senate-2026:ID:votehub:todd-achilles|votehub:jim-risch"
+              "senate-2026:ID:senate-2026-ID:todd-achilles|senate-2026-ID:jim-risch"
             ],
             "latest_compatible_field_end": "2026-08-07T00:00:00",
             "latest_compatible_available_at": "2026-08-14T00:00:00",
@@ -1072,7 +1035,7 @@
             },
             "contest_structure": "binary_dem_vs_rep",
             "candidate_identity_resolved": true,
-            "polling_available": false,
+            "polling_available": true,
             "statistical_target_supported": true,
             "ordinary_binary_model_supported": true,
             "exception_adapter_supported": false,
@@ -1082,29 +1045,35 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 0,
-            "n_candidate_compatible_polls": 0,
-            "n_model_safe_polls": 0,
+            "n_raw_current_polls": 1,
+            "n_candidate_compatible_polls": 1,
+            "n_model_safe_polls": 1,
             "n_exception_adapter_polls": 0,
             "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
             "n_excluded_hypothetical_or_pre_nomination": 0,
-            "raw_poll_ids": [],
-            "compatible_poll_ids": [],
-            "model_safe_poll_ids": [],
+            "raw_poll_ids": [
+              "vh-us-202pub12c802d5"
+            ],
+            "compatible_poll_ids": [
+              "vh-us-202pub12c802d5"
+            ],
+            "model_safe_poll_ids": [
+              "vh-us-202pub12c802d5"
+            ],
             "excluded_poll_ids": [],
-            "matchup_ids_seen": [],
-            "latest_compatible_field_end": null,
-            "latest_compatible_available_at": null,
-            "status": "warning",
-            "forecast_status": "warning",
+            "matchup_ids_seen": [
+              "senate-2026:IL:senate-2026-IL:juliana-stratton|senate-2026-IL:don-tracy"
+            ],
+            "latest_compatible_field_end": "2026-10-01T00:00:00",
+            "latest_compatible_available_at": "2026-10-06T00:00:00",
+            "status": "pass",
+            "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "identity_sensitive_race_has_zero_raw_polls"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-KS",
@@ -1160,7 +1129,7 @@
             ],
             "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:KS:votehub:adam-hamilton|votehub:roger-marshall"
+              "senate-2026:KS:senate-2026-KS:adam-hamilton|senate-2026-KS:roger-marshall"
             ],
             "latest_compatible_field_end": "2026-09-24T00:00:00",
             "latest_compatible_available_at": "2026-09-25T00:00:00",
@@ -1302,11 +1271,11 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 16,
-            "n_candidate_compatible_polls": 9,
-            "n_model_safe_polls": 9,
+            "n_raw_current_polls": 10,
+            "n_candidate_compatible_polls": 10,
+            "n_model_safe_polls": 10,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 7,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
@@ -1314,20 +1283,14 @@
             "raw_poll_ids": [
               "vh-us-202mas5785b9ea",
               "vh-us-202suf43021e00",
-              "vh-us-202suf791a9846",
               "vh-us-202suf91850a3d",
-              "vh-us-202sufcfbc9a05",
               "vh-us-202sur62cbc236",
               "vh-us-202uni06038789",
               "vh-us-202uni7ffc2e9d",
               "vh-us-202uni86a7074d",
-              "vh-us-202unibd1bf2da",
               "vh-us-202unic67dc15d",
-              "vh-us-202unid95802f4",
               "vh-us-202unide9784b7",
-              "vh-us-202unieba4dd24",
-              "vh-us-202unif8cfec03",
-              "vh-us-202unif995f365"
+              "vh-us-202unifcec5d26"
             ],
             "compatible_poll_ids": [
               "vh-us-202mas5785b9ea",
@@ -1338,7 +1301,8 @@
               "vh-us-202uni7ffc2e9d",
               "vh-us-202uni86a7074d",
               "vh-us-202unic67dc15d",
-              "vh-us-202unide9784b7"
+              "vh-us-202unide9784b7",
+              "vh-us-202unifcec5d26"
             ],
             "model_safe_poll_ids": [
               "vh-us-202mas5785b9ea",
@@ -1349,30 +1313,20 @@
               "vh-us-202uni7ffc2e9d",
               "vh-us-202uni86a7074d",
               "vh-us-202unic67dc15d",
-              "vh-us-202unide9784b7"
+              "vh-us-202unide9784b7",
+              "vh-us-202unifcec5d26"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202suf791a9846",
-              "vh-us-202sufcfbc9a05",
-              "vh-us-202unibd1bf2da",
-              "vh-us-202unid95802f4",
-              "vh-us-202unieba4dd24",
-              "vh-us-202unif8cfec03",
-              "vh-us-202unif995f365"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:MA:votehub:ed-markey|votehub:john-deaton",
-              "senate-2026:MA:votehub:seth-moulton|votehub:john-deaton"
+              "senate-2026:MA:senate-2026-MA:ed-markey|senate-2026-MA:john-deaton"
             ],
             "latest_compatible_field_end": "2026-09-22T00:00:00",
-            "latest_compatible_available_at": "2026-09-29T00:00:00",
+            "latest_compatible_available_at": "2026-10-08T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-ME",
@@ -1402,65 +1356,38 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 42,
-            "n_candidate_compatible_polls": 11,
-            "n_model_safe_polls": 11,
+            "n_raw_current_polls": 13,
+            "n_candidate_compatible_polls": 13,
+            "n_model_safe_polls": 13,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 31,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
             "n_excluded_hypothetical_or_pre_nomination": 0,
             "raw_poll_ids": [
               "vh-us-202bea347c91b0",
-              "vh-us-202bea83272bb9",
               "vh-us-202co/7102b7eb",
-              "vh-us-202cyn79bb9aaf",
-              "vh-us-202ech472cd4f1",
-              "vh-us-202ech9490021c",
-              "vh-us-202eme316dd7a3",
-              "vh-us-202emeae25a0b0",
-              "vh-us-202fab3ee58419",
-              "vh-us-202fab5fd4622f",
-              "vh-us-202fabb74398c5",
               "vh-us-202fabe2bcab70",
               "vh-us-202harfe4afc0e",
-              "vh-us-202mai1c9d66fd",
-              "vh-us-202mai234492e4",
-              "vh-us-202mai395fc865",
-              "vh-us-202maic1315c13",
-              "vh-us-202pan29dbf8a8",
-              "vh-us-202pan5a9b4cde",
-              "vh-us-202pan6f538bdb",
-              "vh-us-202pan8d235770",
-              "vh-us-202panabcd1049",
-              "vh-us-202qua10b03a8f",
+              "vh-us-202mare89f317d",
               "vh-us-202qua5c07dc65",
-              "vh-us-202qua64c2cf49",
-              "vh-us-202quad631010c",
-              "vh-us-202tav61219990",
+              "vh-us-202the6b777566",
               "vh-us-202the9a68a494",
-              "vh-us-202thec9ff409a",
-              "vh-us-202thefac9ff9a",
               "vh-us-202uni51f1c418",
-              "vh-us-202uni63b326ca",
               "vh-us-202uni866e047f",
-              "vh-us-202unia4c1a428",
               "vh-us-202unia65b1e02",
-              "vh-us-202unib4f650e2",
-              "vh-us-202unie1113a54",
               "vh-us-202wedfe4427b1",
-              "vh-us-202wic615cfb4b",
-              "vh-us-202you8b2f9799",
-              "vh-us-202zen3e7d2e5c",
-              "vh-us-202zena6743f9d"
+              "vh-us-202you8b2f9799"
             ],
             "compatible_poll_ids": [
               "vh-us-202bea347c91b0",
               "vh-us-202co/7102b7eb",
               "vh-us-202fabe2bcab70",
               "vh-us-202harfe4afc0e",
+              "vh-us-202mare89f317d",
               "vh-us-202qua5c07dc65",
+              "vh-us-202the6b777566",
               "vh-us-202the9a68a494",
               "vh-us-202uni51f1c418",
               "vh-us-202uni866e047f",
@@ -1473,7 +1400,9 @@
               "vh-us-202co/7102b7eb",
               "vh-us-202fabe2bcab70",
               "vh-us-202harfe4afc0e",
+              "vh-us-202mare89f317d",
               "vh-us-202qua5c07dc65",
+              "vh-us-202the6b777566",
               "vh-us-202the9a68a494",
               "vh-us-202uni51f1c418",
               "vh-us-202uni866e047f",
@@ -1481,54 +1410,17 @@
               "vh-us-202wedfe4427b1",
               "vh-us-202you8b2f9799"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202bea83272bb9",
-              "vh-us-202cyn79bb9aaf",
-              "vh-us-202ech472cd4f1",
-              "vh-us-202ech9490021c",
-              "vh-us-202eme316dd7a3",
-              "vh-us-202emeae25a0b0",
-              "vh-us-202fab3ee58419",
-              "vh-us-202fab5fd4622f",
-              "vh-us-202fabb74398c5",
-              "vh-us-202mai1c9d66fd",
-              "vh-us-202mai234492e4",
-              "vh-us-202mai395fc865",
-              "vh-us-202maic1315c13",
-              "vh-us-202pan29dbf8a8",
-              "vh-us-202pan5a9b4cde",
-              "vh-us-202pan6f538bdb",
-              "vh-us-202pan8d235770",
-              "vh-us-202panabcd1049",
-              "vh-us-202qua10b03a8f",
-              "vh-us-202qua64c2cf49",
-              "vh-us-202quad631010c",
-              "vh-us-202tav61219990",
-              "vh-us-202thec9ff409a",
-              "vh-us-202thefac9ff9a",
-              "vh-us-202uni63b326ca",
-              "vh-us-202unia4c1a428",
-              "vh-us-202unib4f650e2",
-              "vh-us-202unie1113a54",
-              "vh-us-202wic615cfb4b",
-              "vh-us-202zen3e7d2e5c",
-              "vh-us-202zena6743f9d"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:ME:votehub:dem|votehub:susan-collins",
-              "senate-2026:ME:votehub:graham-platner|votehub:susan-collins",
-              "senate-2026:ME:votehub:janet-mills|votehub:susan-collins",
-              "senate-2026:ME:votehub:troy-jackson|votehub:susan-collins"
+              "senate-2026:ME:senate-2026-ME:troy-jackson|senate-2026-ME:susan-collins"
             ],
-            "latest_compatible_field_end": "2026-10-01T00:00:00",
-            "latest_compatible_available_at": "2026-10-02T00:00:00",
+            "latest_compatible_field_end": "2026-10-05T00:00:00",
+            "latest_compatible_available_at": "2026-10-09T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-MI",
@@ -1558,11 +1450,11 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 64,
-            "n_candidate_compatible_polls": 33,
-            "n_model_safe_polls": 33,
+            "n_raw_current_polls": 36,
+            "n_candidate_compatible_polls": 36,
+            "n_model_safe_polls": 36,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 31,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
@@ -1574,64 +1466,36 @@
               "vh-us-202cyg13fa7f0a",
               "vh-us-202eme5bdd236b",
               "vh-us-202eme99d02ce6",
-              "vh-us-202emeb507fcbb",
-              "vh-us-202emee754e4c5",
-              "vh-us-202epi46ef28e5",
               "vh-us-202epi5f481027",
-              "vh-us-202epia42401c2",
-              "vh-us-202epid9595901",
               "vh-us-202epife4108d8",
               "vh-us-202fab12ee3caf",
               "vh-us-202gba7596c230",
               "vh-us-202gle0133b0b3",
-              "vh-us-202gle2939b758",
-              "vh-us-202gle322439ae",
-              "vh-us-202gle6589d1bb",
               "vh-us-202gle7fc79cd5",
-              "vh-us-202gleb42f5fae",
-              "vh-us-202glec0316553",
-              "vh-us-202glec19f2301",
               "vh-us-202gledaa7038f",
-              "vh-us-202gleeeb6be84",
               "vh-us-202glef7ac134b",
+              "vh-us-202guic8eacfa2",
               "vh-us-202micb55519f5",
               "vh-us-202miccc27552a",
-              "vh-us-202mit132a3ca8",
               "vh-us-202mit1e6a5692",
-              "vh-us-202mit39173145",
               "vh-us-202mit590c99af",
-              "vh-us-202mit61ba1fad",
-              "vh-us-202mit87b44bfc",
+              "vh-us-202mit7960c973",
               "vh-us-202mit9a5c32a0",
-              "vh-us-202mitf3d55a81",
-              "vh-us-202nor7a88e643",
-              "vh-us-202norbd336de9",
-              "vh-us-202qua1a64cfa3",
-              "vh-us-202qua38d03fbc",
               "vh-us-202qua3b4e634a",
-              "vh-us-202ros2c880fd3",
               "vh-us-202ros410812c7",
-              "vh-us-202ros8e5ec4d9",
-              "vh-us-202soc0b27fd00",
               "vh-us-202soc6e865068",
               "vh-us-202suf59500e62",
               "vh-us-202susb1d73b8b",
-              "vh-us-202tar417e15f3",
               "vh-us-202the9066d3a5",
               "vh-us-202thecf4746de",
-              "vh-us-202tip199bb9db",
-              "vh-us-202tip3da9b019",
               "vh-us-202tip59dfdfa0",
               "vh-us-202tip6d4d41d9",
-              "vh-us-202tip7ac4a21f",
               "vh-us-202tip8915c085",
-              "vh-us-202tip99de5023",
               "vh-us-202tra046dabbf",
               "vh-us-202traa454dc67",
               "vh-us-202tul3efe64f6",
-              "vh-us-202zen354a92cf",
-              "vh-us-202zena20bfa8f",
-              "vh-us-202zenec41aa86"
+              "vh-us-202z tb2a3f7be",
+              "vh-us-202zen354a92cf"
             ],
             "compatible_poll_ids": [
               "vh-us-202bea6ed87549",
@@ -1648,10 +1512,12 @@
               "vh-us-202gle7fc79cd5",
               "vh-us-202gledaa7038f",
               "vh-us-202glef7ac134b",
+              "vh-us-202guic8eacfa2",
               "vh-us-202micb55519f5",
               "vh-us-202miccc27552a",
               "vh-us-202mit1e6a5692",
               "vh-us-202mit590c99af",
+              "vh-us-202mit7960c973",
               "vh-us-202mit9a5c32a0",
               "vh-us-202qua3b4e634a",
               "vh-us-202ros410812c7",
@@ -1666,6 +1532,7 @@
               "vh-us-202tra046dabbf",
               "vh-us-202traa454dc67",
               "vh-us-202tul3efe64f6",
+              "vh-us-202z tb2a3f7be",
               "vh-us-202zen354a92cf"
             ],
             "model_safe_poll_ids": [
@@ -1683,10 +1550,12 @@
               "vh-us-202gle7fc79cd5",
               "vh-us-202gledaa7038f",
               "vh-us-202glef7ac134b",
+              "vh-us-202guic8eacfa2",
               "vh-us-202micb55519f5",
               "vh-us-202miccc27552a",
               "vh-us-202mit1e6a5692",
               "vh-us-202mit590c99af",
+              "vh-us-202mit7960c973",
               "vh-us-202mit9a5c32a0",
               "vh-us-202qua3b4e634a",
               "vh-us-202ros410812c7",
@@ -1701,55 +1570,20 @@
               "vh-us-202tra046dabbf",
               "vh-us-202traa454dc67",
               "vh-us-202tul3efe64f6",
+              "vh-us-202z tb2a3f7be",
               "vh-us-202zen354a92cf"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202emeb507fcbb",
-              "vh-us-202emee754e4c5",
-              "vh-us-202epi46ef28e5",
-              "vh-us-202epia42401c2",
-              "vh-us-202epid9595901",
-              "vh-us-202gle2939b758",
-              "vh-us-202gle322439ae",
-              "vh-us-202gle6589d1bb",
-              "vh-us-202gleb42f5fae",
-              "vh-us-202glec0316553",
-              "vh-us-202glec19f2301",
-              "vh-us-202gleeeb6be84",
-              "vh-us-202mit132a3ca8",
-              "vh-us-202mit39173145",
-              "vh-us-202mit61ba1fad",
-              "vh-us-202mit87b44bfc",
-              "vh-us-202mitf3d55a81",
-              "vh-us-202nor7a88e643",
-              "vh-us-202norbd336de9",
-              "vh-us-202qua1a64cfa3",
-              "vh-us-202qua38d03fbc",
-              "vh-us-202ros2c880fd3",
-              "vh-us-202ros8e5ec4d9",
-              "vh-us-202soc0b27fd00",
-              "vh-us-202tar417e15f3",
-              "vh-us-202tip199bb9db",
-              "vh-us-202tip3da9b019",
-              "vh-us-202tip7ac4a21f",
-              "vh-us-202tip99de5023",
-              "vh-us-202zena20bfa8f",
-              "vh-us-202zenec41aa86"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:MI:votehub:abdul-el-sayed|votehub:mike-rogers",
-              "senate-2026:MI:votehub:haley-stevens|votehub:mike-rogers",
-              "senate-2026:MI:votehub:mallory-mcmorrow|votehub:mike-rogers"
+              "senate-2026:MI:senate-2026-MI:abdul-el-sayed|senate-2026-MI:mike-rogers"
             ],
-            "latest_compatible_field_end": "2026-09-30T00:00:00",
-            "latest_compatible_available_at": "2026-10-02T00:00:00",
+            "latest_compatible_field_end": "2026-10-01T00:00:00",
+            "latest_compatible_available_at": "2026-10-09T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-MN",
@@ -1779,11 +1613,11 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 8,
-            "n_candidate_compatible_polls": 5,
-            "n_model_safe_polls": 5,
+            "n_raw_current_polls": 6,
+            "n_candidate_compatible_polls": 6,
+            "n_model_safe_polls": 6,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 3,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
@@ -1791,9 +1625,7 @@
             "raw_poll_ids": [
               "vh-us-202big7e4bf32f",
               "vh-us-202eme46470152",
-              "vh-us-202emec7074b5d",
-              "vh-us-202pubd69c1e7f",
-              "vh-us-202pubde180c20",
+              "vh-us-202gqr63b7a4d3",
               "vh-us-202qua8837472c",
               "vh-us-202sur47670306",
               "vh-us-202sura38c6933"
@@ -1801,6 +1633,7 @@
             "compatible_poll_ids": [
               "vh-us-202big7e4bf32f",
               "vh-us-202eme46470152",
+              "vh-us-202gqr63b7a4d3",
               "vh-us-202qua8837472c",
               "vh-us-202sur47670306",
               "vh-us-202sura38c6933"
@@ -1808,30 +1641,22 @@
             "model_safe_poll_ids": [
               "vh-us-202big7e4bf32f",
               "vh-us-202eme46470152",
+              "vh-us-202gqr63b7a4d3",
               "vh-us-202qua8837472c",
               "vh-us-202sur47670306",
               "vh-us-202sura38c6933"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202emec7074b5d",
-              "vh-us-202pubd69c1e7f",
-              "vh-us-202pubde180c20"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:MN:votehub:angie-craig|votehub:michele-tafoya",
-              "senate-2026:MN:votehub:angie-craig|votehub:rep",
-              "senate-2026:MN:votehub:peggy-flanagan|votehub:michele-tafoya",
-              "senate-2026:MN:votehub:peggy-flanagan|votehub:rep"
+              "senate-2026:MN:senate-2026-MN:peggy-flanagan|senate-2026-MN:michele-tafoya"
             ],
-            "latest_compatible_field_end": "2026-09-30T00:00:00",
-            "latest_compatible_available_at": "2026-10-02T00:00:00",
+            "latest_compatible_field_end": "2026-10-04T00:00:00",
+            "latest_compatible_available_at": "2026-10-09T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-MS",
@@ -1884,7 +1709,7 @@
             ],
             "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:MS:votehub:scott-colom|votehub:cindy-hyde-smith"
+              "senate-2026:MS:senate-2026-MS:scott-colom|senate-2026-MS:cindy-hyde-smith"
             ],
             "latest_compatible_field_end": "2026-08-15T00:00:00",
             "latest_compatible_available_at": "2026-08-29T00:00:00",
@@ -1922,13 +1747,13 @@
             "probability_model_support_reason": "multiway_plurality_probability_model_not_historically_supported",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 24,
-            "n_candidate_compatible_polls": 6,
+            "n_raw_current_polls": 23,
+            "n_candidate_compatible_polls": 17,
             "n_model_safe_polls": 0,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 18,
+            "n_excluded_obsolete_or_incompatible": 6,
             "n_excluded_identity_unresolved": 0,
-            "n_excluded_unsupported_target": 6,
+            "n_excluded_unsupported_target": 17,
             "ordinary_model_excluded_poll_ids": [],
             "n_excluded_hypothetical_or_pre_nomination": 0,
             "raw_poll_ids": [
@@ -1945,7 +1770,6 @@
               "vh-us-202qua7f691cd6",
               "vh-us-202tav16c902e1",
               "vh-us-202tav1d399417",
-              "vh-us-202tav2313c4bf",
               "vh-us-202tav507e89fe",
               "vh-us-202tav5960dbe5",
               "vh-us-202tav5bb1680a",
@@ -1958,12 +1782,23 @@
               "vh-us-202theb6b894ea"
             ],
             "compatible_poll_ids": [
+              "vh-us-202amec1fe2597",
               "vh-us-202gqr0fc65d4b",
+              "vh-us-202gqr6f3c3766",
               "vh-us-202gqrcac76706",
+              "vh-us-202gra7bd23a76",
+              "vh-us-202har82b4bcdc",
+              "vh-us-202pubfd67a5f3",
+              "vh-us-202qua7f691cd6",
               "vh-us-202tav507e89fe",
+              "vh-us-202tav5960dbe5",
+              "vh-us-202tav5bb1680a",
+              "vh-us-202tav65f6005d",
+              "vh-us-202tav83ffdf29",
               "vh-us-202tav913179a0",
               "vh-us-202tavbdc1a03d",
-              "vh-us-202tavf29ef95a"
+              "vh-us-202tavf29ef95a",
+              "vh-us-202theb6b894ea"
             ],
             "model_safe_poll_ids": [],
             "excluded_poll_ids": [
@@ -1980,7 +1815,6 @@
               "vh-us-202qua7f691cd6",
               "vh-us-202tav16c902e1",
               "vh-us-202tav1d399417",
-              "vh-us-202tav2313c4bf",
               "vh-us-202tav507e89fe",
               "vh-us-202tav5960dbe5",
               "vh-us-202tav5bb1680a",
@@ -1993,12 +1827,11 @@
               "vh-us-202theb6b894ea"
             ],
             "matchup_ids_seen": [
-              "senate-2026:MT:votehub:alani-bankhead|votehub:kurt-alme",
-              "senate-2026:MT:votehub:reilly-neill|votehub:kurt-alme",
-              "senate-2026:MT:votehub:seth-bodnar|votehub:kurt-alme"
+              "senate-2026:MT:senate-2026-MT:alani-bankhead|senate-2026-MT:kurt-alme",
+              "senate-2026:MT:senate-2026-MT:seth-bodnar|senate-2026-MT:kurt-alme"
             ],
-            "latest_compatible_field_end": "2026-07-27T00:00:00",
-            "latest_compatible_available_at": "2026-07-28T00:00:00",
+            "latest_compatible_field_end": "2026-09-24T00:00:00",
+            "latest_compatible_available_at": "2026-09-29T00:00:00",
             "status": "fail",
             "forecast_status": "fail",
             "evidence_status": "pass",
@@ -2037,11 +1870,11 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 37,
-            "n_candidate_compatible_polls": 35,
-            "n_model_safe_polls": 35,
+            "n_raw_current_polls": 36,
+            "n_candidate_compatible_polls": 36,
+            "n_model_safe_polls": 36,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 2,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
@@ -2055,6 +1888,7 @@
               "vh-us-202chab6c27b91",
               "vh-us-202chad53b9fb6",
               "vh-us-202chaf0ea6e94",
+              "vh-us-202eas168b53d4",
               "vh-us-202easa9c1ac17",
               "vh-us-202elo069243f3",
               "vh-us-202elo857d928d",
@@ -2065,7 +1899,6 @@
               "vh-us-202har2b123ce0",
               "vh-us-202harb00382e0",
               "vh-us-202harc083001c",
-              "vh-us-202harc344974e",
               "vh-us-202harca09238f",
               "vh-us-202harfc1499b8",
               "vh-us-202hig0453aa0e",
@@ -2080,7 +1913,6 @@
               "vh-us-202pub96a42a3f",
               "vh-us-202thef5594fea",
               "vh-us-202tipab84b110",
-              "vh-us-202vic0a006caa",
               "vh-us-202vicec5afb5c",
               "vh-us-202you2133db87",
               "vh-us-202youca5f07f2"
@@ -2094,6 +1926,7 @@
               "vh-us-202chab6c27b91",
               "vh-us-202chad53b9fb6",
               "vh-us-202chaf0ea6e94",
+              "vh-us-202eas168b53d4",
               "vh-us-202easa9c1ac17",
               "vh-us-202elo069243f3",
               "vh-us-202elo857d928d",
@@ -2131,6 +1964,7 @@
               "vh-us-202chab6c27b91",
               "vh-us-202chad53b9fb6",
               "vh-us-202chaf0ea6e94",
+              "vh-us-202eas168b53d4",
               "vh-us-202easa9c1ac17",
               "vh-us-202elo069243f3",
               "vh-us-202elo857d928d",
@@ -2159,24 +1993,17 @@
               "vh-us-202you2133db87",
               "vh-us-202youca5f07f2"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202harc344974e",
-              "vh-us-202vic0a006caa"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:NC:votehub:roy-cooper|votehub:don-brown",
-              "senate-2026:NC:votehub:roy-cooper|votehub:lara-trump",
-              "senate-2026:NC:votehub:roy-cooper|votehub:michael-whatley"
+              "senate-2026:NC:senate-2026-NC:roy-cooper|senate-2026-NC:michael-whatley"
             ],
-            "latest_compatible_field_end": "2026-09-29T00:00:00",
-            "latest_compatible_available_at": "2026-10-01T00:00:00",
+            "latest_compatible_field_end": "2026-10-03T00:00:00",
+            "latest_compatible_available_at": "2026-10-09T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-NE",
@@ -2228,7 +2055,7 @@
               "vh-us-202gba71e992b6"
             ],
             "matchup_ids_seen": [
-              "senate-2026:NE:votehub:dan-osborn|votehub:pete-ricketts"
+              "senate-2026:NE:senate-2026-NE:dan-osborn|senate-2026-NE:pete-ricketts"
             ],
             "latest_compatible_field_end": "2026-09-08T00:00:00",
             "latest_compatible_available_at": "2026-09-25T00:00:00",
@@ -2268,11 +2095,11 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 23,
+            "n_raw_current_polls": 19,
             "n_candidate_compatible_polls": 19,
             "n_model_safe_polls": 19,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 4,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
@@ -2289,15 +2116,11 @@
               "vh-us-202sai47715591",
               "vh-us-202saia99778cd",
               "vh-us-202saica770502",
-              "vh-us-202saif530b9d2",
-              "vh-us-202saif937cd00",
               "vh-us-202the55816505",
               "vh-us-202uni02a0a46f",
               "vh-us-202uni0401d0f4",
               "vh-us-202uni1250e038",
-              "vh-us-202uni38178073",
               "vh-us-202uni64743a1f",
-              "vh-us-202uni983e65a4",
               "vh-us-202unib186ef52",
               "vh-us-202unie006e257",
               "vh-us-202yese8051e85"
@@ -2344,15 +2167,9 @@
               "vh-us-202unie006e257",
               "vh-us-202yese8051e85"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202saif530b9d2",
-              "vh-us-202saif937cd00",
-              "vh-us-202uni38178073",
-              "vh-us-202uni983e65a4"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:NH:votehub:chris-pappas|votehub:john-sununu",
-              "senate-2026:NH:votehub:chris-pappas|votehub:scott-brown"
+              "senate-2026:NH:senate-2026-NH:chris-pappas|senate-2026-NH:john-sununu"
             ],
             "latest_compatible_field_end": "2026-09-22T00:00:00",
             "latest_compatible_available_at": "2026-09-25T00:00:00",
@@ -2360,9 +2177,7 @@
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-NJ",
@@ -2444,9 +2259,9 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 1,
-            "n_candidate_compatible_polls": 1,
-            "n_model_safe_polls": 1,
+            "n_raw_current_polls": 2,
+            "n_candidate_compatible_polls": 2,
+            "n_model_safe_polls": 2,
             "n_exception_adapter_polls": 0,
             "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
@@ -2454,20 +2269,23 @@
             "ordinary_model_excluded_poll_ids": [],
             "n_excluded_hypothetical_or_pre_nomination": 0,
             "raw_poll_ids": [
-              "vh-us-202resf47cceea"
+              "vh-us-202resf47cceea",
+              "vh-us-202surae0ec3b2"
             ],
             "compatible_poll_ids": [
-              "vh-us-202resf47cceea"
+              "vh-us-202resf47cceea",
+              "vh-us-202surae0ec3b2"
             ],
             "model_safe_poll_ids": [
-              "vh-us-202resf47cceea"
+              "vh-us-202resf47cceea",
+              "vh-us-202surae0ec3b2"
             ],
             "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:NM:votehub:ben-ray-lujan|votehub:larry-marker"
+              "senate-2026:NM:senate-2026-NM:ben-ray-lujan|senate-2026-NM:larry-marker"
             ],
-            "latest_compatible_field_end": "2026-08-28T00:00:00",
-            "latest_compatible_available_at": "2026-09-01T00:00:00",
+            "latest_compatible_field_end": "2026-09-30T00:00:00",
+            "latest_compatible_available_at": "2026-10-06T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
@@ -2502,9 +2320,9 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 21,
-            "n_candidate_compatible_polls": 21,
-            "n_model_safe_polls": 21,
+            "n_raw_current_polls": 24,
+            "n_candidate_compatible_polls": 24,
+            "n_model_safe_polls": 24,
             "n_exception_adapter_polls": 0,
             "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
@@ -2519,6 +2337,9 @@
               "vh-us-202bow8a765810",
               "vh-us-202bowabd25f95",
               "vh-us-202bowefe05ca7",
+              "vh-us-202cnna1713372",
+              "vh-us-202co/52c27a2f",
+              "vh-us-202co/ed81e3f8",
               "vh-us-202echefadd030",
               "vh-us-202emc72b76be3",
               "vh-us-202eme8f806411",
@@ -2542,6 +2363,9 @@
               "vh-us-202bow8a765810",
               "vh-us-202bowabd25f95",
               "vh-us-202bowefe05ca7",
+              "vh-us-202cnna1713372",
+              "vh-us-202co/52c27a2f",
+              "vh-us-202co/ed81e3f8",
               "vh-us-202echefadd030",
               "vh-us-202emc72b76be3",
               "vh-us-202eme8f806411",
@@ -2565,6 +2389,9 @@
               "vh-us-202bow8a765810",
               "vh-us-202bowabd25f95",
               "vh-us-202bowefe05ca7",
+              "vh-us-202cnna1713372",
+              "vh-us-202co/52c27a2f",
+              "vh-us-202co/ed81e3f8",
               "vh-us-202echefadd030",
               "vh-us-202emc72b76be3",
               "vh-us-202eme8f806411",
@@ -2582,10 +2409,10 @@
             ],
             "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:OH:votehub:sherrod-brown|votehub:jon-husted"
+              "senate-2026:OH:senate-2026-OH:sherrod-brown|senate-2026-OH:jon-husted"
             ],
-            "latest_compatible_field_end": "2026-09-29T00:00:00",
-            "latest_compatible_available_at": "2026-10-02T00:00:00",
+            "latest_compatible_field_end": "2026-10-06T00:00:00",
+            "latest_compatible_available_at": "2026-10-09T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
@@ -2724,9 +2551,9 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 2,
-            "n_candidate_compatible_polls": 2,
-            "n_model_safe_polls": 2,
+            "n_raw_current_polls": 3,
+            "n_candidate_compatible_polls": 3,
+            "n_model_safe_polls": 3,
             "n_exception_adapter_polls": 0,
             "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
@@ -2735,22 +2562,25 @@
             "n_excluded_hypothetical_or_pre_nomination": 0,
             "raw_poll_ids": [
               "vh-us-202uni2c6a92aa",
+              "vh-us-202uni2e797321",
               "vh-us-202uni56d3ce46"
             ],
             "compatible_poll_ids": [
               "vh-us-202uni2c6a92aa",
+              "vh-us-202uni2e797321",
               "vh-us-202uni56d3ce46"
             ],
             "model_safe_poll_ids": [
               "vh-us-202uni2c6a92aa",
+              "vh-us-202uni2e797321",
               "vh-us-202uni56d3ce46"
             ],
             "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:RI:votehub:jack-reed|votehub:raymond-mckay"
+              "senate-2026:RI:senate-2026-RI:jack-reed|senate-2026-RI:raymond-mckay"
             ],
-            "latest_compatible_field_end": "2026-08-24T00:00:00",
-            "latest_compatible_available_at": "2026-08-27T00:00:00",
+            "latest_compatible_field_end": "2026-09-21T00:00:00",
+            "latest_compatible_available_at": "2026-10-08T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
@@ -2808,7 +2638,7 @@
             ],
             "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:SC:votehub:annie-andrews|votehub:darline-graham"
+              "senate-2026:SC:senate-2026-SC:annie-andrews|senate-2026-SC:darline-graham"
             ],
             "latest_compatible_field_end": "2026-09-29T00:00:00",
             "latest_compatible_available_at": "2026-10-02T00:00:00",
@@ -2921,7 +2751,7 @@
             ],
             "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:TN:votehub:marquita-bradshaw|votehub:bill-hagerty"
+              "senate-2026:TN:senate-2026-TN:marquita-bradshaw|senate-2026-TN:bill-hagerty"
             ],
             "latest_compatible_field_end": "2026-08-26T00:00:00",
             "latest_compatible_available_at": "2026-09-03T00:00:00",
@@ -2959,11 +2789,11 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 43,
-            "n_candidate_compatible_polls": 35,
-            "n_model_safe_polls": 35,
+            "n_raw_current_polls": 37,
+            "n_candidate_compatible_polls": 37,
+            "n_model_safe_polls": 37,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 8,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
@@ -2973,18 +2803,16 @@
               "vh-us-202bea54820d8d",
               "vh-us-202beab9600d9b",
               "vh-us-202eme5bcac049",
-              "vh-us-202eme9b9f44a5",
               "vh-us-202emee56d4394",
               "vh-us-202emeef7cbc1d",
               "vh-us-202fab22efb6bc",
+              "vh-us-202gui7fa4251f",
               "vh-us-202imp50137db2",
               "vh-us-202ins8df69531",
               "vh-us-202pub121c904c",
               "vh-us-202pub7e233927",
-              "vh-us-202pubaf44626b",
               "vh-us-202qua6b878295",
               "vh-us-202rag0c28bfd3",
-              "vh-us-202rag8552bbbc",
               "vh-us-202rec22b1c62b",
               "vh-us-202rec773da2d7",
               "vh-us-202rec85c5cf76",
@@ -2994,7 +2822,6 @@
               "vh-us-202sli9f75fb57",
               "vh-us-202socb918e088",
               "vh-us-202tex6938a787",
-              "vh-us-202texaca3925a",
               "vh-us-202texc28cf835",
               "vh-us-202texc8fd4814",
               "vh-us-202texe500a6d5",
@@ -3002,13 +2829,10 @@
               "vh-us-202the54ba4671",
               "vh-us-202thee89c7bce",
               "vh-us-202uni0dc518c7",
-              "vh-us-202uni5040ddd3",
-              "vh-us-202uni731e2279",
               "vh-us-202uni8225dcc0",
-              "vh-us-202unidb95df99",
+              "vh-us-202unic8d0412d",
               "vh-us-202unie89cc6b4",
               "vh-us-202wed4dcf8c6b",
-              "vh-us-202you0dcc69cb",
               "vh-us-202you3c4a4a9f",
               "vh-us-202you9dee520f",
               "vh-us-202youc39ac53a"
@@ -3021,6 +2845,7 @@
               "vh-us-202emee56d4394",
               "vh-us-202emeef7cbc1d",
               "vh-us-202fab22efb6bc",
+              "vh-us-202gui7fa4251f",
               "vh-us-202imp50137db2",
               "vh-us-202ins8df69531",
               "vh-us-202pub121c904c",
@@ -3044,6 +2869,7 @@
               "vh-us-202thee89c7bce",
               "vh-us-202uni0dc518c7",
               "vh-us-202uni8225dcc0",
+              "vh-us-202unic8d0412d",
               "vh-us-202unie89cc6b4",
               "vh-us-202wed4dcf8c6b",
               "vh-us-202you3c4a4a9f",
@@ -3058,6 +2884,7 @@
               "vh-us-202emee56d4394",
               "vh-us-202emeef7cbc1d",
               "vh-us-202fab22efb6bc",
+              "vh-us-202gui7fa4251f",
               "vh-us-202imp50137db2",
               "vh-us-202ins8df69531",
               "vh-us-202pub121c904c",
@@ -3081,35 +2908,24 @@
               "vh-us-202thee89c7bce",
               "vh-us-202uni0dc518c7",
               "vh-us-202uni8225dcc0",
+              "vh-us-202unic8d0412d",
               "vh-us-202unie89cc6b4",
               "vh-us-202wed4dcf8c6b",
               "vh-us-202you3c4a4a9f",
               "vh-us-202you9dee520f",
               "vh-us-202youc39ac53a"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202eme9b9f44a5",
-              "vh-us-202pubaf44626b",
-              "vh-us-202rag8552bbbc",
-              "vh-us-202texaca3925a",
-              "vh-us-202uni5040ddd3",
-              "vh-us-202uni731e2279",
-              "vh-us-202unidb95df99",
-              "vh-us-202you0dcc69cb"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:TX:votehub:james-talarico|votehub:john-cornyn",
-              "senate-2026:TX:votehub:james-talarico|votehub:ken-paxton"
+              "senate-2026:TX:senate-2026-TX:james-talarico|senate-2026-TX:ken-paxton"
             ],
             "latest_compatible_field_end": "2026-09-28T00:00:00",
-            "latest_compatible_available_at": "2026-10-02T00:00:00",
+            "latest_compatible_available_at": "2026-10-08T00:00:00",
             "status": "pass",
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-VA",
@@ -3139,22 +2955,18 @@
             "probability_model_support_reason": "ordinary_dem_vs_rep",
             "identity_sensitive": true,
             "qa_universe": true,
-            "n_raw_current_polls": 6,
+            "n_raw_current_polls": 2,
             "n_candidate_compatible_polls": 2,
             "n_model_safe_polls": 2,
             "n_exception_adapter_polls": 0,
-            "n_excluded_obsolete_or_incompatible": 4,
+            "n_excluded_obsolete_or_incompatible": 0,
             "n_excluded_identity_unresolved": 0,
             "n_excluded_unsupported_target": 0,
             "ordinary_model_excluded_poll_ids": [],
             "n_excluded_hypothetical_or_pre_nomination": 0,
             "raw_poll_ids": [
-              "vh-us-202the23cfbe50",
               "vh-us-202the592aeef5",
-              "vh-us-202the5a104154",
-              "vh-us-202the5f79b2da",
-              "vh-us-202the65a34aca",
-              "vh-us-202thecc936039"
+              "vh-us-202the5a104154"
             ],
             "compatible_poll_ids": [
               "vh-us-202the592aeef5",
@@ -3164,16 +2976,9 @@
               "vh-us-202the592aeef5",
               "vh-us-202the5a104154"
             ],
-            "excluded_poll_ids": [
-              "vh-us-202the23cfbe50",
-              "vh-us-202the5f79b2da",
-              "vh-us-202the65a34aca",
-              "vh-us-202thecc936039"
-            ],
+            "excluded_poll_ids": [],
             "matchup_ids_seen": [
-              "senate-2026:VA:votehub:mark-warner|votehub:bert-mizusawa",
-              "senate-2026:VA:votehub:mark-warner|votehub:david-williams",
-              "senate-2026:VA:votehub:mark-warner|votehub:kim-farington"
+              "senate-2026:VA:senate-2026-VA:mark-warner|senate-2026-VA:bert-mizusawa"
             ],
             "latest_compatible_field_end": "2026-06-16T00:00:00",
             "latest_compatible_available_at": "2026-06-18T00:00:00",
@@ -3181,9 +2986,7 @@
             "forecast_status": "pass",
             "evidence_status": "pass",
             "evidence_reasons": [],
-            "reasons": [
-              "matchup_not_selected_by_reviewed_current_registry"
-            ]
+            "reasons": []
           },
           {
             "race_id": "senate-2026-WV",
@@ -3290,11 +3093,11 @@
             ]
           }
         ],
-        "artifact_sha256": "32ed628e1a24735d609b03470c62b62feaea9ad8aaa53541b8d88d95d712ea49",
+        "artifact_sha256": "a5688bae87c1ddd09ae1280111e134071e5591506535f683849022632884fe64",
         "summary": {
           "n_races": 35,
-          "n_pass": 20,
-          "n_warning": 14,
+          "n_pass": 21,
+          "n_warning": 13,
           "n_fail": 1,
           "n_evidence_fail": 0,
           "evidence_ready": true,
@@ -9454,8 +9257,7 @@
               "modeled_candidate_id": "senate-2026-AK:mary-peltola",
               "opposing_candidate_id": "senate-2026-AK:dan-s-sullivan",
               "matchup_ids_seen": [
-                "votehub:mary-peltola|votehub:dan-sullivan",
-                "votehub:mary-peltola|votehub:dan-sullvian"
+                "senate-2026-AK:mary-peltola|senate-2026-AK:dan-s-sullivan"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "0788a7547bb99cf8f35f7df38be1899a24365598068f4246031d36b65fd86af3",
@@ -9486,7 +9288,7 @@
               "modeled_candidate_id": "senate-2026-AL:everett-wess",
               "opposing_candidate_id": "senate-2026-AL:barry-moore",
               "matchup_ids_seen": [
-                "votehub:everett-wess|votehub:barry-moore"
+                "senate-2026-AL:everett-wess|senate-2026-AL:barry-moore"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "cbe50fb6e635b67a458fdd6aa1e538ba283a17c91e643424bb334155479fc13f",
@@ -9517,7 +9319,7 @@
               "modeled_candidate_id": "senate-2026-AR:hallie-shoffner",
               "opposing_candidate_id": "senate-2026-AR:tom-cotton",
               "matchup_ids_seen": [
-                "votehub:hallie-shoffner|votehub:tom-cotton"
+                "senate-2026-AR:hallie-shoffner|senate-2026-AR:tom-cotton"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "1d573d96f0f21938ffa92a94b17e9282c9a2d1c2c3623c232f7a787aef59dff4",
@@ -9606,8 +9408,7 @@
               "modeled_candidate_id": "senate-2026-FL:angie-nixon",
               "opposing_candidate_id": "senate-2026-FL:ashley-moody",
               "matchup_ids_seen": [
-                "votehub:alexander-vindman|votehub:ashley-moody",
-                "votehub:angie-nixon|votehub:ashley-moody"
+                "senate-2026-FL:angie-nixon|senate-2026-FL:ashley-moody"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "f2862e588c8479a57963b2d477ce395dc6465a217d735ac25d9fc691606cedbd",
@@ -9638,9 +9439,7 @@
               "modeled_candidate_id": "senate-2026-GA:jon-ossoff",
               "opposing_candidate_id": "senate-2026-GA:mike-collins",
               "matchup_ids_seen": [
-                "votehub:jon-ossoff|votehub:buddy-carter",
-                "votehub:jon-ossoff|votehub:derek-dooley",
-                "votehub:jon-ossoff|votehub:mike-collins"
+                "senate-2026-GA:jon-ossoff|senate-2026-GA:mike-collins"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "88c61a06c259339e841b63175eba3a8262aa705d2ff413c002f5d446ec0547f0",
@@ -9671,8 +9470,7 @@
               "modeled_candidate_id": "senate-2026-IA:josh-turek",
               "opposing_candidate_id": "senate-2026-IA:ashley-hinson",
               "matchup_ids_seen": [
-                "votehub:josh-turek|votehub:ashley-hinson",
-                "votehub:zach-wahls|votehub:ashley-hinson"
+                "senate-2026-IA:josh-turek|senate-2026-IA:ashley-hinson"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "a6d12f02d62a0c8585e5085f551d2e217ddb0c967ecb0bc61c53c1c7d98720b0",
@@ -9703,7 +9501,7 @@
               "modeled_candidate_id": "senate-2026-ID:todd-achilles",
               "opposing_candidate_id": "senate-2026-ID:jim-risch",
               "matchup_ids_seen": [
-                "votehub:todd-achilles|votehub:jim-risch"
+                "senate-2026-ID:todd-achilles|senate-2026-ID:jim-risch"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "70b585c4580e3aaf33e094c1a87e75be0ca8c319a89bf1ab31239c381abb78e8",
@@ -9733,7 +9531,9 @@
               "timeline_status": "degraded_no_event_for_race",
               "modeled_candidate_id": "senate-2026-IL:juliana-stratton",
               "opposing_candidate_id": "senate-2026-IL:don-tracy",
-              "matchup_ids_seen": [],
+              "matchup_ids_seen": [
+                "senate-2026-IL:juliana-stratton|senate-2026-IL:don-tracy"
+              ],
               "structural_gap": null,
               "race_evidence_sha256": "7af7334b48b4a67f0e7a28e03e676d04a7ff2d0770fa1a3bc4b64d1dd877ce45",
               "identity_source": "reviewed_current_candidate_registry",
@@ -9763,7 +9563,7 @@
               "modeled_candidate_id": "senate-2026-KS:adam-hamilton",
               "opposing_candidate_id": "senate-2026-KS:roger-marshall",
               "matchup_ids_seen": [
-                "votehub:adam-hamilton|votehub:roger-marshall"
+                "senate-2026-KS:adam-hamilton|senate-2026-KS:roger-marshall"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "a3644c68521c260f0c9f276360f6ecf33d62133c9302813506cd21d75f4cab68",
@@ -9852,8 +9652,7 @@
               "modeled_candidate_id": "senate-2026-MA:ed-markey",
               "opposing_candidate_id": "senate-2026-MA:john-deaton",
               "matchup_ids_seen": [
-                "votehub:ed-markey|votehub:john-deaton",
-                "votehub:seth-moulton|votehub:john-deaton"
+                "senate-2026-MA:ed-markey|senate-2026-MA:john-deaton"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "85b3f44bd8e8ac45558b1ddb754c40f3071c6053c076d946b9c9a98ff8eff0e3",
@@ -9884,10 +9683,7 @@
               "modeled_candidate_id": "senate-2026-ME:troy-jackson",
               "opposing_candidate_id": "senate-2026-ME:susan-collins",
               "matchup_ids_seen": [
-                "votehub:dem|votehub:susan-collins",
-                "votehub:graham-platner|votehub:susan-collins",
-                "votehub:janet-mills|votehub:susan-collins",
-                "votehub:troy-jackson|votehub:susan-collins"
+                "senate-2026-ME:troy-jackson|senate-2026-ME:susan-collins"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "d6e005e4ded6fa672e2547625a34d7d6ca44426010cfbd7c2ad592240ebdb587",
@@ -9918,9 +9714,7 @@
               "modeled_candidate_id": "senate-2026-MI:abdul-el-sayed",
               "opposing_candidate_id": "senate-2026-MI:mike-rogers",
               "matchup_ids_seen": [
-                "votehub:abdul-el-sayed|votehub:mike-rogers",
-                "votehub:haley-stevens|votehub:mike-rogers",
-                "votehub:mallory-mcmorrow|votehub:mike-rogers"
+                "senate-2026-MI:abdul-el-sayed|senate-2026-MI:mike-rogers"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "f3d756541af2dc5a3a3ce27f3f10a3df6fc374f06be68763c319c8bbaa6db1cb",
@@ -9951,10 +9745,7 @@
               "modeled_candidate_id": "senate-2026-MN:peggy-flanagan",
               "opposing_candidate_id": "senate-2026-MN:michele-tafoya",
               "matchup_ids_seen": [
-                "votehub:angie-craig|votehub:michele-tafoya",
-                "votehub:angie-craig|votehub:rep",
-                "votehub:peggy-flanagan|votehub:michele-tafoya",
-                "votehub:peggy-flanagan|votehub:rep"
+                "senate-2026-MN:peggy-flanagan|senate-2026-MN:michele-tafoya"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "1e9b20980f9b15e1a07bd8bfabe1a670fb1d98595b960798ae739e72966226f0",
@@ -9985,7 +9776,7 @@
               "modeled_candidate_id": "senate-2026-MS:scott-colom",
               "opposing_candidate_id": "senate-2026-MS:cindy-hyde-smith",
               "matchup_ids_seen": [
-                "votehub:scott-colom|votehub:cindy-hyde-smith"
+                "senate-2026-MS:scott-colom|senate-2026-MS:cindy-hyde-smith"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "e9376368b80d408bb0ca427cc69b0776c9512c50bf7632113a6257f6f2e980ba",
@@ -10016,9 +9807,8 @@
               "modeled_candidate_id": "senate-2026-MT:seth-bodnar",
               "opposing_candidate_id": "senate-2026-MT:kurt-alme",
               "matchup_ids_seen": [
-                "votehub:alani-bankhead|votehub:kurt-alme",
-                "votehub:reilly-neill|votehub:kurt-alme",
-                "votehub:seth-bodnar|votehub:kurt-alme"
+                "senate-2026-MT:alani-bankhead|senate-2026-MT:kurt-alme",
+                "senate-2026-MT:seth-bodnar|senate-2026-MT:kurt-alme"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "725f3ee4a8a457e63a944fe4321eb7ee9df0761601ecf51b8f03a2284352b425",
@@ -10049,9 +9839,7 @@
               "modeled_candidate_id": "senate-2026-NC:roy-cooper",
               "opposing_candidate_id": "senate-2026-NC:michael-whatley",
               "matchup_ids_seen": [
-                "votehub:roy-cooper|votehub:don-brown",
-                "votehub:roy-cooper|votehub:lara-trump",
-                "votehub:roy-cooper|votehub:michael-whatley"
+                "senate-2026-NC:roy-cooper|senate-2026-NC:michael-whatley"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "075a834fe1d4608fddd4f9a7da10c163391b5194d58405449407cddbeb06a262",
@@ -10082,7 +9870,7 @@
               "modeled_candidate_id": "senate-2026-NE:dan-osborn",
               "opposing_candidate_id": "senate-2026-NE:pete-ricketts",
               "matchup_ids_seen": [
-                "votehub:dan-osborn|votehub:pete-ricketts"
+                "senate-2026-NE:dan-osborn|senate-2026-NE:pete-ricketts"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "fdb6701cded646bd34c3779e2c58b544398df026ad5f6c22b2ad997a0212a468",
@@ -10113,8 +9901,7 @@
               "modeled_candidate_id": "senate-2026-NH:chris-pappas",
               "opposing_candidate_id": "senate-2026-NH:john-sununu",
               "matchup_ids_seen": [
-                "votehub:chris-pappas|votehub:john-sununu",
-                "votehub:chris-pappas|votehub:scott-brown"
+                "senate-2026-NH:chris-pappas|senate-2026-NH:john-sununu"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "7331a3ae56f671cea2366a4c9fec19a4d568bc93bc6975d0df935b065e805e76",
@@ -10174,7 +9961,7 @@
               "modeled_candidate_id": "senate-2026-NM:ben-ray-lujan",
               "opposing_candidate_id": "senate-2026-NM:larry-marker",
               "matchup_ids_seen": [
-                "votehub:ben-ray-lujan|votehub:larry-marker"
+                "senate-2026-NM:ben-ray-lujan|senate-2026-NM:larry-marker"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "993eb7ec8eecea66d7cf4953c784795bf02c4067dda0ee306cbd2d1a5d746fec",
@@ -10205,7 +9992,7 @@
               "modeled_candidate_id": "senate-2026-OH:sherrod-brown",
               "opposing_candidate_id": "senate-2026-OH:jon-husted",
               "matchup_ids_seen": [
-                "votehub:sherrod-brown|votehub:jon-husted"
+                "senate-2026-OH:sherrod-brown|senate-2026-OH:jon-husted"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "10ccbada580e23480be12e95bf2cf847bc28e1d4775648ff62a7524d1dd0c118",
@@ -10294,7 +10081,7 @@
               "modeled_candidate_id": "senate-2026-RI:jack-reed",
               "opposing_candidate_id": "senate-2026-RI:raymond-mckay",
               "matchup_ids_seen": [
-                "votehub:jack-reed|votehub:raymond-mckay"
+                "senate-2026-RI:jack-reed|senate-2026-RI:raymond-mckay"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "82f56b4696a959750044d5d6b3b47a2a99aee2186ec66113e3d7c7c0b06aebae",
@@ -10325,7 +10112,7 @@
               "modeled_candidate_id": "senate-2026-SC:annie-andrews",
               "opposing_candidate_id": "senate-2026-SC:darline-graham",
               "matchup_ids_seen": [
-                "votehub:annie-andrews|votehub:darline-graham"
+                "senate-2026-SC:annie-andrews|senate-2026-SC:darline-graham"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "411677ec8f9e446144d5a9485d041f7759922fdf9fdffc8d39e11065f1252394",
@@ -10385,7 +10172,7 @@
               "modeled_candidate_id": "senate-2026-TN:marquita-bradshaw",
               "opposing_candidate_id": "senate-2026-TN:bill-hagerty",
               "matchup_ids_seen": [
-                "votehub:marquita-bradshaw|votehub:bill-hagerty"
+                "senate-2026-TN:marquita-bradshaw|senate-2026-TN:bill-hagerty"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "5014821b5731f4e9d308a99b3e7d2c0c507b96a050e56c883d434244e1ba9826",
@@ -10416,8 +10203,7 @@
               "modeled_candidate_id": "senate-2026-TX:james-talarico",
               "opposing_candidate_id": "senate-2026-TX:ken-paxton",
               "matchup_ids_seen": [
-                "votehub:james-talarico|votehub:john-cornyn",
-                "votehub:james-talarico|votehub:ken-paxton"
+                "senate-2026-TX:james-talarico|senate-2026-TX:ken-paxton"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "4a9fc66e9241a2d3f8fe493db4c1623330db02c6b12c88a3000ff93a82ed72ba",
@@ -10448,9 +10234,7 @@
               "modeled_candidate_id": "senate-2026-VA:mark-warner",
               "opposing_candidate_id": "senate-2026-VA:bert-mizusawa",
               "matchup_ids_seen": [
-                "votehub:mark-warner|votehub:bert-mizusawa",
-                "votehub:mark-warner|votehub:david-williams",
-                "votehub:mark-warner|votehub:kim-farington"
+                "senate-2026-VA:mark-warner|senate-2026-VA:bert-mizusawa"
               ],
               "structural_gap": null,
               "race_evidence_sha256": "fc532aaebc30e48c1800b4e56fbf056d29f7e0087aad0ed127a1f43631ca4cd7",
@@ -10523,263 +10307,10 @@
           ],
           "ambiguous_poll_matchups": [
             {
-              "race_id": "senate-2026-AK",
-              "matchup_ids": [
-                "votehub:mary-peltola|votehub:dan-sullivan",
-                "votehub:mary-peltola|votehub:dan-sullvian"
-              ],
-              "poll_ids": [
-                "vh-us-202ala3352af00",
-                "vh-us-202ala3b65f6ef",
-                "vh-us-202ala6eea5978",
-                "vh-us-202ala6fd3746f",
-                "vh-us-202alaaa70f06a",
-                "vh-us-202alaaac6776a",
-                "vh-us-202alab987738a",
-                "vh-us-202alabbd6655e",
-                "vh-us-202alabcabdd28",
-                "vh-us-202alafbc93030",
-                "vh-us-202co/0acc5699",
-                "vh-us-202datde291215",
-                "vh-us-202datff65423b",
-                "vh-us-202fabecd2ecd9",
-                "vh-us-202pub023ecafb",
-                "vh-us-202qua198b0338",
-                "vh-us-202the011805d2"
-              ]
-            },
-            {
-              "race_id": "senate-2026-GA",
-              "matchup_ids": [
-                "votehub:jon-ossoff|votehub:buddy-carter",
-                "votehub:jon-ossoff|votehub:derek-dooley",
-                "votehub:jon-ossoff|votehub:mike-collins"
-              ],
-              "poll_ids": [
-                "vh-us-202bea8e2b79ff",
-                "vh-us-202bigbe8a8854",
-                "vh-us-202cyg167b9abc",
-                "vh-us-202ech1a9afcfb",
-                "vh-us-202ech80c320f6",
-                "vh-us-202eme1bcacacc",
-                "vh-us-202eme529afc79",
-                "vh-us-202fab389395b2",
-                "vh-us-202ins63791cfb",
-                "vh-us-202insbbb32dd3",
-                "vh-us-202qua80fe18a7",
-                "vh-us-202quafd79c6ef",
-                "vh-us-202tip0382be0d",
-                "vh-us-202tip53f19ba5",
-                "vh-us-202traba6abade",
-                "vh-us-202wed7f897488",
-                "vh-us-202wic6dd1649c",
-                "vh-us-202wpa60d3da4e"
-              ]
-            },
-            {
-              "race_id": "senate-2026-IA",
-              "matchup_ids": [
-                "votehub:josh-turek|votehub:ashley-hinson",
-                "votehub:zach-wahls|votehub:ashley-hinson"
-              ],
-              "poll_ids": [
-                "vh-us-202bea93a2c09c",
-                "vh-us-202beaadb6c4f9",
-                "vh-us-202cha683eb5ac",
-                "vh-us-202cha781abe34",
-                "vh-us-202co/dc2b4681",
-                "vh-us-202cyg40c776c5",
-                "vh-us-202eche7c2869f",
-                "vh-us-202echf4929c57",
-                "vh-us-202eme4923d9f5",
-                "vh-us-202emec4141ca7",
-                "vh-us-202gba62b36025",
-                "vh-us-202gbab93d5de3",
-                "vh-us-202marf54f428e",
-                "vh-us-202pub957d3bcc",
-                "vh-us-202sufc2449e1f",
-                "vh-us-202the52e3337f",
-                "vh-us-202youa33846f3",
-                "vh-us-202youe257a121"
-              ]
-            },
-            {
-              "race_id": "senate-2026-ME",
-              "matchup_ids": [
-                "votehub:dem|votehub:susan-collins",
-                "votehub:graham-platner|votehub:susan-collins",
-                "votehub:janet-mills|votehub:susan-collins",
-                "votehub:troy-jackson|votehub:susan-collins"
-              ],
-              "poll_ids": [
-                "vh-us-202bea347c91b0",
-                "vh-us-202bea83272bb9",
-                "vh-us-202co/7102b7eb",
-                "vh-us-202cyn79bb9aaf",
-                "vh-us-202ech472cd4f1",
-                "vh-us-202ech9490021c",
-                "vh-us-202eme316dd7a3",
-                "vh-us-202emeae25a0b0",
-                "vh-us-202fab3ee58419",
-                "vh-us-202fab5fd4622f",
-                "vh-us-202fabb74398c5",
-                "vh-us-202fabe2bcab70",
-                "vh-us-202harfe4afc0e",
-                "vh-us-202mai1c9d66fd",
-                "vh-us-202mai234492e4",
-                "vh-us-202mai395fc865",
-                "vh-us-202maic1315c13",
-                "vh-us-202pan29dbf8a8",
-                "vh-us-202pan5a9b4cde",
-                "vh-us-202pan6f538bdb",
-                "vh-us-202pan8d235770",
-                "vh-us-202panabcd1049",
-                "vh-us-202qua10b03a8f",
-                "vh-us-202qua5c07dc65",
-                "vh-us-202qua64c2cf49",
-                "vh-us-202quad631010c",
-                "vh-us-202tav61219990",
-                "vh-us-202the9a68a494",
-                "vh-us-202thec9ff409a",
-                "vh-us-202thefac9ff9a",
-                "vh-us-202uni51f1c418",
-                "vh-us-202uni63b326ca",
-                "vh-us-202uni866e047f",
-                "vh-us-202unia4c1a428",
-                "vh-us-202unia65b1e02",
-                "vh-us-202unib4f650e2",
-                "vh-us-202unie1113a54",
-                "vh-us-202wedfe4427b1",
-                "vh-us-202wic615cfb4b",
-                "vh-us-202you8b2f9799",
-                "vh-us-202zen3e7d2e5c",
-                "vh-us-202zena6743f9d"
-              ]
-            },
-            {
-              "race_id": "senate-2026-MA",
-              "matchup_ids": [
-                "votehub:ed-markey|votehub:john-deaton",
-                "votehub:seth-moulton|votehub:john-deaton"
-              ],
-              "poll_ids": [
-                "vh-us-202mas5785b9ea",
-                "vh-us-202suf43021e00",
-                "vh-us-202suf791a9846",
-                "vh-us-202suf91850a3d",
-                "vh-us-202sufcfbc9a05",
-                "vh-us-202sur62cbc236",
-                "vh-us-202uni06038789",
-                "vh-us-202uni7ffc2e9d",
-                "vh-us-202uni86a7074d",
-                "vh-us-202unibd1bf2da",
-                "vh-us-202unic67dc15d",
-                "vh-us-202unid95802f4",
-                "vh-us-202unide9784b7",
-                "vh-us-202unieba4dd24",
-                "vh-us-202unif8cfec03",
-                "vh-us-202unif995f365"
-              ]
-            },
-            {
-              "race_id": "senate-2026-MI",
-              "matchup_ids": [
-                "votehub:abdul-el-sayed|votehub:mike-rogers",
-                "votehub:haley-stevens|votehub:mike-rogers",
-                "votehub:mallory-mcmorrow|votehub:mike-rogers"
-              ],
-              "poll_ids": [
-                "vh-us-202bea6ed87549",
-                "vh-us-202beac0286b40",
-                "vh-us-202co/b838141c",
-                "vh-us-202cyg13fa7f0a",
-                "vh-us-202eme5bdd236b",
-                "vh-us-202eme99d02ce6",
-                "vh-us-202emeb507fcbb",
-                "vh-us-202emee754e4c5",
-                "vh-us-202epi46ef28e5",
-                "vh-us-202epi5f481027",
-                "vh-us-202epia42401c2",
-                "vh-us-202epid9595901",
-                "vh-us-202epife4108d8",
-                "vh-us-202fab12ee3caf",
-                "vh-us-202gba7596c230",
-                "vh-us-202gle0133b0b3",
-                "vh-us-202gle2939b758",
-                "vh-us-202gle322439ae",
-                "vh-us-202gle6589d1bb",
-                "vh-us-202gle7fc79cd5",
-                "vh-us-202gleb42f5fae",
-                "vh-us-202glec0316553",
-                "vh-us-202glec19f2301",
-                "vh-us-202gledaa7038f",
-                "vh-us-202gleeeb6be84",
-                "vh-us-202glef7ac134b",
-                "vh-us-202micb55519f5",
-                "vh-us-202miccc27552a",
-                "vh-us-202mit132a3ca8",
-                "vh-us-202mit1e6a5692",
-                "vh-us-202mit39173145",
-                "vh-us-202mit590c99af",
-                "vh-us-202mit61ba1fad",
-                "vh-us-202mit87b44bfc",
-                "vh-us-202mit9a5c32a0",
-                "vh-us-202mitf3d55a81",
-                "vh-us-202nor7a88e643",
-                "vh-us-202norbd336de9",
-                "vh-us-202qua1a64cfa3",
-                "vh-us-202qua38d03fbc",
-                "vh-us-202qua3b4e634a",
-                "vh-us-202ros2c880fd3",
-                "vh-us-202ros410812c7",
-                "vh-us-202ros8e5ec4d9",
-                "vh-us-202soc0b27fd00",
-                "vh-us-202soc6e865068",
-                "vh-us-202suf59500e62",
-                "vh-us-202susb1d73b8b",
-                "vh-us-202tar417e15f3",
-                "vh-us-202the9066d3a5",
-                "vh-us-202thecf4746de",
-                "vh-us-202tip199bb9db",
-                "vh-us-202tip3da9b019",
-                "vh-us-202tip59dfdfa0",
-                "vh-us-202tip6d4d41d9",
-                "vh-us-202tip7ac4a21f",
-                "vh-us-202tip8915c085",
-                "vh-us-202tip99de5023",
-                "vh-us-202tra046dabbf",
-                "vh-us-202traa454dc67",
-                "vh-us-202tul3efe64f6",
-                "vh-us-202zen354a92cf",
-                "vh-us-202zena20bfa8f",
-                "vh-us-202zenec41aa86"
-              ]
-            },
-            {
-              "race_id": "senate-2026-MN",
-              "matchup_ids": [
-                "votehub:angie-craig|votehub:michele-tafoya",
-                "votehub:angie-craig|votehub:rep",
-                "votehub:peggy-flanagan|votehub:michele-tafoya",
-                "votehub:peggy-flanagan|votehub:rep"
-              ],
-              "poll_ids": [
-                "vh-us-202big7e4bf32f",
-                "vh-us-202eme46470152",
-                "vh-us-202emec7074b5d",
-                "vh-us-202pubd69c1e7f",
-                "vh-us-202pubde180c20",
-                "vh-us-202qua8837472c",
-                "vh-us-202sur47670306",
-                "vh-us-202sura38c6933"
-              ]
-            },
-            {
               "race_id": "senate-2026-MT",
               "matchup_ids": [
-                "votehub:alani-bankhead|votehub:kurt-alme",
-                "votehub:reilly-neill|votehub:kurt-alme",
-                "votehub:seth-bodnar|votehub:kurt-alme"
+                "senate-2026-MT:alani-bankhead|senate-2026-MT:kurt-alme",
+                "senate-2026-MT:seth-bodnar|senate-2026-MT:kurt-alme"
               ],
               "poll_ids": [
                 "vh-us-202amec1fe2597",
@@ -10795,7 +10326,6 @@
                 "vh-us-202qua7f691cd6",
                 "vh-us-202tav16c902e1",
                 "vh-us-202tav1d399417",
-                "vh-us-202tav2313c4bf",
                 "vh-us-202tav507e89fe",
                 "vh-us-202tav5960dbe5",
                 "vh-us-202tav5bb1680a",
@@ -10806,184 +10336,6 @@
                 "vh-us-202tavbdc1a03d",
                 "vh-us-202tavf29ef95a",
                 "vh-us-202theb6b894ea"
-              ]
-            },
-            {
-              "race_id": "senate-2026-NH",
-              "matchup_ids": [
-                "votehub:chris-pappas|votehub:john-sununu",
-                "votehub:chris-pappas|votehub:scott-brown"
-              ],
-              "poll_ids": [
-                "vh-us-202189327ac2c7",
-                "vh-us-202co/0b672f7f",
-                "vh-us-202co/465a61ff",
-                "vh-us-202eme9a6a68f5",
-                "vh-us-202insfe93ffed",
-                "vh-us-202prad23da08c",
-                "vh-us-202qua5256989f",
-                "vh-us-202sai3a119d63",
-                "vh-us-202sai47715591",
-                "vh-us-202saia99778cd",
-                "vh-us-202saica770502",
-                "vh-us-202saif530b9d2",
-                "vh-us-202saif937cd00",
-                "vh-us-202the55816505",
-                "vh-us-202uni02a0a46f",
-                "vh-us-202uni0401d0f4",
-                "vh-us-202uni1250e038",
-                "vh-us-202uni38178073",
-                "vh-us-202uni64743a1f",
-                "vh-us-202uni983e65a4",
-                "vh-us-202unib186ef52",
-                "vh-us-202unie006e257",
-                "vh-us-202yese8051e85"
-              ]
-            },
-            {
-              "race_id": "senate-2026-NC",
-              "matchup_ids": [
-                "votehub:roy-cooper|votehub:don-brown",
-                "votehub:roy-cooper|votehub:lara-trump",
-                "votehub:roy-cooper|votehub:michael-whatley"
-              ],
-              "poll_ids": [
-                "vh-us-202beacaddacc4",
-                "vh-us-202bigf2db767c",
-                "vh-us-202cha2111afda",
-                "vh-us-202cha2976f667",
-                "vh-us-202chab31a8a6e",
-                "vh-us-202chab6c27b91",
-                "vh-us-202chad53b9fb6",
-                "vh-us-202chaf0ea6e94",
-                "vh-us-202easa9c1ac17",
-                "vh-us-202elo069243f3",
-                "vh-us-202elo857d928d",
-                "vh-us-202elodaa5cffa",
-                "vh-us-202eme013c2ece",
-                "vh-us-202har1bdb30c5",
-                "vh-us-202har1cef6d8a",
-                "vh-us-202har2b123ce0",
-                "vh-us-202harb00382e0",
-                "vh-us-202harc083001c",
-                "vh-us-202harc344974e",
-                "vh-us-202harca09238f",
-                "vh-us-202harfc1499b8",
-                "vh-us-202hig0453aa0e",
-                "vh-us-202hig7de64e7d",
-                "vh-us-202hig8ec8c4e5",
-                "vh-us-202higae3d1182",
-                "vh-us-202higf04011a1",
-                "vh-us-202insf80352ad",
-                "vh-us-202nex3971aa3a",
-                "vh-us-202opi5a64ca39",
-                "vh-us-202pub85665d25",
-                "vh-us-202pub96a42a3f",
-                "vh-us-202thef5594fea",
-                "vh-us-202tipab84b110",
-                "vh-us-202vic0a006caa",
-                "vh-us-202vicec5afb5c",
-                "vh-us-202you2133db87",
-                "vh-us-202youca5f07f2"
-              ]
-            },
-            {
-              "race_id": "senate-2026-TX",
-              "matchup_ids": [
-                "votehub:james-talarico|votehub:john-cornyn",
-                "votehub:james-talarico|votehub:ken-paxton"
-              ],
-              "poll_ids": [
-                "vh-us-202a2 1a5590cb",
-                "vh-us-202bea54820d8d",
-                "vh-us-202beab9600d9b",
-                "vh-us-202eme5bcac049",
-                "vh-us-202eme9b9f44a5",
-                "vh-us-202emee56d4394",
-                "vh-us-202emeef7cbc1d",
-                "vh-us-202fab22efb6bc",
-                "vh-us-202imp50137db2",
-                "vh-us-202ins8df69531",
-                "vh-us-202pub121c904c",
-                "vh-us-202pub7e233927",
-                "vh-us-202pubaf44626b",
-                "vh-us-202qua6b878295",
-                "vh-us-202rag0c28bfd3",
-                "vh-us-202rag8552bbbc",
-                "vh-us-202rec22b1c62b",
-                "vh-us-202rec773da2d7",
-                "vh-us-202rec85c5cf76",
-                "vh-us-202sli284b821d",
-                "vh-us-202sli394bd9a0",
-                "vh-us-202sli6204659f",
-                "vh-us-202sli9f75fb57",
-                "vh-us-202socb918e088",
-                "vh-us-202tex6938a787",
-                "vh-us-202texaca3925a",
-                "vh-us-202texc28cf835",
-                "vh-us-202texc8fd4814",
-                "vh-us-202texe500a6d5",
-                "vh-us-202texee0a6ae6",
-                "vh-us-202the54ba4671",
-                "vh-us-202thee89c7bce",
-                "vh-us-202uni0dc518c7",
-                "vh-us-202uni5040ddd3",
-                "vh-us-202uni731e2279",
-                "vh-us-202uni8225dcc0",
-                "vh-us-202unidb95df99",
-                "vh-us-202unie89cc6b4",
-                "vh-us-202wed4dcf8c6b",
-                "vh-us-202you0dcc69cb",
-                "vh-us-202you3c4a4a9f",
-                "vh-us-202you9dee520f",
-                "vh-us-202youc39ac53a"
-              ]
-            },
-            {
-              "race_id": "senate-2026-VA",
-              "matchup_ids": [
-                "votehub:mark-warner|votehub:bert-mizusawa",
-                "votehub:mark-warner|votehub:david-williams",
-                "votehub:mark-warner|votehub:kim-farington"
-              ],
-              "poll_ids": [
-                "vh-us-202the23cfbe50",
-                "vh-us-202the592aeef5",
-                "vh-us-202the5a104154",
-                "vh-us-202the5f79b2da",
-                "vh-us-202the65a34aca",
-                "vh-us-202thecc936039"
-              ]
-            },
-            {
-              "race_id": "senate-2026-FL",
-              "matchup_ids": [
-                "votehub:alexander-vindman|votehub:ashley-moody",
-                "votehub:angie-nixon|votehub:ashley-moody"
-              ],
-              "poll_ids": [
-                "vh-us-202cha0c7666ff",
-                "vh-us-202cha4c08cfde",
-                "vh-us-202cha69e5536b",
-                "vh-us-202cha6cfd344c",
-                "vh-us-202chad8109bd5",
-                "vh-us-202chae3c0b874",
-                "vh-us-202checa283b6c",
-                "vh-us-202ech2b342f18",
-                "vh-us-202eme1adbecdc",
-                "vh-us-202emed67d42c8",
-                "vh-us-202insad41796a",
-                "vh-us-202mclfb3c3e69",
-                "vh-us-202mdw67caa80b",
-                "vh-us-202qua2b8ed3cb",
-                "vh-us-202st.73c64f89",
-                "vh-us-202ste008437cf",
-                "vh-us-202ste198f7a4a",
-                "vh-us-202ste67ef4e2d",
-                "vh-us-202uni187076c4",
-                "vh-us-202uni1ae0881e",
-                "vh-us-202uni979cabda",
-                "vh-us-202unic788577e"
               ]
             }
           ],
@@ -11034,11 +10386,6 @@
               "reason": "race_ineligible_for_binary_scoring"
             },
             {
-              "poll_id": "vh-us-202alafbc93030",
-              "race_id": "senate-2026-AK",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
               "poll_id": "vh-us-202co/0acc5699",
               "race_id": "senate-2026-AK",
               "reason": "race_ineligible_for_binary_scoring"
@@ -11074,469 +10421,14 @@
               "reason": "race_ineligible_for_binary_scoring"
             },
             {
-              "poll_id": "vh-us-202cha0c7666ff",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202cha4c08cfde",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202cha6cfd344c",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202chae3c0b874",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202checa283b6c",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202ech2b342f18",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202eme1adbecdc",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mclfb3c3e69",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mdw67caa80b",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202ste008437cf",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202uni187076c4",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202uni1ae0881e",
-              "race_id": "senate-2026-FL",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202ech80c320f6",
-              "race_id": "senate-2026-GA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202eme529afc79",
-              "race_id": "senate-2026-GA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202quafd79c6ef",
-              "race_id": "senate-2026-GA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202tip53f19ba5",
-              "race_id": "senate-2026-GA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202cha683eb5ac",
-              "race_id": "senate-2026-IA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202eche7c2869f",
-              "race_id": "senate-2026-IA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202gba62b36025",
-              "race_id": "senate-2026-IA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
               "poll_id": "vh-us-202the39a65ca5",
               "race_id": "senate-2026-ID",
               "reason": "race_ineligible_for_binary_scoring"
             },
             {
-              "poll_id": "vh-us-202suf791a9846",
-              "race_id": "senate-2026-MA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202sufcfbc9a05",
-              "race_id": "senate-2026-MA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202unibd1bf2da",
-              "race_id": "senate-2026-MA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202unid95802f4",
-              "race_id": "senate-2026-MA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202unieba4dd24",
-              "race_id": "senate-2026-MA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202unif8cfec03",
-              "race_id": "senate-2026-MA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202unif995f365",
-              "race_id": "senate-2026-MA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202bea83272bb9",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202cyn79bb9aaf",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202ech472cd4f1",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202ech9490021c",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202eme316dd7a3",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202emeae25a0b0",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202fab3ee58419",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202fab5fd4622f",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202fabb74398c5",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mai1c9d66fd",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mai234492e4",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mai395fc865",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202maic1315c13",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202pan29dbf8a8",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202pan5a9b4cde",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202pan6f538bdb",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202pan8d235770",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202panabcd1049",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202qua10b03a8f",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202qua64c2cf49",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202quad631010c",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202tav61219990",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202thec9ff409a",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202thefac9ff9a",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202uni63b326ca",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202unia4c1a428",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202unib4f650e2",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202unie1113a54",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202wic615cfb4b",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202zen3e7d2e5c",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202zena6743f9d",
-              "race_id": "senate-2026-ME",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202emeb507fcbb",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202emee754e4c5",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202epi46ef28e5",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202epia42401c2",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202epid9595901",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202gle2939b758",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202gle322439ae",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202gle6589d1bb",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202gleb42f5fae",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202glec0316553",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202glec19f2301",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202gleeeb6be84",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mit132a3ca8",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mit39173145",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mit61ba1fad",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mit87b44bfc",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202mitf3d55a81",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202nor7a88e643",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202norbd336de9",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202qua1a64cfa3",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202qua38d03fbc",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202ros2c880fd3",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202ros8e5ec4d9",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202soc0b27fd00",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202tar417e15f3",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202tip199bb9db",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202tip3da9b019",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202tip7ac4a21f",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202tip99de5023",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202zena20bfa8f",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202zenec41aa86",
-              "race_id": "senate-2026-MI",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202emec7074b5d",
-              "race_id": "senate-2026-MN",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202pubd69c1e7f",
-              "race_id": "senate-2026-MN",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202pubde180c20",
-              "race_id": "senate-2026-MN",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
               "poll_id": "vh-us-202amec1fe2597",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202gqr0fc65d4b",
@@ -11551,7 +10443,7 @@
             {
               "poll_id": "vh-us-202gqr6f3c3766",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202gqrcac76706",
@@ -11566,7 +10458,7 @@
             {
               "poll_id": "vh-us-202gra7bd23a76",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202har44ddb49c",
@@ -11576,17 +10468,17 @@
             {
               "poll_id": "vh-us-202har82b4bcdc",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202pubfd67a5f3",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202qua7f691cd6",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202tav16c902e1",
@@ -11599,11 +10491,6 @@
               "reason": "matchup_not_selected_by_reviewed_current_registry"
             },
             {
-              "poll_id": "vh-us-202tav2313c4bf",
-              "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
               "poll_id": "vh-us-202tav507e89fe",
               "race_id": "senate-2026-MT",
               "reason": "race_ineligible_for_binary_scoring"
@@ -11611,22 +10498,22 @@
             {
               "poll_id": "vh-us-202tav5960dbe5",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202tav5bb1680a",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202tav65f6005d",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202tav83ffdf29",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202tav8cd1705b",
@@ -11651,102 +10538,12 @@
             {
               "poll_id": "vh-us-202theb6b894ea",
               "race_id": "senate-2026-MT",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202harc344974e",
-              "race_id": "senate-2026-NC",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202vic0a006caa",
-              "race_id": "senate-2026-NC",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
+              "reason": "race_ineligible_for_binary_scoring"
             },
             {
               "poll_id": "vh-us-202gba71e992b6",
               "race_id": "senate-2026-NE",
               "reason": "race_ineligible_for_binary_scoring"
-            },
-            {
-              "poll_id": "vh-us-202saif530b9d2",
-              "race_id": "senate-2026-NH",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202saif937cd00",
-              "race_id": "senate-2026-NH",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202uni38178073",
-              "race_id": "senate-2026-NH",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202uni983e65a4",
-              "race_id": "senate-2026-NH",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202eme9b9f44a5",
-              "race_id": "senate-2026-TX",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202pubaf44626b",
-              "race_id": "senate-2026-TX",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202rag8552bbbc",
-              "race_id": "senate-2026-TX",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202texaca3925a",
-              "race_id": "senate-2026-TX",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202uni5040ddd3",
-              "race_id": "senate-2026-TX",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202uni731e2279",
-              "race_id": "senate-2026-TX",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202unidb95df99",
-              "race_id": "senate-2026-TX",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202you0dcc69cb",
-              "race_id": "senate-2026-TX",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202the23cfbe50",
-              "race_id": "senate-2026-VA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202the5f79b2da",
-              "race_id": "senate-2026-VA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202the65a34aca",
-              "race_id": "senate-2026-VA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
-            },
-            {
-              "poll_id": "vh-us-202thecc936039",
-              "race_id": "senate-2026-VA",
-              "reason": "matchup_not_selected_by_reviewed_current_registry"
             }
           ],
           "score_exclusions": [
@@ -11772,7 +10569,7 @@
             }
           ],
           "traceable": true,
-          "snapshot_sha256": "a2fe30db7e030afb3823158f15da0161d79e005eeb1484507927d78e70e3c7fc",
+          "snapshot_sha256": "70347d98e184df934bbed3b02c465f715383053be40b6b260dca72b1b923f9ef",
           "candidate_timeline_snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
           "reasons": [],
           "eligible": true,
@@ -11784,7 +10581,7 @@
         }
       },
       "missing_coverage": [],
-      "manifest_sha256": "a85b697d6b52b07d6ff437663b621984c724394490cc7e426aa2acf993c6aece",
+      "manifest_sha256": "22eceda5c4dbba75e448439b1b7cfb6b1523b60c69edcf8d1dac006160732d91",
       "semantic_sha256": "df8e8df9c1c1f2a2539e059c9d465309b5d0f30a7a0626014e905d12c2d06794",
       "parser_version": "official-candidate-document-v1",
       "raw_filing_source_hashes": {
@@ -11794,7 +10591,7 @@
         "fec_form2_2024.csv": "904d93f8b5a9f51a82033e0369a2ae4b88b6ee3cfb2578f68ed09434cfe5c23b",
         "fec_form2_2026.csv": "479d6d3e4ec2951b058a334a59ca88cf23398e90681f5f34380f3bf484a6eddd"
       },
-      "source_gap_audit_sha256": "49788cfec5acd6c4e043c44fc9e45c0d6e15b31209942472fe2ba805c1957a47",
+      "source_gap_audit_sha256": "48c70f2ff10d616397c9a14e8aca9c22149d43498671d366ddf7210cdaf82d2c",
       "source_gap_audit_status": "ready",
       "source_gap_coverage": {
         "senate-2018-lead-60": {
@@ -12084,7 +10881,7 @@
       "adapter": "midterms.evidence.ratings",
       "status": "ready",
       "reasons": [],
-      "manifest_sha256": "94b399f7bff02f3b722c573b8258fd8aa7087731906559b668c982fb2b8ae7c5",
+      "manifest_sha256": "a756cac76b8de263229a26f656eaa1548b87d573293f348bd7665f7830fcaf34",
       "semantic_sha256": "863ab2d96a7f055dca7197287736c0504b83604e63eda7bd39851247a6820ec6",
       "parser_version": "pollster-rating-vintage-v1",
       "raw_source_hashes": {
@@ -12100,7 +10897,7 @@
       "adapter": "midterms.evidence.presidential_results",
       "status": "ready",
       "reasons": [],
-      "manifest_sha256": "ace191122a1713bc241251a49f12cbd146956b63467164878f112a68a96534c4",
+      "manifest_sha256": "92931e92d669934bb9ee793d4273e299b6c93fbacb442ca8fb515968aa2f5e9c",
       "semantic_sha256": "50be4766ead46d24274347a4bc9fb54219d73b4b6c803f228c73c4371b43b5dd",
       "parser_version": "fec-presidential-vote-counts-v1",
       "raw_source_hashes": {},
@@ -13052,7 +11849,7 @@
         },
         "current": {
           "status": "ready",
-          "as_of": "2026-10-09",
+          "as_of": "2026-10-10",
           "selected_release_date": "2026-01-29T00:00:00+00:00",
           "selected_vintages": [
             "2020-2024"
@@ -13168,7 +11965,7 @@
         }
       },
       "missing_cutoffs": [],
-      "manifest_sha256": "ee932a1b8ebb9f37a65aed6e6c24ffd58ff8fa049932e31807b18514bdcb1627",
+      "manifest_sha256": "e8be3309a8ed8626010b81cc1ce646d950ccaf32b3ad662a964d0fe086d53690",
       "semantic_sha256": "46c9719fc80a6bef9709673ae124dc3081f769e3c111174b26d911e7a233a99b",
       "parser_version": "census-acs-urban-v1",
       "canonical_source_contract": {
@@ -13196,7 +11993,7 @@
         "secret_available": false,
         "cutoffs": {
           "current": {
-            "as_of": "2026-10-09",
+            "as_of": "2026-10-10",
             "status": "ready",
             "n_rows": 820,
             "series_ids": [
@@ -13290,7 +12087,7 @@
         "substitutes_present": [],
         "note": "FRED-latest, World Bank, and fixture rows cannot clear the historical real-time gate."
       },
-      "manifest_sha256": "bb169dcc52230b30fe38e25e2c081b20ae713784a910fac0d243894593742217",
+      "manifest_sha256": "565f2a4b280d9d80f4ebed0efeecef8a1b49a362e6381a2afb2cc7441c51ecca",
       "semantic_sha256": "4b58f1c8aff34b8147e36347feeee1ca95b02abd8cbc7f1a9dd19291135e47ed",
       "parser_version": "alfred-v2",
       "canonical_source_contract": {
@@ -14013,7 +12810,7 @@
       },
       "normalized_hash_ok": true,
       "raw_hash_errors": [],
-      "manifest_sha256": "87f4a508b6fc7f3926a692251043e1b221c1f12570c889b7463dd4e37f781bc0",
+      "manifest_sha256": "402cec51d741875fe238d02039760c62f2c611848d5fe31edb3f1fba2a181905",
       "semantic_sha256": "37e1b0fdb135c0f3689bbf379e2b0b3444535d07c5e3b44458bed964c3d847ee",
       "parser_version": "fec-v2-report-receipt-asof",
       "raw_source_hashes": {},
@@ -14036,9 +12833,9 @@
       "reasons": [],
       "historical_production_eligible": true,
       "current_production_eligible": true,
-      "current_rows": 14,
-      "manifest_sha256": "6345ef76dd9224f8aae2d9b0e345521a0ba23ac49f2298e63801f7dc0f7a1119",
-      "semantic_sha256": "67cc61f1bf5d0813ee146e669d1ff4460aa0efd9ecf9807bb598489dfe2ad01b",
+      "current_rows": 15,
+      "manifest_sha256": "9775ef6ace542a08474ad295052084c4faade727acd9eb6aa018f72ad24a0a89",
+      "semantic_sha256": "842ad340249e7d9292088016619ed7bdd19c052545122af413eeff43ab255970",
       "parser_version": "approval-v4-fte-created-at",
       "raw_source_hashes": {
         "fte_biden_approval_polls_20241129.csv": "e16909073b63bbbc7f1fcddfc276cd5606ad5c4c5adcdb86f9baf4c86991ec2c",
@@ -14061,7 +12858,7 @@
       "adapter": "midterms.evidence.ingest",
       "status": "ready",
       "reasons": [],
-      "semantic_sha256": "cb0c471ac9df5774e4865e8996a4032681e60f9855d648cd26598c430371c56f",
+      "semantic_sha256": "e9f48dcbdcd0c0fbea4d22af64fc67c2b578cb81745d701fc4c25bbf549c6acb",
       "historical_method": "derived_from_frozen_senate_poll_deviation"
     },
     "expert_ratings": {
@@ -14088,7 +12885,7 @@
       "adapter": "midterms.evidence.official_ledger",
       "status": "ready",
       "reasons": [],
-      "manifest_sha256": "f346b87bd04cd0c2f907488bf1ed84a64283d29f3d2fb2f389aed3e5804d71e8",
+      "manifest_sha256": "060db09678108eda582bbb660a0a31e996dacf9c9b6cf87352fead1f37d61972",
       "semantic_sha256": "714391ef5d6e6452633278cfb9e6386771a5fa02f75fbea31cabb71cf06c708c",
       "parser_version": "official-ledger-v2",
       "raw_source_hashes": {}

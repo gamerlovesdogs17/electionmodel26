@@ -52,7 +52,7 @@
     },
     "current_polls": {
       "path": "data/normalized/polls.parquet",
-      "sha256": "72aeb1e96a5f272c6ab2cfac2a234cdca7735e888bddf399297c95be1e102d7a"
+      "sha256": "5c04801b4cec50344fbdfc8c1f77f2a3bd573d4c757dffc85cae8e6ec11ed60a"
     }
   },
   "formal_lead_days": [
@@ -722,11 +722,11 @@
         "vh-us-202the39a65ca5"
       ],
       "enop": 1.0,
-      "posterior_location": -11.19389737930706,
-      "posterior_sd": 12.206805698914033,
-      "predictive_sd": 14.594728684392873,
-      "poll_weighted_location": -6.249999999999999,
-      "poll_location_shift": 24.917346428768013,
+      "posterior_location": -11.725862810374425,
+      "posterior_sd": 12.846759310797703,
+      "predictive_sd": 15.134041918455475,
+      "poll_weighted_location": -6.25,
+      "poll_location_shift": 24.38538099770065,
       "house_effect_treatment": "not_applied_party_direction_not_portable"
     },
     "senate-2026-NE": {
@@ -749,11 +749,11 @@
         "vh-us-202gba71e992b6"
       ],
       "enop": 1.0,
-      "posterior_location": -0.579295994812923,
-      "posterior_sd": 8.225889174110849,
-      "predictive_sd": 11.474548039236842,
+      "posterior_location": -0.7789049056863694,
+      "posterior_sd": 8.708031106196428,
+      "predictive_sd": 11.824965359208651,
       "poll_weighted_location": 1.075,
-      "poll_location_shift": 20.349115443374536,
+      "poll_location_shift": 20.14950653250109,
       "house_effect_treatment": "not_applied_party_direction_not_portable"
     },
     "senate-2026-SD": {
@@ -788,42 +788,42 @@
     "results": {
       "0.0": {
         "p_modeled_candidate_by_race": {
-          "senate-2026-ID": 0.178375,
-          "senate-2026-NE": 0.47675,
+          "senate-2026-ID": 0.1755,
+          "senate-2026-NE": 0.46975,
           "senate-2026-SD": 0.139875
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": -0.002973038698824471,
-          "senate-2026-NE": -0.01180658091467085,
-          "senate-2026-SD": -0.0063794988480607795
+          "senate-2026-ID": -0.0029730386988244656,
+          "senate-2026-NE": -0.011806580914670852,
+          "senate-2026-SD": -0.006379498848060779
         },
-        "exceptional_seat_count_variance": 0.5212250000000002
+        "exceptional_seat_count_variance": 0.5192037343750002
       },
       "0.2": {
         "p_modeled_candidate_by_race": {
-          "senate-2026-ID": 0.193,
-          "senate-2026-NE": 0.47575,
+          "senate-2026-ID": 0.191125,
+          "senate-2026-NE": 0.46975,
           "senate-2026-SD": 0.14775
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": 0.4450140478157245,
+          "senate-2026-ID": 0.44501404781572446,
           "senate-2026-NE": 0.43861295108298803,
-          "senate-2026-SD": 0.4425386229584072
+          "senate-2026-SD": 0.44253862295840724
         },
-        "exceptional_seat_count_variance": 0.6713277499999999
+        "exceptional_seat_count_variance": 0.666250609375
       },
       "0.4": {
         "p_modeled_candidate_by_race": {
-          "senate-2026-ID": 0.20325,
-          "senate-2026-NE": 0.47875,
+          "senate-2026-ID": 0.201,
+          "senate-2026-NE": 0.47125,
           "senate-2026-SD": 0.156875
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": 0.6309853485399203,
+          "senate-2026-ID": 0.63098534853992,
           "senate-2026-NE": 0.6267773999877536,
-          "senate-2026-SD": 0.6293453209795288
+          "senate-2026-SD": 0.6293453209795289
         },
-        "exceptional_seat_count_variance": 0.819913734375
+        "exceptional_seat_count_variance": 0.8146767343750001
       }
     }
   },
@@ -844,7 +844,7 @@
           "modeled_candidate_name": "Todd Achilles",
           "opposing_candidate_name": "Jim Risch",
           "modeled_margin": -6.25,
-          "margin_definition": "independent_minus_rep_two_candidate"
+          "margin_definition": "modeled_minus_opposing_two_candidate"
         }
       ],
       "votehub_coverage": "sparse",
@@ -853,7 +853,7 @@
     {
       "race_id": "senate-2026-MT",
       "state": "MT",
-      "n_usable_polls": 6,
+      "n_usable_polls": 17,
       "polls": [
         {
           "poll_id": "vh-us-202tav507e89fe",
@@ -866,7 +866,46 @@
           "modeled_candidate_name": "Seth Bodnar",
           "opposing_candidate_name": "Kurt Alme",
           "modeled_margin": 0.0,
-          "margin_definition": "independent_minus_rep_two_candidate"
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202tav65f6005d",
+          "pollster_id": "Tavern Research",
+          "field_start": "2026-05-13",
+          "field_end": "2026-05-18",
+          "available_at": "2026-05-19",
+          "population": "LV",
+          "sample_size": 607.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -27.778,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202pubfd67a5f3",
+          "pollster_id": "Public Opinion Strategies",
+          "field_start": "2026-06-08",
+          "field_end": "2026-06-11",
+          "available_at": "2026-06-18",
+          "population": "LV",
+          "sample_size": 500.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -37.5,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202tav5bb1680a",
+          "pollster_id": "Tavern Research",
+          "field_start": "2026-06-16",
+          "field_end": "2026-06-19",
+          "available_at": "2026-07-01",
+          "population": "LV",
+          "sample_size": 400.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -32.432,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
           "poll_id": "vh-us-202tavf29ef95a",
@@ -879,20 +918,33 @@
           "modeled_candidate_name": "Seth Bodnar",
           "opposing_candidate_name": "Kurt Alme",
           "modeled_margin": 0.0,
-          "margin_definition": "independent_minus_rep_two_candidate"
+          "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
-          "poll_id": "vh-us-202gqr0fc65d4b",
-          "pollster_id": "GQR",
-          "field_start": "2026-07-23",
-          "field_end": "2026-07-26",
-          "available_at": "2026-07-28",
+          "poll_id": "vh-us-202gra7bd23a76",
+          "pollster_id": "GrayHouse",
+          "field_start": "2026-06-23",
+          "field_end": "2026-06-24",
+          "available_at": "2026-07-01",
           "population": "LV",
           "sample_size": 500.0,
           "modeled_candidate_name": "Seth Bodnar",
           "opposing_candidate_name": "Kurt Alme",
-          "modeled_margin": 4.762,
-          "margin_definition": "independent_minus_rep_two_candidate"
+          "modeled_margin": -41.379,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202theb6b894ea",
+          "pollster_id": "The Bullfinch Group",
+          "field_start": "2026-07-13",
+          "field_end": "2026-07-16",
+          "available_at": "2026-07-28",
+          "population": "LV",
+          "sample_size": 793.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -20.0,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
           "poll_id": "vh-us-202gqrcac76706",
@@ -905,7 +957,59 @@
           "modeled_candidate_name": "Seth Bodnar",
           "opposing_candidate_name": "Kurt Alme",
           "modeled_margin": 6.383,
-          "margin_definition": "independent_minus_rep_two_candidate"
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202gqr6f3c3766",
+          "pollster_id": "GQR",
+          "field_start": "2026-07-23",
+          "field_end": "2026-07-26",
+          "available_at": "2026-07-28",
+          "population": "LV",
+          "sample_size": 500.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -20.588,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202gqr0fc65d4b",
+          "pollster_id": "GQR",
+          "field_start": "2026-07-23",
+          "field_end": "2026-07-26",
+          "available_at": "2026-07-28",
+          "population": "LV",
+          "sample_size": 500.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": 4.762,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202tav5960dbe5",
+          "pollster_id": "Tavern Research",
+          "field_start": "2026-07-23",
+          "field_end": "2026-07-27",
+          "available_at": "2026-07-28",
+          "population": "LV",
+          "sample_size": 517.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -28.947,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202tav83ffdf29",
+          "pollster_id": "Tavern Research",
+          "field_start": "2026-07-23",
+          "field_end": "2026-07-27",
+          "available_at": "2026-07-28",
+          "population": "LV",
+          "sample_size": 517.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -32.432,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
           "poll_id": "vh-us-202tav913179a0",
@@ -918,7 +1022,7 @@
           "modeled_candidate_name": "Seth Bodnar",
           "opposing_candidate_name": "Kurt Alme",
           "modeled_margin": -2.0,
-          "margin_definition": "independent_minus_rep_two_candidate"
+          "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
           "poll_id": "vh-us-202tavbdc1a03d",
@@ -931,7 +1035,46 @@
           "modeled_candidate_name": "Seth Bodnar",
           "opposing_candidate_name": "Kurt Alme",
           "modeled_margin": -5.263,
-          "margin_definition": "independent_minus_rep_two_candidate"
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202har82b4bcdc",
+          "pollster_id": "Hart Research Associates",
+          "field_start": "2026-08-01",
+          "field_end": "2026-08-04",
+          "available_at": "2026-08-13",
+          "population": "LV",
+          "sample_size": 800.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -20.0,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202qua7f691cd6",
+          "pollster_id": "Quantus Insights",
+          "field_start": "2026-09-14",
+          "field_end": "2026-09-15",
+          "available_at": "2026-09-18",
+          "population": "LV",
+          "sample_size": 625.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -29.412,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202amec1fe2597",
+          "pollster_id": "American Pulse Research & Polling",
+          "field_start": "2026-09-19",
+          "field_end": "2026-09-24",
+          "available_at": "2026-09-29",
+          "population": "LV",
+          "sample_size": 604.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -26.761,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
         }
       ],
       "votehub_coverage": "available",
@@ -953,7 +1096,7 @@
           "modeled_candidate_name": "Dan Osborn",
           "opposing_candidate_name": "Pete Ricketts",
           "modeled_margin": 1.075,
-          "margin_definition": "independent_minus_rep_two_candidate"
+          "margin_definition": "modeled_minus_opposing_two_candidate"
         }
       ],
       "votehub_coverage": "sparse",
@@ -974,5 +1117,5 @@
     "reason": "exceptional outcomes are never used to estimate the structural location or uncertainty; every state anchor is derived only from presidential results available at that cutoff"
   },
   "calibration_claim_allowed": false,
-  "artifact_sha256": "d358943fd2b8ac4e5a7541ab920247b2c587c225a25c0e0f8d67cc2fcb247459"
+  "artifact_sha256": "a44ce9b2f60f24ea6ced17b075d8fae2cf942b78e79b1c71bdfdaabd36102386"
 }

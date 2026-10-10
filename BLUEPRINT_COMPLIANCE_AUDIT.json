@@ -19,20 +19,18 @@
     "publication_surface": "research_only"
   },
   "development_status": {
-    "model_version": "senate-hierarchical-v0.9.24",
+    "model_version": "senate-hierarchical-v0.9.25",
     "release_identity_exists": false,
     "research_acceptance_ok": false,
     "promotion_eligible": false,
-    "full_historical_rebuild_completed": false,
-    "v0923_rebuild_completed": true,
     "source_readiness_ok": true,
     "source_blockers": [],
-    "forecast_coverage_ok": true,
+    "forecast_coverage_ok": false,
     "forecast_coverage_blockers": [],
     "forecast_coverage_summary": {
-      "n_pass": 20,
-      "n_warning": 15,
-      "n_fail": 0
+      "n_pass": 21,
+      "n_warning": 13,
+      "n_fail": 1
     },
     "evidence_and_forecast_coverage_separate": true,
     "non_major_adapter_classification": "limited_validation_exception_model",
@@ -41,7 +39,7 @@
     "alaska_rcv_calibration_claim_allowed": false,
     "ordinary_historical_projection_changed": false,
     "historical_equivalent_cutoffs": 8,
-    "exceptional_model_lineage_sha256": "be47d4601ed1f3e88ddf409cc3bcee18c572f309ed23967e7d3a30bdb9aafd13"
+    "exceptional_model_lineage_sha256": "a9d7adf692991c630f97ca34ccc173a98f23e0575e7b6b262b4a856c98355885"
   },
   "allowed_classifications": [
     "implemented",
@@ -122,7 +120,7 @@
     "forecast_model_coverage": "source_and_model_coverage_ready",
     "historical_evidence_equivalence": "historically_equivalent"
   },
-  "empirical_validation_gates_scope": "v0.9.23 completed a sealed research rebuild (2026-10-05). v0.9.24 is research-only code for contest presentation, MT/ID/NE audits, multiway fail-closed, and poll-mechanics repairs; it has not received a fresh nested OOF / stack / publication rebuild. Outside-model probabilities are not calibration targets.",
+  "empirical_validation_gates_scope": "v0.9.22 remains the last completed ordinary empirical release. v0.9.23 current source readiness and forecast coverage are green; the binary non-major and Alaska RCV paths retain separate limited validation, and full v0.9.23 promotion requires the rebuild.",
   "requirements": [
     {
       "id": "warehouse_as_of",
@@ -224,7 +222,7 @@
         "midterms/model/poll_weights.py",
         "midterms/model/state_space.py"
       ],
-      "current_implementation": "v0.9.24: influence_weight = absolute recency × partisan × pollster caps × study clustering (n/quality enter measurement variance once). Absolute recency is preserved after within-race structural normalization. State-space process variance uses calendar Δt.",
+      "current_implementation": "v0.9.24: influence_weight = absolute recency \u00d7 partisan \u00d7 pollster caps \u00d7 study clustering (n/quality enter measurement variance once). Absolute recency is preserved after within-race structural normalization. State-space process variance uses calendar \u0394t.",
       "remaining_issue": "Repairs await a fresh historical OOF before publication claims; explicit study effects still disable heuristic clustering by default.",
       "severity": "medium",
       "blocks_publication_quality_research": false,

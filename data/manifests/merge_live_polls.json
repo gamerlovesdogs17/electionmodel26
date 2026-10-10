@@ -1,8 +1,8 @@
 {
   "schema_version": "votehub-poll-lineage-v3",
   "parser_version": "votehub-ingest-v3-race-scoped-candidate-level",
-  "n_live": 376,
-  "n_warehouse_polls": 4533,
+  "n_live": 287,
+  "n_warehouse_polls": 4444,
   "election_id": "senate-2026",
   "states": [
     "AK",
@@ -12,6 +12,7 @@
     "GA",
     "IA",
     "ID",
+    "IL",
     "KS",
     "MA",
     "ME",
@@ -30,7 +31,7 @@
     "TX",
     "VA"
   ],
-  "generic_ballot_dem_margin": 6.184921674810611,
+  "generic_ballot_dem_margin": 7.0394828626600345,
   "paths": {
     "polls": "normalized/polls.parquet",
     "live": "normalized/polls_live_votehub.parquet",
@@ -38,20 +39,19 @@
   },
   "source": {
     "raw_path": "raw/external/votehub_us_senator.json",
-    "raw_byte_sha256": "9e52469311e79b109bc12033542cecae83ff22a6cff1da4ec7371226fb00ae67",
-    "raw_canonical_json_sha256": "16936d382f5c4e7af8ac11cc31cc16a284daa8e3418560d74c1dd826464ef362",
-    "retrieved_at": "2026-10-05T23:38:19.605547+00:00",
+    "raw_byte_sha256": "e44a5af6cdd2482d03cccf772d56cccff7bb0cc739dfecde11f1c2ab6c5d5c99",
+    "raw_canonical_json_sha256": "02ecfa6eec7ac0f57ae88c70a29c4d39ff6c7e92157d2e2414b4b2a34b40dda8",
+    "retrieved_at": "2026-10-10T16:41:48.336232+00:00",
     "fetch_manifest_path": "data/manifests/fetch_votehub_us_senator.json",
-    "fetch_manifest_sha256": "4982e8c7a4921a068c967107838f380d4d4927ab668c30990f19977a336093b2",
-    "fetch_manifest_recorded_raw_sha256": "9e52469311e79b109bc12033542cecae83ff22a6cff1da4ec7371226fb00ae67"
+    "fetch_manifest_sha256": "7eef9ee768425390b4721cd75b4d1034094c63eda387a9ca95d6247a29398634",
+    "fetch_manifest_recorded_raw_sha256": "e44a5af6cdd2482d03cccf772d56cccff7bb0cc739dfecde11f1c2ab6c5d5c99"
   },
   "outputs": {
-    "live_parquet_byte_sha256": "a600dfa17c2560c7b6f26262d2768fd117cd6104d5b6ddc42635abf96895a82f",
-    "live_semantic_sha256": "748e3762ba93d406aba26ad2f5ddf80a939ab3b3c74fdcb2e4c6c88bf853455d",
-    "warehouse_parquet_byte_sha256": "72aeb1e96a5f272c6ab2cfac2a234cdca7735e888bddf399297c95be1e102d7a",
-    "warehouse_current_semantic_sha256": "748e3762ba93d406aba26ad2f5ddf80a939ab3b3c74fdcb2e4c6c88bf853455d"
+    "live_parquet_byte_sha256": "1012691d36ef36549da0b2b5fc43673d1dc900b9a76048009686e1fac9ef36af",
+    "live_semantic_sha256": "7cbea1bbb3e02abb1f98fdc0fcae8915151cba078a17f95e3125b284e5a93699",
+    "warehouse_parquet_byte_sha256": "5c04801b4cec50344fbdfc8c1f77f2a3bd573d4c757dffc85cae8e6ec11ed60a",
+    "warehouse_current_semantic_sha256": "7cbea1bbb3e02abb1f98fdc0fcae8915151cba078a17f95e3125b284e5a93699"
   },
   "lineage_verified": true,
-  "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0",
-  "resealed_without_renormalize": true
+  "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0"
 }
