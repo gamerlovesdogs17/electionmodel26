@@ -1038,13 +1038,13 @@ class TestWorkflowStructure:
         # Downstream jobs must consume the prepare_evidence output, not env.MULTIWAY_WITHHELD
         assert "needs.prepare_evidence.outputs.multiway_withheld" in text
         assert "env.MULTIWAY_WITHHELD" not in text
-        assert "POST_OOF_EXCEPTIONAL_MODEL_BLOCKER" in text
-        # Approved multiway withholdal after OOF must defer publication without
-        # hard-failing the expensive rebuild job.
-        assert 'publication_blocked={value}' in text
-        assert "publication_blocked != '1'" in text
-        assert '::warning::POST_OOF_EXCEPTIONAL_MODEL_BLOCKER' in text
-        assert "Record deferred publication when multiway withheld" in text
+        assert "POST_OOF_EXCEPTIONAL_MODEL_GATE" in text
+        # Approved multiway withholdal proceeds to publication with seats
+        # withheld fail-closed (no fabricated MT probabilities).
+        assert 'publication_blocked' in text
+        assert "multiway_withheld_publication" in text
+        assert "proceeding to publication" in text
+        assert "Write rebuild status summary" in text
         assert "constraints/research-rebuild.txt" in text
 
     def test_workflow_commit_stages_full_raw_including_live_polls_csv(self):

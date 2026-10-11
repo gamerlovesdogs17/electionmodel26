@@ -92,7 +92,8 @@ def test_rebuild_workflow_has_strict_preflight_current_date_and_pages_deploy():
     prepare_outputs = parsed["jobs"]["prepare_evidence"]["outputs"]
     assert "multiway_withheld" in prepare_outputs
     assert "needs.prepare_evidence.outputs.multiway_withheld" in text
-    assert "POST_OOF_EXCEPTIONAL_MODEL_BLOCKER" in text
+    assert "POST_OOF_EXCEPTIONAL_MODEL_GATE" in text
+    assert "multiway_withheld_publication" in text
     # No cross-job GITHUB_ENV leakage for multiway_withheld
     assert 'echo "MULTIWAY_WITHHELD=' not in text
     assert "-c constraints/research-rebuild.txt" in text

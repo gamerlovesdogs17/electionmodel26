@@ -824,11 +824,10 @@ jobs:
             web/public/data/forecast_latest.json
           if-no-files-found: warn
           overwrite: true
-      - name: Post-OOF exceptional-model completeness blocker
-        # Ordinary OOF/stack work is reusable and already uploaded above.
-        # Approved genuine-multiway withholdal defers publication (warning + skip)
-        # without painting the expensive rebuild as a hard failure. Unexpected
-        # forecast gaps remain fatal.
+      - name: Post-OOF exceptional-model completeness gate
+        # Unexpected forecast gaps remain fatal. Approved genuine-multiway
+        # withholdal (MT) must NOT skip publication: the forecast path already
+        # withholds those seats fail-closed without fabricating probabilities.
         id: exceptional_completeness
         shell: bash
         run: |
@@ -841,9 +840,9 @@ jobs:
           from midterms.evidence.modeling_paths import multiway_plurality_race_ids
           from midterms.evidence.preparation import classify_strict_forecast_coverage
 
-          def _write_blocked(value: str) -> None:
+          def _write(key: str, value: str) -> None:
               with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
-                  out.write(f"publication_blocked={value}\n")
+                  out.write(f"{key}={value}\n")
 
           withheld_flag = os.environ.get("MULTIWAY_WITHHELD", "0") == "1"
           report = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text())
@@ -851,27 +850,25 @@ jobs:
           registry = load_current_candidate_registry()
           multiway_ids = sorted(multiway_plurality_race_ids(registry))
           approved = list(state.get("approved_multiway_withheld_race_ids") or [])
-          if withheld_flag or state.get("multiway_withheld_only"):
-              print(
-                  "::warning::POST_OOF_EXCEPTIONAL_MODEL_BLOCKER: ordinary OOF/stack "
-                  "artifacts were produced and uploaded, but publication is deferred "
-                  f"while genuine multiway races remain fail-closed: {approved or multiway_ids}"
-              )
-              print(
-                  "Do not fabricate multiway probabilities. Resume later with the same "
-                  "evidence bundle / run artifact after historically supported multiway "
-                  "validation exists. Skipping publication/commit steps."
-              )
-              _write_blocked("1")
-              sys.exit(0)
           if state.get("blocking_forecast_incomplete"):
               print(
                   "::error::Forecast coverage still incomplete after OOF: "
                   + json.dumps(state.get("unexpected_forecast_failure_race_ids") or [])
               )
-              _write_blocked("0")
+              _write("publication_blocked", "1")
+              _write("multiway_withheld_publication", "0")
               sys.exit(1)
-          _write_blocked("0")
+          if withheld_flag or state.get("multiway_withheld_only"):
+              print(
+                  "::warning::POST_OOF_EXCEPTIONAL_MODEL_GATE: proceeding to publication "
+                  "with fail-closed multiway seats withheld (no fabricated probabilities): "
+                  + json.dumps(approved or multiway_ids)
+              )
+              _write("publication_blocked", "0")
+              _write("multiway_withheld_publication", "1")
+              sys.exit(0)
+          _write("publication_blocked", "0")
+          _write("multiway_withheld_publication", "0")
           print("exceptional completeness ok; proceeding to publication forecast")
           PY
       - name: Run publication-quality research forecast
@@ -979,13 +976,23 @@ jobs:
             echo "commit_created=true" >> "$GITHUB_OUTPUT"
             echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
-      - name: Record deferred publication when multiway withheld
-        if: steps.exceptional_completeness.outputs.publication_blocked == '1'
+      - name: Write rebuild status summary
+        if: always()
         shell: bash
         run: |
-          echo "publication_blocked=1 (approved multiway withholdal)"
-          echo "OOF/stack artifacts remain available as research-rebuild-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}"
-          echo "Resume this run later after historically supported multiway validation exists; do not fabricate MT probabilities."
+          {
+            echo "## Rebuild Research Forecast"
+            echo ""
+            echo "- as_of: \`$AS_OF\`"
+            echo "- evidence_bundle_id: \`$EVIDENCE_BUNDLE_ID\`"
+            echo "- multiway_withheld (prepare): \`${{ needs.prepare_evidence.outputs.multiway_withheld }}\`"
+            echo "- publication_blocked: \`${{ steps.exceptional_completeness.outputs.publication_blocked }}\`"
+            echo "- multiway_withheld_publication: \`${{ steps.exceptional_completeness.outputs.multiway_withheld_publication }}\`"
+            echo "- commit_created: \`${{ steps.commit.outputs.commit_created }}\`"
+            echo "- artifact: \`research-rebuild-$EVIDENCE_BUNDLE_ID\`"
+            echo ""
+            echo "If the Actions run page fails to load, open this job log or the Artifacts list from the Actions tab."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   deploy_pages:
     needs: [prepare_evidence, rebuild]
