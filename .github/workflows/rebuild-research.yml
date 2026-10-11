@@ -798,8 +798,10 @@ jobs:
           if-no-files-found: warn
           overwrite: true
       - name: Post-OOF exceptional-model completeness blocker
-        # Ordinary OOF/stack work is reusable. Publication must remain impossible
-        # while registry multiway races are intentionally fail-closed.
+        # Ordinary OOF/stack work is reusable and already uploaded above.
+        # Approved genuine-multiway withholdal defers publication (warning + skip)
+        # without painting the expensive rebuild as a hard failure. Unexpected
+        # forecast gaps remain fatal.
         id: exceptional_completeness
         shell: bash
         run: |
@@ -812,6 +814,10 @@ jobs:
           from midterms.evidence.modeling_paths import multiway_plurality_race_ids
           from midterms.evidence.preparation import classify_strict_forecast_coverage
 
+          def _write_blocked(value: str) -> None:
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+                  out.write(f"publication_blocked={value}\n")
+
           withheld_flag = os.environ.get("MULTIWAY_WITHHELD", "0") == "1"
           report = json.loads(Path("data/artifacts/source_readiness_latest.json").read_text())
           state = classify_strict_forecast_coverage(report)
@@ -820,27 +826,32 @@ jobs:
           approved = list(state.get("approved_multiway_withheld_race_ids") or [])
           if withheld_flag or state.get("multiway_withheld_only"):
               print(
-                  "::error::POST_OOF_EXCEPTIONAL_MODEL_BLOCKER: ordinary OOF/stack "
-                  "artifacts were produced, but publication completeness is blocked "
+                  "::warning::POST_OOF_EXCEPTIONAL_MODEL_BLOCKER: ordinary OOF/stack "
+                  "artifacts were produced and uploaded, but publication is deferred "
                   f"while genuine multiway races remain fail-closed: {approved or multiway_ids}"
               )
               print(
                   "Do not fabricate multiway probabilities. Resume later with the same "
-                  "evidence bundle after historically supported multiway validation exists."
+                  "evidence bundle / run artifact after historically supported multiway "
+                  "validation exists. Skipping publication/commit steps."
               )
-              sys.exit(1)
+              _write_blocked("1")
+              sys.exit(0)
           if state.get("blocking_forecast_incomplete"):
               print(
                   "::error::Forecast coverage still incomplete after OOF: "
                   + json.dumps(state.get("unexpected_forecast_failure_race_ids") or [])
               )
+              _write_blocked("0")
               sys.exit(1)
+          _write_blocked("0")
           print("exceptional completeness ok; proceeding to publication forecast")
           PY
       - name: Run publication-quality research forecast
         if: >
-          steps.resume.outputs.forecast_resumed != 'true' ||
-          steps.candidate_spec.outputs.invalidate_canonical == 'true'
+          steps.exceptional_completeness.outputs.publication_blocked != '1' &&
+          (steps.resume.outputs.forecast_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true')
         run: |
           python -m midterms.cli forecast \
             --election-id senate-2026 \
@@ -852,8 +863,9 @@ jobs:
             --n-joint-sims 50000
       - name: Verify forecast exceptional-model attribution and lineage
         if: >
-          steps.resume.outputs.forecast_resumed != 'true' ||
-          steps.candidate_spec.outputs.invalidate_canonical == 'true'
+          steps.exceptional_completeness.outputs.publication_blocked != '1' &&
+          (steps.resume.outputs.forecast_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true')
         run: |
           python - <<'PY'
           import json
@@ -865,19 +877,25 @@ jobs:
           print(validate_forecast_model_paths(forecast, spec))
           PY
       - name: Numerical quality
+        if: steps.exceptional_completeness.outputs.publication_blocked != '1'
         run: python -m midterms.cli numerical-check --publishable
       - name: Validation report and reused posterior diagnostics
+        if: steps.exceptional_completeness.outputs.publication_blocked != '1'
         run: python -m midterms.cli validation-report --full
       - name: Independent rebuild
         if: >
-          steps.resume.outputs.independent_resumed != 'true' ||
-          steps.candidate_spec.outputs.invalidate_canonical == 'true'
+          steps.exceptional_completeness.outputs.publication_blocked != '1' &&
+          (steps.resume.outputs.independent_resumed != 'true' ||
+          steps.candidate_spec.outputs.invalidate_canonical == 'true')
         run: python -m midterms.cli verify-rebuild --independent
       - name: Seal current version release identity
+        if: steps.exceptional_completeness.outputs.publication_blocked != '1'
         run: python -m midterms.cli release-identity
       - name: Seal current forecast shadow
+        if: steps.exceptional_completeness.outputs.publication_blocked != '1'
         run: python -m midterms.cli shadow-publish --mode live
       - name: Run coherence check
+        if: steps.exceptional_completeness.outputs.publication_blocked != '1'
         run: |
           python - <<'PY'
           from midterms.ops.run_coherence import write_coherence_report
@@ -887,8 +905,10 @@ jobs:
               raise SystemExit(1)
           PY
       - name: G1-G11 and blueprint extension gates
+        if: steps.exceptional_completeness.outputs.publication_blocked != '1'
         run: python -m midterms.cli acceptance-gates --strict
       - name: Refresh final validation report status
+        if: steps.exceptional_completeness.outputs.publication_blocked != '1'
         run: python -m midterms.cli validation-report --refresh-status-only
       - name: Upload generated model artifacts
         if: always()
@@ -903,7 +923,9 @@ jobs:
             web/public/data/forecast_latest.json
           overwrite: true
       - name: Refuse artifact push if main diverged from evidence commit
-        if: success()
+        if: >
+          success() &&
+          steps.exceptional_completeness.outputs.publication_blocked != '1'
         shell: bash
         run: |
           git fetch origin main
@@ -913,7 +935,9 @@ jobs:
           }
       - name: Commit successful model artifacts
         id: commit
-        if: success()
+        if: >
+          success() &&
+          steps.exceptional_completeness.outputs.publication_blocked != '1'
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -928,6 +952,13 @@ jobs:
             echo "commit_created=true" >> "$GITHUB_OUTPUT"
             echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
+      - name: Record deferred publication when multiway withheld
+        if: steps.exceptional_completeness.outputs.publication_blocked == '1'
+        shell: bash
+        run: |
+          echo "publication_blocked=1 (approved multiway withholdal)"
+          echo "OOF/stack artifacts remain available as research-rebuild-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}"
+          echo "Resume this run later after historically supported multiway validation exists; do not fabricate MT probabilities."
 
   deploy_pages:
     needs: [prepare_evidence, rebuild]
