@@ -1061,6 +1061,25 @@ class TestWorkflowStructure:
         assert "polls_live_votehub.csv" in commit_block
         assert "git pull --rebase --autostash origin main" in commit_block
 
+    def test_workflow_resume_defaults_as_of_and_verifies_before_coverage(self):
+        """Resume must not use UTC today against an older sealed cutoff."""
+        text, _ = self._load_workflow()
+        prepare_start = text.index("  prepare_evidence:")
+        tests_start = text.index("  tests:")
+        prepare_block = text[prepare_start:tests_start]
+        resolve_pos = prepare_block.find("Resolve AS_OF")
+        resume_verify_pos = prepare_block.find("Verify existing sealed evidence for resume")
+        materialize_pos = prepare_block.find("Materialize presidential prior snapshot for AS_OF")
+        forecast_gate_pos = prepare_block.find("Forecast coverage gate")
+        assert resolve_pos > 0
+        assert resume_verify_pos > resolve_pos
+        assert materialize_pos > resume_verify_pos
+        assert forecast_gate_pos > materialize_pos
+        assert "resume defaulted AS_OF from sealed evidence" in prepare_block
+        # Prior materialization must not be skipped on resume.
+        materialize_block = prepare_block[materialize_pos:forecast_gate_pos]
+        assert "if: inputs.resume_run_id == ''" not in materialize_block
+
     def test_workflow_rebuild_preflight_strict(self):
         """rebuild-preflight in rebuild job must use --strict flag."""
         text, _ = self._load_workflow()

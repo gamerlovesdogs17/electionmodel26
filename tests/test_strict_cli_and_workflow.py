@@ -105,3 +105,8 @@ def test_rebuild_workflow_resume_preserves_sealed_bundle_identity():
     assert "Verify existing sealed evidence for resume" in text
     assert "resume path mutated sealed warehouse inputs; refusing commit" in text
     assert "research-rebuild-${{ needs.prepare_evidence.outputs.evidence_bundle_id }}" in text
+    assert "resume defaulted AS_OF from sealed evidence" in text
+    # Resume verification must precede the forecast-coverage gate.
+    assert text.index("Verify existing sealed evidence for resume") < text.index(
+        "Forecast coverage gate"
+    )
