@@ -861,6 +861,7 @@ def run_forecast(
         fit = merge_alaska_fit(fit, alaska_fit)
 
     from midterms.model.multiway_plurality import (
+        fail_closed_multiway_forecast_rows,
         fit_multiway_plurality_adapter,
         merge_multiway_fits,
     )
@@ -877,9 +878,9 @@ def run_forecast(
         core_fit = merge_multiway_fits(core_fit, multiway_fits)
         fit = merge_multiway_fits(fit, multiway_fits)
 
-    # Unsupported multiway races are withheld from the FitResult rather than
-    # silently binary-collapsed. Chamber accounting pads those seats as
-    # unresolved so ordinary + supported exceptional paths can still smoke.
+    # Unsupported multiway races are withheld from chamber draws rather than
+    # silently binary-collapsed. They still appear in the forecast artifact as
+    # fail-closed multiway rows (p_win=None) so lineage/publication stay coherent.
     multiway_mask = snap.races.get(
         "contest_structure", pd.Series("", index=snap.races.index),
     ).astype(str).eq("multiway_plurality")
@@ -898,6 +899,13 @@ def run_forecast(
         sim_seed=seed + 101,
         withheld_contested_seats=len(withheld_ids),
     )
+    if withheld_ids:
+        present = {str(row.get("race_id")) for row in race_summaries}
+        race_summaries.extend(
+            fail_closed_multiway_forecast_rows(
+                race_ids=[rid for rid in withheld_ids if rid not in present],
+            )
+        )
     contested_active = snap.races[snap.races["race_id"].isin(fit.race_ids)].copy()
     # Align contested to fit order
     contested_active = contested_active.set_index("race_id").loc[fit.race_ids].reset_index()

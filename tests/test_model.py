@@ -67,3 +67,12 @@ def test_end_to_end_forecast_artifact(tmp_path):
     assert art["chamber"]["expected_dem_seats"] > 0
     assert len(art["races"]) >= 30
     assert (tmp_path / "forecast_latest.json").exists()
+    by_id = {row["race_id"]: row for row in art["races"]}
+    mt = by_id.get("senate-2026-MT")
+    assert mt is not None, "fail-closed MT must remain in the forecast artifact"
+    assert mt.get("modeling_path") == "multiway_plurality_adapter"
+    assert mt.get("win_probability_status") == "fail_closed"
+    assert mt.get("p_modeled_candidate") is None
+    assert all(
+        item.get("p_win") is None for item in (mt.get("candidate_probabilities") or [])
+    )

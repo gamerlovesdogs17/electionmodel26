@@ -435,19 +435,22 @@ jobs:
                   f"AK race {ak} has unexpected path {p!r}"
               )
 
-          # Authoritative multiway set may be omitted only when withheld=1.
-          multiway_in_forecast = sorted(forecast_race_ids & multiway_ids)
-          if multiway_withheld:
-              assert not multiway_in_forecast, (
-                  "multiway_withheld=1 but multiway races appear in forecast: "
-                  f"{multiway_in_forecast}"
-              )
-          else:
-              missing_multiway = sorted(multiway_ids - forecast_race_ids)
-              assert not missing_multiway, (
-                  "multiway_withheld=0 but registry multiway races missing from forecast: "
-                  f"{missing_multiway}"
-              )
+          # Fail-closed multiway races must appear in the forecast artifact with
+          # win probabilities withheld (not omitted, and never binary-collapsed).
+          missing_multiway = sorted(multiway_ids - forecast_race_ids)
+          assert not missing_multiway, (
+              "registry multiway races missing from forecast: "
+              f"{missing_multiway}"
+          )
+          for mid in sorted(multiway_ids):
+              row = next(r for r in races if r["race_id"] == mid)
+              assert row.get("modeling_path") == "multiway_plurality_adapter", mid
+              assert row.get("p_modeled_candidate") is None, mid
+              if multiway_withheld:
+                  assert row.get("win_probability_status") == "fail_closed", mid
+                  probs = row.get("candidate_probabilities") or []
+                  assert probs, f"{mid} missing candidate inventory"
+                  assert all(item.get("p_win") is None for item in probs), mid
 
           print("sealed-as-of smoke ok", as_of, len(races), "races; multiway_withheld=", multiway_withheld)
           PY

@@ -216,15 +216,17 @@ def unsupported_multiway_race_payload(
     race_id: str,
     candidates: list[MultiwayCandidate],
     n_analogs: int = 0,
+    state: str | None = None,
 ) -> dict[str, Any]:
     """Fail-closed forecast fields for a correctly classified multiway race."""
     support = historical_analog_support_report(n_analogs=n_analogs)
-    return {
+    payload = {
         "race_id": race_id,
         "contest_structure": MULTIWAY_CONTEST_STRUCTURE,
         "modeling_path": MULTIWAY_MODELING_PATH,
         "probability_model_support_status": support["probability_model_support_status"],
         "win_probability_status": support["win_probability_status"],
+        "p_modeled_candidate": None,
         "candidate_probabilities": [
             {
                 "candidate_id": c.candidate_id,
@@ -238,6 +240,38 @@ def unsupported_multiway_race_payload(
         "analog_support": support,
         "authoritative_binary_aliases": False,
     }
+    if state is not None:
+        payload["state"] = str(state)
+    return payload
+
+
+def fail_closed_multiway_forecast_rows(
+    *,
+    race_ids: list[str] | set[str],
+    registry: dict[str, Any] | None = None,
+    n_analogs: int = 0,
+) -> list[dict[str, Any]]:
+    """Build fail-closed forecast rows for unsupported multiway race ids."""
+    from midterms.evidence.current_candidates import load_current_candidate_registry
+
+    reg = registry if registry is not None else load_current_candidate_registry()
+    by_id = {
+        str(row.get("race_id")): row
+        for row in (reg.get("races") or [])
+        if isinstance(row, dict) and row.get("race_id")
+    }
+    rows: list[dict[str, Any]] = []
+    for race_id in sorted({str(rid) for rid in race_ids if rid}):
+        reg_race = by_id.get(race_id) or {}
+        rows.append(
+            unsupported_multiway_race_payload(
+                race_id=race_id,
+                candidates=_ballot_candidates_from_registry_race(reg_race),
+                n_analogs=n_analogs,
+                state=str(reg_race.get("state") or "") or None,
+            )
+        )
+    return rows
 
 
 def classify_multiway_question(
