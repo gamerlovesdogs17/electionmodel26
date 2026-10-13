@@ -20,11 +20,36 @@ from midterms.evidence.freshness import FRESHNESS_POLICY_VERSION, classify_fresh
 from midterms.evidence.source_registry import canonical_domain_contract
 
 DOMAIN_CONTRACT_VERSION = "production-domain-contract-v1"
+SEALED_ELIGIBILITY_VERIFICATION_VERSION = "sealed-eligibility-verification-v1"
 ROLE_HARD = "required_core"
 ROLE_CONDITIONAL = "conditionally_required"
 ROLE_COMPARE = "compare_only"
 ROLE_DISABLED = "disabled"
 ROLE_QUARANTINE = "quarantine_only"
+
+# Eligibility uses model-facing domain names while the evidence bundle uses
+# source-preparation names for two domains.  Manifest names are the immutable
+# source receipts copied into the eligibility fingerprint at seal time.
+_ELIGIBILITY_BUNDLE_DOMAINS = {
+    "races": "races",
+    "polls": "polls",
+    "structural_prior": "presidential_prior",
+    "candidate_timeline": "candidate_timeline",
+    "finance": "finance",
+    "economics": "economics",
+    "approval": "approval",
+    "demographics": "demographics",
+    "results": "official_results",
+}
+_ELIGIBILITY_MANIFESTS = {
+    "races": "official_senate_ballots.json",
+    "structural_prior": "presidential_vote_sources.json",
+    "candidate_timeline": "candidate_timeline.json",
+    "finance": "fundraising_shares.json",
+    "economics": "economics_vintages.json",
+    "approval": "pres_approval.json",
+    "demographics": "demographic_vintages.json",
+}
 
 
 def effective_production_domain_contract(
@@ -1057,6 +1082,176 @@ def write_eligibility_report(
     )
     report["path"] = str(path)
     return report
+
+
+def verify_sealed_eligibility_report(
+    report: dict[str, Any],
+    evidence_bundle: dict[str, Any],
+    *,
+    election_id: str,
+    as_of: str,
+    domain_contract: dict[str, Any] | None = None,
+    expected_evidence_bundle_id: str | None = None,
+) -> dict[str, Any]:
+    """Verify the eligibility decision frozen with an immutable evidence seal.
+
+    Operational freshness is evaluated when evidence is sealed.  A resume days
+    later must not silently move that clock and invalidate the otherwise exact
+    point-in-time bundle.  This verifier is deliberately read-only and still
+    fails closed on bundle identity, model/as-of, domain-contract, source
+    receipt, or hard-domain mismatches.
+    """
+    from midterms.evidence.evidence_bundle import verify_evidence_bundle
+
+    reasons: list[str] = []
+    expected_contract = domain_contract or effective_production_domain_contract()
+    bundle_check = verify_evidence_bundle(
+        evidence_bundle, expected_id=expected_evidence_bundle_id,
+    )
+    if not bundle_check.get("ok"):
+        reasons.append("sealed evidence bundle identity is invalid")
+
+    expected_as_of = str(as_of)[:10]
+    if report.get("model_version") != MODEL_VERSION:
+        reasons.append("sealed eligibility model_version differs from current code")
+    if evidence_bundle.get("model_version") != MODEL_VERSION:
+        reasons.append("sealed evidence bundle model_version differs from current code")
+    if str(report.get("election_id") or "") != str(election_id):
+        reasons.append("sealed eligibility election_id differs from requested election")
+    if str(report.get("as_of") or "")[:10] != expected_as_of:
+        reasons.append("sealed eligibility as_of differs from requested cutoff")
+    if str(evidence_bundle.get("as_of") or "")[:10] != expected_as_of:
+        reasons.append("sealed evidence bundle as_of differs from requested cutoff")
+    if report.get("effective_domain_contract") != expected_contract:
+        reasons.append("sealed eligibility effective domain contract differs from requested fit")
+    if not (
+        report.get("ok") is True
+        and report.get("publishable") is True
+        and report.get("run_class") == "publication"
+    ):
+        reasons.append("sealed eligibility did not pass publication checks at seal time")
+    if not report.get("checked_at"):
+        reasons.append("sealed eligibility is missing its original freshness check time")
+
+    roles = dict(expected_contract.get("roles") or {})
+    report_domains = dict(report.get("domains") or {})
+    bundle_domains = dict(evidence_bundle.get("domains") or {})
+    manifest_hashes = dict(
+        (report.get("evidence_fingerprint") or {}).get("manifests") or {}
+    )
+    for name, role in sorted(roles.items()):
+        if role not in {ROLE_HARD, ROLE_CONDITIONAL}:
+            continue
+        block = report_domains.get(name)
+        if not isinstance(block, dict):
+            reasons.append(f"sealed eligibility required domain is missing: {name}")
+            continue
+        if block.get("hard_dependency") is not True or block.get("effective_eligible") is not True:
+            reasons.append(f"sealed eligibility required domain did not pass: {name}")
+        freshness = block.get("freshness")
+        if isinstance(freshness, dict) and freshness.get(
+            "required_for_effective_input", True,
+        ) and freshness.get("status") != "fresh":
+            reasons.append(f"sealed eligibility required domain was not fresh: {name}")
+
+        bundle_name = _ELIGIBILITY_BUNDLE_DOMAINS.get(name, name)
+        bundle_block = bundle_domains.get(bundle_name)
+        if not isinstance(bundle_block, dict):
+            reasons.append(f"sealed evidence bundle required domain is missing: {bundle_name}")
+            continue
+        if bundle_block.get("status") != "ready":
+            reasons.append(f"sealed evidence bundle required domain is not ready: {bundle_name}")
+        receipt_hash = bundle_block.get("manifest_sha256")
+        receipt_name = _ELIGIBILITY_MANIFESTS.get(name)
+        if receipt_hash and (
+            not receipt_name or manifest_hashes.get(receipt_name) != receipt_hash
+        ):
+            reasons.append(f"sealed eligibility source receipt differs from bundle: {name}")
+
+    reasons = list(dict.fromkeys(reasons))
+    return {
+        "schema_version": SEALED_ELIGIBILITY_VERIFICATION_VERSION,
+        "ok": not reasons,
+        "reasons": reasons,
+        "election_id": election_id,
+        "as_of": expected_as_of,
+        "model_version": MODEL_VERSION,
+        "evidence_bundle_id": evidence_bundle.get("evidence_bundle_id"),
+        "evidence_bundle_sha256": evidence_bundle.get("evidence_bundle_sha256"),
+        "eligibility_checked_at": report.get("checked_at"),
+        "freshness_clock": "frozen_at_evidence_seal",
+        "effective_domain_contract": expected_contract,
+        "bundle_verification": bundle_check,
+    }
+
+
+def load_sealed_eligibility(
+    *,
+    election_id: str,
+    as_of: str,
+    domain_contract: dict[str, Any] | None = None,
+    eligibility_path: str | Path | None = None,
+    evidence_bundle_path: str | Path | None = None,
+    expected_evidence_bundle_id: str | None = None,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Load and verify the committed eligibility report and evidence bundle."""
+    eligibility_file = Path(eligibility_path or (ARTIFACTS_DIR / "evidence_eligibility_latest.json"))
+    if evidence_bundle_path is None:
+        pointer_path = MANIFESTS_DIR / "evidence_bundle_latest.json"
+        pointer = json.loads(pointer_path.read_text(encoding="utf-8"))
+        evidence_bundle_path = MANIFESTS_DIR / str(pointer["manifest"])
+        expected_evidence_bundle_id = (
+            expected_evidence_bundle_id or str(pointer["evidence_bundle_id"])
+        )
+    bundle_file = Path(evidence_bundle_path)
+    report = json.loads(eligibility_file.read_text(encoding="utf-8"))
+    bundle = json.loads(bundle_file.read_text(encoding="utf-8"))
+    verification = verify_sealed_eligibility_report(
+        report,
+        bundle,
+        election_id=election_id,
+        as_of=as_of,
+        domain_contract=domain_contract,
+        expected_evidence_bundle_id=expected_evidence_bundle_id,
+    )
+    return report, bundle, verification
+
+
+def write_verified_sealed_eligibility(
+    report: dict[str, Any],
+    *,
+    run_id: str,
+    snapshot_id: str,
+    forecast_generated_at: str,
+    verification: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind a verified seal-time eligibility decision to a completed forecast."""
+    if not verification.get("ok"):
+        raise ValueError(
+            "cannot bind an invalid sealed eligibility decision: "
+            + "; ".join(verification.get("reasons") or ["unknown"])
+        )
+    out = dict(report)
+    out["forecast_run_id"] = run_id
+    out["snapshot_id"] = snapshot_id
+    out["forecast_generated_at"] = forecast_generated_at
+    out["sealed_eligibility_verification"] = {
+        key: verification.get(key)
+        for key in (
+            "schema_version", "ok", "evidence_bundle_id", "evidence_bundle_sha256",
+            "eligibility_checked_at", "freshness_clock",
+        )
+    }
+    out["identity_checked_at"] = datetime.now(UTC).isoformat()
+    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
+    (ARTIFACTS_DIR / "evidence_eligibility_latest.json").write_text(
+        json.dumps(out, indent=2, default=str), encoding="utf-8",
+    )
+    (MANIFESTS_DIR / "evidence_eligibility.json").write_text(
+        json.dumps(out, indent=2, default=str), encoding="utf-8",
+    )
+    return out
 
 
 def assert_publishable(

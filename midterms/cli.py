@@ -799,6 +799,17 @@ def main(argv: list[str] | None = None) -> None:
         "--publication-config", action="store_true",
         help="Derive evidence dependencies from the effective publication overlay policy",
     )
+    p_elig.add_argument(
+        "--verify-sealed", action="store_true",
+        help=(
+            "Read-only verification of the eligibility decision frozen with a sealed "
+            "evidence bundle; does not move the operational freshness clock"
+        ),
+    )
+    p_elig.add_argument(
+        "--evidence-bundle", default=None,
+        help="Sealed bundle manifest used with --verify-sealed (default: latest pointer)",
+    )
 
     def _evidence_eligibility(a: argparse.Namespace) -> None:
         eligibility_module = __import__(
@@ -819,11 +830,22 @@ def main(argv: list[str] | None = None) -> None:
                     policy["use_race_markets"] and policy["use_control_market"]
                 ),
             )
-        report = eligibility_module.write_eligibility_report(
-            a.election_id, as_of=a.as_of, domain_contract=contract,
-        )
-        print(json.dumps(report, indent=2, default=str))
-        if a.strict and not report.get("publishable"):
+        if a.verify_sealed:
+            _report, _bundle, result = eligibility_module.load_sealed_eligibility(
+                election_id=a.election_id,
+                as_of=a.as_of,
+                domain_contract=contract,
+                evidence_bundle_path=a.evidence_bundle,
+            )
+            print(json.dumps(result, indent=2, default=str))
+            passed = bool(result.get("ok"))
+        else:
+            result = eligibility_module.write_eligibility_report(
+                a.election_id, as_of=a.as_of, domain_contract=contract,
+            )
+            print(json.dumps(result, indent=2, default=str))
+            passed = bool(result.get("publishable"))
+        if a.strict and not passed:
             raise SystemExit(1)
 
     p_elig.set_defaults(func=_evidence_eligibility)

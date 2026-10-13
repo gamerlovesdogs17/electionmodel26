@@ -243,11 +243,27 @@ jobs:
       - name: Strict publication-domain eligibility
         # Same gate as the rebuild job. Fail here (cheap) rather than after
         # evidence seal + tests when registry/timeline freshness is wrong.
+        if: inputs.resume_run_id == ''
         run: |
           python -m midterms.cli evidence-eligibility \
             --election-id senate-2026 \
             --as-of "$AS_OF" \
             --publication-config \
+            --strict
+      - name: Verify sealed publication eligibility for resume
+        # Freshness was evaluated when this immutable bundle was sealed. A
+        # resume verifies that decision and its source receipts without moving
+        # the clock forward and invalidating a point-in-time research run.
+        if: inputs.resume_run_id != ''
+        shell: bash
+        run: |
+          BUNDLE_FILE="$(python -c "import json; p=json.load(open('data/manifests/evidence_bundle_latest.json')); print('data/manifests/'+p['manifest'])")"
+          python -m midterms.cli evidence-eligibility \
+            --election-id senate-2026 \
+            --as-of "$AS_OF" \
+            --publication-config \
+            --verify-sealed \
+            --evidence-bundle "$BUNDLE_FILE" \
             --strict
       - name: Strict blueprint source gates
         run: python -m midterms.cli blueprint-extension-gates --source-only --strict
@@ -344,19 +360,16 @@ jobs:
       - name: Verify sealed publication eligibility artifact
         # Read-only check of the prepare_evidence seal. Do not recompute
         # eligibility here — forecast tests below may mutate sealed stores.
+        shell: bash
         run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          path = Path("data/artifacts/evidence_eligibility_latest.json")
-          report = json.loads(path.read_text(encoding="utf-8"))
-          if not report.get("publishable"):
-              raise SystemExit(f"sealed eligibility not publishable: {report.get('reasons')}")
-          freshness = (report.get("domains") or {}).get("candidate_timeline", {}).get("freshness") or {}
-          if freshness.get("status") != "fresh":
-              raise SystemExit(f"sealed candidate_timeline freshness not fresh: {freshness}")
-          print("sealed eligibility ok", report.get("as_of"), freshness.get("identity_freshness_basis"))
-          PY
+          BUNDLE_FILE="$(python -c "import json; p=json.load(open('data/manifests/evidence_bundle_latest.json')); print('data/manifests/'+p['manifest'])")"
+          python -m midterms.cli evidence-eligibility \
+            --election-id senate-2026 \
+            --as-of "${{ needs.prepare_evidence.outputs.as_of }}" \
+            --publication-config \
+            --verify-sealed \
+            --evidence-bundle "$BUNDLE_FILE" \
+            --strict
       - name: Run evidence-compatible regression suite
         # Order: read-only / sealed-state checks first, then adapters, then
         # forecast smokes last (they can mutate normalized stores in-process).
@@ -492,11 +505,18 @@ jobs:
           echo "EVIDENCE_BUNDLE_PATH=$BUNDLE_FILE" >> "$GITHUB_ENV"
           python -m midterms.cli verify-evidence-bundle --path "$BUNDLE_FILE" --expected-id "$EVIDENCE_BUNDLE_ID"
       - name: Strict effective publication-domain eligibility
+        # The rebuild consumes the exact sealed point-in-time decision. Source
+        # readiness and bundle identity were checked above; do not re-age the
+        # same evidence against a later wall clock after expensive OOF work.
+        shell: bash
         run: |
+          BUNDLE_FILE="$(python -c "import json; p=json.load(open('data/manifests/evidence_bundle_latest.json')); print('data/manifests/'+p['manifest'])")"
           python -m midterms.cli evidence-eligibility \
             --election-id senate-2026 \
             --as-of "$AS_OF" \
             --publication-config \
+            --verify-sealed \
+            --evidence-bundle "$BUNDLE_FILE" \
             --strict
       - name: Strict exceptional-model, candidate, coverage, and history preflight
         run: |

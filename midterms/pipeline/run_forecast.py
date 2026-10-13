@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -235,7 +236,9 @@ def run_forecast(
     from midterms.evidence.eligibility import (
         assert_publishable,
         effective_production_domain_contract,
+        load_sealed_eligibility,
         write_eligibility_report,
+        write_verified_sealed_eligibility,
     )
     from midterms.evidence.expert_ratings import (
         ensure_expert_ratings_store,
@@ -279,12 +282,35 @@ def run_forecast(
     effective_domain_contract = effective_production_domain_contract(
         use_ratings=with_ratings, use_markets=with_markets,
     )
-    eligibility = assert_publishable(
-        election_id,
-        as_of=str(as_of)[:10],
-        allow_non_publication=allow_non_publication and not require_publishable,
-        domain_contract=effective_domain_contract,
-    )
+    evidence_bundle = None
+    sealed_eligibility_verification = None
+    if require_publishable:
+        eligibility, evidence_bundle, sealed_eligibility_verification = load_sealed_eligibility(
+            election_id=election_id,
+            as_of=str(as_of)[:10],
+            domain_contract=effective_domain_contract,
+            expected_evidence_bundle_id=os.environ.get("EVIDENCE_BUNDLE_ID") or None,
+        )
+        if not sealed_eligibility_verification.get("ok"):
+            raise ValueError(
+                "sealed publication eligibility verification failed: "
+                + "; ".join(sealed_eligibility_verification.get("reasons") or [])
+            )
+        eligibility = dict(eligibility)
+        eligibility["sealed_eligibility_verification"] = {
+            key: sealed_eligibility_verification.get(key)
+            for key in (
+                "schema_version", "ok", "evidence_bundle_id", "evidence_bundle_sha256",
+                "eligibility_checked_at", "freshness_clock",
+            )
+        }
+    else:
+        eligibility = assert_publishable(
+            election_id,
+            as_of=str(as_of)[:10],
+            allow_non_publication=allow_non_publication,
+            domain_contract=effective_domain_contract,
+        )
     if require_publishable and not eligibility.get("publishable"):
         raise ValueError(
             "require_publishable=True but evidence is ineligible: "
@@ -410,19 +436,12 @@ def run_forecast(
 
     wh = Warehouse(ensure_fixtures=False)
     snap = wh.build_as_of(as_of, election_id)
-    evidence_bundle = None
     validated_model_spec = None
     from midterms.model.poll_structure import PollStructureConfig
 
     selected_poll_structure = PollStructureConfig()
     if require_publishable:
-        import os
-
-        from midterms.evidence.preparation import load_latest_evidence_bundle
-
-        evidence_bundle = load_latest_evidence_bundle(
-            expected_id=os.environ.get("EVIDENCE_BUNDLE_ID") or None,
-        )
+        assert evidence_bundle is not None  # verified before any model fitting
         if evidence_bundle.get("model_version") != MODEL_VERSION:
             raise ValueError("sealed evidence bundle model version differs from current code")
         if str(evidence_bundle.get("as_of")) != str(as_of)[:10]:
@@ -439,7 +458,9 @@ def run_forecast(
             expected_evidence_bundle_sha256=evidence_bundle.get("evidence_bundle_sha256"),
         )
         verify_validated_spec_artifacts(validated_model_spec)
-    from midterms.validation.validated_model_spec import coerce_structural_feature_enables
+    from midterms.validation.validated_model_spec import (
+        coerce_structural_feature_enables,
+    )
 
     structural_feature_enables = coerce_structural_feature_enables(
         (validated_model_spec or {}).get("structural_feature_enables")
@@ -1297,14 +1318,24 @@ def run_forecast(
 
     # Keep eligibility artifact identity-tied to this exact forecast run.
     if not rebuild_mode:
-        write_eligibility_report(
-            election_id,
-            as_of=str(as_of)[:10],
-            run_id=run_id,
-            snapshot_id=str(snap.snapshot_id),
-            forecast_generated_at=str(artifact.get("generated_at")),
-            domain_contract=effective_domain_contract,
-        )
+        if require_publishable:
+            assert sealed_eligibility_verification is not None
+            write_verified_sealed_eligibility(
+                eligibility,
+                run_id=run_id,
+                snapshot_id=str(snap.snapshot_id),
+                forecast_generated_at=str(artifact.get("generated_at")),
+                verification=sealed_eligibility_verification,
+            )
+        else:
+            write_eligibility_report(
+                election_id,
+                as_of=str(as_of)[:10],
+                run_id=run_id,
+                snapshot_id=str(snap.snapshot_id),
+                forecast_generated_at=str(artifact.get("generated_at")),
+                domain_contract=effective_domain_contract,
+            )
 
     draws_path = out_dir / f"draws_{run_id}.npz"
     np.savez_compressed(

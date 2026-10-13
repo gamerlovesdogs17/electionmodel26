@@ -66,10 +66,19 @@ def test_publishable_forecast_does_not_mutate_verified_evidence(monkeypatch) -> 
     )
     monkeypatch.setattr(
         eligibility,
-        "assert_publishable",
-        lambda *args, **kwargs: {
-            "publishable": True, "run_class": "publication", "reasons": [],
-        },
+        "load_sealed_eligibility",
+        lambda **kwargs: (
+            {"publishable": True, "run_class": "publication", "reasons": []},
+            {"model_version": module.MODEL_VERSION},
+            {
+                "ok": True,
+                "schema_version": "sealed-eligibility-verification-v1",
+                "evidence_bundle_id": "eb-test",
+                "evidence_bundle_sha256": "a" * 64,
+                "eligibility_checked_at": "2026-09-27T00:00:00Z",
+                "freshness_clock": "frozen_at_evidence_seal",
+            },
+        ),
     )
 
     class StopAfterEvidenceBoundary:

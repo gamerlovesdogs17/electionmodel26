@@ -63,6 +63,33 @@ def test_evidence_preflight_uses_effective_publication_domains(monkeypatch):
     assert captured["roles"]["markets"] == "disabled"
 
 
+def test_sealed_evidence_eligibility_cli_is_read_only(monkeypatch):
+    captured = {}
+
+    def fake_load(**kwargs):
+        captured.update(kwargs)
+        return (
+            {"publishable": True},
+            {"evidence_bundle_id": "eb-test"},
+            {"ok": True, "freshness_clock": "frozen_at_evidence_seal"},
+        )
+
+    monkeypatch.setattr(
+        "midterms.evidence.eligibility.load_sealed_eligibility", fake_load,
+    )
+    monkeypatch.setattr(
+        "midterms.evidence.eligibility.write_eligibility_report",
+        lambda *args, **kwargs: pytest.fail("sealed verification must not rewrite eligibility"),
+    )
+    main([
+        "evidence-eligibility", "--election-id", "senate-2026",
+        "--as-of", "2026-10-10", "--publication-config",
+        "--verify-sealed", "--evidence-bundle", "bundle.json", "--strict",
+    ])
+    assert captured["as_of"] == "2026-10-10"
+    assert captured["evidence_bundle_path"] == "bundle.json"
+
+
 def test_rebuild_workflow_has_strict_preflight_current_date_and_pages_deploy():
     path = Path(".github/workflows/rebuild-research.yml")
     text = path.read_text(encoding="utf-8")
@@ -111,3 +138,13 @@ def test_rebuild_workflow_resume_preserves_sealed_bundle_identity():
     assert text.index("Verify existing sealed evidence for resume") < text.index(
         "Forecast coverage gate"
     )
+    assert "Verify sealed publication eligibility for resume" in text
+    assert "--verify-sealed" in text
+    prepare = text[text.index("  prepare_evidence:"):text.index("  tests:")]
+    assert "Strict publication-domain eligibility" in prepare
+    assert "if: inputs.resume_run_id == ''" in prepare
+    resume_step = prepare[prepare.index("Verify sealed publication eligibility for resume"):]
+    assert "if: inputs.resume_run_id != ''" in resume_step
+    rebuild = text[text.index("  rebuild:"):]
+    eligibility_step = rebuild[rebuild.index("Strict effective publication-domain eligibility"):]
+    assert "--verify-sealed" in eligibility_step
