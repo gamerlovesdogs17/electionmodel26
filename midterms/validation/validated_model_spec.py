@@ -237,6 +237,56 @@ def load_candidate_model_spec(path: str | Path) -> dict[str, Any]:
     return payload
 
 
+def reconcile_candidate_model_spec_for_resume(
+    *,
+    restored_path: str | Path,
+    refreshed_path: str | Path,
+) -> dict[str, Any]:
+    """Keep an OOF-bound candidate file when its statistical identity is unchanged.
+
+    Canonical OOF artifacts intentionally bind the exact candidate-spec bytes.
+    A resume run also records the new checkout SHA in a freshly generated
+    candidate spec, which changes those bytes even when every ordinary model
+    input and setting is identical.  Retaining the verified restored bytes in
+    that case preserves the existing OOF lineage.  Any statistical identity
+    change replaces the restored file and therefore invalidates canonical OOF.
+    """
+
+    restored_path = Path(restored_path)
+    refreshed_path = Path(refreshed_path)
+    refreshed = load_candidate_model_spec(refreshed_path)
+    refreshed_identity = ordinary_statistical_spec_sha256(refreshed)
+    if refreshed.get("ordinary_statistical_spec_sha256") != refreshed_identity:
+        raise ValueError("refreshed candidate ordinary-statistical identity is invalid")
+
+    reused = False
+    if restored_path.is_file():
+        try:
+            restored = load_candidate_model_spec(restored_path)
+            restored_identity = ordinary_statistical_spec_sha256(restored)
+            reused = (
+                restored.get("ordinary_statistical_spec_sha256") == restored_identity
+                and restored_identity == refreshed_identity
+            )
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            # A stale or malformed checked-in candidate is never reusable. The
+            # freshly verified candidate replaces it and invalidates downstream
+            # OOF through the existing exact-file binding.
+            reused = False
+
+    if not reused:
+        restored_path.parent.mkdir(parents=True, exist_ok=True)
+        restored_path.write_bytes(refreshed_path.read_bytes())
+
+    selected = load_candidate_model_spec(restored_path)
+    return {
+        "reused_restored_candidate": reused,
+        "ordinary_statistical_spec_sha256": ordinary_statistical_spec_sha256(selected),
+        "candidate_file_sha256": file_sha256(restored_path),
+        "restored_path": str(restored_path),
+    }
+
+
 def finalize_validated_model_spec(
     *,
     candidate_path: str | Path,

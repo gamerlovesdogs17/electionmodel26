@@ -229,6 +229,38 @@ def test_candidate_neutral_output_has_no_p_dem_and_chamber_uses_caucus() -> None
     assert "dem_candidate" not in summaries[0]
     assert "dem_party" not in summaries[0]
     assert summaries[0]["rating"] == "Tossup"
+    assert summaries[0]["modeling_path"] == "binary_non_major_adapter"
+
+
+@pytest.mark.parametrize(
+    "contest_structure",
+    [
+        "non_major_party_vs_republican",
+        "principal_binary_with_minor_residual",
+    ],
+)
+def test_supported_non_major_structures_keep_adapter_attribution(
+    contest_structure: str,
+) -> None:
+    race = _race(contest_structure=contest_structure)
+    held = [
+        {"race_id": f"held-r-{i}", "state": "ZZ", "not_up": True, "held_by": "R"}
+        for i in range(99)
+    ]
+    fit = FitResult(
+        race_ids=["synthetic-I"],
+        states=["ZZ"],
+        mean_margin=np.array([0.0]),
+        sd_margin=np.array([1.0]),
+        draws_margin=np.array([[1.0], [-1.0]]),
+        house_effects={},
+        diagnostics={},
+        method="limited_validation_exception_model-v1",
+    )
+
+    _sim, summaries = simulate_chamber(fit, pd.DataFrame([*held, race]))
+
+    assert summaries[0]["modeling_path"] == "binary_non_major_adapter"
 
 
 def test_ordinary_output_retains_legacy_dem_probability_aliases() -> None:

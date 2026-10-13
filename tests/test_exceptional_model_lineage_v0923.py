@@ -47,8 +47,14 @@ from midterms.validation.exceptional_model_lineage import (
     verify_exceptional_promotion_inputs,
 )
 from midterms.validation.validated_model_spec import (
+    CANDIDATE_SPEC_SCHEMA,
     ORDINARY_STATISTICAL_SPEC_FIELDS,
     ordinary_statistical_spec_sha256,
+    poll_structure_identity,
+    reconcile_candidate_model_spec_for_resume,
+)
+from midterms.validation.validated_model_spec import (
+    canonical_sha256 as spec_canonical_sha256,
 )
 
 ARTIFACTS = ARTIFACTS_DIR
@@ -791,6 +797,72 @@ def test_ordinary_statistical_cache_key_ignores_exceptional_content() -> None:
     assert sha_a == sha_b
     changed = {**base, "selected_structure_id": "different"}
     assert ordinary_statistical_spec_sha256(changed) != sha_a
+
+
+def test_resume_keeps_exact_oof_bound_candidate_for_metadata_only_change(
+    tmp_path: Path,
+) -> None:
+    def candidate(*, commit: str, selected: str = "pymc") -> dict[str, Any]:
+        poll_structure: dict[str, bool] = {}
+        payload: dict[str, Any] = {
+            "schema_version": CANDIDATE_SPEC_SCHEMA,
+            "model_version": MODEL_VERSION,
+            "evidence_bundle_id": "eb-test",
+            "evidence_bundle_sha256": "e" * 64,
+            "selected_structure_id": selected,
+            "selected_poll_structure": poll_structure,
+            "selected_poll_structure_id": poll_structure_identity(poll_structure),
+            "historical_cycles": [2018, 2020, 2022, 2024],
+            "lead_cutoffs_days": [60, 30],
+            "historical_structural_feature_schema": "synthetic-v1",
+            "structural_feature_enables": {
+                "similarity_terminal": True,
+                "terminal_race": True,
+            },
+            "selected_state_space_config": {},
+            "selected_national_environment_config": {},
+            "code_commit_sha": commit,
+        }
+        payload["ordinary_statistical_spec_sha256"] = ordinary_statistical_spec_sha256(payload)
+        payload["spec_sha256"] = spec_canonical_sha256(payload)
+        return payload
+
+    restored_path = _write(tmp_path / "restored.json", candidate(commit="old"))
+    refreshed_path = _write(tmp_path / "refreshed.json", candidate(commit="new"))
+    restored_bytes = restored_path.read_bytes()
+
+    report = reconcile_candidate_model_spec_for_resume(
+        restored_path=restored_path,
+        refreshed_path=refreshed_path,
+    )
+
+    assert report["reused_restored_candidate"] is True
+    assert restored_path.read_bytes() == restored_bytes
+
+    changed_path = _write(
+        tmp_path / "changed.json",
+        candidate(commit="new", selected="hier_plus_study_effect"),
+    )
+    report = reconcile_candidate_model_spec_for_resume(
+        restored_path=restored_path,
+        refreshed_path=changed_path,
+    )
+    assert report["reused_restored_candidate"] is False
+    assert restored_path.read_bytes() == changed_path.read_bytes()
+
+    stale = candidate(commit="old")
+    stale["model_version"] = "senate-hierarchical-v0.9.22"
+    stale["ordinary_statistical_spec_sha256"] = ordinary_statistical_spec_sha256(stale)
+    stale_without_hash = dict(stale)
+    stale_without_hash.pop("spec_sha256", None)
+    stale["spec_sha256"] = spec_canonical_sha256(stale_without_hash)
+    _write(restored_path, stale)
+    report = reconcile_candidate_model_spec_for_resume(
+        restored_path=restored_path,
+        refreshed_path=refreshed_path,
+    )
+    assert report["reused_restored_candidate"] is False
+    assert restored_path.read_bytes() == refreshed_path.read_bytes()
 
 
 def test_frozen_v0922_release_identity_unchanged() -> None:

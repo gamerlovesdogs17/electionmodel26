@@ -624,15 +624,32 @@ jobs:
         id: candidate_spec
         shell: bash
         run: |
-          # Always (re)freeze so selection G8 structural enables bind into the
-          # ordinary-statistical identity — including resume paths that restored
-          # a pre-enables candidate from an older failed run.
+          # Generate the current candidate separately. On resume, retain the
+          # exact restored candidate bytes only when the versioned ordinary
+          # statistical identity is unchanged. This preserves a valid OOF bind
+          # across metadata-only commits while still invalidating real model,
+          # evidence, structure, or configuration changes.
           python -m midterms.cli freeze-model-spec-candidate \
             --selection data/artifacts/poll_structure_crossfit_latest.json \
             --evidence-bundle "$EVIDENCE_BUNDLE_PATH" \
             --source-readiness data/artifacts/source_readiness_latest.json \
             --code-commit-sha "$(git rev-parse HEAD)" \
-            --out data/artifacts/validated_model_spec_candidate.json
+            --out "$RUNNER_TEMP/validated_model_spec_candidate.refreshed.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from midterms.validation.validated_model_spec import (
+              reconcile_candidate_model_spec_for_resume,
+          )
+
+          report = reconcile_candidate_model_spec_for_resume(
+              restored_path=Path("data/artifacts/validated_model_spec_candidate.json"),
+              refreshed_path=Path(os.environ["RUNNER_TEMP"])
+              / "validated_model_spec_candidate.refreshed.json",
+          )
+          print(json.dumps(report, indent=2))
+          PY
           ORD_SHA="$(python -c "import json; print(json.load(open('data/artifacts/validated_model_spec_candidate.json'))['ordinary_statistical_spec_sha256'])")"
           echo "ordinary_statistical_spec_sha256=$ORD_SHA" >> "$GITHUB_OUTPUT"
           python - <<'PY'

@@ -531,7 +531,10 @@ def simulate_chamber(
                     "binary_non_major_adapter"
                     if row is not None
                     and str(row.get("contest_structure") or "")
-                    == "non_major_party_vs_republican"
+                    in {
+                        "non_major_party_vs_republican",
+                        "principal_binary_with_minor_residual",
+                    }
                     else "ordinary_stack"
                 ),
             }
