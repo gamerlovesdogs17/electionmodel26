@@ -27,3 +27,9 @@ web/out/
 data/licensed/
 *.pem
 !data/manifests/signing_public_key.pem
+
+# Runtime copies of byte-sealed large OOF artifacts. Git stores deterministic
+# .json.gz blobs plus data/artifacts/large_artifact_storage.json; workflows
+# hydrate the exact JSON bytes before validation or model commands.
+/data/artifacts/nested_component_loo_selection.json
+/data/artifacts/nested_component_loo_canonical.json

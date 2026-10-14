@@ -44,6 +44,8 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+      - name: Hydrate versioned large research artifacts
+        run: python -m midterms.ops.large_artifacts hydrate
       - name: Install
         run: pip install -e ".[dev]" -c constraints/research-rebuild.txt
       - name: Resolve AS_OF
@@ -355,6 +357,8 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+      - name: Hydrate versioned large research artifacts
+        run: python -m midterms.ops.large_artifacts hydrate
       - name: Install
         run: pip install -e ".[dev]" -c constraints/research-rebuild.txt
       - name: Verify sealed publication eligibility artifact
@@ -496,6 +500,8 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+      - name: Hydrate versioned large research artifacts
+        run: python -m midterms.ops.large_artifacts hydrate
       - name: Install
         run: pip install -e ".[dev]" -c constraints/research-rebuild.txt
       - name: Verify exact sealed evidence bundle
@@ -1006,13 +1012,27 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Preserve exact OOF JSON bytes while keeping each Git blob below
+          # GitHub's hard size limit. The uploaded Actions checkpoint retains
+          # the runtime JSON; the repository stores deterministic gzip blobs.
+          python -m midterms.ops.large_artifacts pack
           git add data/artifacts data/releases data/manifests data/shadow web/public/data/forecast_latest.json
           if git diff --cached --quiet; then
             echo "commit_created=false" >> "$GITHUB_OUTPUT"
             echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           else
             git commit -m "model: rebuild research forecast ${AS_OF} [bundle ${EVIDENCE_BUNDLE_ID}]"
-            git push origin HEAD:main
+            # A research rebuild can produce a large Git pack.  GitHub may
+            # accept the pack or ref update while the HTTPS client reports an
+            # ambiguous 408/disconnect.  Retry only transient transport
+            # failures, verify the exact remote ref after every attempt, and
+            # fail closed if main moves to any unrelated commit.
+            python -m midterms.ops.git_push \
+              --remote origin \
+              --branch main \
+              --expected-remote-sha "${{ needs.prepare_evidence.outputs.evidence_commit_sha }}" \
+              --attempts 5 \
+              --base-delay-seconds 5
             echo "commit_created=true" >> "$GITHUB_OUTPUT"
             echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi

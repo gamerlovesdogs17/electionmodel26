@@ -1,17 +1,17 @@
 {
   "schema_version": "validated-model-spec-candidate-v1",
-  "model_version": "senate-hierarchical-v0.9.23",
+  "model_version": "senate-hierarchical-v0.9.25",
   "status": "candidate_pending_canonical_oof",
-  "evidence_bundle_id": "eb-19f9ccea0cc3812a",
-  "evidence_bundle_sha256": "19f9ccea0cc3812a6819b559321c2e6c7e38ed9c5ebe0336ebbf7748c67e6690",
-  "source_readiness_sha256": "acebd18ee0f8c986593191fb3b174babcac670b7463375127f9d6f15a1a23cbd",
-  "poll_structure_selection_sha256": "ec5253a40cd4d72bacdae559884a6b0a8aeb59257b8fedd83ceb11a9e5df76f1",
-  "poll_structure_selection_source_nested_sha256": "5da70a3398a0130d8a715dc1592f0517985895dba43f8b2c5f03d2db4a50e4a7",
-  "selected_structure_id": "hier_plus_questionnaire_effect",
+  "evidence_bundle_id": "eb-dcb6d43248b5fcc9",
+  "evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
+  "source_readiness_sha256": "c5e19b7b95c40da2fe99b6040c1f75e136ec3fa75c29e7331ac60de0b80932f4",
+  "poll_structure_selection_sha256": "9f66fd1c7203a0f903b00c2e93c99a75f62f9542c951fdfe91bb2fd2fe620cc6",
+  "poll_structure_selection_source_nested_sha256": "737b4654c2d3735d319383438fa1867ed2a379a23f7f21795bc554853a131c2c",
+  "selected_structure_id": "pymc",
   "selected_poll_structure": {
     "version": "poll-structure-v2",
     "sponsor_effect": false,
-    "questionnaire_effect": true,
+    "questionnaire_effect": false,
     "study_effect": false,
     "heuristic_study_downweight": null,
     "sponsor_scale": 0.75,
@@ -19,7 +19,7 @@
     "study_scale": 1.25,
     "effective_heuristic_study_downweight": true
   },
-  "selected_poll_structure_id": "psc-5035810fb1f3d5e7",
+  "selected_poll_structure_id": "psc-7819fcedea982286",
   "historical_cycles": [
     2018,
     2020,
@@ -33,12 +33,136 @@
   "historical_structural_feature_schema": "historical-structural-features-v1",
   "structural_feature_enables": {
     "similarity_terminal": true,
-    "terminal_race": false
+    "terminal_race": true
   },
-  "code_commit_sha": "8c7c03c9793593fe06929c689fd22bc49cf8039f",
+  "selected_state_space_config": {
+    "fund_pull": 0.35,
+    "flat_prior": false,
+    "process_sd_per_sqrt_day": 0.5
+  },
+  "selected_national_environment_config": {
+    "generic_ballot_enabled": true,
+    "approval_enabled": false,
+    "midterm_outparty_enabled": false,
+    "income_enabled": false
+  },
+  "selected_state_space_name": "state_space_process_sd_0_5",
+  "selected_national_environment_name": "no_approval_no_income_economic_no_midterm_outparty",
+  "same_family_selection_audit": {
+    "state_space": {
+      "reference": "state_space",
+      "challengers_scored": {
+        "state_space_no_ed_fund_repull": {
+          "beats_reference": false,
+          "n_beats_reference": 0,
+          "n_folds": 4,
+          "deltas_reference_minus_challenger": {
+            "2018": -0.4382523307864865,
+            "2020": -0.952036633652134,
+            "2022": -0.715019734217635,
+            "2024": -0.45002888852965217
+          }
+        },
+        "state_space_process_sd_0_5": {
+          "beats_reference": true,
+          "n_beats_reference": 4,
+          "n_folds": 4,
+          "deltas_reference_minus_challenger": {
+            "2018": 0.0645096203245048,
+            "2020": 0.02656647581424565,
+            "2022": 0.04356534510643506,
+            "2024": 0.03347090563843347
+          }
+        },
+        "state_space_process_sd_1_2": {
+          "beats_reference": false,
+          "n_beats_reference": 0,
+          "n_folds": 4,
+          "deltas_reference_minus_challenger": {
+            "2018": -0.07532360806776861,
+            "2020": -0.06474507004521879,
+            "2022": -0.06785987406108074,
+            "2024": -0.059827414278413205
+          }
+        }
+      },
+      "winners": [
+        "state_space_process_sd_0_5"
+      ],
+      "selected_name": "state_space_process_sd_0_5",
+      "selected_config": {
+        "fund_pull": 0.35,
+        "flat_prior": false,
+        "process_sd_per_sqrt_day": 0.5
+      }
+    },
+    "national_environment": {
+      "reference": "ridge_fundamentals",
+      "challengers_scored": {
+        "no_generic_ballot": {
+          "beats_reference": false,
+          "n_beats_reference": 1,
+          "n_folds": 4,
+          "deltas_reference_minus_challenger": {
+            "2018": -0.6579632395431867,
+            "2020": -0.7513062639482158,
+            "2022": 0.8869223065706091,
+            "2024": -0.020305073217331326
+          }
+        },
+        "no_approval": {
+          "beats_reference": true,
+          "n_beats_reference": 2,
+          "n_folds": 4,
+          "deltas_reference_minus_challenger": {
+            "2018": 0.2093988180978421,
+            "2020": -0.06420435370218058,
+            "2022": 1.0237679684773866,
+            "2024": -0.0015932764298902669
+          }
+        },
+        "no_midterm_outparty": {
+          "beats_reference": true,
+          "n_beats_reference": 2,
+          "n_folds": 4,
+          "deltas_reference_minus_challenger": {
+            "2018": -0.36388273464220067,
+            "2020": -0.04713513387062562,
+            "2022": 1.2205971036340113,
+            "2024": 0.01456287460375627
+          }
+        },
+        "no_income_economic": {
+          "beats_reference": true,
+          "n_beats_reference": 3,
+          "n_folds": 4,
+          "deltas_reference_minus_challenger": {
+            "2018": 0.18307469930666986,
+            "2020": -0.03778911244801275,
+            "2022": 1.0388719939674171,
+            "2024": 0.007312579711813427
+          }
+        }
+      },
+      "winners": [
+        "no_approval",
+        "no_midterm_outparty",
+        "no_income_economic"
+      ],
+      "selected_name": "no_approval_no_income_economic_no_midterm_outparty",
+      "selected_config": {
+        "generic_ballot_enabled": true,
+        "approval_enabled": false,
+        "midterm_outparty_enabled": false,
+        "income_enabled": false
+      }
+    },
+    "note": "Majority-vote rule: challenger beats reference when it achieves lower CRPS on \u2265 ceil((n_folds+1)/2) outer folds. Reference is retained when no challenger wins."
+  },
+  "code_commit_sha": "199243385cc41ddf0fcbfda710e364512f1ce415",
   "production_research_eligible": false,
   "next_required_phase": "canonical_poll_structure",
   "ordinary_statistical_only": true,
-  "ordinary_statistical_spec_sha256": "2334c348ea86704d0eeb15c36aa1309dd503545fa971576b8d4529d1021e8f29",
-  "spec_sha256": "5ada4ecc12ed4e82772ab2ebaac51446b2f01716f91377c7424c37ec58df029c"
+  "ordinary_statistical_spec_sha256": "6f6e38d9a370a0055131e615586d7258b9cdd1c30cbfe9818d1d100173a7f558",
+  "spec_sha256": "6d19f4316dbba43c811164eea7aa22ce4ca034a93fd92723aadf87aeeebec4df"
 }

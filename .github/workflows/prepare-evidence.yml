@@ -46,6 +46,9 @@ jobs:
           python-version: "3.11"
           cache: pip
 
+      - name: Hydrate versioned large research artifacts
+        run: python -m midterms.ops.large_artifacts hydrate
+
       - name: Install supported project dependencies
         run: pip install -e ".[dev]"
 

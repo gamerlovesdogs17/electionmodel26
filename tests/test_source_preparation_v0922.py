@@ -239,6 +239,10 @@ def test_workflow_has_two_stage_lineage_and_fail_closed_order():
     assert "refresh-safe" not in expensive
     assert "if: always()" in rebuild
     assert rebuild.index("acceptance-gates --strict") < rebuild.index("Commit successful model artifacts")
+    assert "python -m midterms.ops.git_push" in rebuild
+    assert "--expected-remote-sha" in rebuild
+    assert "python -m midterms.ops.large_artifacts pack" in rebuild
+    assert rebuild.count("python -m midterms.ops.large_artifacts hydrate") == 3
     assert "if: needs.rebuild.result == 'success'" in rebuild
     assert "workflow_dispatch:" in prepare
     assert "publish-live" not in rebuild and "publish-live" not in prepare

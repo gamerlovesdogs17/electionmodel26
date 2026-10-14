@@ -1,17 +1,17 @@
 {
   "schema_version": "validated-model-spec-v2",
-  "model_version": "senate-hierarchical-v0.9.23",
+  "model_version": "senate-hierarchical-v0.9.25",
   "status": "validated_research_model",
-  "evidence_bundle_id": "eb-19f9ccea0cc3812a",
-  "evidence_bundle_sha256": "19f9ccea0cc3812a6819b559321c2e6c7e38ed9c5ebe0336ebbf7748c67e6690",
-  "source_readiness_sha256": "acebd18ee0f8c986593191fb3b174babcac670b7463375127f9d6f15a1a23cbd",
-  "candidate_spec_sha256": "45f9f0d2ad559e1b651cac35733e0bc12ab4b9a506b7ba0aaae1b476011691f3",
-  "poll_structure_selection_sha256": "ec5253a40cd4d72bacdae559884a6b0a8aeb59257b8fedd83ceb11a9e5df76f1",
-  "selected_structure_id": "hier_plus_questionnaire_effect",
+  "evidence_bundle_id": "eb-dcb6d43248b5fcc9",
+  "evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
+  "source_readiness_sha256": "c5e19b7b95c40da2fe99b6040c1f75e136ec3fa75c29e7331ac60de0b80932f4",
+  "candidate_spec_sha256": "f1a15af6bfcaa5bf848871fdecfdabf29143c082b570c1b8907a6ed257f59200",
+  "poll_structure_selection_sha256": "9f66fd1c7203a0f903b00c2e93c99a75f62f9542c951fdfe91bb2fd2fe620cc6",
+  "selected_structure_id": "pymc",
   "selected_poll_structure": {
     "version": "poll-structure-v2",
     "sponsor_effect": false,
-    "questionnaire_effect": true,
+    "questionnaire_effect": false,
     "study_effect": false,
     "heuristic_study_downweight": null,
     "sponsor_scale": 0.75,
@@ -19,18 +19,18 @@
     "study_scale": 1.25,
     "effective_heuristic_study_downweight": true
   },
-  "selected_poll_structure_id": "psc-5035810fb1f3d5e7",
-  "canonical_oof_sha256": "61e51a77e4a02da28ba45fd2c2aead5af023a8e09b588138f2bf5d164bc3bd71",
-  "canonical_frozen_draws_sha256": "439a39f53ce9cdfb52a97f8f729384f9c9560881b2b92b14b428db15ee48e1ca",
-  "stack_weights_sha256": "c4d4ab0e1ca88a45eede52d2ecae8b10ee1ad0fe3851776bb6a76131baa21110",
+  "selected_poll_structure_id": "psc-7819fcedea982286",
+  "canonical_oof_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
+  "canonical_frozen_draws_sha256": "80c529b7cd9849570851e83a6db2a0601b6bd44f4da4865f2cb7804ebf2efcca",
+  "stack_weights_sha256": "27de10c442a22aca3327818740d5b8628e7580d19369a0bee0ff7960825a9b30",
   "stack_candidate_identities": [
     "pymc",
     "state_space"
   ],
-  "uncertainty_calibration_sha256": "3b82b2b2d037ca55c6d948af2787f055a9a6cfde39d26ef073fb89d0700d99f5",
+  "uncertainty_calibration_sha256": "dea7a2fdb53af014b7123467137baa228dc8a0095633e53793a2f05e0d8d1a99",
   "exceptional_model_lineage": {
     "schema_version": "exceptional-model-lineage-v1",
-    "model_version": "senate-hierarchical-v0.9.23",
+    "model_version": "senate-hierarchical-v0.9.25",
     "exceptional_models": {
       "binary_non_major": {
         "adapter_spec_version": "binary-non-major-adapter-v2",
@@ -46,8 +46,8 @@
         },
         "implementation_spec_sha256": "3a5700243d139946453cd75bc153ace4fe06058a5e9932a0a8b9b3f1293f40f9",
         "validation_classification": "limited_validation_exception_model",
-        "validation_sha256": "526d7b73f44bc6f0c0beb3012c9df295720e14b7e8e8d95e15372efa0280aca0",
-        "validation_artifact_sha256": "a96ac9272ade016e7e91d0021466074af19aa54af1329a2e6688505dd5a178f0",
+        "validation_sha256": "aca1bab7d3cffd09105619c63e44539b74073816ee1250e724342f2cbc9ebca0",
+        "validation_artifact_sha256": "3f0790be1a6fad8acfe77ea1e89f971a4c77e76707823e6b71d6f05ad27254b0",
         "selected_prior_id": "state_structural_very_large",
         "selected_prior": {
           "id": "state_structural_very_large",
@@ -63,7 +63,6 @@
         "target": "modeled_candidate_margin",
         "race_ids": [
           "senate-2026-ID",
-          "senate-2026-MT",
           "senate-2026-NE",
           "senate-2026-SD"
         ],
@@ -92,11 +91,11 @@
         },
         "implementation_spec_sha256": "74ee9d513833d16bd5d523a5666f648c260c1bd4bbfd63a424834738a994cb8b",
         "validation_classification": "limited_validation_alaska_rcv_model",
-        "validation_sha256": "68117cd3f34bf8399b7ac732845d39722352324422a2561fc59b72ffa2ab3aab",
-        "validation_artifact_sha256": "6eaa4d215c927783339ddb7dc335ec3b42f4c2bdc30ba3e7b59136c139dd96b4",
+        "validation_sha256": "8ac49d4ffc62f9d28a6ddfa2863a2bbbad8432ccce3853f3c54eb64fc4406acc",
+        "validation_artifact_sha256": "a892ca516554cef0720aa8e6a9fa536b7a36b4b2d6e4eeaf2be77c7dc881438e",
         "source_manifest_sha256": "5c80c8ff593c8b3b1a2232941e63385eb593fbfd6a2d1c4dc2b74fd10a38689a",
         "source_semantic_sha256": "8c5fa884fe8e1cbb39c528511d36a1c064b0a8d48f6794b3144dd46b8726cf43",
-        "candidate_registry_sha256": "78f319e7283db73a7302ea58ff13971df8e867088590839416dca43fa2dd956e",
+        "candidate_registry_sha256": "8f93599be1acd4f4624909e5049835110cc9b9e57d9ba467e6e1c46ea3f3a545",
         "candidate_field_ids": [
           "senate-2026-AK:dan-s-sullivan",
           "senate-2026-AK:daniel-j-sullivan-jr",
@@ -116,21 +115,48 @@
         "ordinary_oof_validates_adapter": false,
         "special_house_actual_winner_frequency": 0.004,
         "special_house_weak_diagnostic_visible": true
+      },
+      "multiway_plurality": {
+        "classification": "insufficient_scorable_historical_multiway_poll_cases",
+        "probability_model_support_status": "unsupported",
+        "activates_forecast_probabilities": false,
+        "n_scorable_cases": 0,
+        "n_materially_multiway_analogs": 10,
+        "artifact_sha256": "5fadd18881eb930ac68752a205d6e0ce3d5eab888980f8ac7d74ef7295f48c2d",
+        "document_sha256": "3f3cc9718d22c4ae2b8a14ab4497ca787c6c9415f9985f3c7315630b7294fe0a",
+        "adapter_specification": {
+          "adapter_spec_version": "multiway-plurality-adapter-v1",
+          "method": "limited_validation_multiway_plurality_model-v1",
+          "modeling_path": "multiway_plurality_adapter",
+          "contest_structure": "multiway_plurality",
+          "target": "candidate_share_draws_and_plurality_winner",
+          "poll_question_schema": "multiway-poll-question-class-v1",
+          "candidate_share_schema": "poll-candidate-shares-v1",
+          "prior_concentration": 4.0,
+          "poll_error_floor": 0.04,
+          "common_shock_strength": 0.08,
+          "heavy_tail_df": 5.0,
+          "binary_poll_treatment": "ignored_not_translated_to_shares",
+          "unknown_caucus_policy": "fail_closed_draw_level_unknown_caucus",
+          "activation_requires": "scorable_historical_multiway_poll_validation"
+        },
+        "ordinary_oof_touched": false
       }
     },
     "forecast_coverage": {
-      "artifact_sha256": "c81eadd2e7f5cedbfdb3bdc29f6c546257d3406e6555b0b4ec6eef7104d5f9e4",
-      "document_sha256": "bd01ff8f1f128e482e231332ff2b19c2bddd91051cf5790e3dedc4d994a2c208",
-      "as_of": "2026-10-05",
+      "artifact_sha256": "a5688bae87c1ddd09ae1280111e134071e5591506535f683849022632884fe64",
+      "document_sha256": "b80eb03c9945264d21fb161b91d66f00c1c2a35ed26f21890ae39d2a96b9d97e",
+      "as_of": "2026-10-10",
       "summary": {
         "n_races": 35,
-        "n_pass": 20,
-        "n_warning": 15,
-        "n_fail": 0,
+        "n_pass": 21,
+        "n_warning": 13,
+        "n_fail": 1,
         "n_evidence_fail": 0,
         "evidence_ready": true,
-        "forecast_complete": true,
-        "source_and_model_coverage_separated": true
+        "forecast_complete": false,
+        "source_and_model_coverage_separated": true,
+        "n_fail_closed_multiway": 1
       },
       "active_race_ids": [
         "senate-2026-AK",
@@ -188,7 +214,7 @@
         "senate-2026-MI": "ordinary_stack",
         "senate-2026-MN": "ordinary_stack",
         "senate-2026-MS": "ordinary_stack",
-        "senate-2026-MT": "binary_non_major_adapter",
+        "senate-2026-MT": "multiway_plurality_adapter",
         "senate-2026-NC": "ordinary_stack",
         "senate-2026-NE": "binary_non_major_adapter",
         "senate-2026-NH": "ordinary_stack",
@@ -210,14 +236,14 @@
     "historical_evidence_equivalence": {
       "classification": "historically_equivalent",
       "formal_cutoffs_equivalent": 8,
-      "comparison_sha256": "2a5d316d484ab88e57fada8c0a125b1c99716b4e672ffeaebdc5164bc83254fc",
-      "document_sha256": "dfff76b1de665932d25d9c9c6022161659b8660c5505b1787028632b8444fbb0",
+      "comparison_sha256": "ef4b02c9d989840de7c4c02d8238f46f3cfcf5dc1859897391754d8a58448be7",
+      "document_sha256": "7391cea496aa8b7a5e5aa62fdea75b32bde03617638ea46f23161e99e23ae9bb",
       "ordinary_only": true,
       "exceptional_models_validated_separately": true
     },
-    "lineage_sha256": "be47d4601ed1f3e88ddf409cc3bcee18c572f309ed23967e7d3a30bdb9aafd13"
+    "lineage_sha256": "2e595f980b6a84309156357ae2759045762fd8185300ae0ad8d6bb2b54fe2262"
   },
-  "exceptional_model_lineage_sha256": "be47d4601ed1f3e88ddf409cc3bcee18c572f309ed23967e7d3a30bdb9aafd13",
+  "exceptional_model_lineage_sha256": "2e595f980b6a84309156357ae2759045762fd8185300ae0ad8d6bb2b54fe2262",
   "exceptional_models": {
     "binary_non_major": {
       "adapter_spec_version": "binary-non-major-adapter-v2",
@@ -233,8 +259,8 @@
       },
       "implementation_spec_sha256": "3a5700243d139946453cd75bc153ace4fe06058a5e9932a0a8b9b3f1293f40f9",
       "validation_classification": "limited_validation_exception_model",
-      "validation_sha256": "526d7b73f44bc6f0c0beb3012c9df295720e14b7e8e8d95e15372efa0280aca0",
-      "validation_artifact_sha256": "a96ac9272ade016e7e91d0021466074af19aa54af1329a2e6688505dd5a178f0",
+      "validation_sha256": "aca1bab7d3cffd09105619c63e44539b74073816ee1250e724342f2cbc9ebca0",
+      "validation_artifact_sha256": "3f0790be1a6fad8acfe77ea1e89f971a4c77e76707823e6b71d6f05ad27254b0",
       "selected_prior_id": "state_structural_very_large",
       "selected_prior": {
         "id": "state_structural_very_large",
@@ -250,7 +276,6 @@
       "target": "modeled_candidate_margin",
       "race_ids": [
         "senate-2026-ID",
-        "senate-2026-MT",
         "senate-2026-NE",
         "senate-2026-SD"
       ],
@@ -279,11 +304,11 @@
       },
       "implementation_spec_sha256": "74ee9d513833d16bd5d523a5666f648c260c1bd4bbfd63a424834738a994cb8b",
       "validation_classification": "limited_validation_alaska_rcv_model",
-      "validation_sha256": "68117cd3f34bf8399b7ac732845d39722352324422a2561fc59b72ffa2ab3aab",
-      "validation_artifact_sha256": "6eaa4d215c927783339ddb7dc335ec3b42f4c2bdc30ba3e7b59136c139dd96b4",
+      "validation_sha256": "8ac49d4ffc62f9d28a6ddfa2863a2bbbad8432ccce3853f3c54eb64fc4406acc",
+      "validation_artifact_sha256": "a892ca516554cef0720aa8e6a9fa536b7a36b4b2d6e4eeaf2be77c7dc881438e",
       "source_manifest_sha256": "5c80c8ff593c8b3b1a2232941e63385eb593fbfd6a2d1c4dc2b74fd10a38689a",
       "source_semantic_sha256": "8c5fa884fe8e1cbb39c528511d36a1c064b0a8d48f6794b3144dd46b8726cf43",
-      "candidate_registry_sha256": "78f319e7283db73a7302ea58ff13971df8e867088590839416dca43fa2dd956e",
+      "candidate_registry_sha256": "8f93599be1acd4f4624909e5049835110cc9b9e57d9ba467e6e1c46ea3f3a545",
       "candidate_field_ids": [
         "senate-2026-AK:dan-s-sullivan",
         "senate-2026-AK:daniel-j-sullivan-jr",
@@ -303,21 +328,48 @@
       "ordinary_oof_validates_adapter": false,
       "special_house_actual_winner_frequency": 0.004,
       "special_house_weak_diagnostic_visible": true
+    },
+    "multiway_plurality": {
+      "classification": "insufficient_scorable_historical_multiway_poll_cases",
+      "probability_model_support_status": "unsupported",
+      "activates_forecast_probabilities": false,
+      "n_scorable_cases": 0,
+      "n_materially_multiway_analogs": 10,
+      "artifact_sha256": "5fadd18881eb930ac68752a205d6e0ce3d5eab888980f8ac7d74ef7295f48c2d",
+      "document_sha256": "3f3cc9718d22c4ae2b8a14ab4497ca787c6c9415f9985f3c7315630b7294fe0a",
+      "adapter_specification": {
+        "adapter_spec_version": "multiway-plurality-adapter-v1",
+        "method": "limited_validation_multiway_plurality_model-v1",
+        "modeling_path": "multiway_plurality_adapter",
+        "contest_structure": "multiway_plurality",
+        "target": "candidate_share_draws_and_plurality_winner",
+        "poll_question_schema": "multiway-poll-question-class-v1",
+        "candidate_share_schema": "poll-candidate-shares-v1",
+        "prior_concentration": 4.0,
+        "poll_error_floor": 0.04,
+        "common_shock_strength": 0.08,
+        "heavy_tail_df": 5.0,
+        "binary_poll_treatment": "ignored_not_translated_to_shares",
+        "unknown_caucus_policy": "fail_closed_draw_level_unknown_caucus",
+        "activation_requires": "scorable_historical_multiway_poll_validation"
+      },
+      "ordinary_oof_touched": false
     }
   },
   "forecast_coverage_lineage": {
-    "artifact_sha256": "c81eadd2e7f5cedbfdb3bdc29f6c546257d3406e6555b0b4ec6eef7104d5f9e4",
-    "document_sha256": "bd01ff8f1f128e482e231332ff2b19c2bddd91051cf5790e3dedc4d994a2c208",
-    "as_of": "2026-10-05",
+    "artifact_sha256": "a5688bae87c1ddd09ae1280111e134071e5591506535f683849022632884fe64",
+    "document_sha256": "b80eb03c9945264d21fb161b91d66f00c1c2a35ed26f21890ae39d2a96b9d97e",
+    "as_of": "2026-10-10",
     "summary": {
       "n_races": 35,
-      "n_pass": 20,
-      "n_warning": 15,
-      "n_fail": 0,
+      "n_pass": 21,
+      "n_warning": 13,
+      "n_fail": 1,
       "n_evidence_fail": 0,
       "evidence_ready": true,
-      "forecast_complete": true,
-      "source_and_model_coverage_separated": true
+      "forecast_complete": false,
+      "source_and_model_coverage_separated": true,
+      "n_fail_closed_multiway": 1
     },
     "active_race_ids": [
       "senate-2026-AK",
@@ -375,7 +427,7 @@
       "senate-2026-MI": "ordinary_stack",
       "senate-2026-MN": "ordinary_stack",
       "senate-2026-MS": "ordinary_stack",
-      "senate-2026-MT": "binary_non_major_adapter",
+      "senate-2026-MT": "multiway_plurality_adapter",
       "senate-2026-NC": "ordinary_stack",
       "senate-2026-NE": "binary_non_major_adapter",
       "senate-2026-NH": "ordinary_stack",
@@ -397,8 +449,8 @@
   "historical_evidence_equivalence_lineage": {
     "classification": "historically_equivalent",
     "formal_cutoffs_equivalent": 8,
-    "comparison_sha256": "2a5d316d484ab88e57fada8c0a125b1c99716b4e672ffeaebdc5164bc83254fc",
-    "document_sha256": "dfff76b1de665932d25d9c9c6022161659b8660c5505b1787028632b8444fbb0",
+    "comparison_sha256": "ef4b02c9d989840de7c4c02d8238f46f3cfcf5dc1859897391754d8a58448be7",
+    "document_sha256": "7391cea496aa8b7a5e5aa62fdea75b32bde03617638ea46f23161e99e23ae9bb",
     "ordinary_only": true,
     "exceptional_models_validated_separately": true
   },
@@ -415,9 +467,9 @@
   "historical_structural_feature_schema": "historical-structural-features-v1",
   "structural_feature_enables": {
     "similarity_terminal": true,
-    "terminal_race": false
+    "terminal_race": true
   },
-  "code_commit_sha": "8c7c03c9793593fe06929c689fd22bc49cf8039f",
+  "code_commit_sha": "85ec48e01dde6e52a0a2f366a2a934261b434014",
   "lineage_checks": {
     "canonical_model_version": true,
     "canonical_phase": true,
@@ -440,5 +492,5 @@
     "historical_evidence_equivalent": true
   },
   "production_research_eligible": true,
-  "spec_sha256": "05af5a5e4c079b9cc5d78d3dbd4a346e0b06de73c7ce0eb64b04231c1e1995c3"
+  "spec_sha256": "689b8ffc32f375f219f2189c0afbb713ee9da6b157d22db4ebd557fedad7d1ff"
 }

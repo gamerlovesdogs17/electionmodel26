@@ -2,6 +2,23 @@
   "audit_item": "P2.2",
   "temperature": 0.75,
   "stacking_mode": "empirical_predictive_mixture_crps_v1",
+  "excluded_specification_challengers": [
+    "hier_no_questionnaire_effect",
+    "hier_no_similarity",
+    "hier_no_sponsor_effect",
+    "hier_no_study_effect",
+    "hier_no_terminal_race",
+    "hier_plus_questionnaire_effect",
+    "hier_plus_sponsor_effect",
+    "hier_plus_study_effect",
+    "no_approval",
+    "no_generic_ballot",
+    "no_income_economic",
+    "no_midterm_outparty",
+    "state_space_no_ed_fund_repull",
+    "state_space_process_sd_0_5",
+    "state_space_process_sd_1_2"
+  ],
   "excluded_structural": [
     "hier_no_questionnaire_effect",
     "hier_no_similarity",
@@ -10,7 +27,14 @@
     "hier_no_terminal_race",
     "hier_plus_questionnaire_effect",
     "hier_plus_sponsor_effect",
-    "hier_plus_study_effect"
+    "hier_plus_study_effect",
+    "no_approval",
+    "no_generic_ballot",
+    "no_income_economic",
+    "no_midterm_outparty",
+    "state_space_no_ed_fund_repull",
+    "state_space_process_sd_0_5",
+    "state_space_process_sd_1_2"
   ],
   "excluded_g8_disable": [
     "equal_weight_polls",
@@ -24,64 +48,64 @@
   "excluded_missing_predictions": {},
   "filtered_crps_by_fold": {
     "2018": {
-      "pymc": 2.9587116728603657,
-      "state_space": 2.877461892330874
+      "pymc": 3.0390920829945403,
+      "state_space": 3.293063274087402
     },
     "2020": {
-      "pymc": 4.382435804921949,
-      "state_space": 3.2745837291309994
+      "pymc": 4.25933830870377,
+      "state_space": 3.3951183615585165
     },
     "2022": {
-      "pymc": 4.2939471147892005,
-      "state_space": 4.193876848476037
+      "pymc": 4.209494460880517,
+      "state_space": 4.33212112476321
     },
     "2024": {
-      "pymc": 3.0420271249055757,
-      "state_space": 2.7804275891981627
+      "pymc": 2.960952809569116,
+      "state_space": 2.755749157349247
     }
   },
   "diagnostic_mean_crps_by_candidate": {
-    "pymc": 3.669280429369273,
-    "state_space": 3.281587514784018
+    "state_space": 3.444012979439594,
+    "pymc": 3.617219415536986
   },
   "stack_weights": {
-    "pymc": 0.2616683595737922,
-    "state_space": 0.7383316404262078
+    "pymc": 0.40728888502473914,
+    "state_space": 0.5927111149752609
   },
   "stack_weights_production": {
-    "pymc": 0.2616683595737922,
-    "state_space": 0.7383316404262078
+    "pymc": 0.40728888502473914,
+    "state_space": 0.5927111149752609
   },
   "diagnostic_score_softmax_loo": {
     "2018": {
-      "pymc": 0.3422866093933608,
-      "state_space": 0.6577133906066392
+      "pymc": 0.3963256588812008,
+      "state_space": 0.6036743411187991
     },
     "2020": {
-      "pymc": 0.45094502228205186,
-      "state_space": 0.5490549777179481
+      "pymc": 0.519034596919673,
+      "state_space": 0.4809654030803269
     },
     "2022": {
-      "pymc": 0.34417219249051983,
-      "state_space": 0.6558278075094802
+      "pymc": 0.41037308197866484,
+      "state_space": 0.5896269180213352
     },
     "2024": {
-      "pymc": 0.3605528590274318,
-      "state_space": 0.6394471409725683
+      "pymc": 0.4460308374952806,
+      "state_space": 0.5539691625047194
     }
   },
-  "matrix_sha256": "306c825ea99f9f2d4bf9c422f7ad02c9cda9bab18af23d685b41af62b0c12caf",
-  "prediction_sha256": "c7780a006c10d4e62294f615b41133d0a4967bb21c7285724af4128321bcea58",
+  "matrix_sha256": "74526fcca913c1cd5d9b5ae004009ec992c11561d1bb43bcaff273e8271c6f46",
+  "prediction_sha256": "f92ae2d99c0533c7efdebe27f2db5406a490119415885ca2de3d9b2bff8c49af",
   "mixture_diagnostics": {
     "method": "empirical_predictive_mixture_crps_v1",
     "weights": {
-      "pymc": 0.2616683595737922,
-      "state_space": 0.7383316404262078
+      "pymc": 0.40728888502473914,
+      "state_space": 0.5927111149752609
     },
-    "objective_crps": 3.2349152730446664,
+    "objective_crps": 3.3074784870771667,
     "individual_crps": {
-      "pymc": 3.676088709800408,
-      "state_space": 3.2903279101589993
+      "pymc": 3.6201445025134555,
+      "state_space": 3.4551169967503386
     },
     "n_complete_cases": 260,
     "case_ids": [
@@ -878,7 +902,7 @@
     },
     "seed": 21,
     "max_draws": 128,
-    "prediction_sha256": "c7780a006c10d4e62294f615b41133d0a4967bb21c7285724af4128321bcea58"
+    "prediction_sha256": "f92ae2d99c0533c7efdebe27f2db5406a490119415885ca2de3d9b2bff8c49af"
   },
   "optimizer_seed": 21,
   "optimizer_max_draws": 128,
@@ -886,7 +910,7 @@
   "predictive_stack_fn": "midterms.model.empirical_mixture.fit_predictive_mixture",
   "note": "Production weights use frozen empirical draws; score softmax is diagnostic only.",
   "source_nested_loo": "data/artifacts/nested_component_loo_canonical.json",
-  "source_nested_sha256": "61e51a77e4a02da28ba45fd2c2aead5af023a8e09b588138f2bf5d164bc3bd71",
+  "source_nested_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
   "source_spine_label": "pymc",
   "source_hierarchical_method": "pymc",
   "source_years": [
@@ -931,18 +955,18 @@
       "30": "fa2602dedb4d49d65ee1b8ea0eeb0c9d232442dec727cedab75286c057d0772b"
     }
   },
-  "source_frozen_index_sha256": "65e1cd88a8a14fd991baaad4ad19b3bba1d6a0655f1b83652298f1ec50819b23",
+  "source_frozen_index_sha256": "22f9215970775e2b5db2cf7dc8cce2dff21019572a4d1c0943b7ae685a4ae537",
   "source_frozen_index_hash_mode": "frozen_prediction_index_semantic_v1",
-  "source_frozen_index_semantic_sha256": "d2e33b7d0b5bb037251d1977ae78cb86b8015f3cf8c51989f1f5cc7d97e79e76",
-  "source_model_version": "senate-hierarchical-v0.9.23",
-  "source_evidence_bundle_id": "eb-19f9ccea0cc3812a",
-  "source_evidence_bundle_sha256": "19f9ccea0cc3812a6819b559321c2e6c7e38ed9c5ebe0336ebbf7748c67e6690",
+  "source_frozen_index_semantic_sha256": "d0f80f3ee3d873446ec782b655f944680d2a1dc45e518bf596e4f27472c1e6d1",
+  "source_model_version": "senate-hierarchical-v0.9.25",
+  "source_evidence_bundle_id": "eb-dcb6d43248b5fcc9",
+  "source_evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
   "source_stack_training_protocol": "formal_60_30_v1",
   "source_validation_phase": "canonical_poll_structure",
   "source_poll_structure_config": {
     "version": "poll-structure-v2",
     "sponsor_effect": false,
-    "questionnaire_effect": true,
+    "questionnaire_effect": false,
     "study_effect": false,
     "heuristic_study_downweight": null,
     "sponsor_scale": 0.75,
@@ -950,8 +974,8 @@
     "study_scale": 1.25,
     "effective_heuristic_study_downweight": true
   },
-  "source_poll_structure_config_id": "psc-5035810fb1f3d5e7",
-  "source_model_spec_candidate_sha256": "45f9f0d2ad559e1b651cac35733e0bc12ab4b9a506b7ba0aaae1b476011691f3",
+  "source_poll_structure_config_id": "psc-7819fcedea982286",
+  "source_model_spec_candidate_sha256": "f1a15af6bfcaa5bf848871fdecfdabf29143c082b570c1b8907a6ed257f59200",
   "reproduction": {
     "ok": true,
     "max_abs_weight_delta": 0.0,
@@ -959,12 +983,12 @@
     "prediction_fingerprint_ok": true,
     "prediction_error": null,
     "recomputed": {
-      "pymc": 0.2616683595737922,
-      "state_space": 0.7383316404262078
+      "pymc": 0.40728888502473914,
+      "state_space": 0.5927111149752609
     },
     "stored": {
-      "pymc": 0.2616683595737922,
-      "state_space": 0.7383316404262078
+      "pymc": 0.40728888502473914,
+      "state_space": 0.5927111149752609
     }
   },
   "path": "data/artifacts/stack_weights_oof.json"

@@ -1,0 +1,47 @@
+{
+  "identity_schema_version": "release-identity-v2",
+  "release_id": "truth_v1_v0.9.25_eb-dcb6d43248b5fcc9",
+  "model_version": "senate-hierarchical-v0.9.25",
+  "generated_at": "2026-10-13T20:59:37.780554+00:00",
+  "code_commit": "85ec48e01dde6e52a0a2f366a2a934261b434014",
+  "seal_source_commit": "85ec48e01dde6e52a0a2f366a2a934261b434014",
+  "PUBLIC_LIVE_ENABLED": false,
+  "publication_surface": "research_only",
+  "schema_version": "truth_v1",
+  "data_hashes": {
+    "official_senate_ledger.json": "c98009168e6345e3822056a8009a09698e932fb95263ce4b27078488aa556598",
+    "independent_chamber_expectations.json": "242f4b4a1c89d391f39a5685af5564c2d14dfbdacdaff64c9904c259d77e7f76",
+    "fte_senate.csv": "26a7d8cf3baaa1caf5706b9e23586b449fcc78b11bd1f03c72d02ea3f3faac05"
+  },
+  "data_hash_modes": {
+    "official_senate_ledger.json": "canonical_json_sha256_v1",
+    "independent_chamber_expectations.json": "canonical_json_sha256_v1",
+    "fte_senate.csv": "raw_sha256_v1"
+  },
+  "lineage": {
+    "model_version": "senate-hierarchical-v0.9.25",
+    "validated_model_spec_sha256": "689b8ffc32f375f219f2189c0afbb713ee9da6b157d22db4ebd557fedad7d1ff",
+    "evidence_bundle_id": "eb-dcb6d43248b5fcc9",
+    "evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
+    "source_readiness_sha256": "c5e19b7b95c40da2fe99b6040c1f75e136ec3fa75c29e7331ac60de0b80932f4",
+    "selected_structure_id": "pymc",
+    "selected_poll_structure_id": "psc-7819fcedea982286",
+    "canonical_oof_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
+    "canonical_frozen_draws_sha256": "80c529b7cd9849570851e83a6db2a0601b6bd44f4da4865f2cb7804ebf2efcca",
+    "stack_weights_sha256": "27de10c442a22aca3327818740d5b8628e7580d19369a0bee0ff7960825a9b30",
+    "uncertainty_calibration_sha256": "dea7a2fdb53af014b7123467137baa228dc8a0095633e53793a2f05e0d8d1a99",
+    "exceptional_model_lineage_sha256": "2e595f980b6a84309156357ae2759045762fd8185300ae0ad8d6bb2b54fe2262",
+    "binary_non_major_validation_sha256": "aca1bab7d3cffd09105619c63e44539b74073816ee1250e724342f2cbc9ebca0",
+    "alaska_rcv_validation_sha256": "8ac49d4ffc62f9d28a6ddfa2863a2bbbad8432ccce3853f3c54eb64fc4406acc",
+    "validated_code_commit": "85ec48e01dde6e52a0a2f366a2a934261b434014"
+  },
+  "config": {
+    "MODEL_VERSION": "senate-hierarchical-v0.9.25",
+    "PUBLIC_LIVE_ENABLED": false
+  },
+  "notes": [
+    "Immutable current-model release identity; historical version seals are retained.",
+    "JSON truth inputs use canonical semantic hashes; binary/text source archives keep explicit raw hashes.",
+    "Forecast-run reproducibility is verified separately by G10 lite and independent rebuild checks."
+  ]
+}

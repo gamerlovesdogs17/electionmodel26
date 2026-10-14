@@ -1,29 +1,29 @@
 {
-  "run_id": "senate-2026_2026-10-05_ensemble_stack_43f06d4b6b_20260901",
-  "model_version": "senate-hierarchical-v0.9.23",
-  "snapshot_id": "a359430ff1fb4dae6e8a81bc77a62dbc332041dbc14a94f5cec23cdb86f92cae",
+  "run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
+  "model_version": "senate-hierarchical-v0.9.25",
+  "snapshot_id": "56edc33e21722cb1561b9dea39747d3940ae02fabe9a7051a40dfc1f5e6ed06e",
   "evidence_fingerprint": {
-    "sha256": "0a732cc77040d227b552920ec248258920efa265a025728903c95f0893bf371a",
+    "sha256": "0f39c976163851e634fc8791ef2f7052601f9342beec8dcd6226905e9b7836be",
     "manifests": {
       "fundraising_shares.json": "402cec51d741875fe238d02039760c62f2c611848d5fe31edb3f1fba2a181905",
       "economics_vintages.json": "565f2a4b280d9d80f4ebed0efeecef8a1b49a362e6381a2afb2cc7441c51ecca",
-      "pres_approval.json": "263f0dc0d365b5e8cf2f3940c7259f0fee67f6c42c2cee277aa7cb8c461ded27",
+      "pres_approval.json": "d95738bb6529c4a8c9099d36546be79bab1e5584725b6341a8d447b4a6e18dea",
       "demographic_vintages.json": "e8be3309a8ed8626010b81cc1ce646d950ccaf32b3ad662a964d0fe086d53690",
       "candidate_timeline.json": "22eceda5c4dbba75e448439b1b7cfb6b1523b60c69edcf8d1dac006160732d91",
       "expert_ratings.json": "626aba81604531c17b221c41165c3cff6cb35ea4c9fd613672fdfc1da5b08ad6",
       "markets_kalshi.json": "495734f2f1af917ad001828da3f09d1659944a5f627f5a6499c0009beed4721e",
       "official_senate_ballots.json": "060db09678108eda582bbb660a0a31e996dacf9c9b6cf87352fead1f37d61972",
-      "presidential_vote_sources.json": "79acc42079a2e43b2c8c063235a3180113ecf9bc3ea9c56e2027e9fb3d49d2e4",
+      "presidential_vote_sources.json": "92931e92d669934bb9ee793d4273e299b6c93fbacb442ca8fb515968aa2f5e9c",
       "wiki_ratings.json": "130fec70c426abab9027a85f83c930d796c6a523c6edc9aabe40a3942585c4fd",
       "alaska_rcv_sources.json": "a7e246f20675678c0e7ae04f0e2fe0f865a4a47fbcef4af88b78c248612ef2ec"
     },
-    "generated_at": "2026-10-06T03:08:06.229840+00:00"
+    "generated_at": "2026-10-13T20:44:46.821479+00:00"
   },
-  "prior_store_sha256": "18395f9596a2bf614bb7713de489609a52193fd980314d62caeaa05901ff10bc",
+  "prior_store_sha256": "a134fa5b7eec4f815822b46d2deb4867e22b3d569a2529847754e2290ac5a262",
   "market_store_sha256": null,
   "market_audit_sha256": null,
-  "stack_artifact_sha256": "c4d4ab0e1ca88a45eede52d2ecae8b10ee1ad0fe3851776bb6a76131baa21110",
-  "forecast_sha256": "462f89194ab9997c20cfaaea4533cc34a875b012cd0829abf24d9d0a4a484ebe",
+  "stack_artifact_sha256": "27de10c442a22aca3327818740d5b8628e7580d19369a0bee0ff7960825a9b30",
+  "forecast_sha256": "e4b81bf19cbe6d92952028a7cdfd229ad781e84350cd1f6fab938645bdbd9f5b",
   "rows": [
     {
       "subject_id": "senate-2026-AL",
@@ -35,7 +35,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "AL",
         "final_prior": -29.706986866349524,
         "method": "recency_weighted_relative_baseline",
@@ -73,32 +73,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "dc8824b2573f194349f1ce1bf0729d0b1c0333147d5398ded0d87707f7c7115c"
+        "snapshot_sha256": "c71fe711d4669caec299941e868201d4a2268adefe83448f48e3a71ff98f84a0"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -29.61399656838891,
+        "value": -28.702719435791067,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -24.943877707684475,
+        "value": -25.31789595576028,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -24.943877707684475,
+        "value": -25.31789595576028,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.67187121515337,
+        "value": 6.438745037652031,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -106,7 +106,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -127,7 +127,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -148,14 +148,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": -21.82495227124189,
+          "value": -23.25917670662057,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.67187121515337,
+          "value": 6.438745037652031,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -182,7 +182,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 1.9794448350863587,
+      "effective_sample_size": 1.3947143713069725,
       "observation_count": 2,
       "exact_overlay_chain": true
     },
@@ -196,7 +196,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "AR",
         "final_prior": -30.880200904707714,
         "method": "recency_weighted_relative_baseline",
@@ -234,32 +234,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "2566df96af732cf1d181e3cc4bfc4f134cb9c961f93c5c1451d298802d44e631"
+        "snapshot_sha256": "d98af5a5150c2a56dee2ba905cdf0d49364949a9bd2c2a3ceb8753726d42ff75"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -30.944897045611654,
+        "value": -30.033619913013816,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -23.01772767495397,
+        "value": -20.518836887834116,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -23.01772767495397,
+        "value": -20.518836887834116,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.638309538819057,
+        "value": 6.187737234361011,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -267,7 +267,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -288,7 +288,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -309,14 +309,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": -18.63228691568363,
+          "value": -13.64821363390329,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.638309538819057,
+          "value": 6.187737234361011,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -343,8 +343,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 1.0114365733743143,
-      "observation_count": 2,
+      "effective_sample_size": 1.5721134618737422,
+      "observation_count": 3,
       "exact_overlay_chain": true
     },
     {
@@ -357,7 +357,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "CO",
         "final_prior": 11.642347565100934,
         "method": "recency_weighted_relative_baseline",
@@ -395,32 +395,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "4d2d99a119beff380b5b60761af9155c96ac8421fee8fc523d999a0e9cb2b0f2"
+        "snapshot_sha256": "b4fddc4839dbded0764e66ed504bf801f43032745e8f39d27134f16e72408968"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 21.66767594212012,
+        "value": 22.57895307471796,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 21.892276881883088,
+        "value": 22.58467533844301,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 21.892276881883088,
+        "value": 22.58467533844301,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.759411483255442,
+        "value": 7.64363312976066,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -428,7 +428,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -449,7 +449,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -470,7 +470,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.759411483255442,
+          "value": 7.64363312976066,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -511,7 +511,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "DE",
         "final_prior": 15.878222560799424,
         "method": "recency_weighted_relative_baseline",
@@ -549,32 +549,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "33eb1fc756b0669e3a2483f5220bf944608c946c457dba6237b5e4da3a3c20bc"
+        "snapshot_sha256": "bdac0f0846ea3d0f833728ea5e4357b49403ff53f342f7ba49647da5f1a07d6f"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 26.84401929454169,
+        "value": 27.755296427139527,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 25.717687347614635,
+        "value": 25.965345632389194,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 25.717687347614635,
+        "value": 25.965345632389194,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.880824449430419,
+        "value": 7.9112271082294665,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -582,7 +582,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -603,7 +603,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -624,7 +624,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.880824449430419,
+          "value": 7.9112271082294665,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -665,7 +665,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "GA",
         "final_prior": -1.9048561644462052,
         "method": "recency_weighted_relative_baseline",
@@ -703,32 +703,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "b4866ee30792543cbc1c2b19862a3972cb51d1f1faef1ade41e50f49a7f5087d"
+        "snapshot_sha256": "3e749ee8986a4bb12e859bad44e5cb8cc7b0e4b76902ab4acdb62bec0b86df1c"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 7.1241479137450066,
+        "value": 8.035425046342844,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 8.984037182608636,
+        "value": 9.407175510134305,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 8.984037182608636,
+        "value": 9.407175510134305,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.114978568664656,
+        "value": 5.4426042410094295,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -736,7 +736,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -757,7 +757,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -778,14 +778,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 9.4879423496711,
+          "value": 9.566374818068306,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.114978568664656,
+          "value": 5.4426042410094295,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -812,7 +812,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 5.785487674410502,
+      "effective_sample_size": 4.395188550907863,
       "observation_count": 14,
       "exact_overlay_chain": true
     },
@@ -826,7 +826,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "IL",
         "final_prior": 12.68446196171245,
         "method": "recency_weighted_relative_baseline",
@@ -864,32 +864,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "e07db256a08dc7f72149c6bb8c1c1869cd78b6c11eb7a692297b95d3d9d3a60a"
+        "snapshot_sha256": "65a1366df4ab8f6fde1a7f6fa13513c446d2469e82b686f2e889d5ff19046e3b"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 20.38981084977307,
+        "value": 21.30108798237091,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 21.372793205953382,
+        "value": 19.86487779949058,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 21.372793205953382,
+        "value": 19.86487779949058,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.721262039034019,
+        "value": 6.420851060738557,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -897,7 +897,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -918,7 +918,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -938,8 +938,15 @@
           "note": "Adds only within the reference anchor; do not add to stacked core"
         },
         {
+          "name": "weighted_observed_poll_location",
+          "value": 15.294,
+          "kind": "observation_location",
+          "source": "available_poll_evidence",
+          "note": "Descriptive weighted observation; not a standalone posterior effect"
+        },
+        {
           "name": "core_scale",
-          "value": 7.721262039034019,
+          "value": 6.420851060738557,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -966,8 +973,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": null,
-      "observation_count": 0,
+      "effective_sample_size": 1.0,
+      "observation_count": 1,
       "exact_overlay_chain": true
     },
     {
@@ -980,7 +987,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "IA",
         "final_prior": -12.264494934009972,
         "method": "recency_weighted_relative_baseline",
@@ -1018,32 +1025,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "bcc908076209fb967916dabb20996690ac7463b2464b898e4155b709e8ac1d48"
+        "snapshot_sha256": "ea0ebb71b607bf949762dd1bf1cf561c490c1d9716804a2889410a8cd0c940a1"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -8.928882808346225,
+        "value": -8.017605675748385,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -1.9030927235235426,
+        "value": -2.452604119188006,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -1.9030927235235426,
+        "value": -2.452604119188006,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.116904310170345,
+        "value": 5.23243562883826,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1051,7 +1058,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1072,7 +1079,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1093,14 +1100,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 1.3306810412640622,
+          "value": 0.14573826421738445,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.116904310170345,
+          "value": 5.23243562883826,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1127,8 +1134,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 6.789626297936636,
-      "observation_count": 15,
+      "effective_sample_size": 8.671067765357472,
+      "observation_count": 17,
       "exact_overlay_chain": true
     },
     {
@@ -1141,7 +1148,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "KS",
         "final_prior": -16.448522504642227,
         "method": "recency_weighted_relative_baseline",
@@ -1179,32 +1186,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "358990bf4be93d875aaba0a259011b36f1c8f21c0383fd35f41cb6be564eafbb"
+        "snapshot_sha256": "3652b5f9f2ce8897cd383db53941ab5e4c328694ba383f95939443bdac808cdd"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -14.020410889959331,
+        "value": -13.109133757361493,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -4.284560498059327,
+        "value": -4.666250327410514,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -4.284560498059327,
+        "value": -4.666250327410514,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.713187137400749,
+        "value": 6.497654975045741,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1212,7 +1219,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1233,7 +1240,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1254,14 +1261,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 2.133059109822882,
+          "value": 2.1305549438549063,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.713187137400749,
+          "value": 6.497654975045741,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1288,7 +1295,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 2.0094393375036055,
+      "effective_sample_size": 1.9865648090557706,
       "observation_count": 3,
       "exact_overlay_chain": true
     },
@@ -1302,7 +1309,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "KY",
         "final_prior": -29.99741769283254,
         "method": "recency_weighted_relative_baseline",
@@ -1340,32 +1347,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "323ceb32a92e2dc775dd225f6b856ed3d22cc192d5861f59ce5b40276ebe59c9"
+        "snapshot_sha256": "4312f1370712d02d53ec50f19c59465d4e5519693a6962b4ac66e6af42589f80"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -28.340307818219404,
+        "value": -27.429030685621562,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -26.73625805801602,
+        "value": -25.54213820406167,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -26.73625805801602,
+        "value": -25.54213820406167,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.9583649244036945,
+        "value": 7.530570333691573,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1373,7 +1380,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1394,7 +1401,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1415,7 +1422,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.9583649244036945,
+          "value": 7.530570333691573,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1456,7 +1463,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "LA",
         "final_prior": -21.72622858793639,
         "method": "recency_weighted_relative_baseline",
@@ -1494,32 +1501,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "6e6684c0ee6b8b72eb3f2b510800ea5ac0016d733a54d43db5a5551da7b35692"
+        "snapshot_sha256": "48bc34cf7f8cf56f58d694304074e1f6089d948a42395199ae0c36542b5a9487"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -21.151822775620317,
+        "value": -20.24054564302248,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -19.578919081944207,
+        "value": -18.516637091646988,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -19.578919081944207,
+        "value": -18.516637091646988,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.925251598115075,
+        "value": 7.665696582192753,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1527,7 +1534,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1548,7 +1555,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1569,7 +1576,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.925251598115075,
+          "value": 7.665696582192753,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1610,7 +1617,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "ME",
         "final_prior": 7.327423076780814,
         "method": "recency_weighted_relative_baseline",
@@ -1648,32 +1655,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "b69071bca1113487a29f4bb766f469cf102183d0446fa59c6a17f84635b7e1eb"
+        "snapshot_sha256": "2a022c8dbd619d104e3be2d0b440ef3607c6bfecf3f6dd1a54caa34b2126ec7e"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 10.605775545160716,
+        "value": 11.517052677758558,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 3.953338263657943,
+        "value": 4.790011417313552,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 3.953338263657943,
+        "value": 4.790011417313552,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.326644295407069,
+        "value": 5.459330110991961,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1681,7 +1688,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1702,7 +1709,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1723,14 +1730,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 1.3937146136179348,
+          "value": 2.487479935542715,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.326644295407069,
+          "value": 5.459330110991961,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1757,8 +1764,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 8.676349363302846,
-      "observation_count": 11,
+      "effective_sample_size": 10.63341920199057,
+      "observation_count": 13,
       "exact_overlay_chain": true
     },
     {
@@ -1771,7 +1778,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "MA",
         "final_prior": 28.17220451613666,
         "method": "recency_weighted_relative_baseline",
@@ -1809,32 +1816,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "eb259fc7b489a1d9f7814b8b3471edf6f5258d5d80469c5f59c81c63aedacc1d"
+        "snapshot_sha256": "ba36d0919901b1b3fa46cb6421d22f1515dee8e386455c296b4e82f4a047a174"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 37.76121162200204,
+        "value": 38.67248875459988,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 31.04218752537391,
+        "value": 32.34016706940259,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 31.04218752537391,
+        "value": 32.34016706940259,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.393137936232447,
+        "value": 5.899615162966758,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -1842,7 +1849,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1863,7 +1870,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -1884,14 +1891,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 27.844536354868822,
+          "value": 28.972149867517718,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.393137936232447,
+          "value": 5.899615162966758,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -1918,8 +1925,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 3.63064508677941,
-      "observation_count": 9,
+      "effective_sample_size": 3.7938853273950848,
+      "observation_count": 10,
       "exact_overlay_chain": true
     },
     {
@@ -1932,7 +1939,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "MI",
         "final_prior": -0.5311972801374288,
         "method": "recency_weighted_relative_baseline",
@@ -1970,32 +1977,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "13e1f88f9190b23ab75613a80617370a745ff2a66cac54eb2c23e35e9af4dac4"
+        "snapshot_sha256": "59b6533eccd7ba21b8c4b1673ca275104e2c21f71c9d14e5f124790f743b4bae"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 5.924251361693603,
+        "value": 6.835528494291442,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 3.8789291541746103,
+        "value": 4.631060005431241,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 3.8789291541746103,
+        "value": 4.631060005431241,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.107088049417806,
+        "value": 5.2372653706044945,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2003,7 +2010,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2024,7 +2031,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2045,14 +2052,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 2.8307363563767094,
+          "value": 3.5087826624185423,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.107088049417806,
+          "value": 5.2372653706044945,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2079,8 +2086,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 14.482700635411907,
-      "observation_count": 33,
+      "effective_sample_size": 17.8365883818692,
+      "observation_count": 36,
       "exact_overlay_chain": true
     },
     {
@@ -2093,7 +2100,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "MN",
         "final_prior": 4.810024262649303,
         "method": "recency_weighted_relative_baseline",
@@ -2131,32 +2138,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "811a123d92c31ecc788120004c68b2703500331e72c29971555056616a96d819"
+        "snapshot_sha256": "72f92ce119635d4c52c55e9f8fb60851f553668379d53196c969c0afdf98897d"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 10.247826747187846,
+        "value": 11.159103879785684,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 6.441155928727317,
+        "value": 7.440688367552727,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 6.441155928727317,
+        "value": 7.440688367552727,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.4444764700269745,
+        "value": 5.829588498719874,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2164,7 +2171,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2185,7 +2192,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2206,14 +2213,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 2.8407208271464874,
+          "value": 3.3684324022813823,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.4444764700269745,
+          "value": 5.829588498719874,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2240,8 +2247,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 3.3949507659114198,
-      "observation_count": 5,
+      "effective_sample_size": 4.297139063876825,
+      "observation_count": 6,
       "exact_overlay_chain": true
     },
     {
@@ -2254,7 +2261,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "MS",
         "final_prior": -21.531930430236145,
         "method": "recency_weighted_relative_baseline",
@@ -2292,32 +2299,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "311d28b910065ff53f41999c7c94741b0b0883ba6050e93cf71974bc8bcccdd3"
+        "snapshot_sha256": "9eb095464e2017c541c5eddab498ce3da50fc36d70d0e5131c3e9f3b2371017b"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -20.3154115243163,
+        "value": -19.40413439171846,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -11.842063180715757,
+        "value": -13.035719837504178,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -11.842063180715757,
+        "value": -13.035719837504178,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.646302809347601,
+        "value": 7.326281221127117,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2325,7 +2332,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2346,7 +2353,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2367,14 +2374,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": -6.438880530631714,
+          "value": -6.665404969554917,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.646302809347601,
+          "value": 7.326281221127117,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2401,7 +2408,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 1.237869366549172,
+      "effective_sample_size": 1.0904181704196685,
       "observation_count": 2,
       "exact_overlay_chain": true
     },
@@ -2415,7 +2422,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "NH",
         "final_prior": 3.8681394596408962,
         "method": "recency_weighted_relative_baseline",
@@ -2453,32 +2460,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "e7ba2d7bffcf0b8b7a58dc299179321ed1f83247116bca299971304623b6238a"
+        "snapshot_sha256": "cf3ff11e7f33471d1769a6a2f9cf858b613367d6591b678236a8ea3df3a96172"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 9.852907258670472,
+        "value": 10.764184391268309,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 6.798740558174077,
+        "value": 7.269276889377707,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 6.798740558174077,
+        "value": 7.269276889377707,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.178341690233806,
+        "value": 5.635038645164769,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2486,7 +2493,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2507,7 +2514,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2528,14 +2535,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 5.49780921281026,
+          "value": 6.283154033424475,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.178341690233806,
+          "value": 5.635038645164769,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2562,7 +2569,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 8.193835075414546,
+      "effective_sample_size": 5.128668903760436,
       "observation_count": 19,
       "exact_overlay_chain": true
     },
@@ -2576,7 +2583,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "NJ",
         "final_prior": 8.887432942164457,
         "method": "recency_weighted_relative_baseline",
@@ -2614,32 +2621,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "59acdffaadbe5a4147d142f1f8ceb69aaa54071010f92bdc773ed5a5133c7d93"
+        "snapshot_sha256": "bf4d76cc735b1becbc56c3aa852717c0f694cd8430db9a864c1360ef98025fcf"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 20.791423440601303,
+        "value": 21.70270057319914,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 19.761137103636774,
+        "value": 20.04873870992158,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 19.761137103636774,
+        "value": 20.04873870992158,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.997211461847993,
+        "value": 7.853396224533646,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2647,7 +2654,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2668,7 +2675,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2689,7 +2696,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.997211461847993,
+          "value": 7.853396224533646,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2730,7 +2737,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "NM",
         "final_prior": 7.261613849056918,
         "method": "recency_weighted_relative_baseline",
@@ -2768,32 +2775,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "dd6ac61bc9f5953600486ccb176b5979a12862c449c87d13f73830f5abac1fe3"
+        "snapshot_sha256": "7d8bd0b97292a9fda64e44d02ffa27b9f99a59b59f404e86411fab383613e101"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 19.165604347493765,
+        "value": 20.076881480091604,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 18.118928048992313,
+        "value": 18.858896573105437,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 18.118928048992313,
+        "value": 18.858896573105437,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 6.071340256996398,
+        "value": 6.315660309952295,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2801,7 +2808,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2822,7 +2829,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2843,14 +2850,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 16.484,
+          "value": 18.92263742956914,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 6.071340256996398,
+          "value": 6.315660309952295,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -2877,8 +2884,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 1.0,
-      "observation_count": 1,
+      "effective_sample_size": 1.739285706016624,
+      "observation_count": 2,
       "exact_overlay_chain": true
     },
     {
@@ -2891,7 +2898,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "NC",
         "final_prior": -3.1418416421121953,
         "method": "recency_weighted_relative_baseline",
@@ -2929,32 +2936,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "b0502f58d983bc1d20e7fc486b2179ce935ebcf212084fc5ca2c33433d00befb"
+        "snapshot_sha256": "dd74492fafe60e0b6c71371ca939ab2e89e638987f5d445ca97343b568de0e44"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 2.1907576119879364,
+        "value": 3.102034744585775,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 7.626878226541958,
+        "value": 7.7271032055274596,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 7.626878226541958,
+        "value": 7.7271032055274596,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.540402011946455,
+        "value": 5.870447361472567,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -2962,7 +2969,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -2983,7 +2990,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3004,14 +3011,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 10.548973575533102,
+          "value": 10.365685122968658,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.540402011946455,
+          "value": 5.870447361472567,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3038,8 +3045,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 16.65909703662226,
-      "observation_count": 35,
+      "effective_sample_size": 11.748953125210962,
+      "observation_count": 36,
       "exact_overlay_chain": true
     },
     {
@@ -3052,7 +3059,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "OK",
         "final_prior": -35.09866994401986,
         "method": "recency_weighted_relative_baseline",
@@ -3090,32 +3097,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "7b90c032ade86d3f27e89fd5d2b5a2da17cd757f7f0587e7615544a4aa6c7f9f"
+        "snapshot_sha256": "e84efa1cf919dcbedc64dfe41511d4933b1cfc7d2892a62c9b148298191c2d74"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -35.432538793746986,
+        "value": -34.521261661149154,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -33.73362698202577,
+        "value": -32.66998946414197,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -33.73362698202577,
+        "value": -32.66998946414197,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.811842928886279,
+        "value": 7.567686943289164,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3123,7 +3130,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3144,7 +3151,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3165,7 +3172,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.811842928886279,
+          "value": 7.567686943289164,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3206,7 +3213,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "OR",
         "final_prior": 14.936927632290168,
         "method": "recency_weighted_relative_baseline",
@@ -3244,32 +3251,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "b3552fc655f61e84cedd710554380727cee09548fb97f6d394966036d8369769"
+        "snapshot_sha256": "24b025a129d11d89b549d6ccd6f46f32b12361b315338921de380f6d51f65420"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 26.840918130727015,
+        "value": 27.752195263324854,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 26.947480341201953,
+        "value": 27.640947603273055,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 26.947480341201953,
+        "value": 27.640947603273055,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.878267181284158,
+        "value": 7.6114501804642,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3277,7 +3284,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3298,7 +3305,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3319,7 +3326,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.878267181284158,
+          "value": 7.6114501804642,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3360,7 +3367,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "RI",
         "final_prior": 15.995923030045505,
         "method": "recency_weighted_relative_baseline",
@@ -3398,32 +3405,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "aa79eb22172fd6d93fc1d29234a3ffcc5660e8febde52261bd27726a3950df3a"
+        "snapshot_sha256": "af583566f75624f034f3e602a52ab22012d4686831bbca510305f3397b4a71fc"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 26.951277336846957,
+        "value": 27.862554469444795,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 24.698433778233927,
+        "value": 24.627222338520223,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 24.698433778233927,
+        "value": 24.627222338520223,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.771765143081162,
+        "value": 6.4794505244021785,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3431,7 +3438,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3452,7 +3459,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3473,14 +3480,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 23.80671162901577,
+          "value": 23.452785613914404,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.771765143081162,
+          "value": 6.4794505244021785,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3507,8 +3514,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 1.3895106352912032,
-      "observation_count": 2,
+      "effective_sample_size": 2.0488506830913984,
+      "observation_count": 3,
       "exact_overlay_chain": true
     },
     {
@@ -3521,7 +3528,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "SC",
         "final_prior": -16.545237055601277,
         "method": "recency_weighted_relative_baseline",
@@ -3559,32 +3566,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "e7193ddc5587f71dfad637fde816e0addfb149f38d6fe2d571cbccd294a59622"
+        "snapshot_sha256": "18a2ac3c117bf67c5466af07446c4b13a72f1713b8087e0eb28802a9ea4307a7"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -13.568718740428112,
+        "value": -12.65744160783027,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -5.423855765505587,
+        "value": -5.237309753740158,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -5.423855765505587,
+        "value": -5.237309753740158,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.529262511239491,
+        "value": 5.75644119818705,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3592,7 +3599,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3613,7 +3620,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3641,7 +3648,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.529262511239491,
+          "value": 5.75644119818705,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3668,7 +3675,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 1.8888187555122296,
+      "effective_sample_size": 1.8888187555122298,
       "observation_count": 2,
       "exact_overlay_chain": true
     },
@@ -3682,7 +3689,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "TN",
         "final_prior": -28.477834422560907,
         "method": "recency_weighted_relative_baseline",
@@ -3720,32 +3727,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "00cf259a0511f37e1e0bbe9019b11e7bb4ac5f93bcbfe3620c201a2ab309e874"
+        "snapshot_sha256": "acbde1cd79ef5a64596c55489d15effe2cf92b9cd90e71b538ce3991d9d79eb2"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -31.470940758833805,
+        "value": -30.559663626235974,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -27.339307563245807,
+        "value": -27.202499617792913,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -27.339307563245807,
+        "value": -27.202499617792913,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.757162094425005,
+        "value": 6.8807253147886,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3753,7 +3760,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3774,7 +3781,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3802,7 +3809,7 @@
         },
         {
           "name": "core_scale",
-          "value": 5.757162094425005,
+          "value": 6.8807253147886,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3843,7 +3850,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "TX",
         "final_prior": -11.651113763453106,
         "method": "recency_weighted_relative_baseline",
@@ -3881,32 +3888,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "b710625f76c69de61f36cbd1272b60d845143181a2d2427ca74fbca8943b637d"
+        "snapshot_sha256": "d67fbe8bd320b0a08c10f05fb7fb8be4e1a39e2fdd024e6f0f2f91c8858cbfac"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -5.51013838356124,
+        "value": -4.5988612509634015,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 0.41563078797919506,
+        "value": 0.45288511179182217,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 0.41563078797919506,
+        "value": 0.45288511179182217,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.175318318536606,
+        "value": 5.347090272011217,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -3914,7 +3921,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3935,7 +3942,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -3956,14 +3963,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 2.998696926391159,
+          "value": 2.7526941266856846,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.175318318536606,
+          "value": 5.347090272011217,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -3990,8 +3997,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 16.070003029301745,
-      "observation_count": 35,
+      "effective_sample_size": 15.714713081868958,
+      "observation_count": 37,
       "exact_overlay_chain": true
     },
     {
@@ -4004,7 +4011,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "VA",
         "final_prior": 6.852068146213631,
         "method": "recency_weighted_relative_baseline",
@@ -4042,32 +4049,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "6f5c55be5473a28ce555a92a40c4382d369588d978771e86431c13879eba7e96"
+        "snapshot_sha256": "bd56792e012cb1f787e73657d8c93e84cc309c794c5825a316a416bfdb11d4d8"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": 18.177119044073336,
+        "value": 19.088396176671175,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 19.839880055627155,
+        "value": 20.84934292747401,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 19.839880055627155,
+        "value": 20.84934292747401,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.68325815471192,
+        "value": 8.377897290374918,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4075,7 +4082,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4096,7 +4103,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4117,14 +4124,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 20.199885351970153,
+          "value": 20.241,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.68325815471192,
+          "value": 8.377897290374918,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4151,7 +4158,7 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 1.9434373670790028,
+      "effective_sample_size": 2.0,
       "observation_count": 2,
       "exact_overlay_chain": true
     },
@@ -4165,7 +4172,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "WV",
         "final_prior": -42.169465653834195,
         "method": "recency_weighted_relative_baseline",
@@ -4203,32 +4210,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "9af152c347ad8a566096550785ebfa214febfbef9360723df8c86161872d2ddc"
+        "snapshot_sha256": "ea5de2ea3d3d1daf488246c68a57bab795c8378e49362c8489a23370836ddaad"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -43.231147147272196,
+        "value": -42.31987001467436,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -41.580048658206344,
+        "value": -40.5425581341556,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -41.580048658206344,
+        "value": -40.5425581341556,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 8.033480306448162,
+        "value": 7.668674296186485,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4236,7 +4243,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4257,7 +4264,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4278,7 +4285,7 @@
         },
         {
           "name": "core_scale",
-          "value": 8.033480306448162,
+          "value": 7.668674296186485,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4319,7 +4326,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "WY",
         "final_prior": -46.80444135372106,
         "method": "recency_weighted_relative_baseline",
@@ -4357,32 +4364,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "7081d92e2e36109db9b9241ca6feeeec300bef8cdb8562ac0597b4cbfb9f7c40"
+        "snapshot_sha256": "b254b1065bcbfe7ca93c238401771749eacf2374ab1e2cf6bee037515501ac0c"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -47.79754768999396,
+        "value": -46.88627055739613,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -47.73395401858903,
+        "value": -47.03229173236673,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -47.73395401858903,
+        "value": -47.03229173236673,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 7.825367210384204,
+        "value": 7.839033048752111,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4390,7 +4397,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4411,7 +4418,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4432,7 +4439,7 @@
         },
         {
           "name": "core_scale",
-          "value": 7.825367210384204,
+          "value": 7.839033048752111,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4473,7 +4480,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "OH",
         "final_prior": -10.771872454505639,
         "method": "recency_weighted_relative_baseline",
@@ -4511,32 +4518,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "6ff2fdec5a47ec3610da75a7b76aefb1f68ce64482014312cdd134556a20a16f"
+        "snapshot_sha256": "45903bc2ad9ede682f3e2b018b3afe98b6b7f2ee368e346f4d2fa7f688c5d9aa"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -6.761496562743598,
+        "value": -5.850219430145759,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": 0.9051450672309628,
+        "value": 0.8141417773521119,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": 0.9051450672309628,
+        "value": 0.8141417773521119,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.280981138241701,
+        "value": 5.303488319797064,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4544,7 +4551,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4565,7 +4572,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4586,14 +4593,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": 4.27521663077318,
+          "value": 3.84295783108849,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.280981138241701,
+          "value": 5.303488319797064,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4620,8 +4627,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 8.301491798377384,
-      "observation_count": 21,
+      "effective_sample_size": 9.554761661839828,
+      "observation_count": 24,
       "exact_overlay_chain": true
     },
     {
@@ -4634,7 +4641,7 @@
         "note": ""
       },
       "prior_provenance": {
-        "as_of": "2026-10-05",
+        "as_of": "2026-10-10",
         "entity_id": "FL",
         "final_prior": -10.456516757271878,
         "method": "recency_weighted_relative_baseline",
@@ -4672,32 +4679,32 @@
           "weights_predeclared": true
         },
         "schema_version": "relative-prior-source-v1",
-        "snapshot_sha256": "9e4ebcabf3900abfa3a296a171479a74c8f625ec6a70d3110a477f13292ad792"
+        "snapshot_sha256": "9d0522b743b9583b4f691315ca0b5da8b6a840dcd2b0562fe5e8722a4004b36e"
       },
       "fundamentals_anchor": {
         "name": "fundamentals_anchor",
-        "value": -7.412168091625092,
+        "value": -6.5008909590272514,
         "kind": "posterior_location",
         "source": "reference_fundamentals_anchor",
         "note": "Deterministic prior location; not additive to stacked core"
       },
       "stacked_core_location": {
         "name": "stacked_core_location",
-        "value": -5.420229912095375,
+        "value": -6.333054006135516,
         "kind": "posterior_location",
         "source": "stacked_predictive_draws",
         "note": ""
       },
       "final_location": {
         "name": "final_location",
-        "value": -5.420229912095375,
+        "value": -6.333054006135516,
         "kind": "posterior_location",
         "source": "final_predictive_draws",
         "note": ""
       },
       "final_scale": {
         "name": "final_scale",
-        "value": 5.174785462826196,
+        "value": 5.216670080401388,
         "kind": "uncertainty_component",
         "source": "final_predictive_draws",
         "note": ""
@@ -4705,7 +4712,7 @@
       "terms": [
         {
           "name": "generic_ballot",
-          "value": 1.7317780689469715,
+          "value": 1.97105520154481,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4726,7 +4733,7 @@
         },
         {
           "name": "pres_approval",
-          "value": 1.596,
+          "value": 2.2680000000000002,
           "kind": "additive_location",
           "source": "reference_fundamentals_anchor",
           "note": "Adds only within the reference anchor; do not add to stacked core"
@@ -4747,14 +4754,14 @@
         },
         {
           "name": "weighted_observed_poll_location",
-          "value": -4.92518413884933,
+          "value": -6.661749753293418,
           "kind": "observation_location",
           "source": "available_poll_evidence",
           "note": "Descriptive weighted observation; not a standalone posterior effect"
         },
         {
           "name": "core_scale",
-          "value": 5.174785462826196,
+          "value": 5.216670080401388,
           "kind": "uncertainty_component",
           "source": "stacked_core",
           "note": "Marginal SD before optional overlays"
@@ -4781,8 +4788,8 @@
           "note": "Scale parameter; does not add linearly to final SD"
         }
       ],
-      "effective_sample_size": 6.151547636147277,
-      "observation_count": 10,
+      "effective_sample_size": 8.89652149449209,
+      "observation_count": 13,
       "exact_overlay_chain": true
     }
   ]

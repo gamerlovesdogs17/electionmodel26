@@ -116,6 +116,8 @@ def test_rebuild_workflow_has_strict_preflight_current_date_and_pages_deploy():
     assert "deploy_pages:" in text
     assert "ref: main" in text
     assert "actions/deploy-pages@v4" in text
+    assert "python -m midterms.ops.large_artifacts pack" in text
+    assert "python -m midterms.ops.git_push" in text
     prepare_outputs = parsed["jobs"]["prepare_evidence"]["outputs"]
     assert "multiway_withheld" in prepare_outputs
     assert "needs.prepare_evidence.outputs.multiway_withheld" in text
