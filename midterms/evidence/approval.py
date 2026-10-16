@@ -1,6 +1,6 @@
 """Presidential approval vintages for as-of fundamentals (blueprint §5.1).
 
-Live path: VoteHub CC BY approval polls for the sitting president (``donald-trump``).
+Live path: VoteHub CC BY approval polls for the sitting president (``Donald Trump``).
 Historical replay prefers immutable Internet Archive captures of FiveThirtyEight
 poll files.  Their ``createddate``/``created_at`` fields are the poll-record
 publication timestamps used for point-in-time filtering; field end remains an
@@ -22,8 +22,10 @@ import pandas as pd
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR, ROOT
 
 PARSER_VERSION = "approval-v3-point-in-time-archive"
-VOTEHUB_SUBJECT = "donald-trump"
-VOTEHUB_SOURCE_URL = "https://polling.votehub.com/polls?subject=donald-trump&poll_type=approval"
+VOTEHUB_SUBJECT = "Donald Trump"
+VOTEHUB_SOURCE_URL = (
+    "https://polling.votehub.com/polls?subject=Donald%20Trump&poll_type=approval"
+)
 HISTORICAL_ARCHIVE = RAW_DIR / "external" / "historical_presidential_approval_polls_1937_2024.csv"
 HISTORICAL_ARCHIVE_SOURCE_URL = (
     "https://github.com/lorenzo-ruffino/approval_rate_usa_president/"
@@ -507,7 +509,11 @@ def aggregate_votehub_approval_vintages(
     return pd.DataFrame(out_rows)
 
 
-def write_approval_store(*, prefer_votehub: bool = True) -> dict[str, Any]:
+def write_approval_store(
+    *,
+    prefer_votehub: bool = True,
+    require_live: bool = False,
+) -> dict[str, Any]:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
     MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -569,6 +575,12 @@ def write_approval_store(*, prefer_votehub: bool = True) -> dict[str, Any]:
             live = aggregate_votehub_approval_vintages()
         except Exception as exc:  # noqa: BLE001
             fetch_error = str(exc)
+    if require_live and live.empty:
+        detail = fetch_error or "VoteHub returned no usable current approval polls"
+        # Strict refreshes must be transactional: do not replace a previously
+        # valid current store with historical-only rows after an API contract,
+        # parser, or network failure.
+        raise ValueError(f"current approval refresh failed closed: {detail}")
 
     frames = [hist]
     if len(live):

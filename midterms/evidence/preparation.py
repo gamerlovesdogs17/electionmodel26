@@ -253,7 +253,10 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
         # obtain it here rather than relying on a later test or forecast call
         # to mutate the sealed store.  The adapter records a fetch error and
         # readiness remains red when VoteHub is unavailable.
-        results["approval"] = write_approval_store(prefer_votehub=True)
+        results["approval"] = write_approval_store(
+            prefer_votehub=True,
+            require_live=True,
+        )
     except Exception as exc:  # noqa: BLE001
         results["approval"] = {"status": "refresh_failed", "error": str(exc)}
     try:

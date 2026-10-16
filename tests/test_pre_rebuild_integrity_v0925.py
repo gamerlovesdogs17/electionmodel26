@@ -315,6 +315,47 @@ def test_votehub_strict_subject_coverage_seals_matching_catalog(tmp_path: Path):
     assert raw["subject_coverage"] == meta["subject_coverage"]
 
 
+def test_votehub_current_approval_uses_exact_subject(monkeypatch):
+    from midterms.evidence import approval
+
+    def fake_get(path, params=None):
+        assert path == "/polls"
+        assert params == {"subject": "Donald Trump", "poll_type": "approval"}
+        return {"items": [{"id": "approval-1"}], "total": 1}
+
+    monkeypatch.setattr("midterms.evidence.ingest.votehub_get", fake_get)
+    assert approval.fetch_votehub_trump_approval_polls() == [{"id": "approval-1"}]
+
+
+def test_required_live_approval_failure_preserves_existing_store(tmp_path: Path, monkeypatch):
+    from midterms.evidence import approval
+
+    raw_dir = tmp_path / "raw"
+    normalized_dir = tmp_path / "normalized"
+    manifests_dir = tmp_path / "manifests"
+    raw_dir.mkdir()
+    normalized_dir.mkdir()
+    manifests_dir.mkdir()
+    raw = raw_dir / "external" / "pres_approval_vintages.json"
+    raw.parent.mkdir()
+    normalized = normalized_dir / "pres_approval.parquet"
+    manifest = manifests_dir / "pres_approval.json"
+    raw.write_bytes(b"sealed-raw")
+    normalized.write_bytes(b"sealed-normalized")
+    manifest.write_bytes(b"sealed-manifest")
+
+    monkeypatch.setattr(approval, "RAW_DIR", raw_dir)
+    monkeypatch.setattr(approval, "NORMALIZED_DIR", normalized_dir)
+    monkeypatch.setattr(approval, "MANIFESTS_DIR", manifests_dir)
+    monkeypatch.setattr(approval, "aggregate_votehub_approval_vintages", lambda: pd.DataFrame())
+
+    with pytest.raises(ValueError, match="current approval refresh failed closed"):
+        approval.write_approval_store(prefer_votehub=True, require_live=True)
+    assert raw.read_bytes() == b"sealed-raw"
+    assert normalized.read_bytes() == b"sealed-normalized"
+    assert manifest.read_bytes() == b"sealed-manifest"
+
+
 def test_extract_poll_page_shapes():
     polls, meta = _extract_poll_page([{"id": 1}])
     assert len(polls) == 1
