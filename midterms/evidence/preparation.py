@@ -17,7 +17,7 @@ from midterms.evidence.source_readiness import (
     write_source_readiness,
 )
 
-PREPARE_EVIDENCE_VERSION = "prepare-evidence-v1"
+PREPARE_EVIDENCE_VERSION = "prepare-evidence-v2-votehub-subject-coverage"
 
 
 def _poll_snapshot_paths() -> tuple[Path, ...]:
@@ -195,7 +195,12 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
         fetched: list[dict[str, Any]] = []
         for poll_type, subject in (("us-senator", None), ("generic-ballot", "2026")):
             try:
-                fetched.append(fetch_votehub_polls(poll_type=poll_type, subject=subject))
+                fetched.append(fetch_votehub_polls(
+                    poll_type=poll_type,
+                    subject=subject,
+                    verify_advertised_subjects=(poll_type == "us-senator" and subject is None),
+                    advertised_subject_year=2026 if poll_type == "us-senator" else None,
+                ))
             except Exception as exc:  # noqa: BLE001
                 fetched.append({
                     "name": f"votehub_{poll_type.replace('-', '_')}",
@@ -206,12 +211,16 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
             (row for row in fetched if row.get("name") == "votehub_us_senator"), None
         )
         sealed_senator = RAW_DIR / "external" / "votehub_us_senator.json"
+        senator_error = str((senator or {}).get("error") or "")
+        source_coverage_inconsistent = senator_error.startswith(
+            "VoteHub advertised-subject coverage failed:"
+        )
         if senator and not senator.get("error"):
             results["polls"] = merge_live_polls_into_warehouse(
                 election_id="senate-2026", replace_synthetic_for_election=True,
                 payload_path=Path(str(senator["path"])),
             )
-        elif sealed_senator.is_file():
+        elif sealed_senator.is_file() and not source_coverage_inconsistent:
             # Live VoteHub can be unreachable in CI. Rematerialize from the
             # sealed receipt so refresh-safe remains deterministic offline.
             results["polls"] = merge_live_polls_into_warehouse(
@@ -227,7 +236,11 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
             }
         else:
             results["polls"] = {
-                "status": "refresh_failed",
+                "status": (
+                    "source_coverage_inconsistent"
+                    if source_coverage_inconsistent
+                    else "refresh_failed"
+                ),
                 "error": (senator or {}).get("error") or "VoteHub Senate response missing",
             }
     except Exception as exc:  # noqa: BLE001
@@ -335,7 +348,10 @@ def prepare_evidence(
     warnings: list[str] = []
 
     poll_status = polls.get("status")
-    polls_may_have_mutated = poll_status != "refresh_failed"
+    polls_may_have_mutated = poll_status not in {
+        "refresh_failed",
+        "source_coverage_inconsistent",
+    }
     # Roll back live polls only when they create a *blocking* coverage/evidence
     # failure. Approved fail-closed multiway withholdal alone must not revert a
     # healthy poll refresh (that produced the false reverted_coverage_regression
@@ -372,16 +388,19 @@ def prepare_evidence(
             warnings.append("poll_refresh_rollback_restored_green_gates")
 
     poll_refresh_failed = polls.get("status") == "refresh_failed"
+    poll_source_coverage_inconsistent = polls.get("status") == "source_coverage_inconsistent"
     poll_used_sealed_fallback = polls.get("status") == "sealed_fallback"
     poll_reverted = polls.get("status") == "reverted_coverage_regression"
     # Live VoteHub outages / regressive live pulls must not fail a rebuild when
     # sealed sources remain green after rollback (multiway-only incompleteness
     # is not a red source gate).
-    poll_refresh_blocks = poll_refresh_failed and (
-        readiness_red or blocking_forecast_incomplete
+    poll_refresh_blocks = poll_source_coverage_inconsistent or (
+        poll_refresh_failed and (readiness_red or blocking_forecast_incomplete)
     )
     if poll_refresh_failed and not poll_refresh_blocks:
         warnings.append("poll_refresh_failed_nonblocking")
+    if poll_source_coverage_inconsistent:
+        warnings.append("poll_source_coverage_inconsistent")
     if poll_used_sealed_fallback:
         warnings.append("poll_refresh_used_sealed_fallback")
     if poll_reverted and (blocking_forecast_incomplete or readiness_red):
@@ -405,7 +424,11 @@ def prepare_evidence(
             reason
             for reason, active in (
                 ("source_readiness_not_green", readiness_red),
-                ("poll_refresh_failed", poll_refresh_blocks),
+                ("poll_source_coverage_inconsistent", poll_source_coverage_inconsistent),
+                (
+                    "poll_refresh_failed",
+                    poll_refresh_blocks and not poll_source_coverage_inconsistent,
+                ),
                 ("forecast_coverage_incomplete", blocking_forecast_incomplete),
             )
             if active

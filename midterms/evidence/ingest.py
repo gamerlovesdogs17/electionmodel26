@@ -1,6 +1,6 @@
 """External poll discovery and normalization (VoteHub + optional archives).
 
-VoteHub Polling API is CC BY 4.0: https://votehub.com/polls/api/
+VoteHub Polling API is CC BY 4.0: https://polling.votehub.com/redoc
 Attribution: Polling data from VoteHub (https://votehub.com).
 VoteHub Pollster Scorecards: https://votehub.com/polls/pollster-scorecards/
 """
@@ -44,9 +44,10 @@ from midterms.evidence.ratings import (
 )
 from midterms.evidence.schema import POLL_COLUMNS, empty_poll_row
 
-VOTEHUB_API = "https://api.votehub.com"
-PARSER_VERSION = "votehub-ingest-v3-race-scoped-candidate-level"
+VOTEHUB_API = "https://polling.votehub.com"
+PARSER_VERSION = "votehub-ingest-v4-current-api-race-scoped-candidate-level"
 VOTEHUB_LINEAGE_VERSION = "votehub-poll-lineage-v3"
+VOTEHUB_SUBJECT_COVERAGE_VERSION = "votehub-advertised-subject-coverage-v1"
 
 STATE_NAME_TO_ABBR = {
     "alabama": "AL",
@@ -219,6 +220,8 @@ def _extract_poll_page(payload: Any) -> tuple[list[dict], dict[str, Any]]:
     if not isinstance(payload, dict):
         return [], meta
     polls = payload.get("polls")
+    if polls is None and isinstance(payload.get("items"), list):
+        polls = payload["items"]
     if polls is None and isinstance(payload.get("data"), list):
         polls = payload["data"]
     if polls is None and isinstance(payload.get("results"), list):
@@ -253,6 +256,113 @@ def _extract_poll_page(payload: Any) -> tuple[list[dict], dict[str, Any]]:
     return polls, meta
 
 
+def _subject_catalog_rows(payload: Any) -> list[dict[str, Any]]:
+    """Return rows from VoteHub's current or legacy subject-discovery feed."""
+
+    if isinstance(payload, list):
+        raw_rows = payload
+    elif isinstance(payload, dict):
+        # Current API: /polls/filter-options groups subjects by poll type.
+        grouped = payload.get("poll_types")
+        if isinstance(grouped, list):
+            return [
+                {"subject": str(subject).strip(), "poll_types": [str(group.get("poll_type"))]}
+                for group in grouped
+                if isinstance(group, dict)
+                for subject in (group.get("subjects") or [])
+                if str(subject).strip()
+            ]
+        raw_rows = (
+            payload.get("subjects")
+            or payload.get("data")
+            or payload.get("results")
+            or []
+        )
+    else:
+        raw_rows = []
+    rows: list[dict[str, Any]] = []
+    for raw in raw_rows:
+        if isinstance(raw, str):
+            rows.append({"subject": raw, "poll_types": []})
+            continue
+        if not isinstance(raw, dict):
+            continue
+        subject = str(raw.get("subject") or raw.get("name") or "").strip()
+        poll_types = raw.get("poll_types") or raw.get("poll_type") or []
+        if isinstance(poll_types, str):
+            poll_types = [poll_types]
+        rows.append({"subject": subject, "poll_types": sorted(map(str, poll_types))})
+    return rows
+
+
+def audit_votehub_subject_coverage(
+    polls: list[dict[str, Any]],
+    subject_catalog: Any,
+    *,
+    poll_type: str,
+    election_year: int | None = None,
+) -> dict[str, Any]:
+    """Compare advertised race subjects with records returned by ``/polls``.
+
+    The subject catalog is an independent discovery surface.  If it advertises
+    a general-election Senate subject but the bulk poll response contains no
+    record for it, the capture is incomplete even though pagination terminated
+    normally.  This check protects against that source/API inconsistency; it
+    does not assert that every Senate race must have a poll.
+    """
+
+    def key(value: Any) -> str:
+        return " ".join(str(value or "").casefold().split())
+
+    year_prefix = f"{int(election_year)} " if election_year is not None else None
+    advertised: set[str] = set()
+    display_by_key: dict[str, str] = {}
+    for row in _subject_catalog_rows(subject_catalog):
+        subject_name = str(row.get("subject") or "").strip()
+        types = {str(value) for value in row.get("poll_types") or []}
+        if types and poll_type not in types:
+            continue
+        if year_prefix and not subject_name.casefold().startswith(year_prefix.casefold()):
+            continue
+        state, is_primary = _parse_subject_state(subject_name)
+        if not state or is_primary:
+            continue
+        subject_key = key(subject_name)
+        advertised.add(subject_key)
+        display_by_key[subject_key] = subject_name
+
+    returned = {
+        key(poll.get("subject"))
+        for poll in polls
+        if isinstance(poll, dict) and str(poll.get("subject") or "").strip()
+    }
+    missing_keys = sorted(advertised - returned)
+    missing = [display_by_key[value] for value in missing_keys]
+    status = (
+        "verified"
+        if advertised and not missing
+        else "advertised_subjects_missing_from_poll_feed"
+        if missing
+        else "no_applicable_advertised_subjects"
+    )
+    semantic = {
+        "schema_version": VOTEHUB_SUBJECT_COVERAGE_VERSION,
+        "poll_type": poll_type,
+        "election_year": election_year,
+        "advertised_subjects": sorted(display_by_key[value] for value in advertised),
+        "returned_subjects": sorted(
+            {str(p.get("subject") or "").strip() for p in polls if isinstance(p, dict)}
+        ),
+        "missing_advertised_subjects": missing,
+        "status": status,
+    }
+    return {
+        **semantic,
+        "ok": bool(advertised) and not missing,
+        "semantic_sha256": _canonical_json_sha256(semantic),
+    }
+
+
 def fetch_votehub_polls(
     *,
     poll_type: str = "us-senator",
@@ -261,6 +371,8 @@ def fetch_votehub_polls(
     max_pages: int = 50,
     client: Any | None = None,
     dest_dir: Path | None = None,
+    verify_advertised_subjects: bool = False,
+    advertised_subject_year: int | None = None,
 ) -> dict:
     """Fetch VoteHub polls with defensive pagination.
 
@@ -323,6 +435,26 @@ def fetch_votehub_polls(
     else:
         terminated_cleanly = False
 
+    subject_coverage = None
+    if verify_advertised_subjects:
+        if subject is not None:
+            raise ValueError("advertised-subject coverage requires an unscoped poll fetch")
+        # VoteHub's current API exposes subjects through an unparameterized
+        # filter-options catalog. Filter locally by explicit poll-type metadata.
+        catalog = get("/polls/filter-options")
+        subject_coverage = audit_votehub_subject_coverage(
+            all_polls,
+            catalog,
+            poll_type=poll_type,
+            election_year=advertised_subject_year,
+        )
+        if not subject_coverage["ok"]:
+            raise ValueError(
+                "VoteHub advertised-subject coverage failed: "
+                f"status={subject_coverage['status']} "
+                f"missing={subject_coverage['missing_advertised_subjects']}"
+            )
+
     combined = {"polls": all_polls, "pagination": {
         "n_pages": len(page_ids),
         "page_ids": page_ids,
@@ -330,6 +462,8 @@ def fetch_votehub_polls(
         "terminated_cleanly": terminated_cleanly,
         "total_count": total_count,
     }}
+    if subject_coverage is not None:
+        combined["subject_coverage"] = subject_coverage
     name = f"votehub_{poll_type.replace('-', '_')}"
     if subject:
         name += f"_{re.sub(r'[^a-z0-9]+', '_', subject.lower()).strip('_')}"
@@ -356,7 +490,7 @@ def fetch_votehub_polls(
         "name": name,
         "endpoint": f"{VOTEHUB_API}/polls",
         "url": f"{VOTEHUB_API}/polls",
-        "api_source_version": "votehub-polls-api",
+        "api_source_version": "votehub-polls-api-v2-items",
         "params": base_params,
         "retrieved_at": datetime.now(UTC).isoformat(),
         "sha256": digest,
@@ -368,6 +502,7 @@ def fetch_votehub_polls(
         "page_hashes": page_hashes,
         "total_result_count": total_count,
         "pagination_terminated_cleanly": terminated_cleanly,
+        "subject_coverage": subject_coverage,
         "path": recorded_path,
         "license": "CC BY 4.0",
         "attribution": "Polling data from VoteHub (https://votehub.com)",

@@ -72,7 +72,7 @@ Artifacts land in `data/artifacts/` with a run manifest under `data/manifests/`.
 ## Data / licensing
 
 - Default path uses **synthetic research fixtures** shaped like historical Senate cycles (2014–2024 + 2026 demo) so CI and offline dev never depend on restricted poll redistribution.
-- **Live polls (preferred):** VoteHub Polling API (`us-senator`, `generic-ballot`) — [CC BY 4.0](https://votehub.com/polls/api/). Attribution: Polling data from [VoteHub](https://votehub.com).
+- **Live polls (preferred):** VoteHub Polling API (`us-senator`, `generic-ballot`) — [current API](https://polling.votehub.com/redoc), under VoteHub's [CC BY 4.0 API terms](https://votehub.com/polls/api/). Attribution: Polling data from [VoteHub](https://votehub.com).
 - **Pollster ratings:** VoteHub [Pollster Scorecards](https://votehub.com/polls/pollster-scorecards/) (grades, house effect, error metrics) plus FiveThirtyEight pollster-ratings CSV as fill-in for unrated firms.
 - Ingest: `python -m midterms.cli fetch-external` then `python -m midterms.cli ingest-polls`.
 - Provenance + sha256 hashes: `data/manifests/`.

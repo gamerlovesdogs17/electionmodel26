@@ -56,6 +56,7 @@ def test_presentation_does_not_mutate_alaska_forecast():
                 "caucus": "D",
                 "p_win": 0.41,
                 "first_choice_estimate": 0.33,
+                "final_support_estimate": 0.46,
             },
             {
                 "candidate_id": "senate-2026-AK:dan-s-sullivan",
@@ -64,6 +65,7 @@ def test_presentation_does_not_mutate_alaska_forecast():
                 "caucus": "R",
                 "p_win": 0.55,
                 "first_choice_estimate": 0.45,
+                "final_support_estimate": 0.51,
             },
             {
                 "candidate_id": "senate-2026-AK:write-in-aggregate",
@@ -72,6 +74,7 @@ def test_presentation_does_not_mutate_alaska_forecast():
                 "caucus": None,
                 "p_win": 0.04,
                 "first_choice_estimate": 0.02,
+                "final_support_estimate": 0.01,
             },
         ],
     }
@@ -82,6 +85,12 @@ def test_presentation_does_not_mutate_alaska_forecast():
     assert view.favored_win_probability == pytest.approx(0.55)
     assert view.rcv_detail is not None
     assert view.rcv_detail["authoritative_binary_aliases"] is False
+    final_round = view.rcv_detail["projected_final_round"]
+    assert final_round["leader_candidate_name"] == "Dan S. Sullivan"
+    assert final_round["runner_up_candidate_name"] == "Mary Peltola"
+    assert final_round["leader_share"] + final_round["runner_up_share"] == pytest.approx(1.0)
+    assert final_round["margin_pp"] == pytest.approx(100 * (0.51 - 0.46) / 0.97)
+    assert "vote transfers" in view.rcv_detail["public_explainer"]
     assert "p_dem" not in race
     assert "p_rep" not in race
 

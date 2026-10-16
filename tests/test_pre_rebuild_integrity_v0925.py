@@ -22,6 +22,7 @@ from midterms.evidence.generic_ballot_context import (
 from midterms.evidence.ingest import (
     _extract_poll_page,
     _two_party_from_answers,
+    audit_votehub_subject_coverage,
     extract_candidate_level_answers,
     fetch_votehub_polls,
 )
@@ -231,6 +232,87 @@ def test_votehub_pagination_consumes_multiple_pages_without_duplicates(tmp_path:
     assert meta["n_polls"] == 5
     assert meta["pagination_terminated_cleanly"] is True
     assert len(set(meta["page_hashes"])) == 3
+
+
+def test_votehub_advertised_subject_coverage_detects_missing_race():
+    polls = [{"id": "ia-1", "subject": "2026 Iowa"}]
+    subjects = [
+        {"subject": "2026 Iowa", "poll_types": ["us-senator"]},
+        {"subject": "2026 South Dakota", "poll_types": ["us-senator"]},
+        {"subject": "2026 Texas Republican", "poll_types": ["us-senator"]},
+    ]
+    audit = audit_votehub_subject_coverage(
+        polls,
+        subjects,
+        poll_type="us-senator",
+        election_year=2026,
+    )
+    assert audit["ok"] is False
+    assert audit["missing_advertised_subjects"] == ["2026 South Dakota"]
+    assert audit["status"] == "advertised_subjects_missing_from_poll_feed"
+
+
+def test_votehub_current_items_and_filter_options_shapes():
+    polls, meta = _extract_poll_page({"items": [{"id": "sd-1"}], "total": 1})
+    assert polls == [{"id": "sd-1"}]
+    assert meta["total_count"] == 1
+    audit = audit_votehub_subject_coverage(
+        [{"id": "sd-1", "subject": "2026 South Dakota"}],
+        {
+            "poll_types": [
+                {"poll_type": "us-senator", "subjects": ["2026 South Dakota"]},
+                {"poll_type": "governor", "subjects": ["2026 South Dakota"]},
+            ]
+        },
+        poll_type="us-senator",
+        election_year=2026,
+    )
+    assert audit["ok"] is True
+
+
+def test_votehub_strict_subject_coverage_fails_before_overwriting_raw(tmp_path: Path):
+    def fake_get(path, params=None):
+        if path == "/polls":
+            return {"polls": [{"id": "ia-1", "subject": "2026 Iowa"}]}
+        if path == "/polls/filter-options":
+            return [
+                {"subject": "2026 Iowa", "poll_types": ["us-senator"]},
+                {"subject": "2026 South Dakota", "poll_types": ["us-senator"]},
+            ]
+        raise AssertionError(path)
+
+    with pytest.raises(ValueError, match="2026 South Dakota"):
+        fetch_votehub_polls(
+            client=fake_get,
+            dest_dir=tmp_path,
+            verify_advertised_subjects=True,
+            advertised_subject_year=2026,
+        )
+    assert not (tmp_path / "votehub_us_senator.json").exists()
+
+
+def test_votehub_strict_subject_coverage_seals_matching_catalog(tmp_path: Path):
+    def fake_get(path, params=None):
+        if path == "/polls":
+            return {"polls": [{"id": "ia-1", "subject": "2026 Iowa"}]}
+        if path == "/polls/filter-options":
+            assert params is None
+            return [
+                {"subject": "2026 Iowa", "poll_types": ["us-senator"]},
+                {"subject": "2026 Iowa Republican", "poll_types": ["us-senator"]},
+            ]
+        raise AssertionError(path)
+
+    meta = fetch_votehub_polls(
+        client=fake_get,
+        dest_dir=tmp_path,
+        verify_advertised_subjects=True,
+        advertised_subject_year=2026,
+    )
+    raw = json.loads((tmp_path / "votehub_us_senator.json").read_text(encoding="utf-8"))
+    assert meta["subject_coverage"]["status"] == "verified"
+    assert meta["subject_coverage"]["semantic_sha256"]
+    assert raw["subject_coverage"] == meta["subject_coverage"]
 
 
 def test_extract_poll_page_shapes():

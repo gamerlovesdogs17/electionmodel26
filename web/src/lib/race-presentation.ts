@@ -31,6 +31,19 @@ export type RacePresentation = {
     exhausted_ballot_share: number | null;
     candidate_probabilities: CandidatePresentation[];
     authoritative_binary_aliases: boolean;
+    projected_final_round: {
+      leader_candidate_id: string;
+      leader_candidate_name: string;
+      leader_ballot_party: string;
+      runner_up_candidate_id: string;
+      runner_up_candidate_name: string;
+      runner_up_ballot_party: string;
+      leader_share: number;
+      runner_up_share: number;
+      margin_pp: number;
+      derivation: "top_two_mean_terminal_support_renormalized";
+    } | null;
+    public_explainer: string;
     note: string;
   } | null;
   unsupported_probability: boolean;
@@ -55,6 +68,34 @@ function finite(value: unknown): number | null {
     return null;
   }
   return value;
+}
+
+function projectedRcvFinalRound(candidates: CandidatePresentation[]) {
+  const supported = candidates
+    .filter((candidate) => candidate.share_estimate != null && candidate.share_estimate >= 0)
+    .sort(
+      (a, b) =>
+        (b.share_estimate ?? 0) - (a.share_estimate ?? 0) ||
+        a.candidate_id.localeCompare(b.candidate_id),
+    );
+  if (supported.length < 2) return null;
+  const [leader, runnerUp] = supported;
+  const total = (leader.share_estimate ?? 0) + (runnerUp.share_estimate ?? 0);
+  if (total <= 0) return null;
+  const leaderShare = (leader.share_estimate ?? 0) / total;
+  const runnerUpShare = (runnerUp.share_estimate ?? 0) / total;
+  return {
+    leader_candidate_id: leader.candidate_id,
+    leader_candidate_name: leader.candidate_name,
+    leader_ballot_party: leader.ballot_party,
+    runner_up_candidate_id: runnerUp.candidate_id,
+    runner_up_candidate_name: runnerUp.candidate_name,
+    runner_up_ballot_party: runnerUp.ballot_party,
+    leader_share: leaderShare,
+    runner_up_share: runnerUpShare,
+    margin_pp: 100 * (leaderShare - runnerUpShare),
+    derivation: "top_two_mean_terminal_support_renormalized" as const,
+  };
 }
 
 export function presentRace(race: RaceForecast): RacePresentation {
@@ -158,6 +199,9 @@ export function presentRace(race: RaceForecast): RacePresentation {
           exhausted_ballot_share: finite(race.exhausted_ballot_share ?? null),
           candidate_probabilities: candidates,
           authoritative_binary_aliases: Boolean(race.authoritative_binary_aliases),
+          projected_final_round: projectedRcvFinalRound(candidates),
+          public_explainer:
+            "Alaska uses ranked-choice voting. Our simulations account for candidate eliminations and vote transfers.",
           note: "Authoritative Alaska result remains candidate-level RCV.",
         }
       : null,

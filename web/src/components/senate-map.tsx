@@ -471,13 +471,22 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
             ? `${view.favored_candidate ?? "—"} has a ${pct(view.favored_win_probability, 1)} chance.`
             : `${view.favored_candidate ?? "—"} — probability withheld.`}
       </p>
-      <p className="mt-1 text-[10px] uppercase tracking-wide text-[var(--muted)]">
-        {view.modeling_path}
-      </p>
+      {!view.rcv_detail ? (
+        <p className="mt-1 text-[10px] uppercase tracking-wide text-[var(--muted)]">
+          {view.modeling_path}
+        </p>
+      ) : null}
       <div className="mt-2">
+        {view.rcv_detail ? (
+          <p className="mb-1 text-[10px] uppercase tracking-wide text-[var(--muted)]">
+            Candidate win probability
+          </p>
+        ) : null}
         {listed.map((candidate) => {
           const share =
-            candidate.share_estimate != null
+            view.rcv_detail && candidate.p_win != null
+              ? candidate.p_win * 100
+              : candidate.share_estimate != null
               ? candidate.share_estimate <= 1
                 ? candidate.share_estimate * 100
                 : candidate.share_estimate
@@ -496,7 +505,7 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
         {!multiwayUnsupported ? (
           <div className="mt-1 flex justify-between text-sm">
             <span className="text-[var(--muted)]">
-              {view.rcv_detail ? "D-caucus seat" : "Margin"}
+              {view.rcv_detail ? "Projected final round" : "Margin"}
             </span>
             <span
               className={`font-medium ${
@@ -508,7 +517,9 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
               }`}
             >
               {view.rcv_detail
-                ? pct(view.seat_control_p_dem_caucus, 1)
+                ? view.rcv_detail.projected_final_round
+                  ? `${view.rcv_detail.projected_final_round.leader_candidate_name} +${view.rcv_detail.projected_final_round.margin_pp.toFixed(1)}`
+                  : "—"
                 : typeof race.mean_margin === "number"
                   ? signedRaceMargin(race)
                   : "—"}
@@ -517,25 +528,9 @@ function RaceTooltipBlock({ race }: { race: RaceForecast }) {
         ) : null}
       </div>
       {view.rcv_detail ? (
-        <div className="mt-2 space-y-1 border-t border-[var(--line)] pt-2">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--muted)]">
-            RCV candidate detail · {view.modeling_path}
-          </p>
-          {view.rcv_detail.candidate_probabilities.map((candidate) => (
-            <p
-              key={candidate.candidate_id}
-              className="flex justify-between gap-3 text-xs text-[var(--muted)]"
-            >
-              <span>
-                {candidate.candidate_name} ({candidate.ballot_party})
-              </span>
-              <span className="tabular-nums text-[var(--ink)]">
-                {pct(candidate.p_win, 1)}
-              </span>
-            </p>
-          ))}
-          <p className="text-[10px] text-[var(--muted)]">
-            Exhaustion {pct(view.rcv_detail.exhausted_ballot_share, 1)}
+        <div className="mt-2 border-t border-[var(--line)] pt-2">
+          <p className="text-[11px] leading-relaxed text-[var(--muted)]">
+            {view.rcv_detail.public_explainer}
           </p>
         </div>
       ) : null}

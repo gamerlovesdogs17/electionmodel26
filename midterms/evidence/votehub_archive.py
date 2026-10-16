@@ -1,7 +1,7 @@
 """VoteHub CC BY poll dump sealing + import (current cycle).
 
-VoteHub's documented API (https://votehub.com/polls/api/) exposes:
-  GET /polls, /polls/{id}, /pollsters, /subjects, /poll-types
+VoteHub's current documented API (https://polling.votehub.com/redoc) exposes:
+  GET /polls, /polls/{id}, /pollsters, and /polls/filter-options
 There is **no** /polls/archive endpoint. Historical complete-cycle polls come from
 FiveThirtyEight's public Senate poll mirror instead (`midterms.evidence.fte_polls`).
 
@@ -88,7 +88,7 @@ def try_fetch_votehub_archive() -> dict[str, Any]:
             "VoteHub API has no /polls/archive. Use: python -m midterms.cli ingest-fte-polls"
         ),
         "attribution": ATTRIBUTION,
-        "docs": "https://votehub.com/polls/api/",
+        "docs": "https://polling.votehub.com/redoc",
     }
 
 

@@ -772,6 +772,47 @@ def test_prepare_evidence_strict_allows_live_poll_outage_when_sealed_ready(monke
     assert "poll_refresh_failed_nonblocking" in (report.get("strict_warnings") or [])
 
 
+def test_prepare_evidence_strict_blocks_known_votehub_subject_coverage_gap(monkeypatch):
+    """A known incomplete API feed cannot hide behind a previously green seal."""
+    from midterms.evidence import preparation
+
+    monkeypatch.setattr(
+        preparation,
+        "refresh_safe_evidence",
+        lambda *, as_of: {
+            "results": {
+                "polls": {
+                    "status": "source_coverage_inconsistent",
+                    "error": (
+                        "VoteHub advertised-subject coverage failed: "
+                        "missing=['2026 South Dakota']"
+                    ),
+                }
+            }
+        },
+    )
+    monkeypatch.setattr(
+        preparation,
+        "write_source_readiness",
+        lambda **kwargs: {
+            "ready_for_expensive_rebuild": True,
+            "blockers": [],
+            "forecast_coverage": {
+                "summary": {"forecast_complete": True, "n_fail": 0},
+            },
+        },
+    )
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-10",
+        mode="refresh-safe",
+        strict=True,
+    )
+    assert report["strict_failure"] is True
+    assert "poll_source_coverage_inconsistent" in report["strict_failure_reasons"]
+    assert "poll_source_coverage_inconsistent" in report["strict_warnings"]
+
+
 def test_prepare_evidence_strict_blocks_when_poll_outage_and_readiness_red(monkeypatch):
     from midterms.evidence import preparation
 

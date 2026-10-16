@@ -80,11 +80,11 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
           <thead className="bg-[var(--panel)] text-xs uppercase tracking-wide text-[var(--muted)]">
             <tr>
               <th className="px-3 py-2 font-medium">State</th>
-              <th className="hidden px-3 py-2 font-medium lg:table-cell">
+              <th className="px-3 py-2 font-medium">
                 Candidates
               </th>
               <th className="px-3 py-2 font-medium">Rating</th>
-              <th className="px-3 py-2 font-medium">P(modeled)</th>
+              <th className="px-3 py-2 font-medium">Win probability</th>
               <th className="px-3 py-2 font-medium">Margin</th>
               <th className="hidden px-3 py-2 font-medium sm:table-cell">
                 90% interval
@@ -124,7 +124,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                       </span>
                     ) : null}
                   </td>
-                  <td className="hidden px-3 py-2.5 text-xs text-[var(--muted)] lg:table-cell">
+                  <td className="min-w-56 px-3 py-2.5 text-xs text-[var(--muted)]">
                     {view.candidates.length ? (
                       <div className="space-y-1">
                         {view.candidates
@@ -143,6 +143,27 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                             ) : null}
                           </div>
                         ))}
+                        {view.rcv_detail ? (
+                          <>
+                            <p className="max-w-sm pt-1 text-[11px] leading-relaxed text-[var(--muted)]">
+                              {view.rcv_detail.public_explainer}
+                            </p>
+                            <details className="pt-1 text-[11px] text-[var(--muted)]">
+                              <summary className="cursor-pointer select-none text-[var(--ink)]">
+                                Advanced RCV details
+                              </summary>
+                              <div className="mt-1 space-y-1 border-l border-[var(--line)] pl-2">
+                                <p>
+                                  D-caucus seat probability: {pct(view.seat_control_p_dem_caucus, 1)}
+                                </p>
+                                <p>
+                                  Estimated exhausted ballots: {pct(view.rcv_detail.exhausted_ballot_share, 1)}
+                                </p>
+                                <p>Model path: {view.modeling_path}</p>
+                              </div>
+                            </details>
+                          </>
+                        ) : null}
                       </div>
                     ) : (
                       <>
@@ -182,14 +203,16 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                       </div>
                     )}
                     {view.rcv_detail && !view.unsupported_probability ? (
-                      <span className="mt-1 block text-xs text-[var(--muted)]">
-                        D-caucus seat: {pct(view.seat_control_p_dem_caucus, 1)}
+                      <span className="mt-1 block max-w-32 text-xs text-[var(--muted)]">
+                        {view.favored_candidate}
                       </span>
                     ) : null}
                   </td>
                   <td className="px-3 py-2.5 tabular-nums text-[var(--ink)]">
                     {view.rcv_detail
-                      ? "—"
+                      ? view.rcv_detail.projected_final_round
+                        ? `${view.rcv_detail.projected_final_round.leader_candidate_name} +${view.rcv_detail.projected_final_round.margin_pp.toFixed(1)}`
+                        : "—"
                       : typeof r.mean_margin === "number"
                         ? signedRaceMargin(r)
                         : "—"}
@@ -201,7 +224,7 @@ export function RaceTable({ races }: { races: RaceForecast[] }) {
                   </td>
                   <td className="hidden px-3 py-2.5 tabular-nums text-[var(--muted)] sm:table-cell">
                     {view.rcv_detail
-                      ? `Exhaustion: ${pct(view.rcv_detail.exhausted_ballot_share, 1)}`
+                      ? "Projected final round"
                       : typeof r.ci05 === "number" && typeof r.ci95 === "number"
                         ? `${signedRaceMargin(r, r.ci05)} – ${signedRaceMargin(r, r.ci95)}`
                         : "—"}

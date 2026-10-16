@@ -60,6 +60,47 @@ def _finite(value: Any) -> float | None:
     return number
 
 
+def _projected_rcv_final_round(
+    candidates: list[CandidatePresentation],
+) -> dict[str, Any] | None:
+    """Summarize the two leading mean terminal-support estimates.
+
+    The adapter stores candidate win probabilities separately from mean support
+    at tabulation stop.  Renormalizing the two leading support estimates gives
+    a compact final-round-style margin for presentation without inventing a
+    binary probability alias or changing the authoritative RCV simulation.
+    """
+
+    supported = [
+        candidate
+        for candidate in candidates
+        if candidate.share_estimate is not None and candidate.share_estimate >= 0
+    ]
+    supported.sort(
+        key=lambda candidate: (-float(candidate.share_estimate or 0.0), candidate.candidate_id)
+    )
+    if len(supported) < 2:
+        return None
+    leader, runner_up = supported[:2]
+    total = float(leader.share_estimate or 0.0) + float(runner_up.share_estimate or 0.0)
+    if total <= 0:
+        return None
+    leader_share = float(leader.share_estimate or 0.0) / total
+    runner_up_share = float(runner_up.share_estimate or 0.0) / total
+    return {
+        "leader_candidate_id": leader.candidate_id,
+        "leader_candidate_name": leader.candidate_name,
+        "leader_ballot_party": leader.ballot_party,
+        "runner_up_candidate_id": runner_up.candidate_id,
+        "runner_up_candidate_name": runner_up.candidate_name,
+        "runner_up_ballot_party": runner_up.ballot_party,
+        "leader_share": leader_share,
+        "runner_up_share": runner_up_share,
+        "margin_pp": 100.0 * (leader_share - runner_up_share),
+        "derivation": "top_two_mean_terminal_support_renormalized",
+    }
+
+
 def present_race(race: dict[str, Any]) -> RacePresentation:
     """Build a presentation-safe view from an authoritative race forecast dict."""
     structure = race.get("contest_structure")
@@ -198,6 +239,11 @@ def present_race(race: dict[str, Any]) -> RacePresentation:
                 for c in candidates
             ],
             "authoritative_binary_aliases": bool(race.get("authoritative_binary_aliases")),
+            "projected_final_round": _projected_rcv_final_round(candidates),
+            "public_explainer": (
+                "Alaska uses ranked-choice voting. Our simulations account for "
+                "candidate eliminations and vote transfers."
+            ),
             "note": "Authoritative Alaska result remains candidate-level RCV.",
         }
 

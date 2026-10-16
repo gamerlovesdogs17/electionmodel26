@@ -1205,7 +1205,7 @@ def test_canonical_votehub_fetch_writes_matching_raw_and_receipt(
     assert b"\r\n" not in raw_path.read_bytes()
     assert receipt_path.read_bytes().endswith(b"\n")
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-    assert receipt["url"] == "https://api.votehub.com/polls"
+    assert receipt["url"] == "https://polling.votehub.com/polls"
     assert receipt["license"] == "CC BY 4.0"
     assert "VoteHub" in receipt["attribution"]
 

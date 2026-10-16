@@ -21,6 +21,7 @@ from midterms.evidence.ingest import normalize_votehub_senate_polls
 from midterms.evidence.outcome_identity import require_binary_chamber_compatibility
 from midterms.evidence.schema import POLL_COLUMNS
 from midterms.evidence.source_readiness import audit_source_readiness
+from midterms.model.non_major_adapter import fit_non_major_adapter
 from midterms.validation.artifact_lineage import require_current_model_version
 from midterms.validation.historical_evidence_equivalence import (
     compare_historical_projections,
@@ -196,6 +197,45 @@ def test_sc_party_and_independent_semantics():
     assert pd.isna(ne["dem_candidate_id"])
     assert pd.isna(ne["two_party_margin"])
     assert ne["margin_definition"] == "modeled_minus_opposing_two_candidate"
+
+
+def test_named_south_dakota_independent_poll_reaches_exceptional_adapter():
+    polls = normalize_votehub_senate_polls(
+        _payload("South Dakota", [(2601, "Brian Bengs", "Mike Rounds")]),
+        write_manifest=False,
+    )
+    assert polls["race_id"].tolist() == ["senate-2026-SD"]
+    row = polls.iloc[0]
+    assert row["modeled_candidate_id"] == "senate-2026-SD:brian-bengs"
+    assert row["opposing_candidate_id"] == "senate-2026-SD:mike-rounds"
+    assert row["modeled_ballot_party"] == "I"
+    assert pd.isna(row["two_party_margin"])
+    assert row["modeled_margin"] == pytest.approx(
+        round(100 * (48 - 47) / (48 + 47), 3)
+    )
+
+    registry = load_current_candidate_registry()
+    race = next(item for item in registry["races"] if item["state"] == "SD")
+    race = {
+        **race,
+        "not_up": False,
+        "prior_lean": -20.0,
+        "prior_source": "observed_presidential_relative_v1",
+        "prior_production_eligible": True,
+        "prior_snapshot_sha256": "a" * 64,
+        "prior_provenance_sha256": "b" * 64,
+    }
+    fit = fit_non_major_adapter(
+        pd.DataFrame([race]),
+        polls,
+        as_of="2026-09-10",
+        n_draws=100,
+        seed=7,
+    )
+    record = fit.diagnostics["records"][0]
+    assert record["poll_ids"] == ["vh-2601"]
+    assert record["n_candidate_compatible_polls"] == 1
+    assert record["prior_only"] is False
 
 
 def test_registry_has_reviewed_sc_nh_and_independent_ballot_identity():

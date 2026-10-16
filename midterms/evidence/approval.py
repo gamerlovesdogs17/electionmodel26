@@ -23,7 +23,7 @@ from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR, ROOT
 
 PARSER_VERSION = "approval-v3-point-in-time-archive"
 VOTEHUB_SUBJECT = "donald-trump"
-VOTEHUB_SOURCE_URL = "https://api.votehub.com/polls?subject=donald-trump&poll_type=approval"
+VOTEHUB_SOURCE_URL = "https://polling.votehub.com/polls?subject=donald-trump&poll_type=approval"
 HISTORICAL_ARCHIVE = RAW_DIR / "external" / "historical_presidential_approval_polls_1937_2024.csv"
 HISTORICAL_ARCHIVE_SOURCE_URL = (
     "https://github.com/lorenzo-ruffino/approval_rate_usa_president/"
@@ -410,7 +410,7 @@ def fetch_votehub_trump_approval_polls() -> list[dict[str, Any]]:
         "/polls", {"subject": VOTEHUB_SUBJECT, "poll_type": "approval"}
     )
     if isinstance(payload, dict):
-        polls = payload.get("polls") or payload.get("results") or []
+        polls = payload.get("polls") or payload.get("items") or payload.get("results") or []
     else:
         polls = payload or []
     return list(polls)
