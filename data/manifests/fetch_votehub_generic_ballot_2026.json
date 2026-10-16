@@ -1,24 +1,25 @@
 {
   "name": "votehub_generic_ballot_2026",
-  "endpoint": "https://api.votehub.com/polls",
-  "url": "https://api.votehub.com/polls",
-  "api_source_version": "votehub-polls-api",
+  "endpoint": "https://polling.votehub.com/polls",
+  "url": "https://polling.votehub.com/polls",
+  "api_source_version": "votehub-polls-api-v2-items",
   "params": {
     "poll_type": "generic-ballot",
     "subject": "2026"
   },
-  "retrieved_at": "2026-10-10T18:04:01.924981+00:00",
-  "sha256": "e9f48dcbdcd0c0fbea4d22af64fc67c2b578cb81745d701fc4c25bbf549c6acb",
-  "bytes": 376492,
-  "n_polls": 548,
+  "retrieved_at": "2026-10-16T22:41:51.366934+00:00",
+  "sha256": "cd33275daae2ec6adaf50895074ae5c2396dc37d22a2c03d4046a2a8c5843a30",
+  "bytes": 558973,
+  "n_polls": 697,
   "n_pages": 1,
   "first_page_id": "page-0",
   "last_page_id": "page-0",
   "page_hashes": [
-    "15b6dfe36a9e60553af314579a44a9b8f72badba8229c28036edea389e811bfc"
+    "19f529c8ea7b20f87b892879971095c839f775f98f2c6742caa3e86fe230070d"
   ],
-  "total_result_count": null,
+  "total_result_count": 697,
   "pagination_terminated_cleanly": true,
+  "subject_coverage": null,
   "path": "data/raw/external/votehub_generic_ballot_2026.json",
   "license": "CC BY 4.0",
   "attribution": "Polling data from VoteHub (https://votehub.com)"

@@ -2,18 +2,18 @@
   "schema_version": "source-readiness-v1",
   "model_version": "senate-hierarchical-v0.9.25",
   "election_id": "senate-2026",
-  "as_of": "2026-10-10",
+  "as_of": "2026-10-16",
   "ready_for_expensive_rebuild": true,
   "evidence_source_ready": true,
   "forecast_coverage_ready": false,
   "forecast_coverage": {
     "schema_version": "current-race-poll-coverage-v3",
-    "artifact_sha256": "a5688bae87c1ddd09ae1280111e134071e5591506535f683849022632884fe64",
+    "artifact_sha256": "7edf3ca374d7d13c296ada64e5e90f37fdf1953e3efba043ef85faff5db9c407",
     "summary": {
       "n_races": 35,
       "n_pass": 21,
-      "n_warning": 13,
-      "n_fail": 1,
+      "n_warning": 12,
+      "n_fail": 2,
       "n_evidence_fail": 0,
       "evidence_ready": true,
       "forecast_complete": false,
@@ -21,7 +21,8 @@
       "source_and_model_coverage_separated": true
     },
     "unsupported_or_withheld_race_ids": [
-      "senate-2026-MT"
+      "senate-2026-MT",
+      "senate-2026-SD"
     ],
     "artifact_path": "data/artifacts/current_race_poll_coverage_v0923.json"
   },
@@ -304,8 +305,8 @@
       "current_race_coverage": {
         "schema_version": "current-race-poll-coverage-v3",
         "model_version": "senate-hierarchical-v0.9.25",
-        "as_of": "2026-10-10",
-        "candidate_state_snapshot_sha256": "70347d98e184df934bbed3b02c465f715383053be40b6b260dca72b1b923f9ef",
+        "as_of": "2026-10-16",
+        "candidate_state_snapshot_sha256": "a9ed1f80bab9e2330cea84cddcaccbf40825b6b148a00d46c78f40821dbc9d1f",
         "races": [
           {
             "race_id": "senate-2026-AK",
@@ -2669,11 +2670,11 @@
             "polling_available": false,
             "statistical_target_supported": false,
             "ordinary_binary_model_supported": false,
-            "exception_adapter_supported": true,
+            "exception_adapter_supported": false,
             "binary_score_eligible": false,
-            "probability_model_supported": true,
-            "probability_model_support_status": "limited_supported_prior_only",
-            "probability_model_support_reason": "state_structural_prior_only_zero_candidate_compatible_polls",
+            "probability_model_supported": false,
+            "probability_model_support_status": "withheld",
+            "probability_model_support_reason": "zero_candidate_compatible_polls_and_no_eligible_structural_prior",
             "identity_sensitive": true,
             "qa_universe": true,
             "n_raw_current_polls": 0,
@@ -2692,15 +2693,13 @@
             "matchup_ids_seen": [],
             "latest_compatible_field_end": null,
             "latest_compatible_available_at": null,
-            "status": "warning",
-            "forecast_status": "warning",
+            "status": "fail",
+            "forecast_status": "fail",
             "evidence_status": "pass",
             "evidence_reasons": [],
             "reasons": [
               "identity_sensitive_race_has_zero_raw_polls",
-              "limited_validation_exception_model",
-              "prior_only_zero_candidate_compatible_polls",
-              "wide_exceptional_uncertainty_required"
+              "zero_candidate_compatible_polls_and_no_eligible_structural_prior"
             ]
           },
           {
@@ -3093,12 +3092,12 @@
             ]
           }
         ],
-        "artifact_sha256": "a5688bae87c1ddd09ae1280111e134071e5591506535f683849022632884fe64",
+        "artifact_sha256": "7edf3ca374d7d13c296ada64e5e90f37fdf1953e3efba043ef85faff5db9c407",
         "summary": {
           "n_races": 35,
           "n_pass": 21,
-          "n_warning": 13,
-          "n_fail": 1,
+          "n_warning": 12,
+          "n_fail": 2,
           "n_evidence_fail": 0,
           "evidence_ready": true,
           "forecast_complete": false,
@@ -10134,9 +10133,9 @@
               "binary_score_eligible": false,
               "binary_score_exclusion_reason": "no_validated_non_major_party_margin_transform",
               "candidate_identity_eligible": true,
-              "probability_model_supported": true,
-              "probability_model_support_status": "limited_supported_prior_only",
-              "probability_model_support_reason": "state_structural_prior_only_zero_candidate_compatible_polls",
+              "probability_model_supported": false,
+              "probability_model_support_status": "withheld",
+              "probability_model_support_reason": "zero_candidate_compatible_polls_and_no_eligible_structural_prior",
               "modeled_side": "modeled",
               "opposing_side": "opposing",
               "timeline_status": "degraded_no_event_for_race",
@@ -10569,7 +10568,7 @@
             }
           ],
           "traceable": true,
-          "snapshot_sha256": "70347d98e184df934bbed3b02c465f715383053be40b6b260dca72b1b923f9ef",
+          "snapshot_sha256": "a9ed1f80bab9e2330cea84cddcaccbf40825b6b148a00d46c78f40821dbc9d1f",
           "candidate_timeline_snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
           "reasons": [],
           "eligible": true,
@@ -10897,7 +10896,7 @@
       "adapter": "midterms.evidence.presidential_results",
       "status": "ready",
       "reasons": [],
-      "manifest_sha256": "92931e92d669934bb9ee793d4273e299b6c93fbacb442ca8fb515968aa2f5e9c",
+      "manifest_sha256": "79acc42079a2e43b2c8c063235a3180113ecf9bc3ea9c56e2027e9fb3d49d2e4",
       "semantic_sha256": "50be4766ead46d24274347a4bc9fb54219d73b4b6c803f228c73c4371b43b5dd",
       "parser_version": "fec-presidential-vote-counts-v1",
       "raw_source_hashes": {},
@@ -11849,7 +11848,7 @@
         },
         "current": {
           "status": "ready",
-          "as_of": "2026-10-10",
+          "as_of": "2026-10-16",
           "selected_release_date": "2026-01-29T00:00:00+00:00",
           "selected_vintages": [
             "2020-2024"
@@ -11993,7 +11992,7 @@
         "secret_available": false,
         "cutoffs": {
           "current": {
-            "as_of": "2026-10-10",
+            "as_of": "2026-10-16",
             "status": "ready",
             "n_rows": 820,
             "series_ids": [
@@ -12833,9 +12832,9 @@
       "reasons": [],
       "historical_production_eligible": true,
       "current_production_eligible": true,
-      "current_rows": 15,
-      "manifest_sha256": "d95738bb6529c4a8c9099d36546be79bab1e5584725b6341a8d447b4a6e18dea",
-      "semantic_sha256": "90f94b4628a690411c81863e6356a36b08a2979eda26c470e271add756cc8428",
+      "current_rows": 21,
+      "manifest_sha256": "6dfbcad1e777172f74454b1b935dd99d28f791ccaaadaa9afa6633735701a842",
+      "semantic_sha256": "b0f3e6f92d07c54362bfe9807ca36cc085d7920c92db89e5375b9184a905cca2",
       "parser_version": "approval-v4-fte-created-at",
       "raw_source_hashes": {
         "fte_biden_approval_polls_20241129.csv": "e16909073b63bbbc7f1fcddfc276cd5606ad5c4c5adcdb86f9baf4c86991ec2c",

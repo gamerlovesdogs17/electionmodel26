@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-10-10T18:04:02.117054+00:00",
-  "n": 46,
-  "n_votehub": 38,
+  "generated_at": "2026-10-16T22:41:51.540447+00:00",
+  "n": 51,
+  "n_votehub": 43,
   "n_historical_archive_cutoffs": 8,
   "parser_version": "approval-v4-fte-created-at",
   "historical_sources": [
@@ -56,7 +56,7 @@
   "historical_availability_basis": "fte_poll_record_created_at",
   "historical_production_eligible": true,
   "historical_ineligible_reason": null,
-  "source_url": "https://api.votehub.com/polls?subject=donald-trump&poll_type=approval",
+  "source_url": "https://polling.votehub.com/polls?subject=Donald%20Trump&poll_type=approval",
   "tier": "aggregator",
   "license": "CC BY 4.0",
   "attribution": "Historical polling data from FiveThirtyEight; archived by the Internet Archive",
@@ -68,5 +68,5 @@
     "raw": "data/raw/external/pres_approval_vintages.json",
     "normalized": "data/normalized/pres_approval.parquet"
   },
-  "normalized_sha256": "a9912a711b018f9f0ce2aab505cb3f8c1c2fc9cff516078c5b3b39b88d34b8aa"
+  "normalized_sha256": "fd0879b25d1661741f17f2ce519188aeaf504677967ee2956a2253efe178ebc7"
 }

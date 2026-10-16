@@ -1,0 +1,114 @@
+{
+  "schema_version": "evidence-bundle-v1",
+  "model_version": "senate-hierarchical-v0.9.25",
+  "as_of": "2026-10-16",
+  "current_snapshot_id": "b78911880b25b6b41ec0d4d47e67fb9f7c6667c591d03cc06da10f9072b96173",
+  "historical_snapshot_ids": {
+    "senate-2018-lead-30": "a462162297f17fe75cd3ca51663646ae85f65ed9b95217a30055e4c608527297",
+    "senate-2018-lead-60": "723388dafefb460982de6ba404553a21dac29a4677274579e11ee09c1b7a9c8d",
+    "senate-2020-lead-30": "cc863dfb4e033c75ca71417af9e545c04f57e7879cbbbd584d9b88ea31a58b88",
+    "senate-2020-lead-60": "6db9ba70cb2f88166c9a8f83b1b75d580d38ee2b2f34467dd9c970930957b2f7",
+    "senate-2022-lead-30": "38c42b6a21c5614483c62654b4fb573e4c5eec8faccac0711ab7b344c21fec9e",
+    "senate-2022-lead-60": "3fc107a8fb4c7e77f20989a1096fa58b5d33777cae72560e23a3d3969c2d8739",
+    "senate-2024-lead-30": "ec4e0c1a56e6d0422236beccbb0b74cbacb993adc1393abb98bc05adca07315d",
+    "senate-2024-lead-60": "a5381753b653c6d7563b4f163697f375f29fd482c1dc922e949cf5afec9ec0d0"
+  },
+  "domains": {
+    "approval": {
+      "status": "ready",
+      "semantic_sha256": "b0f3e6f92d07c54362bfe9807ca36cc085d7920c92db89e5375b9184a905cca2",
+      "manifest_sha256": "6dfbcad1e777172f74454b1b935dd99d28f791ccaaadaa9afa6633735701a842",
+      "parser_version": "approval-v4-fte-created-at",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    },
+    "candidate_timeline": {
+      "status": "ready",
+      "semantic_sha256": "df8e8df9c1c1f2a2539e059c9d465309b5d0f30a7a0626014e905d12c2d06794",
+      "manifest_sha256": "22eceda5c4dbba75e448439b1b7cfb6b1523b60c69edcf8d1dac006160732d91",
+      "parser_version": "official-candidate-document-v1",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    },
+    "demographics": {
+      "status": "ready",
+      "semantic_sha256": "46c9719fc80a6bef9709673ae124dc3081f769e3c111174b26d911e7a233a99b",
+      "manifest_sha256": "e8be3309a8ed8626010b81cc1ce646d950ccaf32b3ad662a964d0fe086d53690",
+      "parser_version": "census-acs-urban-v1",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    },
+    "economics": {
+      "status": "ready",
+      "semantic_sha256": "4b58f1c8aff34b8147e36347feeee1ca95b02abd8cbc7f1a9dd19291135e47ed",
+      "manifest_sha256": "565f2a4b280d9d80f4ebed0efeecef8a1b49a362e6381a2afb2cc7441c51ecca",
+      "parser_version": "alfred-v2",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    },
+    "expert_ratings": {
+      "status": "optional_disabled",
+      "required_for_core": false,
+      "required_for_historical_validation": false
+    },
+    "finance": {
+      "status": "ready",
+      "semantic_sha256": "37e1b0fdb135c0f3689bbf379e2b0b3444535d07c5e3b44458bed964c3d847ee",
+      "manifest_sha256": "402cec51d741875fe238d02039760c62f2c611848d5fe31edb3f1fba2a181905",
+      "parser_version": "fec-v2-report-receipt-asof",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    },
+    "generic_ballot": {
+      "status": "ready",
+      "semantic_sha256": "e9f48dcbdcd0c0fbea4d22af64fc67c2b578cb81745d701fc4c25bbf549c6acb",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    },
+    "markets": {
+      "status": "optional_disabled",
+      "required_for_core": false,
+      "required_for_historical_validation": false
+    },
+    "official_results": {
+      "status": "ready",
+      "semantic_sha256": "714391ef5d6e6452633278cfb9e6386771a5fa02f75fbea31cabb71cf06c708c",
+      "manifest_sha256": "060db09678108eda582bbb660a0a31e996dacf9c9b6cf87352fead1f37d61972",
+      "parser_version": "official-ledger-v2",
+      "required_for_core": false,
+      "required_for_historical_validation": true
+    },
+    "polls": {
+      "status": "ready",
+      "semantic_sha256": "2ac99425f2e4586181d7babc83f9a0cadaf6eb1248b4b59a52ba4fc975f6234d",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    },
+    "pollster_ratings": {
+      "status": "ready",
+      "semantic_sha256": "863ab2d96a7f055dca7197287736c0504b83604e63eda7bd39851247a6820ec6",
+      "manifest_sha256": "a756cac76b8de263229a26f656eaa1548b87d573293f348bd7665f7830fcaf34",
+      "parser_version": "pollster-rating-vintage-v1",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    },
+    "presidential_prior": {
+      "status": "ready",
+      "semantic_sha256": "50be4766ead46d24274347a4bc9fb54219d73b4b6c803f228c73c4371b43b5dd",
+      "manifest_sha256": "79acc42079a2e43b2c8c063235a3180113ecf9bc3ea9c56e2027e9fb3d49d2e4",
+      "parser_version": "fec-presidential-vote-counts-v1",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    },
+    "races": {
+      "status": "ready",
+      "semantic_sha256": "4f4727db74732187dafadef6c09a7af8cb70a3f7c63809304853b2e8dba9b736",
+      "required_for_core": true,
+      "required_for_historical_validation": true
+    }
+  },
+  "source_preparation_registry_version": "source-preparation-registry-v1",
+  "freshness_policy_version": "domain-freshness-v2",
+  "evidence_bundle_sha256": "5b7bb10f836fae52f131db09b902130c1e60f07b04c4116964d748afd4757cfb",
+  "evidence_bundle_id": "eb-5b7bb10f836fae52"
+}
