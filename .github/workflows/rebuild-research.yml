@@ -239,12 +239,9 @@ jobs:
       - name: Synchronize compliance readiness metadata
         if: inputs.resume_run_id == ''
         run: python -m midterms.cli sync-compliance-status --write
-      - name: Seal and strictly verify evidence bundle
-        if: inputs.resume_run_id == ''
-        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode seal --strict
-      - name: Strict publication-domain eligibility
-        # Same gate as the rebuild job. Fail here (cheap) rather than after
-        # evidence seal + tests when registry/timeline freshness is wrong.
+      - name: Strict publication-domain eligibility before seal
+        # Same gate as the rebuild job. Fail here before creating or committing
+        # an evidence bundle when source lineage or operational freshness is red.
         if: inputs.resume_run_id == ''
         run: |
           python -m midterms.cli evidence-eligibility \
@@ -252,6 +249,9 @@ jobs:
             --as-of "$AS_OF" \
             --publication-config \
             --strict
+      - name: Seal and strictly verify evidence bundle
+        if: inputs.resume_run_id == ''
+        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode seal --strict
       - name: Verify sealed publication eligibility for resume
         # Freshness was evaluated when this immutable bundle was sealed. A
         # resume verifies that decision and its source receipts without moving

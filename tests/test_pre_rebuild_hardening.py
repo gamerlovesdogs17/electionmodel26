@@ -938,6 +938,7 @@ def test_refresh_safe_falls_back_to_sealed_votehub_when_live_fetch_fails(monkeyp
     from midterms.evidence import (
         approval,
         economics,
+        fec,
         ingest,
         preparation,
         presidential_results,
@@ -956,6 +957,11 @@ def test_refresh_safe_falls_back_to_sealed_votehub_when_live_fetch_fails(monkeyp
     monkeypatch.setattr(approval, "write_approval_store", lambda **kwargs: {"status": "ok"})
     monkeypatch.setattr(
         ratings, "prepare_vendored_pollster_rating_vintages", lambda: {"status": "ok"}
+    )
+    monkeypatch.setattr(
+        fec,
+        "prepare_official_finance_history",
+        lambda **kwargs: {"status": "ok", "production_eligible": True},
     )
 
     def boom(**kwargs):

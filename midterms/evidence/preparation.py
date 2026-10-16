@@ -17,7 +17,7 @@ from midterms.evidence.source_readiness import (
     write_source_readiness,
 )
 
-PREPARE_EVIDENCE_VERSION = "prepare-evidence-v2-votehub-subject-coverage"
+PREPARE_EVIDENCE_VERSION = "prepare-evidence-v3-transactional-source-refresh"
 
 
 def _poll_snapshot_paths() -> tuple[Path, ...]:
@@ -30,6 +30,10 @@ def _poll_snapshot_paths() -> tuple[Path, ...]:
         RAW_DIR / "external" / "votehub_us_senator.json",
         LIVE_GENERIC_BALLOT_PATH,
         RAW_DIR / "polls_live_votehub.csv",
+        MANIFESTS_DIR / "fetch_votehub_us_senator.json",
+        MANIFESTS_DIR / "fetch_votehub_generic_ballot_2026.json",
+        MANIFESTS_DIR / "normalize_votehub_senate.json",
+        MANIFESTS_DIR / "merge_live_polls.json",
     )
 
 
@@ -53,6 +57,68 @@ def _restore_poll_artifacts(snapshot: dict[str, bytes | None]) -> list[str]:
         path.write_bytes(payload)
         restored.append(path.as_posix())
     return restored
+
+
+def _finance_snapshot_paths() -> tuple[Path, ...]:
+    """Every versioned artifact mutated by the official FEC refresh."""
+    from midterms.config import NORMALIZED_DIR, RAW_DIR
+
+    external = RAW_DIR / "external"
+    paths: list[Path] = [
+        NORMALIZED_DIR / "fec_candidate_committees.parquet",
+        NORMALIZED_DIR / "fec_form3_reports.parquet",
+        NORMALIZED_DIR / "fundraising_shares.parquet",
+        MANIFESTS_DIR / "fundraising_shares.json",
+    ]
+    for cycle in (2018, 2020, 2022, 2024, 2026):
+        paths.extend((
+            external / f"fec_candidate_committee_linkage_{cycle}.zip",
+            external / f"fec_form2_{cycle}.csv",
+            external / f"fec_form3_reports_{cycle}.zip",
+        ))
+    return tuple(paths)
+
+
+def _snapshot_artifacts(paths: tuple[Path, ...]) -> dict[str, bytes | None]:
+    return {
+        str(path): (path.read_bytes() if path.is_file() else None)
+        for path in paths
+    }
+
+
+def _restore_artifacts(snapshot: dict[str, bytes | None]) -> list[str]:
+    restored: list[str] = []
+    for raw_path, payload in snapshot.items():
+        path = Path(raw_path)
+        if payload is None:
+            if path.is_file():
+                path.unlink()
+                restored.append(f"removed:{path.as_posix()}")
+            continue
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(payload)
+        restored.append(path.as_posix())
+    return restored
+
+
+def _refresh_official_finance(*, as_of: str) -> dict[str, Any]:
+    """Refresh the receipt-safe FEC store as one recoverable transaction."""
+    finance_snapshot = _snapshot_artifacts(_finance_snapshot_paths())
+    try:
+        from midterms.evidence.fec import prepare_official_finance_history
+
+        finance = prepare_official_finance_history(current_as_of=as_of)
+        if finance.get("production_eligible") is not True:
+            raise ValueError("refreshed official finance store is not production eligible")
+        return {"status": "refreshed", **finance}
+    except Exception as exc:  # noqa: BLE001
+        restored = _restore_artifacts(finance_snapshot)
+        return {
+            "status": "refresh_failed",
+            "error": str(exc),
+            "restored_paths": restored,
+            "transactional_restore": True,
+        }
 
 
 def _coverage_summary(readiness: dict[str, Any]) -> dict[str, Any]:
@@ -265,10 +331,11 @@ def refresh_safe_evidence(*, as_of: str) -> dict[str, Any]:
         results["pollster_ratings"] = prepare_vendored_pollster_rating_vintages()
     except Exception as exc:  # noqa: BLE001
         results["pollster_ratings"] = {"status": "refresh_failed", "error": str(exc)}
-    results["finance"] = {
-        "status": "adapter_not_configured",
-        "reason": "unattended finance refresh remains disabled until sealed-store preservation is guaranteed",
-    }
+    # Finance is a hard production input with a 14-day retrieval-freshness
+    # policy.  Refresh it before sealing, but treat the whole official FEC
+    # source family as one transaction: a network/parser failure must not leave
+    # a mixture of new raw receipts and old normalized data behind.
+    results["finance"] = _refresh_official_finance(as_of=as_of)
     return {
         "preparation_version": PREPARE_EVIDENCE_VERSION,
         "mode": "refresh-safe",

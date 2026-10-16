@@ -82,7 +82,15 @@ jobs:
         if: inputs.refresh_safe_sources
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe
+        run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe --strict
+
+      - name: Strict publication-domain eligibility before seal
+        run: |
+          python -m midterms.cli evidence-eligibility \
+            --election-id senate-2026 \
+            --as-of "$AS_OF" \
+            --publication-config \
+            --strict
 
       - name: Seal evidence bundle
         if: inputs.seal

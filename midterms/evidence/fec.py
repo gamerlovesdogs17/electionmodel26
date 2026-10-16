@@ -661,6 +661,17 @@ def prepare_official_finance_history(
     all_reports: list[pd.DataFrame] = []
     sources: list[dict[str, Any]] = []
     retrieved_at = datetime.now(timezone.utc).isoformat()
+    prior_manifest_path = MANIFESTS_DIR / "fundraising_shares.json"
+    prior_manifest = (
+        json.loads(prior_manifest_path.read_text(encoding="utf-8"))
+        if prior_manifest_path.is_file()
+        else {}
+    )
+    prior_sources = {
+        int(row.get("cycle")): row
+        for row in (prior_manifest.get("sources") or [])
+        if isinstance(row, dict) and row.get("cycle") is not None
+    }
 
     for cycle in cycles:
         cutoffs = list(REQUIRED_FINANCE_CUTOFFS.get(int(cycle), ()))
@@ -671,14 +682,21 @@ def prepare_official_finance_history(
         max_cutoff = max(pd.Timestamp(value).date() for value in cutoffs)
         yy = f"{int(cycle) % 100:02d}"
         linkage_url = CANDIDATE_COMMITTEE_URL.format(cycle=int(cycle), yy=yy)
-        linkage_blob = _download_bytes(linkage_url)
         linkage_path = external_dir / f"fec_candidate_committee_linkage_{cycle}.zip"
-        linkage_path.write_bytes(linkage_blob)
         form2_path = external_dir / f"fec_form2_{cycle}.csv"
         form2_url = (
             f"https://www.fec.gov/files/bulk-downloads/{cycle}/Form2Filer_{cycle}.csv"
         )
-        form2_path.write_bytes(_download_bytes(form2_url))
+        immutable_historical = int(cycle) != 2026
+        reuse_linkage = immutable_historical and linkage_path.is_file()
+        reuse_form2 = immutable_historical and form2_path.is_file()
+        if reuse_linkage:
+            linkage_blob = linkage_path.read_bytes()
+        else:
+            linkage_blob = _download_bytes(linkage_url)
+            linkage_path.write_bytes(linkage_blob)
+        if not reuse_form2:
+            form2_path.write_bytes(_download_bytes(form2_url))
         links = candidate_committee_links_from_sources(
             cycle=int(cycle), linkage_blob=linkage_blob, form2_path=form2_path,
             max_as_of=max_cutoff,
@@ -691,23 +709,37 @@ def prepare_official_finance_history(
             committee_ids=sorted(links["committee_id"].astype(str).unique()),
             max_as_of=max_cutoff,
             archive_path=reports_archive,
+            # Historical receipts are immutable and reused only after their
+            # query descriptor verifies. The current cycle is always fetched
+            # again so a fresh retrieval cannot merely restamp old API bytes.
+            reuse_existing=immutable_historical,
         )
         if reports.empty:
             raise ValueError(f"no official Form 3 reports returned for {cycle}")
         all_links.append(links)
         all_reports.append(reports)
+        previous = prior_sources.get(int(cycle)) or {}
+        previous_linkage = previous.get("linkage") or {}
+        previous_form2 = previous.get("form2") or {}
+        previous_form3 = previous.get("form3") or {}
         sources.append({
             "cycle": int(cycle),
             "linkage": {
                 "path": linkage_path.name,
                 "url": linkage_url,
-                "retrieved_at": retrieved_at,
+                "retrieved_at": (
+                    previous_linkage.get("retrieved_at")
+                    if reuse_linkage else retrieved_at
+                ),
                 "sha256": _sha256_file(linkage_path),
             },
             "form2": {
                 "path": form2_path.name,
                 "url": form2_url,
-                "retrieved_at": retrieved_at,
+                "retrieved_at": (
+                    previous_form2.get("retrieved_at")
+                    if reuse_form2 else retrieved_at
+                ),
                 "sha256": _sha256_file(form2_path),
                 "role": "receipt clock for principal-committee designation",
             },
@@ -715,7 +747,11 @@ def prepare_official_finance_history(
                 **report_meta,
                 "path": reports_archive.name,
                 "url": f"{OPENFEC}{FORM3_ENDPOINT}",
-                "retrieved_at": retrieved_at,
+                "retrieved_at": (
+                    previous_form3.get("retrieved_at")
+                    if immutable_historical and report_meta.get("reused_sealed_archive")
+                    else retrieved_at
+                ),
                 "sha256": _sha256_file(reports_archive),
             },
         })
@@ -1050,6 +1086,7 @@ def _form3_row(result: dict[str, Any], *, cycle: int, source_url: str) -> dict[s
 def fetch_form3_reports_for_committees(
     *, cycle: int, committee_ids: list[str], max_as_of: str | date,
     archive_path: Path, batch_size: int = 25, reuse_existing: bool = True,
+    replace_existing_on_query_change: bool = False,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Fetch cutoff-bounded Form 3 reports and seal every API response byte."""
     cutoff = pd.Timestamp(max_as_of).date()
@@ -1063,6 +1100,20 @@ def fetch_form3_reports_for_committees(
         "committee_ids": sorted(set(committee_ids)),
         "batch_size": int(batch_size),
     }
+    if reuse_existing and replace_existing_on_query_change and archive_path.is_file():
+        with zipfile.ZipFile(archive_path) as archive:
+            stored_descriptor = (
+                json.loads(archive.read("request-metadata.json").decode("utf-8"))
+                if "request-metadata.json" in archive.namelist()
+                else None
+            )
+        if stored_descriptor is not None and any(
+            stored_descriptor.get(key) != value for key, value in descriptor.items()
+        ):
+            # The current-cycle cutoff and candidate/committee universe move
+            # over time.  A caller that explicitly opts in may replace that
+            # receipt, but the default remains fail-closed for historical use.
+            reuse_existing = False
     if reuse_existing and archive_path.is_file():
         needs_descriptor = False
         with zipfile.ZipFile(archive_path) as archive:
@@ -1148,43 +1199,53 @@ def fetch_form3_reports_for_committees(
             "n_reports": len(frame),
             "reused_sealed_archive": True,
         }
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        for batch_number, start in enumerate(range(0, len(committee_ids), batch_size), 1):
-            batch = sorted(set(committee_ids[start:start + batch_size]))
-            page = 1
-            while True:
-                raw, url = _get_raw(FORM3_ENDPOINT, {
-                    "cycle": int(cycle),
-                    "committee_id": batch,
-                    "max_receipt_date": cutoff.strftime("%m/%d/%Y"),
-                    "per_page": 100,
-                    "page": page,
-                    "sort": "receipt_date",
-                })
-                member = f"batch-{batch_number:03d}-page-{page:03d}.json"
-                archive.writestr(member, raw)
-                payload = json.loads(raw.decode("utf-8"))
-                results = payload.get("results") or []
-                requests_meta.append({
-                    "member": member,
-                    "url": url.replace(f"api_key={_fec_api_key()}", "api_key=REDACTED"),
-                    "response_sha256": _sha256_bytes(raw),
-                    "n_results": len(results),
-                })
-                rows.extend(
-                    _form3_row(item, cycle=cycle, source_url=url.split("?", 1)[0])
-                    for item in results
-                )
-                pages = int((payload.get("pagination") or {}).get("pages") or 1)
-                if page >= pages:
-                    break
-                page += 1
+    temporary_archive = archive_path.with_name(f".{archive_path.name}.refreshing")
+    try:
+        with zipfile.ZipFile(
+            temporary_archive, "w", compression=zipfile.ZIP_DEFLATED,
+        ) as archive:
+            for batch_number, start in enumerate(range(0, len(committee_ids), batch_size), 1):
+                batch = sorted(set(committee_ids[start:start + batch_size]))
+                page = 1
+                while True:
+                    raw, url = _get_raw(FORM3_ENDPOINT, {
+                        "cycle": int(cycle),
+                        "committee_id": batch,
+                        "max_receipt_date": cutoff.strftime("%m/%d/%Y"),
+                        "per_page": 100,
+                        "page": page,
+                        "sort": "receipt_date",
+                    })
+                    member = f"batch-{batch_number:03d}-page-{page:03d}.json"
+                    archive.writestr(member, raw)
+                    payload = json.loads(raw.decode("utf-8"))
+                    results = payload.get("results") or []
+                    requests_meta.append({
+                        "member": member,
+                        "url": url.replace(
+                            f"api_key={_fec_api_key()}", "api_key=REDACTED"
+                        ),
+                        "response_sha256": _sha256_bytes(raw),
+                        "n_results": len(results),
+                    })
+                    rows.extend(
+                        _form3_row(item, cycle=cycle, source_url=url.split("?", 1)[0])
+                        for item in results
+                    )
+                    pages = int((payload.get("pagination") or {}).get("pages") or 1)
+                    if page >= pages:
+                        break
+                    page += 1
+                    time.sleep(0.15)
                 time.sleep(0.15)
-            time.sleep(0.15)
-        archive.writestr(
-            "request-metadata.json",
-            json.dumps(descriptor, sort_keys=True, separators=(",", ":")),
-        )
+            archive.writestr(
+                "request-metadata.json",
+                json.dumps(descriptor, sort_keys=True, separators=(",", ":")),
+            )
+        temporary_archive.replace(archive_path)
+    finally:
+        if temporary_archive.is_file():
+            temporary_archive.unlink()
     frame = pd.DataFrame(rows)
     if len(frame):
         frame = frame.sort_values(
