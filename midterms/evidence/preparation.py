@@ -111,7 +111,18 @@ def _refresh_official_finance(*, as_of: str) -> dict[str, Any]:
 
         finance = prepare_official_finance_history(current_as_of=as_of)
         if finance.get("production_eligible") is not True:
-            raise ValueError("refreshed official finance store is not production eligible")
+            incomplete = {
+                str(label): {
+                    "missing_race_ids": block.get("missing_race_ids") or [],
+                    "excluded_race_ids": block.get("excluded_race_ids") or [],
+                }
+                for label, block in (finance.get("coverage") or {}).items()
+                if not bool((block or {}).get("production_eligible"))
+            }
+            raise ValueError(
+                "refreshed official finance store is not production eligible: "
+                + json.dumps(incomplete, sort_keys=True)
+            )
         return {"status": "refreshed", **finance}
     except Exception as exc:  # noqa: BLE001
         restored = _restore_artifacts(finance_snapshot)

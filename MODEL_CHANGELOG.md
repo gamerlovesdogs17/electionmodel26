@@ -21,6 +21,15 @@ should be preserved alongside newer ones under `data/artifacts/` and
 - Removed the `FEC_API_KEY` GitHub Actions secret requirement from evidence
   preparation and research rebuild workflows. Strict source readiness and
   transactional rollback remain unchanged.
+- Corrected the historical finance coverage contract: contests without a
+  complete Democratic/Republican ticket are explicitly recorded as excluded
+  from binary finance validation instead of being treated as missing evidence
+  or filled with unsafe party aggregates. Every binary historical ticket and
+  every declared current candidate-side contest remains required.
+- Current finance identity matching now follows the named candidate across
+  ballot parties, so an Independent modeled candidate retains Independent
+  identity and is never substituted with a Democratic filer. The workflow
+  regenerates the cheap finance-input audit before structural parity checks.
 
 ## 2026-10-04 — v0.9.23 Alaska ranked-choice adapter (validation limited)
 

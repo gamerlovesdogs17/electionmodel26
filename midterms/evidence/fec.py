@@ -20,7 +20,7 @@ import pandas as pd
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 from midterms.evidence.tickets import TICKETS_2026
 
-PARSER_VERSION = "fec-v3-report-receipt-asof-bulk-current"
+PARSER_VERSION = "fec-v4-candidate-aware-bulk-current"
 REPORT_FINANCE_SCHEMA_VERSION = "fec-report-finance-v1"
 OPENFEC = "https://api.open.fec.gov/v1"
 # FEC all-candidates summary (no API key; same underlying filings as OpenFEC).
@@ -279,6 +279,39 @@ def select_unique_party_candidate(
     }
 
 
+def select_unique_named_candidate(
+    candidates: pd.DataFrame,
+    *,
+    ticket_name: str | None,
+) -> dict[str, Any] | None:
+    """Resolve one FEC candidate by identity without guessing from party.
+
+    Candidate identity is authoritative for nonstandard tickets.  Party is
+    retained as source metadata, but an Independent modeled candidate must not
+    be replaced by a Democratic filer merely because the downstream feature
+    still uses legacy ``dem_*`` column names for the modeled side.
+    """
+    if not ticket_name or candidates is None or candidates.empty:
+        return None
+    work = candidates.copy()
+    if "candidate_name" not in work.columns and "name" in work.columns:
+        work = work.rename(columns={"name": "candidate_name"})
+    if "candidate_name" not in work.columns:
+        return None
+    matched = work[
+        work["candidate_name"].map(lambda value: fec_name_matches(value, ticket_name))
+    ]
+    ids = sorted(matched["candidate_id"].astype(str).unique())
+    if len(ids) != 1:
+        return None
+    row = matched[matched["candidate_id"].astype(str).eq(ids[0])].iloc[0]
+    return {
+        "candidate_id": ids[0],
+        "candidate_name": str(row.get("candidate_name") or ticket_name),
+        "party": _normalize_party(str(row.get("party") or "")),
+    }
+
+
 def historical_nominee_tickets(election_id: str) -> dict[str, dict[str, str]]:
     """Map ``race_id`` → dem/rep nominee names from the certified ledger.
 
@@ -310,6 +343,8 @@ def historical_nominee_tickets(election_id: str) -> dict[str, dict[str, str]]:
             "rep_name": str(rep),
             "modeled_candidate_name": str(dem),
             "opposing_candidate_name": str(rep),
+            "modeled_ballot_party": "D",
+            "opposing_ballot_party": "R",
         }
     return out
 
@@ -331,6 +366,8 @@ def current_registry_tickets() -> dict[str, dict[str, str]]:
             "opposing_candidate_id": str(row["opposing_candidate_id"]),
             "modeled_candidate_name": str(row["modeled_candidate_name"]),
             "opposing_candidate_name": str(row["opposing_candidate_name"]),
+            "modeled_ballot_party": str(row.get("modeled_ballot_party") or ""),
+            "opposing_ballot_party": str(row.get("opposing_ballot_party") or ""),
         }
     return out
 
@@ -443,10 +480,12 @@ def report_level_fundraising_shares_as_of(
     """Derive race finance features from receipt-safe official report summaries.
 
     When ``require_candidate_match`` is True (production default), fundraising
-    uses only the modeled Democratic and Republican nominees' authorized
+    uses only the modeled candidate and opposing candidate's authorized
     committees for that race. Party-wide sums and max-receipt surrogates are
-    refused. Unmatched identities yield a neutral 0.5 share with explicit
-    ``match_status`` provenance rather than silently picking another filer.
+    refused. Legacy ``dem_*`` columns mean the modeled side for nonstandard
+    current tickets. Unmatched identities yield a neutral 0.5 share with
+    explicit ``match_status`` provenance rather than silently picking another
+    filer.
     """
     selected = select_candidate_committee_reports_as_of(
         reports, candidate_committees, as_of=as_of,
@@ -515,12 +554,8 @@ def report_level_fundraising_shares_as_of(
         group = by_candidate[by_candidate["state"].astype(str).str.upper().eq(state_key)]
         dem_ticket = ticket.get("dem_name") or ticket.get("modeled_candidate_name")
         rep_ticket = ticket.get("rep_name") or ticket.get("opposing_candidate_name")
-        dem_sel = select_unique_party_candidate(
-            group, party="DEM", ticket_name=dem_ticket,
-        )
-        rep_sel = select_unique_party_candidate(
-            group, party="REP", ticket_name=rep_ticket,
-        )
+        dem_sel = select_unique_named_candidate(group, ticket_name=dem_ticket)
+        rep_sel = select_unique_named_candidate(group, ticket_name=rep_ticket)
         match_status = "candidate_matched"
         dem = group.iloc[0:0]
         rep = group.iloc[0:0]
@@ -598,6 +633,8 @@ def report_level_fundraising_shares_as_of(
             "rep_cash_on_hand": rep_cash,
             "modeled_candidate_name": dem_ticket,
             "opposing_candidate_name": rep_ticket,
+            "modeled_ballot_party": ticket.get("modeled_ballot_party") or "D",
+            "opposing_ballot_party": ticket.get("opposing_ballot_party") or "R",
             "dem_fec_candidate_id": dem_id,
             "rep_fec_candidate_id": rep_id,
             "dem_committee_ids": dem_committees,
@@ -609,7 +646,7 @@ def report_level_fundraising_shares_as_of(
             "availability_basis": "fec_receipt_date",
             "source": "fec_form3_report_summaries",
             "parser_version": PARSER_VERSION,
-            "finance_identity_schema": "candidate-specific-race-v2",
+            "finance_identity_schema": "candidate-specific-race-v3",
         })
     return pd.DataFrame(rows)
 
@@ -628,20 +665,47 @@ def _frame_semantic_sha256(frame: pd.DataFrame) -> str:
     return _sha256_bytes(payload)
 
 
-def _required_race_states(races: pd.DataFrame, election_id: str) -> list[str]:
+def _finance_coverage_universe(
+    races: pd.DataFrame,
+    election_id: str,
+) -> dict[str, Any]:
+    """Declare which contests require a candidate-specific finance feature.
+
+    Historical stack validation scores only contests with a frozen Democratic
+    and Republican nominee pair.  Same-party finals, Independent contests, and
+    uncontested major-party races are explicitly excluded from binary scoring;
+    requiring a D/R fundraising share for them previously encouraged unsafe
+    party-wide aggregation.  Current races remain required because the current
+    production adapters model their declared candidate side directly.
+    """
     selected = races[races["election_id"].astype(str).eq(election_id)].copy()
     selected = selected[~selected.get(
         "not_up", pd.Series(False, index=selected.index),
     ).fillna(False).astype(bool)]
-    return sorted(selected["state"].dropna().astype(str).unique())
-
-
-def _required_race_ids(races: pd.DataFrame, election_id: str) -> list[str]:
-    selected = races[races["election_id"].astype(str).eq(election_id)].copy()
-    selected = selected[~selected.get(
-        "not_up", pd.Series(False, index=selected.index),
-    ).fillna(False).astype(bool)]
-    return sorted(selected["race_id"].dropna().astype(str).unique())
+    all_ids = sorted(selected["race_id"].dropna().astype(str).unique())
+    if str(election_id) == "senate-2026":
+        required_ids = all_ids
+        policy = "current_declared_candidate_side"
+    else:
+        ticket_ids = set(historical_nominee_tickets(str(election_id)))
+        required_ids = sorted(set(all_ids) & ticket_ids)
+        policy = "historical_complete_dem_rep_ticket_only"
+    excluded_ids = sorted(set(all_ids) - set(required_ids))
+    required_states = sorted(
+        selected[selected["race_id"].astype(str).isin(required_ids)]["state"]
+        .dropna().astype(str).unique()
+    )
+    return {
+        "policy": policy,
+        "all_contested_race_ids": all_ids,
+        "required_race_ids": required_ids,
+        "required_states": required_states,
+        "excluded_race_ids": excluded_ids,
+        "excluded_reason": (
+            None if not excluded_ids else
+            "no_complete_dem_rep_ticket_and_excluded_from_binary_finance_scoring"
+        ),
+    }
 
 
 def _current_ticket_relevant_links(
@@ -668,11 +732,13 @@ def _current_ticket_relevant_links(
         state_links = links[
             links["state"].astype(str).str.upper().eq(state)
         ].copy()
-        dem = select_unique_party_candidate(
-            state_links, party="DEM", ticket_name=ticket.get("dem_name"),
+        dem = select_unique_named_candidate(
+            state_links,
+            ticket_name=ticket.get("modeled_candidate_name") or ticket.get("dem_name"),
         )
-        rep = select_unique_party_candidate(
-            state_links, party="REP", ticket_name=ticket.get("rep_name"),
+        rep = select_unique_named_candidate(
+            state_links,
+            ticket_name=ticket.get("opposing_candidate_name") or ticket.get("rep_name"),
         )
         if dem is not None and rep is not None:
             selected_candidate_ids.update((dem["candidate_id"], rep["candidate_id"]))
@@ -857,8 +923,9 @@ def prepare_official_finance_history(
         cycle_cutoffs = list(REQUIRED_FINANCE_CUTOFFS.get(int(cycle), ()))
         if int(cycle) == 2026:
             cycle_cutoffs.append(current_cutoff.isoformat())
-        required_states = _required_race_states(races, election_id)
-        required_race_ids = _required_race_ids(races, election_id)
+        coverage_universe = _finance_coverage_universe(races, election_id)
+        required_states = coverage_universe["required_states"]
+        required_race_ids = coverage_universe["required_race_ids"]
         for cutoff_value in cycle_cutoffs:
             if int(cycle) == 2026:
                 label = f"{election_id}-current"
@@ -885,6 +952,10 @@ def prepare_official_finance_history(
             missing_race_ids = sorted(set(required_race_ids) - set(covered_race_ids))
             coverage[label] = {
                 "as_of": cutoff_value,
+                "coverage_policy": coverage_universe["policy"],
+                "all_contested_race_ids": coverage_universe["all_contested_race_ids"],
+                "excluded_race_ids": coverage_universe["excluded_race_ids"],
+                "excluded_reason": coverage_universe["excluded_reason"],
                 "required_states": required_states,
                 "covered_states": covered_states,
                 "missing_states": missing_states,

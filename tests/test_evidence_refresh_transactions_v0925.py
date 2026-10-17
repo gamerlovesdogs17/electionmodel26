@@ -71,6 +71,32 @@ def test_finance_refresh_failure_restores_entire_store(monkeypatch, tmp_path: Pa
         assert path.read_bytes() == payload
 
 
+def test_finance_refresh_failure_reports_exact_incomplete_cutoff(
+    monkeypatch, tmp_path: Path,
+):
+    original = tmp_path / "sealed.json"
+    original.write_bytes(b"sealed")
+    monkeypatch.setattr(preparation, "_finance_snapshot_paths", lambda: (original,))
+    monkeypatch.setattr(fec, "prepare_official_finance_history", lambda **_: {
+        "production_eligible": False,
+        "coverage": {
+            "senate-2024-lead-30": {
+                "production_eligible": False,
+                "missing_race_ids": ["senate-2024-AA"],
+                "excluded_race_ids": ["senate-2024-BB"],
+            },
+        },
+    })
+
+    result = preparation._refresh_official_finance(as_of="2026-10-16")
+
+    assert result["status"] == "refresh_failed"
+    assert "senate-2024-lead-30" in result["error"]
+    assert "senate-2024-AA" in result["error"]
+    assert "senate-2024-BB" in result["error"]
+    assert original.read_bytes() == b"sealed"
+
+
 def test_current_form3_receipt_can_atomically_replace_changed_query(
     monkeypatch, tmp_path: Path,
 ):
@@ -163,6 +189,68 @@ def test_current_finance_query_uses_ticket_candidates_and_state_fallback(monkeyp
     }]
 
 
+def test_current_finance_query_matches_named_independent_without_party_substitution(
+    monkeypatch,
+):
+    links = pd.DataFrame([
+        {"candidate_id": "I1", "candidate_name": "EXAMPLE, INDY", "committee_id": "CI", "state": "AA", "party": "IND"},
+        {"candidate_id": "D1", "candidate_name": "EXAMPLE, DEM", "committee_id": "CD", "state": "AA", "party": "DEM"},
+        {"candidate_id": "R1", "candidate_name": "EXAMPLE, RILEY", "committee_id": "CR", "state": "AA", "party": "REP"},
+    ])
+    monkeypatch.setattr(fec, "current_registry_tickets", lambda: {
+        "senate-2026-AA": {
+            "state": "AA",
+            "modeled_candidate_name": "Indy Example",
+            "opposing_candidate_name": "Riley Example",
+            "modeled_ballot_party": "I",
+            "opposing_ballot_party": "R",
+        },
+    })
+
+    selected, audit = fec._current_ticket_relevant_links(links)
+
+    assert set(selected["candidate_id"]) == {"I1", "R1"}
+    assert "D1" not in set(selected["candidate_id"])
+    assert audit["n_matched_races"] == 1
+    assert audit["fallback_races"] == []
+
+
+def test_historical_finance_coverage_requires_only_complete_binary_tickets(monkeypatch):
+    races = pd.DataFrame([
+        {"election_id": "senate-2024", "race_id": "senate-2024-AA", "state": "AA", "not_up": False},
+        {"election_id": "senate-2024", "race_id": "senate-2024-BB", "state": "BB", "not_up": False},
+        {"election_id": "senate-2024", "race_id": "senate-2024-CC", "state": "CC", "not_up": True},
+    ])
+    monkeypatch.setattr(fec, "historical_nominee_tickets", lambda _election_id: {
+        "senate-2024-AA": {
+            "race_id": "senate-2024-AA", "state": "AA",
+            "dem_name": "Alpha", "rep_name": "Beta",
+        },
+    })
+
+    universe = fec._finance_coverage_universe(races, "senate-2024")
+
+    assert universe["policy"] == "historical_complete_dem_rep_ticket_only"
+    assert universe["all_contested_race_ids"] == ["senate-2024-AA", "senate-2024-BB"]
+    assert universe["required_race_ids"] == ["senate-2024-AA"]
+    assert universe["required_states"] == ["AA"]
+    assert universe["excluded_race_ids"] == ["senate-2024-BB"]
+    assert "excluded_from_binary_finance_scoring" in universe["excluded_reason"]
+
+
+def test_current_finance_coverage_keeps_nonstandard_declared_candidates_required():
+    races = pd.DataFrame([
+        {"election_id": "senate-2026", "race_id": "senate-2026-AA", "state": "AA", "not_up": False},
+        {"election_id": "senate-2026", "race_id": "senate-2026-BB", "state": "BB", "not_up": False},
+    ])
+
+    universe = fec._finance_coverage_universe(races, "senate-2026")
+
+    assert universe["policy"] == "current_declared_candidate_side"
+    assert universe["required_race_ids"] == ["senate-2026-AA", "senate-2026-BB"]
+    assert universe["excluded_race_ids"] == []
+
+
 def test_demo_key_rate_limit_fails_immediately_and_points_to_bulk(monkeypatch):
     headers = Message()
     headers["Retry-After"] = "33893"
@@ -239,6 +327,22 @@ def test_workflow_checks_publication_eligibility_before_sealing():
     assert "Require personal FEC key for current finance refresh" not in standalone
     assert "prepare-evidence --election-id senate-2026" in rebuild
     assert "prepare-evidence --election-id senate-2026" in standalone
+
+
+def test_workflow_refreshes_finance_audit_before_structural_parity():
+    workflow = Path(".github/workflows/rebuild-research.yml").read_text(
+        encoding="utf-8",
+    )
+    parity = workflow.index("Historical structural-feature parity (pre-OOF)")
+    audit = workflow.index(
+        "python -m midterms.validation.probability_integrity_repair",
+        parity,
+    )
+    parity_check = workflow.index(
+        "python -m midterms.cli historical-model-feature-parity",
+        parity,
+    )
+    assert audit < parity_check
 
 
 def test_official_form3_bulk_is_keyless_receipt_bounded_and_deterministic(

@@ -567,6 +567,10 @@ jobs:
       - name: Historical structural-feature parity (pre-OOF)
         if: steps.resume.outputs.resumed != 'true'
         run: |
+          # Finance refresh can change the receipt-safe candidate-specific
+          # inputs. Rebuild the cheap audit first so parity never compares the
+          # new warehouse against a stale pre-refresh audit artifact.
+          python -m midterms.validation.probability_integrity_repair
           python -m midterms.cli historical-model-feature-parity \
             --out data/artifacts/historical_model_feature_parity_v0923.json
           python - <<'PY'
