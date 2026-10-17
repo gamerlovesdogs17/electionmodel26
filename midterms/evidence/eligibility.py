@@ -490,6 +490,30 @@ def candidate_timeline_freshness(
         observed_at=observed_at,
         source_available=bool(identity_required),
     )
+    if registry_basis and registry_dates:
+        # reviewed_as_of is date-granularity provenance. Measure its age in
+        # calendar days rather than inventing a precise midnight retrieval
+        # time. The declared 14-day boundary is valid through calendar day 14
+        # and becomes stale on day 15.
+        checked_date = pd.Timestamp(freshness_checked_at).date()
+        review_date = max(registry_dates)
+        calendar_age = (checked_date - review_date).days
+        result["retrieval_age_days"] = float(calendar_age)
+        result["observation_age_days"] = float(calendar_age)
+        result["timestamp_granularity"] = "date"
+        result["age_basis"] = "calendar_days"
+        limit = int(result["limits_days"]["retrieval"])
+        if calendar_age < 0:
+            result["status"] = "future_timestamp"
+            result["reasons"] = [
+                "registry review date is later than the eligibility cutoff"
+            ]
+        elif calendar_age > limit:
+            result["status"] = "stale_retrieval"
+            result["reasons"] = []
+        else:
+            result["status"] = "fresh"
+            result["reasons"] = []
     result["required_for_effective_input"] = True
     result["identity_required_races"] = identity_required
     if freshness_basis:

@@ -18,16 +18,17 @@ from midterms.evidence.source_readiness import (
     write_source_readiness,
 )
 
-PREPARE_EVIDENCE_VERSION = "prepare-evidence-v3-transactional-source-refresh"
+PREPARE_EVIDENCE_VERSION = "prepare-evidence-v4-append-only-poll-receipts"
 
 
 def _poll_snapshot_paths() -> tuple[Path, ...]:
     from midterms.config import NORMALIZED_DIR, RAW_DIR
     from midterms.evidence.live_generic_ballot import LIVE_GENERIC_BALLOT_PATH
 
-    return (
+    fixed = (
         NORMALIZED_DIR / "polls.parquet",
         NORMALIZED_DIR / "polls_live_votehub.parquet",
+        NORMALIZED_DIR / "poll_candidate_shares_votehub.parquet",
         RAW_DIR / "external" / "votehub_us_senator.json",
         LIVE_GENERIC_BALLOT_PATH,
         RAW_DIR / "polls_live_votehub.csv",
@@ -36,6 +37,12 @@ def _poll_snapshot_paths() -> tuple[Path, ...]:
         MANIFESTS_DIR / "normalize_votehub_senate.json",
         MANIFESTS_DIR / "merge_live_polls.json",
     )
+    archived = tuple(sorted(
+        (RAW_DIR / "external" / "votehub_poll_receipts").glob("*.json")
+    )) + tuple(sorted(
+        (MANIFESTS_DIR / "votehub_poll_receipts").glob("*.json")
+    ))
+    return fixed + archived
 
 
 def _snapshot_poll_artifacts() -> dict[str, bytes | None]:
@@ -47,6 +54,22 @@ def _snapshot_poll_artifacts() -> dict[str, bytes | None]:
 
 def _restore_poll_artifacts(snapshot: dict[str, bytes | None]) -> list[str]:
     restored: list[str] = []
+    from midterms.config import RAW_DIR
+
+    # Remove receipt files created after the transaction snapshot. They would
+    # otherwise re-enter the next append-only normalization after a rollback.
+    archive_dirs = (
+        RAW_DIR / "external" / "votehub_poll_receipts",
+        MANIFESTS_DIR / "votehub_poll_receipts",
+    )
+    snapshot_paths = {str(Path(value)) for value in snapshot}
+    for directory in archive_dirs:
+        if not directory.is_dir():
+            continue
+        for path in directory.glob("*.json"):
+            if str(path) not in snapshot_paths:
+                path.unlink()
+                restored.append(f"removed:{path.as_posix()}")
     for raw_path, payload in snapshot.items():
         path = Path(raw_path)
         if payload is None:
@@ -486,6 +509,55 @@ def prepare_evidence(
     poll_used_sealed_fallback = polls.get("status") == "sealed_fallback"
     poll_reverted = polls.get("status") == "reverted_coverage_regression"
     finance_refresh_failed = finance.get("status") == "refresh_failed"
+    poll_fallback_freshness: dict[str, Any] | None = None
+    poll_fallback_stale = False
+    if poll_refresh_failed or poll_used_sealed_fallback or poll_reverted:
+        from midterms.config import NORMALIZED_DIR
+        from midterms.evidence.eligibility import domain_freshness_from_provenance
+
+        poll_path = NORMALIZED_DIR / "polls.parquet"
+        if poll_path.is_file():
+            import pandas as pd
+
+            poll_frame = pd.read_parquet(poll_path)
+            poll_frame = poll_frame[
+                poll_frame.get("election_id", pd.Series("", index=poll_frame.index))
+                .astype(str)
+                .eq("senate-2026")
+            ]
+        else:
+            poll_frame = None
+        latest_retrieval = None
+        latest_observation = None
+        if poll_frame is not None and len(poll_frame):
+            retrievals = pd.to_datetime(
+                poll_frame.get(
+                    "retrieved_at", pd.Series(index=poll_frame.index, dtype=object)
+                ),
+                errors="coerce",
+                utc=True,
+            )
+            observations = pd.to_datetime(
+                poll_frame.get(
+                    "field_end", pd.Series(index=poll_frame.index, dtype=object)
+                ),
+                errors="coerce",
+                utc=True,
+            )
+            latest_retrieval = (
+                retrievals.max().isoformat() if retrievals.notna().any() else None
+            )
+            latest_observation = (
+                observations.max().isoformat() if observations.notna().any() else None
+            )
+        poll_fallback_freshness = domain_freshness_from_provenance(
+            "polls",
+            checked_at=datetime.now(UTC).isoformat(),
+            retrieved_at=latest_retrieval,
+            observed_at=latest_observation,
+            source_available=bool(poll_frame is not None and len(poll_frame)),
+        )
+        poll_fallback_stale = poll_fallback_freshness.get("status") != "fresh"
     finance_fallback_freshness: dict[str, Any] | None = None
     finance_refresh_blocks = False
     if finance_refresh_failed:
@@ -503,11 +575,12 @@ def prepare_evidence(
             source_available=manifest is not None,
         )
         finance_refresh_blocks = finance_fallback_freshness.get("status") != "fresh"
-    # Live VoteHub outages / regressive live pulls must not fail a rebuild when
-    # sealed sources remain green after rollback (multiway-only incompleteness
-    # is not a red source gate).
+    # Live VoteHub outages / regressive pulls may use a sealed fallback only
+    # while that fallback remains operationally fresh. Source-readiness alone
+    # does not apply the shorter live-poll retrieval clock.
     poll_refresh_blocks = poll_source_coverage_inconsistent or (
-        poll_refresh_failed and (readiness_red or blocking_forecast_incomplete)
+        (poll_refresh_failed or poll_used_sealed_fallback or poll_reverted)
+        and (readiness_red or blocking_forecast_incomplete or poll_fallback_stale)
     )
     if poll_refresh_failed and not poll_refresh_blocks:
         warnings.append("poll_refresh_failed_nonblocking")
@@ -515,6 +588,8 @@ def prepare_evidence(
         warnings.append("poll_source_coverage_inconsistent")
     if poll_used_sealed_fallback:
         warnings.append("poll_refresh_used_sealed_fallback")
+    if poll_fallback_stale:
+        warnings.append("poll_refresh_fallback_stale")
     if poll_reverted and (blocking_forecast_incomplete or readiness_red):
         # Rollback could not restore green gates; keep the regression visible.
         warnings.append("poll_refresh_rollback_still_red")
@@ -547,7 +622,7 @@ def prepare_evidence(
                 ("source_readiness_not_green", readiness_red),
                 ("poll_source_coverage_inconsistent", poll_source_coverage_inconsistent),
                 (
-                    "poll_refresh_failed",
+                    "poll_refresh_unusable_or_stale_fallback",
                     poll_refresh_blocks and not poll_source_coverage_inconsistent,
                 ),
                 ("forecast_coverage_incomplete", blocking_forecast_incomplete),
@@ -569,6 +644,7 @@ def prepare_evidence(
                 "status": polls.get("status"),
                 "error": polls.get("error") or polls.get("live_fetch_error"),
                 "restored_paths": polls.get("restored_paths"),
+                "fallback_freshness": poll_fallback_freshness,
             },
             "finance_refresh": {
                 "status": finance.get("status"),

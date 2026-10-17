@@ -4,6 +4,22 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-10-17 — current poll receipt and freshness repair
+
+- Treat VoteHub's unscoped Senate response as a rolling snapshot. Each exact
+  raw response and retrieval receipt is now stored under a content-addressed,
+  append-only archive; normalization reconstructs the union by poll ID instead
+  of deleting valid polls absent from a shorter later response.
+- Lineage v4 records and verifies every archived raw byte hash and canonical
+  JSON hash. Git text conversion is disabled narrowly for these immutable
+  receipts, and refresh rollback removes receipts created by the failed
+  transaction.
+- A stale sealed poll fallback now fails during refresh preparation with its
+  operational freshness diagnosis, before the later publication gate.
+- Candidate-registry `reviewed_as_of` is an explicit date-granularity clock.
+  Its 14-day limit now uses calendar days, remaining valid through day 14 and
+  becoming stale on day 15; the threshold itself is unchanged.
+
 ## 2026-10-17 — keyless current-cycle FEC finance refresh
 
 - Replaced the current-cycle OpenFEC API refresh with the FEC's official,

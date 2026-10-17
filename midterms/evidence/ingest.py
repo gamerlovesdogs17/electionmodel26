@@ -46,8 +46,10 @@ from midterms.evidence.schema import POLL_COLUMNS, empty_poll_row
 
 VOTEHUB_API = "https://polling.votehub.com"
 PARSER_VERSION = "votehub-ingest-v4-current-api-race-scoped-candidate-level"
-VOTEHUB_LINEAGE_VERSION = "votehub-poll-lineage-v3"
+VOTEHUB_LINEAGE_VERSION = "votehub-poll-lineage-v4-append-only-receipts"
+LEGACY_VOTEHUB_LINEAGE_VERSIONS = {"votehub-poll-lineage-v3"}
 VOTEHUB_SUBJECT_COVERAGE_VERSION = "votehub-advertised-subject-coverage-v1"
+VOTEHUB_RECEIPT_ARCHIVE_VERSION = "votehub-poll-receipt-archive-v1"
 
 STATE_NAME_TO_ABBR = {
     "alabama": "AL",
@@ -164,9 +166,97 @@ def validate_local_fetch_receipt(
 
 def _votehub_receipt(path: Path) -> dict[str, Any]:
     receipt_path = MANIFESTS_DIR / "fetch_votehub_us_senator.json"
-    if path.name != "votehub_us_senator.json" or not receipt_path.exists():
+    archive_dir = RAW_DIR / "external" / "votehub_poll_receipts"
+    if path.parent.resolve() == archive_dir.resolve():
+        candidates = []
+        for candidate in (MANIFESTS_DIR / "votehub_poll_receipts").glob(
+            f"{path.stem}-*.json"
+        ):
+            try:
+                payload = json.loads(candidate.read_text(encoding="utf-8"))
+                candidates.append((str(payload.get("retrieved_at") or ""), candidate))
+            except (OSError, TypeError, ValueError, json.JSONDecodeError):
+                continue
+        if not candidates:
+            return {}
+        receipt_path = max(candidates, key=lambda row: row[0])[1]
+    elif path.name != "votehub_us_senator.json":
+        return {}
+    if not receipt_path.exists():
         return {}
     return json.loads(receipt_path.read_text(encoding="utf-8"))
+
+
+def archive_votehub_poll_receipt(
+    raw_path: Path | None = None,
+    receipt_path: Path | None = None,
+) -> dict[str, Any]:
+    """Preserve one exact VoteHub Senate response and its retrieval receipt.
+
+    VoteHub's unscoped endpoint is a rolling snapshot, not a guaranteed full
+    historical export. A later response may therefore contain fewer poll IDs
+    than an earlier valid response. Content-addressed receipts let the current
+    store be rebuilt as an append-only union without mislabeling old evidence
+    as part of the newest response.
+    """
+    raw_path = raw_path or (RAW_DIR / "external" / "votehub_us_senator.json")
+    receipt_path = receipt_path or (MANIFESTS_DIR / "fetch_votehub_us_senator.json")
+    verified = validate_local_fetch_receipt(raw_path, receipt_path)
+    digest = str(verified["sha256"])
+    receipt_digest = _sha256_bytes(receipt_path.read_bytes())
+    raw_archive = RAW_DIR / "external" / "votehub_poll_receipts" / f"{digest}.json"
+    manifest_archive = (
+        MANIFESTS_DIR / "votehub_poll_receipts"
+        / f"{digest}-{receipt_digest[:16]}.json"
+    )
+    raw_archive.parent.mkdir(parents=True, exist_ok=True)
+    manifest_archive.parent.mkdir(parents=True, exist_ok=True)
+    raw_bytes = raw_path.read_bytes()
+    receipt_bytes = receipt_path.read_bytes()
+    if raw_archive.exists() and raw_archive.read_bytes() != raw_bytes:
+        raise ValueError(f"VoteHub content-addressed raw collision: {raw_archive}")
+    if manifest_archive.exists() and manifest_archive.read_bytes() != receipt_bytes:
+        raise ValueError(f"VoteHub content-addressed receipt collision: {manifest_archive}")
+    raw_archive.write_bytes(raw_bytes)
+    manifest_archive.write_bytes(receipt_bytes)
+    validate_local_fetch_receipt(raw_archive, manifest_archive)
+    return {
+        "schema_version": VOTEHUB_RECEIPT_ARCHIVE_VERSION,
+        "sha256": digest,
+        "bytes": len(raw_bytes),
+        "raw_path": raw_archive.resolve().relative_to(RAW_DIR.parent.resolve()).as_posix(),
+        "receipt_path": manifest_archive.resolve().relative_to(
+            MANIFESTS_DIR.parent.resolve()
+        ).as_posix(),
+        "retrieved_at": json.loads(receipt_bytes.decode("utf-8")).get("retrieved_at"),
+    }
+
+
+def votehub_poll_receipt_sources() -> list[dict[str, Any]]:
+    """Return every verified archived Senate-poll receipt in retrieval order."""
+    raw_dir = RAW_DIR / "external" / "votehub_poll_receipts"
+    manifest_dir = MANIFESTS_DIR / "votehub_poll_receipts"
+    sources: list[dict[str, Any]] = []
+    if not raw_dir.is_dir():
+        return sources
+    for receipt_path in sorted(manifest_dir.glob("*.json")):
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        raw_sha = str(receipt.get("sha256") or "")
+        raw_path = raw_dir / f"{raw_sha}.json"
+        verified = validate_local_fetch_receipt(raw_path, receipt_path)
+        payload = json.loads(raw_path.read_text(encoding="utf-8"))
+        sources.append({
+            "raw_path": raw_path,
+            "receipt_path": receipt_path,
+            "raw_byte_sha256": verified["sha256"],
+            "raw_canonical_json_sha256": _canonical_json_sha256(payload),
+            "retrieved_at": receipt.get("retrieved_at"),
+            "n_polls": len(payload.get("polls", [])) if isinstance(payload, dict) else len(payload),
+        })
+    return sorted(
+        sources,
+        key=lambda row: (str(row.get("retrieved_at") or ""), str(row["raw_byte_sha256"])),
+    )
 
 
 def fetch_url(name: str, url: str, dest_dir: Path | None = None) -> dict:
@@ -470,6 +560,15 @@ def fetch_votehub_polls(
     dest = dest_dir or (RAW_DIR / "external")
     dest.mkdir(parents=True, exist_ok=True)
     out = dest / f"{name}.json"
+    receipt_path = MANIFESTS_DIR / f"fetch_{name}.json"
+    previous_archive = None
+    if (
+        dest_dir is None
+        and name == "votehub_us_senator"
+        and out.is_file()
+        and receipt_path.is_file()
+    ):
+        previous_archive = archive_votehub_poll_receipt(out, receipt_path)
     # Explicit UTF-8 LF bytes via write_bytes (not Path.write_text) so Windows
     # never seals a CRLF raw capture whose receipt hash then fails on Linux CI.
     blob = json.dumps(combined, indent=2).encode("utf-8")
@@ -512,10 +611,12 @@ def fetch_votehub_polls(
     # policy, and re-validated so a raw update cannot orphan a stale receipt.
     if dest_dir is None:
         MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
-        receipt_path = MANIFESTS_DIR / f"fetch_{name}.json"
         receipt_blob = (json.dumps(meta, indent=2) + "\n").encode("utf-8")
         receipt_path.write_bytes(receipt_blob)
         validate_local_fetch_receipt(out, receipt_path)
+        if name == "votehub_us_senator":
+            meta["previous_archive"] = previous_archive
+            meta["archive"] = archive_votehub_poll_receipt(out, receipt_path)
     return meta
 
 
@@ -818,6 +919,7 @@ def normalize_votehub_senate_polls(
     election_id: str = DEMO_ELECTION_ID,
     retrieved_at: str | None = None,
     write_manifest: bool = True,
+    write_outputs: bool = True,
 ) -> pd.DataFrame:
     """Convert VoteHub us-senator polls into blueprint poll records."""
     if payload is None:
@@ -834,7 +936,9 @@ def normalize_votehub_senate_polls(
     registry_by_race: dict[str, dict] = {}
     if election_id == DEMO_ELECTION_ID:
         try:
-            from midterms.evidence.current_candidates import load_current_candidate_registry
+            from midterms.evidence.current_candidates import (
+                load_current_candidate_registry,
+            )
 
             registry = load_current_candidate_registry()
             registry_by_race = {str(r["race_id"]): r for r in registry.get("races") or []}
@@ -976,7 +1080,7 @@ def normalize_votehub_senate_polls(
         rows.append(row)
 
     df = pd.DataFrame(rows)
-    if candidate_level_rows:
+    if candidate_level_rows and write_outputs:
         NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
         cand_path = NORMALIZED_DIR / "poll_candidate_shares_votehub.parquet"
         pd.DataFrame(candidate_level_rows).to_parquet(cand_path, index=False)
@@ -1044,7 +1148,6 @@ def generic_ballot_aggregate(
     historical paths apply the same weighting / winsorization math.
     """
     from midterms.evidence.generic_ballot_aggregate import aggregate_generic_ballot
-
     from midterms.evidence.live_generic_ballot import LIVE_GENERIC_BALLOT_PATH
 
     path = path or LIVE_GENERIC_BALLOT_PATH
@@ -1112,19 +1215,56 @@ def generic_ballot_aggregate(
     )
 
 
+def normalize_votehub_receipt_union(
+    sources: list[Path | dict[str, Any]],
+    *,
+    election_id: str = DEMO_ELECTION_ID,
+) -> pd.DataFrame:
+    """Normalize and de-duplicate an ordered set of immutable raw receipts."""
+    parts = []
+    for source in sources:
+        source_path = Path(source["raw_path"]) if isinstance(source, dict) else source
+        retrieved_at = source.get("retrieved_at") if isinstance(source, dict) else None
+        parts.append(normalize_votehub_senate_polls(
+            path=Path(source_path),
+            election_id=election_id,
+            retrieved_at=str(retrieved_at) if retrieved_at else None,
+            write_manifest=False,
+            write_outputs=False,
+        ))
+    live = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
+    if len(live):
+        live = live.sort_values(
+            ["retrieved_at", "poll_id"], kind="mergesort", na_position="first"
+        ).drop_duplicates(subset=["poll_id"], keep="last")
+    return live
+
+
 def merge_live_polls_into_warehouse(
     *,
     election_id: str = DEMO_ELECTION_ID,
     replace_synthetic_for_election: bool = True,
     payload_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Normalize VoteHub polls and merge into normalized polls.parquet."""
+    """Normalize VoteHub receipts and merge their append-only poll-ID union."""
     if not (NORMALIZED_DIR / "pollster_ratings.parquet").exists():
         write_normalized_ratings()
     if payload_path is None:
         current_receipt = RAW_DIR / "external" / "votehub_us_senator.json"
         payload_path = current_receipt if current_receipt.exists() else None
-    live = normalize_votehub_senate_polls(path=payload_path, election_id=election_id)
+    if payload_path is None:
+        raise FileNotFoundError("VoteHub Senate raw receipt is missing")
+    default_receipt = RAW_DIR / "external" / "votehub_us_senator.json"
+    use_archive = payload_path.resolve() == default_receipt.resolve()
+    if use_archive:
+        # This also migrates a coherent legacy current receipt into the archive
+        # before its first append-only merge.
+        archive_votehub_poll_receipt(payload_path)
+    archived_sources = votehub_poll_receipt_sources() if use_archive else []
+    sources: list[Path | dict[str, Any]] = list(archived_sources)
+    if not sources:
+        sources = [payload_path]
+    live = normalize_votehub_receipt_union(sources, election_id=election_id)
     if live.empty:
         return {"n_live": 0, "warning": "no VoteHub polls normalized"}
 
@@ -1147,7 +1287,8 @@ def merge_live_polls_into_warehouse(
                 & (existing["parser_version"].astype(str).str.startswith("fixtures"))
             )
         ]
-        # also drop prior live rows for same election to avoid dupes
+        # The archived raw-receipt union reconstructs every retained live row,
+        # so the previous derived current-cycle rows can be replaced safely.
         existing = existing[existing["election_id"] != election_id]
 
     merged = pd.concat([existing, core], ignore_index=True)
@@ -1164,6 +1305,20 @@ def merge_live_polls_into_warehouse(
     merged.to_parquet(polls_path, index=False)
     # Keep extended live table for diagnostics / model priors
     live.to_parquet(NORMALIZED_DIR / "polls_live_votehub.parquet", index=False)
+    candidate_level_rows: list[dict[str, Any]] = []
+    for value in live.get("candidate_level_shares", pd.Series(dtype=object)):
+        if isinstance(value, (list, tuple, np.ndarray)):
+            candidate_level_rows.extend(
+                dict(row) for row in value if isinstance(row, dict)
+            )
+    if candidate_level_rows:
+        candidate_frame = pd.DataFrame(candidate_level_rows)
+        candidate_frame = candidate_frame.drop_duplicates(
+            subset=["poll_id", "candidate_id", "candidate_name"], keep="last"
+        )
+        candidate_frame.to_parquet(
+            NORMALIZED_DIR / "poll_candidate_shares_votehub.parquet", index=False
+        )
     raw_csv = RAW_DIR / "polls_live_votehub.csv"
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     live.to_csv(raw_csv, index=False)
@@ -1216,6 +1371,28 @@ def merge_live_polls_into_warehouse(
             if source_receipt else None,
             "fetch_manifest_recorded_raw_sha256": source_receipt.get("sha256"),
         },
+        **({
+            "source_archive": {
+                "schema_version": VOTEHUB_RECEIPT_ARCHIVE_VERSION,
+                "n_receipts": len(archived_sources),
+                "receipts": [
+                    {
+                        **{
+                            key: value
+                            for key, value in row.items()
+                            if key not in {"raw_path", "receipt_path"}
+                        },
+                        "raw_path": Path(row["raw_path"]).resolve().relative_to(
+                            RAW_DIR.parent.resolve()
+                        ).as_posix(),
+                        "receipt_path": Path(row["receipt_path"]).resolve().relative_to(
+                            MANIFESTS_DIR.parent.resolve()
+                        ).as_posix(),
+                    }
+                    for row in archived_sources
+                ],
+            },
+        } if archived_sources else {}),
         "outputs": {
             "live_parquet_byte_sha256": _file_sha256(live_path),
             "live_semantic_sha256": semantic_frame_hash(core),
@@ -1228,6 +1405,17 @@ def merge_live_polls_into_warehouse(
         "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0",
     }
     (MANIFESTS_DIR / "merge_live_polls.json").write_text(json.dumps(summary, indent=2))
+    (MANIFESTS_DIR / "normalize_votehub_senate.json").write_text(
+        json.dumps({
+            "parser_version": PARSER_VERSION,
+            "source_archive_schema_version": VOTEHUB_RECEIPT_ARCHIVE_VERSION,
+            "n_source_receipts": len(archived_sources),
+            "n_normalized": len(live),
+            "receipt_sha256s": [row["raw_byte_sha256"] for row in archived_sources],
+            "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0",
+        }, indent=2),
+        encoding="utf-8",
+    )
     return summary
 
 
@@ -1237,7 +1425,9 @@ def verify_votehub_poll_lineage(
     """Fail closed unless normalized polls bind to the canonical raw JSON."""
     manifest_path = manifest_path or (MANIFESTS_DIR / "merge_live_polls.json")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("schema_version") != VOTEHUB_LINEAGE_VERSION:
+    if manifest.get("schema_version") not in {
+        VOTEHUB_LINEAGE_VERSION, *LEGACY_VOTEHUB_LINEAGE_VERSIONS,
+    }:
         raise ValueError("VoteHub poll lineage manifest is missing or stale")
     source = manifest.get("source") or {}
     raw_rel = source.get("raw_path")
@@ -1250,6 +1440,24 @@ def verify_votehub_poll_lineage(
     if _canonical_json_sha256(payload) != source.get("raw_canonical_json_sha256"):
         raise ValueError("VoteHub raw semantic content changed")
     outputs = manifest.get("outputs") or {}
+    archive = manifest.get("source_archive") or {}
+    if archive:
+        if archive.get("schema_version") != VOTEHUB_RECEIPT_ARCHIVE_VERSION:
+            raise ValueError("VoteHub receipt archive schema is missing or stale")
+        receipts = archive.get("receipts") or []
+        if int(archive.get("n_receipts") or 0) != len(receipts) or not receipts:
+            raise ValueError("VoteHub receipt archive is incomplete")
+        for row in receipts:
+            archived_raw = RAW_DIR.parent / str(row.get("raw_path") or "")
+            archived_receipt = MANIFESTS_DIR.parent / str(row.get("receipt_path") or "")
+            verified = validate_local_fetch_receipt(archived_raw, archived_receipt)
+            if verified["sha256"] != row.get("raw_byte_sha256"):
+                raise ValueError("VoteHub archived raw byte hash changed")
+            archived_payload = json.loads(archived_raw.read_text(encoding="utf-8"))
+            if _canonical_json_sha256(archived_payload) != row.get(
+                "raw_canonical_json_sha256"
+            ):
+                raise ValueError("VoteHub archived raw semantic content changed")
     for key, path in (
         ("live_parquet_byte_sha256", NORMALIZED_DIR / "polls_live_votehub.parquet"),
         ("warehouse_parquet_byte_sha256", NORMALIZED_DIR / "polls.parquet"),
@@ -1258,7 +1466,7 @@ def verify_votehub_poll_lineage(
             raise ValueError(f"VoteHub normalized output integrity failed: {key}")
     return {
         "ok": True,
-        "schema_version": VOTEHUB_LINEAGE_VERSION,
+        "schema_version": manifest.get("schema_version"),
         "raw_canonical_json_sha256": source["raw_canonical_json_sha256"],
         "parser_version": manifest.get("parser_version"),
     }

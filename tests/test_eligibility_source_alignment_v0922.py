@@ -307,6 +307,17 @@ def test_registry_freshness_uses_backdated_snapshot_cutoff_not_later_job_clock()
     assert result["freshness_checked_at"].startswith("2026-10-16T23:59:59")
     assert result["eligibility_checked_at"] == "2026-10-17T14:18:00Z"
 
+    boundary = candidate_timeline_freshness(
+        audit,
+        {},
+        checked_at="2026-10-17T22:30:00Z",
+        as_of="2026-10-17",
+    )
+    assert boundary["status"] == "fresh"
+    assert boundary["retrieval_age_days"] == 14.0
+    assert boundary["timestamp_granularity"] == "date"
+    assert boundary["age_basis"] == "calendar_days"
+
     stale = candidate_timeline_freshness(
         audit,
         {},

@@ -10,7 +10,8 @@ from urllib.error import HTTPError
 
 import pandas as pd
 
-from midterms.evidence import fec, preparation
+from midterms.evidence import fec, ingest, preparation
+from midterms.evidence.current_candidates import load_current_candidate_registry
 
 
 def test_poll_rollback_snapshot_includes_raw_normalized_and_lineage_manifests():
@@ -18,12 +19,141 @@ def test_poll_rollback_snapshot_includes_raw_normalized_and_lineage_manifests():
     assert {
         "polls.parquet",
         "polls_live_votehub.parquet",
+        "poll_candidate_shares_votehub.parquet",
         "votehub_us_senator.json",
         "fetch_votehub_us_senator.json",
         "fetch_votehub_generic_ballot_2026.json",
         "normalize_votehub_senate.json",
         "merge_live_polls.json",
     } <= names
+
+
+def _votehub_poll(poll_id: int, modeled_name: str, opposing_name: str) -> dict:
+    return {
+        "id": poll_id,
+        "subject": "2026 Alabama",
+        "pollster": "Synthetic Polling",
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-02",
+        "created_at": "2026-10-03",
+        "population": "LV",
+        "sample_size": 600,
+        "answers": [
+            {"choice": modeled_name, "pct": 47},
+            {"choice": opposing_name, "pct": 46},
+        ],
+    }
+
+
+def _write_votehub_receipt(
+    raw: Path,
+    receipt: Path,
+    *,
+    poll: dict,
+    retrieved_at: str,
+) -> None:
+    payload = {"polls": [poll], "pagination": {"terminated_cleanly": True}}
+    blob = json.dumps(payload, indent=2).encode("utf-8")
+    raw.parent.mkdir(parents=True, exist_ok=True)
+    receipt.parent.mkdir(parents=True, exist_ok=True)
+    raw.write_bytes(blob)
+    receipt.write_text(json.dumps({
+        "sha256": ingest._sha256_bytes(blob),
+        "bytes": len(blob),
+        "retrieved_at": retrieved_at,
+    }), encoding="utf-8")
+
+
+def test_votehub_receipt_archive_retains_shorter_later_snapshot(
+    monkeypatch, tmp_path: Path,
+):
+    raw_root = tmp_path / "data" / "raw"
+    manifest_root = tmp_path / "data" / "manifests"
+    monkeypatch.setattr(ingest, "RAW_DIR", raw_root)
+    monkeypatch.setattr(ingest, "MANIFESTS_DIR", manifest_root)
+    registry = load_current_candidate_registry()
+    al = next(row for row in registry["races"] if row["state"] == "AL")
+    current_raw = raw_root / "external" / "votehub_us_senator.json"
+    current_receipt = manifest_root / "fetch_votehub_us_senator.json"
+
+    _write_votehub_receipt(
+        current_raw,
+        current_receipt,
+        poll=_votehub_poll(
+            1, al["modeled_candidate_name"], al["opposing_candidate_name"]
+        ),
+        retrieved_at="2026-10-10T12:00:00Z",
+    )
+    ingest.archive_votehub_poll_receipt(current_raw, current_receipt)
+    _write_votehub_receipt(
+        current_raw,
+        current_receipt,
+        poll=_votehub_poll(
+            2, al["modeled_candidate_name"], al["opposing_candidate_name"]
+        ),
+        retrieved_at="2026-10-17T12:00:00Z",
+    )
+    ingest.archive_votehub_poll_receipt(current_raw, current_receipt)
+
+    sources = ingest.votehub_poll_receipt_sources()
+    assert [row["n_polls"] for row in sources] == [1, 1]
+    union = ingest.normalize_votehub_receipt_union(
+        [Path(row["raw_path"]) for row in sources]
+    )
+    assert set(union["poll_id"]) == {"vh-1", "vh-2"}
+    assert union["retrieved_at"].max() == "2026-10-17T12:00:00Z"
+
+
+def test_votehub_receipt_archive_fails_closed_on_changed_bytes(
+    monkeypatch, tmp_path: Path,
+):
+    raw_root = tmp_path / "data" / "raw"
+    manifest_root = tmp_path / "data" / "manifests"
+    monkeypatch.setattr(ingest, "RAW_DIR", raw_root)
+    monkeypatch.setattr(ingest, "MANIFESTS_DIR", manifest_root)
+    raw = raw_root / "external" / "votehub_us_senator.json"
+    receipt = manifest_root / "fetch_votehub_us_senator.json"
+    _write_votehub_receipt(
+        raw, receipt,
+        poll=_votehub_poll(1, "Example One", "Example Two"),
+        retrieved_at="2026-10-17T12:00:00Z",
+    )
+    archived = ingest.archive_votehub_poll_receipt(raw, receipt)
+    archived_raw = tmp_path / "data" / archived["raw_path"]
+    archived_raw.write_text('{"changed":true}', encoding="utf-8")
+    try:
+        ingest.votehub_poll_receipt_sources()
+    except ValueError as exc:
+        assert "sha256" in str(exc)
+    else:
+        raise AssertionError("changed archived VoteHub bytes passed verification")
+
+
+def test_votehub_archive_preserves_new_retrieval_of_identical_content(
+    monkeypatch, tmp_path: Path,
+):
+    raw_root = tmp_path / "data" / "raw"
+    manifest_root = tmp_path / "data" / "manifests"
+    monkeypatch.setattr(ingest, "RAW_DIR", raw_root)
+    monkeypatch.setattr(ingest, "MANIFESTS_DIR", manifest_root)
+    raw = raw_root / "external" / "votehub_us_senator.json"
+    receipt = manifest_root / "fetch_votehub_us_senator.json"
+    poll = _votehub_poll(1, "Example One", "Example Two")
+    _write_votehub_receipt(
+        raw, receipt, poll=poll, retrieved_at="2026-10-10T12:00:00Z",
+    )
+    first = ingest.archive_votehub_poll_receipt(raw, receipt)
+    _write_votehub_receipt(
+        raw, receipt, poll=poll, retrieved_at="2026-10-17T12:00:00Z",
+    )
+    second = ingest.archive_votehub_poll_receipt(raw, receipt)
+
+    assert first["raw_path"] == second["raw_path"]
+    assert first["receipt_path"] != second["receipt_path"]
+    sources = ingest.votehub_poll_receipt_sources()
+    assert [row["retrieved_at"] for row in sources] == [
+        "2026-10-10T12:00:00Z", "2026-10-17T12:00:00Z",
+    ]
 
 
 def test_finance_transaction_includes_keyless_current_bulk_source():
