@@ -70,6 +70,7 @@ def _finance_snapshot_paths() -> tuple[Path, ...]:
         NORMALIZED_DIR / "fec_form3_reports.parquet",
         NORMALIZED_DIR / "fundraising_shares.parquet",
         MANIFESTS_DIR / "fundraising_shares.json",
+        external / "fec_house_senate_reports_2026.csv",
     ]
     for cycle in (2018, 2020, 2022, 2024, 2026):
         paths.extend((

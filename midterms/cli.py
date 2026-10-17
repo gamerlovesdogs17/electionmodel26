@@ -87,7 +87,10 @@ def main(argv: list[str] | None = None) -> None:
 
     p_fec_history = sub.add_parser(
         "prepare-finance-sources",
-        help="Seal receipt-timed official FEC linkages and Form 3 reports for required cycles",
+        help=(
+            "Seal receipt-timed official FEC linkages and Form 3 reports; "
+            "the current cycle uses the no-key House/Senate bulk download"
+        ),
     )
     p_fec_history.add_argument("--as-of", default="2026-09-27")
     p_fec_history.set_defaults(

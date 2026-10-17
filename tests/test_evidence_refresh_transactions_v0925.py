@@ -26,6 +26,13 @@ def test_poll_rollback_snapshot_includes_raw_normalized_and_lineage_manifests():
     } <= names
 
 
+def test_finance_transaction_includes_keyless_current_bulk_source():
+    names = {path.name for path in preparation._finance_snapshot_paths()}
+    assert "fec_house_senate_reports_2026.csv" in names
+    attributes = Path(".gitattributes").read_text(encoding="utf-8")
+    assert "data/raw/external/fec_house_senate_reports_*.csv -text" in attributes
+
+
 def test_checked_in_votehub_store_has_coherent_lineage():
     from midterms.evidence.ingest import verify_votehub_poll_lineage
 
@@ -156,7 +163,7 @@ def test_current_finance_query_uses_ticket_candidates_and_state_fallback(monkeyp
     }]
 
 
-def test_demo_key_rate_limit_fails_immediately_with_actionable_secret(monkeypatch):
+def test_demo_key_rate_limit_fails_immediately_and_points_to_bulk(monkeypatch):
     headers = Message()
     headers["Retry-After"] = "33893"
     error = HTTPError(
@@ -180,7 +187,7 @@ def test_demo_key_rate_limit_fails_immediately_with_actionable_secret(monkeypatc
     except RuntimeError as exc:
         message = str(exc)
         assert "public DEMO_KEY" in message
-        assert "FEC_API_KEY" in message
+        assert "official House/Senate bulk source" in message
         assert "Retry-After=33893s" in message
     else:
         raise AssertionError("shared DEMO_KEY rate limit did not fail closed")
@@ -226,10 +233,90 @@ def test_workflow_checks_publication_eligibility_before_sealing():
     assert standalone.index("Strict publication-domain eligibility before seal") < standalone.index(
         "Seal evidence bundle"
     )
-    assert "FEC_API_KEY: ${{ secrets.FEC_API_KEY }}" in rebuild
-    assert "FEC_API_KEY: ${{ secrets.FEC_API_KEY }}" in standalone
-    assert "Require personal FEC key for current finance refresh" in rebuild
-    assert "Require personal FEC key for current finance refresh" in standalone
+    assert "FEC_API_KEY" not in rebuild
+    assert "FEC_API_KEY" not in standalone
+    assert "Require personal FEC key for current finance refresh" not in rebuild
+    assert "Require personal FEC key for current finance refresh" not in standalone
+    assert "prepare-evidence --election-id senate-2026" in rebuild
+    assert "prepare-evidence --election-id senate-2026" in standalone
+
+
+def test_official_form3_bulk_is_keyless_receipt_bounded_and_deterministic(
+    monkeypatch, tmp_path: Path,
+):
+    source = pd.DataFrame([
+        {
+            "CMTE_ID": "C1", "CMTE_NM": "ALPHA", "FORM_TP_CD": "F3",
+            "RPT_TP": "Q3", "RECEIPT_DT": "15-OCT-26",
+            "CVG_START_DT": "2026-07-01", "CVG_END_DT": "2026-09-30",
+            "TTL_RECEIPTS": "125.50", "TTL_DISB": "45.25", "COH_COP": "80.25",
+        },
+        {
+            "CMTE_ID": "C1", "CMTE_NM": "ALPHA", "FORM_TP_CD": "F3",
+            "RPT_TP": "12G", "RECEIPT_DT": "17-OCT-26",
+            "CVG_START_DT": "2026-10-01", "CVG_END_DT": "2026-10-14",
+            "TTL_RECEIPTS": "200", "TTL_DISB": "70", "COH_COP": "130",
+        },
+        {
+            "CMTE_ID": "C2", "CMTE_NM": "OTHER", "FORM_TP_CD": "F3",
+            "RPT_TP": "Q3", "RECEIPT_DT": "15-OCT-26",
+            "CVG_START_DT": "2026-07-01", "CVG_END_DT": "2026-09-30",
+            "TTL_RECEIPTS": "999", "TTL_DISB": "1", "COH_COP": "998",
+        },
+    ])
+    blob = source.to_csv(index=False, lineterminator="\n").encode("utf-8")
+    monkeypatch.setattr(fec, "_download_bytes", lambda url: blob)
+    raw_path = tmp_path / "fec-house-senate.csv"
+
+    first, metadata = fec.fetch_form3_reports_from_official_bulk(
+        cycle=2026,
+        committee_ids=["C1"],
+        max_as_of="2026-10-16",
+        raw_path=raw_path,
+        retrieved_at="2026-10-17T12:00:00Z",
+    )
+    second = fec.parse_form3_reports_official_bulk(
+        blob,
+        cycle=2026,
+        committee_ids=["C1"],
+        max_as_of="2026-10-16",
+        source_url=metadata["source_url"],
+    )
+
+    assert raw_path.read_bytes() == blob
+    assert first["receipt_date"].tolist() == ["2026-10-15"]
+    assert first["receipts"].tolist() == [125.5]
+    assert first["disbursements"].tolist() == [45.25]
+    assert first["cash_on_hand_end_period"].tolist() == [80.25]
+    assert first["filing_id"].tolist() == second["filing_id"].tolist()
+    assert first["source_record_sha256"].tolist() == second[
+        "source_record_sha256"
+    ].tolist()
+    assert metadata["api_key_required"] is False
+    assert metadata["raw_sha256"] == fec._sha256_bytes(blob)
+
+
+def test_official_current_bulk_refuses_historical_backfill(monkeypatch, tmp_path: Path):
+    calls = {"n": 0}
+
+    def unexpected_download(_url):
+        calls["n"] += 1
+        return b""
+
+    monkeypatch.setattr(fec, "_download_bytes", unexpected_download)
+    try:
+        fec.fetch_form3_reports_from_official_bulk(
+            cycle=2026,
+            committee_ids=["C1"],
+            max_as_of="2026-10-14",
+            raw_path=tmp_path / "reports.csv",
+            retrieved_at="2026-10-17T12:00:00Z",
+        )
+    except ValueError as exc:
+        assert "cannot reconstruct a historical cutoff" in str(exc)
+    else:
+        raise AssertionError("current-version FEC bulk source backfilled a stale cutoff")
+    assert calls["n"] == 0
 
 
 def test_stale_finance_fallback_makes_strict_refresh_fail_closed(

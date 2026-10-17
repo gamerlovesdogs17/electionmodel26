@@ -1,4 +1,4 @@
-"""OpenFEC / FEC bulk campaign-finance ingest → Dem fundraising share by Senate race."""
+"""Official FEC campaign-finance ingest → fundraising share by Senate race."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import json
 import os
 import time
 import zipfile
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError
@@ -20,7 +20,7 @@ import pandas as pd
 from midterms.config import MANIFESTS_DIR, NORMALIZED_DIR, RAW_DIR
 from midterms.evidence.tickets import TICKETS_2026
 
-PARSER_VERSION = "fec-v2-report-receipt-asof"
+PARSER_VERSION = "fec-v3-report-receipt-asof-bulk-current"
 REPORT_FINANCE_SCHEMA_VERSION = "fec-report-finance-v1"
 OPENFEC = "https://api.open.fec.gov/v1"
 # FEC all-candidates summary (no API key; same underlying filings as OpenFEC).
@@ -29,6 +29,12 @@ CANDIDATE_COMMITTEE_URL = (
     "https://www.fec.gov/files/bulk-downloads/{cycle}/ccl{yy}.zip"
 )
 FORM3_ENDPOINT = "/reports/house-senate/"
+HOUSE_SENATE_REPORTS_BULK_URL = (
+    "https://www.fec.gov/files/bulk-downloads/{cycle}/"
+    "{cycle}_HOUSE_SENATE_CAMPAIGNS_DOWNLOAD.csv"
+)
+FORM3_BULK_SCHEMA_VERSION = "fec-house-senate-report-summary-bulk-v1"
+CURRENT_BULK_MAX_BACKFILL_DAYS = 1
 REQUIRED_FINANCE_CUTOFFS: dict[int, tuple[str, ...]] = {
     2018: ("2018-09-07", "2018-10-07"),
     2020: ("2020-09-04", "2020-10-04"),
@@ -641,13 +647,11 @@ def _required_race_ids(races: pd.DataFrame, election_id: str) -> list[str]:
 def _current_ticket_relevant_links(
     links: pd.DataFrame,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
-    """Limit the current Form 3 query to committees relevant to modeled races.
+    """Limit the current Form 3 normalization to relevant committees.
 
-    The public ``DEMO_KEY`` is a shared, tightly rate-limited credential.  The
-    former refresh queried every Senate filer in the cycle even though the
-    normalized feature uses the two declared ticket identities.  That made a
-    clean GitHub runner exhaust the shared quota before it could seal a fresh
-    receipt.
+    The current-cycle source is the FEC's complete, nightly House/Senate report
+    summary download.  Filtering happens only after its exact bytes have been
+    sealed, and therefore does not require an OpenFEC API key.
 
     For an unambiguous D/R ticket, retain every principal committee linked to
     the two matched candidates.  When either side cannot be matched, retain
@@ -774,24 +778,28 @@ def prepare_official_finance_history(
             "n_source_links": len(links),
             "n_selected_links": len(links),
         }
-        report_batch_size = 25
         if int(cycle) == 2026:
             report_links, query_scope = _current_ticket_relevant_links(links)
-            # Larger batches reduce calls against the shared public DEMO_KEY;
-            # URL size remains comfortably below common proxy limits.
-            report_batch_size = 50
-        reports_archive = external_dir / f"fec_form3_reports_{cycle}.zip"
-        reports, report_meta = fetch_form3_reports_for_committees(
-            cycle=int(cycle),
-            committee_ids=sorted(report_links["committee_id"].astype(str).unique()),
-            max_as_of=max_cutoff,
-            archive_path=reports_archive,
-            batch_size=report_batch_size,
-            # Historical receipts are immutable and reused only after their
-            # query descriptor verifies. The current cycle is always fetched
-            # again so a fresh retrieval cannot merely restamp old API bytes.
-            reuse_existing=immutable_historical,
-        )
+            reports_archive = external_dir / f"fec_house_senate_reports_{cycle}.csv"
+            reports, report_meta = fetch_form3_reports_from_official_bulk(
+                cycle=int(cycle),
+                committee_ids=sorted(report_links["committee_id"].astype(str).unique()),
+                max_as_of=max_cutoff,
+                raw_path=reports_archive,
+            )
+        else:
+            reports_archive = external_dir / f"fec_form3_reports_{cycle}.zip"
+            reports, report_meta = fetch_form3_reports_for_committees(
+                cycle=int(cycle),
+                committee_ids=sorted(report_links["committee_id"].astype(str).unique()),
+                max_as_of=max_cutoff,
+                archive_path=reports_archive,
+                batch_size=25,
+                # Historical receipts are immutable and reused only after their
+                # query descriptor verifies. No API request occurs when the
+                # checked-in archive matches its sealed descriptor.
+                reuse_existing=True,
+            )
         if reports.empty:
             raise ValueError(f"no official Form 3 reports returned for {cycle}")
         all_links.append(report_links)
@@ -825,7 +833,7 @@ def prepare_official_finance_history(
                 **report_meta,
                 "query_scope": query_scope,
                 "path": reports_archive.name,
-                "url": f"{OPENFEC}{FORM3_ENDPOINT}",
+                "url": report_meta.get("source_url") or f"{OPENFEC}{FORM3_ENDPOINT}",
                 "retrieved_at": (
                     previous_form3.get("retrieved_at")
                     if immutable_historical and report_meta.get("reused_sealed_archive")
@@ -907,7 +915,7 @@ def prepare_official_finance_history(
         "linkage_availability_basis": "fec_form2_receipt_date",
         "linkage_policy": "principal_campaign_committee_only",
         "source_provider": "Federal Election Commission",
-        "source_url": f"{OPENFEC}{FORM3_ENDPOINT}",
+        "source_url": "https://www.fec.gov/data/browse-data/?tab=filings",
         "tier": "first_party",
         "cycles": [int(value) for value in cycles],
         "current_as_of": current_cutoff.isoformat(),
@@ -961,8 +969,9 @@ def _openfec_rate_limit_error(exc: HTTPError) -> RuntimeError:
     credential = "public DEMO_KEY" if _fec_api_key() == "DEMO_KEY" else "configured key"
     return RuntimeError(
         "OpenFEC rate limit exhausted for "
-        f"{credential} (Retry-After={retry_after}s); configure the repository "
-        "FEC_API_KEY secret with a personal api.data.gov key before refreshing finance"
+        f"{credential} (Retry-After={retry_after}s); current-cycle finance "
+        "refreshes must use the official House/Senate bulk source, while an "
+        "unavailable historical sealed archive must fail closed"
     )
 
 
@@ -1184,6 +1193,168 @@ def _form3_row(result: dict[str, Any], *, cycle: int, source_url: str) -> dict[s
         "cash_on_hand_end_period": numeric(result.get("cash_on_hand_end_period")),
         "source_url": source_url,
         "parser_version": PARSER_VERSION,
+    }
+
+
+def _parse_bulk_receipt_date(value: Any) -> date | None:
+    """Parse the documented day-month-year receipt clock in the FEC CSV."""
+    text = str(value or "").strip()
+    if not text:
+        return None
+    for fmt in ("%d-%b-%y", "%Y-%m-%d", "%m/%d/%Y"):
+        try:
+            return datetime.strptime(text, fmt).replace(tzinfo=UTC).date()
+        except ValueError:
+            continue
+    return None
+
+
+def _numeric_or_zero(value: Any) -> float:
+    try:
+        return float(value or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def parse_form3_reports_official_bulk(
+    blob: bytes,
+    *,
+    cycle: int,
+    committee_ids: list[str],
+    max_as_of: str | date,
+    source_url: str,
+) -> pd.DataFrame:
+    """Normalize the FEC's nightly House/Senate report-summary CSV.
+
+    The FEC bulk file is a processed current-version report extract.  It
+    exposes the report receipt date, coverage dates, and cumulative Form 3
+    totals without requiring an API credential.  Receipt date remains the
+    availability clock.  Rows received after ``max_as_of`` are rejected.
+
+    The bulk extract has no OpenFEC ``file_number`` column.  ``filing_id`` is
+    therefore a deterministic surrogate derived from every source field in the
+    row.  ``source_record_sha256`` and ``filing_id_basis`` make that distinction
+    explicit; the surrogate is only a stable identity/tiebreak and is never
+    represented as an FEC filing number.
+    """
+    required = {
+        "CMTE_ID", "CMTE_NM", "FORM_TP_CD", "RPT_TP", "RECEIPT_DT",
+        "CVG_START_DT", "CVG_END_DT", "TTL_RECEIPTS", "TTL_DISB", "COH_COP",
+    }
+    source = pd.read_csv(io.BytesIO(blob), dtype=str, keep_default_na=False)
+    missing = sorted(required - set(source.columns))
+    if missing:
+        raise ValueError(f"FEC House/Senate bulk file missing columns: {missing}")
+    selected_ids = set(map(str, committee_ids))
+    cutoff = pd.Timestamp(max_as_of).date()
+    source = source[
+        source["CMTE_ID"].astype(str).isin(selected_ids)
+        & source["FORM_TP_CD"].astype(str).eq("F3")
+    ].copy()
+    rows: list[dict[str, Any]] = []
+    for source_row in source.to_dict(orient="records"):
+        received = _parse_bulk_receipt_date(source_row.get("RECEIPT_DT"))
+        if received is None or received > cutoff:
+            continue
+        canonical = json.dumps(
+            {str(key): str(value) for key, value in sorted(source_row.items())},
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+        record_sha256 = _sha256_bytes(canonical)
+        coverage_start = _coverage_iso(source_row.get("CVG_START_DT", ""))
+        coverage_end = _coverage_iso(source_row.get("CVG_END_DT", ""))
+
+        committee_id = str(source_row.get("CMTE_ID") or "")
+        report_type = str(source_row.get("RPT_TP") or "")
+        rows.append({
+            "cycle": int(cycle),
+            "committee_id": committee_id,
+            "committee_name": str(source_row.get("CMTE_NM") or ""),
+            "report_type": report_type,
+            "coverage_start_date": coverage_start,
+            "coverage_end_date": coverage_end,
+            "receipt_date": received.isoformat(),
+            # Fits signed int64 while remaining deterministic across platforms.
+            "filing_id": int(record_sha256[:15], 16),
+            "filing_id_basis": "synthetic_bulk_row_sha256",
+            "amendment_indicator": "current_processed_version",
+            "amendment_chain_id": "|".join((
+                committee_id, report_type, str(coverage_start), str(coverage_end),
+            )),
+            "receipts": _numeric_or_zero(source_row.get("TTL_RECEIPTS")),
+            "disbursements": _numeric_or_zero(source_row.get("TTL_DISB")),
+            "cash_on_hand_end_period": _numeric_or_zero(source_row.get("COH_COP")),
+            "source_record_sha256": record_sha256,
+            "source_url": source_url,
+            "source_mode": FORM3_BULK_SCHEMA_VERSION,
+            "parser_version": PARSER_VERSION,
+        })
+    frame = pd.DataFrame(rows)
+    if frame.empty:
+        return frame
+    return frame.sort_values(
+        ["committee_id", "receipt_date", "filing_id"], kind="stable",
+    ).drop_duplicates(
+        ["committee_id", "amendment_chain_id", "receipt_date"], keep="last",
+    ).reset_index(drop=True)
+
+
+def fetch_form3_reports_from_official_bulk(
+    *,
+    cycle: int,
+    committee_ids: list[str],
+    max_as_of: str | date,
+    raw_path: Path,
+    retrieved_at: str | datetime | None = None,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Download, atomically seal, and parse the official no-key report CSV."""
+    cutoff = pd.Timestamp(max_as_of).date()
+    retrieval_time = pd.Timestamp(retrieved_at or datetime.now(UTC))
+    if retrieval_time.tzinfo is None:
+        retrieval_time = retrieval_time.tz_localize("UTC")
+    else:
+        retrieval_time = retrieval_time.tz_convert("UTC")
+    retrieval_date = retrieval_time.date()
+    if cutoff > retrieval_date:
+        raise ValueError("FEC current bulk cutoff cannot be later than retrieval date")
+    if cutoff < retrieval_date - timedelta(days=CURRENT_BULK_MAX_BACKFILL_DAYS):
+        raise ValueError(
+            "FEC current-version bulk extract cannot reconstruct a historical "
+            f"cutoff older than {CURRENT_BULK_MAX_BACKFILL_DAYS} day; reuse a "
+            "sealed versioned archive instead"
+        )
+    url = HOUSE_SENATE_REPORTS_BULK_URL.format(cycle=int(cycle))
+    blob = _download_bytes(url)
+    temporary = raw_path.with_name(f".{raw_path.name}.refreshing")
+    raw_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        temporary.write_bytes(blob)
+        temporary.replace(raw_path)
+    finally:
+        if temporary.is_file():
+            temporary.unlink()
+    frame = parse_form3_reports_official_bulk(
+        blob,
+        cycle=int(cycle),
+        committee_ids=committee_ids,
+        max_as_of=cutoff,
+        source_url=url,
+    )
+    return frame, {
+        "schema_version": FORM3_BULK_SCHEMA_VERSION,
+        "cycle": int(cycle),
+        "max_as_of": cutoff.isoformat(),
+        "retrieved_at": retrieval_time.isoformat(),
+        "source_url": url,
+        "raw_sha256": _sha256_bytes(blob),
+        "n_source_bytes": len(blob),
+        "n_selected_committees": len(set(map(str, committee_ids))),
+        "n_reports": len(frame),
+        "availability_basis": "fec_receipt_date",
+        "filing_id_basis": "synthetic_bulk_row_sha256",
+        "api_key_required": False,
     }
 
 

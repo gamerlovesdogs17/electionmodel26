@@ -31,6 +31,8 @@ data/raw/external/current_candidates_2026/* -text -whitespace
 # on Windows and Linux so exact source hashes remain reproducible.
 data/raw/external/historical_presidential_approval_polls_1937_2024.csv -text
 data/raw/external/fec_form2_*.csv -text
+# Nightly House/Senate report summary is hashed as exact official source bytes.
+data/raw/external/fec_house_senate_reports_*.csv -text
 data/raw/external/pollster_ratings_*.csv -text
 data/raw/external/census_state_urban_rural_2020_2010.xlsx -text
 data/raw/external/census_acs5_* -text

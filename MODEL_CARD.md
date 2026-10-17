@@ -120,7 +120,7 @@ future-version research candidates.
 | Pollster quality | VoteHub plus sealed FiveThirtyEight snapshots | Exact source-commit dates are sealed for the 2018/2020/2023 content vintages; none was public by the formal 2018 cutoffs, and the mismatched 2021 file is excluded |
 | Economics | Sealed ALFRED observations-by-vintage archive | All formal 60/30 cutoffs plus the current cutoff are source-ready; FRED latest, World Bank and fixtures cannot clear the gate |
 | Approval | Vendored compiled individual-poll archive plus VoteHub current polls | Formal historical cutoffs use the sealed point-in-time 30-day aggregate and pass source readiness |
-| Finance | Official FEC candidate/committee links plus Form 3 report summaries | Formal cutoffs use receipt-date availability and as-of amendment resolution; source readiness is complete |
+| Finance | Official FEC candidate/committee links plus Form 3 report summaries | Historical cutoffs reuse sealed receipt/version archives; the current cycle uses the nightly FEC House/Senate report-summary bulk CSV with no API credential. Receipt date remains the availability clock; source readiness is complete when the refreshed hashes and cutoff coverage pass. |
 | Candidate state | Official race universe, bitemporal candidate events, and archived official pages | Historical replay retains the conditional identity contract. Current identities and sources are ready; Alaska is covered by a separate limited-validation RCV adapter. |
 | Expert ratings | **Wikipedia multi-rater** (Cook / IE / Sabato core; WH/RCP/DDHQ/Fox/Econ extended) | Ablatable; CC BY-SA page; Solid/Likely/Lean/Tilt/Tossup |
 | Licensed ratings | Optional local CSV via `COOK_RATINGS_CSV` | Dormant adapter only — no vendor license required |

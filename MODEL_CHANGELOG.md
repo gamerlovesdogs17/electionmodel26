@@ -4,6 +4,24 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-10-17 — keyless current-cycle FEC finance refresh
+
+- Replaced the current-cycle OpenFEC API refresh with the FEC's official,
+  nightly House/Senate campaign report-summary CSV. The exact CSV bytes and
+  SHA-256 are sealed before candidate-committee filtering; no API key or shared
+  `DEMO_KEY` quota is involved.
+- Receipt date remains the availability clock. The bulk source is used only for
+  the current-cycle cutoff; the existing historical point-in-time cycles keep
+  their sealed versioned response archives so later amendments cannot leak
+  backward.
+- The FEC bulk file omits OpenFEC filing numbers. Normalized current-cycle rows
+  therefore carry an explicitly labeled deterministic row-hash surrogate plus
+  the full source-record SHA-256. It is an identity/tiebreak only and is never
+  represented as an official filing number.
+- Removed the `FEC_API_KEY` GitHub Actions secret requirement from evidence
+  preparation and research rebuild workflows. Strict source readiness and
+  transactional rollback remain unchanged.
+
 ## 2026-10-04 — v0.9.23 Alaska ranked-choice adapter (validation limited)
 
 - Added a separate Alaska IRV adapter without changing the ordinary D-v-R

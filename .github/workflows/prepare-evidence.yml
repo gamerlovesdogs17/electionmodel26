@@ -78,22 +78,10 @@ jobs:
       - name: Audit source readiness before refresh
         run: python -m midterms.cli source-readiness --election-id senate-2026 --as-of "$AS_OF"
 
-      - name: Require personal FEC key for current finance refresh
-        if: inputs.refresh_safe_sources
-        shell: bash
-        env:
-          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
-        run: |
-          if [[ -z "${FEC_API_KEY:-}" ]]; then
-            echo "::error::Set the repository Actions secret FEC_API_KEY to a personal api.data.gov key. The shared OpenFEC DEMO_KEY is not reliable on hosted runners."
-            exit 1
-          fi
-
       - name: Refresh publication-safe adapters
         if: inputs.refresh_safe_sources
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
         run: python -m midterms.cli prepare-evidence --election-id senate-2026 --as-of "$AS_OF" --mode refresh-safe --strict
 
       - name: Strict publication-domain eligibility before seal
