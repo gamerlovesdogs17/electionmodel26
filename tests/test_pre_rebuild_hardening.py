@@ -933,6 +933,64 @@ def test_prepare_evidence_reverts_live_poll_merge_that_breaks_forecast_coverage(
     assert calls["n"] == 2
 
 
+def test_prepare_evidence_keeps_healthy_poll_refresh_when_unrelated_domain_is_red(
+    monkeypatch, tmp_path,
+):
+    """A finance blocker must not roll back a successful poll transaction."""
+    from midterms.evidence import preparation
+
+    polls_path = tmp_path / "polls.parquet"
+    polls_path.write_bytes(b"SEALED_POLLS")
+    monkeypatch.setattr(preparation, "_poll_snapshot_paths", lambda: (polls_path,))
+
+    def fake_refresh(*, as_of: str):
+        polls_path.write_bytes(b"FRESH_POLLS")
+        return {"results": {"polls": {"n_live": 2, "status": "live_merged"}}}
+
+    calls = {"n": 0}
+
+    def finance_red_readiness(**kwargs):
+        calls["n"] += 1
+        return {
+            "ready_for_expensive_rebuild": False,
+            "blockers": [{"domain": "finance", "status": "stale_retrieval"}],
+            "domains": {
+                "polls": {
+                    "status": "ready",
+                    "current_race_coverage": {"races": []},
+                }
+            },
+            "forecast_coverage": {
+                "summary": {
+                    "forecast_complete": True,
+                    "n_fail": 0,
+                    "n_races": 1,
+                }
+            },
+        }
+
+    monkeypatch.setattr(preparation, "refresh_safe_evidence", fake_refresh)
+    monkeypatch.setattr(
+        preparation, "write_source_readiness", finance_red_readiness
+    )
+
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-17",
+        mode="refresh-safe",
+        strict=True,
+    )
+
+    assert polls_path.read_bytes() == b"FRESH_POLLS"
+    assert report["strict_failure"] is True
+    assert report["strict_failure_reasons"] == ["source_readiness_not_green"]
+    assert report["refresh"]["results"]["polls"]["status"] == "live_merged"
+    assert "poll_refresh_reverted_coverage_regression" not in (
+        report.get("strict_warnings") or []
+    )
+    assert calls["n"] == 1
+
+
 def test_refresh_safe_falls_back_to_sealed_votehub_when_live_fetch_fails(monkeypatch, tmp_path):
     from midterms import config
     from midterms.evidence import (

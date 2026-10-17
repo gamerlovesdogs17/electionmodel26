@@ -415,6 +415,11 @@ def prepare_evidence(
     blocking_forecast_incomplete = bool(coverage_state["blocking_forecast_incomplete"])
     multiway_withheld_only = bool(coverage_state["multiway_withheld_only"])
     readiness_red = not readiness["ready_for_expensive_rebuild"]
+    poll_domain_red = any(
+        str(blocker.get("domain") or "") in {"polls", "generic_ballot"}
+        for blocker in (readiness.get("blockers") or [])
+        if isinstance(blocker, dict)
+    )
     warnings: list[str] = []
 
     poll_status = polls.get("status")
@@ -430,7 +435,7 @@ def prepare_evidence(
         mode == "refresh-safe"
         and poll_snapshot is not None
         and polls_may_have_mutated
-        and (blocking_forecast_incomplete or readiness_red)
+        and (blocking_forecast_incomplete or poll_domain_red)
     ):
         restored = _restore_poll_artifacts(poll_snapshot)
         readiness = write_source_readiness(election_id=election_id, as_of=as_of)
@@ -440,6 +445,11 @@ def prepare_evidence(
         blocking_forecast_incomplete = bool(coverage_state["blocking_forecast_incomplete"])
         multiway_withheld_only = bool(coverage_state["multiway_withheld_only"])
         readiness_red = not readiness["ready_for_expensive_rebuild"]
+        poll_domain_red = any(
+            str(blocker.get("domain") or "") in {"polls", "generic_ballot"}
+            for blocker in (readiness.get("blockers") or [])
+            if isinstance(blocker, dict)
+        )
         polls = {
             **polls,
             "status": "reverted_coverage_regression",
