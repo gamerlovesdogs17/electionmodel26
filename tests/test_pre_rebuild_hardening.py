@@ -736,8 +736,14 @@ def test_prepare_evidence_strict_fails_multiway_with_evidence_fail(monkeypatch):
 
 
 def test_prepare_evidence_strict_allows_live_poll_outage_when_sealed_ready(monkeypatch):
-    """CI often cannot reach VoteHub; sealed green readiness must still pass --strict."""
-    from midterms.evidence import preparation
+    """A fresh sealed fallback may carry a transient VoteHub outage."""
+    from midterms.evidence import eligibility, preparation
+
+    monkeypatch.setattr(
+        eligibility,
+        "domain_freshness_from_provenance",
+        lambda domain, **kwargs: {"domain": domain, "status": "fresh"},
+    )
 
     monkeypatch.setattr(
         preparation,
@@ -770,6 +776,59 @@ def test_prepare_evidence_strict_allows_live_poll_outage_when_sealed_ready(monke
     )
     assert report.get("strict_failure") is not True
     assert "poll_refresh_failed_nonblocking" in (report.get("strict_warnings") or [])
+
+
+def test_prepare_evidence_strict_blocks_stale_poll_fallback(monkeypatch):
+    """Green coverage cannot make a stale sealed poll fallback publishable."""
+    from midterms.evidence import eligibility, preparation
+
+    monkeypatch.setattr(
+        eligibility,
+        "domain_freshness_from_provenance",
+        lambda domain, **kwargs: {
+            "domain": domain,
+            "status": "stale_retrieval",
+        },
+    )
+    monkeypatch.setattr(
+        preparation,
+        "refresh_safe_evidence",
+        lambda *, as_of: {
+            "results": {
+                "polls": {
+                    "status": "refresh_failed",
+                    "error": "simulated VoteHub unreachable",
+                }
+            }
+        },
+    )
+    monkeypatch.setattr(
+        preparation,
+        "write_source_readiness",
+        lambda **kwargs: {
+            "ready_for_expensive_rebuild": True,
+            "blockers": [],
+            "forecast_coverage": {
+                "summary": {"forecast_complete": True, "n_fail": 0},
+            },
+        },
+    )
+
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-17",
+        mode="refresh-safe",
+        strict=True,
+    )
+
+    assert report["strict_failure"] is True
+    assert "poll_refresh_unusable_or_stale_fallback" in report[
+        "strict_failure_reasons"
+    ]
+    assert "poll_refresh_fallback_stale" in report["strict_warnings"]
+    assert report["strict_failure_detail"]["polls_refresh"][
+        "fallback_freshness"
+    ]["status"] == "stale_retrieval"
 
 
 def test_prepare_evidence_strict_blocks_known_votehub_subject_coverage_gap(monkeypatch):
@@ -846,7 +905,9 @@ def test_prepare_evidence_strict_blocks_when_poll_outage_and_readiness_red(monke
         strict=True,
     )
     assert report["strict_failure"] is True
-    assert "poll_refresh_failed" in report["strict_failure_reasons"]
+    assert "poll_refresh_unusable_or_stale_fallback" in report[
+        "strict_failure_reasons"
+    ]
     assert "source_readiness_not_green" in report["strict_failure_reasons"]
 
 
@@ -854,7 +915,13 @@ def test_prepare_evidence_reverts_live_poll_merge_that_breaks_forecast_coverage(
     monkeypatch, tmp_path,
 ):
     """Regressive live VoteHub pulls must roll back to the sealed poll snapshot."""
-    from midterms.evidence import preparation
+    from midterms.evidence import eligibility, preparation
+
+    monkeypatch.setattr(
+        eligibility,
+        "domain_freshness_from_provenance",
+        lambda domain, **kwargs: {"domain": domain, "status": "fresh"},
+    )
 
     polls_path = tmp_path / "polls.parquet"
     polls_path.write_bytes(b"GOOD_POLLS")
