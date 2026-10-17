@@ -4,7 +4,7 @@
   "publishable": true,
   "run_class": "publication",
   "election_id": "senate-2026",
-  "as_of": "2026-10-10",
+  "as_of": "2026-10-17",
   "reasons": [],
   "domains": {
     "races": {
@@ -26,12 +26,12 @@
       "effective_eligible": true
     },
     "polls": {
-      "n": 246,
+      "n": 251,
       "tier_counts": {
-        "aggregator": 246
+        "aggregator": 251
       },
       "blocked_n": 0,
-      "eligible_n": 246,
+      "eligible_n": 251,
       "eligible": true,
       "canonical_source_contract": {
         "schema_version": "canonical-domain-contract-v1",
@@ -45,12 +45,12 @@
       },
       "source_lineage": {
         "ok": true,
-        "schema_version": "votehub-poll-lineage-v3",
-        "raw_canonical_json_sha256": "02ecfa6eec7ac0f57ae88c70a29c4d39ff6c7e92157d2e2414b4b2a34b40dda8",
-        "parser_version": "votehub-ingest-v3-race-scoped-candidate-level"
+        "schema_version": "votehub-poll-lineage-v4-append-only-receipts",
+        "raw_canonical_json_sha256": "869c5f98143c2f66f96c834391041a3235c4b2480a48837389a2853c2525d93d",
+        "parser_version": "votehub-ingest-v4-current-api-race-scoped-candidate-level"
       },
       "stale": false,
-      "latest_age_hours": 72.0,
+      "latest_age_hours": 240.0,
       "freshness": {
         "policy_version": "domain-freshness-v2",
         "domain": "polls",
@@ -61,8 +61,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 1.293948716099537,
-        "observation_age_days": 5.046738572048611
+        "retrieval_age_days": 0.0003440153819444445,
+        "observation_age_days": 10.95359701488426
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -468,7 +468,9 @@
           "timeline_status": "degraded_no_event_for_race",
           "modeled_candidate_id": "senate-2026-KY:charles-booker",
           "opposing_candidate_id": "senate-2026-KY:andy-barr",
-          "matchup_ids_seen": [],
+          "matchup_ids_seen": [
+            "senate-2026-KY:charles-booker|senate-2026-KY:andy-barr"
+          ],
           "structural_gap": null,
           "race_evidence_sha256": "deb2bda3283da36bfde8669c9438b58775e4f95a6b293e24afd88d6809c34a16",
           "identity_source": "reviewed_current_candidate_registry",
@@ -1010,14 +1012,16 @@
           "binary_score_exclusion_reason": "no_validated_non_major_party_margin_transform",
           "candidate_identity_eligible": true,
           "probability_model_supported": true,
-          "probability_model_support_status": "limited_supported_prior_only",
-          "probability_model_support_reason": "state_structural_prior_only_zero_candidate_compatible_polls",
+          "probability_model_support_status": "limited_supported",
+          "probability_model_support_reason": "limited_validation_exception_model-v1",
           "modeled_side": "modeled",
           "opposing_side": "opposing",
           "timeline_status": "degraded_no_event_for_race",
           "modeled_candidate_id": "senate-2026-SD:brian-bengs",
           "opposing_candidate_id": "senate-2026-SD:mike-rounds",
-          "matchup_ids_seen": [],
+          "matchup_ids_seen": [
+            "senate-2026-SD:brian-bengs|senate-2026-SD:mike-rounds"
+          ],
           "structural_gap": null,
           "race_evidence_sha256": "56d09d34b5a4e5403d79f40f203dfce95cabc0630173ea9ffbd1e724e60a5468",
           "identity_source": "reviewed_current_candidate_registry",
@@ -1199,6 +1203,7 @@
             "vh-us-202har82b4bcdc",
             "vh-us-202pubfd67a5f3",
             "vh-us-202qua7f691cd6",
+            "vh-us-202quaa7f32247",
             "vh-us-202tav16c902e1",
             "vh-us-202tav1d399417",
             "vh-us-202tav507e89fe",
@@ -1356,6 +1361,11 @@
           "reason": "race_ineligible_for_binary_scoring"
         },
         {
+          "poll_id": "vh-us-202quaa7f32247",
+          "race_id": "senate-2026-MT",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
           "poll_id": "vh-us-202tav16c902e1",
           "race_id": "senate-2026-MT",
           "reason": "matchup_not_selected_by_reviewed_current_registry"
@@ -1416,8 +1426,53 @@
           "reason": "race_ineligible_for_binary_scoring"
         },
         {
+          "poll_id": "vh-us-202chaddcc63e6",
+          "race_id": "senate-2026-NE",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
           "poll_id": "vh-us-202gba71e992b6",
           "race_id": "senate-2026-NE",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
+          "poll_id": "vh-us-202impbfd9cc63",
+          "race_id": "senate-2026-NE",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
+          "poll_id": "vh-us-202wed094a8c88",
+          "race_id": "senate-2026-NE",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
+          "poll_id": "vh-us-202pub3b88a61b",
+          "race_id": "senate-2026-SD",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
+          "poll_id": "vh-us-202pub582855c6",
+          "race_id": "senate-2026-SD",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
+          "poll_id": "vh-us-202pub9b574ef8",
+          "race_id": "senate-2026-SD",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
+          "poll_id": "vh-us-202pubc334ec70",
+          "race_id": "senate-2026-SD",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
+          "poll_id": "vh-us-202pube6bd07cf",
+          "race_id": "senate-2026-SD",
+          "reason": "race_ineligible_for_binary_scoring"
+        },
+        {
+          "poll_id": "vh-us-202pubfcda5d02",
+          "race_id": "senate-2026-SD",
           "reason": "race_ineligible_for_binary_scoring"
         }
       ],
@@ -1444,7 +1499,7 @@
         }
       ],
       "traceable": true,
-      "snapshot_sha256": "70347d98e184df934bbed3b02c465f715383053be40b6b260dca72b1b923f9ef",
+      "snapshot_sha256": "9ae5c6ea130ac8784d9f47f3cb0f88d0aaed8ea59a864191eeadf032758ca5d2",
       "candidate_timeline_snapshot_sha256": "333f778c1deef69ce01c1d60aef5689bcf0eed31f48fb20e229a6e98cd668c05",
       "reasons": [],
       "eligible": true,
@@ -1472,11 +1527,15 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 9.046738572048612,
-        "observation_age_days": 9.046738572048612,
+        "retrieval_age_days": 14.0,
+        "observation_age_days": 14.0,
+        "timestamp_granularity": "date",
+        "age_basis": "calendar_days",
         "required_for_effective_input": true,
         "identity_required_races": 35,
-        "identity_freshness_basis": "reviewed_current_candidate_registry"
+        "identity_freshness_basis": "reviewed_current_candidate_registry",
+        "freshness_checked_at": "2026-10-17T22:53:10.782086+00:00",
+        "eligibility_checked_at": "2026-10-17T22:53:10.782086+00:00"
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -1486,7 +1545,7 @@
       "tier": "first_party",
       "eligible": true,
       "n": 35,
-      "source_url": "https://api.open.fec.gov/v1/reports/house-senate/",
+      "source_url": "https://www.fec.gov/data/browse-data/?tab=filings",
       "source_mix": {
         "fec_form3_report_summaries": 35
       },
@@ -1503,8 +1562,8 @@
         "operational_freshness_clock": "source retrieved_at + latest receipt date"
       },
       "freshness_provenance": {
-        "retrieved_at": "2026-09-29T13:06:57.420583+00:00",
-        "observed_at": "2026-09-27T00:00:00+00:00",
+        "retrieved_at": "2026-10-17T22:52:43.063867+00:00",
+        "observed_at": "2026-10-16T00:00:00+00:00",
         "source_available": true
       },
       "freshness": {
@@ -1517,8 +1576,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 12.500240648634259,
-        "observation_age_days": 15.04673857204861
+        "retrieval_age_days": 0.0003208127199074074,
+        "observation_age_days": 1.9535970148842592
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -1565,8 +1624,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 17.080766349826387,
-        "observation_age_days": 18.04673857204861
+        "retrieval_age_days": 22.98762479266204,
+        "observation_age_days": 23.95359701488426
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -1575,8 +1634,8 @@
     "approval": {
       "tier": "aggregator",
       "eligible": true,
-      "n": 15,
-      "source_url": "https://api.votehub.com/polls?subject=donald-trump&poll_type=approval",
+      "n": 21,
+      "source_url": "https://polling.votehub.com/polls?subject=Donald%20Trump&poll_type=approval",
       "blocked_reason": null,
       "canonical_source_contract": {
         "schema_version": "canonical-domain-contract-v1",
@@ -1589,8 +1648,8 @@
         "operational_freshness_clock": "source retrieved_at + poll observation date"
       },
       "freshness_provenance": {
-        "retrieved_at": "2026-10-10T18:04:03.278974+00:00",
-        "observed_at": "2026-10-06T00:00:00+00:00",
+        "retrieved_at": "2026-10-17T22:52:42.943850+00:00",
+        "observed_at": "2026-10-13T00:00:00+00:00",
         "source_available": true
       },
       "freshness": {
@@ -1603,8 +1662,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 1.2939228431828704,
-        "observation_age_days": 6.046738572048611
+        "retrieval_age_days": 0.0003222018055555555,
+        "observation_age_days": 4.953597014884259
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -1647,8 +1706,8 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 13.0590649609375,
-        "observation_age_days": 256.04673857204864
+        "retrieval_age_days": 18.96592340377315,
+        "observation_age_days": 261.9535970148843
       },
       "production_role": "required_core",
       "hard_dependency": true,
@@ -1670,7 +1729,7 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 19.994738719699072,
+        "retrieval_age_days": 25.901597162534724,
         "observation_age_days": null
       },
       "production_role": "disabled",
@@ -1692,7 +1751,7 @@
         },
         "source_available": true,
         "reasons": [],
-        "retrieval_age_days": 20.04673857204861,
+        "retrieval_age_days": 25.953597014884256,
         "observation_age_days": null
       },
       "production_role": "disabled",
@@ -1742,13 +1801,13 @@
     "untraceable"
   ],
   "note": "Fresh audit R-04: publishable runs reject synthetic/imputed/untraceable evidence across races/polls/results/finance/economics/approval/ratings/markets.",
-  "checked_at": "2026-10-12T01:07:18.236404+00:00",
+  "checked_at": "2026-10-17T22:53:10.795939+00:00",
   "evidence_fingerprint": {
-    "sha256": "0f39c976163851e634fc8791ef2f7052601f9342beec8dcd6226905e9b7836be",
+    "sha256": "fcedfff17d5c7b29dd40d4454c58a66899780563b03477bbc712752ac1c04c14",
     "manifests": {
-      "fundraising_shares.json": "402cec51d741875fe238d02039760c62f2c611848d5fe31edb3f1fba2a181905",
+      "fundraising_shares.json": "a5effb407dd72d386ac2b90ae0a01ab2b76c688a08d7fb9fed9c855682340ca6",
       "economics_vintages.json": "565f2a4b280d9d80f4ebed0efeecef8a1b49a362e6381a2afb2cc7441c51ecca",
-      "pres_approval.json": "d95738bb6529c4a8c9099d36546be79bab1e5584725b6341a8d447b4a6e18dea",
+      "pres_approval.json": "2c3895802e427341aba3c16b069e4b85025131421b97c0faf6cf1c41a39d327b",
       "demographic_vintages.json": "e8be3309a8ed8626010b81cc1ce646d950ccaf32b3ad662a964d0fe086d53690",
       "candidate_timeline.json": "22eceda5c4dbba75e448439b1b7cfb6b1523b60c69edcf8d1dac006160732d91",
       "expert_ratings.json": "626aba81604531c17b221c41165c3cff6cb35ea4c9fd613672fdfc1da5b08ad6",
@@ -1758,19 +1817,8 @@
       "wiki_ratings.json": "130fec70c426abab9027a85f83c930d796c6a523c6edc9aabe40a3942585c4fd",
       "alaska_rcv_sources.json": "a7e246f20675678c0e7ae04f0e2fe0f865a4a47fbcef4af88b78c248612ef2ec"
     },
-    "generated_at": "2026-10-13T20:44:46.870442+00:00"
+    "generated_at": "2026-10-17T22:53:10.799361+00:00"
   },
   "PUBLIC_LIVE_ENABLED": false,
-  "identity_checked_at": "2026-10-13T20:44:46.921260+00:00",
-  "sealed_eligibility_verification": {
-    "schema_version": "sealed-eligibility-verification-v1",
-    "ok": true,
-    "evidence_bundle_id": "eb-dcb6d43248b5fcc9",
-    "evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
-    "eligibility_checked_at": "2026-10-12T01:07:18.236404+00:00",
-    "freshness_clock": "frozen_at_evidence_seal"
-  },
-  "forecast_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
-  "snapshot_id": "56edc33e21722cb1561b9dea39747d3940ae02fabe9a7051a40dfc1f5e6ed06e",
-  "forecast_generated_at": "2026-10-13T20:44:46.870459+00:00"
+  "identity_checked_at": "2026-10-17T22:53:10.799368+00:00"
 }

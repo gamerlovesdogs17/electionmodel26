@@ -1,8 +1,8 @@
 {
-  "schema_version": "votehub-poll-lineage-v3",
-  "parser_version": "votehub-ingest-v3-race-scoped-candidate-level",
-  "n_live": 287,
-  "n_warehouse_polls": 4444,
+  "schema_version": "votehub-poll-lineage-v4-append-only-receipts",
+  "parser_version": "votehub-ingest-v4-current-api-race-scoped-candidate-level",
+  "n_live": 302,
+  "n_warehouse_polls": 4459,
   "election_id": "senate-2026",
   "states": [
     "AK",
@@ -14,6 +14,7 @@
     "ID",
     "IL",
     "KS",
+    "KY",
     "MA",
     "ME",
     "MI",
@@ -27,11 +28,12 @@
     "OH",
     "RI",
     "SC",
+    "SD",
     "TN",
     "TX",
     "VA"
   ],
-  "generic_ballot_dem_margin": 7.0394828626600345,
+  "generic_ballot_dem_margin": 7.129821279789252,
   "paths": {
     "polls": "normalized/polls.parquet",
     "live": "normalized/polls_live_votehub.parquet",
@@ -39,18 +41,40 @@
   },
   "source": {
     "raw_path": "raw/external/votehub_us_senator.json",
-    "raw_byte_sha256": "e44a5af6cdd2482d03cccf772d56cccff7bb0cc739dfecde11f1c2ab6c5d5c99",
-    "raw_canonical_json_sha256": "02ecfa6eec7ac0f57ae88c70a29c4d39ff6c7e92157d2e2414b4b2a34b40dda8",
-    "retrieved_at": "2026-10-10T18:04:01.043554+00:00",
+    "raw_byte_sha256": "b795c1cabde296dd1c083468c6e0e81a5ed0f4270a43eacb48584ba579731498",
+    "raw_canonical_json_sha256": "869c5f98143c2f66f96c834391041a3235c4b2480a48837389a2853c2525d93d",
+    "retrieved_at": "2026-10-17T22:52:41.059157+00:00",
     "fetch_manifest_path": "data/manifests/fetch_votehub_us_senator.json",
-    "fetch_manifest_sha256": "0570f684539522c55a367e13669d3913dc06c4b7ba946300fc3ecf31cbbf17fe",
-    "fetch_manifest_recorded_raw_sha256": "e44a5af6cdd2482d03cccf772d56cccff7bb0cc739dfecde11f1c2ab6c5d5c99"
+    "fetch_manifest_sha256": "73f3a1702ac7c3cc50eb4e39fe90e13a0d5b7d979fdbf21afdd2aa9bb12d41d6",
+    "fetch_manifest_recorded_raw_sha256": "b795c1cabde296dd1c083468c6e0e81a5ed0f4270a43eacb48584ba579731498"
+  },
+  "source_archive": {
+    "schema_version": "votehub-poll-receipt-archive-v1",
+    "n_receipts": 2,
+    "receipts": [
+      {
+        "raw_byte_sha256": "e44a5af6cdd2482d03cccf772d56cccff7bb0cc739dfecde11f1c2ab6c5d5c99",
+        "raw_canonical_json_sha256": "02ecfa6eec7ac0f57ae88c70a29c4d39ff6c7e92157d2e2414b4b2a34b40dda8",
+        "retrieved_at": "2026-10-10T18:04:01.043554+00:00",
+        "n_polls": 460,
+        "raw_path": "raw/external/votehub_poll_receipts/e44a5af6cdd2482d03cccf772d56cccff7bb0cc739dfecde11f1c2ab6c5d5c99.json",
+        "receipt_path": "manifests/votehub_poll_receipts/e44a5af6cdd2482d03cccf772d56cccff7bb0cc739dfecde11f1c2ab6c5d5c99-0570f684539522c5.json"
+      },
+      {
+        "raw_byte_sha256": "b795c1cabde296dd1c083468c6e0e81a5ed0f4270a43eacb48584ba579731498",
+        "raw_canonical_json_sha256": "869c5f98143c2f66f96c834391041a3235c4b2480a48837389a2853c2525d93d",
+        "retrieved_at": "2026-10-17T22:52:41.059157+00:00",
+        "n_polls": 118,
+        "raw_path": "raw/external/votehub_poll_receipts/b795c1cabde296dd1c083468c6e0e81a5ed0f4270a43eacb48584ba579731498.json",
+        "receipt_path": "manifests/votehub_poll_receipts/b795c1cabde296dd1c083468c6e0e81a5ed0f4270a43eacb48584ba579731498-73f3a1702ac7c3cc.json"
+      }
+    ]
   },
   "outputs": {
-    "live_parquet_byte_sha256": "b4932042776f33a205acaae01173af74665f75615de51661e5b921f171eac3d4",
-    "live_semantic_sha256": "ec2b5770592524e03da99142753f1b29dbef85d4dc3cbf43ed93fd3bb8d3c2ad",
-    "warehouse_parquet_byte_sha256": "4bb5eab0f1a27ba28a86ec102da9c833ac8bb1f96a1efeb1ba793f17a1a61038",
-    "warehouse_current_semantic_sha256": "ec2b5770592524e03da99142753f1b29dbef85d4dc3cbf43ed93fd3bb8d3c2ad"
+    "live_parquet_byte_sha256": "8a537074b17f3ad898e6359a3e0ed753f702edcc7983dc486f039dff4e013ab6",
+    "live_semantic_sha256": "a47f7bc957dbe22a9d3c56590cb2b1f2f54f0fe5d0dc73254237375dd6ce1322",
+    "warehouse_parquet_byte_sha256": "61baa8c792f1696b0ef55862fdfe0288d1ba6a930f0ac0cf8a811b50a2ee1328",
+    "warehouse_current_semantic_sha256": "a47f7bc957dbe22a9d3c56590cb2b1f2f54f0fe5d0dc73254237375dd6ce1322"
   },
   "lineage_verified": true,
   "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0"

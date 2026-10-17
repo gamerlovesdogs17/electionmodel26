@@ -52,7 +52,7 @@
     },
     "current_polls": {
       "path": "data/normalized/polls.parquet",
-      "sha256": "4bb5eab0f1a27ba28a86ec102da9c833ac8bb1f96a1efeb1ba793f17a1a61038"
+      "sha256": "61baa8c792f1696b0ef55862fdfe0288d1ba6a930f0ac0cf8a811b50a2ee1328"
     }
   },
   "formal_lead_days": [
@@ -676,29 +676,29 @@
     "zero_centered_weak": {
       "race_id": "senate-2026-SD",
       "n_compatible_polls": 0,
-      "support_status": "limited_supported_prior_only",
+      "support_status": "limited_supported",
       "prior_location": 0.0,
-      "predictive_mean": -1.794120407794253e-16,
-      "predictive_sd": 21.618472064343713,
-      "interval_90_width": 66.47379410172749
+      "predictive_mean": -15.673556601315367,
+      "predictive_sd": 14.106873812724457,
+      "interval_90_width": 43.37667446871737
     },
     "state_structural_very_large": {
       "race_id": "senate-2026-SD",
       "n_compatible_polls": 0,
-      "support_status": "limited_supported_prior_only",
+      "support_status": "limited_supported",
       "prior_location": -29.39524036154415,
-      "predictive_mean": -29.39524036154416,
-      "predictive_sd": 31.160507525086228,
-      "interval_90_width": 95.81422568453829
+      "predictive_mean": -24.60004732647696,
+      "predictive_sd": 15.154175884000127,
+      "interval_90_width": 46.596982640408896
     },
     "state_structural_extra_large": {
       "race_id": "senate-2026-SD",
       "n_compatible_polls": 0,
-      "support_status": "limited_supported_prior_only",
+      "support_status": "limited_supported",
       "prior_location": -29.39524036154415,
-      "predictive_mean": -29.39524036154413,
-      "predictive_sd": 40.939512478469545,
-      "interval_90_width": 125.88330549074377
+      "predictive_mean": -24.18465046102829,
+      "predictive_sd": 15.619178153019204,
+      "interval_90_width": 48.02679992794022
     }
   },
   "selected_current_adapter_records": {
@@ -722,11 +722,11 @@
         "vh-us-202the39a65ca5"
       ],
       "enop": 1.0,
-      "posterior_location": -11.725862810374425,
-      "posterior_sd": 12.846759310797703,
-      "predictive_sd": 15.134041918455475,
+      "posterior_location": -12.543571877324316,
+      "posterior_sd": 13.772599109060538,
+      "predictive_sd": 15.927475826975696,
       "poll_weighted_location": -6.25,
-      "poll_location_shift": 24.38538099770065,
+      "poll_location_shift": 23.567671930750755,
       "house_effect_treatment": "not_applied_party_direction_not_portable"
     },
     "senate-2026-NE": {
@@ -740,20 +740,23 @@
       "opposing_caucus": "R",
       "support_status": "limited_supported",
       "support_reason": "principal_binary_with_minor_residual_candidate_neutral_path",
-      "n_candidate_compatible_polls": 1,
+      "n_candidate_compatible_polls": 4,
       "prior_mode": "state_structural",
       "prior_location": -20.92841143818746,
       "prior_sd": 30.0,
       "prior_only": false,
       "poll_ids": [
-        "vh-us-202gba71e992b6"
+        "vh-us-202chaddcc63e6",
+        "vh-us-202gba71e992b6",
+        "vh-us-202impbfd9cc63",
+        "vh-us-202wed094a8c88"
       ],
-      "enop": 1.0,
-      "posterior_location": -0.7789049056863694,
-      "posterior_sd": 8.708031106196428,
-      "predictive_sd": 11.824965359208651,
-      "poll_weighted_location": 1.075,
-      "poll_location_shift": 20.14950653250109,
+      "enop": 1.6945740393872828,
+      "posterior_location": -3.1474451285759626,
+      "posterior_sd": 6.208853336230459,
+      "predictive_sd": 10.12669046385936,
+      "poll_weighted_location": -2.351747588528771,
+      "poll_location_shift": 17.780966309611497,
       "house_effect_treatment": "not_applied_party_direction_not_portable"
     },
     "senate-2026-SD": {
@@ -765,21 +768,28 @@
       "opposing_ballot_party": "R",
       "modeled_caucus": "D",
       "opposing_caucus": "R",
-      "support_status": "limited_supported_prior_only",
-      "support_reason": "state_structural_prior_only_zero_candidate_compatible_polls",
-      "n_candidate_compatible_polls": 0,
+      "support_status": "limited_supported",
+      "support_reason": "limited_validation_exception_model-v1",
+      "n_candidate_compatible_polls": 6,
       "prior_mode": "state_structural",
       "prior_location": -29.39524036154415,
       "prior_sd": 30.0,
-      "prior_only": true,
-      "poll_ids": [],
-      "enop": 0.0,
-      "posterior_location": -29.39524036154415,
-      "posterior_sd": 30.0,
-      "predictive_sd": 31.04834939252005,
-      "poll_weighted_location": null,
-      "poll_location_shift": null,
-      "house_effect_treatment": "not_applicable_zero_polls"
+      "prior_only": false,
+      "poll_ids": [
+        "vh-us-202pub3b88a61b",
+        "vh-us-202pub582855c6",
+        "vh-us-202pub9b574ef8",
+        "vh-us-202pubc334ec70",
+        "vh-us-202pube6bd07cf",
+        "vh-us-202pubfcda5d02"
+      ],
+      "enop": 1.6767251231611542,
+      "posterior_location": -24.600047326476954,
+      "posterior_sd": 12.806203148703046,
+      "predictive_sd": 15.099630428783739,
+      "poll_weighted_location": -23.531562475220973,
+      "poll_location_shift": 4.7951930350671965,
+      "house_effect_treatment": "not_applied_party_direction_not_portable"
     }
   },
   "common_shock_sensitivity": {
@@ -788,42 +798,42 @@
     "results": {
       "0.0": {
         "p_modeled_candidate_by_race": {
-          "senate-2026-ID": 0.1755,
-          "senate-2026-NE": 0.46975,
-          "senate-2026-SD": 0.139875
+          "senate-2026-ID": 0.17225,
+          "senate-2026-NE": 0.349375,
+          "senate-2026-SD": 0.046
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": -0.0029730386988244704,
-          "senate-2026-NE": -0.011806580914670847,
-          "senate-2026-SD": -0.006379498848060775
+          "senate-2026-ID": -0.002973038698824474,
+          "senate-2026-NE": -0.011806580914670857,
+          "senate-2026-SD": -0.0063794988480607735
         },
-        "exceptional_seat_count_variance": 0.5192037343750002
+        "exceptional_seat_count_variance": 0.41667685937499993
       },
       "0.2": {
         "p_modeled_candidate_by_race": {
-          "senate-2026-ID": 0.191125,
-          "senate-2026-NE": 0.46975,
-          "senate-2026-SD": 0.14775
+          "senate-2026-ID": 0.188,
+          "senate-2026-NE": 0.361,
+          "senate-2026-SD": 0.04775
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": 0.4450140478157244,
-          "senate-2026-NE": 0.438612951082988,
-          "senate-2026-SD": 0.44253862295840724
+          "senate-2026-ID": 0.4450140478157246,
+          "senate-2026-NE": 0.4386129510829882,
+          "senate-2026-SD": 0.44253862295840707
         },
-        "exceptional_seat_count_variance": 0.666250609375
+        "exceptional_seat_count_variance": 0.5056394374999998
       },
       "0.4": {
         "p_modeled_candidate_by_race": {
-          "senate-2026-ID": 0.201,
-          "senate-2026-NE": 0.47125,
-          "senate-2026-SD": 0.156875
+          "senate-2026-ID": 0.198875,
+          "senate-2026-NE": 0.370125,
+          "senate-2026-SD": 0.048375
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": 0.6309853485399199,
-          "senate-2026-NE": 0.6267773999877534,
-          "senate-2026-SD": 0.629345320979529
+          "senate-2026-ID": 0.6309853485399197,
+          "senate-2026-NE": 0.6267773999877537,
+          "senate-2026-SD": 0.6293453209795291
         },
-        "exceptional_seat_count_variance": 0.8146767343750001
+        "exceptional_seat_count_variance": 0.5994731093750002
       }
     }
   },
@@ -853,7 +863,7 @@
     {
       "race_id": "senate-2026-MT",
       "state": "MT",
-      "n_usable_polls": 17,
+      "n_usable_polls": 18,
       "polls": [
         {
           "poll_id": "vh-us-202tav507e89fe",
@@ -895,19 +905,6 @@
           "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
-          "poll_id": "vh-us-202tav5bb1680a",
-          "pollster_id": "Tavern Research",
-          "field_start": "2026-06-16",
-          "field_end": "2026-06-19",
-          "available_at": "2026-07-01",
-          "population": "LV",
-          "sample_size": 400.0,
-          "modeled_candidate_name": "Seth Bodnar",
-          "opposing_candidate_name": "Kurt Alme",
-          "modeled_margin": -32.432,
-          "margin_definition": "modeled_minus_opposing_two_candidate"
-        },
-        {
           "poll_id": "vh-us-202tavf29ef95a",
           "pollster_id": "Tavern Research",
           "field_start": "2026-06-16",
@@ -918,6 +915,19 @@
           "modeled_candidate_name": "Seth Bodnar",
           "opposing_candidate_name": "Kurt Alme",
           "modeled_margin": 0.0,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202tav5bb1680a",
+          "pollster_id": "Tavern Research",
+          "field_start": "2026-06-16",
+          "field_end": "2026-06-19",
+          "available_at": "2026-07-01",
+          "population": "LV",
+          "sample_size": 400.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -32.432,
           "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
@@ -947,7 +957,7 @@
           "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
-          "poll_id": "vh-us-202gqrcac76706",
+          "poll_id": "vh-us-202gqr0fc65d4b",
           "pollster_id": "GQR",
           "field_start": "2026-07-23",
           "field_end": "2026-07-26",
@@ -956,7 +966,7 @@
           "sample_size": 500.0,
           "modeled_candidate_name": "Seth Bodnar",
           "opposing_candidate_name": "Kurt Alme",
-          "modeled_margin": 6.383,
+          "modeled_margin": 4.762,
           "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
@@ -973,7 +983,7 @@
           "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
-          "poll_id": "vh-us-202gqr0fc65d4b",
+          "poll_id": "vh-us-202gqrcac76706",
           "pollster_id": "GQR",
           "field_start": "2026-07-23",
           "field_end": "2026-07-26",
@@ -982,7 +992,7 @@
           "sample_size": 500.0,
           "modeled_candidate_name": "Seth Bodnar",
           "opposing_candidate_name": "Kurt Alme",
-          "modeled_margin": 4.762,
+          "modeled_margin": 6.383,
           "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
@@ -1051,6 +1061,19 @@
           "margin_definition": "modeled_minus_opposing_two_candidate"
         },
         {
+          "poll_id": "vh-us-202quaa7f32247",
+          "pollster_id": "Quantus Insights",
+          "field_start": "2026-09-14",
+          "field_end": "2026-09-15",
+          "available_at": "2026-09-19",
+          "population": "LV",
+          "sample_size": 625.0,
+          "modeled_candidate_name": "Seth Bodnar",
+          "opposing_candidate_name": "Kurt Alme",
+          "modeled_margin": -29.412,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
           "poll_id": "vh-us-202qua7f691cd6",
           "pollster_id": "Quantus Insights",
           "field_start": "2026-09-14",
@@ -1083,8 +1106,34 @@
     {
       "race_id": "senate-2026-NE",
       "state": "NE",
-      "n_usable_polls": 1,
+      "n_usable_polls": 4,
       "polls": [
+        {
+          "poll_id": "vh-us-202chaddcc63e6",
+          "pollster_id": "Change Research",
+          "field_start": "2025-03-28",
+          "field_end": "2025-04-01",
+          "available_at": "2026-03-13",
+          "population": "LV",
+          "sample_size": 524.0,
+          "modeled_candidate_name": "Dan Osborn",
+          "opposing_candidate_name": "Pete Ricketts",
+          "modeled_margin": -1.099,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202impbfd9cc63",
+          "pollster_id": "Fabrizio-Impact",
+          "field_start": "2026-02-02",
+          "field_end": "2026-02-05",
+          "available_at": "2026-03-13",
+          "population": "LV",
+          "sample_size": 600.0,
+          "modeled_candidate_name": "Dan Osborn",
+          "opposing_candidate_name": "Pete Ricketts",
+          "modeled_margin": -1.053,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
         {
           "poll_id": "vh-us-202gba71e992b6",
           "pollster_id": "GBAO Strategies",
@@ -1097,17 +1146,109 @@
           "opposing_candidate_name": "Pete Ricketts",
           "modeled_margin": 1.075,
           "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202wed094a8c88",
+          "pollster_id": "Wedgewood Polls",
+          "field_start": "2026-09-14",
+          "field_end": "2026-09-16",
+          "available_at": "2026-09-16",
+          "population": "LV",
+          "sample_size": 500.0,
+          "modeled_candidate_name": "Dan Osborn",
+          "opposing_candidate_name": "Pete Ricketts",
+          "modeled_margin": -4.0,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
         }
       ],
-      "votehub_coverage": "sparse",
+      "votehub_coverage": "available",
       "additional_repository_source_ingested": false
     },
     {
       "race_id": "senate-2026-SD",
       "state": "SD",
-      "n_usable_polls": 0,
-      "polls": [],
-      "votehub_coverage": "zero",
+      "n_usable_polls": 6,
+      "polls": [
+        {
+          "poll_id": "vh-us-202pub9b574ef8",
+          "pollster_id": "Public Policy Polling",
+          "field_start": "2025-07-30",
+          "field_end": "2025-07-31",
+          "available_at": "2026-05-28",
+          "population": "RV",
+          "sample_size": 552.0,
+          "modeled_candidate_name": "Brian Bengs",
+          "opposing_candidate_name": "Mike Rounds",
+          "modeled_margin": -18.841,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202pubc334ec70",
+          "pollster_id": "Public Policy Polling",
+          "field_start": "2025-11-13",
+          "field_end": "2025-11-14",
+          "available_at": "2026-05-28",
+          "population": "RV",
+          "sample_size": 814.0,
+          "modeled_candidate_name": "Brian Bengs",
+          "opposing_candidate_name": "Mike Rounds",
+          "modeled_margin": -17.333,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202pubfcda5d02",
+          "pollster_id": "Public Policy Polling",
+          "field_start": "2026-02-17",
+          "field_end": "2026-02-18",
+          "available_at": "2026-05-28",
+          "population": "RV",
+          "sample_size": 685.0,
+          "modeled_candidate_name": "Brian Bengs",
+          "opposing_candidate_name": "Mike Rounds",
+          "modeled_margin": -14.634,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202pub3b88a61b",
+          "pollster_id": "Public Policy Polling",
+          "field_start": "2026-05-29",
+          "field_end": "2026-05-30",
+          "available_at": "2026-06-15",
+          "population": "RV",
+          "sample_size": 726.0,
+          "modeled_candidate_name": "Brian Bengs",
+          "opposing_candidate_name": "Mike Rounds",
+          "modeled_margin": -4.762,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202pube6bd07cf",
+          "pollster_id": "Public Policy Polling",
+          "field_start": "2026-05-29",
+          "field_end": "2026-05-30",
+          "available_at": "2026-06-15",
+          "population": "RV",
+          "sample_size": 726.0,
+          "modeled_candidate_name": "Brian Bengs",
+          "opposing_candidate_name": "Mike Rounds",
+          "modeled_margin": -30.303,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        },
+        {
+          "poll_id": "vh-us-202pub582855c6",
+          "pollster_id": "Public Opinion Strategies",
+          "field_start": "2026-07-06",
+          "field_end": "2026-07-09",
+          "available_at": "2026-08-06",
+          "population": "LV",
+          "sample_size": 500.0,
+          "modeled_candidate_name": "Brian Bengs",
+          "opposing_candidate_name": "Mike Rounds",
+          "modeled_margin": -25.843,
+          "margin_definition": "modeled_minus_opposing_two_candidate"
+        }
+      ],
+      "votehub_coverage": "available",
       "additional_repository_source_ingested": false
     }
   ],
@@ -1117,5 +1258,5 @@
     "reason": "exceptional outcomes are never used to estimate the structural location or uncertainty; every state anchor is derived only from presidential results available at that cutoff"
   },
   "calibration_claim_allowed": false,
-  "artifact_sha256": "3f0790be1a6fad8acfe77ea1e89f971a4c77e76707823e6b71d6f05ad27254b0"
+  "artifact_sha256": "82b15f7d8129de0b9446d8c9fdadd17ff99762eb950e0cfb64ad5ec972aac1d8"
 }
