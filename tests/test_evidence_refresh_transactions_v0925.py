@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import json
 import zipfile
+from email.message import Message
 from pathlib import Path
+from urllib.error import HTTPError
+
+import pandas as pd
 
 from midterms.evidence import fec, preparation
 
@@ -121,6 +125,68 @@ def test_current_form3_receipt_can_atomically_replace_changed_query(
     assert not (tmp_path / ".reports.zip.refreshing").exists()
 
 
+def test_current_finance_query_uses_ticket_candidates_and_state_fallback(monkeypatch):
+    links = pd.DataFrame([
+        {"candidate_id": "D1", "candidate_name": "Alpha, Alice", "committee_id": "C1", "state": "AA", "party": "DEM"},
+        {"candidate_id": "R1", "candidate_name": "Beta, Bob", "committee_id": "C2", "state": "AA", "party": "REP"},
+        {"candidate_id": "X1", "candidate_name": "Other, Casey", "committee_id": "C3", "state": "AA", "party": "DEM"},
+        {"candidate_id": "D2", "candidate_name": "Someone, Dana", "committee_id": "C4", "state": "BB", "party": "DEM"},
+        {"candidate_id": "R2", "candidate_name": "Else, Evan", "committee_id": "C5", "state": "BB", "party": "REP"},
+    ])
+    monkeypatch.setattr(fec, "current_registry_tickets", lambda: {
+        "senate-2026-AA": {
+            "state": "AA", "dem_name": "Alice Alpha", "rep_name": "Bob Beta",
+        },
+        "senate-2026-BB": {
+            "state": "BB", "dem_name": "Missing Person", "rep_name": "Evan Else",
+        },
+    })
+
+    selected, audit = fec._current_ticket_relevant_links(links)
+
+    assert set(selected["candidate_id"]) == {"D1", "R1", "D2", "R2"}
+    assert "X1" not in set(selected["candidate_id"])
+    assert audit["n_matched_races"] == 1
+    assert audit["fallback_races"] == [{
+        "race_id": "senate-2026-BB",
+        "state": "BB",
+        "modeled_candidate_matched": False,
+        "opposing_candidate_matched": True,
+        "fallback": "all_state_senate_principal_committees",
+    }]
+
+
+def test_demo_key_rate_limit_fails_immediately_with_actionable_secret(monkeypatch):
+    headers = Message()
+    headers["Retry-After"] = "33893"
+    error = HTTPError(
+        "https://api.open.fec.gov/v1/reports/house-senate/",
+        429,
+        "Too Many Requests",
+        headers,
+        None,
+    )
+    calls = {"n": 0}
+
+    def rate_limited(*_args, **_kwargs):
+        calls["n"] += 1
+        raise error
+
+    monkeypatch.delenv("FEC_API_KEY", raising=False)
+    monkeypatch.setattr(fec, "urlopen", rate_limited)
+
+    try:
+        fec._get_raw("/reports/house-senate/", {"cycle": 2026})
+    except RuntimeError as exc:
+        message = str(exc)
+        assert "public DEMO_KEY" in message
+        assert "FEC_API_KEY" in message
+        assert "Retry-After=33893s" in message
+    else:
+        raise AssertionError("shared DEMO_KEY rate limit did not fail closed")
+    assert calls["n"] == 1
+
+
 def test_historical_form3_query_change_still_fails_closed(tmp_path: Path):
     archive_path = tmp_path / "reports.zip"
     old_descriptor = {
@@ -160,4 +226,60 @@ def test_workflow_checks_publication_eligibility_before_sealing():
     assert standalone.index("Strict publication-domain eligibility before seal") < standalone.index(
         "Seal evidence bundle"
     )
+    assert "FEC_API_KEY: ${{ secrets.FEC_API_KEY }}" in rebuild
+    assert "FEC_API_KEY: ${{ secrets.FEC_API_KEY }}" in standalone
+    assert "Require personal FEC key for current finance refresh" in rebuild
+    assert "Require personal FEC key for current finance refresh" in standalone
+
+
+def test_stale_finance_fallback_makes_strict_refresh_fail_closed(
+    monkeypatch, tmp_path: Path,
+):
+    manifest_dir = tmp_path / "manifests"
+    manifest_dir.mkdir()
+    (manifest_dir / "fundraising_shares.json").write_text(json.dumps({
+        "generated_at": "2026-09-01T00:00:00Z",
+        "available_at": "2026-09-01",
+    }))
+    monkeypatch.setattr(preparation, "MANIFESTS_DIR", manifest_dir)
+    monkeypatch.setattr(preparation, "refresh_safe_evidence", lambda **_: {
+        "results": {
+            "polls": {"status": "refresh_failed", "error": "offline"},
+            "finance": {
+                "status": "refresh_failed",
+                "error": "HTTP Error 429: Too Many Requests",
+                "transactional_restore": True,
+            },
+        },
+    })
+    readiness = {
+        "ready_for_expensive_rebuild": True,
+        "blockers": [],
+        "forecast_coverage": {"summary": {
+            "forecast_complete": True, "n_fail": 0,
+        }},
+    }
+    monkeypatch.setattr(preparation, "write_source_readiness", lambda **_: readiness)
+    monkeypatch.setattr(preparation, "classify_strict_forecast_coverage", lambda *_: {
+        "summary": readiness["forecast_coverage"]["summary"],
+        "blocking_forecast_incomplete": False,
+        "multiway_withheld_only": False,
+        "approved_multiway_withheld_race_ids": [],
+        "unexpected_forecast_failure_race_ids": [],
+    })
+    monkeypatch.setattr(preparation, "_failing_forecast_races", lambda *_: [])
+    monkeypatch.setattr(preparation, "_snapshot_poll_artifacts", dict)
+
+    report = preparation.prepare_evidence(
+        election_id="senate-2026",
+        as_of="2026-10-16",
+        mode="refresh-safe",
+        strict=True,
+    )
+
+    assert report["strict_failure"] is True
+    assert "finance_refresh_failed_stale_fallback" in report["strict_failure_reasons"]
+    detail = report["strict_failure_detail"]["finance_refresh"]
+    assert detail["error"] == "HTTP Error 429: Too Many Requests"
+    assert detail["fallback_freshness"]["status"] == "stale_retrieval"
 

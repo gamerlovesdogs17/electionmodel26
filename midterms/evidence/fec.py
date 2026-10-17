@@ -638,6 +638,70 @@ def _required_race_ids(races: pd.DataFrame, election_id: str) -> list[str]:
     return sorted(selected["race_id"].dropna().astype(str).unique())
 
 
+def _current_ticket_relevant_links(
+    links: pd.DataFrame,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Limit the current Form 3 query to committees relevant to modeled races.
+
+    The public ``DEMO_KEY`` is a shared, tightly rate-limited credential.  The
+    former refresh queried every Senate filer in the cycle even though the
+    normalized feature uses the two declared ticket identities.  That made a
+    clean GitHub runner exhaust the shared quota before it could seal a fresh
+    receipt.
+
+    For an unambiguous D/R ticket, retain every principal committee linked to
+    the two matched candidates.  When either side cannot be matched, retain
+    the full state candidate set so the existing fail-safe neutral/unmatched
+    behavior and its provenance remain unchanged.  No candidate is selected
+    by receipts or by a highest-value surrogate.
+    """
+    tickets = current_registry_tickets()
+    selected_candidate_ids: set[str] = set()
+    fallback_races: list[dict[str, Any]] = []
+    matched_races: list[str] = []
+    for race_id, ticket in sorted(tickets.items()):
+        state = str(ticket.get("state") or "").upper()
+        state_links = links[
+            links["state"].astype(str).str.upper().eq(state)
+        ].copy()
+        dem = select_unique_party_candidate(
+            state_links, party="DEM", ticket_name=ticket.get("dem_name"),
+        )
+        rep = select_unique_party_candidate(
+            state_links, party="REP", ticket_name=ticket.get("rep_name"),
+        )
+        if dem is not None and rep is not None:
+            selected_candidate_ids.update((dem["candidate_id"], rep["candidate_id"]))
+            matched_races.append(str(race_id))
+            continue
+        # Preserve the prior unmatched-race semantics.  Keeping the state's
+        # complete source set also prevents an unrelated query optimization
+        # from fabricating an availability timestamp for a neutral feature.
+        selected_candidate_ids.update(state_links["candidate_id"].astype(str))
+        fallback_races.append({
+            "race_id": str(race_id),
+            "state": state,
+            "modeled_candidate_matched": dem is not None,
+            "opposing_candidate_matched": rep is not None,
+            "fallback": "all_state_senate_principal_committees",
+        })
+    selected = links[
+        links["candidate_id"].astype(str).isin(selected_candidate_ids)
+    ].copy()
+    if selected.empty:
+        raise ValueError("current ticket finance query selected no FEC committees")
+    return selected, {
+        "schema_version": "fec-current-ticket-query-scope-v1",
+        "selection_basis": "reviewed_ticket_identity_with_state_fallback",
+        "n_source_links": len(links),
+        "n_selected_links": len(selected),
+        "n_selected_candidate_ids": int(selected["candidate_id"].astype(str).nunique()),
+        "n_matched_races": len(matched_races),
+        "matched_race_ids": matched_races,
+        "fallback_races": fallback_races,
+    }
+
+
 def prepare_official_finance_history(
     *, current_as_of: str | date = "2026-09-27",
     cycles: tuple[int, ...] = (2018, 2020, 2022, 2024, 2026),
@@ -703,12 +767,26 @@ def prepare_official_finance_history(
         )
         if links.empty:
             raise ValueError(f"no receipt-timed Senate principal committees for {cycle}")
+        report_links = links
+        query_scope: dict[str, Any] = {
+            "schema_version": "fec-form3-query-scope-v1",
+            "selection_basis": "all_cycle_senate_principal_committees",
+            "n_source_links": len(links),
+            "n_selected_links": len(links),
+        }
+        report_batch_size = 25
+        if int(cycle) == 2026:
+            report_links, query_scope = _current_ticket_relevant_links(links)
+            # Larger batches reduce calls against the shared public DEMO_KEY;
+            # URL size remains comfortably below common proxy limits.
+            report_batch_size = 50
         reports_archive = external_dir / f"fec_form3_reports_{cycle}.zip"
         reports, report_meta = fetch_form3_reports_for_committees(
             cycle=int(cycle),
-            committee_ids=sorted(links["committee_id"].astype(str).unique()),
+            committee_ids=sorted(report_links["committee_id"].astype(str).unique()),
             max_as_of=max_cutoff,
             archive_path=reports_archive,
+            batch_size=report_batch_size,
             # Historical receipts are immutable and reused only after their
             # query descriptor verifies. The current cycle is always fetched
             # again so a fresh retrieval cannot merely restamp old API bytes.
@@ -716,7 +794,7 @@ def prepare_official_finance_history(
         )
         if reports.empty:
             raise ValueError(f"no official Form 3 reports returned for {cycle}")
-        all_links.append(links)
+        all_links.append(report_links)
         all_reports.append(reports)
         previous = prior_sources.get(int(cycle)) or {}
         previous_linkage = previous.get("linkage") or {}
@@ -745,6 +823,7 @@ def prepare_official_finance_history(
             },
             "form3": {
                 **report_meta,
+                "query_scope": query_scope,
                 "path": reports_archive.name,
                 "url": f"{OPENFEC}{FORM3_ENDPOINT}",
                 "retrieved_at": (
@@ -877,6 +956,23 @@ def _fec_api_key() -> str:
     return os.environ.get("FEC_API_KEY") or "DEMO_KEY"
 
 
+def _openfec_rate_limit_error(exc: HTTPError) -> RuntimeError:
+    retry_after = str((exc.headers or {}).get("Retry-After") or "unknown")
+    credential = "public DEMO_KEY" if _fec_api_key() == "DEMO_KEY" else "configured key"
+    return RuntimeError(
+        "OpenFEC rate limit exhausted for "
+        f"{credential} (Retry-After={retry_after}s); configure the repository "
+        "FEC_API_KEY secret with a personal api.data.gov key before refreshing finance"
+    )
+
+
+def _openfec_retry_after_seconds(exc: HTTPError) -> int:
+    try:
+        return max(0, int(str((exc.headers or {}).get("Retry-After") or "0")))
+    except ValueError:
+        return 0
+
+
 def _get(path: str, params: dict[str, Any], *, retries: int = 4) -> dict[str, Any]:
     q = dict(params)
     q["api_key"] = _fec_api_key()
@@ -889,9 +985,13 @@ def _get(path: str, params: dict[str, Any], *, retries: int = 4) -> dict[str, An
                 return json.loads(resp.read().decode("utf-8"))
         except HTTPError as exc:
             last_exc = exc
-            if int(getattr(exc, "code", 0) or 0) == 429 and attempt + 1 < retries:
-                time.sleep(1.5 * (2**attempt))
-                continue
+            if int(getattr(exc, "code", 0) or 0) == 429:
+                retry_after = _openfec_retry_after_seconds(exc)
+                if _fec_api_key() == "DEMO_KEY" or retry_after > 60:
+                    raise _openfec_rate_limit_error(exc) from exc
+                if attempt + 1 < retries:
+                    time.sleep(max(float(retry_after), 1.5 * (2**attempt)))
+                    continue
             raise
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
@@ -944,9 +1044,13 @@ def _get_raw(
                 return response.read(), url
         except HTTPError as exc:
             last_exc = exc
-            if int(getattr(exc, "code", 0) or 0) == 429 and attempt + 1 < retries:
-                time.sleep(2.0 * (2**attempt))
-                continue
+            if int(getattr(exc, "code", 0) or 0) == 429:
+                retry_after = _openfec_retry_after_seconds(exc)
+                if _fec_api_key() == "DEMO_KEY" or retry_after > 60:
+                    raise _openfec_rate_limit_error(exc) from exc
+                if attempt + 1 < retries:
+                    time.sleep(max(float(retry_after), 2.0 * (2**attempt)))
+                    continue
             raise
         except Exception as exc:  # noqa: BLE001
             last_exc = exc

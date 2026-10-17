@@ -13,9 +13,9 @@ from midterms.evidence.demographic_vintages import ingest_demographic_vintages
 from midterms.evidence.eligibility import (
     _audit_configured_domains,
     apply_domain_contract,
+    audit_canonical_approval,
     audit_canonical_demographics,
     audit_canonical_finance,
-    audit_canonical_approval,
     candidate_timeline_freshness,
     domain_freshness_from_provenance,
 )
@@ -280,6 +280,40 @@ def test_registry_resolved_identity_uses_review_boundary_for_freshness():
     )
     assert failures == []
     assert annotated["candidate_timeline"]["effective_eligible"] is True
+
+
+def test_registry_freshness_uses_backdated_snapshot_cutoff_not_later_job_clock():
+    audit = {
+        "eligible": True,
+        "conditional_identity_contract": True,
+        "n_identity_required_and_resolved": 1,
+        "n_identity_required_and_missing": 0,
+        "classification_records": [{
+            "race_id": "senate-2026-ZZ",
+            "candidate_identity_required": True,
+            "candidate_identity_resolved": True,
+            "identity_source": "reviewed_current_candidate_registry",
+            "identity_reviewed_as_of": "2026-10-03",
+        }],
+    }
+    result = candidate_timeline_freshness(
+        audit,
+        {},
+        checked_at="2026-10-17T14:18:00Z",
+        as_of="2026-10-16",
+    )
+    assert result["status"] == "fresh"
+    assert result["retrieval_age_days"] < 14.0
+    assert result["freshness_checked_at"].startswith("2026-10-16T23:59:59")
+    assert result["eligibility_checked_at"] == "2026-10-17T14:18:00Z"
+
+    stale = candidate_timeline_freshness(
+        audit,
+        {},
+        checked_at="2026-10-19T14:18:00Z",
+        as_of="2026-10-18",
+    )
+    assert stale["status"] == "stale_retrieval"
 
 
 def test_readiness_and_eligibility_select_same_canonical_products():

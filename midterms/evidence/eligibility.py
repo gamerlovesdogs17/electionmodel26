@@ -414,6 +414,7 @@ def candidate_timeline_freshness(
     metadata: dict[str, Any] | None,
     *,
     checked_at: str,
+    as_of: str | None = None,
 ) -> dict[str, Any]:
     """Require operational freshness only when candidate identity is an input."""
     identity_required = int(audit.get("n_identity_required_and_resolved") or 0) + int(
@@ -436,31 +437,55 @@ def candidate_timeline_freshness(
     retrieved_at = meta.get("latest_retrieved_at")
     observed_at = meta.get("latest_effective_at")
     freshness_basis = meta.get("identity_freshness_basis")
-    if retrieved_at is None:
-        # Fall back to the reviewed current-registry boundary when that is the
-        # identity source for required races (no timeline retrieved_at exists).
-        from datetime import date as _date
+    freshness_checked_at = checked_at
+    # The warehouse can explicitly carry the registry review date as
+    # ``latest_retrieved_at``.  Treat that the same as the fallback below; it
+    # is still a dated review boundary rather than this job's network receipt.
+    from datetime import date as _date
 
-        records = list(audit.get("classification_records") or []) or list(
-            meta.get("classification_records") or []
-        )
-        registry_dates = [
-            _date.fromisoformat(str(row["identity_reviewed_as_of"]))
-            for row in records
-            if row.get("candidate_identity_required")
-            and row.get("candidate_identity_resolved")
-            and str(row.get("identity_source") or "")
-            == "reviewed_current_candidate_registry"
-            and row.get("identity_reviewed_as_of")
-        ]
-        if registry_dates:
-            stamp = max(registry_dates).isoformat()
-            retrieved_at = stamp
-            observed_at = observed_at or stamp
-            freshness_basis = "reviewed_current_candidate_registry"
+    records = list(audit.get("classification_records") or []) or list(
+        meta.get("classification_records") or []
+    )
+    registry_dates = [
+        _date.fromisoformat(str(row["identity_reviewed_as_of"]))
+        for row in records
+        if row.get("candidate_identity_required")
+        and row.get("candidate_identity_resolved")
+        and str(row.get("identity_source") or "")
+        == "reviewed_current_candidate_registry"
+        and row.get("identity_reviewed_as_of")
+    ]
+    registry_basis = (
+        freshness_basis == "reviewed_current_candidate_registry"
+        or (retrieved_at is None and bool(registry_dates))
+    )
+    if registry_basis and registry_dates:
+        stamp = max(registry_dates).isoformat()
+        retrieved_at = stamp
+        observed_at = observed_at or stamp
+        freshness_basis = "reviewed_current_candidate_registry"
+        if as_of:
+            # The registry review is a dated point-in-time observation,
+            # not a network retrieval performed by this run.  For a
+            # backdated snapshot, measure its age at the end of the
+            # requested cutoff day.  Using wall-clock job time here made a
+            # 2026-10-16 snapshot fail on 2026-10-17 even though the
+            # 2026-10-03 review was still inside the declared 14-day
+            # policy at the snapshot cutoff.
+            cutoff_end = (
+                pd.Timestamp(str(as_of)[:10], tz="UTC")
+                + pd.Timedelta(days=1)
+                - pd.Timedelta(microseconds=1)
+            )
+            runtime = pd.Timestamp(checked_at)
+            runtime = (
+                runtime.tz_localize("UTC")
+                if runtime.tzinfo is None else runtime.tz_convert("UTC")
+            )
+            freshness_checked_at = min(runtime, cutoff_end).isoformat()
     result = domain_freshness_from_provenance(
         "candidate_ballot",
-        checked_at=checked_at,
+        checked_at=freshness_checked_at,
         retrieved_at=retrieved_at,
         observed_at=observed_at,
         source_available=bool(identity_required),
@@ -469,6 +494,8 @@ def candidate_timeline_freshness(
     result["identity_required_races"] = identity_required
     if freshness_basis:
         result["identity_freshness_basis"] = freshness_basis
+    result["freshness_checked_at"] = freshness_checked_at
+    result["eligibility_checked_at"] = checked_at
     return result
 
 # Ordered from strongest to weakest
@@ -949,6 +976,7 @@ def audit_evidence(
             domains["candidate_timeline"],
             timeline_meta,
             checked_at=freshness_checked_at,
+            as_of=as_of,
         )
 
         manifest_names = {

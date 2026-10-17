@@ -1460,6 +1460,7 @@ def main(argv: list[str] | None = None) -> None:
             readiness = report.get("readiness") or {}
             coverage = ((readiness.get("forecast_coverage") or {}).get("summary") or {})
             polls = ((report.get("refresh") or {}).get("results") or {}).get("polls") or {}
+            finance = ((report.get("refresh") or {}).get("results") or {}).get("finance") or {}
             detail = report.get("strict_failure_detail") or {}
             compact = {
                 "mode": report.get("mode"),
@@ -1475,6 +1476,8 @@ def main(argv: list[str] | None = None) -> None:
                 "failing_forecast_races": detail.get("failing_forecast_races") or [],
                 "polls_refresh_status": polls.get("status"),
                 "polls_refresh_error": polls.get("error") or polls.get("live_fetch_error"),
+                "finance_refresh_status": finance.get("status"),
+                "finance_refresh_error": finance.get("error"),
                 "strict_failure": report.get("strict_failure"),
                 "strict_failure_reasons": report.get("strict_failure_reasons") or [],
                 "strict_warnings": report.get("strict_warnings") or [],

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -410,6 +411,7 @@ def prepare_evidence(
     result = {"mode": mode, "refresh": refresh, "readiness": readiness}
     refresh_results = (refresh or {}).get("results") or {}
     polls = refresh_results.get("polls") or {}
+    finance = refresh_results.get("finance") or {}
     coverage_state = classify_strict_forecast_coverage(readiness)
     coverage_summary = coverage_state["summary"]
     blocking_forecast_incomplete = bool(coverage_state["blocking_forecast_incomplete"])
@@ -471,6 +473,24 @@ def prepare_evidence(
     poll_source_coverage_inconsistent = polls.get("status") == "source_coverage_inconsistent"
     poll_used_sealed_fallback = polls.get("status") == "sealed_fallback"
     poll_reverted = polls.get("status") == "reverted_coverage_regression"
+    finance_refresh_failed = finance.get("status") == "refresh_failed"
+    finance_fallback_freshness: dict[str, Any] | None = None
+    finance_refresh_blocks = False
+    if finance_refresh_failed:
+        from midterms.evidence.eligibility import domain_freshness_from_provenance
+
+        manifest_path = MANIFESTS_DIR / "fundraising_shares.json"
+        manifest = (
+            json.loads(manifest_path.read_text(encoding="utf-8"))
+            if manifest_path.is_file() else None
+        )
+        finance_fallback_freshness = domain_freshness_from_provenance(
+            "finance",
+            checked_at=datetime.now(UTC).isoformat(),
+            manifest=manifest,
+            source_available=manifest is not None,
+        )
+        finance_refresh_blocks = finance_fallback_freshness.get("status") != "fresh"
     # Live VoteHub outages / regressive live pulls must not fail a rebuild when
     # sealed sources remain green after rollback (multiway-only incompleteness
     # is not a red source gate).
@@ -486,6 +506,10 @@ def prepare_evidence(
     if poll_reverted and (blocking_forecast_incomplete or readiness_red):
         # Rollback could not restore green gates; keep the regression visible.
         warnings.append("poll_refresh_rollback_still_red")
+    if finance_refresh_failed and not finance_refresh_blocks:
+        warnings.append("finance_refresh_failed_fresh_fallback_retained")
+    if finance_refresh_blocks:
+        warnings.append("finance_refresh_failed_stale_fallback")
     if multiway_withheld_only:
         warnings.append("forecast_coverage_multiway_withheld_only")
     if warnings:
@@ -498,7 +522,12 @@ def prepare_evidence(
         coverage_state.get("unexpected_forecast_failure_race_ids") or []
     )
     failing_races = _failing_forecast_races(readiness)
-    if strict and (readiness_red or blocking_forecast_incomplete or poll_refresh_blocks):
+    if strict and (
+        readiness_red
+        or blocking_forecast_incomplete
+        or poll_refresh_blocks
+        or finance_refresh_blocks
+    ):
         result["strict_failure"] = True
         result["strict_failure_reasons"] = [
             reason
@@ -510,6 +539,7 @@ def prepare_evidence(
                     poll_refresh_blocks and not poll_source_coverage_inconsistent,
                 ),
                 ("forecast_coverage_incomplete", blocking_forecast_incomplete),
+                ("finance_refresh_failed_stale_fallback", finance_refresh_blocks),
             )
             if active
         ]
@@ -527,6 +557,12 @@ def prepare_evidence(
                 "status": polls.get("status"),
                 "error": polls.get("error") or polls.get("live_fetch_error"),
                 "restored_paths": polls.get("restored_paths"),
+            },
+            "finance_refresh": {
+                "status": finance.get("status"),
+                "error": finance.get("error"),
+                "transactional_restore": finance.get("transactional_restore"),
+                "fallback_freshness": finance_fallback_freshness,
             },
         }
     return result
