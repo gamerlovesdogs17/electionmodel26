@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -97,8 +98,16 @@ def test_merge_keeps_candidate_specific_columns(tmp_path: Path, monkeypatch: pyt
     normalized.mkdir(parents=True)
     manifests.mkdir(parents=True)
     payload_path = raw_dir / "external" / "votehub_us_senator.json"
-    payload_path.write_text(
-        json.dumps(_payload("Texas", [(1, "James Talarico", "Ken Paxton")])),
+    raw_bytes = json.dumps(
+        _payload("Texas", [(1, "James Talarico", "Ken Paxton")])
+    ).encode("utf-8")
+    payload_path.write_bytes(raw_bytes)
+    (manifests / "fetch_votehub_us_senator.json").write_text(
+        json.dumps({
+            "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+            "bytes": len(raw_bytes),
+            "retrieved_at": "2026-09-03T12:00:00+00:00",
+        }),
         encoding="utf-8",
     )
     monkeypatch.setattr(ingest, "RAW_DIR", raw_dir)

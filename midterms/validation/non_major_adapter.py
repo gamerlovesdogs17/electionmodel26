@@ -440,7 +440,7 @@ def build_non_major_adapter_validation(*, current_as_of: str = "2026-10-03") -> 
         record["race_id"]: record
         for record in selected_current_fit.diagnostics["records"]
     }
-    zero_poll_behavior: dict[str, Any] = {}
+    current_support_diagnostics: dict[str, Any] = {}
     for spec in PRIOR_SPECIFICATIONS:
         fit = fit_non_major_adapter(
             current_races,
@@ -455,25 +455,22 @@ def build_non_major_adapter_validation(*, current_as_of: str = "2026-10-03") -> 
             race_id: index for index, race_id in enumerate(fit.race_ids)
         }
         sd_index = by_race.get("senate-2026-SD")
-        zero_poll_behavior[str(spec["id"])] = {
+        sd_record = next(
+            (
+                record
+                for record in fit.diagnostics["records"]
+                if record["race_id"] == "senate-2026-SD"
+            ),
+            {},
+        )
+        current_support_diagnostics[str(spec["id"])] = {
             "race_id": "senate-2026-SD",
-            "n_compatible_polls": 0,
-            "support_status": next(
-                (
-                    record["support_status"]
-                    for record in fit.diagnostics["records"]
-                    if record["race_id"] == "senate-2026-SD"
-                ),
-                "not_present",
+            "n_compatible_polls": int(
+                sd_record.get("n_candidate_compatible_polls") or 0
             ),
-            "prior_location": next(
-                (
-                    record["prior_location"]
-                    for record in fit.diagnostics["records"]
-                    if record["race_id"] == "senate-2026-SD"
-                ),
-                None,
-            ),
+            "prior_only": bool(sd_record.get("prior_only")),
+            "support_status": sd_record.get("support_status", "not_present"),
+            "prior_location": sd_record.get("prior_location"),
             "predictive_mean": (
                 None if sd_index is None else float(fit.mean_margin[sd_index])
             ),
@@ -588,7 +585,7 @@ def build_non_major_adapter_validation(*, current_as_of: str = "2026-10-03") -> 
         "cases": scored,
         "aggregate": _aggregate(scored),
         "prior_specification_comparison": prior_comparison,
-        "zero_poll_behavior": zero_poll_behavior,
+        "current_support_diagnostics": current_support_diagnostics,
         "selected_current_adapter_records": selected_current_records,
         "common_shock_sensitivity": {
             "retained_share": COMMON_VARIANCE_SHARE,
