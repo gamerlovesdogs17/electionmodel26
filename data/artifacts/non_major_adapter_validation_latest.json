@@ -52,7 +52,7 @@
     },
     "current_polls": {
       "path": "data/normalized/polls.parquet",
-      "sha256": "61baa8c792f1696b0ef55862fdfe0288d1ba6a930f0ac0cf8a811b50a2ee1328"
+      "sha256": "f7db41c47607b03ca593a40061fdab936c43b3a180eaf35b46b22141b17a47d6"
     }
   },
   "formal_lead_days": [
@@ -806,9 +806,9 @@
           "senate-2026-SD": 0.046
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": -0.0029730386988244747,
-          "senate-2026-NE": -0.011806580914670864,
-          "senate-2026-SD": -0.006379498848060778
+          "senate-2026-ID": -0.0029730386988244687,
+          "senate-2026-NE": -0.011806580914670853,
+          "senate-2026-SD": -0.006379498848060779
         },
         "exceptional_seat_count_variance": 0.41667685937499993
       },
@@ -819,9 +819,9 @@
           "senate-2026-SD": 0.04775
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": 0.44501404781572446,
-          "senate-2026-NE": 0.43861295108298803,
-          "senate-2026-SD": 0.442538622958407
+          "senate-2026-ID": 0.4450140478157246,
+          "senate-2026-NE": 0.4386129510829881,
+          "senate-2026-SD": 0.4425386229584071
         },
         "exceptional_seat_count_variance": 0.5056394374999998
       },
@@ -832,9 +832,9 @@
           "senate-2026-SD": 0.048375
         },
         "correlation_with_synthetic_ordinary_factor_by_race": {
-          "senate-2026-ID": 0.6309853485399196,
-          "senate-2026-NE": 0.6267773999877537,
-          "senate-2026-SD": 0.6293453209795294
+          "senate-2026-ID": 0.6309853485399199,
+          "senate-2026-NE": 0.6267773999877536,
+          "senate-2026-SD": 0.6293453209795292
         },
         "exceptional_seat_count_variance": 0.5994731093750002
       }
@@ -1261,5 +1261,5 @@
     "reason": "exceptional outcomes are never used to estimate the structural location or uncertainty; every state anchor is derived only from presidential results available at that cutoff"
   },
   "calibration_claim_allowed": false,
-  "artifact_sha256": "5ecf60b7ae4a12a5d89ed756ba6a900cc02fe1b46a1954963462691d717a3849"
+  "artifact_sha256": "8abf3efbcb477eaaa77574c98c1a7c5dca9481b29e15ddf1ae9310a85549e505"
 }

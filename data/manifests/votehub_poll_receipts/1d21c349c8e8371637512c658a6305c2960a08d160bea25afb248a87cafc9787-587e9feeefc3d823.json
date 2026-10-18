@@ -1,0 +1,67 @@
+{
+  "name": "votehub_us_senator",
+  "endpoint": "https://polling.votehub.com/polls",
+  "url": "https://polling.votehub.com/polls",
+  "api_source_version": "votehub-polls-api-v2-items",
+  "params": {
+    "poll_type": "us-senator"
+  },
+  "retrieved_at": "2026-10-18T19:46:55.310115+00:00",
+  "sha256": "1d21c349c8e8371637512c658a6305c2960a08d160bea25afb248a87cafc9787",
+  "bytes": 105966,
+  "n_polls": 118,
+  "n_pages": 1,
+  "first_page_id": "page-0",
+  "last_page_id": "page-0",
+  "page_hashes": [
+    "a7ad212df8daa73dacacc0a56ebc07ab19b34efdf8446b0ee5c26168f3916564"
+  ],
+  "total_result_count": 118,
+  "pagination_terminated_cleanly": true,
+  "subject_coverage": {
+    "schema_version": "votehub-advertised-subject-coverage-v1",
+    "poll_type": "us-senator",
+    "election_year": 2026,
+    "advertised_subjects": [
+      "2026 Alabama",
+      "2026 Alaska",
+      "2026 Florida",
+      "2026 Georgia",
+      "2026 Iowa",
+      "2026 Kentucky",
+      "2026 Michigan",
+      "2026 Minnesota",
+      "2026 Mississippi",
+      "2026 Montana",
+      "2026 Nebraska",
+      "2026 North Carolina",
+      "2026 South Dakota"
+    ],
+    "returned_subjects": [
+      "2026 Alabama",
+      "2026 Alaska",
+      "2026 Florida",
+      "2026 Georgia",
+      "2026 Illinois Democratic",
+      "2026 Illinois Republican",
+      "2026 Iowa",
+      "2026 Kentucky",
+      "2026 Michigan",
+      "2026 Minnesota",
+      "2026 Mississippi",
+      "2026 Montana",
+      "2026 Nebraska",
+      "2026 North Carolina",
+      "2026 South Dakota",
+      "2026 Texas Democratic",
+      "2026 Texas Republican"
+    ],
+    "missing_advertised_subjects": [],
+    "status": "verified",
+    "ok": true,
+    "semantic_sha256": "1805df25fd34b963d332feef43058add55950e700c2d77b58492c0c981383aa4"
+  },
+  "path": "data/raw/external/votehub_us_senator.json",
+  "license": "CC BY 4.0",
+  "attribution": "Polling data from VoteHub (https://votehub.com)"
+}

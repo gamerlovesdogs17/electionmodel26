@@ -41,16 +41,16 @@
   },
   "source": {
     "raw_path": "raw/external/votehub_us_senator.json",
-    "raw_byte_sha256": "b795c1cabde296dd1c083468c6e0e81a5ed0f4270a43eacb48584ba579731498",
-    "raw_canonical_json_sha256": "869c5f98143c2f66f96c834391041a3235c4b2480a48837389a2853c2525d93d",
-    "retrieved_at": "2026-10-17T22:52:41.059157+00:00",
+    "raw_byte_sha256": "1d21c349c8e8371637512c658a6305c2960a08d160bea25afb248a87cafc9787",
+    "raw_canonical_json_sha256": "0666346ed447ba9de6a1cd30182e3572f57dbeb5a1ae888a0b150df799f6f4d3",
+    "retrieved_at": "2026-10-18T19:46:55.310115+00:00",
     "fetch_manifest_path": "data/manifests/fetch_votehub_us_senator.json",
-    "fetch_manifest_sha256": "73f3a1702ac7c3cc50eb4e39fe90e13a0d5b7d979fdbf21afdd2aa9bb12d41d6",
-    "fetch_manifest_recorded_raw_sha256": "b795c1cabde296dd1c083468c6e0e81a5ed0f4270a43eacb48584ba579731498"
+    "fetch_manifest_sha256": "587e9feeefc3d82315e3f7ff8583dfe7f8c25610d8d63618bcc0b24fffcea452",
+    "fetch_manifest_recorded_raw_sha256": "1d21c349c8e8371637512c658a6305c2960a08d160bea25afb248a87cafc9787"
   },
   "source_archive": {
     "schema_version": "votehub-poll-receipt-archive-v1",
-    "n_receipts": 2,
+    "n_receipts": 3,
     "receipts": [
       {
         "raw_byte_sha256": "e44a5af6cdd2482d03cccf772d56cccff7bb0cc739dfecde11f1c2ab6c5d5c99",
@@ -67,14 +67,22 @@
         "n_polls": 118,
         "raw_path": "raw/external/votehub_poll_receipts/b795c1cabde296dd1c083468c6e0e81a5ed0f4270a43eacb48584ba579731498.json",
         "receipt_path": "manifests/votehub_poll_receipts/b795c1cabde296dd1c083468c6e0e81a5ed0f4270a43eacb48584ba579731498-73f3a1702ac7c3cc.json"
+      },
+      {
+        "raw_byte_sha256": "1d21c349c8e8371637512c658a6305c2960a08d160bea25afb248a87cafc9787",
+        "raw_canonical_json_sha256": "0666346ed447ba9de6a1cd30182e3572f57dbeb5a1ae888a0b150df799f6f4d3",
+        "retrieved_at": "2026-10-18T19:46:55.310115+00:00",
+        "n_polls": 118,
+        "raw_path": "raw/external/votehub_poll_receipts/1d21c349c8e8371637512c658a6305c2960a08d160bea25afb248a87cafc9787.json",
+        "receipt_path": "manifests/votehub_poll_receipts/1d21c349c8e8371637512c658a6305c2960a08d160bea25afb248a87cafc9787-587e9feeefc3d823.json"
       }
     ]
   },
   "outputs": {
-    "live_parquet_byte_sha256": "8a537074b17f3ad898e6359a3e0ed753f702edcc7983dc486f039dff4e013ab6",
-    "live_semantic_sha256": "a47f7bc957dbe22a9d3c56590cb2b1f2f54f0fe5d0dc73254237375dd6ce1322",
-    "warehouse_parquet_byte_sha256": "61baa8c792f1696b0ef55862fdfe0288d1ba6a930f0ac0cf8a811b50a2ee1328",
-    "warehouse_current_semantic_sha256": "a47f7bc957dbe22a9d3c56590cb2b1f2f54f0fe5d0dc73254237375dd6ce1322"
+    "live_parquet_byte_sha256": "437682fe8ef0165d4223c766e76ed85f88843fbf8cc997d952f887e0d6227548",
+    "live_semantic_sha256": "4bb21ff8178f296b592d24da7d053ec54077bb84a55764bc5020edbbc54fa9f9",
+    "warehouse_parquet_byte_sha256": "f7db41c47607b03ca593a40061fdab936c43b3a180eaf35b46b22141b17a47d6",
+    "warehouse_current_semantic_sha256": "4bb21ff8178f296b592d24da7d053ec54077bb84a55764bc5020edbbc54fa9f9"
   },
   "lineage_verified": true,
   "attribution": "Polling data from VoteHub (https://votehub.com), CC BY 4.0"
