@@ -43,7 +43,7 @@ class ChamberSimulation:
     majority_threshold: int
     p_dem_majority: float
     p_rep_majority: float
-    p_fifty_fifty: float  # P(exactly 50 D) — counted inside Rep control via VP
+    p_fifty_fifty: float  # P(exactly 50 D / 50 R / 0 I); Rep control via R VP
     expected_dem_seats: float
     seat_histogram: dict[str, int]
     vp_tiebreak_party: str = "R"
@@ -53,6 +53,13 @@ class ChamberSimulation:
     unresolved_seat_draws: np.ndarray | None = None  # seats with unknown caucus
     p_unresolved_control: float = 0.0
     expected_unresolved_seats: float = 0.0
+    candidate_win: np.ndarray | None = None  # modeled-candidate wins by race
+    rep_seat_draws: np.ndarray | None = None
+    independent_seat_draws: np.ndarray | None = None
+    expected_rep_seats: float = 0.0
+    expected_independent_seats: float = 0.0
+    p_independent_balance: float = 0.0
+    held_independent_affiliation: int = 0
 
 
 def expand_joint_draws(
@@ -92,11 +99,11 @@ def simulate_chamber(
     """
     Translate joint margin draws into seat outcomes and chamber control.
 
-    Held seats (not_up) are fixed from `held_by`. Contested seats flip by sign of
-    the joint margin draw. Independents caucusing with Democrats count as Dem seats.
-
-    With a Republican VP, Dem control requires >=51 seats; dem_seats <= 50 is
-    Republican control (including 50–50).
+    Held seats (not_up) are fixed from explicit chamber-affiliation metadata.
+    Contested candidate wins are mapped separately to D, R, or Independent
+    seats. With a Republican VP, D control requires >=51 seats and R control
+    requires >=50 Republican seats; an Independent can therefore hold the
+    balance without being silently assigned to either caucus.
 
     ``n_sims`` optionally expands posterior draws to a larger joint-simulation
     count via resampling (correlated structure preserved).
@@ -119,8 +126,20 @@ def simulate_chamber(
     contested = races[races.apply(is_active_ballot_row, axis=1)] if len(races) else races
     held = races[races["not_up"]] if len(races) else races
     held_ind = int((held["held_by"] == "I").sum()) if len(held) else 0
-    held_dem = int((held["held_by"] == "D").sum()) + held_ind if len(held) else 0
-    held_rep = int((held["held_by"] == "R").sum()) if len(held) else 0
+    if len(held):
+        held_affiliation = held["held_by"].astype(str).copy()
+        held_i_mask = held["held_by"].eq("I")
+        if held_i_mask.any():
+            held_affiliation.loc[held_i_mask] = held.loc[
+                held_i_mask, "held_caucus"
+            ].astype(str)
+        if not set(held_affiliation).issubset({"D", "R", "I"}):
+            raise ValueError("held seats lack an explicit supported chamber affiliation")
+        held_dem = int(held_affiliation.eq("D").sum())
+        held_rep = int(held_affiliation.eq("R").sum())
+        held_independent_affiliation = int(held_affiliation.eq("I").sum())
+    else:
+        held_dem = held_rep = held_independent_affiliation = 0
 
     margins = np.asarray(fit.draws_margin, dtype=float)
     n_post = int(margins.shape[0]) if margins.ndim == 2 else 0
@@ -128,7 +147,34 @@ def simulate_chamber(
         seed = int(sim_seed if sim_seed is not None else 0)
         margins = expand_joint_draws(margins, n_sims=int(n_sims), seed=seed)
     n_draws, n_races = margins.shape
-    wins = (margins >= 0).astype(int)
+    candidate_wins = (margins >= 0).astype(int)
+    dem_wins = np.zeros((n_draws, n_races), dtype=int)
+    rep_wins = np.zeros((n_draws, n_races), dtype=int)
+    independent_wins = np.zeros((n_draws, n_races), dtype=int)
+    unresolved_by_race = np.zeros((n_draws, n_races), dtype=int)
+
+    contested_ix = contested.set_index("race_id")
+    for index, race_id in enumerate(fit.race_ids):
+        row = contested_ix.loc[race_id] if race_id in contested_ix.index else None
+        modeled_caucus = "D"
+        opposing_caucus = "R"
+        if row is not None:
+            if pd.notna(row.get("modeled_caucus")):
+                modeled_caucus = str(row.get("modeled_caucus"))
+            if pd.notna(row.get("opposing_caucus")):
+                opposing_caucus = str(row.get("opposing_caucus"))
+        for caucus, mask in (
+            (modeled_caucus, candidate_wins[:, index].astype(bool)),
+            (opposing_caucus, ~candidate_wins[:, index].astype(bool)),
+        ):
+            if caucus == "D":
+                dem_wins[mask, index] = 1
+            elif caucus == "R":
+                rep_wins[mask, index] = 1
+            elif caucus == "I":
+                independent_wins[mask, index] = 1
+            else:
+                unresolved_by_race[mask, index] = 1
 
     # Alaska's adapter retains the multi-candidate winner as the authoritative
     # draw.  Its signed column exists only to fit the common FitResult shape;
@@ -154,10 +200,13 @@ def simulate_chamber(
         if not caucuses or np.any((alaska_winners < 0) | (alaska_winners >= len(caucuses))):
             raise ValueError("Alaska RCV winner identity cannot be mapped to a caucus")
         winner_caucuses = np.asarray([caucuses[index] for index in alaska_winners], dtype=object)
-        if not set(winner_caucuses.tolist()).issubset({"D", "R"}):
+        if not set(winner_caucuses.tolist()).issubset({"D", "R", "I"}):
             raise ValueError("Alaska RCV winner has no explicit chamber-caucus mapping")
         alaska_index = fit.race_ids.index(alaska_race_id)
-        wins[:, alaska_index] = (winner_caucuses == "D").astype(int)
+        dem_wins[:, alaska_index] = (winner_caucuses == "D").astype(int)
+        rep_wins[:, alaska_index] = (winner_caucuses == "R").astype(int)
+        independent_wins[:, alaska_index] = (winner_caucuses == "I").astype(int)
+        unresolved_by_race[:, alaska_index] = 0
 
     # Generic multiway plurality: candidate winners are authoritative; signed
     # margin is only a FitResult compatibility carrier. Unknown-caucus winners
@@ -168,7 +217,6 @@ def simulate_chamber(
         if isinstance(multiway_block, list)
         else ([multiway_block] if multiway_block else [])
     )
-    unresolved_by_race = np.zeros((n_draws, n_races), dtype=int)
     for multiway_diagnostics in multiway_rows:
         if not isinstance(multiway_diagnostics, dict):
             continue
@@ -203,21 +251,27 @@ def simulate_chamber(
             )
         }
         dem_col = np.zeros(n_draws, dtype=int)
+        rep_col = np.zeros(n_draws, dtype=int)
+        independent_col = np.zeros(n_draws, dtype=int)
+        unresolved_col = np.zeros(n_draws, dtype=int)
         for draw, (winner, failed) in enumerate(zip(winner_ids, fail_closed)):
             if failed or winner is None:
+                unresolved_col[draw] = 1
                 continue
             caucus = caucus_map.get(str(winner))
             if caucus == "D":
                 dem_col[draw] = 1
-            elif caucus != "R":
-                # Unknown caucus: leave as 0 Dem and do not invent an R seat.
-                continue
+            elif caucus == "R":
+                rep_col[draw] = 1
+            elif caucus == "I":
+                independent_col[draw] = 1
+            else:
+                unresolved_col[draw] = 1
         multiway_index = fit.race_ids.index(multiway_race_id)
-        wins[:, multiway_index] = dem_col
-        # Track unknown-caucus / residual winners separately so they are not
-        # silently mapped to Republican via (margins < 0).
-        if fail_closed.size == n_draws:
-            unresolved_by_race[:, multiway_index] = fail_closed.astype(int)
+        dem_wins[:, multiway_index] = dem_col
+        rep_wins[:, multiway_index] = rep_col
+        independent_wins[:, multiway_index] = independent_col
+        unresolved_by_race[:, multiway_index] = unresolved_col
 
     # An active contest without predictive draws is an incomplete chamber
     # forecast.  Incumbent/held_by is historical state, not a deterministic
@@ -233,43 +287,68 @@ def simulate_chamber(
             )
 
     draw_unresolved = unresolved_by_race.sum(axis=1)
-    dem_seats = held_dem + wins.sum(axis=1)
+    dem_seats = held_dem + dem_wins.sum(axis=1)
+    rep_seats = held_rep + rep_wins.sum(axis=1)
+    independent_seats = (
+        held_independent_affiliation + independent_wins.sum(axis=1)
+    )
     # Permanent withheld seats (unsupported multiway not in FitResult) conserve
     # the 100-seat total as unresolved, but do not zero every draw's majority
     # probability — only draw-level unknown-caucus winners do that.
     unresolved_seats = draw_unresolved + withheld_contested_seats
-    total = held_dem + held_rep + n_races + withheld_contested_seats
+    total = (
+        held_dem + held_rep + held_independent_affiliation
+        + n_races + withheld_contested_seats
+    )
     if total != 100:
         raise ValueError(
             f"Senate seat accounting must total 100 (held_dem={held_dem}, "
-            f"held_rep={held_rep}, contested_in_fit={n_races}, "
+            f"held_rep={held_rep}, held_independent={held_independent_affiliation}, "
+            f"contested_in_fit={n_races}, "
             f"withheld_contested={withheld_contested_seats}, total={total}). "
             "Check not_up / withdrawn / fit race_ids."
         )
-    rep_seats = total - dem_seats - unresolved_seats
-    if np.any(rep_seats < 0) or np.any(dem_seats + unresolved_seats + rep_seats != total):
-        raise ValueError("multiway unknown-caucus accounting broke 100-seat conservation")
+    if (
+        np.any(rep_seats < 0)
+        or np.any(dem_seats < 0)
+        or np.any(independent_seats < 0)
+        or np.any(
+            dem_seats + rep_seats + independent_seats + unresolved_seats != total
+        )
+    ):
+        raise ValueError("chamber-affiliation accounting broke 100-seat conservation")
 
     hist: dict[str, int] = {}
     for s in dem_seats.astype(int):
         hist[str(int(s))] = hist.get(str(int(s)), 0) + 1
 
-    draw_resolved = draw_unresolved == 0
-    p_fifty = float(((dem_seats == 50) & draw_resolved).mean())
-    p_unresolved = float((~draw_resolved).mean())
-    # VP tiebreak among draws without fitted unknown-caucus winners.
+    draw_resolved = unresolved_seats == 0
+    p_fifty = float((
+        (dem_seats == 50)
+        & (rep_seats == 50)
+        & (independent_seats == 0)
+        & draw_resolved
+    ).mean())
     if vp_tiebreak_party == "R":
-        p_dem_maj = float(((dem_seats >= majority_threshold) & draw_resolved).mean())
-        p_rep_maj = float(((dem_seats < majority_threshold) & draw_resolved).mean())
+        dem_control = dem_seats >= majority_threshold
+        rep_control = rep_seats >= 50
     elif vp_tiebreak_party == "D":
-        p_dem_maj = float(((dem_seats >= 50) & draw_resolved).mean())
-        p_rep_maj = float(((dem_seats <= 49) & draw_resolved).mean())
+        dem_control = dem_seats >= 50
+        rep_control = rep_seats >= majority_threshold
     else:
         raise ValueError(f"vp_tiebreak_party must be 'R' or 'D', got {vp_tiebreak_party!r}")
+    if np.any(dem_control & rep_control):
+        raise ValueError("both parties cannot control the chamber in one draw")
+    independent_balance = draw_resolved & ~dem_control & ~rep_control
+    unresolved_control = ~draw_resolved & ~dem_control & ~rep_control
+    p_dem_maj = float(dem_control.mean())
+    p_rep_maj = float(rep_control.mean())
+    p_independent_balance = float(independent_balance.mean())
+    p_unresolved = float(unresolved_control.mean())
 
     sim = ChamberSimulation(
         seat_draws=dem_seats,
-        race_win=wins,
+        race_win=dem_wins,
         race_ids=fit.race_ids,
         states=fit.states,
         held_dem=held_dem,
@@ -287,9 +366,15 @@ def simulate_chamber(
         unresolved_seat_draws=unresolved_seats,
         p_unresolved_control=p_unresolved,
         expected_unresolved_seats=float(unresolved_seats.mean()),
+        candidate_win=candidate_wins,
+        rep_seat_draws=rep_seats,
+        independent_seat_draws=independent_seats,
+        expected_rep_seats=float(rep_seats.mean()),
+        expected_independent_seats=float(independent_seats.mean()),
+        p_independent_balance=p_independent_balance,
+        held_independent_affiliation=held_independent_affiliation,
     )
 
-    contested_ix = contested.set_index("race_id")
     adapter_diagnostics = (fit.diagnostics or {}).get("exceptional_adapter") or {}
     if not adapter_diagnostics and (fit.diagnostics or {}).get("target") == "modeled_candidate_margin":
         adapter_diagnostics = fit.diagnostics or {}
@@ -300,7 +385,7 @@ def simulate_chamber(
     summaries = []
     for i, rid in enumerate(fit.race_ids):
         draw_i = margins[:, i]
-        p_modeled = float(wins[:, i].mean())
+        p_modeled = float(candidate_wins[:, i].mean())
         state = fit.states[i]
         row = contested_ix.loc[rid] if rid in contested_ix.index else None
         held_raw = None if row is None else row.get("held_by")
@@ -350,14 +435,12 @@ def simulate_chamber(
             modeled_ballot_party=dem_party,
             opposing_ballot_party=opposing_party,
         )
-        modeled_caucus = None if row is None else row.get("modeled_caucus")
-        opposing_caucus = None if row is None else row.get("opposing_caucus")
+        modeled_caucus = "D" if row is None or pd.isna(row.get("modeled_caucus")) else str(row.get("modeled_caucus"))
+        opposing_caucus = "R" if row is None or pd.isna(row.get("opposing_caucus")) else str(row.get("opposing_caucus"))
         favored_caucus = str(
             modeled_caucus if p_modeled >= 0.5 else opposing_caucus
         )
-        if favored_caucus not in {"D", "R"}:
-            favored_caucus = "D" if p_modeled >= 0.5 else "R"
-        favored_party = dem_party if favored_caucus == "D" else "R"
+        favored_party = dem_party if p_modeled >= 0.5 else opposing_party
         held_caucus = (
             str(row.get("held_caucus")) if held_by == "I" and row is not None
             and pd.notna(row.get("held_caucus")) else held_by if held_by in {"D", "R"} else None
@@ -374,6 +457,8 @@ def simulate_chamber(
             probabilities = [float(np.mean(alaska_winners == index)) for index in range(len(candidate_ids))]
             favored_index = int(np.argmax(probabilities))
             p_dem_caucus = float(sum(probabilities[index] for index, caucus in enumerate(caucuses) if caucus == "D"))
+            p_rep_caucus = float(sum(probabilities[index] for index, caucus in enumerate(caucuses) if caucus == "R"))
+            p_independent = float(sum(probabilities[index] for index, caucus in enumerate(caucuses) if caucus == "I"))
             summary = {
                 "race_id": rid, "state": state, "seat_class": seat_class,
                 "contest_structure": "ranked_choice_multiway",
@@ -390,7 +475,9 @@ def simulate_chamber(
                 "favored_candidate": candidate_names[favored_index],
                 "favored_party": parties[favored_index], "favored_caucus": caucuses[favored_index],
                 "caucus": caucuses[favored_index], "p_dem_caucus": p_dem_caucus,
-                "p_rep_caucus": 1.0 - p_dem_caucus, "p_dem": None, "p_rep": None,
+                "p_rep_caucus": p_rep_caucus,
+                "p_independent_chamber": p_independent,
+                "p_dem": None, "p_rep": None,
                 "p_modeled_candidate": None, "p_opposing_candidate": None,
                 "mean_margin": None, "sd_margin": None, "ci05": None, "ci95": None,
                 "prior_lean": prior_lean, "incumbent_party": incumbent, "is_open": is_open,
@@ -443,6 +530,13 @@ def simulate_chamber(
                         if caucus == "R"
                     )
                 )
+            p_independent = float(
+                sum(
+                    probabilities[index]
+                    for index, caucus in enumerate(caucuses)
+                    if caucus == "I"
+                )
+            )
             summary = {
                 "race_id": rid,
                 "state": state,
@@ -471,6 +565,7 @@ def simulate_chamber(
                 "caucus": caucuses[favored_index],
                 "p_dem_caucus": p_dem_caucus,
                 "p_rep_caucus": p_rep_caucus,
+                "p_independent_chamber": p_independent,
                 "p_unknown_caucus": p_unknown,
                 "p_dem": None,
                 "p_rep": None,
@@ -498,6 +593,9 @@ def simulate_chamber(
                 "seat_class": seat_class,
                 "p_modeled_candidate": p_modeled,
                 "p_opposing_candidate": float(1.0 - p_modeled),
+                "p_dem_caucus": float(dem_wins[:, i].mean()),
+                "p_rep_caucus": float(rep_wins[:, i].mean()),
+                "p_independent_chamber": float(independent_wins[:, i].mean()),
                 "modeled_candidate_margin": mean_m,
                 "modeled_candidate_share": round(dem_share, 1),
                 "opposing_candidate_share": round(rep_share, 1),
@@ -578,10 +676,6 @@ def independent_bernoulli_foil(
 ) -> np.ndarray:
     """Documented foil: independent Bernoulli from marginals (NOT used for production totals)."""
     rng = np.random.default_rng(seed)
-    ps = np.array([
-        s.get("p_modeled_candidate")
-        if s.get("p_modeled_candidate") is not None else s.get("p_dem_caucus")
-        for s in summaries
-    ], dtype=float)
+    ps = np.array([float(s.get("p_dem_caucus") or 0.0) for s in summaries], dtype=float)
     wins = rng.random((n_draws, len(ps))) < ps
     return held_dem + wins.sum(axis=1)

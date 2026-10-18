@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -19,6 +20,19 @@ from midterms.evidence.source_readiness import (
 )
 
 PREPARE_EVIDENCE_VERSION = "prepare-evidence-v4-append-only-poll-receipts"
+
+
+@dataclass(frozen=True)
+class PollArtifactSnapshot:
+    """Transactional poll snapshot with an explicit archive baseline.
+
+    Directory membership is separate from ``files`` so rollback may prune
+    receipts created by this transaction without treating a partial file map as
+    authority over every checked-in receipt in the repository.
+    """
+
+    files: dict[str, bytes | None]
+    archive_members: dict[str, frozenset[str]]
 
 
 def _poll_snapshot_paths() -> tuple[Path, ...]:
@@ -45,32 +59,49 @@ def _poll_snapshot_paths() -> tuple[Path, ...]:
     return fixed + archived
 
 
-def _snapshot_poll_artifacts() -> dict[str, bytes | None]:
-    return {
-        str(path): (path.read_bytes() if path.is_file() else None)
-        for path in _poll_snapshot_paths()
-    }
-
-
-def _restore_poll_artifacts(snapshot: dict[str, bytes | None]) -> list[str]:
-    restored: list[str] = []
+def _poll_archive_dirs() -> tuple[Path, ...]:
     from midterms.config import RAW_DIR
 
-    # Remove receipt files created after the transaction snapshot. They would
-    # otherwise re-enter the next append-only normalization after a rollback.
-    archive_dirs = (
+    return (
         RAW_DIR / "external" / "votehub_poll_receipts",
         MANIFESTS_DIR / "votehub_poll_receipts",
     )
-    snapshot_paths = {str(Path(value)) for value in snapshot}
-    for directory in archive_dirs:
-        if not directory.is_dir():
-            continue
-        for path in directory.glob("*.json"):
-            if str(path) not in snapshot_paths:
-                path.unlink()
-                restored.append(f"removed:{path.as_posix()}")
-    for raw_path, payload in snapshot.items():
+
+
+def _snapshot_poll_artifacts() -> PollArtifactSnapshot:
+    files = {
+        str(path): (path.read_bytes() if path.is_file() else None)
+        for path in _poll_snapshot_paths()
+    }
+    archive_members = {
+        str(directory): frozenset(
+            str(path) for path in directory.glob("*.json")
+        )
+        for directory in _poll_archive_dirs()
+    }
+    return PollArtifactSnapshot(files=files, archive_members=archive_members)
+
+
+def _restore_poll_artifacts(
+    snapshot: PollArtifactSnapshot | dict[str, bytes | None],
+) -> list[str]:
+    restored: list[str] = []
+    if isinstance(snapshot, PollArtifactSnapshot):
+        files = snapshot.files
+        # Remove only receipts absent from the explicitly captured directory
+        # baseline. A plain/partial mapping has no authority to prune unrelated
+        # archives (and keeps synthetic transaction tests isolated).
+        for raw_directory, baseline in snapshot.archive_members.items():
+            directory = Path(raw_directory)
+            if not directory.is_dir():
+                continue
+            for path in directory.glob("*.json"):
+                if str(path) not in baseline:
+                    path.unlink()
+                    restored.append(f"removed:{path.as_posix()}")
+    else:
+        files = snapshot
+    for raw_path, payload in files.items():
         path = Path(raw_path)
         if payload is None:
             if path.is_file():
@@ -433,7 +464,7 @@ def prepare_evidence(
 ) -> dict[str, Any]:
     if mode not in {"audit", "refresh-safe", "seal"}:
         raise ValueError("prepare-evidence mode must be audit, refresh-safe, or seal")
-    poll_snapshot: dict[str, bytes | None] | None = None
+    poll_snapshot: PollArtifactSnapshot | dict[str, bytes | None] | None = None
     if mode == "refresh-safe":
         # Live VoteHub can introduce incompatible current polls that turn an
         # identity-sensitive warning into a hard forecast coverage failure.

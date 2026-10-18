@@ -28,7 +28,12 @@ from midterms.config import (
     PUBLICATION_SURFACE_DEFAULT,
     ROOT,
 )
-from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
+from midterms.evidence.outcome_identity import (
+    CHAMBER_AFFILIATION_POLICY_VERSION,
+    INDEPENDENT_DEM_CAUCUSES_BASIS,
+    OSBORN_CANDIDATE_ID,
+    OSBORN_INDEPENDENT_CHAMBER_BASIS,
+)
 
 
 def compact_run_id(
@@ -787,14 +792,31 @@ def run_forecast(
         # Hard chamber calibration is OFF by default (blueprint §9.4: optional soft overlay).
         if used_control and control_calibrate:
             held = snap.races[snap.races["not_up"]] if len(snap.races) else snap.races
-            held_ind = int((held["held_by"] == "I").sum()) if len(held) else 0
-            held_dem = int((held["held_by"] == "D").sum()) + held_ind if len(held) else 0
+            held_affiliation = held["held_by"].astype(str).copy()
+            held_i = held["held_by"].eq("I")
+            held_affiliation.loc[held_i] = held.loc[held_i, "held_caucus"].astype(str)
+            held_dem = int(held_affiliation.eq("D").sum())
+            active_by_id = snap.races[
+                snap.races["race_id"].isin(fit.race_ids)
+            ].set_index("race_id")
+            modeled_caucuses = [
+                str(active_by_id.loc[race_id, "modeled_caucus"])
+                if race_id in active_by_id.index else "D"
+                for race_id in fit.race_ids
+            ]
+            opposing_caucuses = [
+                str(active_by_id.loc[race_id, "opposing_caucus"])
+                if race_id in active_by_id.index else "R"
+                for race_id in fit.race_ids
+            ]
             shifted, control_cal_meta = calibrate_draws_to_control(
                 shifted,
                 held_dem=held_dem,
                 control_p_dem=float(control_p),
                 weight=control_weight,
                 vp_tiebreak_party="R",
+                modeled_caucuses=modeled_caucuses,
+                opposing_caucuses=opposing_caucuses,
             )
             control_cal_meta["mode"] = "calibrate_draws_to_control"
         elif used_control:
@@ -980,14 +1002,22 @@ def run_forecast(
         "unadjusted": {
             "p_dem_majority": core_sim.p_dem_majority,
             "p_rep_majority": core_sim.p_rep_majority,
+            "p_independent_balance": core_sim.p_independent_balance,
+            "p_unresolved_control": core_sim.p_unresolved_control,
             "p_fifty_fifty": core_sim.p_fifty_fifty,
             "expected_dem_seats": core_sim.expected_dem_seats,
+            "expected_rep_seats": core_sim.expected_rep_seats,
+            "expected_independent_seats": core_sim.expected_independent_seats,
         },
         "adjusted": {
             "p_dem_majority": sim.p_dem_majority,
             "p_rep_majority": sim.p_rep_majority,
+            "p_independent_balance": sim.p_independent_balance,
+            "p_unresolved_control": sim.p_unresolved_control,
             "p_fifty_fifty": sim.p_fifty_fifty,
             "expected_dem_seats": sim.expected_dem_seats,
+            "expected_rep_seats": sim.expected_rep_seats,
+            "expected_independent_seats": sim.expected_independent_seats,
         },
         "delta_p_dem_majority": float(sim.p_dem_majority - core_sim.p_dem_majority),
         "delta_expected_dem_seats": float(sim.expected_dem_seats - core_sim.expected_dem_seats),
@@ -1033,7 +1063,7 @@ def run_forecast(
         {"dem_seats": int(k), "count": int(v), "probability": v / len(sim.seat_draws)}
         for k, v in sorted(sim.seat_histogram.items(), key=lambda kv: int(kv[0]))
     ]
-    expected_rep = 100.0 - sim.expected_dem_seats
+    expected_rep = sim.expected_rep_seats
     # control already loaded above for overlay; refresh for artifact snapshot
     control = load_control_market(as_of=str(as_of)[:10])
 
@@ -1139,19 +1169,29 @@ def run_forecast(
             "held_rep": sim.held_rep,
             "held_ind": getattr(sim, "held_ind", 0),
             "independent_caucus_policy": {
-                "ballot_party": "I",
-                "seat_accounting_caucus": "D",
-                "basis": INDEPENDENT_DEM_CAUCUSES_BASIS,
+                "schema_version": CHAMBER_AFFILIATION_POLICY_VERSION,
                 "type": "user_declared_model_assumption",
+                "default_independent_seat_accounting_caucus": "D",
+                "default_basis": INDEPENDENT_DEM_CAUCUSES_BASIS,
+                "candidate_overrides": [{
+                    "candidate_id": OSBORN_CANDIDATE_ID,
+                    "ballot_party": "I",
+                    "seat_accounting_affiliation": "I",
+                    "basis": OSBORN_INDEPENDENT_CHAMBER_BASIS,
+                }],
             },
             "majority_threshold": sim.majority_threshold,
             "p_dem_majority": sim.p_dem_majority,
             "p_rep_majority": sim.p_rep_majority,
+            "p_independent_balance": sim.p_independent_balance,
+            "p_unresolved_control": sim.p_unresolved_control,
             "p_fifty_fifty": sim.p_fifty_fifty,
             "p_tie": sim.p_fifty_fifty,
             "vp_tiebreak_party": sim.vp_tiebreak_party,
             "expected_dem_seats": sim.expected_dem_seats,
             "expected_rep_seats": expected_rep,
+            "expected_independent_seats": sim.expected_independent_seats,
+            "expected_unresolved_seats": sim.expected_unresolved_seats,
             "n_joint_sims": int(getattr(sim, "n_joint_sims", len(sim.seat_draws))),
             "n_posterior_margin_draws": int(
                 getattr(sim, "n_posterior_margin_draws", fit.draws_margin.shape[0])
@@ -1160,10 +1200,11 @@ def run_forecast(
             "independent_bernoulli_foil_expected": float(np.mean(foil)),
             "note": (
                 "Chamber totals from joint correlated draws. "
-                "Independent candidates retain their ballot identity and enter "
-                "Democratic-caucus seat totals under the declared model assumption. "
+                "Independent candidates retain their ballot identity and use "
+                "the candidate-specific chamber-affiliation assumptions recorded above. "
                 "Display ratings are model-derived from P(Dem); expert/Kalshi overlays are ablatable. "
-                "p_tie/p_fifty_fifty is P(exactly 50 Dem seats); with VP=R that outcome is Rep control."
+                "p_tie/p_fifty_fifty is P(exactly 50 D and 50 R seats with no Independent); "
+                "with VP=R that outcome is Republican control."
             ),
         },
         "races": race_summaries,
@@ -1342,6 +1383,9 @@ def run_forecast(
         draws_path,
         margins=fit.draws_margin.astype(np.float32),
         dem_seats=sim.seat_draws.astype(np.int16),
+        rep_seats=sim.rep_seat_draws.astype(np.int16),
+        independent_seats=sim.independent_seat_draws.astype(np.int16),
+        unresolved_seats=sim.unresolved_seat_draws.astype(np.int16),
         race_ids=np.array(fit.race_ids),
     )
 
@@ -1368,7 +1412,9 @@ def run_forecast(
         "control_weight": control_weight,
         "control_calibrate": control_calibrate,
         "allow_fast_fallback": allow_fast_fallback,
-        "independent_caucus_basis": INDEPENDENT_DEM_CAUCUSES_BASIS,
+        "chamber_affiliation_policy_version": CHAMBER_AFFILIATION_POLICY_VERSION,
+        "default_independent_caucus_basis": INDEPENDENT_DEM_CAUCUSES_BASIS,
+        "osborn_independent_chamber_basis": OSBORN_INDEPENDENT_CHAMBER_BASIS,
         "effective_domain_contract": effective_domain_contract,
         "poll_structure": selected_poll_structure.to_dict(),
         "validated_model_spec_sha256": (

@@ -38,7 +38,7 @@ from midterms.validation.nonmajor_contest_structure_audit_v0924 import (
 
 
 def test_lineage_still_v0924_research_only():
-    assert MODEL_VERSION == "senate-hierarchical-v0.9.25"
+    assert MODEL_VERSION == "senate-hierarchical-v0.9.26"
     assert PUBLIC_LIVE_ENABLED is False
 
 

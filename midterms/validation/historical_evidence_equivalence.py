@@ -126,10 +126,11 @@ def compare_historical_projections(
             "candidate_state_metadata": True,
         },
         "reusable_lineage_claim": (
-            "v0.9.22 historical model inputs were not changed by this current-cycle repair; "
-            "no v0.9.22 artifact is relabeled as v0.9.23"
+            "The reference and candidate historical input projections are semantically "
+            "identical at every formal cutoff. This comparison does not relabel model-fit "
+            "or forecast artifacts."
             if equivalent else
-            "one or more formal historical inputs changed; v0.9.23 requires rebuilt validation"
+            "One or more formal historical inputs changed; historical validation must be rebuilt."
         ),
     }
     payload["comparison_sha256"] = _canonical_sha256(payload)
@@ -147,5 +148,54 @@ def write_historical_equivalence_report(
     report = compare_historical_projections(before, after)
     path = path or (ARTIFACTS_DIR / "historical_evidence_equivalence_v0923.json")
     path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    return report
+
+
+def rebind_equivalent_projection_lineage(
+    path: Path | None = None,
+    *,
+    current_projection: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Advance only the code-version label after proving inputs are unchanged.
+
+    This is deliberately narrower than rebuilding historical validation.  Every
+    current projection hash must equal the previously recorded candidate-side
+    hash.  A changed cutoff, missing cutoff, or changed semantic hash fails
+    closed instead of blessing stale historical evidence.
+    """
+    path = path or (ARTIFACTS_DIR / "historical_evidence_equivalence_v0923.json")
+    report = json.loads(path.read_text(encoding="utf-8"))
+    if report.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError("historical equivalence schema is unsupported")
+    if report.get("classification") != "historically_equivalent":
+        raise ValueError("historical inputs are not classified as equivalent")
+
+    projection = current_projection or build_historical_projection()
+    rows = {str(row.get("cutoff")): row for row in report.get("formal_cutoffs") or []}
+    current = projection.get("cutoffs") or {}
+    if set(rows) != set(current):
+        raise ValueError("historical cutoff set changed")
+    for cutoff, value in current.items():
+        expected = rows[cutoff].get("after_semantic_sha256")
+        actual = value.get("semantic_sha256")
+        if not expected or actual != expected:
+            raise ValueError(f"historical projection changed at {cutoff}")
+
+    previous = report.get("candidate_model_version")
+    report["candidate_model_version"] = MODEL_VERSION
+    report["reusable_lineage_claim"] = (
+        "The recorded candidate projection was recomputed under the current code and "
+        "remains semantically identical at every formal cutoff. No historical model-fit "
+        "or forecast artifact was relabeled."
+    )
+    report["lineage_rebind"] = {
+        "from_model_version": previous,
+        "to_model_version": MODEL_VERSION,
+        "verification": "all_current_projection_hashes_equal_recorded_candidate_hashes",
+        "n_verified_cutoffs": len(current),
+    }
+    report.pop("comparison_sha256", None)
+    report["comparison_sha256"] = _canonical_sha256(report)
     path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report

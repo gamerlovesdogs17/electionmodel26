@@ -1,14 +1,10 @@
-# Model card — Senate hierarchical v0.9.24 development boundary
+# Model card — Senate hierarchical v0.9.26 development boundary
 
-> **Validation status (2026-10-06):** `senate-hierarchical-v0.9.23` completed a
-> sealed research rebuild for as-of `2026-10-05` against evidence bundle
-> `eb-19f9ccea0cc3812a` (release identity retained under `data/releases/` and
-> `data/shadow/`). Those v0.9.23 artifacts are historical records and must not
-> be rewritten. **v0.9.24** begins blueprint-faithful contest/presentation and
-> poll-mechanics repair on top of that rebuild; it is research-only development
-> code that has **not** received a fresh full nested OOF / stack / publication
-> rebuild. `PUBLIC_LIVE_ENABLED=False`; publication surface remains
-> `research_only`.
+> **Validation status (2026-10-18):** checked-in v0.9.25 research artifacts are
+> retained as historical records. **v0.9.26** changes the chamber-affiliation
+> estimand for Dan Osborn and therefore requires a fresh, version-bound rebuild;
+> old forecasts and validated model specs cannot be treated as current.
+> `PUBLIC_LIVE_ENABLED=False`; publication surface remains `research_only`.
 
 ## Target
 - **Office:** U.S. Senate only (Class II 2026 + OH/FL specials + historical cycles)
@@ -17,9 +13,11 @@
 - **Auxiliary:** multiway shares + turnout foils (do not drive seat math)
 - **Nonstandard candidates:** candidate, ballot party, modeled side, and caucus
   affiliation are distinct fields. Warehouse rows now carry current ticket
-  identities. The four modeled Independents and held Independent seats retain
-  `I` ballot/held labels and use a user-declared Democratic-caucus accounting
-  assumption. Ballot party never changes because of that caucus assumption.
+  identities. Idaho, Montana, and South Dakota retain `I` ballot labels and a
+  user-declared Democratic-caucus accounting assumption. Dan Osborn retains an
+  `I` ballot label and an explicit Independent chamber affiliation. Held
+  Independents retain their explicit, separately versioned caucus metadata.
+  Ballot party never changes because of a chamber-affiliation assumption.
   A separate, limited-validation adapter supports reviewed binary I-v-R
   contests. Idaho, Montana, and Nebraska use candidate-compatible polls. South
   Dakota is explicitly prior-only with zero compatible polls and very wide
@@ -30,7 +28,7 @@
 2. **Stack candidates** — separately identified frozen OOF predictors: static `pymc`, `pymc_dynamic`, `state_space`, `ridge_fundamentals`, and eligible baselines. Structural challengers are diagnostics and are excluded from the production simplex. The validated structure is the all-off `pymc` reference; sponsor, questionnaire, and study effects remain disabled, with heuristic study downweighting enabled.
 3. **Distributional mixture code** — nonnegative weights from empirical predictive-mixture CRPS over frozen draws. Mean-score softmax is diagnostic only. The validated v0.9.22 stack assigns approximately 21.9% to `pymc` and 78.1% to `state_space`; other candidates receive zero production mass.
 4. **Overlays** — expert ratings + Kalshi race/control soft pulls are optional. Publication use requires an exact-weight timestamp-pure nested-OOS validation contract; otherwise the publication fit runs core-only and records the layers as compare-only.
-5. **Final correlated chamber simulator** — joint margin draws → seats → control. Simulation count is separate from posterior sample count (`n_joint_sims` vs `n_posterior_samples`). Independent Bernoulli foil is diagnostic only.
+5. **Final correlated chamber simulator** — joint margin draws → candidate winners → explicit D/R/I/unresolved seats → control. Simulation count is separate from posterior sample count (`n_joint_sims` vs `n_posterior_samples`). Independent Bernoulli foil is diagnostic only.
 
 ### Limited non-major-party adapter
 
@@ -235,9 +233,11 @@ transition is enabled. Turnout remains auxiliary and does not drive seat math.
 
 ## Limitations
 - **Public live probabilities are locked** (`PUBLIC_LIVE_ENABLED=False`). Surface is `research_only` until a fresh independent clearance.
-- Independent modeled candidates count toward the Democratic caucus **by a
-  declared modeling assumption**, not by ballot party or a verified individual
-  caucus pledge. The ballot party and display identity remain Independent.
+- Independent chamber affiliation is candidate-specific metadata. Idaho,
+  Montana, and South Dakota use a declared Democratic-caucus modeling
+  assumption; Dan Osborn is modeled as an Independent seat. These are model
+  assumptions, not verified personal caucus pledges, and ballot/display identity
+  remains Independent in every case.
 - The non-major-party adapter has only four historical lead-time cases across
   two scorable elections. It is labeled limited validation and makes no
   calibration claim. Zero-poll South Dakota is explicitly prior-only with a

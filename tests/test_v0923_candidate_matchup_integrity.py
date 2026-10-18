@@ -26,6 +26,7 @@ from midterms.model.non_major_adapter import fit_non_major_adapter
 from midterms.validation.artifact_lineage import require_current_model_version
 from midterms.validation.historical_evidence_equivalence import (
     compare_historical_projections,
+    rebind_equivalent_projection_lineage,
 )
 
 
@@ -414,6 +415,35 @@ def test_historical_equivalence_detects_equal_and_changed_cutoffs():
     assert compare_historical_projections(before, changed)["classification"] == "historical_inputs_changed"
 
 
+def test_historical_equivalence_rebind_requires_exact_recorded_projection(tmp_path: Path):
+    entry = {"races": [{"race_id": "r"}], "polls": [], "candidate_timeline": {}}
+    projection = {
+        "model_version": MODEL_VERSION,
+        "cutoffs": {"cycle@date": {**entry, "semantic_sha256": "same"}},
+    }
+    report = {
+        "schema_version": "historical-evidence-equivalence-v1",
+        "reference_model_version": "old-reference",
+        "candidate_model_version": "old-candidate",
+        "classification": "historically_equivalent",
+        "formal_cutoffs": [{
+            "cutoff": "cycle@date",
+            "equivalent": True,
+            "after_semantic_sha256": "same",
+        }],
+        "comparison_sha256": "old",
+    }
+    path = tmp_path / "equivalence.json"
+    path.write_text(json.dumps(report), encoding="utf-8")
+    rebound = rebind_equivalent_projection_lineage(path, current_projection=projection)
+    assert rebound["candidate_model_version"] == MODEL_VERSION
+    assert rebound["lineage_rebind"]["n_verified_cutoffs"] == 1
+
+    projection["cutoffs"]["cycle@date"]["semantic_sha256"] = "changed"
+    with pytest.raises(ValueError, match="projection changed"):
+        rebind_equivalent_projection_lineage(path, current_projection=projection)
+
+
 def test_checked_in_votehub_regression_matchups():
     frame = normalize_votehub_senate_polls(write_manifest=False)
     # Current-registry resolution may collapse obsolete hypothetical matchups.
@@ -439,7 +469,7 @@ def test_checked_in_votehub_regression_matchups():
 
 
 def test_v0922_empirical_artifact_is_stale_at_v0923_boundary():
-    assert MODEL_VERSION == "senate-hierarchical-v0.9.25"
+    assert MODEL_VERSION == "senate-hierarchical-v0.9.26"
     with pytest.raises(ValueError, match="stale historical OOF model_version"):
         require_current_model_version(
             {"model_version": "senate-hierarchical-v0.9.22"},

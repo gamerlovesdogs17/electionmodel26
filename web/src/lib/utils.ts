@@ -79,11 +79,15 @@ export type ChamberForecast = {
   majority_threshold: number;
   p_dem_majority: number;
   p_rep_majority: number;
+  p_independent_balance?: number;
+  p_unresolved_control?: number;
   p_tie: number;
   p_fifty_fifty?: number;
   vp_tiebreak_party?: string;
   expected_dem_seats: number;
   expected_rep_seats?: number;
+  expected_independent_seats?: number;
+  expected_unresolved_seats?: number;
   seat_histogram: { dem_seats: number; count: number; probability: number }[];
   independent_bernoulli_foil_expected?: number;
   note?: string;

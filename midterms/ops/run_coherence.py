@@ -106,12 +106,31 @@ def check_run_coherence(
 
     run_id = str(forecast.get("run_id") or "")
     if forecast.get("election_id") == "senate-2026":
-        from midterms.evidence.outcome_identity import INDEPENDENT_DEM_CAUCUSES_BASIS
+        from midterms.evidence.outcome_identity import (
+            CHAMBER_AFFILIATION_POLICY_VERSION,
+            INDEPENDENT_DEM_CAUCUSES_BASIS,
+            OSBORN_CANDIDATE_ID,
+            OSBORN_INDEPENDENT_CHAMBER_BASIS,
+        )
 
         policy = (forecast.get("chamber") or {}).get("independent_caucus_policy") or {}
-        if (policy.get("ballot_party") != "I"
-                or policy.get("seat_accounting_caucus") != "D"
-                or policy.get("basis") != INDEPENDENT_DEM_CAUCUSES_BASIS):
+        overrides = policy.get("candidate_overrides") or []
+        osborn = next(
+            (
+                item for item in overrides
+                if isinstance(item, dict)
+                and item.get("candidate_id") == OSBORN_CANDIDATE_ID
+            ),
+            {},
+        )
+        if (
+            policy.get("schema_version") != CHAMBER_AFFILIATION_POLICY_VERSION
+            or policy.get("default_independent_seat_accounting_caucus") != "D"
+            or policy.get("default_basis") != INDEPENDENT_DEM_CAUCUSES_BASIS
+            or osborn.get("ballot_party") != "I"
+            or osborn.get("seat_accounting_affiliation") != "I"
+            or osborn.get("basis") != OSBORN_INDEPENDENT_CHAMBER_BASIS
+        ):
             mismatches.append("Independent caucus accounting policy differs from current code")
     model_version = str(forecast.get("model_version") or "")
     snap = forecast.get("snapshot") or {}

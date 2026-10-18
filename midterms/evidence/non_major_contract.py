@@ -39,7 +39,7 @@ def non_major_identity_supported(row: Mapping[str, Any] | pd.Series) -> bool:
         structure in PRINCIPAL_BINARY_ELIGIBLE_STRUCTURES
         and str(row.get("modeled_ballot_party") or "").upper() == "I"
         and str(row.get("opposing_ballot_party") or "").upper() == "R"
-        and str(row.get("modeled_caucus") or "").upper() == "D"
+        and str(row.get("modeled_caucus") or "").upper() in {"D", "I"}
         and str(row.get("opposing_caucus") or "").upper() == "R"
         and _present(row.get("modeled_candidate_id"))
         and _present(row.get("opposing_candidate_id"))

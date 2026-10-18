@@ -131,7 +131,9 @@ signing, licensed ratings CSV path (`COOK_RATINGS_CSV`), VoteHub CC BY dump seal
 
 - **OH + FL specials** in the contested universe (35 races / 65 held).
 - **Model-derived display ratings** aligned with Probability map bands; expert ratings are overlay inputs only.
-- **Independent caucus display** (`dem_party=I` / held `I`) with Dem seat math unchanged.
+- **Candidate-specific Independent accounting**: ballot identity remains `I`;
+  Dan Osborn is an Independent chamber seat, while other explicit caucus
+  assumptions remain separate metadata.
 - **Peer comparison** panel (Kalshi / DDHQ / Economist snapshots) — not averaged into the ensemble.
 - Cycle replay adds **chamber seat CRPS / control Brier** and overlay ablation deltas.
 

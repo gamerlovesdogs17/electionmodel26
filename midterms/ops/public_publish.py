@@ -190,9 +190,9 @@ def stamp_public_release(
         "acceptance_gates_ok": True,
         "disclaimer": (
             "Probabilistic Senate forecast for research and public information. "
-            "Not betting advice. Chamber control uses ≥51 Dem seats; 50–50 is Republican "
-            "via the Vice President. Independents without a Dem nominee still count toward "
-            "Democratic caucus seats when applicable."
+            "Not betting advice. Chamber control uses the explicit D/R/I affiliation "
+            "recorded for each candidate and the Vice President's tiebreak. Independent "
+            "seats remain separate unless a documented candidate-specific assumption says otherwise."
         ),
         "limitations_url_hint": "MODEL_CARD.md / acceptance_gates_latest.md",
         "archive_scope": "2018-2024 official for validation; live target is senate-2026",

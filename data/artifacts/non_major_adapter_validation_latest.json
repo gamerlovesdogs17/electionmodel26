@@ -1,6 +1,6 @@
 {
   "schema_version": "non-major-adapter-validation-v2",
-  "model_version": "senate-hierarchical-v0.9.25",
+  "model_version": "senate-hierarchical-v0.9.26",
   "adapter_spec_version": "binary-non-major-adapter-v2",
   "classification": "limited_validation_exception_model",
   "target": "modeled_candidate_margin",
@@ -739,7 +739,7 @@
       "opposing_candidate_id": "senate-2026-NE:pete-ricketts",
       "modeled_ballot_party": "I",
       "opposing_ballot_party": "R",
-      "modeled_caucus": "D",
+      "modeled_caucus": "I",
       "opposing_caucus": "R",
       "support_status": "limited_supported",
       "support_reason": "principal_binary_with_minor_residual_candidate_neutral_path",
@@ -1261,5 +1261,5 @@
     "reason": "exceptional outcomes are never used to estimate the structural location or uncertainty; every state anchor is derived only from presidential results available at that cutoff"
   },
   "calibration_claim_allowed": false,
-  "artifact_sha256": "c6058c86962018bbdc92af9bd41f766f70d8790f0c2ec0732973a4b607cd53f0"
+  "artifact_sha256": "5ecf60b7ae4a12a5d89ed756ba6a900cc02fe1b46a1954963462691d717a3849"
 }

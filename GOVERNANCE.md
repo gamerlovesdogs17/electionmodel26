@@ -3,7 +3,7 @@
 Blueprint §§11–12 roles and change control (Senate research production).
 
 ## Public live probabilities
-**HOLD (4 Oct 2026 v0.9.23 development boundary):** `PUBLIC_LIVE_ENABLED=False`.
+**HOLD (18 Oct 2026 v0.9.26 development boundary):** `PUBLIC_LIVE_ENABLED=False`.
 Truth_v1 ledger/expectations are unified; Wikipedia vote scrape remains quarantined.
 The sealed multi-cycle research rebuild, independent rebuild, G1–G11, extension
 gates, and run coherence pass. This establishes a validated production research
@@ -17,7 +17,9 @@ Strict research acceptance requires both the unchanged G1-G11 report and the
 separate version-bound blueprint extension evaluation. Old-version empirical
 artifacts remain historical records and cannot be relabeled as current.
 
-Current surface: `research_only`. Do not label research runs as live.
+Current surface: `research_only`. Do not label research runs as live. The
+candidate-specific chamber-affiliation change makes v0.9.25 current-run
+artifacts stale for v0.9.26; they remain immutable historical records.
 
 v0.9.23 repairs current candidate/matchup evidence and is not empirically
 validated. A separate limited-validation adapter supports reviewed binary

@@ -1,7 +1,7 @@
 {
   "schema_version": "historical-evidence-equivalence-v1",
   "reference_model_version": "senate-hierarchical-v0.9.22",
-  "candidate_model_version": "senate-hierarchical-v0.9.25",
+  "candidate_model_version": "senate-hierarchical-v0.9.26",
   "classification": "historically_equivalent",
   "formal_cutoffs": [
     {
@@ -157,6 +157,12 @@
     ],
     "candidate_state_metadata": true
   },
-  "reusable_lineage_claim": "v0.9.22 historical model inputs were not changed by this current-cycle repair; no v0.9.22 artifact is relabeled as v0.9.23",
-  "comparison_sha256": "ef4b02c9d989840de7c4c02d8238f46f3cfcf5dc1859897391754d8a58448be7"
+  "reusable_lineage_claim": "The recorded candidate projection was recomputed under the current code and remains semantically identical at every formal cutoff. No historical model-fit or forecast artifact was relabeled.",
+  "lineage_rebind": {
+    "from_model_version": "senate-hierarchical-v0.9.25",
+    "to_model_version": "senate-hierarchical-v0.9.26",
+    "verification": "all_current_projection_hashes_equal_recorded_candidate_hashes",
+    "n_verified_cutoffs": 8
+  },
+  "comparison_sha256": "f26e743a6b6de8a816449dbf93cf6d35fb74cf866f2af10968f62f55dc661bd3"
 }

@@ -64,8 +64,12 @@ def _is_credible_principal(
     if party in {"D", "R"}:
         return True
     caucus = str(cand.get("caucus") or "").upper()
-    if party == "I" and caucus in {"D", "R"}:
-        # Petition / independent with an explicit caucus facing a major-party opponent.
+    caucus_basis = str(cand.get("caucus_basis") or "").strip()
+    if party == "I" and (
+        caucus in {"D", "R"} or (caucus == "I" and caucus_basis)
+    ):
+        # Petition / independent with an explicit chamber-affiliation contract
+        # facing a major-party opponent. ``I`` remains separate in seat math.
         return True
     return poll_share is not None and float(poll_share) >= PRINCIPAL_POLL_SHARE_FLOOR
 

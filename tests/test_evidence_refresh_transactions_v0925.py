@@ -28,6 +28,45 @@ def test_poll_rollback_snapshot_includes_raw_normalized_and_lineage_manifests():
     } <= names
 
 
+def test_partial_poll_snapshot_cannot_prune_unrelated_receipts(
+    monkeypatch, tmp_path: Path,
+):
+    """A synthetic/partial snapshot only restores the paths it owns."""
+    archive = tmp_path / "votehub_poll_receipts"
+    archive.mkdir()
+    unrelated = archive / "checked-in.json"
+    unrelated.write_text('{"evidence":true}', encoding="utf-8")
+    owned = tmp_path / "polls.parquet"
+    owned.write_bytes(b"changed")
+    monkeypatch.setattr(preparation, "_poll_archive_dirs", lambda: (archive,))
+
+    restored = preparation._restore_poll_artifacts({str(owned): b"original"})
+
+    assert owned.read_bytes() == b"original"
+    assert unrelated.read_text(encoding="utf-8") == '{"evidence":true}'
+    assert not any(entry.endswith("checked-in.json") for entry in restored)
+
+
+def test_full_poll_snapshot_prunes_only_receipts_created_after_snapshot(
+    monkeypatch, tmp_path: Path,
+):
+    archive = tmp_path / "votehub_poll_receipts"
+    archive.mkdir()
+    baseline = archive / "baseline.json"
+    baseline.write_text('{"evidence":true}', encoding="utf-8")
+    monkeypatch.setattr(preparation, "_poll_archive_dirs", lambda: (archive,))
+    monkeypatch.setattr(preparation, "_poll_snapshot_paths", lambda: (baseline,))
+    snapshot = preparation._snapshot_poll_artifacts()
+    created = archive / "created-during-refresh.json"
+    created.write_text('{"temporary":true}', encoding="utf-8")
+
+    restored = preparation._restore_poll_artifacts(snapshot)
+
+    assert baseline.is_file()
+    assert not created.exists()
+    assert any(entry.endswith("created-during-refresh.json") for entry in restored)
+
+
 def _votehub_poll(poll_id: int, modeled_name: str, opposing_name: str) -> dict:
     return {
         "id": poll_id,

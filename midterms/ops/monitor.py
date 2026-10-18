@@ -39,14 +39,30 @@ def monitor_check(*, min_polls: int = 50, min_enop: float = 5.0) -> dict[str, An
     add("model_version_present", bool(art.get("model_version")), art.get("model_version"))
     p_dem = float(chamber.get("p_dem_majority") or 0)
     p_rep = float(chamber.get("p_rep_majority") or 0)
+    p_independent = float(chamber.get("p_independent_balance") or 0)
+    p_unresolved = float(chamber.get("p_unresolved_control") or 0)
     add(
-        "control_probs_sum_to_one",
-        abs(p_dem + p_rep - 1.0) < 1e-3,
-        {"p_dem": p_dem, "p_rep": p_rep},
-        "control probabilities do not sum to 1",
+        "chamber_outcomes_sum_to_one",
+        abs(p_dem + p_rep + p_independent + p_unresolved - 1.0) < 1e-3,
+        {
+            "p_dem": p_dem, "p_rep": p_rep,
+            "p_independent_balance": p_independent,
+            "p_unresolved": p_unresolved,
+        },
+        "chamber outcome probabilities do not sum to 1",
     )
     exp = float(chamber.get("expected_dem_seats") or -1)
     add("expected_seats_in_range", 0.0 <= exp <= 100.0, exp)
+    expected_total = sum(float(chamber.get(key) or 0.0) for key in (
+        "expected_dem_seats", "expected_rep_seats",
+        "expected_independent_seats", "expected_unresolved_seats",
+    ))
+    add(
+        "expected_seats_sum_to_100",
+        abs(expected_total - 100.0) < 1e-3,
+        expected_total,
+        "expected D/R/I/unresolved seats do not sum to 100",
+    )
     n_polls = int(snap.get("n_polls") or diag.get("n_polls") or 0)
     add("min_polls", n_polls >= min_polls, n_polls, f"stale/low polls n={n_polls}")
     enop = float(diag.get("enop_global") or 0.0)

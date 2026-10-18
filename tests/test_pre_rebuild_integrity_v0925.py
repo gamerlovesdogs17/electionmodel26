@@ -64,7 +64,7 @@ from midterms.validation.nested_component_loo import (
 
 
 def test_model_version_bumped_for_probability_affecting_repairs():
-    assert MODEL_VERSION == "senate-hierarchical-v0.9.25"
+    assert MODEL_VERSION == "senate-hierarchical-v0.9.26"
     assert PREVIOUS_SEALED_MODEL_VERSION == "senate-hierarchical-v0.9.23"
     assert PUBLIC_LIVE_ENABLED is False
 
@@ -651,6 +651,6 @@ def test_tracked_artifacts_avoid_user_home_absolute_paths():
 
 
 def test_release_spec_identity_changes_with_probability_config():
-    assert MODEL_VERSION.endswith("v0.9.25")
+    assert MODEL_VERSION.endswith("v0.9.26")
     assert DEFAULT_FUND_PULL == 0.35
     assert DEFAULT_PROCESS_SD_PER_SQRT_DAY == 0.8

@@ -10,6 +10,11 @@ from datetime import date
 import pandas as pd
 
 INDEPENDENT_DEM_CAUCUSES_BASIS = "user_declared_independent_dem_caucus_assumption_2026_09_20"
+OSBORN_INDEPENDENT_CHAMBER_BASIS = (
+    "user_declared_osborn_independent_chamber_assumption_2026_10_18"
+)
+OSBORN_CANDIDATE_ID = "senate-2026-NE:dan-osborn"
+CHAMBER_AFFILIATION_POLICY_VERSION = "candidate-specific-chamber-affiliation-v2"
 
 
 def canonical_ballot_party(value: object) -> str | None:
@@ -268,7 +273,7 @@ def require_explicit_caucus(races: pd.DataFrame, race_ids: list[str]) -> None:
 
 
 def require_binary_chamber_compatibility(races: pd.DataFrame) -> None:
-    """Reject nonstandard affiliations the current two-caucus engine cannot account for."""
+    """Require explicit chamber affiliation for every nonstandard binary side."""
     if "not_up" not in races.columns:
         raise ValueError(
             "chamber accounting requires complete race columns: not_up"
@@ -312,8 +317,8 @@ def require_binary_chamber_compatibility(races: pd.DataFrame) -> None:
         party = canonical_ballot_party(party)
         if party is None or party == "D":
             continue
-        if (row.get("modeled_caucus") != "D"
-                or row.get("opposing_caucus") != "R"
+        if (row.get("modeled_caucus") not in {"D", "R", "I"}
+                or row.get("opposing_caucus") not in {"D", "R", "I"}
                 or pd.isna(row.get("modeled_caucus_basis"))
                 or pd.isna(row.get("opposing_caucus_basis"))):
             raise ValueError(f"nonstandard contest lacks supported explicit caucus mapping: {race_id}")

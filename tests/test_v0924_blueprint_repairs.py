@@ -34,7 +34,7 @@ from midterms.simulate.institutional import (
 
 def test_public_live_still_disabled():
     assert PUBLIC_LIVE_ENABLED is False
-    assert MODEL_VERSION == "senate-hierarchical-v0.9.25"
+    assert MODEL_VERSION == "senate-hierarchical-v0.9.26"
 
 
 def test_presentation_does_not_mutate_alaska_forecast():

@@ -17,10 +17,16 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
     Number.isFinite(chamber.expected_rep_seats)
       ? chamber.expected_rep_seats
       : 100 - expectedDem;
+  const expectedIndependent =
+    typeof chamber.expected_independent_seats === "number" &&
+    Number.isFinite(chamber.expected_independent_seats)
+      ? chamber.expected_independent_seats
+      : 0;
+  const independentBalance = chamber.p_independent_balance ?? 0;
 
   return (
     <section className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={`grid gap-4 ${independentBalance > 0 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
         <Stat
           label="Democrats control"
           value={pct(chamber.p_dem_majority, 1)}
@@ -31,6 +37,13 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
           value={pct(chamber.p_rep_majority, 1)}
           tone="rep"
         />
+        {independentBalance > 0 ? (
+          <Stat
+            label="Independent balance"
+            value={pct(independentBalance, 1)}
+            tone="ind"
+          />
+        ) : null}
       </div>
 
       <div className="rounded-lg border border-[var(--line)] bg-[var(--panel)]/70 p-4 sm:p-5">
@@ -49,7 +62,16 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
               <span className="font-medium text-[var(--ink)]">
                 {expectedRep.toFixed(1)} R
               </span>
-              . Bars at ≤50 seats are Republican control.
+              {expectedIndependent > 0 ? (
+                <>
+                  {" / "}
+                  <span className="font-medium text-[var(--ink)]">
+                    {expectedIndependent.toFixed(1)} I
+                  </span>
+                </>
+              ) : null}
+              . Control is computed from each party&apos;s seats and the Vice President;
+              Independent seats remain separate.
             </p>
           </div>
           <p className="text-xs text-[var(--muted)]">
@@ -70,12 +92,16 @@ export function ChamberPanel({ chamber }: { chamber: ChamberForecast }) {
                 key={bin.dem_seats}
                 className="group relative flex h-full min-w-[12px] flex-1 flex-col items-center justify-end"
                 title={`${bin.dem_seats} Dem seats → ${
-                  isDemControl ? "Dem" : "Rep"
-                } control: ${pct(bin.probability, 1)}`}
+                  isDemControl ? "Dem control range" : "below Dem control threshold"
+                }: ${pct(bin.probability, 1)}`}
               >
                 <div
                   className={`w-full rounded-t-sm transition ${
-                    isDemControl ? "bg-[var(--dem)]" : "bg-[var(--rep)]"
+                    isDemControl
+                      ? "bg-[var(--dem)]"
+                      : independentBalance > 0
+                        ? "bg-[var(--muted)]"
+                        : "bg-[var(--rep)]"
                   }`}
                   style={{ height: `${barPx}px` }}
                 />
@@ -101,9 +127,13 @@ function Stat({
 }: {
   label: string;
   value: string;
-  tone: "dem" | "rep";
+  tone: "dem" | "rep" | "ind";
 }) {
-  const color = tone === "dem" ? "text-[var(--dem)]" : "text-[var(--rep)]";
+  const color = tone === "dem"
+    ? "text-[var(--dem)]"
+    : tone === "rep"
+      ? "text-[var(--rep)]"
+      : "text-[var(--ink)]";
   return (
     <div className="rounded-lg border border-[var(--line)] bg-[var(--panel)]/70 px-4 py-3">
       <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">

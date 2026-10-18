@@ -1,4 +1,4 @@
-"""Cheap pre-OOF rebuild preflight (v0.9.25).
+"""Cheap pre-OOF rebuild preflight (v0.9.26).
 
 Performs all checks that can fail quickly *before* the expensive PyMC OOF
 run is launched.  No PyMC is invoked here; the only allowed imports are

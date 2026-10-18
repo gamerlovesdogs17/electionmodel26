@@ -1786,7 +1786,7 @@ def main(argv: list[str] | None = None) -> None:
     p_preflight = sub.add_parser(
         "rebuild-preflight",
         help=(
-            "Cheap pre-OOF rebuild gates (v0.9.25): source readiness, forecast coverage, "
+            "Cheap pre-OOF rebuild gates (v0.9.26): source readiness, forecast coverage, "
             "modeling paths, challenger/stack classification, exceptional lineage, "
             "multiway share smoke, and chamber accounting. No PyMC is invoked."
         ),

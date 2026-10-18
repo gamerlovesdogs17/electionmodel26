@@ -64,6 +64,14 @@ def load_current_candidate_registry(
             raise ValueError("current registry may contain only senate-2026 races")
         if row["current_matchup_status"] != "reviewed_current":
             raise ValueError(f"current matchup is not reviewed: {race_id}")
+        for side in ("modeled", "opposing"):
+            chamber_affiliation = str(row.get(f"{side}_caucus") or "").upper()
+            if chamber_affiliation not in {"D", "R", "I"}:
+                raise ValueError(
+                    f"{side}_caucus must be D, R, or I: {race_id}"
+                )
+            if not str(row.get(f"{side}_caucus_basis") or "").strip():
+                raise ValueError(f"{side}_caucus_basis is required: {race_id}")
         if date.fromisoformat(str(row["reviewed_as_of"])) != reviewed_as_of:
             raise ValueError(f"review date differs within current registry: {race_id}")
         if not isinstance(row.get("modeled_candidate_is_incumbent"), bool):

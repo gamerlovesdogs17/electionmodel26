@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
@@ -207,6 +208,8 @@ def calibrate_draws_to_control(
     weight: float = 0.55,
     vp_tiebreak_party: str = "R",
     n_steps: int = 5,
+    modeled_caucuses: Sequence[str] | None = None,
+    opposing_caucuses: Sequence[str] | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """
     Shared national shift so joint P(Dem control) moves toward CONTROLS market.
@@ -227,8 +230,37 @@ def calibrate_draws_to_control(
     except (TypeError, ValueError):
         return draws, meta
 
+    n_races = int(draws.shape[1]) if draws.ndim == 2 else 0
+    modeled = (
+        list(modeled_caucuses)
+        if modeled_caucuses is not None else ["D"] * n_races
+    )
+    opposing = (
+        list(opposing_caucuses)
+        if opposing_caucuses is not None else ["R"] * n_races
+    )
+    if len(modeled) != n_races or len(opposing) != n_races:
+        raise ValueError("control calibration caucus vectors must align with draw columns")
+    if not set(modeled + opposing).issubset({"D", "R", "I"}):
+        raise ValueError("control calibration requires explicit D/R/I affiliations")
+    dem_sensitive = np.asarray([
+        (modeled_caucus == "D") != (opposing_caucus == "D")
+        for modeled_caucus, opposing_caucus in zip(
+            modeled, opposing, strict=True,
+        )
+    ], dtype=bool)
+
     def _p_control(arr: np.ndarray) -> float:
-        dem_seats = held_dem + (arr > 0).sum(axis=1)
+        candidate_wins = arr > 0
+        dem_contested = np.zeros(arr.shape[0], dtype=int)
+        for index, (modeled_caucus, opposing_caucus) in enumerate(
+            zip(modeled, opposing, strict=True)
+        ):
+            if modeled_caucus == "D":
+                dem_contested += candidate_wins[:, index].astype(int)
+            if opposing_caucus == "D":
+                dem_contested += (~candidate_wins[:, index]).astype(int)
+        dem_seats = held_dem + dem_contested
         if vp_tiebreak_party == "D":
             return float((dem_seats >= 50).mean())
         return float((dem_seats >= 51).mean())
@@ -236,14 +268,23 @@ def calibrate_draws_to_control(
     out = draws.astype(float, copy=True)
     p0 = _p_control(out)
     aim = (1.0 - float(np.clip(weight, 0.0, 1.0))) * p0 + float(np.clip(weight, 0.0, 1.0)) * target
+    if not dem_sensitive.any():
+        meta.update({
+            "p_before": p0,
+            "p_after": p0,
+            "aim_p_dem": float(aim),
+            "reason": "no_dem_control_sensitive_races",
+            "n_shifted_races": 0,
+        })
+        return out, meta
     shift = 0.0
     for _ in range(max(int(n_steps), 1)):
-        p_now = _p_control(out + shift)
+        p_now = _p_control(out + shift * dem_sensitive)
         err = aim - p_now
         if abs(err) < 0.01:
             break
         shift += float(np.clip(err * 10.0, -5.0, 5.0))
-    out = out + shift
+    out = out + shift * dem_sensitive
     meta.update(
         {
             "enabled": True,
@@ -251,6 +292,7 @@ def calibrate_draws_to_control(
             "p_after": _p_control(out),
             "aim_p_dem": float(aim),
             "shift_pp": float(shift),
+            "n_shifted_races": int(dem_sensitive.sum()),
         }
     )
     return out, meta

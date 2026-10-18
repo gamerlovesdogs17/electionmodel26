@@ -4,6 +4,29 @@ Immutable research release notes (blueprint §11.3 / §12). Older public artifac
 should be preserved alongside newer ones under `data/artifacts/` and
 `data/releases/{run_id}/`. Index: `data/manifests/releases.jsonl`.
 
+## 2026-10-18 — v0.9.26 chamber-affiliation and CI rollback boundary
+
+- Dan Osborn remains an Independent ballot candidate and now also contributes
+  an Independent seat when he wins. His outcome is no longer added to the
+  Democratic caucus total. The other reviewed Independent candidates retain
+  their separately declared Democratic-caucus modeling assumptions.
+- Chamber draws now account explicitly for Democratic, Republican,
+  Independent, and unresolved seats. Control probabilities are derived from
+  each party's actual seat count and the Vice President; an Independent balance
+  outcome is separate. Candidate-win probability remains distinct from caucus
+  seat probability.
+- Hard control-market calibration now uses each modeled and opposing side's
+  explicit chamber affiliation, so an Independent win cannot be counted as a
+  Democratic seat inside that optional layer.
+- Fixed refresh rollback isolation: a synthetic or partial poll snapshot can
+  restore only files it owns and cannot delete unrelated checked-in VoteHub
+  receipt archives. Full refresh transactions still remove receipts created by
+  the failed transaction.
+- This is a substantive chamber-estimand boundary. Existing v0.9.25 forecasts,
+  validated model specs, checkpoints, and chamber diagnostics remain historical
+  records and are stale for v0.9.26. No forecast or model fit was run in this
+  repair. `PUBLIC_LIVE_ENABLED=False` remains unchanged.
+
 ## 2026-10-17 — current poll receipt and freshness repair
 
 - Treat VoteHub's unscoped Senate response as a rolling snapshot. Each exact

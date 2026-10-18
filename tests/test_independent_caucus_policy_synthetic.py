@@ -6,6 +6,7 @@ import pytest
 
 from midterms.evidence.outcome_identity import (
     INDEPENDENT_DEM_CAUCUSES_BASIS,
+    OSBORN_INDEPENDENT_CHAMBER_BASIS,
     attach_2026_ticket_identities,
     attach_declared_held_independent_caucus,
     identity_from_ticket,
@@ -14,6 +15,7 @@ from midterms.evidence.outcome_identity import (
 )
 from midterms.evidence.tickets import TICKETS_2026
 from midterms.model.pymc_model import FitResult
+from midterms.model.overlays import calibrate_draws_to_control
 from midterms.simulate.chamber import simulate_chamber
 
 
@@ -24,11 +26,16 @@ def test_independent_tickets_keep_ballot_identity_and_declared_caucus() -> None:
     }
     assert set(independent) == {"ID", "MT", "NE", "SD"}
     for state, ticket in independent.items():
-        assert ticket["modeled_caucus"] == "D"
-        assert ticket["modeled_caucus_basis"] == INDEPENDENT_DEM_CAUCUSES_BASIS
+        expected = "I" if state == "NE" else "D"
+        expected_basis = (
+            OSBORN_INDEPENDENT_CHAMBER_BASIS
+            if state == "NE" else INDEPENDENT_DEM_CAUCUSES_BASIS
+        )
+        assert ticket["modeled_caucus"] == expected
+        assert ticket["modeled_caucus_basis"] == expected_basis
         contest = identity_from_ticket(f"synthetic-{state}", ticket)
         assert contest.contenders[0].ballot_party == "I"
-        assert contest.contenders[0].caucus_affiliation == "D"
+        assert contest.contenders[0].caucus_affiliation == expected
         assert contest.two_party_margin_eligible is False
 
 
@@ -49,7 +56,10 @@ def test_synthetic_race_snapshot_attaches_candidate_and_held_policy() -> None:
     require_explicit_caucus(races, active_ids)
     require_binary_chamber_compatibility(races)
     assert races.loc[races["race_id"].isin(active_ids), "modeled_ballot_party"].eq("I").all()
-    assert races.loc[races["race_id"].isin(active_ids), "modeled_caucus"].eq("D").all()
+    affiliations = races.loc[
+        races["race_id"].isin(active_ids)
+    ].set_index("state")["modeled_caucus"].to_dict()
+    assert affiliations == {"ID": "D", "MT": "D", "NE": "I", "SD": "D"}
     assert races.loc[races["race_id"] == "synthetic-held-i", "held_by"].iloc[0] == "I"
 
 
@@ -100,6 +110,71 @@ def test_conflicting_held_independent_caucus_fails_closed() -> None:
     }])
     with pytest.raises(ValueError, match="conflicting"):
         attach_declared_held_independent_caucus(races)
+
+
+def test_osborn_win_remains_independent_in_chamber_accounting() -> None:
+    rows = [
+        {"race_id": f"held-d-{i}", "not_up": True, "held_by": "D"}
+        for i in range(50)
+    ]
+    rows += [
+        {"race_id": f"held-r-{i}", "not_up": True, "held_by": "R"}
+        for i in range(49)
+    ]
+    rows.append({
+        "race_id": "senate-2026-NE", "not_up": False, "held_by": "R",
+        "state": "NE", "prior_lean": 0.0, "incumbent_party": "R",
+        "is_open": False, "seat_class": "II", "ballot_status": "nominated",
+        "election_phase": "general", "modeled_ballot_party": "I",
+        "modeled_candidate_id": "senate-2026-NE:dan-osborn",
+        "modeled_candidate_name": "Dan Osborn",
+        "modeled_caucus": "I",
+        "modeled_caucus_basis": OSBORN_INDEPENDENT_CHAMBER_BASIS,
+        "opposing_candidate_id": "senate-2026-NE:pete-ricketts",
+        "opposing_candidate_name": "Pete Ricketts",
+        "opposing_ballot_party": "R", "opposing_caucus": "R",
+        "opposing_caucus_basis": "synthetic_declared_assumption",
+    })
+    races = pd.DataFrame(rows)
+    fit = FitResult(
+        race_ids=["senate-2026-NE"], states=["NE"],
+        mean_margin=np.array([0.0]), sd_margin=np.array([1.0]),
+        draws_margin=np.array([[1.0], [-1.0]]), house_effects={},
+        diagnostics={}, method="synthetic",
+    )
+
+    sim, summaries = simulate_chamber(fit, races, vp_tiebreak_party="R")
+
+    assert sim.candidate_win[:, 0].tolist() == [1, 0]
+    assert sim.race_win[:, 0].tolist() == [0, 0]
+    assert sim.seat_draws.tolist() == [50, 50]
+    assert sim.rep_seat_draws.tolist() == [49, 50]
+    assert sim.independent_seat_draws.tolist() == [1, 0]
+    assert sim.p_dem_majority == 0.0
+    assert sim.p_rep_majority == 0.5
+    assert sim.p_independent_balance == 0.5
+    assert sim.p_unresolved_control == 0.0
+    assert sim.p_fifty_fifty == 0.5
+    assert summaries[0]["modeled_caucus"] == "I"
+    assert summaries[0]["p_modeled_candidate"] == 0.5
+    assert summaries[0]["p_independent_chamber"] == 0.5
+
+
+def test_control_calibration_does_not_count_independent_win_as_dem() -> None:
+    draws = np.array([[4.0], [2.0], [-2.0], [-4.0]])
+    calibrated, metadata = calibrate_draws_to_control(
+        draws,
+        held_dem=50,
+        control_p_dem=0.8,
+        weight=0.5,
+        modeled_caucuses=np.array(["I"]),
+        opposing_caucuses=np.array(["R"]),
+    )
+    assert metadata["p_before"] == 0.0
+    assert metadata["p_after"] == 0.0
+    assert metadata["enabled"] is False
+    assert metadata["reason"] == "no_dem_control_sensitive_races"
+    np.testing.assert_array_equal(calibrated, draws)
 
 
 def test_nonbinary_contested_seats_omitted_from_margin_fit_fail_closed() -> None:

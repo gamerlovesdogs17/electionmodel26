@@ -117,6 +117,39 @@ def test_coherence_rejects_stale_independent_caucus_policy(tmp_path: Path):
     assert any("Independent caucus accounting policy" in item for item in report["mismatches"])
 
 
+def test_coherence_accepts_current_osborn_independent_policy(tmp_path: Path):
+    from midterms.config import MODEL_VERSION
+    from midterms.evidence.outcome_identity import (
+        CHAMBER_AFFILIATION_POLICY_VERSION,
+        INDEPENDENT_DEM_CAUCUSES_BASIS,
+        OSBORN_CANDIDATE_ID,
+        OSBORN_INDEPENDENT_CHAMBER_BASIS,
+    )
+
+    forecast = {
+        "run_id": "synthetic-run", "model_version": MODEL_VERSION,
+        "election_id": "senate-2026", "publishable": False,
+        "run_class": "non_publication", "publication_surface": "research_only",
+        "snapshot": {"snapshot_id": "synthetic-snapshot"},
+        "chamber": {"independent_caucus_policy": {
+            "schema_version": CHAMBER_AFFILIATION_POLICY_VERSION,
+            "default_independent_seat_accounting_caucus": "D",
+            "default_basis": INDEPENDENT_DEM_CAUCUSES_BASIS,
+            "candidate_overrides": [{
+                "candidate_id": OSBORN_CANDIDATE_ID,
+                "ballot_party": "I",
+                "seat_accounting_affiliation": "I",
+                "basis": OSBORN_INDEPENDENT_CHAMBER_BASIS,
+            }],
+        }},
+    }
+    (tmp_path / "forecast_latest.json").write_text(json.dumps(forecast), encoding="utf-8")
+    report = check_run_coherence(
+        artifacts_dir=tmp_path, require_matching_eligibility=False,
+    )
+    assert report["ok"] is True
+
+
 def test_coherence_binds_decomposition_to_forecast(tmp_path: Path):
     from midterms.config import MODEL_VERSION
 

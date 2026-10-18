@@ -49,6 +49,9 @@ def test_forecast_with_real_overlays(tmp_path):
     assert "ablation" in art
     assert "unadjusted" in art["ablation"]
     assert "adjusted" in art["ablation"]
-    assert abs(art["chamber"]["p_dem_majority"] + art["chamber"]["p_rep_majority"] - 1.0) < 1e-6
+    assert abs(sum(float(art["chamber"].get(key) or 0.0) for key in (
+        "p_dem_majority", "p_rep_majority", "p_independent_balance",
+        "p_unresolved_control",
+    )) - 1.0) < 1e-6
     assert art["overlays"]["ratings"]["enabled"] in {True, False}
     assert art["overlays"]["markets"]["enabled"] in {True, False}

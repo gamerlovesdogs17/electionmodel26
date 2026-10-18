@@ -1,5 +1,15 @@
 # Incomplete validation status — 2026-09-20
 
+## Superseding chamber status — 2026-10-18
+
+The v0.9.26 code boundary replaces the earlier blanket Independent-to-D caucus
+assumption with candidate-specific chamber affiliation. Dan Osborn is an
+Independent seat in chamber math; Idaho, Montana, and South Dakota retain their
+declared Democratic-caucus model assumptions. The checked-in v0.9.25 forecast,
+validated spec, checkpoints, and downstream validation are stale for this new
+estimand. No forecast or expensive model validation was run during this repair.
+`PUBLIC_LIVE_ENABLED=False` and `research_only` remain unchanged.
+
 ## Superseding code status — 2026-09-22
 
 The September 20 research artifacts were produced before the blueprint
