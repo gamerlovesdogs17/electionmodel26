@@ -48,64 +48,64 @@
   "excluded_missing_predictions": {},
   "filtered_crps_by_fold": {
     "2018": {
-      "pymc": 3.0390920829945403,
+      "pymc": 3.006282095690642,
       "state_space": 3.293063274087402
     },
     "2020": {
-      "pymc": 4.25933830870377,
-      "state_space": 3.3951183615585165
+      "pymc": 4.2812295085105845,
+      "state_space": 3.396105886766316
     },
     "2022": {
-      "pymc": 4.209494460880517,
+      "pymc": 4.24276319505525,
       "state_space": 4.33212112476321
     },
     "2024": {
-      "pymc": 2.960952809569116,
-      "state_space": 2.755749157349247
+      "pymc": 2.9388381282194134,
+      "state_space": 2.7139091898098515
     }
   },
   "diagnostic_mean_crps_by_candidate": {
-    "state_space": 3.444012979439594,
-    "pymc": 3.617219415536986
+    "state_space": 3.4337998688566946,
+    "pymc": 3.6172782318689727
   },
   "stack_weights": {
-    "pymc": 0.40728888502473914,
-    "state_space": 0.5927111149752609
+    "pymc": 0.4069741289275109,
+    "state_space": 0.5930258710724892
   },
   "stack_weights_production": {
-    "pymc": 0.40728888502473914,
-    "state_space": 0.5927111149752609
+    "pymc": 0.4069741289275109,
+    "state_space": 0.5930258710724892
   },
   "diagnostic_score_softmax_loo": {
     "2018": {
-      "pymc": 0.3963256588812008,
-      "state_space": 0.6036743411187991
+      "pymc": 0.38849518388151505,
+      "state_space": 0.611504816118485
     },
     "2020": {
-      "pymc": 0.519034596919673,
-      "state_space": 0.4809654030803269
+      "pymc": 0.5167948093690057,
+      "state_space": 0.48320519063099443
     },
     "2022": {
-      "pymc": 0.41037308197866484,
-      "state_space": 0.5896269180213352
+      "pymc": 0.4095324852260766,
+      "state_space": 0.5904675147739233
     },
     "2024": {
-      "pymc": 0.4460308374952806,
-      "state_space": 0.5539691625047194
+      "pymc": 0.4436861082616471,
+      "state_space": 0.5563138917383529
     }
   },
-  "matrix_sha256": "74526fcca913c1cd5d9b5ae004009ec992c11561d1bb43bcaff273e8271c6f46",
-  "prediction_sha256": "f92ae2d99c0533c7efdebe27f2db5406a490119415885ca2de3d9b2bff8c49af",
+  "matrix_sha256": "a71f3f8dea568a28c36ee3f7d10784fe8fa3fda33fc203d6c9791778f5357e0d",
+  "prediction_sha256": "bfd0dc1a5bbb51642c4b9e38966a6448ff887596f123c8fca4c2b8b1a2795e56",
   "mixture_diagnostics": {
     "method": "empirical_predictive_mixture_crps_v1",
     "weights": {
-      "pymc": 0.40728888502473914,
-      "state_space": 0.5927111149752609
+      "pymc": 0.4069741289275109,
+      "state_space": 0.5930258710724892
     },
-    "objective_crps": 3.3074784870771667,
+    "objective_crps": 3.288874448133503,
     "individual_crps": {
-      "pymc": 3.6201445025134555,
-      "state_space": 3.4551169967503386
+      "pymc": 3.622174505268982,
+      "state_space": 3.445846274920684
     },
     "n_complete_cases": 260,
     "case_ids": [
@@ -902,7 +902,7 @@
     },
     "seed": 21,
     "max_draws": 128,
-    "prediction_sha256": "f92ae2d99c0533c7efdebe27f2db5406a490119415885ca2de3d9b2bff8c49af"
+    "prediction_sha256": "bfd0dc1a5bbb51642c4b9e38966a6448ff887596f123c8fca4c2b8b1a2795e56"
   },
   "optimizer_seed": 21,
   "optimizer_max_draws": 128,
@@ -910,7 +910,7 @@
   "predictive_stack_fn": "midterms.model.empirical_mixture.fit_predictive_mixture",
   "note": "Production weights use frozen empirical draws; score softmax is diagnostic only.",
   "source_nested_loo": "data/artifacts/nested_component_loo_canonical.json",
-  "source_nested_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
+  "source_nested_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
   "source_spine_label": "pymc",
   "source_hierarchical_method": "pymc",
   "source_years": [
@@ -955,18 +955,18 @@
       "30": "fa2602dedb4d49d65ee1b8ea0eeb0c9d232442dec727cedab75286c057d0772b"
     }
   },
-  "source_frozen_index_sha256": "22f9215970775e2b5db2cf7dc8cce2dff21019572a4d1c0943b7ae685a4ae537",
+  "source_frozen_index_sha256": "60e0a5b3dee614a6759d14c438def15949f3d2317142ef7ece27617aca61747a",
   "source_frozen_index_hash_mode": "frozen_prediction_index_semantic_v1",
-  "source_frozen_index_semantic_sha256": "d0f80f3ee3d873446ec782b655f944680d2a1dc45e518bf596e4f27472c1e6d1",
-  "source_model_version": "senate-hierarchical-v0.9.25",
-  "source_evidence_bundle_id": "eb-dcb6d43248b5fcc9",
-  "source_evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
+  "source_frozen_index_semantic_sha256": "131a4ec5f4fcc4b44107ce7dea9e3a6079a2b1a03dd0c4f54de75d5443252545",
+  "source_model_version": "senate-hierarchical-v0.9.26",
+  "source_evidence_bundle_id": "eb-89a17ef758cdd2d0",
+  "source_evidence_bundle_sha256": "89a17ef758cdd2d0f25756199664a429e8ceb78db2aedf6f63961e5b9290a2e4",
   "source_stack_training_protocol": "formal_60_30_v1",
   "source_validation_phase": "canonical_poll_structure",
   "source_poll_structure_config": {
     "version": "poll-structure-v2",
     "sponsor_effect": false,
-    "questionnaire_effect": false,
+    "questionnaire_effect": true,
     "study_effect": false,
     "heuristic_study_downweight": null,
     "sponsor_scale": 0.75,
@@ -974,8 +974,8 @@
     "study_scale": 1.25,
     "effective_heuristic_study_downweight": true
   },
-  "source_poll_structure_config_id": "psc-7819fcedea982286",
-  "source_model_spec_candidate_sha256": "f1a15af6bfcaa5bf848871fdecfdabf29143c082b570c1b8907a6ed257f59200",
+  "source_poll_structure_config_id": "psc-5035810fb1f3d5e7",
+  "source_model_spec_candidate_sha256": "c0f4a23846e80b6a7836806f9deef3861ae1ffce5e51c0172b781cdcce91e54e",
   "reproduction": {
     "ok": true,
     "max_abs_weight_delta": 0.0,
@@ -983,12 +983,12 @@
     "prediction_fingerprint_ok": true,
     "prediction_error": null,
     "recomputed": {
-      "pymc": 0.40728888502473914,
-      "state_space": 0.5927111149752609
+      "pymc": 0.4069741289275109,
+      "state_space": 0.5930258710724892
     },
     "stored": {
-      "pymc": 0.40728888502473914,
-      "state_space": 0.5927111149752609
+      "pymc": 0.4069741289275109,
+      "state_space": 0.5930258710724892
     }
   },
   "path": "data/artifacts/stack_weights_oof.json"

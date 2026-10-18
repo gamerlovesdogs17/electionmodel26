@@ -1,17 +1,17 @@
 {
   "schema_version": "validated-model-spec-v2",
-  "model_version": "senate-hierarchical-v0.9.25",
+  "model_version": "senate-hierarchical-v0.9.26",
   "status": "validated_research_model",
-  "evidence_bundle_id": "eb-dcb6d43248b5fcc9",
-  "evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
-  "source_readiness_sha256": "c5e19b7b95c40da2fe99b6040c1f75e136ec3fa75c29e7331ac60de0b80932f4",
-  "candidate_spec_sha256": "f1a15af6bfcaa5bf848871fdecfdabf29143c082b570c1b8907a6ed257f59200",
-  "poll_structure_selection_sha256": "9f66fd1c7203a0f903b00c2e93c99a75f62f9542c951fdfe91bb2fd2fe620cc6",
-  "selected_structure_id": "pymc",
+  "evidence_bundle_id": "eb-89a17ef758cdd2d0",
+  "evidence_bundle_sha256": "89a17ef758cdd2d0f25756199664a429e8ceb78db2aedf6f63961e5b9290a2e4",
+  "source_readiness_sha256": "fbd3457f722236d2d24c1ebab04d96a0158bd91bd7e2b47a85ef205c99c49134",
+  "candidate_spec_sha256": "c0f4a23846e80b6a7836806f9deef3861ae1ffce5e51c0172b781cdcce91e54e",
+  "poll_structure_selection_sha256": "35df2526a343bf945261351ec4e9d56d0aad84b1bc73371c8258bc6d339fefc1",
+  "selected_structure_id": "hier_plus_questionnaire_effect",
   "selected_poll_structure": {
     "version": "poll-structure-v2",
     "sponsor_effect": false,
-    "questionnaire_effect": false,
+    "questionnaire_effect": true,
     "study_effect": false,
     "heuristic_study_downweight": null,
     "sponsor_scale": 0.75,
@@ -19,18 +19,18 @@
     "study_scale": 1.25,
     "effective_heuristic_study_downweight": true
   },
-  "selected_poll_structure_id": "psc-7819fcedea982286",
-  "canonical_oof_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
-  "canonical_frozen_draws_sha256": "80c529b7cd9849570851e83a6db2a0601b6bd44f4da4865f2cb7804ebf2efcca",
-  "stack_weights_sha256": "27de10c442a22aca3327818740d5b8628e7580d19369a0bee0ff7960825a9b30",
+  "selected_poll_structure_id": "psc-5035810fb1f3d5e7",
+  "canonical_oof_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
+  "canonical_frozen_draws_sha256": "00a3b262d4928b7afea10ae3a44a7276c4d36cc90fd76e99a441584a9be95573",
+  "stack_weights_sha256": "ceb233796434660fdf0a4d0a61799fcf6e6d40620025557d18fcc44efec8247a",
   "stack_candidate_identities": [
     "pymc",
     "state_space"
   ],
-  "uncertainty_calibration_sha256": "dea7a2fdb53af014b7123467137baa228dc8a0095633e53793a2f05e0d8d1a99",
+  "uncertainty_calibration_sha256": "151a4f534bfeb9f5b8e2d0961a47ec3fb93ad1588944740f2640b06b05fe95a5",
   "exceptional_model_lineage": {
     "schema_version": "exceptional-model-lineage-v1",
-    "model_version": "senate-hierarchical-v0.9.25",
+    "model_version": "senate-hierarchical-v0.9.26",
     "exceptional_models": {
       "binary_non_major": {
         "adapter_spec_version": "binary-non-major-adapter-v2",
@@ -46,8 +46,8 @@
         },
         "implementation_spec_sha256": "3a5700243d139946453cd75bc153ace4fe06058a5e9932a0a8b9b3f1293f40f9",
         "validation_classification": "limited_validation_exception_model",
-        "validation_sha256": "aca1bab7d3cffd09105619c63e44539b74073816ee1250e724342f2cbc9ebca0",
-        "validation_artifact_sha256": "3f0790be1a6fad8acfe77ea1e89f971a4c77e76707823e6b71d6f05ad27254b0",
+        "validation_sha256": "02a7620cc7fe77d55cb350aa95069060b59d2d5535b0d2ceeeaffa42f54be4da",
+        "validation_artifact_sha256": "8abf3efbcb477eaaa77574c98c1a7c5dca9481b29e15ddf1ae9310a85549e505",
         "selected_prior_id": "state_structural_very_large",
         "selected_prior": {
           "id": "state_structural_very_large",
@@ -91,11 +91,11 @@
         },
         "implementation_spec_sha256": "74ee9d513833d16bd5d523a5666f648c260c1bd4bbfd63a424834738a994cb8b",
         "validation_classification": "limited_validation_alaska_rcv_model",
-        "validation_sha256": "8ac49d4ffc62f9d28a6ddfa2863a2bbbad8432ccce3853f3c54eb64fc4406acc",
-        "validation_artifact_sha256": "a892ca516554cef0720aa8e6a9fa536b7a36b4b2d6e4eeaf2be77c7dc881438e",
+        "validation_sha256": "2f6ff62571cbfa74731d32b9524ec580992d00f619dcfe30d1820b4cb0d555ba",
+        "validation_artifact_sha256": "1b78dd65aa564419e02453d9f3e1795fc59edee0bd2bf3c2386986b921383e9c",
         "source_manifest_sha256": "5c80c8ff593c8b3b1a2232941e63385eb593fbfd6a2d1c4dc2b74fd10a38689a",
         "source_semantic_sha256": "8c5fa884fe8e1cbb39c528511d36a1c064b0a8d48f6794b3144dd46b8726cf43",
-        "candidate_registry_sha256": "8f93599be1acd4f4624909e5049835110cc9b9e57d9ba467e6e1c46ea3f3a545",
+        "candidate_registry_sha256": "05b3ac128f6c2350c71d4f30d22c97d35bbf56de7edbf5456b5aed3a6f74c1f4",
         "candidate_field_ids": [
           "senate-2026-AK:dan-s-sullivan",
           "senate-2026-AK:daniel-j-sullivan-jr",
@@ -122,8 +122,8 @@
         "activates_forecast_probabilities": false,
         "n_scorable_cases": 0,
         "n_materially_multiway_analogs": 10,
-        "artifact_sha256": "5fadd18881eb930ac68752a205d6e0ce3d5eab888980f8ac7d74ef7295f48c2d",
-        "document_sha256": "3f3cc9718d22c4ae2b8a14ab4497ca787c6c9415f9985f3c7315630b7294fe0a",
+        "artifact_sha256": "bf6186c882ece87f691051811a153bf229f73cc37a62d786fc2478226e84cd39",
+        "document_sha256": "1063a223c27eaab8a310759b175a1e94a2037af236815ab8b9a7b248bc631bf4",
         "adapter_specification": {
           "adapter_spec_version": "multiway-plurality-adapter-v1",
           "method": "limited_validation_multiway_plurality_model-v1",
@@ -144,13 +144,13 @@
       }
     },
     "forecast_coverage": {
-      "artifact_sha256": "a5688bae87c1ddd09ae1280111e134071e5591506535f683849022632884fe64",
-      "document_sha256": "b80eb03c9945264d21fb161b91d66f00c1c2a35ed26f21890ae39d2a96b9d97e",
-      "as_of": "2026-10-10",
+      "artifact_sha256": "90ceeaf80f7537a81be6301622cd7cf688d49c55c8cda925152c40f109d87e13",
+      "document_sha256": "604e7b75a9cd87a0c544381f6259885fe9d6fffc5bacdaa622ad4b19fe2a9af8",
+      "as_of": "2026-10-17",
       "summary": {
         "n_races": 35,
-        "n_pass": 21,
-        "n_warning": 13,
+        "n_pass": 22,
+        "n_warning": 12,
         "n_fail": 1,
         "n_evidence_fail": 0,
         "evidence_ready": true,
@@ -236,14 +236,14 @@
     "historical_evidence_equivalence": {
       "classification": "historically_equivalent",
       "formal_cutoffs_equivalent": 8,
-      "comparison_sha256": "ef4b02c9d989840de7c4c02d8238f46f3cfcf5dc1859897391754d8a58448be7",
-      "document_sha256": "7391cea496aa8b7a5e5aa62fdea75b32bde03617638ea46f23161e99e23ae9bb",
+      "comparison_sha256": "f26e743a6b6de8a816449dbf93cf6d35fb74cf866f2af10968f62f55dc661bd3",
+      "document_sha256": "afe15cfb4ba413581279a52a053b382b78e45c8dd14ce757da8cc9972325d2bb",
       "ordinary_only": true,
       "exceptional_models_validated_separately": true
     },
-    "lineage_sha256": "2e595f980b6a84309156357ae2759045762fd8185300ae0ad8d6bb2b54fe2262"
+    "lineage_sha256": "1ec99abde6e5daa9faa8e4099e0f81a1dad2f905dd0b8a847ec061a4067f26a2"
   },
-  "exceptional_model_lineage_sha256": "2e595f980b6a84309156357ae2759045762fd8185300ae0ad8d6bb2b54fe2262",
+  "exceptional_model_lineage_sha256": "1ec99abde6e5daa9faa8e4099e0f81a1dad2f905dd0b8a847ec061a4067f26a2",
   "exceptional_models": {
     "binary_non_major": {
       "adapter_spec_version": "binary-non-major-adapter-v2",
@@ -259,8 +259,8 @@
       },
       "implementation_spec_sha256": "3a5700243d139946453cd75bc153ace4fe06058a5e9932a0a8b9b3f1293f40f9",
       "validation_classification": "limited_validation_exception_model",
-      "validation_sha256": "aca1bab7d3cffd09105619c63e44539b74073816ee1250e724342f2cbc9ebca0",
-      "validation_artifact_sha256": "3f0790be1a6fad8acfe77ea1e89f971a4c77e76707823e6b71d6f05ad27254b0",
+      "validation_sha256": "02a7620cc7fe77d55cb350aa95069060b59d2d5535b0d2ceeeaffa42f54be4da",
+      "validation_artifact_sha256": "8abf3efbcb477eaaa77574c98c1a7c5dca9481b29e15ddf1ae9310a85549e505",
       "selected_prior_id": "state_structural_very_large",
       "selected_prior": {
         "id": "state_structural_very_large",
@@ -304,11 +304,11 @@
       },
       "implementation_spec_sha256": "74ee9d513833d16bd5d523a5666f648c260c1bd4bbfd63a424834738a994cb8b",
       "validation_classification": "limited_validation_alaska_rcv_model",
-      "validation_sha256": "8ac49d4ffc62f9d28a6ddfa2863a2bbbad8432ccce3853f3c54eb64fc4406acc",
-      "validation_artifact_sha256": "a892ca516554cef0720aa8e6a9fa536b7a36b4b2d6e4eeaf2be77c7dc881438e",
+      "validation_sha256": "2f6ff62571cbfa74731d32b9524ec580992d00f619dcfe30d1820b4cb0d555ba",
+      "validation_artifact_sha256": "1b78dd65aa564419e02453d9f3e1795fc59edee0bd2bf3c2386986b921383e9c",
       "source_manifest_sha256": "5c80c8ff593c8b3b1a2232941e63385eb593fbfd6a2d1c4dc2b74fd10a38689a",
       "source_semantic_sha256": "8c5fa884fe8e1cbb39c528511d36a1c064b0a8d48f6794b3144dd46b8726cf43",
-      "candidate_registry_sha256": "8f93599be1acd4f4624909e5049835110cc9b9e57d9ba467e6e1c46ea3f3a545",
+      "candidate_registry_sha256": "05b3ac128f6c2350c71d4f30d22c97d35bbf56de7edbf5456b5aed3a6f74c1f4",
       "candidate_field_ids": [
         "senate-2026-AK:dan-s-sullivan",
         "senate-2026-AK:daniel-j-sullivan-jr",
@@ -335,8 +335,8 @@
       "activates_forecast_probabilities": false,
       "n_scorable_cases": 0,
       "n_materially_multiway_analogs": 10,
-      "artifact_sha256": "5fadd18881eb930ac68752a205d6e0ce3d5eab888980f8ac7d74ef7295f48c2d",
-      "document_sha256": "3f3cc9718d22c4ae2b8a14ab4497ca787c6c9415f9985f3c7315630b7294fe0a",
+      "artifact_sha256": "bf6186c882ece87f691051811a153bf229f73cc37a62d786fc2478226e84cd39",
+      "document_sha256": "1063a223c27eaab8a310759b175a1e94a2037af236815ab8b9a7b248bc631bf4",
       "adapter_specification": {
         "adapter_spec_version": "multiway-plurality-adapter-v1",
         "method": "limited_validation_multiway_plurality_model-v1",
@@ -357,13 +357,13 @@
     }
   },
   "forecast_coverage_lineage": {
-    "artifact_sha256": "a5688bae87c1ddd09ae1280111e134071e5591506535f683849022632884fe64",
-    "document_sha256": "b80eb03c9945264d21fb161b91d66f00c1c2a35ed26f21890ae39d2a96b9d97e",
-    "as_of": "2026-10-10",
+    "artifact_sha256": "90ceeaf80f7537a81be6301622cd7cf688d49c55c8cda925152c40f109d87e13",
+    "document_sha256": "604e7b75a9cd87a0c544381f6259885fe9d6fffc5bacdaa622ad4b19fe2a9af8",
+    "as_of": "2026-10-17",
     "summary": {
       "n_races": 35,
-      "n_pass": 21,
-      "n_warning": 13,
+      "n_pass": 22,
+      "n_warning": 12,
       "n_fail": 1,
       "n_evidence_fail": 0,
       "evidence_ready": true,
@@ -449,8 +449,8 @@
   "historical_evidence_equivalence_lineage": {
     "classification": "historically_equivalent",
     "formal_cutoffs_equivalent": 8,
-    "comparison_sha256": "ef4b02c9d989840de7c4c02d8238f46f3cfcf5dc1859897391754d8a58448be7",
-    "document_sha256": "7391cea496aa8b7a5e5aa62fdea75b32bde03617638ea46f23161e99e23ae9bb",
+    "comparison_sha256": "f26e743a6b6de8a816449dbf93cf6d35fb74cf866f2af10968f62f55dc661bd3",
+    "document_sha256": "afe15cfb4ba413581279a52a053b382b78e45c8dd14ce757da8cc9972325d2bb",
     "ordinary_only": true,
     "exceptional_models_validated_separately": true
   },
@@ -467,9 +467,9 @@
   "historical_structural_feature_schema": "historical-structural-features-v1",
   "structural_feature_enables": {
     "similarity_terminal": true,
-    "terminal_race": true
+    "terminal_race": false
   },
-  "code_commit_sha": "85ec48e01dde6e52a0a2f366a2a934261b434014",
+  "code_commit_sha": "652db4835a062706fb52e2c06414289ba78451b6",
   "lineage_checks": {
     "canonical_model_version": true,
     "canonical_phase": true,
@@ -492,5 +492,5 @@
     "historical_evidence_equivalent": true
   },
   "production_research_eligible": true,
-  "spec_sha256": "689b8ffc32f375f219f2189c0afbb713ee9da6b157d22db4ebd557fedad7d1ff"
+  "spec_sha256": "707caa93f165813ee59183fb3e5805ab060d9369fd6eec539a45cbe6ab50da7d"
 }

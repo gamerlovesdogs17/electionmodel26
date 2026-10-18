@@ -1,7 +1,7 @@
 {
   "schema_version": "structural-metadata-consistency-v0923.1",
-  "generated_at": "2026-10-05T23:05:56.404672+00:00",
-  "model_version": "senate-hierarchical-v0.9.23",
+  "generated_at": "2026-10-18T19:52:15.184554+00:00",
+  "model_version": "senate-hierarchical-v0.9.26",
   "n_races": 35,
   "n_flagged": 4,
   "n_incumbency_feature_changed": 2,
@@ -610,9 +610,9 @@
       "personal_incumbency_feature": 0.0,
       "incumbency_feature_changed": false,
       "ordinary_binary_target_supported": false,
-      "exceptional_probability_model_supported": true,
+      "exceptional_probability_model_supported": false,
       "statistical_target_supported": false,
-      "probability_model_support_status": "limited_supported",
+      "probability_model_support_status": "unsupported",
       "personal_incumbency_identity_status": "open_seat_officeholder_not_nominee",
       "provenance": "seat_officeholders_2026_v1",
       "flags": [],
@@ -1041,5 +1041,5 @@
       "status": "ok"
     }
   ],
-  "path": "C:\\Users\\zydlo\\OneDrive\\Desktop\\electionmodel26\\data\\artifacts\\structural_metadata_consistency_v0923.json"
+  "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/structural_metadata_consistency_v0923.json"
 }

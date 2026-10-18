@@ -1,17 +1,17 @@
 {
   "schema_version": "validated-model-spec-candidate-v1",
-  "model_version": "senate-hierarchical-v0.9.25",
+  "model_version": "senate-hierarchical-v0.9.26",
   "status": "candidate_pending_canonical_oof",
-  "evidence_bundle_id": "eb-dcb6d43248b5fcc9",
-  "evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
-  "source_readiness_sha256": "c5e19b7b95c40da2fe99b6040c1f75e136ec3fa75c29e7331ac60de0b80932f4",
-  "poll_structure_selection_sha256": "9f66fd1c7203a0f903b00c2e93c99a75f62f9542c951fdfe91bb2fd2fe620cc6",
-  "poll_structure_selection_source_nested_sha256": "737b4654c2d3735d319383438fa1867ed2a379a23f7f21795bc554853a131c2c",
-  "selected_structure_id": "pymc",
+  "evidence_bundle_id": "eb-89a17ef758cdd2d0",
+  "evidence_bundle_sha256": "89a17ef758cdd2d0f25756199664a429e8ceb78db2aedf6f63961e5b9290a2e4",
+  "source_readiness_sha256": "fbd3457f722236d2d24c1ebab04d96a0158bd91bd7e2b47a85ef205c99c49134",
+  "poll_structure_selection_sha256": "35df2526a343bf945261351ec4e9d56d0aad84b1bc73371c8258bc6d339fefc1",
+  "poll_structure_selection_source_nested_sha256": "adbbaac28bec7a27d3dc7df7668a443f46eab9df5d314464021d3b9ad27a41c9",
+  "selected_structure_id": "hier_plus_questionnaire_effect",
   "selected_poll_structure": {
     "version": "poll-structure-v2",
     "sponsor_effect": false,
-    "questionnaire_effect": false,
+    "questionnaire_effect": true,
     "study_effect": false,
     "heuristic_study_downweight": null,
     "sponsor_scale": 0.75,
@@ -19,7 +19,7 @@
     "study_scale": 1.25,
     "effective_heuristic_study_downweight": true
   },
-  "selected_poll_structure_id": "psc-7819fcedea982286",
+  "selected_poll_structure_id": "psc-5035810fb1f3d5e7",
   "historical_cycles": [
     2018,
     2020,
@@ -33,7 +33,7 @@
   "historical_structural_feature_schema": "historical-structural-features-v1",
   "structural_feature_enables": {
     "similarity_terminal": true,
-    "terminal_race": true
+    "terminal_race": false
   },
   "selected_state_space_config": {
     "fund_pull": 0.35,
@@ -57,10 +57,10 @@
           "n_beats_reference": 0,
           "n_folds": 4,
           "deltas_reference_minus_challenger": {
-            "2018": -0.4382523307864865,
-            "2020": -0.952036633652134,
-            "2022": -0.715019734217635,
-            "2024": -0.45002888852965217
+            "2018": -0.43825233078648695,
+            "2020": -0.9502292079244619,
+            "2022": -0.7150197342176341,
+            "2024": -0.4871840098384954
           }
         },
         "state_space_process_sd_0_5": {
@@ -68,10 +68,10 @@
           "n_beats_reference": 4,
           "n_folds": 4,
           "deltas_reference_minus_challenger": {
-            "2018": 0.0645096203245048,
-            "2020": 0.02656647581424565,
+            "2018": 0.06450962032450436,
+            "2020": 0.025781799694128082,
             "2022": 0.04356534510643506,
-            "2024": 0.03347090563843347
+            "2024": 0.037872359502637565
           }
         },
         "state_space_process_sd_1_2": {
@@ -79,10 +79,10 @@
           "n_beats_reference": 0,
           "n_folds": 4,
           "deltas_reference_minus_challenger": {
-            "2018": -0.07532360806776861,
-            "2020": -0.06474507004521879,
-            "2022": -0.06785987406108074,
-            "2024": -0.059827414278413205
+            "2018": -0.07532360806776905,
+            "2020": -0.06414288373810306,
+            "2022": -0.06785987406107985,
+            "2024": -0.06180075382925132
           }
         }
       },
@@ -105,20 +105,20 @@
           "n_folds": 4,
           "deltas_reference_minus_challenger": {
             "2018": -0.6579632395431867,
-            "2020": -0.7513062639482158,
+            "2020": -0.7537533234463893,
             "2022": 0.8869223065706091,
-            "2024": -0.020305073217331326
+            "2024": -0.014984791288418009
           }
         },
         "no_approval": {
           "beats_reference": true,
-          "n_beats_reference": 2,
+          "n_beats_reference": 3,
           "n_folds": 4,
           "deltas_reference_minus_challenger": {
             "2018": 0.2093988180978421,
-            "2020": -0.06420435370218058,
+            "2020": -0.06412473264478802,
             "2022": 1.0237679684773866,
-            "2024": -0.0015932764298902669
+            "2024": 0.0005939293200873941
           }
         },
         "no_midterm_outparty": {
@@ -127,9 +127,9 @@
           "n_folds": 4,
           "deltas_reference_minus_challenger": {
             "2018": -0.36388273464220067,
-            "2020": -0.04713513387062562,
+            "2020": -0.04710421879348292,
             "2022": 1.2205971036340113,
-            "2024": 0.01456287460375627
+            "2024": 0.014651902743704426
           }
         },
         "no_income_economic": {
@@ -138,9 +138,9 @@
           "n_folds": 4,
           "deltas_reference_minus_challenger": {
             "2018": 0.18307469930666986,
-            "2020": -0.03778911244801275,
+            "2020": -0.03798279604024746,
             "2022": 1.0388719939674171,
-            "2024": 0.007312579711813427
+            "2024": 0.010619846420291346
           }
         }
       },
@@ -159,10 +159,10 @@
     },
     "note": "Majority-vote rule: challenger beats reference when it achieves lower CRPS on \u2265 ceil((n_folds+1)/2) outer folds. Reference is retained when no challenger wins."
   },
-  "code_commit_sha": "199243385cc41ddf0fcbfda710e364512f1ce415",
+  "code_commit_sha": "652db4835a062706fb52e2c06414289ba78451b6",
   "production_research_eligible": false,
   "next_required_phase": "canonical_poll_structure",
   "ordinary_statistical_only": true,
-  "ordinary_statistical_spec_sha256": "6f6e38d9a370a0055131e615586d7258b9cdd1c30cbfe9818d1d100173a7f558",
-  "spec_sha256": "6d19f4316dbba43c811164eea7aa22ce4ca034a93fd92723aadf87aeeebec4df"
+  "ordinary_statistical_spec_sha256": "cbbeb8db0960e7cae68aa670e1733c42046fcb671581cd9f3fdba66c97e1fda5",
+  "spec_sha256": "10b5d3230efc7d5c563163c8e6524af69e86bb8e8adffb41526f1a6bfb93d848"
 }

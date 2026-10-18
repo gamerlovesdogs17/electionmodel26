@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-13T20:45:46.211135+00:00",
-  "model_version": "senate-hierarchical-v0.9.25",
+  "generated_at": "2026-10-18T20:59:07.190559+00:00",
+  "model_version": "senate-hierarchical-v0.9.26",
   "primary_holdout": 2022,
   "quick": false,
   "lead_time_grid": {
@@ -15,15 +15,15 @@
           "n": 32,
           "crps": 4.066004701193809,
           "log_score": -3.4318683716185574,
-          "brier": 0.045876027977780495,
+          "brier": 0.04587602797778048,
           "mae": 5.715630898341471
         },
         "extended": {
           "n": 32,
           "crps": 4.066004701193809,
-          "interval_score_90": 32.172160163600005,
-          "brier": 0.045876027977780495,
-          "log_score": -0.15538469310779246,
+          "interval_score_90": 32.1721601636,
+          "brier": 0.04587602797778048,
+          "log_score": -0.1553846931077924,
           "mae": 5.715630898341471,
           "coverage_90": 0.96875,
           "reliability": [
@@ -31,7 +31,7 @@
               "bin_lo": 0.0,
               "bin_hi": 0.1,
               "n": 13.0,
-              "mean_p": 0.0070004371881072554,
+              "mean_p": 0.007000437188107258,
               "mean_y": 0.0
             },
             {
@@ -73,7 +73,7 @@
               "bin_lo": 0.7000000000000001,
               "bin_hi": 0.8,
               "n": 3.0,
-              "mean_p": 0.753661355085718,
+              "mean_p": 0.7536613550857179,
               "mean_y": 0.6666666666666666
             },
             {
@@ -178,7 +178,7 @@
           "n_snapshot_seats": 98,
           "n_fit_races": 34
         },
-        "energy_score": 29.33084994842919
+        "energy_score": 29.330849948429176
       },
       {
         "lead_days": 60,
@@ -186,17 +186,17 @@
         "n_polls": 195,
         "scores": {
           "n": 34,
-          "crps": 5.037497573808428,
+          "crps": 5.0374975738084276,
           "log_score": -3.6874508661989585,
           "brier": 0.060041251450680275,
           "mae": 6.823920294499797
         },
         "extended": {
           "n": 34,
-          "crps": 5.037497573808428,
-          "interval_score_90": 45.40867401117301,
+          "crps": 5.0374975738084276,
+          "interval_score_90": 45.408674011173005,
           "brier": 0.060041251450680275,
-          "log_score": -0.19249064865689083,
+          "log_score": -0.1924906486568908,
           "mae": 6.823920294499797,
           "coverage_90": 0.8529411764705882,
           "reliability": [
@@ -204,7 +204,7 @@
               "bin_lo": 0.0,
               "bin_hi": 0.1,
               "n": 12.0,
-              "mean_p": 0.005966046650659731,
+              "mean_p": 0.005966046650659734,
               "mean_y": 0.0
             },
             {
@@ -246,7 +246,7 @@
               "bin_lo": 0.6000000000000001,
               "bin_hi": 0.7000000000000001,
               "n": 3.0,
-              "mean_p": 0.6399851182969085,
+              "mean_p": 0.6399851182969084,
               "mean_y": 0.3333333333333333
             },
             {
@@ -351,7 +351,7 @@
           "n_snapshot_seats": 100,
           "n_fit_races": 36
         },
-        "energy_score": 40.61236001954083
+        "energy_score": 40.612360019540844
       },
       {
         "lead_days": 30,
@@ -359,32 +359,32 @@
         "n_polls": 335,
         "scores": {
           "n": 34,
-          "crps": 4.708742559066078,
+          "crps": 4.708742559066077,
           "log_score": -3.5488615505826075,
           "brier": 0.04356009894140079,
-          "mae": 6.508999349432922
+          "mae": 6.508999349432921
         },
         "extended": {
           "n": 34,
-          "crps": 4.708742559066078,
-          "interval_score_90": 39.378757215688836,
+          "crps": 4.708742559066077,
+          "interval_score_90": 39.37875721568884,
           "brier": 0.04356009894140079,
           "log_score": -0.15001903485212065,
-          "mae": 6.508999349432922,
+          "mae": 6.508999349432921,
           "coverage_90": 0.8529411764705882,
           "reliability": [
             {
               "bin_lo": 0.0,
               "bin_hi": 0.1,
               "n": 13.0,
-              "mean_p": 0.01574559683143256,
+              "mean_p": 0.015745596831432562,
               "mean_y": 0.0
             },
             {
               "bin_lo": 0.2,
               "bin_hi": 0.30000000000000004,
               "n": 1.0,
-              "mean_p": 0.28496778448957116,
+              "mean_p": 0.2849677844895711,
               "mean_y": 0.0
             },
             {
@@ -433,7 +433,7 @@
           "calibration_slope_intercept": {
             "n": 34,
             "slope": 1.0825474358426133,
-            "intercept": -0.05957534464246552,
+            "intercept": -0.0595753446424656,
             "ok": true,
             "ideal": {
               "slope": 1.0,
@@ -443,7 +443,7 @@
           "pit": {
             "n": 34,
             "mean": 0.4182630436147872,
-            "var": 0.06751023404556616,
+            "var": 0.06751023404556615,
             "expected_mean": 0.5,
             "expected_var": 0.08333333333333333,
             "histogram": [
@@ -527,23 +527,23 @@
           "n": 34,
           "crps": 4.1124893229185275,
           "log_score": -3.4204945488721994,
-          "brier": 0.03497557593138628,
-          "mae": 5.644581732440194
+          "brier": 0.034975575931386296,
+          "mae": 5.644581732440196
         },
         "extended": {
           "n": 34,
           "crps": 4.1124893229185275,
-          "interval_score_90": 33.408646761605816,
-          "brier": 0.03497557593138628,
+          "interval_score_90": 33.40864676160581,
+          "brier": 0.034975575931386296,
           "log_score": -0.1291686901896131,
-          "mae": 5.644581732440194,
+          "mae": 5.644581732440196,
           "coverage_90": 0.7941176470588235,
           "reliability": [
             {
               "bin_lo": 0.0,
               "bin_hi": 0.1,
               "n": 12.0,
-              "mean_p": 0.003305452017338156,
+              "mean_p": 0.0033054520173381595,
               "mean_y": 0.0
             },
             {
@@ -557,7 +557,7 @@
               "bin_lo": 0.30000000000000004,
               "bin_hi": 0.4,
               "n": 2.0,
-              "mean_p": 0.3546850027149725,
+              "mean_p": 0.35468500271497255,
               "mean_y": 0.0
             },
             {
@@ -578,7 +578,7 @@
               "bin_lo": 0.7000000000000001,
               "bin_hi": 0.8,
               "n": 2.0,
-              "mean_p": 0.7257779551843404,
+              "mean_p": 0.7257779551843403,
               "mean_y": 1.0
             },
             {
@@ -695,21 +695,21 @@
     "ablations": {
       "baseline": {
         "n": 34,
-        "crps": 5.0877985234253496,
+        "crps": 5.08779852342535,
         "log_score": -3.6860927604226346,
         "brier": 0.06308417721492626,
         "mae": 6.7857127222683955
       },
       "no_heavy_tails": {
         "n": 34,
-        "crps": 5.171161350153679,
-        "log_score": -3.6985739966651474,
-        "brier": 0.0644459037368212,
-        "mae": 7.031953347434828
+        "crps": 5.171161350153678,
+        "log_score": -3.698573996665147,
+        "brier": 0.06444590373682119,
+        "mae": 7.031953347434829
       },
       "independent_errors": {
         "n": 34,
-        "crps": 5.128461837225087,
+        "crps": 5.128461837225088,
         "log_score": -3.6886055966516262,
         "brier": 0.0669766079527781,
         "mae": 6.896079820096396
@@ -717,15 +717,15 @@
       "no_national_factor": {
         "n": 34,
         "crps": 17.585870338784698,
-        "log_score": -13.46599850983547,
+        "log_score": -13.465998509835472,
         "brier": 0.08832574890931309,
-        "mae": 20.155264428814828
+        "mae": 20.155264428814824
       }
     },
     "deltas_crps_vs_baseline": {
-      "no_heavy_tails": 0.08336282672832951,
+      "no_heavy_tails": 0.08336282672832773,
       "independent_errors": 0.040663313799737644,
-      "no_national_factor": 12.49807181535935
+      "no_national_factor": 12.498071815359348
     },
     "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/component_ablation_2022.json"
   },
@@ -744,11 +744,11 @@
         "era_weight": 0.85,
         "train_mean_crps": 5.169767393638711,
         "train_scores": [
-          6.251520359769153,
+          6.251520359769154,
           8.393650291724814,
-          4.073276740129656,
+          4.073276740129655,
           4.239224873362268,
-          2.891164703207663
+          2.8911647032076635
         ]
       },
       {
@@ -758,8 +758,8 @@
         "train_scores": [
           6.229425729717742,
           8.352866509275016,
-          4.081075547557099,
-          4.249332401598969,
+          4.0810755475570994,
+          4.24933240159897,
           2.919427037104266
         ]
       },
@@ -768,11 +768,11 @@
         "era_weight": 1.15,
         "train_mean_crps": 5.164979185293506,
         "train_scores": [
-          6.207591277311059,
+          6.2075912773110575,
           8.310468850458859,
           4.092094265426615,
           4.26220450220871,
-          2.9525370310622834
+          2.952537031062283
         ]
       },
       {
@@ -781,22 +781,22 @@
         "train_mean_crps": 5.185209384811314,
         "train_scores": [
           6.303284036893646,
-          8.544123107793009,
+          8.54412310779301,
           4.003817157800713,
           4.262269261026483,
-          2.812553360542718
+          2.8125533605427187
         ]
       },
       {
         "student_t_df": 5.0,
         "era_weight": 1.0,
-        "train_mean_crps": 5.178555967986927,
+        "train_mean_crps": 5.178555967986928,
         "train_scores": [
-          6.28048493273904,
+          6.280484932739039,
           8.504428817648709,
           4.0046496529535975,
           4.266038053150862,
-          2.837178383442429
+          2.83717838344243
         ]
       },
       {
@@ -807,8 +807,8 @@
           6.257947963308375,
           8.462470688093578,
           4.007647735171757,
-          4.271532920489292,
-          2.8659875113996915
+          4.2715329204892925,
+          2.865987511399692
         ]
       },
       {
@@ -816,11 +816,11 @@
         "era_weight": 0.85,
         "train_mean_crps": 5.216100176078411,
         "train_scores": [
-          6.285466303583737,
+          6.285466303583736,
           8.686768484273511,
-          4.150845519150032,
+          4.150845519150033,
           4.308130732557543,
-          2.649289840827233
+          2.649289840827234
         ]
       },
       {
@@ -831,7 +831,7 @@
           6.264039903022757,
           8.644859891353928,
           4.146296546012313,
-          4.309919885969776,
+          4.3099198859697765,
           2.6672706350310564
         ]
       },
@@ -840,9 +840,9 @@
         "era_weight": 1.15,
         "train_mean_crps": 5.197371798202399,
         "train_scores": [
-          6.241955472912412,
+          6.241955472912413,
           8.600106545216082,
-          4.14289965770094,
+          4.142899657700941,
           4.31302978859138,
           2.6888675265911797
         ]
@@ -853,14 +853,14 @@
       "era_weight": 1.15,
       "train_mean_crps": 5.164979185293506,
       "train_scores": [
-        6.207591277311059,
+        6.2075912773110575,
         8.310468850458859,
         4.092094265426615,
         4.26220450220871,
-        2.9525370310622834
+        2.952537031062283
       ]
     },
-    "holdout_crps": 4.506571493165569,
+    "holdout_crps": 4.50657149316557,
     "note": "Hyperparameters selected without seeing holdout cycle",
     "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/nested_df_era_2022.json"
   },
@@ -871,21 +871,21 @@
     "freeze_before_truth": true,
     "no_weight_remapping": true,
     "mean_crps_by_component": {
-      "no_generic_ballot": 5.183109637900815,
-      "pymc_dynamic": 4.007998029812546,
-      "no_income_economic": 4.749579030231811,
-      "last_election_swing": 5.140491289812883,
-      "pymc": 3.617219415536986,
-      "no_midterm_outparty": 4.841411042935048,
-      "state_space": 3.444012979439594,
-      "state_space_no_ed_fund_repull": 4.082847376236071,
-      "poll_only_state_space": 9.986306748950838,
-      "no_approval": 4.7556042812554935,
-      "ridge_fundamentals": 5.047446570366283,
+      "state_space_process_sd_1_2": 3.5010816487807457,
+      "pymc_dynamic": 3.9951385086111655,
+      "pymc": 3.6172782318689727,
+      "state_space_process_sd_0_5": 3.390867587699769,
       "equal_weight_polls": 4.922701207453702,
+      "poll_only_state_space": 9.986622135747602,
+      "no_midterm_outparty": 4.811152162241992,
       "shrinkage_polls": 4.342464304268731,
-      "state_space_process_sd_0_5": 3.4019848927186893,
-      "state_space_process_sd_1_2": 3.510951971052714
+      "no_generic_ballot": 5.152162437404346,
+      "no_approval": 4.724808679664868,
+      "no_income_economic": 4.718571739563967,
+      "ridge_fundamentals": 5.0172176754775,
+      "last_election_swing": 5.140491289812883,
+      "state_space_no_ed_fund_repull": 4.0814711895484646,
+      "state_space": 3.4337998688566946
     },
     "g8_recommendations": {
       "state_space": {
@@ -893,10 +893,10 @@
         "n_folds": 4,
         "recommend": "keep",
         "deltas_spine_minus_component": {
-          "2018": -0.2539711910928619,
-          "2020": 0.8642199471452532,
-          "2022": -0.12262666388269317,
-          "2024": 0.2052036522198688
+          "2018": -0.28678117839676,
+          "2020": 0.8851236217442686,
+          "2022": -0.08935792970796008,
+          "2024": 0.22492893840956185
         }
       },
       "poll_only_state_space": {
@@ -904,10 +904,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -3.7481131328069948,
-          "2020": -8.131906405869605,
-          "2022": -9.074315305739903,
-          "2024": -4.522014489238906
+          "2018": -3.780923120110893,
+          "2020": -8.11002558184624,
+          "2022": -9.04104657156517,
+          "2024": -4.545380341992215
         }
       },
       "ridge_fundamentals": {
@@ -915,10 +915,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -3.0240558213659945,
-          "2020": -0.2018027795294124,
-          "2022": -1.428001930501642,
-          "2024": -1.0670480879201407
+          "2018": -3.0568658086698925,
+          "2020": -0.19001317960695996,
+          "2022": -1.394733196326909,
+          "2024": -0.9581455898303477
         }
       },
       "pymc_dynamic": {
@@ -926,10 +926,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -0.2510310851551223,
-          "2020": -0.6036820938288763,
-          "2022": -0.35194873601465204,
-          "2024": -0.35645254210358956
+          "2018": -0.286434962730175,
+          "2020": -0.5737159691376608,
+          "2022": -0.26425503843928944,
+          "2024": -0.38703513666164513
         }
       },
       "last_election_swing": {
@@ -937,10 +937,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -2.9656826912625514,
-          "2020": -0.6094265088068278,
-          "2022": -0.45155622944395457,
-          "2024": -2.066422067590255
+          "2018": -2.9984926785664494,
+          "2020": -0.587535309000013,
+          "2022": -0.4182874952692215,
+          "2024": -2.0885367489399576
         }
       },
       "equal_weight_polls": {
@@ -948,10 +948,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -2.78968702670499,
-          "2020": -1.0755280495608632,
-          "2022": -0.9124316818615785,
-          "2024": -0.44428040953943526
+          "2018": -2.822497014008888,
+          "2020": -1.0536368497540485,
+          "2022": -0.8791629476868454,
+          "2024": -0.4663950908891379
         }
       },
       "shrinkage_polls": {
@@ -959,10 +959,10 @@
         "n_folds": 4,
         "recommend": "disable",
         "deltas_spine_minus_component": {
-          "2018": -0.8594397921314458,
-          "2020": -0.6501542423297213,
-          "2022": -0.8257184436590261,
-          "2024": -0.565667076806788
+          "2018": -0.8922497794353439,
+          "2020": -0.6282630425229065,
+          "2022": -0.792449709484293,
+          "2024": -0.5877817581564906
         }
       },
       "similarity_terminal": {
@@ -1234,7 +1234,7 @@
         "bin_lo": 0.8,
         "bin_hi": 0.9,
         "n": 3.0,
-        "mean_p": 0.8242163199241279,
+        "mean_p": 0.824216319924128,
         "mean_y": 1.0
       },
       {
@@ -1249,10 +1249,10 @@
     "brier": 0.06308417721492626,
     "margin_scores": {
       "n": 34,
-      "crps": 5.0877985234253496,
+      "crps": 5.08779852342535,
       "interval_score_90": 46.2812025344663,
       "brier": 0.06308417721492626,
-      "log_score": -0.2082909559382418,
+      "log_score": -0.20829095593824176,
       "mae": 6.7857127222683955,
       "coverage_90": 0.9411764705882353,
       "reliability": [
@@ -1309,7 +1309,7 @@
           "bin_lo": 0.8,
           "bin_hi": 0.9,
           "n": 3.0,
-          "mean_p": 0.8242163199241279,
+          "mean_p": 0.824216319924128,
           "mean_y": 1.0
         },
         {
@@ -1322,8 +1322,8 @@
       ],
       "calibration_slope_intercept": {
         "n": 34,
-        "slope": 1.1099380290925003,
-        "intercept": -0.048561717794097216,
+        "slope": 1.1099380290925005,
+        "intercept": -0.04856171779409729,
         "ok": true,
         "ideal": {
           "slope": 1.0,
@@ -1403,9 +1403,9 @@
   },
   "joint_proper_scores": {
     "schema_version": "joint-oof-scores-v1",
-    "model_version": "senate-hierarchical-v0.9.25",
-    "source_nested_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
-    "source_frozen_draws_sha256": "80c529b7cd9849570851e83a6db2a0601b6bd44f4da4865f2cb7804ebf2efcca",
+    "model_version": "senate-hierarchical-v0.9.26",
+    "source_nested_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
+    "source_frozen_draws_sha256": "00a3b262d4928b7afea10ae3a44a7276c4d36cc90fd76e99a441584a9be95573",
     "draw_alignment_preserved": true,
     "rows": [
       {
@@ -1726,9 +1726,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 31.204383449285228,
-          "variogram_score_p05": 1.153033902649117,
-          "seat_count_crps": 1.3597542968750003
+          "energy_score": 31.260372174828053,
+          "variogram_score_p05": 1.1545298203266794,
+          "seat_count_crps": 1.3601613281250002
         }
       },
       {
@@ -1743,9 +1743,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 31.290931617250116,
-          "variogram_score_p05": 1.197435583967149,
-          "seat_count_crps": 1.3005781250000001
+          "energy_score": 31.345372045999355,
+          "variogram_score_p05": 1.19906859861322,
+          "seat_count_crps": 1.302771875
         }
       },
       {
@@ -1794,9 +1794,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 28.88287624347054,
-          "variogram_score_p05": 1.2058523227838482,
-          "seat_count_crps": 1.0219453125
+          "energy_score": 27.993990844179713,
+          "variogram_score_p05": 1.1230984668452282,
+          "seat_count_crps": 0.8947628906249999
         }
       },
       {
@@ -1811,9 +1811,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 27.96758608745586,
-          "variogram_score_p05": 1.1975340978371507,
-          "seat_count_crps": 0.993637890625
+          "energy_score": 27.101224786275143,
+          "variogram_score_p05": 1.1176657274451811,
+          "seat_count_crps": 0.87256328125
         }
       },
       {
@@ -1862,8 +1862,8 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 35.29796847706169,
-          "variogram_score_p05": 1.126746566397799,
+          "energy_score": 35.370238318215954,
+          "variogram_score_p05": 1.1287785860526265,
           "seat_count_crps": 1.9879078125
         }
       },
@@ -1879,9 +1879,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 36.17711412098311,
-          "variogram_score_p05": 1.1788896236386652,
-          "seat_count_crps": 2.119697265625
+          "energy_score": 36.244915007917676,
+          "variogram_score_p05": 1.1804230659641204,
+          "seat_count_crps": 2.120849609375
         }
       },
       {
@@ -1930,9 +1930,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 28.584575511290886,
-          "variogram_score_p05": 1.212665821601022,
-          "seat_count_crps": 1.221568359375
+          "energy_score": 27.646924450958657,
+          "variogram_score_p05": 1.1294602260884472,
+          "seat_count_crps": 1.074353125
         }
       },
       {
@@ -1947,9 +1947,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 28.607192492698456,
-          "variogram_score_p05": 1.20705534881674,
-          "seat_count_crps": 1.164004296875
+          "energy_score": 27.725585681681434,
+          "variogram_score_p05": 1.127523034546104,
+          "seat_count_crps": 1.0302085937499998
         }
       },
       {
@@ -1998,9 +1998,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 30.95211284627554,
-          "variogram_score_p05": 1.1385103802299683,
-          "seat_count_crps": 1.3024312500000002
+          "energy_score": 31.011184980745682,
+          "variogram_score_p05": 1.1403958473246085,
+          "seat_count_crps": 1.3034628906249999
         }
       },
       {
@@ -2015,9 +2015,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 31.871665298421053,
-          "variogram_score_p05": 1.1987378660212646,
-          "seat_count_crps": 1.327793359375
+          "energy_score": 31.92900198330106,
+          "variogram_score_p05": 1.2005392834586057,
+          "seat_count_crps": 1.3286355468750002
         }
       },
       {
@@ -2066,9 +2066,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 28.522945291547998,
-          "variogram_score_p05": 1.2094953101594468,
-          "seat_count_crps": 1.02475625
+          "energy_score": 27.619468776157895,
+          "variogram_score_p05": 1.1260826518224205,
+          "seat_count_crps": 0.8712597656250001
         }
       },
       {
@@ -2083,9 +2083,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 28.391790006201322,
-          "variogram_score_p05": 1.1962461726423999,
-          "seat_count_crps": 0.9852769531250001
+          "energy_score": 27.521214287035566,
+          "variogram_score_p05": 1.1149307801734887,
+          "seat_count_crps": 0.858091796875
         }
       },
       {
@@ -2134,9 +2134,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 31.215268409024894,
-          "variogram_score_p05": 1.1334219129934437,
-          "seat_count_crps": 1.3057785156249997
+          "energy_score": 31.270695728958614,
+          "variogram_score_p05": 1.1350574733024117,
+          "seat_count_crps": 1.3057476562499999
         }
       },
       {
@@ -2151,9 +2151,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 31.760247905265036,
-          "variogram_score_p05": 1.197657008676403,
-          "seat_count_crps": 1.3946210937499997
+          "energy_score": 31.81688478033212,
+          "variogram_score_p05": 1.1993934521079188,
+          "seat_count_crps": 1.3959070312500002
         }
       },
       {
@@ -2202,9 +2202,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 28.482288046465627,
-          "variogram_score_p05": 1.2060770873534192,
-          "seat_count_crps": 1.05367265625
+          "energy_score": 27.59501651465414,
+          "variogram_score_p05": 1.1227977378376062,
+          "seat_count_crps": 0.9037523437500001
         }
       },
       {
@@ -2219,9 +2219,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 28.344593903161066,
-          "variogram_score_p05": 1.1987643468097966,
-          "seat_count_crps": 1.058987109375
+          "energy_score": 27.473568335353182,
+          "variogram_score_p05": 1.1184699583737716,
+          "seat_count_crps": 0.9177382812500001
         }
       },
       {
@@ -2270,9 +2270,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 91.89877182254273,
-          "variogram_score_p05": 5.665981314735855,
-          "seat_count_crps": 3.081856640625
+          "energy_score": 91.89975834530689,
+          "variogram_score_p05": 5.666069665662399,
+          "seat_count_crps": 3.0791816406250003
         }
       },
       {
@@ -2287,9 +2287,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 96.91358725030292,
-          "variogram_score_p05": 6.874625245004262,
-          "seat_count_crps": 2.1374265625
+          "energy_score": 96.91438731336207,
+          "variogram_score_p05": 6.874716351553115,
+          "seat_count_crps": 2.13546953125
         }
       },
       {
@@ -2338,9 +2338,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 59.45308884427595,
-          "variogram_score_p05": 2.723528933158023,
-          "seat_count_crps": 1.215618359375
+          "energy_score": 59.456852520332674,
+          "variogram_score_p05": 2.7227461698189845,
+          "seat_count_crps": 1.2211117187499998
         }
       },
       {
@@ -2355,9 +2355,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 67.15237139739459,
-          "variogram_score_p05": 3.8906578354849493,
-          "seat_count_crps": 1.110065234375
+          "energy_score": 67.14851145885902,
+          "variogram_score_p05": 3.8902845078515984,
+          "seat_count_crps": 1.1086359375
         }
       },
       {
@@ -2372,9 +2372,9 @@
           "n_dimensions": 31,
           "race_order_sha256": "68de2f69cad4b39a4fabfbc635fdafa1c3e017c46ef681ab0ce258546fbe19ec",
           "subsampling_seed": 20260922,
-          "energy_score": 23.249621447721253,
-          "variogram_score_p05": 0.6898034730589382,
-          "seat_count_crps": 0.6306015625000001
+          "energy_score": 22.407644954722024,
+          "variogram_score_p05": 0.6919637446034045,
+          "seat_count_crps": 0.6821468749999999
         }
       },
       {
@@ -2389,9 +2389,9 @@
           "n_dimensions": 31,
           "race_order_sha256": "68de2f69cad4b39a4fabfbc635fdafa1c3e017c46ef681ab0ce258546fbe19ec",
           "subsampling_seed": 20260922,
-          "energy_score": 20.29246292520756,
-          "variogram_score_p05": 0.6553493242859251,
-          "seat_count_crps": 0.5005859375000001
+          "energy_score": 19.70245597807405,
+          "variogram_score_p05": 0.6411555365321153,
+          "seat_count_crps": 0.5268437499999998
         }
       },
       {
@@ -2406,9 +2406,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 30.223386987865002,
-          "variogram_score_p05": 0.8079946767830241,
-          "seat_count_crps": 1.27816953125
+          "energy_score": 30.280777875959988,
+          "variogram_score_p05": 0.7976301832345499,
+          "seat_count_crps": 1.2810417968749999
         }
       },
       {
@@ -2423,9 +2423,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 30.81086327142616,
-          "variogram_score_p05": 0.9431875690851528,
-          "seat_count_crps": 0.9355253906250001
+          "energy_score": 31.171912051258445,
+          "variogram_score_p05": 0.9633320117662816,
+          "seat_count_crps": 0.9597203124999998
         }
       },
       {
@@ -2440,9 +2440,9 @@
           "n_dimensions": 34,
           "race_order_sha256": "0638065411afb28c12365978b2d5a4e3cc70a8cd576052203279d2b9faf2d0c5",
           "subsampling_seed": 20260922,
-          "energy_score": 30.259607082800457,
-          "variogram_score_p05": 1.0004529294973208,
-          "seat_count_crps": 0.5150691406249999
+          "energy_score": 31.015933786156655,
+          "variogram_score_p05": 1.0072611519738557,
+          "seat_count_crps": 0.56828046875
         }
       },
       {
@@ -2457,9 +2457,9 @@
           "n_dimensions": 34,
           "race_order_sha256": "0638065411afb28c12365978b2d5a4e3cc70a8cd576052203279d2b9faf2d0c5",
           "subsampling_seed": 20260922,
-          "energy_score": 31.43226830017062,
-          "variogram_score_p05": 1.186794830478303,
-          "seat_count_crps": 0.573552734375
+          "energy_score": 32.59851123473862,
+          "variogram_score_p05": 1.194105724007391,
+          "seat_count_crps": 0.538544921875
         }
       },
       {
@@ -2474,9 +2474,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 18.58650907025061,
-          "variogram_score_p05": 0.45516360054186966,
-          "seat_count_crps": 0.8786597656249999
+          "energy_score": 18.044046358972512,
+          "variogram_score_p05": 0.42359182812765006,
+          "seat_count_crps": 1.03014140625
         }
       },
       {
@@ -2491,9 +2491,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 22.677876080450854,
-          "variogram_score_p05": 0.736479027265185,
-          "seat_count_crps": 0.613905859375
+          "energy_score": 22.225240157207192,
+          "variogram_score_p05": 0.6788255550408777,
+          "seat_count_crps": 0.678201171875
         }
       },
       {
@@ -2508,9 +2508,9 @@
           "n_dimensions": 31,
           "race_order_sha256": "68de2f69cad4b39a4fabfbc635fdafa1c3e017c46ef681ab0ce258546fbe19ec",
           "subsampling_seed": 20260922,
-          "energy_score": 24.789282661306952,
-          "variogram_score_p05": 0.7478141893925087,
-          "seat_count_crps": 0.7430324218750001
+          "energy_score": 24.78886924066732,
+          "variogram_score_p05": 0.7481097315329874,
+          "seat_count_crps": 0.756615234375
         }
       },
       {
@@ -2525,9 +2525,9 @@
           "n_dimensions": 31,
           "race_order_sha256": "68de2f69cad4b39a4fabfbc635fdafa1c3e017c46ef681ab0ce258546fbe19ec",
           "subsampling_seed": 20260922,
-          "energy_score": 21.504886601629735,
-          "variogram_score_p05": 0.7072301872534145,
-          "seat_count_crps": 0.7192296874999999
+          "energy_score": 21.55024710023898,
+          "variogram_score_p05": 0.7092300446668466,
+          "seat_count_crps": 0.7089000000000001
         }
       },
       {
@@ -2542,9 +2542,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 32.21190470074227,
-          "variogram_score_p05": 0.7797402714276618,
-          "seat_count_crps": 1.77855703125
+          "energy_score": 31.89162965174159,
+          "variogram_score_p05": 0.7860568786897421,
+          "seat_count_crps": 1.784389453125
         }
       },
       {
@@ -2559,9 +2559,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 35.319677526678305,
-          "variogram_score_p05": 0.9038485660525513,
-          "seat_count_crps": 1.5899808593750002
+          "energy_score": 35.576401509054264,
+          "variogram_score_p05": 0.9093589591244093,
+          "seat_count_crps": 1.61776171875
         }
       },
       {
@@ -2576,9 +2576,9 @@
           "n_dimensions": 34,
           "race_order_sha256": "0638065411afb28c12365978b2d5a4e3cc70a8cd576052203279d2b9faf2d0c5",
           "subsampling_seed": 20260922,
-          "energy_score": 32.574386333118476,
-          "variogram_score_p05": 1.0479586123891182,
-          "seat_count_crps": 0.6493683593749999
+          "energy_score": 32.28492285499634,
+          "variogram_score_p05": 1.0426942414032832,
+          "seat_count_crps": 0.64208984375
         }
       },
       {
@@ -2593,9 +2593,9 @@
           "n_dimensions": 34,
           "race_order_sha256": "0638065411afb28c12365978b2d5a4e3cc70a8cd576052203279d2b9faf2d0c5",
           "subsampling_seed": 20260922,
-          "energy_score": 34.91761932671209,
-          "variogram_score_p05": 1.3248259691307345,
-          "seat_count_crps": 0.730323828125
+          "energy_score": 34.21831008841333,
+          "variogram_score_p05": 1.3107821689162413,
+          "seat_count_crps": 0.727683984375
         }
       },
       {
@@ -2610,9 +2610,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 19.236481173819776,
-          "variogram_score_p05": 0.44226815371667916,
-          "seat_count_crps": 1.30300546875
+          "energy_score": 19.661218599226345,
+          "variogram_score_p05": 0.4309019868543714,
+          "seat_count_crps": 1.3831527343749999
         }
       },
       {
@@ -2627,9 +2627,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 24.05442500383903,
-          "variogram_score_p05": 0.7832872432518979,
-          "seat_count_crps": 0.9944824218749999
+          "energy_score": 23.989290315214127,
+          "variogram_score_p05": 0.7527555914139649,
+          "seat_count_crps": 1.0437054687499998
         }
       },
       {
@@ -2678,9 +2678,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 31.02792723136305,
-          "variogram_score_p05": 1.1180150537384312,
-          "seat_count_crps": 1.3425609375
+          "energy_score": 31.087006436832354,
+          "variogram_score_p05": 1.1199017237291122,
+          "seat_count_crps": 1.3444582031249999
         }
       },
       {
@@ -2695,9 +2695,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 31.460228560286815,
-          "variogram_score_p05": 1.1917085266993745,
-          "seat_count_crps": 1.31773515625
+          "energy_score": 31.514125246498587,
+          "variogram_score_p05": 1.1933537817078812,
+          "seat_count_crps": 1.3192886718749999
         }
       },
       {
@@ -2746,9 +2746,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 28.518294140055925,
-          "variogram_score_p05": 1.204927006424285,
-          "seat_count_crps": 1.040215625
+          "energy_score": 27.638102132430507,
+          "variogram_score_p05": 1.1237496939987113,
+          "seat_count_crps": 0.9030531249999999
         }
       },
       {
@@ -2763,9 +2763,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 28.14579907380617,
-          "variogram_score_p05": 1.2018350876350123,
-          "seat_count_crps": 1.0060605468750001
+          "energy_score": 27.279281948542295,
+          "variogram_score_p05": 1.121278316597962,
+          "seat_count_crps": 0.8796078125000001
         }
       },
       {
@@ -2950,9 +2950,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 23.39750442170374,
-          "variogram_score_p05": 0.8578280719866014,
-          "seat_count_crps": 0.6031062500000002
+          "energy_score": 23.38477175669029,
+          "variogram_score_p05": 0.8571146767169168,
+          "seat_count_crps": 0.6017625
         }
       },
       {
@@ -2967,9 +2967,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 26.569309289043296,
-          "variogram_score_p05": 1.0257075229614923,
-          "seat_count_crps": 0.6372605468749999
+          "energy_score": 26.595207093956304,
+          "variogram_score_p05": 1.0274480085159712,
+          "seat_count_crps": 0.636559375
         }
       },
       {
@@ -3018,9 +3018,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 18.246010590640118,
-          "variogram_score_p05": 0.4849352658631787,
-          "seat_count_crps": 0.6186617187500001
+          "energy_score": 17.914753491529275,
+          "variogram_score_p05": 0.44985076465369195,
+          "seat_count_crps": 0.6197691406249999
         }
       },
       {
@@ -3035,9 +3035,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 19.556687054305787,
-          "variogram_score_p05": 0.6769214120186703,
-          "seat_count_crps": 0.6956082031249999
+          "energy_score": 19.298154585316816,
+          "variogram_score_p05": 0.6446051598749879,
+          "seat_count_crps": 0.6914894531249998
         }
       },
       {
@@ -3086,9 +3086,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 29.902004885621537,
-          "variogram_score_p05": 1.1499868906707,
-          "seat_count_crps": 1.8481195312499998
+          "energy_score": 29.887867490273948,
+          "variogram_score_p05": 1.1493761260081607,
+          "seat_count_crps": 1.8450960937499998
         }
       },
       {
@@ -3103,9 +3103,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 32.038992829970525,
-          "variogram_score_p05": 1.3857935361107265,
-          "seat_count_crps": 1.1288343749999998
+          "energy_score": 32.04491133206753,
+          "variogram_score_p05": 1.3868420763118094,
+          "seat_count_crps": 1.1263628906249998
         }
       },
       {
@@ -3154,9 +3154,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 20.146455776042643,
-          "variogram_score_p05": 0.48292305015113746,
-          "seat_count_crps": 0.98663046875
+          "energy_score": 20.13044127268011,
+          "variogram_score_p05": 0.47981662882139203,
+          "seat_count_crps": 0.9883347656249999
         }
       },
       {
@@ -3171,9 +3171,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 24.115649357497208,
-          "variogram_score_p05": 0.8443539472037619,
-          "seat_count_crps": 0.9181621093749999
+          "energy_score": 24.076651307701884,
+          "variogram_score_p05": 0.8371059422005893,
+          "seat_count_crps": 0.910748828125
         }
       },
       {
@@ -3222,9 +3222,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 23.153535324495877,
-          "variogram_score_p05": 0.8430914034747601,
-          "seat_count_crps": 0.5689605468749999
+          "energy_score": 23.14590423248461,
+          "variogram_score_p05": 0.8427691312661787,
+          "seat_count_crps": 0.5687031249999999
         }
       },
       {
@@ -3239,9 +3239,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 26.763329368433496,
-          "variogram_score_p05": 1.0201507484541565,
-          "seat_count_crps": 0.612701171875
+          "energy_score": 26.78656511865788,
+          "variogram_score_p05": 1.0214877162487461,
+          "seat_count_crps": 0.6113964843749999
         }
       },
       {
@@ -3290,9 +3290,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 17.97580685315705,
-          "variogram_score_p05": 0.4828985116497054,
-          "seat_count_crps": 0.6304695312499999
+          "energy_score": 17.63014910619025,
+          "variogram_score_p05": 0.44535925854905234,
+          "seat_count_crps": 0.6292890625
         }
       },
       {
@@ -3307,9 +3307,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 20.07362193710156,
-          "variogram_score_p05": 0.6526731315382767,
-          "seat_count_crps": 0.6558605468749998
+          "energy_score": 19.77591447250001,
+          "variogram_score_p05": 0.6168658071448037,
+          "seat_count_crps": 0.6574835937499999
         }
       },
       {
@@ -3358,9 +3358,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 23.68734339586726,
-          "variogram_score_p05": 0.8687065392100751,
-          "seat_count_crps": 0.6462042968749999
+          "energy_score": 23.669863587707447,
+          "variogram_score_p05": 0.8676898498039564,
+          "seat_count_crps": 0.6447523437499998
         }
       },
       {
@@ -3375,9 +3375,9 @@
           "n_dimensions": 33,
           "race_order_sha256": "ac585c5dbe41a199170ddb3a940c3ace72a41c241232aef67faac0ed0f0c7916",
           "subsampling_seed": 20260922,
-          "energy_score": 27.25749901167019,
-          "variogram_score_p05": 1.0441732391543377,
-          "seat_count_crps": 0.6983355468749999
+          "energy_score": 27.281139688503288,
+          "variogram_score_p05": 1.0457280608133528,
+          "seat_count_crps": 0.6969468749999999
         }
       },
       {
@@ -3426,9 +3426,9 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 18.939221648843503,
-          "variogram_score_p05": 0.5038118527495492,
-          "seat_count_crps": 0.5930382812499999
+          "energy_score": 18.655365445513077,
+          "variogram_score_p05": 0.47112009434329133,
+          "seat_count_crps": 0.58942890625
         }
       },
       {
@@ -3443,17 +3443,17 @@
           "n_dimensions": 32,
           "race_order_sha256": "23e7e0b6247a3481ca41f48e9595af1a5ebbc8c52d787e1861d23b6fd4e81257",
           "subsampling_seed": 20260922,
-          "energy_score": 20.784011951137053,
-          "variogram_score_p05": 0.708726745954202,
-          "seat_count_crps": 0.629001953125
+          "energy_score": 20.55875455100223,
+          "variogram_score_p05": 0.6793016057202045,
+          "seat_count_crps": 0.630587109375
         }
       }
     ],
     "ok": true
   },
   "stack_weights_artifact": {
-    "pymc": 0.40728888502473914,
-    "state_space": 0.5927111149752609
+    "pymc": 0.4069741289275109,
+    "state_space": 0.5930258710724892
   },
   "stack_weights_meta": {
     "source_nested_loo": "data/artifacts/nested_component_loo_canonical.json",
@@ -4189,24 +4189,24 @@
     "control_ok": false,
     "control_soft": true,
     "control_gaps": {
-      "ddhq": 0.40044,
-      "kalshi": 0.2913310891089109
+      "ddhq": 0.39024000000000003,
+      "kalshi": 0.28113108910891094
     },
-    "primary_control_gap": 0.2913310891089109,
-    "max_abs_control_gap": 0.40044,
+    "primary_control_gap": 0.28113108910891094,
+    "max_abs_control_gap": 0.39024000000000003,
     "race_scores": {
       "ddhq": {
         "n": 9,
-        "brier_vs_peer_favorite": 0.25543745368888887,
-        "mae": 0.20498222222222226,
-        "crps_proxy": 0.20498222222222226,
+        "brier_vs_peer_favorite": 0.2584716881333334,
+        "mae": 0.21002888888888893,
+        "crps_proxy": 0.21002888888888893,
         "ok": false
       },
       "kalshi": {
         "n": 7,
-        "brier_vs_peer_favorite": 0.055300780742857145,
-        "mae": 0.08904276742173825,
-        "crps_proxy": 0.08904276742173825,
+        "brier_vs_peer_favorite": 0.059914580285714295,
+        "mae": 0.10703705313602398,
+        "crps_proxy": 0.10703705313602398,
         "ok": true
       }
     },
@@ -4218,9 +4218,9 @@
     ],
     "method": "ensemble_stack+limited_validation_exception_model-v1+limited_validation_alaska_rcv_model-v1",
     "core_method": "pymc",
-    "generic_ballot": 7.0394828626600345,
+    "generic_ballot": 7.118492730150463,
     "reasons": [
-      "control gap vs primary peer large (gap=0.291 > 0.25); gaps={'ddhq': 0.40044, 'kalshi': 0.2913310891089109} \u2014 informational under blueprint \u00a72 (peers not averaged)",
+      "control gap vs primary peer large (gap=0.281 > 0.25); gaps={'ddhq': 0.39024000000000003, 'kalshi': 0.28113108910891094} \u2014 informational under blueprint \u00a72 (peers not averaged)",
       "null margins in races: ['senate-2026-AK', 'senate-2026-MT']"
     ],
     "thresholds": {
@@ -4234,8 +4234,8 @@
   },
   "acceptance_gates": {
     "audit_item": "Milestone-0",
-    "model_version": "senate-hierarchical-v0.9.25",
-    "generated_at": "2026-10-13T20:59:48.824579+00:00",
+    "model_version": "senate-hierarchical-v0.9.26",
+    "generated_at": "2026-10-18T21:06:44.957537+00:00",
     "archive_scope": "2014-2024",
     "archive_note": "Milestone archive scope is 2014\u20132024 official ballots + certified margins (chamber G1/G2). Poll-coverage production gate remains 2018\u20132024 until FTE identity polls are sealed for 2014/2016.",
     "gates": {
@@ -4334,8 +4334,8 @@
           ],
           "coherence_ok": true,
           "coherence_notes": [],
-          "forecast_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
-          "evidence_fingerprint": "0f39c976163851e634fc8791ef2f7052601f9342beec8dcd6226905e9b7836be"
+          "forecast_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
+          "evidence_fingerprint": "09ca6d5dbc09fd61ad2b732e99c442992ff3efdbabc9a867ffb8e75e2bb8efdb"
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
@@ -4357,7 +4357,7 @@
           "no_weight_remapping": true,
           "stack_source_spine": "pymc",
           "reproduction_ok": true,
-          "matrix_sha256": "74526fcca913c1cd5d9b5ae004009ec992c11561d1bb43bcaff273e8271c6f46",
+          "matrix_sha256": "a71f3f8dea568a28c36ee3f7d10784fe8fa3fda33fc203d6c9791778f5357e0d",
           "forecast_method": "ensemble_stack+limited_validation_exception_model-v1+limited_validation_alaska_rcv_model-v1",
           "forecast_core": "pymc"
         },
@@ -4377,23 +4377,23 @@
         "status": "pass",
         "detail": {
           "g8_metric": "crps",
-          "mean_crps": 3.617219415536986,
+          "mean_crps": 3.6172782318689727,
           "mean_crps_by_component": {
-            "no_generic_ballot": 5.183109637900815,
-            "pymc_dynamic": 4.007998029812546,
-            "no_income_economic": 4.749579030231811,
-            "last_election_swing": 5.140491289812883,
-            "pymc": 3.617219415536986,
-            "no_midterm_outparty": 4.841411042935048,
-            "state_space": 3.444012979439594,
-            "state_space_no_ed_fund_repull": 4.082847376236071,
-            "poll_only_state_space": 9.986306748950838,
-            "no_approval": 4.7556042812554935,
-            "ridge_fundamentals": 5.047446570366283,
+            "state_space_process_sd_1_2": 3.5010816487807457,
+            "pymc_dynamic": 3.9951385086111655,
+            "pymc": 3.6172782318689727,
+            "state_space_process_sd_0_5": 3.390867587699769,
             "equal_weight_polls": 4.922701207453702,
+            "poll_only_state_space": 9.986622135747602,
+            "no_midterm_outparty": 4.811152162241992,
             "shrinkage_polls": 4.342464304268731,
-            "state_space_process_sd_0_5": 3.4019848927186893,
-            "state_space_process_sd_1_2": 3.510951971052714
+            "no_generic_ballot": 5.152162437404346,
+            "no_approval": 4.724808679664868,
+            "no_income_economic": 4.718571739563967,
+            "ridge_fundamentals": 5.0172176754775,
+            "last_election_swing": 5.140491289812883,
+            "state_space_no_ed_fund_repull": 4.0814711895484646,
+            "state_space": 3.4337998688566946
           },
           "n_folds": 4,
           "n_outer_years": 4,
@@ -4408,11 +4408,11 @@
             "n": 34,
             "brier": 0.06308417721492626,
             "has_margin_scores": true,
-            "log_score": -0.2082909559382418,
+            "log_score": -0.20829095593824176,
             "calibration_slope_intercept": {
               "n": 34,
-              "slope": 1.1099380290925003,
-              "intercept": -0.048561717794097216,
+              "slope": 1.1099380290925005,
+              "intercept": -0.04856171779409729,
               "ok": true,
               "ideal": {
                 "slope": 1.0,
@@ -4514,9 +4514,9 @@
           "crossfit_procedure": "cycle_cross_fitted_production_stack",
           "crossfit_raw_metrics": {
             "n": 260,
-            "empirical_crps": 3.605682740830045,
-            "brier": 0.04777281321885048,
-            "log_score": -0.1518985587262061
+            "empirical_crps": 3.6016437375705928,
+            "brier": 0.048500573365096604,
+            "log_score": -0.15454250506294578
           },
           "experimental_calibration_not_production": {
             "production_adopted": false,
@@ -4526,13 +4526,13 @@
               "overconfident_bins": [],
               "n_overconfident": 0,
               "total_n": 260.0,
-              "n_adequate_bins": 5,
+              "n_adequate_bins": 3,
               "thin_sample": false,
               "calibration_claim_allowed": true
             },
-            "empirical_crps": 3.605682740830045,
-            "brier": 0.04777281321885048,
-            "log_score": -0.1518985587262061
+            "empirical_crps": 3.6081240065548084,
+            "brier": 0.04842239127375045,
+            "log_score": -0.1545301103454909
           },
           "n_bins": 10,
           "reliability_gate": {
@@ -4540,7 +4540,7 @@
             "overconfident_bins": [],
             "n_overconfident": 0,
             "total_n": 260.0,
-            "n_adequate_bins": 5,
+            "n_adequate_bins": 3,
             "thin_sample": false,
             "calibration_claim_allowed": true
           },
@@ -4593,7 +4593,7 @@
         "status": "pass",
         "detail": {
           "alerts": [],
-          "mcse_control": 0.0014509679968903518
+          "mcse_control": 0.0015028129783842032
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
@@ -4610,10 +4610,10 @@
           "mode": "hash_seal_and_independent",
           "verify_rebuild": {
             "ok": true,
-            "run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
+            "run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
             "error": null,
-            "forecast_hash_expected": "e4b81bf19cbe6d92952028a7cdfd229ad781e84350cd1f6fab938645bdbd9f5b",
-            "forecast_hash_actual": "e4b81bf19cbe6d92952028a7cdfd229ad781e84350cd1f6fab938645bdbd9f5b"
+            "forecast_hash_expected": "a81d9d686072e7d5bea94871067fad94c025c8ff5ed0b62d70fa48f74512467d",
+            "forecast_hash_actual": "a81d9d686072e7d5bea94871067fad94c025c8ff5ed0b62d70fa48f74512467d"
           },
           "independent_rebuild": {
             "ok": true,
@@ -4644,75 +4644,75 @@
                   "ok": true,
                   "expected": {
                     "senate-2026-TX": "ordinary_stack",
-                    "senate-2026-NE": "binary_non_major_adapter",
                     "senate-2026-OH": "ordinary_stack",
+                    "senate-2026-NE": "binary_non_major_adapter",
                     "senate-2026-AK": "alaska_rcv_adapter",
                     "senate-2026-IA": "ordinary_stack",
                     "senate-2026-KS": "ordinary_stack",
-                    "senate-2026-ID": "binary_non_major_adapter",
-                    "senate-2026-ME": "ordinary_stack",
-                    "senate-2026-MI": "ordinary_stack",
                     "senate-2026-SC": "ordinary_stack",
-                    "senate-2026-SD": "binary_non_major_adapter",
-                    "senate-2026-FL": "ordinary_stack",
+                    "senate-2026-ID": "binary_non_major_adapter",
+                    "senate-2026-MI": "ordinary_stack",
+                    "senate-2026-ME": "ordinary_stack",
                     "senate-2026-MN": "ordinary_stack",
+                    "senate-2026-FL": "ordinary_stack",
                     "senate-2026-NH": "ordinary_stack",
+                    "senate-2026-SD": "binary_non_major_adapter",
                     "senate-2026-NC": "ordinary_stack",
-                    "senate-2026-GA": "ordinary_stack",
                     "senate-2026-MS": "ordinary_stack",
-                    "senate-2026-VA": "ordinary_stack",
+                    "senate-2026-GA": "ordinary_stack",
                     "senate-2026-LA": "ordinary_stack",
-                    "senate-2026-NJ": "ordinary_stack",
-                    "senate-2026-CO": "ordinary_stack",
-                    "senate-2026-DE": "ordinary_stack",
+                    "senate-2026-VA": "ordinary_stack",
+                    "senate-2026-KY": "ordinary_stack",
                     "senate-2026-IL": "ordinary_stack",
+                    "senate-2026-OR": "ordinary_stack",
+                    "senate-2026-NJ": "ordinary_stack",
                     "senate-2026-NM": "ordinary_stack",
                     "senate-2026-AR": "ordinary_stack",
-                    "senate-2026-KY": "ordinary_stack",
-                    "senate-2026-OR": "ordinary_stack",
+                    "senate-2026-CO": "ordinary_stack",
                     "senate-2026-RI": "ordinary_stack",
+                    "senate-2026-DE": "ordinary_stack",
                     "senate-2026-TN": "ordinary_stack",
-                    "senate-2026-AL": "ordinary_stack",
                     "senate-2026-OK": "ordinary_stack",
-                    "senate-2026-MA": "ordinary_stack",
+                    "senate-2026-AL": "ordinary_stack",
                     "senate-2026-WV": "ordinary_stack",
+                    "senate-2026-MA": "ordinary_stack",
                     "senate-2026-WY": "ordinary_stack",
                     "senate-2026-MT": "multiway_plurality_adapter"
                   },
                   "actual": {
                     "senate-2026-TX": "ordinary_stack",
-                    "senate-2026-NE": "binary_non_major_adapter",
                     "senate-2026-OH": "ordinary_stack",
+                    "senate-2026-NE": "binary_non_major_adapter",
                     "senate-2026-AK": "alaska_rcv_adapter",
                     "senate-2026-IA": "ordinary_stack",
                     "senate-2026-KS": "ordinary_stack",
-                    "senate-2026-ID": "binary_non_major_adapter",
-                    "senate-2026-ME": "ordinary_stack",
-                    "senate-2026-MI": "ordinary_stack",
                     "senate-2026-SC": "ordinary_stack",
-                    "senate-2026-SD": "binary_non_major_adapter",
-                    "senate-2026-FL": "ordinary_stack",
+                    "senate-2026-ID": "binary_non_major_adapter",
+                    "senate-2026-MI": "ordinary_stack",
+                    "senate-2026-ME": "ordinary_stack",
                     "senate-2026-MN": "ordinary_stack",
+                    "senate-2026-FL": "ordinary_stack",
                     "senate-2026-NH": "ordinary_stack",
+                    "senate-2026-SD": "binary_non_major_adapter",
                     "senate-2026-NC": "ordinary_stack",
-                    "senate-2026-GA": "ordinary_stack",
                     "senate-2026-MS": "ordinary_stack",
-                    "senate-2026-VA": "ordinary_stack",
+                    "senate-2026-GA": "ordinary_stack",
                     "senate-2026-LA": "ordinary_stack",
-                    "senate-2026-NJ": "ordinary_stack",
-                    "senate-2026-CO": "ordinary_stack",
-                    "senate-2026-DE": "ordinary_stack",
+                    "senate-2026-VA": "ordinary_stack",
+                    "senate-2026-KY": "ordinary_stack",
                     "senate-2026-IL": "ordinary_stack",
+                    "senate-2026-OR": "ordinary_stack",
+                    "senate-2026-NJ": "ordinary_stack",
                     "senate-2026-NM": "ordinary_stack",
                     "senate-2026-AR": "ordinary_stack",
-                    "senate-2026-KY": "ordinary_stack",
-                    "senate-2026-OR": "ordinary_stack",
+                    "senate-2026-CO": "ordinary_stack",
                     "senate-2026-RI": "ordinary_stack",
+                    "senate-2026-DE": "ordinary_stack",
                     "senate-2026-TN": "ordinary_stack",
-                    "senate-2026-AL": "ordinary_stack",
                     "senate-2026-OK": "ordinary_stack",
-                    "senate-2026-MA": "ordinary_stack",
+                    "senate-2026-AL": "ordinary_stack",
                     "senate-2026-WV": "ordinary_stack",
+                    "senate-2026-MA": "ordinary_stack",
                     "senate-2026-WY": "ordinary_stack",
                     "senate-2026-MT": "multiway_plurality_adapter"
                   }
@@ -4724,57 +4724,57 @@
             "domain_ok": true,
             "error": null,
             "run_id_match": true,
-            "forecast_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
-            "rebuild_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
+            "forecast_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
+            "rebuild_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
             "freshness": {
-              "forecast_generated_at": "2026-10-13T20:44:46.870459+00:00",
-              "rebuild_generated_at": "2026-10-13T20:59:36.883689+00:00",
+              "forecast_generated_at": "2026-10-18T20:58:34.302651+00:00",
+              "rebuild_generated_at": "2026-10-18T21:06:36.168861+00:00",
               "rebuild_after_forecast": true
             },
             "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact."
           },
           "shadow_verify": [
             {
-              "shadow_id": "shadow_senate-2026_2026-10-10_senate-hierarchical-v0.9.25_20261013T205938Z",
+              "shadow_id": "shadow_senate-2026_2026-10-17_senate-hierarchical-v0.9.26_20261018T210637Z",
               "ok": true,
               "hashes_ok": true,
               "signatures_ok": true,
               "signature_status": "legacy_hmac",
-              "path": "data/shadow/shadow_senate-2026_2026-10-10_senate-hierarchical-v0.9.25_20261013T205938Z",
-              "model_version": "senate-hierarchical-v0.9.25"
+              "path": "data/shadow/shadow_senate-2026_2026-10-17_senate-hierarchical-v0.9.26_20261018T210637Z",
+              "model_version": "senate-hierarchical-v0.9.26"
             }
           ],
           "shadow_rows_checked": 1,
           "shadow_selection": {
-            "required_model_version": "senate-hierarchical-v0.9.25",
-            "required_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
+            "required_model_version": "senate-hierarchical-v0.9.26",
+            "required_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
             "historical_fallback_allowed": false
           },
           "shadow_signature_note": "signature_status=verified \u2192 Ed25519 ok against historical key_id; legacy_hmac \u2192 shared-secret integrity only; missing \u2192 hashes-only; unverifiable \u2192 hash ok but key does not verify (e.g. rotated trust root); failed \u2192 integrity/corrupt seal. PUBLIC_LIVE requires verified; research accepts missing/unverifiable with hashes.",
           "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
           "release_identity": {
             "ok": true,
-            "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0925_eb-dcb6d43248b5fcc9.json",
-            "release_id": "truth_v1_v0.9.25_eb-dcb6d43248b5fcc9",
+            "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0926_eb-89a17ef758cdd2d0.json",
+            "release_id": "truth_v1_v0.9.26_eb-89a17ef758cdd2d0",
             "identity_schema_version": "release-identity-v2",
-            "expected_model_version": "senate-hierarchical-v0.9.25",
-            "model_version": "senate-hierarchical-v0.9.25",
+            "expected_model_version": "senate-hierarchical-v0.9.26",
+            "model_version": "senate-hierarchical-v0.9.26",
             "lineage": {
-              "model_version": "senate-hierarchical-v0.9.25",
-              "validated_model_spec_sha256": "689b8ffc32f375f219f2189c0afbb713ee9da6b157d22db4ebd557fedad7d1ff",
-              "evidence_bundle_id": "eb-dcb6d43248b5fcc9",
-              "evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
-              "source_readiness_sha256": "c5e19b7b95c40da2fe99b6040c1f75e136ec3fa75c29e7331ac60de0b80932f4",
-              "selected_structure_id": "pymc",
-              "selected_poll_structure_id": "psc-7819fcedea982286",
-              "canonical_oof_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
-              "canonical_frozen_draws_sha256": "80c529b7cd9849570851e83a6db2a0601b6bd44f4da4865f2cb7804ebf2efcca",
-              "stack_weights_sha256": "27de10c442a22aca3327818740d5b8628e7580d19369a0bee0ff7960825a9b30",
-              "uncertainty_calibration_sha256": "dea7a2fdb53af014b7123467137baa228dc8a0095633e53793a2f05e0d8d1a99",
-              "exceptional_model_lineage_sha256": "2e595f980b6a84309156357ae2759045762fd8185300ae0ad8d6bb2b54fe2262",
-              "binary_non_major_validation_sha256": "aca1bab7d3cffd09105619c63e44539b74073816ee1250e724342f2cbc9ebca0",
-              "alaska_rcv_validation_sha256": "8ac49d4ffc62f9d28a6ddfa2863a2bbbad8432ccce3853f3c54eb64fc4406acc",
-              "validated_code_commit": "85ec48e01dde6e52a0a2f366a2a934261b434014"
+              "model_version": "senate-hierarchical-v0.9.26",
+              "validated_model_spec_sha256": "707caa93f165813ee59183fb3e5805ab060d9369fd6eec539a45cbe6ab50da7d",
+              "evidence_bundle_id": "eb-89a17ef758cdd2d0",
+              "evidence_bundle_sha256": "89a17ef758cdd2d0f25756199664a429e8ceb78db2aedf6f63961e5b9290a2e4",
+              "source_readiness_sha256": "fbd3457f722236d2d24c1ebab04d96a0158bd91bd7e2b47a85ef205c99c49134",
+              "selected_structure_id": "hier_plus_questionnaire_effect",
+              "selected_poll_structure_id": "psc-5035810fb1f3d5e7",
+              "canonical_oof_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
+              "canonical_frozen_draws_sha256": "00a3b262d4928b7afea10ae3a44a7276c4d36cc90fd76e99a441584a9be95573",
+              "stack_weights_sha256": "ceb233796434660fdf0a4d0a61799fcf6e6d40620025557d18fcc44efec8247a",
+              "uncertainty_calibration_sha256": "151a4f534bfeb9f5b8e2d0961a47ec3fb93ad1588944740f2640b06b05fe95a5",
+              "exceptional_model_lineage_sha256": "1ec99abde6e5daa9faa8e4099e0f81a1dad2f905dd0b8a847ec061a4067f26a2",
+              "binary_non_major_validation_sha256": "02a7620cc7fe77d55cb350aa95069060b59d2d5535b0d2ceeeaffa42f54be4da",
+              "alaska_rcv_validation_sha256": "2f6ff62571cbfa74731d32b9524ec580992d00f619dcfe30d1820b4cb0d555ba",
+              "validated_code_commit": "652db4835a062706fb52e2c06414289ba78451b6"
             },
             "problems": [],
             "mismatches": {},
@@ -4788,7 +4788,7 @@
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/manifests/shadow_publications.jsonl",
-          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0925_eb-dcb6d43248b5fcc9.json"
+          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0926_eb-89a17ef758cdd2d0.json"
         ],
         "failure_behavior": "Reject release.",
         "notes": []
@@ -4800,13 +4800,13 @@
         "status": "pass",
         "detail": {
           "model_card": true,
-          "model_version": "senate-hierarchical-v0.9.25",
+          "model_version": "senate-hierarchical-v0.9.26",
           "model_card_has_limitations_section": true,
           "run_class": "publication",
           "publishable": true,
           "publication_surface": "research_only",
           "has_limitations": true,
-          "forecast_model_version": "senate-hierarchical-v0.9.25",
+          "forecast_model_version": "senate-hierarchical-v0.9.26",
           "validation_limitations_n": 9,
           "poll_coverage_present": true
         },
@@ -4915,8 +4915,8 @@
           ],
           "coherence_ok": true,
           "coherence_notes": [],
-          "forecast_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
-          "evidence_fingerprint": "0f39c976163851e634fc8791ef2f7052601f9342beec8dcd6226905e9b7836be"
+          "forecast_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
+          "evidence_fingerprint": "09ca6d5dbc09fd61ad2b732e99c442992ff3efdbabc9a867ffb8e75e2bb8efdb"
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/evidence_eligibility_latest.json"
@@ -4938,7 +4938,7 @@
           "no_weight_remapping": true,
           "stack_source_spine": "pymc",
           "reproduction_ok": true,
-          "matrix_sha256": "74526fcca913c1cd5d9b5ae004009ec992c11561d1bb43bcaff273e8271c6f46",
+          "matrix_sha256": "a71f3f8dea568a28c36ee3f7d10784fe8fa3fda33fc203d6c9791778f5357e0d",
           "forecast_method": "ensemble_stack+limited_validation_exception_model-v1+limited_validation_alaska_rcv_model-v1",
           "forecast_core": "pymc"
         },
@@ -4958,23 +4958,23 @@
         "status": "pass",
         "detail": {
           "g8_metric": "crps",
-          "mean_crps": 3.617219415536986,
+          "mean_crps": 3.6172782318689727,
           "mean_crps_by_component": {
-            "no_generic_ballot": 5.183109637900815,
-            "pymc_dynamic": 4.007998029812546,
-            "no_income_economic": 4.749579030231811,
-            "last_election_swing": 5.140491289812883,
-            "pymc": 3.617219415536986,
-            "no_midterm_outparty": 4.841411042935048,
-            "state_space": 3.444012979439594,
-            "state_space_no_ed_fund_repull": 4.082847376236071,
-            "poll_only_state_space": 9.986306748950838,
-            "no_approval": 4.7556042812554935,
-            "ridge_fundamentals": 5.047446570366283,
+            "state_space_process_sd_1_2": 3.5010816487807457,
+            "pymc_dynamic": 3.9951385086111655,
+            "pymc": 3.6172782318689727,
+            "state_space_process_sd_0_5": 3.390867587699769,
             "equal_weight_polls": 4.922701207453702,
+            "poll_only_state_space": 9.986622135747602,
+            "no_midterm_outparty": 4.811152162241992,
             "shrinkage_polls": 4.342464304268731,
-            "state_space_process_sd_0_5": 3.4019848927186893,
-            "state_space_process_sd_1_2": 3.510951971052714
+            "no_generic_ballot": 5.152162437404346,
+            "no_approval": 4.724808679664868,
+            "no_income_economic": 4.718571739563967,
+            "ridge_fundamentals": 5.0172176754775,
+            "last_election_swing": 5.140491289812883,
+            "state_space_no_ed_fund_repull": 4.0814711895484646,
+            "state_space": 3.4337998688566946
           },
           "n_folds": 4,
           "n_outer_years": 4,
@@ -4989,11 +4989,11 @@
             "n": 34,
             "brier": 0.06308417721492626,
             "has_margin_scores": true,
-            "log_score": -0.2082909559382418,
+            "log_score": -0.20829095593824176,
             "calibration_slope_intercept": {
               "n": 34,
-              "slope": 1.1099380290925003,
-              "intercept": -0.048561717794097216,
+              "slope": 1.1099380290925005,
+              "intercept": -0.04856171779409729,
               "ok": true,
               "ideal": {
                 "slope": 1.0,
@@ -5095,9 +5095,9 @@
           "crossfit_procedure": "cycle_cross_fitted_production_stack",
           "crossfit_raw_metrics": {
             "n": 260,
-            "empirical_crps": 3.605682740830045,
-            "brier": 0.04777281321885048,
-            "log_score": -0.1518985587262061
+            "empirical_crps": 3.6016437375705928,
+            "brier": 0.048500573365096604,
+            "log_score": -0.15454250506294578
           },
           "experimental_calibration_not_production": {
             "production_adopted": false,
@@ -5107,13 +5107,13 @@
               "overconfident_bins": [],
               "n_overconfident": 0,
               "total_n": 260.0,
-              "n_adequate_bins": 5,
+              "n_adequate_bins": 3,
               "thin_sample": false,
               "calibration_claim_allowed": true
             },
-            "empirical_crps": 3.605682740830045,
-            "brier": 0.04777281321885048,
-            "log_score": -0.1518985587262061
+            "empirical_crps": 3.6081240065548084,
+            "brier": 0.04842239127375045,
+            "log_score": -0.1545301103454909
           },
           "n_bins": 10,
           "reliability_gate": {
@@ -5121,7 +5121,7 @@
             "overconfident_bins": [],
             "n_overconfident": 0,
             "total_n": 260.0,
-            "n_adequate_bins": 5,
+            "n_adequate_bins": 3,
             "thin_sample": false,
             "calibration_claim_allowed": true
           },
@@ -5174,7 +5174,7 @@
         "status": "pass",
         "detail": {
           "alerts": [],
-          "mcse_control": 0.0014509679968903518
+          "mcse_control": 0.0015028129783842032
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/forecast_latest.json"
@@ -5191,10 +5191,10 @@
           "mode": "hash_seal_and_independent",
           "verify_rebuild": {
             "ok": true,
-            "run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
+            "run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
             "error": null,
-            "forecast_hash_expected": "e4b81bf19cbe6d92952028a7cdfd229ad781e84350cd1f6fab938645bdbd9f5b",
-            "forecast_hash_actual": "e4b81bf19cbe6d92952028a7cdfd229ad781e84350cd1f6fab938645bdbd9f5b"
+            "forecast_hash_expected": "a81d9d686072e7d5bea94871067fad94c025c8ff5ed0b62d70fa48f74512467d",
+            "forecast_hash_actual": "a81d9d686072e7d5bea94871067fad94c025c8ff5ed0b62d70fa48f74512467d"
           },
           "independent_rebuild": {
             "ok": true,
@@ -5225,75 +5225,75 @@
                   "ok": true,
                   "expected": {
                     "senate-2026-TX": "ordinary_stack",
-                    "senate-2026-NE": "binary_non_major_adapter",
                     "senate-2026-OH": "ordinary_stack",
+                    "senate-2026-NE": "binary_non_major_adapter",
                     "senate-2026-AK": "alaska_rcv_adapter",
                     "senate-2026-IA": "ordinary_stack",
                     "senate-2026-KS": "ordinary_stack",
-                    "senate-2026-ID": "binary_non_major_adapter",
-                    "senate-2026-ME": "ordinary_stack",
-                    "senate-2026-MI": "ordinary_stack",
                     "senate-2026-SC": "ordinary_stack",
-                    "senate-2026-SD": "binary_non_major_adapter",
-                    "senate-2026-FL": "ordinary_stack",
+                    "senate-2026-ID": "binary_non_major_adapter",
+                    "senate-2026-MI": "ordinary_stack",
+                    "senate-2026-ME": "ordinary_stack",
                     "senate-2026-MN": "ordinary_stack",
+                    "senate-2026-FL": "ordinary_stack",
                     "senate-2026-NH": "ordinary_stack",
+                    "senate-2026-SD": "binary_non_major_adapter",
                     "senate-2026-NC": "ordinary_stack",
-                    "senate-2026-GA": "ordinary_stack",
                     "senate-2026-MS": "ordinary_stack",
-                    "senate-2026-VA": "ordinary_stack",
+                    "senate-2026-GA": "ordinary_stack",
                     "senate-2026-LA": "ordinary_stack",
-                    "senate-2026-NJ": "ordinary_stack",
-                    "senate-2026-CO": "ordinary_stack",
-                    "senate-2026-DE": "ordinary_stack",
+                    "senate-2026-VA": "ordinary_stack",
+                    "senate-2026-KY": "ordinary_stack",
                     "senate-2026-IL": "ordinary_stack",
+                    "senate-2026-OR": "ordinary_stack",
+                    "senate-2026-NJ": "ordinary_stack",
                     "senate-2026-NM": "ordinary_stack",
                     "senate-2026-AR": "ordinary_stack",
-                    "senate-2026-KY": "ordinary_stack",
-                    "senate-2026-OR": "ordinary_stack",
+                    "senate-2026-CO": "ordinary_stack",
                     "senate-2026-RI": "ordinary_stack",
+                    "senate-2026-DE": "ordinary_stack",
                     "senate-2026-TN": "ordinary_stack",
-                    "senate-2026-AL": "ordinary_stack",
                     "senate-2026-OK": "ordinary_stack",
-                    "senate-2026-MA": "ordinary_stack",
+                    "senate-2026-AL": "ordinary_stack",
                     "senate-2026-WV": "ordinary_stack",
+                    "senate-2026-MA": "ordinary_stack",
                     "senate-2026-WY": "ordinary_stack",
                     "senate-2026-MT": "multiway_plurality_adapter"
                   },
                   "actual": {
                     "senate-2026-TX": "ordinary_stack",
-                    "senate-2026-NE": "binary_non_major_adapter",
                     "senate-2026-OH": "ordinary_stack",
+                    "senate-2026-NE": "binary_non_major_adapter",
                     "senate-2026-AK": "alaska_rcv_adapter",
                     "senate-2026-IA": "ordinary_stack",
                     "senate-2026-KS": "ordinary_stack",
-                    "senate-2026-ID": "binary_non_major_adapter",
-                    "senate-2026-ME": "ordinary_stack",
-                    "senate-2026-MI": "ordinary_stack",
                     "senate-2026-SC": "ordinary_stack",
-                    "senate-2026-SD": "binary_non_major_adapter",
-                    "senate-2026-FL": "ordinary_stack",
+                    "senate-2026-ID": "binary_non_major_adapter",
+                    "senate-2026-MI": "ordinary_stack",
+                    "senate-2026-ME": "ordinary_stack",
                     "senate-2026-MN": "ordinary_stack",
+                    "senate-2026-FL": "ordinary_stack",
                     "senate-2026-NH": "ordinary_stack",
+                    "senate-2026-SD": "binary_non_major_adapter",
                     "senate-2026-NC": "ordinary_stack",
-                    "senate-2026-GA": "ordinary_stack",
                     "senate-2026-MS": "ordinary_stack",
-                    "senate-2026-VA": "ordinary_stack",
+                    "senate-2026-GA": "ordinary_stack",
                     "senate-2026-LA": "ordinary_stack",
-                    "senate-2026-NJ": "ordinary_stack",
-                    "senate-2026-CO": "ordinary_stack",
-                    "senate-2026-DE": "ordinary_stack",
+                    "senate-2026-VA": "ordinary_stack",
+                    "senate-2026-KY": "ordinary_stack",
                     "senate-2026-IL": "ordinary_stack",
+                    "senate-2026-OR": "ordinary_stack",
+                    "senate-2026-NJ": "ordinary_stack",
                     "senate-2026-NM": "ordinary_stack",
                     "senate-2026-AR": "ordinary_stack",
-                    "senate-2026-KY": "ordinary_stack",
-                    "senate-2026-OR": "ordinary_stack",
+                    "senate-2026-CO": "ordinary_stack",
                     "senate-2026-RI": "ordinary_stack",
+                    "senate-2026-DE": "ordinary_stack",
                     "senate-2026-TN": "ordinary_stack",
-                    "senate-2026-AL": "ordinary_stack",
                     "senate-2026-OK": "ordinary_stack",
-                    "senate-2026-MA": "ordinary_stack",
+                    "senate-2026-AL": "ordinary_stack",
                     "senate-2026-WV": "ordinary_stack",
+                    "senate-2026-MA": "ordinary_stack",
                     "senate-2026-WY": "ordinary_stack",
                     "senate-2026-MT": "multiway_plurality_adapter"
                   }
@@ -5305,57 +5305,57 @@
             "domain_ok": true,
             "error": null,
             "run_id_match": true,
-            "forecast_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
-            "rebuild_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
+            "forecast_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
+            "rebuild_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
             "freshness": {
-              "forecast_generated_at": "2026-10-13T20:44:46.870459+00:00",
-              "rebuild_generated_at": "2026-10-13T20:59:36.883689+00:00",
+              "forecast_generated_at": "2026-10-18T20:58:34.302651+00:00",
+              "rebuild_generated_at": "2026-10-18T21:06:36.168861+00:00",
               "rebuild_after_forecast": true
             },
             "claim": "Independent rebuild verifies the sealed forecast run_id with a re-execution no older than the forecast artifact."
           },
           "shadow_verify": [
             {
-              "shadow_id": "shadow_senate-2026_2026-10-10_senate-hierarchical-v0.9.25_20261013T205938Z",
+              "shadow_id": "shadow_senate-2026_2026-10-17_senate-hierarchical-v0.9.26_20261018T210637Z",
               "ok": true,
               "hashes_ok": true,
               "signatures_ok": true,
               "signature_status": "legacy_hmac",
-              "path": "data/shadow/shadow_senate-2026_2026-10-10_senate-hierarchical-v0.9.25_20261013T205938Z",
-              "model_version": "senate-hierarchical-v0.9.25"
+              "path": "data/shadow/shadow_senate-2026_2026-10-17_senate-hierarchical-v0.9.26_20261018T210637Z",
+              "model_version": "senate-hierarchical-v0.9.26"
             }
           ],
           "shadow_rows_checked": 1,
           "shadow_selection": {
-            "required_model_version": "senate-hierarchical-v0.9.25",
-            "required_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
+            "required_model_version": "senate-hierarchical-v0.9.26",
+            "required_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
             "historical_fallback_allowed": false
           },
           "shadow_signature_note": "signature_status=verified \u2192 Ed25519 ok against historical key_id; legacy_hmac \u2192 shared-secret integrity only; missing \u2192 hashes-only; unverifiable \u2192 hash ok but key does not verify (e.g. rotated trust root); failed \u2192 integrity/corrupt seal. PUBLIC_LIVE requires verified; research accepts missing/unverifiable with hashes.",
           "note": "G10: lite hash seal (verify-rebuild) + independent re-execution within MCSE tolerances (verify-rebuild --independent) + write-once shadow seals.",
           "release_identity": {
             "ok": true,
-            "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0925_eb-dcb6d43248b5fcc9.json",
-            "release_id": "truth_v1_v0.9.25_eb-dcb6d43248b5fcc9",
+            "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0926_eb-89a17ef758cdd2d0.json",
+            "release_id": "truth_v1_v0.9.26_eb-89a17ef758cdd2d0",
             "identity_schema_version": "release-identity-v2",
-            "expected_model_version": "senate-hierarchical-v0.9.25",
-            "model_version": "senate-hierarchical-v0.9.25",
+            "expected_model_version": "senate-hierarchical-v0.9.26",
+            "model_version": "senate-hierarchical-v0.9.26",
             "lineage": {
-              "model_version": "senate-hierarchical-v0.9.25",
-              "validated_model_spec_sha256": "689b8ffc32f375f219f2189c0afbb713ee9da6b157d22db4ebd557fedad7d1ff",
-              "evidence_bundle_id": "eb-dcb6d43248b5fcc9",
-              "evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
-              "source_readiness_sha256": "c5e19b7b95c40da2fe99b6040c1f75e136ec3fa75c29e7331ac60de0b80932f4",
-              "selected_structure_id": "pymc",
-              "selected_poll_structure_id": "psc-7819fcedea982286",
-              "canonical_oof_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
-              "canonical_frozen_draws_sha256": "80c529b7cd9849570851e83a6db2a0601b6bd44f4da4865f2cb7804ebf2efcca",
-              "stack_weights_sha256": "27de10c442a22aca3327818740d5b8628e7580d19369a0bee0ff7960825a9b30",
-              "uncertainty_calibration_sha256": "dea7a2fdb53af014b7123467137baa228dc8a0095633e53793a2f05e0d8d1a99",
-              "exceptional_model_lineage_sha256": "2e595f980b6a84309156357ae2759045762fd8185300ae0ad8d6bb2b54fe2262",
-              "binary_non_major_validation_sha256": "aca1bab7d3cffd09105619c63e44539b74073816ee1250e724342f2cbc9ebca0",
-              "alaska_rcv_validation_sha256": "8ac49d4ffc62f9d28a6ddfa2863a2bbbad8432ccce3853f3c54eb64fc4406acc",
-              "validated_code_commit": "85ec48e01dde6e52a0a2f366a2a934261b434014"
+              "model_version": "senate-hierarchical-v0.9.26",
+              "validated_model_spec_sha256": "707caa93f165813ee59183fb3e5805ab060d9369fd6eec539a45cbe6ab50da7d",
+              "evidence_bundle_id": "eb-89a17ef758cdd2d0",
+              "evidence_bundle_sha256": "89a17ef758cdd2d0f25756199664a429e8ceb78db2aedf6f63961e5b9290a2e4",
+              "source_readiness_sha256": "fbd3457f722236d2d24c1ebab04d96a0158bd91bd7e2b47a85ef205c99c49134",
+              "selected_structure_id": "hier_plus_questionnaire_effect",
+              "selected_poll_structure_id": "psc-5035810fb1f3d5e7",
+              "canonical_oof_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
+              "canonical_frozen_draws_sha256": "00a3b262d4928b7afea10ae3a44a7276c4d36cc90fd76e99a441584a9be95573",
+              "stack_weights_sha256": "ceb233796434660fdf0a4d0a61799fcf6e6d40620025557d18fcc44efec8247a",
+              "uncertainty_calibration_sha256": "151a4f534bfeb9f5b8e2d0961a47ec3fb93ad1588944740f2640b06b05fe95a5",
+              "exceptional_model_lineage_sha256": "1ec99abde6e5daa9faa8e4099e0f81a1dad2f905dd0b8a847ec061a4067f26a2",
+              "binary_non_major_validation_sha256": "02a7620cc7fe77d55cb350aa95069060b59d2d5535b0d2ceeeaffa42f54be4da",
+              "alaska_rcv_validation_sha256": "2f6ff62571cbfa74731d32b9524ec580992d00f619dcfe30d1820b4cb0d555ba",
+              "validated_code_commit": "652db4835a062706fb52e2c06414289ba78451b6"
             },
             "problems": [],
             "mismatches": {},
@@ -5369,7 +5369,7 @@
         },
         "evidence": [
           "/home/runner/work/electionmodel26/electionmodel26/data/manifests/shadow_publications.jsonl",
-          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0925_eb-dcb6d43248b5fcc9.json"
+          "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/release_identity_v0926_eb-89a17ef758cdd2d0.json"
         ],
         "failure_behavior": "Reject release.",
         "notes": []
@@ -5381,13 +5381,13 @@
         "status": "pass",
         "detail": {
           "model_card": true,
-          "model_version": "senate-hierarchical-v0.9.25",
+          "model_version": "senate-hierarchical-v0.9.26",
           "model_card_has_limitations_section": true,
           "run_class": "publication",
           "publishable": true,
           "publication_surface": "research_only",
           "has_limitations": true,
-          "forecast_model_version": "senate-hierarchical-v0.9.25",
+          "forecast_model_version": "senate-hierarchical-v0.9.26",
           "validation_limitations_n": 9,
           "poll_coverage_present": true
         },
@@ -5494,15 +5494,15 @@
       },
       "evaluation": {
         "schema_version": "blueprint-extension-gates-v1",
-        "model_version": "senate-hierarchical-v0.9.25",
+        "model_version": "senate-hierarchical-v0.9.26",
         "gates": {
           "alaska_rcv_adapter": {
             "declared_status": "limited_validation_alaska_rcv_model",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "alaska_rcv_validation_latest.json",
-            "artifact_sha256": "32b1f9282cfca000c54fb2882534ce1fd6673b63e827ac397cca7292e673bac4",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "635000dab4a7005e49d3957a47c0f1b5da54fe3506962c33003e8ef27062676f",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "reason": null,
@@ -5528,11 +5528,11 @@
               },
               "implementation_spec_sha256": "74ee9d513833d16bd5d523a5666f648c260c1bd4bbfd63a424834738a994cb8b",
               "validation_classification": "limited_validation_alaska_rcv_model",
-              "validation_sha256": "8ac49d4ffc62f9d28a6ddfa2863a2bbbad8432ccce3853f3c54eb64fc4406acc",
-              "validation_artifact_sha256": "a892ca516554cef0720aa8e6a9fa536b7a36b4b2d6e4eeaf2be77c7dc881438e",
+              "validation_sha256": "2f6ff62571cbfa74731d32b9524ec580992d00f619dcfe30d1820b4cb0d555ba",
+              "validation_artifact_sha256": "1b78dd65aa564419e02453d9f3e1795fc59edee0bd2bf3c2386986b921383e9c",
               "source_manifest_sha256": "5c80c8ff593c8b3b1a2232941e63385eb593fbfd6a2d1c4dc2b74fd10a38689a",
               "source_semantic_sha256": "8c5fa884fe8e1cbb39c528511d36a1c064b0a8d48f6794b3144dd46b8726cf43",
-              "candidate_registry_sha256": "8f93599be1acd4f4624909e5049835110cc9b9e57d9ba467e6e1c46ea3f3a545",
+              "candidate_registry_sha256": "05b3ac128f6c2350c71d4f30d22c97d35bbf56de7edbf5456b5aed3a6f74c1f4",
               "candidate_field_ids": [
                 "senate-2026-AK:dan-s-sullivan",
                 "senate-2026-AK:daniel-j-sullivan-jr",
@@ -5557,7 +5557,7 @@
           "approval_poll_timing_lineage": {
             "declared_status": "source_ready",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": null,
             "artifact_sha256": null,
             "status": "pass",
@@ -5570,10 +5570,10 @@
           "binary_non_major_party_adapter": {
             "declared_status": "limited_validation_exception_model",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "non_major_adapter_validation_latest.json",
-            "artifact_sha256": "96c9b3a9e0c4a6bc3a7d0ad02634493c00df61764b4b6191c4cfc0ece35b2276",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "dc3a95ac0a9a63b790cb13ed255e9e1691da916032cc3ec34c4380786f4c65bc",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "reason": null,
@@ -5591,8 +5591,8 @@
               },
               "implementation_spec_sha256": "3a5700243d139946453cd75bc153ace4fe06058a5e9932a0a8b9b3f1293f40f9",
               "validation_classification": "limited_validation_exception_model",
-              "validation_sha256": "aca1bab7d3cffd09105619c63e44539b74073816ee1250e724342f2cbc9ebca0",
-              "validation_artifact_sha256": "3f0790be1a6fad8acfe77ea1e89f971a4c77e76707823e6b71d6f05ad27254b0",
+              "validation_sha256": "02a7620cc7fe77d55cb350aa95069060b59d2d5535b0d2ceeeaffa42f54be4da",
+              "validation_artifact_sha256": "8abf3efbcb477eaaa77574c98c1a7c5dca9481b29e15ddf1ae9310a85549e505",
               "selected_prior_id": "state_structural_very_large",
               "selected_prior": {
                 "id": "state_structural_very_large",
@@ -5618,10 +5618,10 @@
           "candidate_timeline_real_data": {
             "declared_status": "source_ready",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "evidence_eligibility_latest.json",
-            "artifact_sha256": "ce20e7e28407d97a60011ff8e1083fa99ef1e5a424db395a7141bdb94da4b095",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "14db8ed76ef191f394f2b6c81a7c03e572cba6858a088aa05db7b77cfe1f8856",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "reason": null,
@@ -11728,7 +11728,7 @@
           "demographic_point_in_time_snapshots": {
             "declared_status": "source_ready",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": null,
             "artifact_sha256": null,
             "status": "pass",
@@ -11741,7 +11741,7 @@
           "economic_realtime_history": {
             "declared_status": "source_ready",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": null,
             "artifact_sha256": null,
             "status": "pass",
@@ -11752,7 +11752,7 @@
           "finance_report_level_history": {
             "declared_status": "source_ready",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": null,
             "artifact_sha256": null,
             "status": "pass",
@@ -11765,21 +11765,21 @@
           "forecast_model_coverage": {
             "declared_status": "source_and_model_coverage_ready",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "current_race_poll_coverage_v0923.json",
-            "artifact_sha256": "2f5513c784f6f36ea9d30fb61ae356a54149b29c131eebfc4bc430be990920ed",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "1d6034aa6b1c61bd8af27745b7365382664018bd10a7cdc7dd31fe7a62b577b9",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "reason": null,
             "semantic_validation": {
-              "artifact_sha256": "a5688bae87c1ddd09ae1280111e134071e5591506535f683849022632884fe64",
-              "document_sha256": "b80eb03c9945264d21fb161b91d66f00c1c2a35ed26f21890ae39d2a96b9d97e",
-              "as_of": "2026-10-10",
+              "artifact_sha256": "90ceeaf80f7537a81be6301622cd7cf688d49c55c8cda925152c40f109d87e13",
+              "document_sha256": "604e7b75a9cd87a0c544381f6259885fe9d6fffc5bacdaa622ad4b19fe2a9af8",
+              "as_of": "2026-10-17",
               "summary": {
                 "n_races": 35,
-                "n_pass": 21,
-                "n_warning": 13,
+                "n_pass": 22,
+                "n_warning": 12,
                 "n_fail": 1,
                 "n_evidence_fail": 0,
                 "evidence_ready": true,
@@ -11866,10 +11866,10 @@
           "freshness_current_domains": {
             "declared_status": "validated",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "evidence_eligibility_latest.json",
-            "artifact_sha256": "ce20e7e28407d97a60011ff8e1083fa99ef1e5a424db395a7141bdb94da4b095",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "14db8ed76ef191f394f2b6c81a7c03e572cba6858a088aa05db7b77cfe1f8856",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "freshness_statuses": {
@@ -11885,7 +11885,7 @@
           "full_model_sbc": {
             "declared_status": "pending",
             "required_for_full_validation": false,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "full_model_sbc_latest.json",
             "artifact_sha256": null,
             "status": "partial",
@@ -11895,18 +11895,18 @@
           "historical_evidence_equivalence": {
             "declared_status": "historically_equivalent",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "historical_evidence_equivalence_v0923.json",
-            "artifact_sha256": "60777415f338e01b61a924311749f909e467de07185a6d8bf4e8b4983531b7de",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "dd6b9933b9b9fb913faac5c6f12ad92efba8ee906095f1a7ebadcf4dbae155d8",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "reason": null,
             "semantic_validation": {
               "classification": "historically_equivalent",
               "formal_cutoffs_equivalent": 8,
-              "comparison_sha256": "ef4b02c9d989840de7c4c02d8238f46f3cfcf5dc1859897391754d8a58448be7",
-              "document_sha256": "7391cea496aa8b7a5e5aa62fdea75b32bde03617638ea46f23161e99e23ae9bb",
+              "comparison_sha256": "f26e743a6b6de8a816449dbf93cf6d35fb74cf866f2af10968f62f55dc661bd3",
+              "document_sha256": "afe15cfb4ba413581279a52a053b382b78e45c8dd14ce757da8cc9972325d2bb",
               "ordinary_only": true,
               "exceptional_models_validated_separately": true
             }
@@ -11914,7 +11914,7 @@
           "institutional_transition_model": {
             "declared_status": "intentionally_deferred",
             "required_for_full_validation": false,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": null,
             "artifact_sha256": null,
             "status": "intentionally_deferred",
@@ -11924,21 +11924,21 @@
           "joint_scores_historical": {
             "declared_status": "validated",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "joint_oof_scores_latest.json",
-            "artifact_sha256": "e9846cec349ec3520bf5f8e0b82036bf164f2972a90a16cc2a729247cc7062e0",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "42ec2335ca818b7640497eac35035ed844b84172217b57f7b54be44299a54344",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
-            "required_source_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
-            "artifact_source_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
+            "required_source_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
+            "artifact_source_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
             "frozen_draw_fingerprint_matches": true,
             "reason": null
           },
           "market_contract_semantics_refresh": {
             "declared_status": "intentionally_deferred",
             "required_for_full_validation": false,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": null,
             "artifact_sha256": null,
             "status": "intentionally_deferred",
@@ -11948,7 +11948,7 @@
           "overlay_incremental_value": {
             "declared_status": "intentionally_deferred",
             "required_for_full_validation": false,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "overlay_validation.json",
             "artifact_sha256": "ad8be828fb5500ba9be2df596cd5b5942bfaa4c8edbcd05892a371324188e6b2",
             "status": "intentionally_deferred",
@@ -11957,32 +11957,43 @@
           },
           "poll_structure_nested_oos": {
             "declared_status": "intentionally_deferred",
-            "required_for_full_validation": false,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_for_full_validation": true,
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "nested_component_loo_canonical.json",
-            "artifact_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
-            "status": "intentionally_deferred",
+            "artifact_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
+            "status": "pass",
             "ok": true,
-            "reason": "feature is disabled in the effective production configuration"
+            "reason": null,
+            "enabled_poll_features": [
+              "questionnaire_effect"
+            ],
+            "selected_poll_features": [
+              "questionnaire_effect"
+            ],
+            "required_ablation_ids": [
+              "hier_no_questionnaire_effect"
+            ],
+            "validated_model_spec_sha256": "99c564eaab544bafeea74c7317d275fba8d421f04f960fcd581d1bba6f93d5b4"
           },
           "poll_structure_positive_crossfit": {
             "declared_status": "validated",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "poll_structure_crossfit_latest.json",
-            "artifact_sha256": "9f66fd1c7203a0f903b00c2e93c99a75f62f9542c951fdfe91bb2fd2fe620cc6",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "35df2526a343bf945261351ec4e9d56d0aad84b1bc73371c8258bc6d339fefc1",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "reason": null,
-            "required_source_sha256": "737b4654c2d3735d319383438fa1867ed2a379a23f7f21795bc554853a131c2c",
-            "artifact_source_sha256": "737b4654c2d3735d319383438fa1867ed2a379a23f7f21795bc554853a131c2c",
+            "required_source_sha256": "adbbaac28bec7a27d3dc7df7668a443f46eab9df5d314464021d3b9ad27a41c9",
+            "artifact_source_sha256": "adbbaac28bec7a27d3dc7df7668a443f46eab9df5d314464021d3b9ad27a41c9",
             "n_outer_folds": 4
           },
           "pollster_ratings_point_in_time": {
             "declared_status": "source_ready",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": null,
             "artifact_sha256": null,
             "status": "pass",
@@ -11995,43 +12006,43 @@
           "posterior_predictive_historical": {
             "declared_status": "validated",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "posterior_predictive_oof_latest.json",
-            "artifact_sha256": "508eac5684e0632a599282e32ce7306ca40dcab36b7b70b294cfe8178a4d0dd6",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "d51a83cbf39364cf55a1b9556ed09184e343055323057fd820f3282388577d92",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
-            "required_source_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
-            "artifact_source_sha256": "e66be0946790e5480931940ec810de6f7b31694d9cc024348589e465b7f95c8e",
+            "required_source_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
+            "artifact_source_sha256": "501d3a0341c2bc491449e338314ca093a0ccd1258ef81ca722750522a20a75aa",
             "frozen_draw_fingerprint_matches": true,
             "reason": null
           },
           "prior_predictive_current_model": {
             "declared_status": "validated",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "prior_predictive_latest.json",
-            "artifact_sha256": "350fe1e3a5be1dde26a3617e91d6495a39b52173d4107b218a28442dffe8e3c5",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "3089d0c076e9ffe307c98ca784bdac87f84a8fb1b519dd4abe38da1c7462d837",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
-            "required_source_sha256": "e4b81bf19cbe6d92952028a7cdfd229ad781e84350cd1f6fab938645bdbd9f5b",
-            "artifact_source_sha256": "e4b81bf19cbe6d92952028a7cdfd229ad781e84350cd1f6fab938645bdbd9f5b",
+            "required_source_sha256": "a81d9d686072e7d5bea94871067fad94c025c8ff5ed0b62d70fa48f74512467d",
+            "artifact_source_sha256": "a81d9d686072e7d5bea94871067fad94c025c8ff5ed0b62d70fa48f74512467d",
             "reason": null
           },
           "same_family_ablation_oos": {
             "declared_status": "validated",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "nested_component_loo_selection.json",
-            "artifact_sha256": "737b4654c2d3735d319383438fa1867ed2a379a23f7f21795bc554853a131c2c",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "adbbaac28bec7a27d3dc7df7668a443f46eab9df5d314464021d3b9ad27a41c9",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "reason": null,
             "structural_feature_enables": {
               "similarity_terminal": true,
-              "terminal_race": true
+              "terminal_race": false
             },
             "validated_ablation_ids": [
               "hier_no_similarity",
@@ -12040,19 +12051,19 @@
             "invalid_ablation_ids": [],
             "feature_recommendations": {
               "similarity_terminal": "keep",
-              "terminal_race": "keep"
+              "terminal_race": "drop_or_shrink"
             },
-            "frozen_index_model_version": "senate-hierarchical-v0.9.25",
-            "required_frozen_index_semantic_sha256": "c0039ba105f6eeab2fb6940ca9ed1c54f3e92b760bc138072dd8defad3dde64b",
-            "actual_frozen_index_semantic_sha256": "c0039ba105f6eeab2fb6940ca9ed1c54f3e92b760bc138072dd8defad3dde64b"
+            "frozen_index_model_version": "senate-hierarchical-v0.9.26",
+            "required_frozen_index_semantic_sha256": "e6fd0d9b7ae096371ea69e6ac2de6c5ab51c9ac2682ee65b4c8633362cf204b3",
+            "actual_frozen_index_semantic_sha256": "e6fd0d9b7ae096371ea69e6ac2de6c5ab51c9ac2682ee65b4c8633362cf204b3"
           },
           "sampler_health_current_reference": {
             "declared_status": "validated",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "forecast_latest.json",
-            "artifact_sha256": "e4b81bf19cbe6d92952028a7cdfd229ad781e84350cd1f6fab938645bdbd9f5b",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "a81d9d686072e7d5bea94871067fad94c025c8ff5ed0b62d70fa48f74512467d",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "reason": null,
@@ -12062,10 +12073,10 @@
           "validated_model_spec_lineage": {
             "declared_status": "validated",
             "required_for_full_validation": true,
-            "required_model_version": "senate-hierarchical-v0.9.25",
+            "required_model_version": "senate-hierarchical-v0.9.26",
             "required_artifact": "validated_model_spec_latest.json",
-            "artifact_sha256": "1b8992b04218786e01c5bbbc7a2a076925d2d18cca968dc2ca78c1dab8703c69",
-            "artifact_model_version": "senate-hierarchical-v0.9.25",
+            "artifact_sha256": "99c564eaab544bafeea74c7317d275fba8d421f04f960fcd581d1bba6f93d5b4",
+            "artifact_model_version": "senate-hierarchical-v0.9.26",
             "status": "pass",
             "ok": true,
             "reason": null,
@@ -12089,13 +12100,13 @@
       "ok": true,
       "mismatches": [],
       "notes": [],
-      "forecast_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
-      "snapshot_id": "56edc33e21722cb1561b9dea39747d3940ae02fabe9a7051a40dfc1f5e6ed06e",
-      "model_version": "senate-hierarchical-v0.9.25",
+      "forecast_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
+      "snapshot_id": "3c6494a672c9a175adab2682fa6cd29c438d76549b08494e806ccabfe5c221ca",
+      "model_version": "senate-hierarchical-v0.9.26",
       "forecast_publishable": true,
       "PUBLIC_LIVE_ENABLED": false,
       "live_locked": true,
-      "generated_at": "2026-10-13T21:00:21.736673+00:00",
+      "generated_at": "2026-10-18T21:07:06.336161+00:00",
       "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/run_coherence_latest.json"
     },
     "g1_g11_ok": true,
@@ -12119,68 +12130,68 @@
     "method": "fast_hierarchical_t",
     "baseline": {
       "n": 34,
-      "crps": 5.022317332424705,
+      "crps": 5.022317332424706,
       "log_score": -3.6686626540178846,
       "brier": 0.05971162681789538,
-      "mae": 6.814755818410477
+      "mae": 6.814755818410479
     },
     "drops": [
       {
         "pollster_id": "Center Street PAC",
         "n_polls": 25,
-        "crps": 4.992412461039201,
-        "brier": 0.05758667218615673,
-        "delta_crps": -0.029904871385503462,
-        "delta_brier": -0.002124954631738653
+        "crps": 5.104512982366215,
+        "brier": 0.05852509636959081,
+        "delta_crps": 0.08219564994150907,
+        "delta_brier": -0.0011865304483045722
       },
       {
         "pollster_id": "Trafalgar Group",
         "n_polls": 13,
-        "crps": 4.509452853454619,
-        "brier": 0.06423565605808156,
-        "delta_crps": -0.5128644789700854,
-        "delta_brier": 0.004524029240186175
+        "crps": 4.493838981508797,
+        "brier": 0.06263696687352775,
+        "delta_crps": -0.5284783509159086,
+        "delta_brier": 0.002925340055632372
       },
       {
         "pollster_id": "Emerson",
         "n_polls": 11,
-        "crps": 4.870011852001546,
-        "brier": 0.05818769156440914,
-        "delta_crps": -0.15230548042315917,
-        "delta_brier": -0.001523935253486243
+        "crps": 5.049312192848264,
+        "brier": 0.06260530299577981,
+        "delta_crps": 0.026994860423558364,
+        "delta_brier": 0.002893676177884427
       }
     ],
-    "mean_abs_delta_crps": 0.23169161025958265,
+    "mean_abs_delta_crps": 0.21255628709365867,
     "note": "Leave-pollster-out: large positive delta_crps means that pollster was important; stable scores imply robustness to single-house dominance.",
     "path": "/home/runner/work/electionmodel26/electionmodel26/data/artifacts/leave_pollster_out_latest.json"
   },
   "current_status": {
     "schema_version": "validation-report-current-status-v1",
-    "refreshed_at": "2026-10-13T21:00:22.447094+00:00",
+    "refreshed_at": "2026-10-18T21:07:06.839981+00:00",
     "source_hash_mode": "canonical_json_sha256_v1",
     "source_artifact_sha256": {
-      "acceptance_gates": "4db0761b06e46b556def32b0ad79c1add1e40ca00930456a5086117a3258c2da",
-      "run_coherence": "0abf845354b1a672f66c7df0d1edf609074ca21645ce2b333bea3a36e15302b7",
-      "forecast": "c52d8fd241d01e3cdececeb411ba7ceedc76978884629f047415aca6e0746974",
-      "evidence_eligibility": "1d7ee1276c077e4899fb18bab2059622802510f4619490114d3cd25be60c61ba",
-      "validated_model_spec": "af84e9b96574a5ed6fbc023f495588060ccc6457fc511eb8cb1bacc8c68b9e76",
-      "stack_weights": "8d6af37b3a25613ab942e14b40005db52070b06eefbfda713fcd3cde894f0140",
-      "stack_reliability": "13b277ff9fd7b0d92ff2998d7d0e5872fd275c12075c8b3bf5c9250eeb4cb637",
-      "source_readiness": "9e66758a233b255c572763557b8359359b9d41ada18833f71c92d8c2dd7f6dac",
-      "forecast_coverage": "b80eb03c9945264d21fb161b91d66f00c1c2a35ed26f21890ae39d2a96b9d97e",
-      "non_major_adapter_validation": "aca1bab7d3cffd09105619c63e44539b74073816ee1250e724342f2cbc9ebca0",
-      "alaska_rcv_validation": "8ac49d4ffc62f9d28a6ddfa2863a2bbbad8432ccce3853f3c54eb64fc4406acc",
-      "historical_evidence_equivalence": "7391cea496aa8b7a5e5aa62fdea75b32bde03617638ea46f23161e99e23ae9bb",
-      "release_identity": "5734dcb061b0399384baf475086641924fddadfddf6881db8058307f2f667037"
+      "acceptance_gates": "5679df20b36bb1b8c5fd44ff2340ce4a20994f75d48f2972e4297ca88682bc38",
+      "run_coherence": "c64fb5710f9b9b9839acbaac9e9e9c0d34787e92787eae2060d7394eec49d27d",
+      "forecast": "70b755bc1c7e9f95425f4fad4bd6389b927220905f9fd88c4bfc01d92a52a38f",
+      "evidence_eligibility": "6e66f50655172a3ca312a5e8edeabf5aac705740798d96be091c3e90c6db6473",
+      "validated_model_spec": "fc2a59ff3cc84fb021e14b8d25300b8a1d1245580b5198af3c4f4a565bc4008a",
+      "stack_weights": "22d396a6789c5a44ec42cee42a30f92e66e9ff6357576f7fc14d782fa0c4aaed",
+      "stack_reliability": "b53d80ec5198b9d72f7181278a197bf6eeb9ed6f2e20265068371faa3acdadf1",
+      "source_readiness": "aa8629cf3ee186ec41e902cb1d61f0d0f523f8363c8027c47d8ad152deab3485",
+      "forecast_coverage": "604e7b75a9cd87a0c544381f6259885fe9d6fffc5bacdaa622ad4b19fe2a9af8",
+      "non_major_adapter_validation": "02a7620cc7fe77d55cb350aa95069060b59d2d5535b0d2ceeeaffa42f54be4da",
+      "alaska_rcv_validation": "2f6ff62571cbfa74731d32b9524ec580992d00f619dcfe30d1820b4cb0d555ba",
+      "historical_evidence_equivalence": "afe15cfb4ba413581279a52a053b382b78e45c8dd14ce757da8cc9972325d2bb",
+      "release_identity": "55ec3aa4595aed566da9fc09f8119ca41980c0f10a8dd969f0be36b5f620ed7f"
     },
-    "model_version": "senate-hierarchical-v0.9.25",
-    "forecast_run_id": "senate-2026_2026-10-10_ensemble_stack_43f06d4b6b_20260901",
-    "evidence_bundle_id": "eb-dcb6d43248b5fcc9",
-    "evidence_bundle_sha256": "dcb6d43248b5fcc9c6721e88c8ddae4f3916b9c68b29d3e0538a733c1333d438",
-    "validated_model_spec_sha256": "689b8ffc32f375f219f2189c0afbb713ee9da6b157d22db4ebd557fedad7d1ff",
-    "selected_structure_id": "pymc",
-    "selected_poll_structure_id": "psc-7819fcedea982286",
-    "exceptional_model_lineage_sha256": "2e595f980b6a84309156357ae2759045762fd8185300ae0ad8d6bb2b54fe2262",
+    "model_version": "senate-hierarchical-v0.9.26",
+    "forecast_run_id": "senate-2026_2026-10-17_ensemble_stack_43f06d4b6b_20260901",
+    "evidence_bundle_id": "eb-89a17ef758cdd2d0",
+    "evidence_bundle_sha256": "89a17ef758cdd2d0f25756199664a429e8ceb78db2aedf6f63961e5b9290a2e4",
+    "validated_model_spec_sha256": "707caa93f165813ee59183fb3e5805ab060d9369fd6eec539a45cbe6ab50da7d",
+    "selected_structure_id": "hier_plus_questionnaire_effect",
+    "selected_poll_structure_id": "psc-5035810fb1f3d5e7",
+    "exceptional_model_lineage_sha256": "1ec99abde6e5daa9faa8e4099e0f81a1dad2f905dd0b8a847ec061a4067f26a2",
     "evidence_source_readiness": {
       "ready": true,
       "blockers": []
@@ -12189,8 +12200,8 @@
       "complete": false,
       "summary": {
         "n_races": 35,
-        "n_pass": 21,
-        "n_warning": 13,
+        "n_pass": 22,
+        "n_warning": 12,
         "n_fail": 1,
         "n_evidence_fail": 0,
         "evidence_ready": true,
@@ -12208,7 +12219,7 @@
       }
     },
     "historical_evidence_equivalence": "historically_equivalent",
-    "release_id": "truth_v1_v0.9.25_eb-dcb6d43248b5fcc9",
+    "release_id": "truth_v1_v0.9.26_eb-89a17ef758cdd2d0",
     "release_identity_verified": true,
     "gates": {
       "G1": "pass",
@@ -12232,9 +12243,9 @@
     "promotion_eligible": true,
     "cycle_crossfit_reliability": {
       "n": 260,
-      "brier": 0.04777281321885048,
-      "calibration_slope": 1.0140561785951983,
-      "calibration_intercept": -0.01742516245215844,
+      "brier": 0.048500573365096604,
+      "calibration_slope": 1.0043286959808522,
+      "calibration_intercept": -0.013994308957503315,
       "n_overconfident_bins": 0
     },
     "PUBLIC_LIVE_ENABLED": false,
